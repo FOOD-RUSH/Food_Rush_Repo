@@ -1,0 +1,1294 @@
+# FoodRush React Native App Setup Guide
+
+## Project Structure Overview
+
+```
+FoodRush/
+├── app/                          # Expo Router app directory
+│   ├── (auth)/                   # Authentication routes
+│   ├── (customer)/               # Customer app screens with tab layout
+│   │   ├── (tabs)/               # Tab-based navigation
+│   │   │   ├── home.tsx          # Home/Restaurant discovery
+│   │   │   ├── search.tsx        # Search restaurants/food
+│   │   │   ├── orders.tsx        # Order history & tracking
+│   │   │   ├── favorites.tsx     # Favorite restaurants
+│   │   │   └── profile.tsx       # User profile & settings
+│   │   ├── _layout.tsx           # Customer layout with tabs
+│   │   ├── restaurant/[id].tsx   # Restaurant detail screen
+│   │   ├── checkout.tsx          # Checkout screen
+│   │   ├── order-tracking/[id].tsx # Order tracking screen
+│   │   └── index.tsx             # Customer entry point
+│   ├── (restaurant)/             # Restaurant dashboard screens
+│   ├── (delivery)/               # Delivery personnel screens
+│   ├── _layout.tsx               # Root layout
+│   └── index.tsx                 # Entry point
+├── components/                   # Reusable components
+│   ├── ui/                       # UI components
+│   ├── forms/                    # Form components
+│   ├── maps/                     # Map-related components
+│   └── common/                   # Common components
+├── constants/                    # App constants
+│   ├── Colors.ts                 # Color scheme
+│   ├── Fonts.ts                  # Typography
+│   └── Layout.ts                 # Layout constants
+├── hooks/                        # Custom hooks
+│   ├── useAuth.ts                # Authentication hook
+│   ├── useLocation.ts            # Location services
+│   └── usePayment.ts             # Payment integration
+├── services/                     # External services
+│   ├── firebase/                 # Firebase configuration
+│   ├── mobileMoneyApis/          # MTN & Orange Money APIs
+│   └── notifications/            # Push notifications
+├── store/                        # State management
+│   ├── slices/                   # Redux slices
+│   └── store.ts                  # Store configuration
+├── types/                        # TypeScript definitions
+├── utils/                        # Utility functions
+│   ├── validation.ts             # Form validation
+│   ├── formatters.ts             # Data formatters
+│   └── constants.ts              # App constants
+├── assets/                       # Static assets
+│   ├── images/                   # Images
+│   ├── icons/                    # Custom icons
+│   └── fonts/                    # Custom fonts
+└── config/                       # Configuration files
+    ├── firebase.ts               # Firebase config
+    └── theme.ts                  # Theme configuration
+```
+
+## 1. Initial Setup
+
+### Install Expo CLI and Create Project
+```bash
+# Install Expo CLI globally
+npm install -g @expo/cli
+
+# Create new Expo project with TypeScript
+npx create-expo-app FoodRush --template
+
+# Navigate to project directory
+cd FoodRush
+```
+
+### Install Required Dependencies
+```bash
+# Core navigation and routing
+npm install @react-navigation/native @react-navigation/stack @react-navigation/bottom-tabs
+npx expo install react-native-screens react-native-safe-area-context
+
+# Expo Router for file-based routing
+npx expo install expo-router
+
+# UI and Styling
+npm install react-native-paper
+npm install nativewind
+npm install --save-dev tailwindcss
+
+# State Management
+npm install @reduxjs/toolkit react-redux
+
+# Firebase
+npm install firebase
+npx expo install expo-auth-session expo-crypto
+
+# Location Services
+npx expo install expo-location expo-maps
+
+# Notifications
+npx expo install expo-notifications expo-device
+
+# Forms and Validation
+npm install react-hook-form yup @hookform/resolvers
+
+# HTTP Client
+npm install axios
+
+# Date/Time utilities
+npm install date-fns
+
+# AsyncStorage for local storage
+npx expo install @react-native-async-storage/async-storage
+
+# Image handling
+npx expo install expo-image-picker expo-image-manipulator
+
+# Permissions
+npx expo install expo-permissions
+
+# SMS and Phone
+npx expo install expo-sms expo-contacts
+
+# Camera and Barcode (for QR codes)
+npx expo install expo-camera expo-barcode-scanner
+```
+
+## 2. Configuration Files
+
+### app.json / app.config.js
+```json
+{
+  "expo": {
+    "name": "FoodRush",
+    "slug": "foodrush-cameroon",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.foodrush.cameroon"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "package": "com.foodrush.cameroon",
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "CAMERA",
+        "SEND_SMS",
+        "READ_PHONE_STATE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#ffffff"
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow FoodRush to use your location for accurate food delivery."
+        }
+      ]
+    ],
+    "scheme": "foodrush",
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
+```
+
+### tailwind.config.js
+```javascript
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: ["./app/**/*.{js,jsx,ts,tsx}", "./components/**/*.{js,jsx,ts,tsx}"],
+  theme: {
+    extend: {
+      colors: {
+        // Cameroon-inspired color palette
+        primary: {
+          50: '#f0f9ff',
+          100: '#e0f2fe',
+          200: '#bae6fd',
+          300: '#7dd3fc',
+          500: '#0ea5e9', // Main blue
+          600: '#0284c7',
+          700: '#0369a1',
+          800: '#075985',
+          900: '#0c4a6e',
+        },
+        secondary: {
+          50: '#fefce8',
+          100: '#fef9c3',
+          200: '#fef08a',
+          300: '#fde047',
+          400: '#facc15', // Main yellow
+          500: '#eab308',
+          600: '#ca8a04',
+          700: '#a16207',
+          800: '#854d0e',
+          900: '#713f12',
+        },
+        success: {
+          50: '#f0fdf4',
+          100: '#dcfce7',
+          200: '#bbf7d0',
+          300: '#86efac',
+          400: '#4ade80',
+          500: '#22c55e', // Main green
+          600: '#16a34a',
+          700: '#15803d',
+          800: '#166534',
+          900: '#14532d',
+        },
+        danger: {
+          50: '#fef2f2',
+          100: '#fee2e2',
+          200: '#fecaca',
+          300: '#fca5a5',
+          400: '#f87171',
+          500: '#ef4444', // Main red
+          600: '#dc2626',
+          700: '#b91c1c',
+          800: '#991b1b',
+          900: '#7f1d1d',
+        }
+      },
+      fontFamily: {
+        'sans': ['Inter', 'system-ui', 'sans-serif'],
+        'heading': ['Poppins', 'system-ui', 'sans-serif'],
+      },
+    },
+  },
+  plugins: [],
+}
+```
+
+### babel.config.js
+```javascript
+module.exports = function(api) {
+  api.cache(true);
+  return {
+    presets: ['babel-preset-expo'],
+    plugins: [
+      'nativewind/babel',
+      'react-native-paper/babel',
+      require.resolve('expo-router/babel'),
+    ],
+  };
+};
+```
+
+### metro.config.js
+```javascript
+const { getDefaultConfig } = require('expo/metro-config');
+const { withNativeWind } = require('nativewind/metro');
+
+const config = getDefaultConfig(__dirname);
+
+module.exports = withNativeWind(config, { input: './global.css' });
+```
+
+## 3. Theme Configuration
+
+### config/theme.ts
+```typescript
+import { MD3LightTheme, MD3DarkTheme } from 'react-native-paper';
+
+export const lightTheme = {
+  ...MD3LightTheme,
+  colors: {
+    ...MD3LightTheme.colors,
+    primary: '#0ea5e9', // Blue from Cameroon flag
+    secondary: '#facc15', // Yellow from Cameroon flag
+    tertiary: '#22c55e', // Green representing nature
+    surface: '#ffffff',
+    surfaceVariant: '#f8fafc',
+    background: '#ffffff',
+    error: '#ef4444',
+    errorContainer: '#fef2f2',
+    onPrimary: '#ffffff',
+    onSecondary: '#000000',
+    onSurface: '#1e293b',
+    onBackground: '#1e293b',
+    outline: '#cbd5e1',
+  },
+};
+
+export const darkTheme = {
+  ...MD3DarkTheme,
+  colors: {
+    ...MD3DarkTheme.colors,
+    primary: '#0ea5e9',
+    secondary: '#facc15',
+    tertiary: '#22c55e',
+    surface: '#1e293b',
+    surfaceVariant: '#334155',
+    background: '#0f172a',
+    error: '#ef4444',
+    errorContainer: '#7f1d1d',
+    onPrimary: '#ffffff',
+    onSecondary: '#000000',
+    onSurface: '#f1f5f9',
+    onBackground: '#f1f5f9',
+    outline: '#64748b',
+  },
+};
+```
+
+### global.css
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+## 4. Firebase Configuration
+
+### config/firebase.ts
+```typescript
+import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
+import { getFunctions } from 'firebase/functions';
+
+const firebaseConfig = {
+  // Your Firebase config object
+  apiKey: "your-api-key",
+  authDomain: "your-auth-domain",
+  projectId: "your-project-id",
+  storageBucket: "your-storage-bucket",
+  messagingSenderId: "your-messaging-sender-id",
+  appId: "your-app-id"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+
+// Initialize Firebase services
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+export const storage = getStorage(app);
+export const functions = getFunctions(app);
+
+export default app;
+```
+
+### services/firebase/auth.ts
+```typescript
+import { 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword,
+  signOut,
+  sendPasswordResetEmail,
+  updateProfile,
+  User
+} from 'firebase/auth';
+import { auth } from '../../config/firebase';
+
+export const authService = {
+  // Sign up with email and password
+  signUp: async (email: string, password: string, displayName: string) => {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    await updateProfile(userCredential.user, { displayName });
+    return userCredential.user;
+  },
+
+  // Sign in with email and password
+  signIn: async (email: string, password: string) => {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    return userCredential.user;
+  },
+
+  // Sign out
+  signOut: async () => {
+    await signOut(auth);
+  },
+
+  // Reset password
+  resetPassword: async (email: string) => {
+    await sendPasswordResetEmail(auth, email);
+  },
+
+  // Get current user
+  getCurrentUser: (): User | null => {
+    return auth.currentUser;
+  }
+};
+```
+
+## 5. State Management Setup
+
+### store/store.ts
+```typescript
+import { configureStore } from '@reduxjs/toolkit';
+import authSlice from './slices/authSlice';
+import orderSlice from './slices/orderSlice';
+import restaurantSlice from './slices/restaurantSlice';
+import locationSlice from './slices/locationSlice';
+
+export const store = configureStore({
+  reducer: {
+    auth: authSlice,
+    orders: orderSlice,
+    restaurants: restaurantSlice,
+    location: locationSlice,
+  },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: ['persist/PERSIST'],
+      },
+    }),
+});
+
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
+```
+
+### store/slices/authSlice.ts
+```typescript
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+
+interface User {
+  uid: string;
+  email: string;
+  displayName: string;
+  phoneNumber?: string;
+  userType: 'customer' | 'restaurant' | 'delivery';
+}
+
+interface AuthState {
+  user: User | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+}
+
+const initialState: AuthState = {
+  user: null,
+  isLoading: false,
+  isAuthenticated: false,
+};
+
+const authSlice = createSlice({
+  name: 'auth',
+  initialState,
+  reducers: {
+    setUser: (state, action: PayloadAction<User>) => {
+      state.user = action.payload;
+      state.isAuthenticated = true;
+      state.isLoading = false;
+    },
+    clearUser: (state) => {
+      state.user = null;
+      state.isAuthenticated = false;
+      state.isLoading = false;
+    },
+    setLoading: (state, action: PayloadAction<boolean>) => {
+      state.isLoading = action.payload;
+    },
+  },
+});
+
+export const { setUser, clearUser, setLoading } = authSlice.actions;
+export default authSlice.reducer;
+```
+
+## 6. TypeScript Definitions
+
+### types/index.ts
+```typescript
+// User Types
+export interface User {
+  uid: string;
+  email: string;
+  displayName: string;
+  phoneNumber?: string;
+  userType: 'customer' | 'restaurant' | 'delivery';
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Restaurant Types
+export interface Restaurant {
+  id: string;
+  name: string;
+  description: string;
+  cuisine: string[];
+  rating: number;
+  deliveryTime: number;
+  deliveryFee: number;
+  minimumOrder: number;
+  isOpen: boolean;
+  location: Location;
+  images: string[];
+  menu: MenuItem[];
+}
+
+export interface MenuItem {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  image?: string;
+  isAvailable: boolean;
+  dietaryInfo: string[];
+}
+
+// Order Types
+export interface Order {
+  id: string;
+  customerId: string;
+  restaurantId: string;
+  deliveryPersonId?: string;
+  items: OrderItem[];
+  status: OrderStatus;
+  totalAmount: number;
+  deliveryAddress: Address;
+  paymentMethod: PaymentMethod;
+  createdAt: Date;
+  estimatedDeliveryTime: Date;
+}
+
+export interface OrderItem {
+  menuItemId: string;
+  quantity: number;
+  specialInstructions?: string;
+  price: number;
+}
+
+export type OrderStatus = 
+  | 'pending'
+  | 'confirmed'
+  | 'preparing'
+  | 'ready'
+  | 'picked_up'
+  | 'delivered'
+  | 'cancelled';
+
+// Location Types
+export interface Location {
+  latitude: number;
+  longitude: number;
+  address?: string;
+}
+
+export interface Address {
+  street: string;
+  city: string;
+  region: string;
+  landmark?: string;
+  instructions?: string;
+}
+
+// Payment Types
+export type PaymentMethod = 
+  | 'mtn_mobile_money'
+  | 'orange_money'
+  | 'cash_on_delivery';
+
+export interface PaymentTransaction {
+  id: string;
+  orderId: string;
+  amount: number;
+  method: PaymentMethod;
+  status: 'pending' | 'completed' | 'failed';
+  transactionId?: string;
+  createdAt: Date;
+}
+```
+
+## 7. Customer Tab Layout Setup
+
+### app/(customer)/_layout.tsx
+```typescript
+import React from 'react';
+import { Tabs } from 'expo-router';
+import { useColorScheme } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
+import { useTheme } from 'react-native-paper';
+
+export default function CustomerLayout() {
+  const colorScheme = useColorScheme();
+  const theme = useTheme();
+
+  return (
+    <Tabs
+      screenOptions={{
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.onSurfaceVariant,
+        tabBarStyle: {
+          backgroundColor: theme.colors.surface,
+          borderTopColor: theme.colors.outline,
+          borderTopWidth: 1,
+          paddingTop: 8,
+          paddingBottom: 8,
+          height: 70,
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '500',
+          marginTop: 4,
+        },
+        headerShown: false,
+      }}
+    >
+      <Tabs.Screen
+        name="(tabs)/home"
+        options={{
+          title: 'Accueil',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="home" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="(tabs)/search"
+        options={{
+          title: 'Recherche',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="search" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="(tabs)/orders"
+        options={{
+          title: 'Commandes',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="receipt-long" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="(tabs)/favorites"
+        options={{
+          title: 'Favoris',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="favorite" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="(tabs)/profile"
+        options={{
+          title: 'Profil',
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="person" size={size} color={color} />
+          ),
+        }}
+      />
+      
+      {/* Hidden screens - not shown in tabs but accessible via navigation */}
+      <Tabs.Screen
+        name="restaurant/[id]"
+        options={{
+          href: null, // Hide from tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="checkout"
+        options={{
+          href: null, // Hide from tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="order-tracking/[id]"
+        options={{
+          href: null, // Hide from tab bar
+        }}
+      />
+      <Tabs.Screen
+        name="index"
+        options={{
+          href: null, // Hide from tab bar
+        }}
+      />
+    </Tabs>
+  );
+}
+```
+
+### app/(customer)/index.tsx (Customer Entry Point)
+```typescript
+import React, { useEffect } from 'react';
+import { View, ActivityIndicator } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store/store';
+
+export default function CustomerIndex() {
+  const router = useRouter();
+  const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
+
+  useEffect(() => {
+    if (isAuthenticated && user?.userType === 'customer') {
+      // Redirect to customer home tab
+      router.replace('/(customer)/(tabs)/home');
+    } else {
+      // Redirect to authentication if not logged in
+      router.replace('/(auth)/login');
+    }
+  }, [isAuthenticated, user]);
+
+  return (
+    <View className="flex-1 justify-center items-center bg-white">
+      <ActivityIndicator size="large" color="#0ea5e9" />
+    </View>
+  );
+}
+```
+
+### Tab Screen Placeholders
+
+### app/(customer)/(tabs)/home.tsx
+```typescript
+import React from 'react';
+import { View, ScrollView } from 'react-native';
+import { Text, Card, Searchbar, Chip } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+export default function HomeScreen() {
+  const [searchQuery, setSearchQuery] = React.useState('');
+
+  return (
+    <SafeAreaView className="flex-1 bg-gray-50">
+      {/* Header */}
+      <View className="bg-white px-4 py-4 border-b border-gray-200">
+        <Text variant="headlineSmall" className="text-gray-800 mb-2">
+          Bonjour! 👋
+        </Text>
+        <Text variant="bodyMedium" className="text-gray-600 mb-4">
+          Que voulez-vous manger aujourd'hui?
+        </Text>
+        
+        <Searchbar
+          placeholder="Rechercher restaurants, plats..."
+          onChangeText={setSearchQuery}
+          value={searchQuery}
+          className="mb-4"
+        />
+        
+        {/* Quick Filters */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <View className="flex-row space-x-2">
+            <Chip icon="flash" mode="outlined">Livraison rapide</Chip>
+            <Chip icon="star" mode="outlined">Populaire</Chip>
+            <Chip icon="cash" mode="outlined">Promotion</Chip>
+            <Chip icon="leaf" mode="outlined">Végétarien</Chip>
+          </View>
+        </ScrollView>
+      </View>
+
+      <ScrollView className="flex-1 px-4 py-4">
+        {/* Featured Restaurants Section */}
+        <Text variant="titleLarge" className="mb-4 font-semibold">
+          Restaurants populaires
+        </Text>
+        
+        {/* Restaurant cards will go here */}
+        <Card className="mb-4">
+          <Card.Cover 
+            source={{ uri: 'https://via.placeholder.com/400x200' }} 
+            className="h-48" 
+          />
+          <Card.Content className="p-4">
+            <Text variant="titleMedium" className="font-semibold mb-1">
+              Restaurant Example
+            </Text>
+            <Text variant="bodySmall" className="text-gray-600 mb-2">
+              Cuisine africaine • 25-35 min • 1500 FCFA livraison
+            </Text>
+            <View className="flex-row items-center">
+              <Text variant="bodySmall" className="text-yellow-600 mr-1">★ 4.5</Text>
+              <Text variant="bodySmall" className="text-gray-500">(120+ avis)</Text>
+            </View>
+          </Card.Content>
+        </Card>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+```
+
+### app/(customer)/(tabs)/search.tsx
+```typescript
+import React from 'react';
+import { View, ScrollView } from 'react-native';
+import { Text, Searchbar, Chip, List } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+export default function SearchScreen() {
+  const [searchQuery, setSearchQuery] = React.useState('');
+
+  return (
+    <SafeAreaView className="flex-1 bg-white">
+      <View className="px-4 py-4 border-b border-gray-200">
+        <Searchbar
+          placeholder="Rechercher restaurants, plats, cuisine..."
+          onChangeText={setSearchQuery}
+          value={searchQuery}
+          autoFocus
+        />
+      </View>
+
+      <ScrollView className="flex-1">
+        {/* Search Categories */}
+        <View className="px-4 py-4">
+          <Text variant="titleMedium" className="mb-3 font-semibold">
+            Catégories populaires
+          </Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View className="flex-row space-x-2">
+              <Chip icon="rice" mode="outlined">Riz</Chip>
+              <Chip icon="fish" mode="outlined">Poisson</Chip>
+              <Chip icon="leaf" mode="outlined">Ndolé</Chip>
+              <Chip icon="food" mode="outlined">Poulet</Chip>
+              <Chip icon="cup" mode="outlined">Boissons</Chip>
+            </View>
+          </ScrollView>
+        </View>
+
+        {/* Recent Searches */}
+        <View className="px-4">
+          <Text variant="titleMedium" className="mb-3 font-semibold">
+            Recherches récentes
+          </Text>
+          <List.Item
+            title="Restaurant Central"
+            description="Cuisine camerounaise"
+            left={props => <List.Icon {...props} icon="history" />}
+          />
+          <List.Item
+            title="Pizza"
+            description="Fast food"
+            left={props => <List.Icon {...props} icon="history" />}
+          />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+```
+
+### app/(customer)/(tabs)/orders.tsx
+```typescript
+import React from 'react';
+import { View, ScrollView } from 'react-native';
+import { Text, Card, Button, Chip } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+export default function OrdersScreen() {
+  return (
+    <SafeAreaView className="flex-1 bg-gray-50">
+      <View className="px-4 py-4 bg-white border-b border-gray-200">
+        <Text variant="headlineSmall" className="font-semibold">
+          Mes commandes
+        </Text>
+      </View>
+
+      <ScrollView className="flex-1 px-4 py-4">
+        {/* Current Order */}
+        <Text variant="titleMedium" className="mb-3 font-semibold">
+          Commande en cours
+        </Text>
+        
+        <Card className="mb-6 border border-primary-200">
+          <Card.Content className="p-4">
+            <View className="flex-row justify-between items-start mb-3">
+              <View className="flex-1">
+                <Text variant="titleMedium" className="font-semibold mb-1">
+                  Restaurant Central
+                </Text>
+                <Text variant="bodySmall" className="text-gray-600">
+                  Commande #FR001234
+                </Text>
+              </View>
+              <Chip mode="flat" textStyle={{ color: '#22c55e' }}>
+                En préparation
+              </Chip>
+            </View>
+            
+            <Text variant="bodyMedium" className="mb-3">
+              1x Ndolé + Riz • 1x Poisson braisé
+            </Text>
+            
+            <View className="flex-row justify-between items-center">
+              <Text variant="titleMedium" className="font-semibold">
+                4,500 FCFA
+              </Text>
+              <Button mode="contained" compact>
+                Suivre
+              </Button>
+            </View>
+          </Card.Content>
+        </Card>
+
+        {/* Order History */}
+        <Text variant="titleMedium" className="mb-3 font-semibold">
+          Historique des commandes
+        </Text>
+        
+        <Card className="mb-4">
+          <Card.Content className="p-4">
+            <View className="flex-row justify-between items-start mb-2">
+              <View className="flex-1">
+                <Text variant="titleMedium" className="font-semibold mb-1">
+                  Chez Mama
+                </Text>
+                <Text variant="bodySmall" className="text-gray-600">
+                  15 Mai 2024 • 14:30
+                </Text>
+              </View>
+              <Chip mode="flat" textStyle={{ color: '#22c55e' }}>
+                Livré
+              </Chip>
+            </View>
+            
+            <Text variant="bodyMedium" className="mb-2">
+              2x Poulet DG • 1x Jus d'orange
+            </Text>
+            
+            <Text variant="titleMedium" className="font-semibold">
+              6,000 FCFA
+            </Text>
+          </Card.Content>
+        </Card>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+```
+
+### app/(customer)/(tabs)/favorites.tsx
+```typescript
+import React from 'react';
+import { View, ScrollView } from 'react-native';
+import { Text, Card, IconButton } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+export default function FavoritesScreen() {
+  return (
+    <SafeAreaView className="flex-1 bg-gray-50">
+      <View className="px-4 py-4 bg-white border-b border-gray-200">
+        <Text variant="headlineSmall" className="font-semibold">
+          Mes favoris
+        </Text>
+      </View>
+
+      <ScrollView className="flex-1 px-4 py-4">
+        <Card className="mb-4">
+          <Card.Cover 
+            source={{ uri: 'https://via.placeholder.com/400x150' }} 
+            className="h-36" 
+          />
+          <Card.Content className="p-4">
+            <View className="flex-row justify-between items-start">
+              <View className="flex-1">
+                <Text variant="titleMedium" className="font-semibold mb-1">
+                  Restaurant Central
+                </Text>
+                <Text variant="bodySmall" className="text-gray-600 mb-2">
+                  Cuisine camerounaise • 25-35 min
+                </Text>
+                <View className="flex-row items-center">
+                  <Text variant="bodySmall" className="text-yellow-600 mr-1">★ 4.8</Text>
+                  <Text variant="bodySmall" className="text-gray-500">(200+ avis)</Text>
+                </View>
+              </View>
+              <IconButton
+                icon="heart"
+                iconColor="#ef4444"
+                size={24}
+                onPress={() => {}}
+              />
+            </View>
+          </Card.Content>
+        </Card>
+
+        <Card className="mb-4">
+          <Card.Cover 
+            source={{ uri: 'https://via.placeholder.com/400x150' }} 
+            className="h-36" 
+          />
+          <Card.Content className="p-4">
+            <View className="flex-row justify-between items-start">
+              <View className="flex-1">
+                <Text variant="titleMedium" className="font-semibold mb-1">
+                  Chez Mama
+                </Text>
+                <Text variant="bodySmall" className="text-gray-600 mb-2">
+                  Plats traditionnels • 20-30 min
+                </Text>
+                <View className="flex-row items-center">
+                  <Text variant="bodySmall" className="text-yellow-600 mr-1">★ 4.6</Text>
+                  <Text variant="bodySmall" className="text-gray-500">(150+ avis)</Text>
+                </View>
+              </View>
+              <IconButton
+                icon="heart"
+                iconColor="#ef4444"
+                size={24}
+                onPress={() => {}}
+              />
+            </View>
+          </Card.Content>
+        </Card>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+```
+
+### app/(customer)/(tabs)/profile.tsx
+```typescript
+import React from 'react';
+import { View, ScrollView } from 'react-native';
+import { Text, List, Avatar, Button, Divider } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+export default function ProfileScreen() {
+  return (
+    <SafeAreaView className="flex-1 bg-gray-50">
+      {/* Profile Header */}
+      <View className="bg-white px-4 py-6 items-center border-b border-gray-200">
+        <Avatar.Text size={80} label="JD" className="mb-3" />
+        <Text variant="titleLarge" className="font-semibold mb-1">
+          Jean Dupont
+        </Text>
+        <Text variant="bodyMedium" className="text-gray-600">
+          +237 6XX XXX XXX
+        </Text>
+      </View>
+
+      <ScrollView className="flex-1">
+        <View className="bg-white mt-4">
+          <List.Item
+            title="Mes adresses"
+            description="Gérer vos adresses de livraison"
+            left={props => <List.Icon {...props} icon="map-marker" />}
+            right={props => <List.Icon {...props} icon="chevron-right" />}
+          />
+          <Divider />
+          <List.Item
+            title="Méthodes de paiement"
+            description="Mobile Money, Cartes bancaires"
+            left={props => <List.Icon {...props} icon="credit-card" />}
+            right={props => <List.Icon {...props} icon="chevron-right" />}
+          />
+          <Divider />
+          <List.Item
+            title="Notifications"
+            description="Paramètres des notifications"
+            left={props => <List.Icon {...props} icon="bell" />}
+            right={props => <List.Icon {...props} icon="chevron-right" />}
+          />
+        </View>
+
+        <View className="bg-white mt-4">
+          <List.Item
+            title="Aide et support"
+            left={props => <List.Icon {...props} icon="help-circle" />}
+            right={props => <List.Icon {...props} icon="chevron-right" />}
+          />
+          <Divider />
+          <List.Item
+            title="À propos"
+            left={props => <List.Icon {...props} icon="information" />}
+            right={props => <List.Icon {...props} icon="chevron-right" />}
+          />
+          <Divider />
+          <List.Item
+            title="Conditions d'utilisation"
+            left={props => <List.Icon {...props} icon="file-document" />}
+            right={props => <List.Icon {...props} icon="chevron-right" />}
+          />
+        </View>
+
+        <View className="px-4 py-6">
+          <Button mode="outlined" textColor="#ef4444" className="border-red-200">
+            Se déconnecter
+          </Button>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+```
+
+### app/_layout.tsx
+```typescript
+import React from 'react';
+import { Stack } from 'expo-router';
+import { Provider as PaperProvider } from 'react-native-paper';
+import { Provider as ReduxProvider } from 'react-redux';
+import { StatusBar } from 'expo-status-bar';
+import { store } from '../store/store';
+import { lightTheme } from '../config/theme';
+import '../global.css';
+
+export default function RootLayout() {
+  return (
+    <ReduxProvider store={store}>
+      <PaperProvider theme={lightTheme}>
+        <StatusBar style="auto" />
+        <Stack>
+          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen name="(customer)" options={{ headerShown: false }} />
+          <Stack.Screen name="(restaurant)" options={{ headerShown: false }} />
+          <Stack.Screen name="(delivery)" options={{ headerShown: false }} />
+        </Stack>
+      </PaperProvider>
+    </ReduxProvider>
+  );
+}
+```
+
+### app/index.tsx
+```typescript
+import React from 'react';
+import { View } from 'react-native';
+import { Text, Button } from 'react-native-paper';
+import { router } from 'expo-router';
+
+export default function WelcomeScreen() {
+  return (
+    <View className="flex-1 justify-center items-center bg-white px-6">
+      <Text variant="headlineLarge" className="text-center mb-4 text-primary-600">
+        Bienvenue à FoodRush
+      </Text>
+      <Text variant="titleMedium" className="text-center mb-8 text-gray-600">
+        Votre application de livraison de nourriture au Cameroun
+      </Text>
+      
+      <View className="w-full space-y-4">
+        <Button 
+          mode="contained" 
+          onPress={() => router.push('/(auth)/login')}
+          className="w-full"
+        >
+          Se connecter
+        </Button>
+        
+        <Button 
+          mode="outlined" 
+          onPress={() => router.push('/(auth)/register')}
+          className="w-full"
+        >
+          S'inscrire
+        </Button>
+      </View>
+    </View>
+  );
+}
+```
+
+## 9. Utility Functions
+
+### utils/validation.ts
+```typescript
+import * as yup from 'yup';
+
+export const loginSchema = yup.object().shape({
+  email: yup
+    .string()
+    .email('Email invalide')
+    .required('Email requis'),
+  password: yup
+    .string()
+    .min(6, 'Le mot de passe doit contenir au moins 6 caractères')
+    .required('Mot de passe requis'),
+});
+
+export const registerSchema = yup.object().shape({
+  displayName: yup
+    .string()
+    .min(2, 'Le nom doit contenir au moins 2 caractères')
+    .required('Nom requis'),
+  email: yup
+    .string()
+    .email('Email invalide')
+    .required('Email requis'),
+  phoneNumber: yup
+    .string()
+    .matches(/^[0-9]{9}$/, 'Numéro de téléphone invalide (9 chiffres)')
+    .required('Numéro de téléphone requis'),
+  password: yup
+    .string()
+    .min(6, 'Le mot de passe doit contenir au moins 6 caractères')
+    .required('Mot de passe requis'),
+  confirmPassword: yup
+    .string()
+    .oneOf([yup.ref('password')], 'Les mots de passe ne correspondent pas')
+    .required('Confirmation du mot de passe requise'),
+});
+```
+
+### utils/formatters.ts
+```typescript
+// Format CFA Franc currency
+export const formatCurrency = (amount: number): string => {
+  return new Intl.NumberFormat('fr-CM', {
+    style: 'currency',
+    currency: 'XAF',
+    minimumFractionDigits: 0,
+  }).format(amount);
+};
+
+// Format phone number for Cameroon
+export const formatPhoneNumber = (phone: string): string => {
+  // Remove any non-digit characters
+  const cleaned = phone.replace(/\D/g, '');
+  
+  // Format as XXX XXX XXX
+  if (cleaned.length === 9) {
+    return cleaned.replace(/(\d{3})(\d{3})(\d{3})/, '$1 $2 $3');
+  }
+  
+  return phone;
+};
+
+// Format delivery time
+export const formatDeliveryTime = (minutes: number): string => {
+  if (minutes < 60) {
+    return `${minutes} min`;
+  }
+  
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  
+  if (remainingMinutes === 0) {
+    return `${hours}h`;
+  }
+  
+  return `${hours}h ${remainingMinutes}min`;
+};
+```
+
+## 10. Getting Started Commands
+
+```bash
+# Start the development server
+npx expo start
+
+# Start with specific platform
+npx expo start --ios
+npx expo start --android
+npx expo start --web
+
+# Build for production
+npx expo build:android
+npx expo build:ios
+
+# Install new dependencies
+npx expo install [package-name]
+```
+
+## 11. Folder Structure Explanation
+
+- **app/**: Contains all screens using Expo Router's file-based routing
+  - **(auth)/**: Authentication screens (login, register, forgot password)
+  - **(customer)/**: Customer-facing app screens
+  - **(restaurant)/**: Restaurant dashboard screens
+  - **(delivery)/**: Delivery personnel app screens
+
+- **components/**: Reusable UI components organized by functionality
+- **services/**: External service integrations (Firebase, Mobile Money APIs)
+- **store/**: Redux state management with organized slices
+- **types/**: TypeScript type definitions for type safety
+- **utils/**: Utility functions for common operations
+- **config/**: Configuration files for theme, Firebase, etc.
+
+This setup provides a solid foundation for your FoodRush app with proper TypeScript support, state management, Firebase integration, and Cameroon-specific configurations. You can now start building individual screens while leveraging this robust architecture.
