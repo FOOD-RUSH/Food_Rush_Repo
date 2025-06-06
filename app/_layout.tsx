@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
@@ -55,5 +56,17 @@ function RootLayoutNav() {
         <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
       </Stack>
     </ThemeProvider>
+=======
+import { Stack } from "expo-router";
+import './globals.css';
+
+export default function RootLayout() {
+  return (
+    <Stack>
+      <Stack.Screen name="index" options={{title: "Home"}} />
+      <Stack.Screen name="login" options={{title: "Signin"}} />
+      <Stack.Screen name="onboarding" options={{title: "Onboarding"}} />
+    </Stack>
+>>>>>>> dca64a0 (Update submodule content)
   );
 }
