@@ -1,5 +1,5 @@
 import { ScrollView, StyleSheet, Text, TextInput,View } from 'react-native'
-import OpacityButton from '../components/OpacityButton'
+import OpacityButton from '@/components/common/OpacityButton'
 import React from 'react'
 
 const LoginScreen = () => {

@@ -20,15 +20,15 @@ const CustomLayout = () => {
         />
         <Tabs.Screen name='(tabs)/notifications'
         options={{
-            title: "Home"
+            title: "notifcations"
         }}
         />
         <Tabs.Screen name='(tabs)/profile'
         options={{
-            title: "Home"
+            title: "profile"
         }}
         />
-        {/* screens accessible via navigation but hidder */}
+        {/* screens accessible via navigation but hidden */}
         <Tabs.Screen
         name='(tabs)/restaurant[id]'
         options = {{title: 'restaurant'}}
