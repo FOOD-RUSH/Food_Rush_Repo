@@ -33,7 +33,10 @@ const Onboarding = () => {
     const [progress , setProgress] = useState(0);
     
     return (
-    <ImageBackground source={onboardingInfo[0].backgroundImage} className='flex-1 flex-col items-start justify-between'>
+    <ImageBackground 
+    source={onboardingInfo[0].backgroundImage}
+    resizeMode="cover"
+     className='flex-1 flex-col items-start justify-between'>
             <Image source={logoImage} className='' height={50} width={50}/>
             <View className='h-[250px] w-[300px] bg-primaryColor justify-center items-center rounded-xl m-3 p-4 '>
                 <Text className='text-center text-2xl text-white font-bold' >

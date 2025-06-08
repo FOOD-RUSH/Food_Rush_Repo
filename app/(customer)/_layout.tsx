@@ -1,10 +1,11 @@
-import { View, Text } from 'react-native'
 import React from 'react'
 import { Tabs } from 'expo-router'
 
 const CustomLayout = () => {
   return (
-    <Tabs 
+    <Tabs screenOptions={{headerShown: false
+        
+    }}
    
     >
         <Tabs.Screen name='(tabs)/home'

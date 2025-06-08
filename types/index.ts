@@ -86,7 +86,6 @@ export interface Address {
 export type PaymentMethod = 
   | 'mtn_mobile_money'
   | 'orange_money'
-  | 'cash_on_delivery';
 
 export interface PaymentTransaction {
   id: string;
