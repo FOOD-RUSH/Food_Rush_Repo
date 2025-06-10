@@ -6,10 +6,24 @@ export default function Index() {
   return (
     <View className="flex-1 justify-center items-center">
       <Text className="font-bold">Edit app/index.tsx to edit this screen.</Text>
-      <Link href="./screens/Onboarding">Login  </Link>
+      <Link href="./(auth)/Login">Login  </Link>
     </View>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 const Onboarding = () => {
     // onboarding information

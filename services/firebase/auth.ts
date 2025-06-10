@@ -5,8 +5,9 @@ import { auth } from "@/config/firebase";
 
 export const authService = {
     //sign up with email and password
-    signUp: async (email: string, password: string, displayName: string, phoneNumber: string) => {
+    signUp: async (email: string, password: string, displayName: string) => {
         const userCrendentails = await createUserWithEmailAndPassword(auth,email, password);
+    
         await updateProfile (userCrendentails.user, {displayName})
     }, 
     signIn: async (email: string, password: string) => {
@@ -15,6 +16,7 @@ export const authService = {
     }, 
     signOut: async () => {
         await signOut(auth);
+        //clears app state too
     },
     resetPassword: async (email: string) =>
     {
