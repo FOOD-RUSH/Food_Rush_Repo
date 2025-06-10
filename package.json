@@ -9,8 +9,7 @@
     "web": "expo start --web",
     "test": "jest --watchAll",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "format": "prettier --write .",
-    "reset-project": "rimraf ./app && cp -r ./app-example ./app"
+    "format": "prettier --write ."
   },
   "jest": {
     "preset": "jest-expo"
