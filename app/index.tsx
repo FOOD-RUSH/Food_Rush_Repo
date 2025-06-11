@@ -31,26 +31,26 @@ const Onboarding = () => {
         {
             heading: "We Serve Incomparable Delicacies",
             description: "All the best restaurant with thier top menu waiting for you, they can't wait for your order!!",
-            backgroundImage: require("../../assets/images/background.png"),
+            backgroundImage: require("@/assets/images/background.png"),
 
         },
          {
             heading: "Fast Delivery , Fast Craving",
             description: "No more waiting lines, or traffic jams indulge in delicious and enjoy food from the comfort of your home",
-            backgroundImage: require("../../assets/images/background2.png"),
+            backgroundImage: require("@/assets/images/background2.png"),
 
 
         },
          {
             heading: "Crave It, We Deliver It",
             description: "Your one-stop app for all Cameroonian cuisines - spicy jollof rice to sweet puff-puff, Discover, Order & Enjoy the flavors!", 
-            backgroundImage: require("../../assets/images/background3.png"),
+            backgroundImage: require("@/assets/images/background3.png"),
 
         }
     
     ];
     //logo Image
-    const logoImage = require("../../assets/images/Foodrushlogo.png");
+    const logoImage = require("@/assets/images/Foodrushlogo.png");
     //function for progress bar 
     const [progress , setProgress] = useState(0);
     

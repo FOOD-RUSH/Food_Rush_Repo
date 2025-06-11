@@ -25,7 +25,7 @@ export const registerSchema = yup.object().shape({
     .string()
     .matches(/^[0-9]{9}$/, 'invalide Phone number(9 number)')
     .required('Phone number required'),
-   password: yup
+  password: yup
     .string()
     .min(8, 'Password must contain atleast 8 characters')
     .required('Password required'),

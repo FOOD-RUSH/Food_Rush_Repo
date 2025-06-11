@@ -8,14 +8,6 @@
     "scheme": "foodrush",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-<<<<<<< HEAD
-    "splash": {
-      "image": "./assets/images/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-=======
->>>>>>> dca64a0 (Update submodule content)
     "ios": {
       "supportsTablet": true
     },
@@ -32,9 +24,6 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-<<<<<<< HEAD
-      "expo-router"
-=======
       "expo-router",
       [
         "expo-splash-screen",
@@ -45,7 +34,6 @@
           "backgroundColor": "#ffffff"
         }
       ]
->>>>>>> dca64a0 (Update submodule content)
     ],
     "experiments": {
       "typedRoutes": true

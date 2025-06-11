@@ -1,6 +1,7 @@
 import { Provider as PaperProvider } from "react-native-paper";
 import { lightTheme } from "@/config/theme";
 import { StatusBar } from "react-native";
+import { Stack } from "expo-router";
 export default function RootLayout() {
   return (
    <PaperProvider theme={lightTheme}>
@@ -11,10 +12,7 @@ export default function RootLayout() {
      <Stack.Screen name="(customer)" options={{headerShown: false}} />
      <Stack.Screen name="(restaurant)" options={{headerShown: false}} />
     </Stack>
-<<<<<<< HEAD
->>>>>>> dca64a0 (Update submodule content)
-=======
+
    </PaperProvider>
->>>>>>> 1d969ab (cleaned up a little bit ~Tochukwu Paul)
   );
 }
