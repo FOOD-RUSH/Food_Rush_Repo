@@ -84,8 +84,8 @@ const Onboarding = () => {
 } 
 //FIRST onboarding screen
 const OnboardingScreen = () => {
-  const relayLogo = require("../../assets/images/foodrush.svg");
-  const gif = require("../../assets/images/Delivery.gif");
+  const relayLogo = require("@/assets/images/Foodrushlogo.png");
+  const gif = require("@/assets/images/Delivery.gif");
 
   return (
     <View className='flex flex-col p-4 justify-between bg-white items-center'>

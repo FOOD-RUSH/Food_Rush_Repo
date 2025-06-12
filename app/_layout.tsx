@@ -1,4 +1,5 @@
 import { Provider as PaperProvider } from "react-native-paper";
+import './globals.css';
 import { lightTheme } from "@/config/theme";
 import { StatusBar } from "react-native";
 import { Stack } from "expo-router";
