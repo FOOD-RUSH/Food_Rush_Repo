@@ -15,6 +15,7 @@
     "preset": "jest-expo"
   },
   "dependencies": {
+    "@expo-google-fonts/inter": "^0.4.1",
     "@expo/vector-icons": "^14.1.0",
     "@hookform/resolvers": "^5.1.0",
     "@react-navigation/bottom-tabs": "^7.3.14",
@@ -54,7 +55,8 @@
     "react-native-web": "~0.20.0",
     "react-native-webview": "13.13.5",
     "react-redux": "^9.2.0",
-    "yup": "^1.6.1"
+    "yup": "^1.6.1",
+    "expo-asset": "~11.1.5"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

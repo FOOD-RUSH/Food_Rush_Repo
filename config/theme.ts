@@ -3,9 +3,10 @@ import { MD3LightTheme, MD3DarkTheme } from 'react-native-paper';
 
 export const lightTheme = {
   ...MD3LightTheme,
+
   colors: {
     ...MD3LightTheme.colors,
-    primary: '#0ea5e9', // Blue from Cameroon flag
+    primary: '#007aff', // Blue from Cameroon flag
     secondary: '#facc15', // Yellow from Cameroon flag
     tertiary: '#22c55e', // Green representing nature
     surface: '#ffffff',
@@ -19,6 +20,7 @@ export const lightTheme = {
     onBackground: '#1e293b',
     outline: '#cbd5e1',
   },
+   
 };
 
 export const darkTheme = {

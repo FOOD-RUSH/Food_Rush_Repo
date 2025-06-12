@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
 import { Image, ScrollView, Text, View, Alert, TouchableOpacity } from 'react-native';
-import { Button, Divider, HelperText, TextInput } from 'react-native-paper';
+import { Button,  HelperText, TextInput } from 'react-native-paper';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { loginSchema } from '@/utils/validation';
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
-import { auth } from '@/config/firebase'; // Adjust path to your firebase config
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { TextButton } from '@/components/common/TextButton';
+import { Link, useNavigation } from 'expo-router';
 // import { GoogleSignin } from '@react-native-google-signin/google-signin'; // Uncomment if using Google Sign-in
 
-interface LoginFormData {
+
+
+const LoginScreen = () => {
+  interface LoginFormData {
   email: string;
   password: string;
 }
-
-const LoginScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -25,39 +27,10 @@ const LoginScreen = () => {
     }
   });
 
-  const onSubmit = async (data: LoginFormData) => {
+  const onSubmit =  (data: LoginFormData) => {
     setLoading(true);
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
-      console.log('User logged in successfully:', userCredential.user);
-      // Navigate to main app screen
-      // navigation.navigate('Home'); // Uncomment and adjust based on your navigation
-    } catch (error: any) {
-      console.error('Login error:', error);
-      let errorMessage = 'Login failed. Please try again.';
-      
-      switch (error.code) {
-        case 'auth/user-not-found':
-          errorMessage = 'No account found with this email address.';
-          break;
-        case 'auth/wrong-password':
-          errorMessage = 'Invalid password. Please try again.';
-          break;
-        case 'auth/invalid-email':
-          errorMessage = 'Please enter a valid email address.';
-          break;
-        case 'auth/user-disabled':
-          errorMessage = 'This account has been disabled.';
-          break;
-        case 'auth/too-many-requests':
-          errorMessage = 'Too many failed attempts. Please try again later.';
-          break;
-      }
-      
-      Alert.alert('Login Error', errorMessage);
-    } finally {
-      setLoading(false);
-    }
+    //log it in my console 
+    console.log(data);
   };
 
   const handleGoogleSignIn = async () => {
@@ -84,10 +57,12 @@ const LoginScreen = () => {
     console.log('Forgot password pressed');
     // navigation.navigate('ForgotPassword'); // Uncomment and adjust
   };
+ 
 
   const logoImage = require("@/assets/images/Foodrushlogo.png");
 
   return (
+    <SafeAreaView>
     <ScrollView className="bg-white flex-1">
       <View className="flex-1 px-6 py-8">
         {/* Header */}
@@ -176,11 +151,8 @@ const LoginScreen = () => {
 
           {/* Forgot Password */}
           <View className="flex-row justify-end">
-            <TouchableOpacity onPress={handleForgotPassword}>
-              <Text className="text-blue-600 text-base font-medium">
-                Forgot password?
-              </Text>
-            </TouchableOpacity>
+           
+            <TextButton text='Forgot password' onPress= {handleForgotPassword} />
           </View>
 
           {/* Login Button */}
@@ -189,7 +161,7 @@ const LoginScreen = () => {
             onPress={handleSubmit(onSubmit)}
             loading={loading}
             disabled={loading}
-            buttonColor="#0ea5e9"
+            buttonColor="#007aff"
             textColor="white"
             contentStyle={{ paddingVertical: 8 }}
             style={{ borderRadius: 12, marginTop: 24 }}
@@ -236,18 +208,22 @@ const LoginScreen = () => {
           {/* Sign Up Link */}
           <View className="flex-row justify-center items-center mt-6">
             <Text className="text-gray-600 text-base">
-              Don't have an account?{' '}
+              Dont have an account?{' '}
             </Text>
+                        <Link href='./(auth)/Signup'>
+
             <TouchableOpacity onPress={() => console.log('Navigate to sign up')}>
-              <Text className="text-blue-600 text-base font-medium">
+              <Text className="text-primaryColor text-base font-medium">
                 Sign Up
               </Text>
             </TouchableOpacity>
+            </Link>
           </View>
         </View>
       </View>
     </ScrollView>
-  );
+  </SafeAreaView>
+);
 };
 
 export default LoginScreen;

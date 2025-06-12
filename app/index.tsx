@@ -1,6 +1,6 @@
 import { Link } from "expo-router";
 import { useState } from "react";
-import { View, Text, ImageBackground, Image, Button, TouchableHighlight } from 'react-native'
+import { View, Text, ImageBackground, Image,TouchableHighlight } from 'react-native'
 
 export default function Index() {
   return (

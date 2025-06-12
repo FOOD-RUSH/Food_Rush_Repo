@@ -1,0 +1,39 @@
+ try {
+      const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
+      console.log('User logged in successfully:', userCredential.user);
+      // Navigate to main app screen
+      // navigation.navigate('Home'); // Uncomment and adjust based on your navigation
+    } catch (error: any) {
+      console.error('Login error:', error);
+      let errorMessage = 'Login failed. Please try again.';
+      
+      switch (error.code) {
+        case 'auth/user-not-found':
+          errorMessage = 'No account found with this email address.';
+          break;
+        case 'auth/wrong-password':
+          errorMessage = 'Invalid password. Please try again.';
+          break;
+        case 'auth/invalid-email':
+          errorMessage = 'Please enter a valid email address.';
+          break;
+        case 'auth/user-disabled':
+          errorMessage = 'This account has been disabled.';
+          break;
+        case 'auth/too-many-requests':
+          errorMessage = 'Too many failed attempts. Please try again later.';
+          break;
+      }
+      
+      Alert.alert('Login Error', errorMessage);
+    } finally {
+      setLoading(false);
+    }
+
+
+    fonts: {
+    regular: { fontFamily: 'Inter_400Regular', fontWeight: 'normal' },
+    medium: { fontFamily: 'Inter_500Medium', fontWeight: 'normal' },
+    light: { fontFamily: 'Inter_300Light', fontWeight: 'normal' },
+    thin: { fontFamily: 'Inter_200ExtraLight', fontWeight: 'normal' },
+  },
