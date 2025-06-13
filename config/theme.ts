@@ -20,7 +20,8 @@ export const lightTheme = {
     onBackground: '#1e293b',
     outline: '#cbd5e1',
   },
-   
+
+
 };
 
 export const darkTheme = {

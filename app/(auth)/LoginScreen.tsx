@@ -14,6 +14,8 @@ import { loginSchema } from '@/utils/validation';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { TextButton } from '@/components/common/TextButton';
 import { Link, useNavigation } from 'expo-router';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { AuthStackParamList } from '@/navigation/types';
 // import { GoogleSignin } from '@react-native-google-signin/google-signin'; // Uncomment if using Google Sign-in
 
 const LoginScreen = () => {
@@ -35,6 +37,8 @@ const LoginScreen = () => {
       password: '',
     },
   });
+
+  const navigation = useNavigation <NativeStackNavigationProp<AuthStackParamList>>();
 
   const onSubmit = (data: LoginFormData) => {
     setLoading(true);
@@ -64,13 +68,11 @@ const LoginScreen = () => {
   const handleForgotPassword = () => {
     // Navigate to forgot password screen or show modal
     console.log('Forgot password pressed');
-    // navigation.navigate('ForgotPassword'); // Uncomment and adjust
+    navigation.navigate('ForgotPassword'); // Uncomment and adjust
   };
 
-  const logoImage = require('@/assets/images/Foodrushlogo.png');
 
   return (
-    <SafeAreaView>
       <ScrollView className="bg-white flex-1">
         <View className="flex-1 px-6 py-8">
           {/* Header */}
@@ -208,34 +210,24 @@ const LoginScreen = () => {
               Continue with Google
             </Button>
 
-            {/* Logo */}
-            <View className="items-center mt-8">
-              <Image
-                source={logoImage}
-                style={{ width: 80, height: 80 }}
-                resizeMode="contain"
-              />
-            </View>
+           
 
             {/* Sign Up Link */}
             <View className="flex-row justify-center items-center mt-6">
               <Text className="text-gray-600 text-base">
                 Dont have an account?{' '}
               </Text>
-              <Link href="./(auth)/Signup">
                 <TouchableOpacity
-                  onPress={() => console.log('Navigate to sign up')}
+                onPress= {()=> navigation.navigate('Signup')}
                 >
                   <Text className="text-primaryColor text-base font-medium">
                     Sign Up
                   </Text>
                 </TouchableOpacity>
-              </Link>
             </View>
           </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
   );
 };
 

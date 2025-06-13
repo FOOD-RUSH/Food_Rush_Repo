@@ -30,7 +30,7 @@ const ForgotPassword = () => {
 
   return (
     <SafeAreaView>
-      <View className="flex-1 bg-white px-6 py-8">
+      <View className="flex flex-1 bg-white px-6 py-8">
         <View className="mb-8">
           <Text className="text-4xl font-bold text-gray-900 leading-tight">
             Forgot your Password ?
@@ -63,7 +63,7 @@ const ForgotPassword = () => {
                 contentStyle={{ paddingHorizontal: 16 }}
                 error={!!errors.email}
                 right={
-                  <TextInput.Icon icon="close" onPress={() => onChange('')} />
+                  <TextInput.Icon icon="close-circle-outline" onPress={() => onChange('')} />
                 }
               />
               {errors.email && (

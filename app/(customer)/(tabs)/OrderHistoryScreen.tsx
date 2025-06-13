@@ -1,12 +1,12 @@
 import { View, Text } from 'react-native';
 import React from 'react';
 
-const cart = () => {
+const OrderHistoryScreen = () => {
   return (
     <View>
-      <Text>cart</Text>
+      <Text>OrderHistoryScreen</Text>
     </View>
   );
 };
 
-export default cart;
+export default OrderHistoryScreen;

@@ -1,12 +1,12 @@
 import { View, Text } from 'react-native';
 import React from 'react';
 
-const notifications = () => {
+const FavoritesScreen = () => {
   return (
     <View>
-      <Text>notifications</Text>
+      <Text>FavoritesScreen</Text>
     </View>
   );
 };
 
-export default notifications;
+export default FavoritesScreen;
