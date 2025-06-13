@@ -25,7 +25,7 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <PaperProvider theme={lightTheme}>
-          <RootNavigator />
+        <RootNavigator />
       </PaperProvider>
     </SafeAreaProvider>
   );

@@ -1,4 +1,11 @@
-import { View, Text, ScrollView, TouchableOpacity, Modal, FlatList } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Modal,
+  FlatList,
+} from 'react-native';
 import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, Checkbox, HelperText, TextInput } from 'react-native-paper';
@@ -32,11 +39,12 @@ const SignupScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [selectedCountryCode, setSelectedCountryCode] = useState(COUNTRY_CODES[0]); // Default to Cameroon
+  const [selectedCountryCode, setSelectedCountryCode] = useState(
+    COUNTRY_CODES[0],
+  ); // Default to Cameroon
   const [showCountryModal, setShowCountryModal] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
 
-  
   // Form controller for register customer
   const {
     control,
@@ -66,7 +74,7 @@ const SignupScreen = () => {
     }
 
     setLoading(true);
-    
+
     try {
       // Prepare data with country code
       const signupData = {
@@ -75,9 +83,8 @@ const SignupScreen = () => {
       };
 
       // TODO: Implement signup logic
-     
+
       console.log('SignupScreen data:', signupData);
-      
     } catch (error) {
       console.error('SignupScreen error:', error);
       // Handle error - show toast/alert
@@ -92,12 +99,12 @@ const SignupScreen = () => {
     console.log('Navigate to login');
   };
 
-  const selectCountryCode = (country: typeof COUNTRY_CODES[0]) => {
+  const selectCountryCode = (country: (typeof COUNTRY_CODES)[0]) => {
     setSelectedCountryCode(country);
     setShowCountryModal(false);
   };
 
-  const renderCountryItem = ({ item }: { item: typeof COUNTRY_CODES[0] }) => (
+  const renderCountryItem = ({ item }: { item: (typeof COUNTRY_CODES)[0] }) => (
     <TouchableOpacity
       className="flex-row items-center py-3 px-4 border-b border-gray-100"
       onPress={() => selectCountryCode(item)}
@@ -202,7 +209,9 @@ const SignupScreen = () => {
                       className="border border-gray-300 rounded-l-xl px-3 py-4 bg-gray-50 flex-row items-center"
                       onPress={() => setShowCountryModal(true)}
                     >
-                      <Text className="text-lg mr-1">{selectedCountryCode.flag}</Text>
+                      <Text className="text-lg mr-1">
+                        {selectedCountryCode.flag}
+                      </Text>
                       <Text className="text-base font-medium text-gray-700 mr-1">
                         {selectedCountryCode.code}
                       </Text>
@@ -216,12 +225,12 @@ const SignupScreen = () => {
                       mode="outlined"
                       keyboardType="phone-pad"
                       autoComplete="tel"
-                      outlineStyle={{ 
+                      outlineStyle={{
                         borderRadius: 12,
                         borderTopLeftRadius: 0,
                         borderBottomLeftRadius: 0,
                       }}
-                      style={{ 
+                      style={{
                         backgroundColor: 'white',
                         flex: 1,
                       }}
@@ -301,7 +310,9 @@ const SignupScreen = () => {
                     right={
                       <TextInput.Icon
                         icon={showConfirmPassword ? 'eye-off' : 'eye'}
-                        onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                        onPress={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
                       />
                     }
                   />
@@ -324,20 +335,20 @@ const SignupScreen = () => {
               <View className="flex-1 ml-2 ">
                 <Text className="text-sm text-gray-700 leading-5">
                   I agree with{' '}
-                  <TextButton  
-                    text="terms of service" 
+                  <TextButton
+                    text="terms of service"
                     onPress={() => {
                       // TODO: Navigate to terms screen
                       console.log('Show terms of service');
-                    }} 
+                    }}
                   />{' '}
                   and{' '}
-                  <TextButton 
-                    text="privacy policy" 
+                  <TextButton
+                    text="privacy policy"
                     onPress={() => {
                       // TODO: Navigate to privacy policy screen
                       console.log('Show privacy policy');
-                    }} 
+                    }}
                   />
                 </Text>
               </View>
@@ -381,8 +392,6 @@ const SignupScreen = () => {
               >
                 Continue with Google
               </Button>
-              
-             
             </View>
 
             {/* Login Link */}
@@ -390,10 +399,7 @@ const SignupScreen = () => {
               <Text className="text-gray-600 text-base">
                 Already have an account?{' '}
               </Text>
-              <TextButton 
-                text="Sign In" 
-                onPress={handleLogin}
-              />
+              <TextButton text="Sign In" onPress={handleLogin} />
             </View>
           </View>
         </View>

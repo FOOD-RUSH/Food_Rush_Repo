@@ -3,8 +3,8 @@ import React from 'react';
 
 const NotificationScreen = () => {
   return (
-    <View className='justify-center items-center flex-1'>
-      <Text className='justify-items-center'>NotificationScreen</Text>
+    <View className="justify-center items-center flex-1">
+      <Text className="justify-items-center">NotificationScreen</Text>
     </View>
   );
 };

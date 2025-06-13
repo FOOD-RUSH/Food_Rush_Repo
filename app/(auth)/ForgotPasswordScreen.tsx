@@ -63,7 +63,10 @@ const ForgotPassword = () => {
                 contentStyle={{ paddingHorizontal: 16 }}
                 error={!!errors.email}
                 right={
-                  <TextInput.Icon icon="close-circle-outline" onPress={() => onChange('')} />
+                  <TextInput.Icon
+                    icon="close-circle-outline"
+                    onPress={() => onChange('')}
+                  />
                 }
               />
               {errors.email && (
