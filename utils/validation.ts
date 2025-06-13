@@ -11,16 +11,15 @@ export const loginSchema = yup.object().shape({
     .min(8, 'Password must contain atleast 8 characters')
     .required('Password required'),
 });
+//email validation schema
+export const emailValidation = yup.string().email('Invalid email').required('Email is required')
 
 export const registerSchema = yup.object().shape({
   displayName: yup
     .string()
     .min(5, 'Name must contain atleast 5 characters')
     .required('Name required'),
-  email: yup
-    .string()
-    .email('Invalid Email')
-    .required('Email required'),
+  email: emailValidation,
   phoneNumber: yup
     .string()
     .matches(/^[0-9]{9}$/, 'invalide Phone number(9 number)')
@@ -36,3 +35,4 @@ export const registerSchema = yup.object().shape({
    
 
 });
+
