@@ -1,5 +1,7 @@
 
+import { useFonts } from '@expo-google-fonts/inter';
 import { MD3LightTheme, MD3DarkTheme } from 'react-native-paper';
+import { fontConfig } from 'react-native-paper/lib/typescript/styles/fonts';
 
 export const lightTheme = {
   ...MD3LightTheme,
@@ -20,7 +22,6 @@ export const lightTheme = {
     onBackground: '#1e293b',
     outline: '#cbd5e1',
   },
-
 
 };
 

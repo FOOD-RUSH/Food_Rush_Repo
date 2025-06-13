@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  Image,
   ScrollView,
   Text,
   View,
@@ -11,9 +10,8 @@ import { Button, HelperText, TextInput } from 'react-native-paper';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { loginSchema } from '@/utils/validation';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { TextButton } from '@/components/common/TextButton';
-import { Link, useNavigation } from 'expo-router';
+import { useNavigation } from 'expo-router';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '@/navigation/types';
 // import { GoogleSignin } from '@react-native-google-signin/google-signin'; // Uncomment if using Google Sign-in
