@@ -60,7 +60,7 @@ class AuthService {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const firebaseUser = userCredential.user;
 
-      // Send email verification removed for the moent
+      // Send email verification removed for the moment
 
 
       // Create user profile in Firestore
@@ -162,6 +162,7 @@ class AuthService {
         const user = await this.getCurrentUser();
         callback(user);
       } catch (error) {
+        console.log(error)
         callback(null);
       }
     });

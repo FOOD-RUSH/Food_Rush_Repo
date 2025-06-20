@@ -28,7 +28,7 @@ export type CustomerStackParamList = {
     Tabs: TabCustomerParamList
     // TODO: ADD MORE PAGES
 }
-// Reststaurant Stack Param List
+// Restaurant Stack Param List
 export type TabRestaurantStackParamList = {
    Dashboard: undefined,
     Orders: undefined,

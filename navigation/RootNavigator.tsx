@@ -16,7 +16,6 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootNavigator() {
   const dispatch = useDispatch<AppDispatch>()
-  // problem
 
   const {user, isAuthenticated, hasHydrated} = useSelector((state: RootState) => state.auth)
   const isOnboardingComplete = useSelector((state: RootState) => state.app.isOnboardingComplete);

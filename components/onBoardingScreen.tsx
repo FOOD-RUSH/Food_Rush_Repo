@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   View, 
   Text, 
@@ -18,8 +18,8 @@ const { width: screenWidth } = Dimensions.get('window');
 const OnboardingWelcome = ({ onComplete }: { onComplete: () => void }) => {
   const relayLogo = require('@/assets/images/Foodrushlogo.png');
   const gif = require('@/assets/images/Delivery.gif');
-  const fadeAnim = new Animated.Value(0);
-  const slideAnim = new Animated.Value(50);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
 
   useEffect(() => {
     // Animate entrance

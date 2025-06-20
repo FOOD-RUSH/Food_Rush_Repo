@@ -1,5 +1,4 @@
-import { View, Text, ImageBackground, TouchableWithoutFeedback } from 'react-native'
-import { Image } from 'react-native'
+import { View, Text, ImageBackground, TouchableWithoutFeedback, Image } from 'react-native'
 import React from 'react'
 import { OnboardingSlide as onboardingInfo } from '@/types'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -29,7 +28,7 @@ const OnboardingSlide = (slide: onboardingInfo, next: Function, skip: Function) 
             {/* Onboarding controls */}
             <View className='flex-row justify-between'>
                 {/* Next Button */}
-                <TouchableWithoutFeedback onPress={()=> next}>
+                <TouchableWithoutFeedback onPress={() => next()}>
                     <Text>Next</Text>
                 </TouchableWithoutFeedback>
 
