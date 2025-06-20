@@ -6,6 +6,11 @@ import * as SplashScreen from 'expo-splash-screen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useEffect } from 'react';
 import RootNavigator from '@/navigation/RootNavigator';
+import { PersistGate } from 'redux-persist/integration/react';
+import LoadingScreen from '@/components/common/LoadingScreen';
+import { persistor, store } from '@/store/store';
+import { Provider as StateProvider } from 'react-redux';
+
 
 SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
@@ -23,11 +28,16 @@ export default function RootLayout() {
     return null;
   }
   return (
-    <SafeAreaProvider>
+    <StateProvider store={store}>
+    <PersistGate loading={<LoadingScreen />} persistor={persistor}>
+      <SafeAreaProvider>
       <PaperProvider theme={lightTheme}>
         <RootNavigator />
       </PaperProvider>
     </SafeAreaProvider>
+    </PersistGate>
+    </StateProvider>
+    
   );
 }
 

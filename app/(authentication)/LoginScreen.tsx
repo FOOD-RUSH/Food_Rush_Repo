@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScrollView, Text, View, Alert, TouchableOpacity } from 'react-native';
+import { ScrollView, Text, View, Alert, TouchableOpacity, KeyboardAvoidingView } from 'react-native';
 import { Button, HelperText, TextInput } from 'react-native-paper';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -7,17 +7,24 @@ import { loginSchema } from '@/utils/validation';
 import { TextButton } from '@/components/common/TextButton';
 import { useNavigation } from 'expo-router';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { AuthStackParamList } from '@/navigation/types';
+import {
+  TabCustomerParamList,
+} from '@/navigation/types';
+import {  RootState } from '@/store/store';
+import { useAuth } from '@/hooks/useAuth';
+
+import {  useSelector } from 'react-redux';
+import { SafeAreaView } from 'react-native-safe-area-context';
 // import { GoogleSignin } from '@react-native-google-signin/google-signin'; // Uncomment if using Google Sign-in
 
-const LoginScreen = () => {
+export default function LoginScreen() {
   interface LoginFormData {
     email: string;
     password: string;
   }
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-
+  const authError = useSelector((state: RootState) => state.auth.error);
   const {
     control,
     handleSubmit,
@@ -29,14 +36,28 @@ const LoginScreen = () => {
       password: '',
     },
   });
-
+  const { signIn, error } = useAuth();
   const navigation =
-    useNavigation<NativeStackNavigationProp<AuthStackParamList>>();
+    useNavigation<NativeStackNavigationProp<TabCustomerParamList>>();
 
-  const onSubmit = (data: LoginFormData) => {
+  const onSubmit = async (data: LoginFormData) => {
     setLoading(true);
     //log it in my console
-    console.log(data);
+    try {
+      await signIn(data.email, data.password, 'customer');
+      Alert.alert('Login Successful', 'You have successfully logged in.');
+      navigation.navigate('Home'); // Navigate to customer home screen
+    } catch (error) {
+      console.error('Login error:', error);
+      alert(error);
+      Alert.alert(
+        'Login Error',
+        authError || 'An error occurred during login.',
+      );
+    } finally {
+      setLoading(false);
+    }
+    console.log('Login form submitted:', data);
   };
 
   const handleGoogleSignIn = async () => {
@@ -61,10 +82,13 @@ const LoginScreen = () => {
   const handleForgotPassword = () => {
     // Navigate to forgot password screen or show modal
     console.log('Forgot password pressed');
-    navigation.navigate('ForgotPassword'); // Uncomment and adjust
+    // navigation.navigate('ForgotPassword'); // Uncomment and adjust
   };
 
   return (
+    
+    <SafeAreaView>
+      <KeyboardAvoidingView>
     <ScrollView className="bg-white flex-1">
       <View className="flex-1 px-6 py-8">
         {/* Header */}
@@ -202,7 +226,7 @@ const LoginScreen = () => {
             <Text className="text-gray-600 text-base">
               Dont have an account?{' '}
             </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
+            <TouchableOpacity onPress={() => {}}>
               <Text className="text-primaryColor text-base font-medium">
                 Sign Up
               </Text>
@@ -211,7 +235,7 @@ const LoginScreen = () => {
         </View>
       </View>
     </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
-};
-
-export default LoginScreen;
+}

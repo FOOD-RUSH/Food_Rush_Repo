@@ -5,6 +5,9 @@ import {
   TouchableOpacity,
   Modal,
   FlatList,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -13,6 +16,9 @@ import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { registerSchema } from '@/utils/validation';
 import { TextButton } from '@/components/common/TextButton';
+import { useDispatch, useSelector } from 'react-redux';
+import { useAuth } from '@/hooks/useAuth';
+import type { AppDispatch, RootState } from '@/store/store';
 
 // Country codes data - you can move this to a separate file
 const COUNTRY_CODES = [
@@ -62,6 +68,7 @@ const SignupScreen = () => {
     },
   });
 
+  const {error, signUp} = useAuth();
   // Watch password for confirm password validation
   const password = watch('password');
 
@@ -83,11 +90,19 @@ const SignupScreen = () => {
       };
 
       // TODO: Implement signup logic
+      await signUp(signupData.email, signupData.password, 'customer', {phoneNumber: signupData.phoneNumber, userName: signupData.displayName})
+      // Show success toast or alert
+      console.log('Signup successful');
+      Alert.alert('Success', 'Account created successfully');
+      alert('Account created successfully!');
 
       console.log('SignupScreen data:', signupData);
-    } catch (error) {
+    } catch (error: any ) {
       console.error('SignupScreen error:', error);
+
       // Handle error - show toast/alert
+          Alert.alert('Signup Failed', error || 'Could not create account');
+
     } finally {
       setLoading(false);
     }
@@ -116,6 +131,11 @@ const SignupScreen = () => {
   );
 
   return (
+     <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      >
     <SafeAreaView className="flex-1 flex-col bg-white">
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         <View className="flex-1 px-6 py-8">
@@ -401,6 +421,9 @@ const SignupScreen = () => {
               </Text>
               <TextButton text="Sign In" onPress={handleLogin} />
             </View>
+            {error && (
+  <Text className="text-red-500 text-center mb-2">{error}</Text>
+)}
           </View>
         </View>
       </ScrollView>
@@ -427,6 +450,7 @@ const SignupScreen = () => {
         </SafeAreaView>
       </Modal>
     </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 };
 

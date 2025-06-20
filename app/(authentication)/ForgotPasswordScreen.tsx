@@ -1,5 +1,5 @@
 import { View, Text } from 'react-native';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { emailValidation } from '@/utils/validation';
 import { Controller, useForm } from 'react-hook-form';
@@ -7,45 +7,53 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { Button, HelperText, TextInput } from 'react-native-paper';
 
-const ForgotPassword = () => {
-  // EMAIL SCHEMA
-  const schema = yup.object({
-    email: emailValidation,
-  });
+// Move schema outside component to prevent recreation on every render
+const schema = yup.object({
+  email: emailValidation,
+});
 
+const ForgotPassword = () => {
   const {
     control,
     handleSubmit,
-    formState: { errors },
+    setValue,
+    formState: { errors, isSubmitting },
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
       email: '',
     },
   });
-  //handle forgot password
-  const handleForgotPassword = () => {
-    console.log();
-  };
+
+  // Memoize handlers to prevent unnecessary re-renders
+  const handleForgotPassword = useCallback((data: { email: string }) => {
+    console.log('Password reset requested for:', data.email);
+    // Add your password reset logic here
+  }, []);
+
+  const clearEmail = useCallback(() => {
+    setValue('email', '', { shouldValidate: true });
+  }, [setValue]);
 
   return (
-    <SafeAreaView>
-      <View className="flex flex-1 bg-white px-6 py-8">
+    <SafeAreaView className="flex-1">
+      <View className="flex-1 bg-white px-6 py-8">
+        {/* Header Section */}
         <View className="mb-8">
           <Text className="text-4xl font-bold text-gray-900 leading-tight">
-            Forgot your Password ?
+            Forgot your Password?
           </Text>
           <Text className="text-base text-gray-500 mt-2">
-            Enter your email so that we could send your email to verify your
-            account
+            Enter your email so we can send you a verification link
           </Text>
         </View>
-        {/* email input */}
+
+        {/* Email Input */}
         <Controller
           control={control}
           name="email"
           render={({ field: { onChange, onBlur, value } }) => (
-            <View>
+            <View className="mb-6">
               <Text className="text-base font-semibold text-gray-900 mb-2">
                 Email Address
               </Text>
@@ -63,31 +71,34 @@ const ForgotPassword = () => {
                 contentStyle={{ paddingHorizontal: 16 }}
                 error={!!errors.email}
                 right={
-                  <TextInput.Icon
-                    icon="close-circle-outline"
-                    onPress={() => onChange('')}
-                  />
+                  value ? (
+                    <TextInput.Icon
+                      icon="close-circle-outline"
+                      onPress={clearEmail}
+                    />
+                  ) : null
                 }
               />
-              {errors.email && (
-                <HelperText type="error" visible={!!errors.email}>
-                  {errors.email.message}
-                </HelperText>
-              )}
+              <HelperText type="error" visible={!!errors.email}>
+                {errors.email?.message || ''}
+              </HelperText>
             </View>
           )}
         />
-        {/* forgot Password Button */}
+
+        {/* Submit Button */}
         <Button
           mode="contained"
           onPress={handleSubmit(handleForgotPassword)}
+          loading={isSubmitting}
+          disabled={isSubmitting}
           buttonColor="#007aff"
           textColor="white"
           contentStyle={{ paddingVertical: 8 }}
-          style={{ borderRadius: 12, marginTop: 24 }}
+          style={{ borderRadius: 12 }}
           labelStyle={{ fontSize: 16, fontWeight: '600' }}
         >
-          Continue
+          {isSubmitting ? 'Sending...' : 'Continue'}
         </Button>
       </View>
     </SafeAreaView>

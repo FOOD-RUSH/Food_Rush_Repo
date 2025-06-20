@@ -1,30 +1,57 @@
 export interface User {
   uid: string;
   email: string;
-  displayName: string;
-  phoneNumber?: string;
-  userName: string,
-  userType: 'customer' | 'restaurant' | 'delivery';
-  createdAt: Date;
-  updatedAt: Date;
+  userType: 'customer' | 'restaurant';
+  profile: CustomerProfile | RestaurantProfile;
+  isEmailVerified: boolean;
+
+}
+// app state
+export interface AppState {
+  isOnboardingComplete: boolean;
+  theme: 'light' | 'dark';
+  language: string;
+  currentOnboardingStep: number,
+
+}
+// Onboarding slides 
+export interface OnboardingSlide {
+  id: number,
+  title: string,
+  description: string;
+  image: any,
+  
 }
 
-// Restaurant Types
-export interface Restaurant {
+// Customer profile
+export interface CustomerProfile {
+  userName: string;
+  phoneNumber: string;
+  addresses?: Address[];
+  preferences?: {
+    dietary: string[];
+    cuisineTypes: string[];
+  };
+}
+//Restaurant profile
+export interface RestaurantProfile {
   id: string;
   name: string;
   description: string;
+  phone: string;
+  address: Address;
   cuisine: string[];
+  hours: {
+    [key: string]: { open: string; close: string; isOpen: boolean };
+  };
+  isVerified: boolean;
   rating: number;
+  images: [];
   deliveryTime: number;
   deliveryFee: number;
-  minimumOrder: number;
-  isOpen: boolean;
-  location: Location;
-  images: string[];
-  menu: MenuItem[];
+  menu: MenuItem[]
 }
-
+// MENU ITEM INTERFace
 export interface MenuItem {
   id: string;
   name: string;
@@ -35,6 +62,7 @@ export interface MenuItem {
   isAvailable: boolean;
   dietaryInfo: string[];
 }
+
 
 // Order Types
 export interface Order {
@@ -50,7 +78,15 @@ export interface Order {
   createdAt: Date;
   estimatedDeliveryTime: Date;
 }
-
+//  Auth state 
+export interface AuthState {
+  user: User | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  error: string | null;
+  hasHydrated: boolean;
+}
+// Order item
 export interface OrderItem {
   menuItemId: string;
   quantity: number;
@@ -58,7 +94,7 @@ export interface OrderItem {
   price: number;
 }
 
-export type OrderStatus = 
+export type OrderStatus =
   | 'pending'
   | 'confirmed'
   | 'preparing'
@@ -83,7 +119,7 @@ export interface Address {
 }
 
 // Payment Types
-export type PaymentMethod = 
+export type PaymentMethod =
   | 'mtn_mobile_money'
   | 'orange_money'
 

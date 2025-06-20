@@ -3,14 +3,18 @@ import React from 'react'
 
 
 
-export const TextButton = ({text, onPress}) => {
-    
+type TextButtonProps = {
+  text: string;
+  onPress: () => void;
+};
+
+export const TextButton: React.FC<TextButtonProps> = ({ text, onPress }) => {
   return (
-     <TouchableOpacity onPress={onPress}>
-                  <Text className="text-primaryColor text-base font-medium">
-                    {text}
-                  </Text>
+    <TouchableOpacity onPress={onPress}>
+      <Text className="text-primaryColor text-base font-medium">
+        {text}
+      </Text>
     </TouchableOpacity>
-  )
-}
+  );
+};
 
