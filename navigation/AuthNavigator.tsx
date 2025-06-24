@@ -1,16 +1,17 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AuthStackParamList } from './types';
-import  LoginScreen from '@/app/(authentication)/LoginScreen';
-// import  RegisterScreen from '@/app/(auth)';
-import SignupScreen from '@/app/(authentication)/SignupScreen';
-import ForgotPasswordScreen from '@/app/(authentication)/ForgotPasswordScreen';
+import LoginScreen from '@/app/screens/auth/LoginScreen';
+import SignupScreen from '@/app/screens/auth/SignupScreen';
+import ForgotPasswordScreen from '@/app/screens/auth/ForgotPasswordScreen';
+import OTPScreen from '@/app/screens/auth/OTPScreen';
+import ResetPasswordScreen from '@/app/screens/auth/ResetPasswordScreen';
 
-const Stack = createNativeStackNavigator<AuthStackParamList>();
+const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 
 export default function AuthNavigator() {
   return (
-    <Stack.Navigator
+    <AuthStack.Navigator
       initialRouteName="Login"
       screenOptions={{
         headerStyle: {
@@ -23,28 +24,45 @@ export default function AuthNavigator() {
         animation: 'slide_from_right', // iOS-style animation
       }}
     >
-      <Stack.Screen 
-        name="Login" 
+      <AuthStack.Screen
+        name="Login"
         component={LoginScreen}
         options={{
-          headerShown: false, // Custom design for login
+          headerShown: false,
+          // Custom design for login
         }}
       />
-      <Stack.Screen 
-        name="Signup" 
+      <AuthStack.Screen
+        name="Register"
         component={SignupScreen}
         options={{
           title: 'Create Account',
           headerBackTitle: 'Back', // iOS specific
         }}
       />
-      <Stack.Screen 
-        name="ForgotPassword" 
+      <AuthStack.Screen
+        name="ForgotPassword"
         component={ForgotPasswordScreen}
         options={{
           title: 'Reset Password',
         }}
       />
-    </Stack.Navigator>
+      <AuthStack.Screen
+        name="OTPScreen"
+        component={OTPScreen}
+        options={{
+          title: 'Verify Phone Number',
+          headerBackTitle: 'Back', // iOS specific
+        }}
+      />
+      <AuthStack.Screen
+        name="ResetPassword"
+        component={ResetPasswordScreen}
+        options={{
+          title: 'Reset Password',
+          headerBackTitle: 'Back', // iOS specific
+        }}
+      />
+    </AuthStack.Navigator>
   );
 }

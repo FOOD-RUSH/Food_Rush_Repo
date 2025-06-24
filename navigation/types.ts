@@ -1,85 +1,102 @@
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 export type RootStackParamList = {
-    Auth: undefined;
-    Customer: undefined;
-    RestaurantAuth: undefined;
-    Restaurant: undefined;
+  Auth: undefined;
+  CustomerApp: undefined;
+  RestaurantApp: undefined;
+
 
 }
 
+// Auth Stack Navigator types
 export type AuthStackParamList = {
-    Login: undefined,
-    Signup: undefined,
-    ForgotPassword: undefined,
-    OTP: undefined,
-    ResetPassword: { email?: string },
+  Login: { userType: 'customer' | 'restaurant' };
+  Register: { userType: 'customer' | 'restaurant' };
+  ForgotPassword: undefined;
+  ResetPassword: { token: string };
+  OTPScreen: { phoneNumber: string };
+};
+// customer Tab Navigator types
+export type CustomerTabsParamList = {
+  Home: undefined;
+  Search: undefined;
+  Cart: undefined;
+  Profile: undefined;
+}
+
+//  Customer Stack Navigator types
+export type CustomerHomeStackParamList = {
+  HomeScreen: undefined;
+  FoodDetails: undefined;
+  // TODO: ADD MORE PAGES
 
 }
 
-// we need to put parameters for foodDetails
-
-export type CustomerStackParamList = {
-    Search: undefined,
-    Favorites: undefined,
-    FoodDetails: undefined,
-    // location logic will be implemented later, we should make sure everything can work first like ordering food using dummy data
-    OrderHistory: undefined,
-    Tabs: TabCustomerParamList
-    // TODO: ADD MORE PAGES
-}
-// Restaurant Stack Param List
-export type TabRestaurantStackParamList = {
-   Dashboard: undefined,
-    Orders: undefined,
-    Menu: undefined,
-    Profile: undefined,
-}
-export type RestaurantStackParamList = {
-    RestaurantTabs: TabRestaurantStackParamList,
-    FoodDetails: undefined,
-    AddFood: undefined,
-    EditFood: { foodId: string },
-    OrderDetails: { orderId: string },
-    OrderHistory: undefined,
-    Notifications: undefined,
+export type CustomerSearchParamList = {
+  SearchScreen: undefined;
+  SearchResults: { query: string };
+  FilterOptions: undefined;
 }
 
-// Restaurant Auth Stack Param List
-export type RestaurantAuthStackParamList = {
-     LoginRestaurant: undefined,
-    RegisterRestaurant: undefined,
-    ForgotPasswordRestaurant: { email?: string },
-    OTPRestaurant: undefined,
-    ResetPasswordRestaurant: { email?: string },
+export type CustomerCartStackParamList = {
+  CartScreen: undefined;
+  Checkout: undefined;
+  PaymentMethods: undefined;
+  AddPaymentMethod: undefined;
+  DeliveryAddress: undefined;
+  AddAddress: undefined;
+  OrderConfirmation: { orderId: string };
+};
 
-}
+export type CustomerProfileStackParamList = {
+  ProfileScreen: undefined;
+  EditProfile: undefined;
+  OrderHistory: undefined;
+  OrderDetails: { orderId: string };
+  Addresses: undefined;
+  AddAddress: undefined;
+  PaymentMethods: undefined;
+  Settings: undefined;
+  Help: undefined;
+  Favorites: undefined;
+};
 
-export type TabCustomerParamList = {
-    Home: undefined,
-    Cart: undefined,
-    Notifcation: undefined,
-    Profile: undefined, 
-}
+// Restaurant Tab Navigator Types
+export type RestaurantTabParamList = {
+  Orders: undefined;
+  Menu: undefined;
+  Analytics: undefined;
+  Profile: undefined;
+};
 
-// Helper types for screen props
-export type RootStackScreenProps<T extends keyof RootStackParamList> = 
-  NativeStackScreenProps<RootStackParamList, T>;
+// Restaurant Stack Navigator Types
+export type RestaurantOrdersStackParamList = {
+  OrdersScreen: undefined;
+  OrderDetails: { orderId: string };
+  OrderHistory: undefined;
+};
 
-export type AuthStackScreenProps<T extends keyof AuthStackParamList> = 
-  NativeStackScreenProps<AuthStackParamList, T>;
+export type RestaurantMenuStackParamList = {
+  MenuScreen: undefined;
+  AddMenuItem: undefined;
+  EditMenuItem: { itemId: string };
+  Categories: undefined;
+  AddCategory: undefined;
+  EditCategory: { categoryId: string };
+};
 
-export type CustomerStackScreenProps<T extends keyof CustomerStackParamList> = 
-  NativeStackScreenProps<CustomerStackParamList, T>;
+export type RestaurantAnalyticsStackParamList = {
+  AnalyticsScreen: undefined;
+  SalesReport: undefined;
+  CustomerInsights: undefined;
+  PopularItems: undefined;
+};
 
-export type RestaurantAuthStackProps<T extends keyof RestaurantAuthStackParamList> = 
-  NativeStackScreenProps<RestaurantAuthStackParamList, T>;
-
-export type RestaurantStackScreenProps<T extends keyof RestaurantStackParamList> =
-  NativeStackScreenProps<RestaurantStackParamList, T>;
-// Global navigation type augmentation
-declare global {
-  namespace ReactNavigation {
-    interface RootParamList extends RootStackParamList {}
-  }
-}
+export type RestaurantProfileStackParamList = {
+  ProfileScreen: undefined;
+  EditProfile: undefined;
+  RestaurantSettings: undefined;
+  BusinessHours: undefined;
+  DeliverySettings: undefined;
+  Notifications: undefined;
+  Help: undefined;
+};

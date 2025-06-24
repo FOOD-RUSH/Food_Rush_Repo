@@ -1,6 +1,6 @@
 import React, { useEffect} from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { RootStackParamList } from './types';
+import {RootStackParamList } from './types';
 import AuthNavigator from './AuthNavigator';
 import CustomerNavigator from './CustomerNavigator';
 import { useDispatch, useSelector } from 'react-redux';
@@ -11,16 +11,14 @@ import LoadingScreen from '@/components/common/LoadingScreen';
 import OnboardingScreen from '@/components/onBoardingScreen';
 import { OnboardingSlides } from '@/app/data/onboardingData';
 import { setOnboardingComplete } from '@/store/slices/appSlice';
+const RootStack = createNativeStackNavigator<RootStackParamList>();
 
-const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootNavigator() {
   const dispatch = useDispatch<AppDispatch>()
 
   const {user, isAuthenticated, hasHydrated} = useSelector((state: RootState) => state.auth)
   const isOnboardingComplete = useSelector((state: RootState) => state.app.isOnboardingComplete);
-
- 
   useEffect(()=> {
     dispatch(hydrateAuth());
   }, [dispatch])
@@ -34,28 +32,40 @@ export default function RootNavigator() {
     return (
       <OnboardingScreen
         OnboardingSlides={OnboardingSlides}
-        onComplete={() => dispatch(setOnboardingComplete(true))}
+        onComplete={(userType) => {
+          // Handle completion with selected user type
+          console.log('Onboarding completed with user type:', userType);
+          // Dispatch action to set onboarding complete
+          dispatch(setOnboardingComplete(true));
+          // Navigate to appropriate screen based on userType
+        }}
+        onLogin={() => {
+          // Handle login navigation
+          console.log('Navigate to login screen');
+          
+        }}
       />
     );
   }
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <RootStack.Navigator screenOptions={{ headerShown: false }}> 
   {!isAuthenticated ? (
           // Show login/signup screens
-          <Stack.Screen name="Auth" component={AuthNavigator} />
+          <RootStack.Screen name="Auth" component={AuthNavigator} />
         ) : user?.userType === 'customer' ? (
           // Show customer app
-          <Stack.Screen name="Customer" component={CustomerNavigator} />
+          <RootStack.Screen name="CustomerApp" component={CustomerNavigator} />
         ) 
         : (
           // Show restaurant app
-          <Stack.Screen name="Restaurant" component={RestaurantNavigator} />
+          <RootStack.Screen name="RestaurantApp" component={RestaurantNavigator} />
           // to fix
         
         )
         }
-    </Stack.Navigator>
+    </RootStack.Navigator>
   );
 }
+
 
 

@@ -22,7 +22,7 @@ export const lightTheme = {
     onBackground: '#1e293b',
     outline: '#cbd5e1',
   },
-
+  dark: false
 };
 
 export const darkTheme = {
@@ -43,4 +43,5 @@ export const darkTheme = {
     onBackground: '#f1f5f9',
     outline: '#64748b',
   },
+  dark: true
 };

@@ -1,6 +1,5 @@
-import { Provider as PaperProvider } from 'react-native-paper';
+import '@/config/firebase';
 import './globals.css';
-import { lightTheme } from '@/config/theme';
 import { Inter_900Black, useFonts } from '@expo-google-fonts/inter';
 import * as SplashScreen from 'expo-splash-screen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -10,6 +9,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 import LoadingScreen from '@/components/common/LoadingScreen';
 import { persistor, store } from '@/store/store';
 import { Provider as StateProvider } from 'react-redux';
+import { ThemeProvider } from '@/components/ThemeProvider';
 
 
 SplashScreen.preventAutoHideAsync();
@@ -27,17 +27,17 @@ export default function RootLayout() {
   if (!loaded && !error) {
     return null;
   }
+
   return (
     <StateProvider store={store}>
-    <PersistGate loading={<LoadingScreen />} persistor={persistor}>
-      <SafeAreaProvider>
-      <PaperProvider theme={lightTheme}>
-        <RootNavigator />
-      </PaperProvider>
-    </SafeAreaProvider>
-    </PersistGate>
+      <PersistGate loading={<LoadingScreen />} persistor={persistor}>
+        <SafeAreaProvider>
+          <ThemeProvider>
+            <RootNavigator />
+          </ThemeProvider>
+        </SafeAreaProvider>
+      </PersistGate>
     </StateProvider>
-    
   );
 }
 

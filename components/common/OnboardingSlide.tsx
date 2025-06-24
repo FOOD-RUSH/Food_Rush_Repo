@@ -23,7 +23,6 @@ const OnboardingSlide = (slide: onboardingInfo, next: Function, skip: Function) 
                 <Text className='text-[16px] mb-2 text-center'>
                     {slide.description}
                 </Text>
-                {/* ProgressIndicator TODO: */}
             </View>
             {/* Onboarding controls */}
             <View className='flex-row justify-between'>

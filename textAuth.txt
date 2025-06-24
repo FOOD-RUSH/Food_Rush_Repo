@@ -37,3 +37,85 @@
     light: { fontFamily: 'Inter_300Light', fontWeight: 'normal' },
     thin: { fontFamily: 'Inter_200ExtraLight', fontWeight: 'normal' },
   },
+
+  Perfect! Since you've already set up AsyncStorage in your authentication, you should stick with `initializeAuth` with AsyncStorage persistence. This is actually the better approach for your Expo app.
+
+The "auth not initialized" error you're experiencing is likely due to one of these common issues:
+
+## Most Common Fixes:
+
+**1. Import order issue** - Make sure you import your Firebase config before any components that use auth:
+
+```typescript
+// App.tsx
+import React from 'react';
+import './firebase'; // Import FIRST, before other components
+import { Provider } from 'react-redux';
+import { store } from './store/store';
+import MainNavigator from './navigation/MainNavigator';
+```
+
+**2. Double initialization prevention:**
+```typescript
+// firebase.ts
+let auth: Auth;
+try {
+  auth = initializeAuth(app, {
+    persistence: getReactNativePersistence(AsyncStorage)
+  });
+} catch (error: any) {
+  if (error.code === 'auth/already-initialized') {
+    auth = getAuth(app);
+  } else {
+    throw error;
+  }
+}
+```
+
+**3. Check if you're trying to use auth before it's fully initialized:**
+```typescript
+// Instead of using auth immediately, wait for it to be ready
+import { auth } from '../firebase';
+
+// In your component/hook
+useEffect(() => {
+  const unsubscribe = onAuthStateChanged(auth, (user) => {
+    // This ensures auth is ready before using it
+    console.log('Auth state changed:', user);
+  });
+  return unsubscribe;
+}, []);
+```
+
+**4. Make sure AsyncStorage is properly installed:**
+```bash
+npx expo install @react-native-async-storage/async-storage
+```
+
+## Debug Steps:
+
+Add these console logs to your Firebase config to see what's happening:
+
+```typescript
+console.log('Firebase app initialized:', app);
+console.log('Attempting to initialize auth...');
+
+try {
+  auth = initializeAuth(app, {
+    persistence: getReactNativePersistence(AsyncStorage)
+  });
+  console.log('Auth initialized successfully:', auth);
+} catch (error: any) {
+  console.log('Auth initialization error:', error.code, error.message);
+  if (error.code === 'auth/already-initialized') {
+    auth = getAuth(app);
+    console.log('Using existing auth instance:', auth);
+  }
+}
+```
+
+Since you've already set up AsyncStorage properly, the issue is likely timing-related. Can you share:
+1. Where exactly you're getting the "auth not initialized" error?
+2. How you're importing/using the auth instance in your components?
+
+This will help pinpoint the exact issue with your current setup.
