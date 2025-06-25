@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  View, 
-  Text, 
-  Image, 
-  ImageBackground, 
-  TouchableOpacity, 
+import {
+  View,
+  Text,
+  Image,
+  ImageBackground,
+  TouchableOpacity,
   Dimensions,
   StatusBar,
-  Animated
+  Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { OnboardingSlide as OnboardingInfo } from '@/types';
@@ -47,17 +47,17 @@ const OnboardingWelcome = ({ onComplete }: { onComplete: () => void }) => {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar barStyle="dark-content" backgroundColor="white" />
-      <Animated.View 
+      <Animated.View
         className="flex-1 justify-between items-center px-6 flex-col "
         style={{
           opacity: fadeAnim,
-          transform: [{ translateY: slideAnim }]
+          transform: [{ translateY: slideAnim }],
         }}
       >
         {/* Logo */}
         <View className="mb-8">
-          <Image 
-            source={relayLogo} 
+          <Image
+            source={relayLogo}
             style={{
               width: screenWidth * 0.3,
               height: screenWidth * 0.3,
@@ -96,12 +96,14 @@ const OnboardingWelcome = ({ onComplete }: { onComplete: () => void }) => {
               className="w-2 h-2 bg-blue-400 rounded-full"
               style={{
                 opacity: fadeAnim,
-                transform: [{
-                  scale: fadeAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0.5, 1],
-                  })
-                }]
+                transform: [
+                  {
+                    scale: fadeAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0.5, 1],
+                    }),
+                  },
+                ],
               }}
             />
           ))}
@@ -112,12 +114,12 @@ const OnboardingWelcome = ({ onComplete }: { onComplete: () => void }) => {
 };
 
 // Onboarding Slide Component
-const OnboardingSlide = ({ 
-  slide, 
-  onNext, 
-  onSkip, 
-  currentIndex, 
-  totalSlides 
+const OnboardingSlide = ({
+  slide,
+  onNext,
+  onSkip,
+  currentIndex,
+  totalSlides,
 }: {
   slide: OnboardingInfo;
   onNext: () => void;
@@ -130,9 +132,13 @@ const OnboardingSlide = ({
 
   return (
     <SafeAreaView className="flex-1">
-      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
-      <ImageBackground 
-        className="flex-1" 
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor="transparent"
+        translucent
+      />
+      <ImageBackground
+        className="flex-1"
         source={slide.image}
         resizeMode="cover"
       >
@@ -140,8 +146,8 @@ const OnboardingSlide = ({
         <View className="flex-1 bg-black/30">
           {/* Header with Logo */}
           <View className="p-4 pt-8">
-            <Image 
-              source={relayLogo} 
+            <Image
+              source={relayLogo}
               style={{
                 width: 80,
                 height: 80,
@@ -167,8 +173,8 @@ const OnboardingSlide = ({
                   <View
                     key={index}
                     className={`h-2 mx-1 rounded-full ${
-                      index === currentIndex 
-                        ? 'bg-blue-600 w-8' 
+                      index === currentIndex
+                        ? 'bg-blue-600 w-8'
                         : 'bg-gray-300 w-2'
                     }`}
                   />
@@ -178,7 +184,7 @@ const OnboardingSlide = ({
               {/* Action Buttons */}
               <View className="flex-row justify-between items-center">
                 {/* Skip Button */}
-                <TouchableOpacity 
+                <TouchableOpacity
                   onPress={onSkip}
                   className="py-3 px-6"
                   activeOpacity={0.7}
@@ -208,9 +214,9 @@ const OnboardingSlide = ({
 };
 
 // Main Onboarding Screen Component
-const OnboardingScreen = ({ 
-  OnboardingSlides, 
-  onComplete 
+const OnboardingScreen = ({
+  OnboardingSlides,
+  onComplete,
 }: {
   OnboardingSlides: OnboardingInfo[];
   onComplete: () => void;

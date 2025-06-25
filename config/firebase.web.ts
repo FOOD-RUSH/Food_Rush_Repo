@@ -1,10 +1,8 @@
 import { initializeApp } from "firebase/app";
-import {getReactNativePersistence } from 'firebase/auth/react-native';
 import { getFirestore } from 'firebase/firestore';
-import { initializeAuth, getAuth } from "firebase/auth";
+import { getAuth } from "firebase/auth";
 import { getStorage } from 'firebase/storage';
 import { getFunctions } from 'firebase/functions';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
@@ -16,20 +14,16 @@ const firebaseConfig = {
   appId: "1:358809288798:web:9a0a2115f59169b7d074cf",
   measurementId: "G-7C3R812G43"
 };
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-
-
-// app state 
- const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(AsyncStorage)
-})
-
+// WEB-specific auth initialization (uses default browser persistence)
+const auth = getAuth(app);
 
 //firebase
 export const db = getFirestore(app);
 export const storage = getStorage(app);
 export const functions = getFunctions(app);
 
-export {auth, app};
+export { auth, app }; 

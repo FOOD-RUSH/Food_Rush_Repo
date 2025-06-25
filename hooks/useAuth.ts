@@ -1,26 +1,22 @@
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState, AppDispatch } from '@/store/store';
-import { signInUser, signUpUser, signOutUser, updateUserProfile } from '../store/slices/authSlice';
-import { CustomerProfile, RestaurantProfile } from '@/types';
+import { RootState, AppDispatch } from '@/store';
+import { signInUser, signUpUser, signOutUser } from '../store/slices/authSlice';
+// import { CustomerProfile, RestaurantProfile } from '@/types';
 
 export const useAuth = () => {
   const dispatch = useDispatch<AppDispatch>();
   const auth = useSelector((state: RootState) => state.auth);
 
-  const signIn = (email: string, password: string, userType: 'customer' | 'restaurant') => {
-    return dispatch(signInUser({ email, password, userType }));
+  const signIn = (email: string, password: string) => {
+    return dispatch(signInUser({ email, password }));
   };
 
-  const signUp = (email: string, password: string, userType: 'customer' | 'restaurant', profile: CustomerProfile  | RestaurantProfile) => {
-    return dispatch(signUpUser({ email, password, userType, profile }));
+  const signUp = (email: string, password: string) => {
+    return dispatch(signUpUser({ email, password }));
   };
 
   const signOut = () => {
     return dispatch(signOutUser());
-  };
-
-  const updateProfile = (profile: CustomerProfile | RestaurantProfile ) => {
-    return dispatch(updateUserProfile(profile));
   };
 
   const canAccess = (allowedUserTypes: ('customer' | 'restaurant')[]): boolean => {
@@ -40,7 +36,6 @@ export const useAuth = () => {
     signIn,
     signUp,
     signOut,
-    updateProfile,
     canAccess,
     isCustomer,
     isRestaurant,
