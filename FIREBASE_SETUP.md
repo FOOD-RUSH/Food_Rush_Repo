@@ -34,7 +34,7 @@ const firebaseConfig = {
 
 ## 4. Test the App
 
-1. Run `npm start` or `expo start`
+1. Run `npm start` or `npx expo start`
 2. Try creating an account with email/password
 3. Try logging in with the created account
 

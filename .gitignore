@@ -35,8 +35,5 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
-<<<<<<< HEAD
-=======
 
 app-example
->>>>>>> dca64a0 (Update submodule content)
