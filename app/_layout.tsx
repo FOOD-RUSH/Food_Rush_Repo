@@ -1,6 +1,4 @@
-import { Provider as PaperProvider } from 'react-native-paper';
 import './globals.css';
-import { lightTheme } from '@/config/theme';
 import { Inter_900Black, useFonts } from '@expo-google-fonts/inter';
 import * as SplashScreen from 'expo-splash-screen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -13,6 +11,8 @@ import { Slot } from 'expo-router';
 import { initializeFirebaseAuth } from '@/config/firebase.native';
 import { checkAuthState } from '@/store/slices/authSlice';
 import { persistor, store, AppDispatch } from '@/store';
+import { PaperProvider } from 'react-native-paper';
+import { lightTheme } from '@/config/theme';
 
 SplashScreen.preventAutoHideAsync();
 

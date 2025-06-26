@@ -1,12 +1,12 @@
 import { View, Text } from 'react-native';
 import React from 'react';
 
-const Otp = () => {
+const OrderHistoryScreen = () => {
   return (
     <View>
-      <Text>Otp</Text>
+      <Text>OrderHistoryScreen</Text>
     </View>
   );
 };
 
-export default Otp;
+export default OrderHistoryScreen;

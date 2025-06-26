@@ -44,7 +44,7 @@ export default function SignupScreen() {
       .unwrap()
       .then(() => {
         Alert.alert('Signup Successful', 'Your account has been created.');
-        router.replace('/(customer)/(tabs)/HomeScreen');
+        router.replace('/');
       })
       .catch((err: any) => {
         Alert.alert('Signup Error', err?.message || 'An error occurred during signup.');

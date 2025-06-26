@@ -41,7 +41,7 @@ const onSubmit = async (data: LoginFormData) => {
       password: data.password
     })).unwrap();
     
-    router.replace('/(customer)/(tabs)/HomeScreen');
+    router.replace('/');
   } catch (error: any) {
     Alert.alert('Login Failed', error.message || 'Authentication error');
   }

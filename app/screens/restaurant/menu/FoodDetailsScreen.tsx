@@ -1,12 +1,12 @@
 import { View, Text } from 'react-native';
 import React from 'react';
 
-const RestaurantSignIn = () => {
+const FoodDetailsScereen = () => {
   return (
     <View>
-      <Text>RestaurantSignIn</Text>
+      <Text>FoodDetailsScereen</Text>
     </View>
   );
 };
 
-export default RestaurantSignIn;
+export default FoodDetailsScereen;

@@ -1,12 +1,12 @@
 import { View, Text } from 'react-native';
 import React from 'react';
 
-const Otp = () => {
+const AnalyticsScreen = () => {
   return (
     <View>
-      <Text>Otp</Text>
+      <Text>AnalyticsScreen</Text>
     </View>
   );
 };
 
-export default Otp;
+export default AnalyticsScreen;

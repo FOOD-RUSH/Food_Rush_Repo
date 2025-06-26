@@ -2,18 +2,25 @@ export interface User {
   uid: string;
   email: string;
   userType: 'customer' | 'restaurant';
-  profile: CustomerProfile | RestaurantProfile;
+  profile?: CustomerProfile | RestaurantProfile;
   isEmailVerified: boolean;
 
 }
 // app state
 export interface AppState {
   isOnboardingComplete: boolean;
-  theme: 'light' | 'dark';
   language: string;
   currentOnboardingStep: number,
 
 }
+//theme State
+export type ThemeMode = 'light' | 'dark' | 'system';
+
+export interface ThemeState {
+  mode: ThemeMode;
+  isLoading: boolean;
+}
+
 // Onboarding slides 
 export interface OnboardingSlide {
   id: number,

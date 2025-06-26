@@ -2,6 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getFirestore } from 'firebase/firestore';
 import { getAuth } from "firebase/auth";
 import { getStorage } from 'firebase/storage';
+import {  getReactNativePersistence } from 'firebase/auth/react-native';
 import { getFunctions } from 'firebase/functions';
 
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional

@@ -3,7 +3,6 @@ import { AppState } from "@/types";
 
 const initialState: AppState = {
   isOnboardingComplete: false,
-  theme: 'light',
   language: 'en',
   currentOnboardingStep: 0,
 
@@ -16,9 +15,7 @@ const appSlice = createSlice({
     setOnboardingComplete: (state, action: PayloadAction<boolean>) => {
       state.isOnboardingComplete = action.payload;
     },
-    setTheme: (state, action: PayloadAction<'light' | 'dark'>) => {
-      state.theme = action.payload;
-    },
+    
     setLanguage: (state, action: PayloadAction<string>) => {
       state.language = action.payload;
     },
@@ -33,5 +30,5 @@ const appSlice = createSlice({
   },
 });
 
-export const { setOnboardingComplete, setTheme, setLanguage, skipOnboarding } = appSlice.actions;
+export const { setOnboardingComplete, setLanguage, skipOnboarding } = appSlice.actions;
 export default appSlice.reducer;
