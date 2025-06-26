@@ -1,6 +1,6 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { useTheme as usePaperTheme } from 'react-native-paper';
-import { RootState, AppDispatch } from '@/store/store';
+import { RootState, AppDispatch } from '@/store';
 import { saveTheme, selectThemeMode, getActualTheme } from '@/store/slices/themeSlice';
 import { ThemeMode } from '@/types/index';
 

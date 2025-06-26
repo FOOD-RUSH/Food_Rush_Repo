@@ -1,44 +1,36 @@
-import '@/config/firebase';
 import './globals.css';
 import { Inter_900Black, useFonts } from '@expo-google-fonts/inter';
 import * as SplashScreen from 'expo-splash-screen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useEffect } from 'react';
-import RootNavigator from '@/navigation/RootNavigator';
-import { PersistGate } from 'redux-persist/integration/react';
 import LoadingScreen from '@/components/common/LoadingScreen';
-import { persistor, store } from '@/store/store';
-import { Provider as StateProvider } from 'react-redux';
-import { ThemeProvider } from '@/components/ThemeProvider';
-
+import { Slot } from 'expo-router';
+import { PaperProvider } from 'react-native-paper';
+import { lightTheme } from '@/config/theme';
+import { AuthProvider } from '@/contexts/AuthContext';
 
 SplashScreen.preventAutoHideAsync();
+
 export default function RootLayout() {
-  const [loaded, error] = useFonts({
-    Inter_900Black,
-  });
+  const [fontsLoaded] = useFonts({ Inter_900Black });
 
   useEffect(() => {
-    if (loaded || error) {
+    if (fontsLoaded) {
       SplashScreen.hideAsync();
     }
-  }, [loaded, error]);
+  }, [fontsLoaded]);
 
-  if (!loaded && !error) {
-    return null;
+  if (!fontsLoaded) {
+    return <LoadingScreen />;
   }
 
   return (
-    <StateProvider store={store}>
-      <PersistGate loading={<LoadingScreen />} persistor={persistor}>
-        <SafeAreaProvider>
-          <ThemeProvider>
-            <RootNavigator />
-          </ThemeProvider>
-        </SafeAreaProvider>
-      </PersistGate>
-    </StateProvider>
+    <AuthProvider>
+      <SafeAreaProvider>
+        <PaperProvider theme={lightTheme}>
+          <Slot />
+        </PaperProvider>
+      </SafeAreaProvider>
+    </AuthProvider>
   );
 }
-
-// spash-screen-background color: rgba(6, 16, 43, 1)

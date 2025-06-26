@@ -92,6 +92,7 @@ export interface AuthState {
   isAuthenticated: boolean;
   error: string | null;
   hasHydrated: boolean;
+  authStateChecked: boolean;
 }
 // Order item
 export interface OrderItem {

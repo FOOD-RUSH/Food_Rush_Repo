@@ -1,6 +1,7 @@
 import React from 'react';
+import { View } from 'react-native';
 import { useSelector } from 'react-redux';
-import { RootState } from '@/store/store'
+import { RootState } from '@/store'
 import { User } from '@/types';
 
 interface ProtectedRouteProps {
@@ -22,25 +23,25 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Check if user is authenticated
   if (!isAuthenticated || !user) {
-    return <>{fallback}</>;
+    return <View>{fallback}</View>;
   }
 
   // Check if user type is allowed
   if (!allowedUserTypes.includes(user.userType)) {
-    return <>{fallback}</>;
+    return <View>{fallback}</View>;
   }
 
   // Check email verification if required
   if (requireEmailVerification && !user.isEmailVerified) {
-    return <>{fallback}</>;
+    return <View>{fallback}</View>;
   }
 
   // Check profile completion if required
   if (requireProfileCompletion && !isProfileComplete(user)) {
-    return <>{fallback}</>;
+    return <View>{fallback}</View>;
   }
 
-  return <>{children}</>;
+  return <View>{children}</View>;
 };
 
 const isProfileComplete = (user: User): boolean => {

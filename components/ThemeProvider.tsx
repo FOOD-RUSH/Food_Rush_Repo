@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Appearance } from 'react-native';
 import { PaperProvider } from 'react-native-paper';
 import { StatusBar } from 'expo-status-bar';
-import { AppDispatch, RootState } from '@/store/store';
+import { AppDispatch, RootState } from '@/store';
 import { loadTheme, selectThemeMode, selectThemeLoading, getActualTheme } from '@/store/slices/themeSlice';
 import { lightTheme, darkTheme } from '@/config/theme';
 
