@@ -14,19 +14,22 @@ const ResetPasswordScreen = () => {
   const validationSchema = yup.object({
     password: yup
       .string()
-      .min(8, 'Password must be atleast 8 characters')
+      .min(8, 'Password must be at least 8 characters')
       .required('Password is required'),
 
     confirmPassword: yup
       .string()
-      .oneOf([yup.ref('password')], 'Password do not match')
+      .oneOf([yup.ref('password')], 'Passwords do not match')
       .required('Confirmation required'),
   });
   // state variable
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   //
-  const onSubmit = () => {};
+  const onSubmit = (data: ResetPassword) => {
+    console.log('Form Data:', data);
+    // Add API call or logic to handle password reset here
+  };
   // form controller for reset password
   const {
     control,
