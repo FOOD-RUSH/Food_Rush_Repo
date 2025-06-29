@@ -1,7 +1,6 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/store';
 import { signInUser, signUpUser, signOutUser } from '../store/slices/authSlice';
-// import { CustomerProfile, RestaurantProfile } from '@/types';
 
 export const useAuth = () => {
   const dispatch = useDispatch<AppDispatch>();

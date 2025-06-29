@@ -10,7 +10,6 @@ export interface User {
 export interface AppState {
   isOnboardingComplete: boolean;
   language: string;
-  currentOnboardingStep: number,
 
 }
 //theme State

@@ -1,5 +1,13 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, sendEmailVerification, applyActionCode } from 'firebase/auth';
+import {
+  User,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  sendEmailVerification,
+  applyActionCode,
+} from 'firebase/auth';
 import { getFirebaseAuth } from '../config/firebase.native';
 
 interface AuthContextType {
@@ -22,29 +30,38 @@ export const useAuth = () => {
   return context;
 };
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     console.log('AuthProvider: Setting up auth state listener');
-    
+    let unsubscribe: (() => void) | undefined;
+
     try {
       const auth = getFirebaseAuth();
       console.log('AuthProvider: Got auth instance:', !!auth);
-      
-      // Check if auth has the expected methods
-      if (auth && typeof auth.onAuthStateChanged === 'function') {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-          console.log('AuthProvider: Auth state changed, user:', !!user, 'email:', user?.email);
-          setUser(user);
-          setLoading(false);
-        }, (error) => {
-          console.error('AuthProvider: Auth state change error:', error);
-          setLoading(false);
-        });
 
-        return unsubscribe;
+      if (auth && typeof auth.onAuthStateChanged === 'function') {
+        unsubscribe = onAuthStateChanged(
+          auth,
+          (user) => {
+            console.log(
+              'AuthProvider: Auth state changed, user:',
+              !!user,
+              'email:',
+              user?.email,
+            );
+            setUser(user);
+            setLoading(false);
+          },
+          (error) => {
+            console.error('AuthProvider: Auth state change error:', error);
+            setLoading(false);
+          },
+        );
       } else {
         console.log('AuthProvider: Using mock auth - no user logged in');
         setLoading(false);
@@ -53,24 +70,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('AuthProvider: Error getting auth instance:', error);
       setLoading(false);
     }
+
+    // Only return the unsubscribe function if it exists
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
     console.log('AuthProvider: Attempting sign in for:', email);
-    
+
     try {
       const auth = getFirebaseAuth();
       const result = await signInWithEmailAndPassword(auth, email, password);
-      console.log('AuthProvider: Sign in successful:', !!result.user, 'email:', result.user?.email);
+      console.log(
+        'AuthProvider: Sign in successful:',
+        !!result.user,
+        'email:',
+        result.user?.email,
+      );
     } catch (error: any) {
       console.error('AuthProvider: Sign in error:', error);
-      
+
       // Handle specific Firebase errors
-      if (error.message === 'Auth not available' || 
-          error.message.includes('_getRecaptchaConfig') ||
-          error.message.includes('recaptcha') ||
-          error.message.includes('Cannot read property') ||
-          error.message.includes('create')) {
+      if (
+        error.message === 'Auth not available' ||
+        error.message.includes('_getRecaptchaConfig') ||
+        error.message.includes('recaptcha') ||
+        error.message.includes('Cannot read property') ||
+        error.message.includes('create')
+      ) {
         // For demo purposes, create a mock user
         const mockUser = {
           uid: 'mock-user-id',
@@ -91,7 +120,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           phoneNumber: null,
           providerId: 'password',
         } as User;
-        
+
         setUser(mockUser);
         console.log('AuthProvider: Mock sign in successful');
       } else {
@@ -102,24 +131,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signUp = async (email: string, password: string) => {
     console.log('AuthProvider: Attempting sign up for:', email);
-    
+
     try {
       const auth = getFirebaseAuth();
-      const result = await createUserWithEmailAndPassword(auth, email, password);
+      const result = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password,
+      );
       // Send verification email
       if (result.user) {
         await sendEmailVerification(result.user);
       }
-      console.log('AuthProvider: Sign up successful:', !!result.user, 'email:', result.user?.email);
+      console.log(
+        'AuthProvider: Sign up successful:',
+        !!result.user,
+        'email:',
+        result.user?.email,
+      );
     } catch (error: any) {
       console.error('AuthProvider: Sign up error:', error);
-      
+
       // Handle specific Firebase errors
-      if (error.message === 'Auth not available' || 
-          error.message.includes('_getRecaptchaConfig') ||
-          error.message.includes('recaptcha') ||
-          error.message.includes('Cannot read property') ||
-          error.message.includes('create')) {
+      if (
+        error.message === 'Auth not available' ||
+        error.message.includes('_getRecaptchaConfig') ||
+        error.message.includes('recaptcha') ||
+        error.message.includes('Cannot read property') ||
+        error.message.includes('create')
+      ) {
         // For demo purposes, create a mock user
         const mockUser = {
           uid: 'mock-user-id',
@@ -140,7 +180,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           phoneNumber: null,
           providerId: 'password',
         } as User;
-        
+
         setUser(mockUser);
         console.log('AuthProvider: Mock sign up successful');
       } else {
@@ -176,12 +216,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await sendEmailVerification(user);
         console.log('AuthProvider: Resend sign up email successful');
       } else {
-        throw new Error("No user is available to resend verification email.");
+        throw new Error('No user is available to resend verification email.');
       }
     } catch (error: any) {
       console.error('AuthProvider: Resend sign up email error:', error);
-       // Mock for native
-       if (error.message.includes('undefined is not an object')) {
+      // Mock for native
+      if (error.message.includes('undefined is not an object')) {
         console.log('AuthProvider: Mock resend sign up email successful');
         return;
       }
@@ -191,18 +231,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     console.log('AuthProvider: Attempting logout');
-    
+
     try {
       const auth = getFirebaseAuth();
       await signOut(auth);
       console.log('AuthProvider: Logout successful');
     } catch (error: any) {
       console.error('AuthProvider: Logout error:', error);
-      if (error.message === 'Auth not available' || 
-          error.message.includes('_getRecaptchaConfig') ||
-          error.message.includes('recaptcha') ||
-          error.message.includes('Cannot read property') ||
-          error.message.includes('create')) {
+      if (
+        error.message === 'Auth not available' ||
+        error.message.includes('_getRecaptchaConfig') ||
+        error.message.includes('recaptcha') ||
+        error.message.includes('Cannot read property') ||
+        error.message.includes('create')
+      ) {
         setUser(null);
         console.log('AuthProvider: Mock logout successful');
       } else {
@@ -221,11 +263,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     resendSignUp,
   };
 
-  console.log('AuthProvider: Rendering with user:', !!user, 'loading:', loading, 'email:', user?.email);
-
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
+  console.log(
+    'AuthProvider: Rendering with user:',
+    !!user,
+    'loading:',
+    loading,
+    'email:',
+    user?.email,
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

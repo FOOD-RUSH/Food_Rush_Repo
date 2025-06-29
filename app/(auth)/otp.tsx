@@ -1,16 +1,16 @@
 import React, { useState, useRef } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TouchableOpacity, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
   Alert,
   TextInput,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
   Pressable,
-  Keyboard
+  Keyboard,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -28,11 +28,11 @@ export default function Otp() {
 
   const handleOnPress = () => {
     ref?.current?.focus();
-  }
-  
+  };
+
   const handleOnBlur = () => {
     ref?.current?.blur();
-  }
+  };
 
   const handleVerify = async () => {
     if (code.length !== 6) {
@@ -66,7 +66,7 @@ export default function Otp() {
 
   const goToLogin = () => {
     router.push('/(auth)/login');
-  }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -82,12 +82,17 @@ export default function Otp() {
 
         <View style={styles.content}>
           <View style={styles.iconContainer}>
-            <Ionicons name="shield-checkmark-outline" size={60} color="#3B82F6" />
+            <Ionicons
+              name="shield-checkmark-outline"
+              size={60}
+              color="#3B82F6"
+            />
           </View>
-          
+
           <Text style={styles.title}>Enter Verification Code</Text>
           <Text style={styles.subtitle}>
-            We have sent a 6-digit OTP to your email address. Please check your inbox.
+            We have sent a 6-digit OTP to your email address. Please check your
+            inbox.
           </Text>
 
           <Pressable style={styles.inputContainer} onPress={handleOnPress}>
@@ -96,11 +101,11 @@ export default function Otp() {
                 const digit = code[index] || '';
                 const isCurrentDigit = index === code.length;
                 return (
-                  <View 
-                    key={index} 
+                  <View
+                    key={index}
                     style={[
-                      styles.codeBox, 
-                      isCurrentDigit && styles.codeBoxFocused
+                      styles.codeBox,
+                      isCurrentDigit && styles.codeBoxFocused,
                     ]}
                   >
                     <Text style={styles.codeDigit}>{digit}</Text>
@@ -122,7 +127,10 @@ export default function Otp() {
           </Pressable>
 
           <TouchableOpacity
-            style={[styles.primaryButton, (loading || code.length !== 6) && styles.buttonDisabled]}
+            style={[
+              styles.primaryButton,
+              (loading || code.length !== 6) && styles.buttonDisabled,
+            ]}
             onPress={handleVerify}
             disabled={loading || code.length !== 6}
           >
@@ -134,7 +142,9 @@ export default function Otp() {
           </TouchableOpacity>
 
           <View style={styles.resendContainer}>
-            <Text style={styles.resendText}>Didn&apos;t receive the code? </Text>
+            <Text style={styles.resendText}>
+              Didn&apos;t receive the code?{' '}
+            </Text>
             <TouchableOpacity onPress={handleResend} disabled={resendLoading}>
               <Text style={styles.resendLink}>
                 {resendLoading ? 'Sending...' : 'Resend'}
@@ -194,6 +204,7 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: 30,
     alignItems: 'center',
+    margin: 10,
   },
   input: {
     position: 'absolute',

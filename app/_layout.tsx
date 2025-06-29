@@ -4,8 +4,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useEffect } from 'react';
 import LoadingScreen from '@/components/common/LoadingScreen';
-import { Slot } from 'expo-router';
 import { PaperProvider } from 'react-native-paper';
+import { StatusBar } from 'expo-status-bar';
 import { lightTheme } from '@/config/theme';
 import { AuthProvider } from '@/contexts/AuthContext';
 
@@ -28,7 +28,8 @@ export default function RootLayout() {
     <AuthProvider>
       <SafeAreaProvider>
         <PaperProvider theme={lightTheme}>
-          <Slot />
+        <StatusBar style="auto" />
+          <RootLayout />
         </PaperProvider>
       </SafeAreaProvider>
     </AuthProvider>
