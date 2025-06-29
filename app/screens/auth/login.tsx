@@ -1,21 +1,20 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  StyleSheet, 
-  Alert, 
-  KeyboardAvoidingView, 
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  KeyboardAvoidingView,
   Platform,
   ScrollView,
-  
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'expo-router';
-import { navigate } from '../navigation/navigationHelpers';
+import { navigate } from '../../navigation/navigationHelpers';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -49,17 +48,19 @@ export default function Login() {
       // TODO: Implement Google Sign In
       Alert.alert('Coming Soon', 'Google Sign In will be implemented soon!');
     } catch (error: any) {
-      Alert.alert('Google Sign In Failed', error.message || 'An error occurred');
+      Alert.alert(
+        'Google Sign In Failed',
+        error.message || 'An error occurred',
+      );
     } finally {
       setGoogleLoading(false);
     }
   };
 
   const goToSignup = () => {
-    navigate('Auth',  {
-      screen: 'SignUp'
-
-    })
+    navigate('Auth', {
+      screen: 'SignUp',
+    });
   };
 
   const goToForgotPassword = () => {
@@ -68,11 +69,11 @@ export default function Login() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}
       >
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
@@ -84,7 +85,9 @@ export default function Login() {
               </View>
             </View>
             <Text style={styles.title}>Welcome Back</Text>
-            <Text style={styles.subtitle}>Sign in to continue your food journey</Text>
+            <Text style={styles.subtitle}>
+              Sign in to continue your food journey
+            </Text>
           </View>
 
           {/* Form Section */}
@@ -93,7 +96,12 @@ export default function Login() {
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Email Address</Text>
               <View style={styles.inputWrapper}>
-                <Ionicons name="mail-outline" size={20} color="#666" style={styles.inputIcon} />
+                <Ionicons
+                  name="mail-outline"
+                  size={20}
+                  color="#666"
+                  style={styles.inputIcon}
+                />
                 <TextInput
                   style={styles.input}
                   placeholder="Enter your email"
@@ -110,7 +118,12 @@ export default function Login() {
             <View style={styles.inputContainer}>
               <Text style={styles.inputLabel}>Password</Text>
               <View style={styles.inputWrapper}>
-                <Ionicons name="lock-closed-outline" size={20} color="#666" style={styles.inputIcon} />
+                <Ionicons
+                  name="lock-closed-outline"
+                  size={20}
+                  color="#666"
+                  style={styles.inputIcon}
+                />
                 <TextInput
                   style={styles.input}
                   placeholder="Enter your password"
@@ -119,21 +132,24 @@ export default function Login() {
                   secureTextEntry={!showPassword}
                   autoComplete="password"
                 />
-                <TouchableOpacity 
+                <TouchableOpacity
                   onPress={() => setShowPassword(!showPassword)}
                   style={styles.eyeIcon}
                 >
-                  <Ionicons 
-                    name={showPassword ? "eye-off-outline" : "eye-outline"} 
-                    size={20} 
-                    color="#666" 
+                  <Ionicons
+                    name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                    size={20}
+                    color="#666"
                   />
                 </TouchableOpacity>
               </View>
             </View>
 
             {/* Forgot Password Link */}
-            <TouchableOpacity onPress={goToForgotPassword} style={styles.forgotPassword}>
+            <TouchableOpacity
+              onPress={goToForgotPassword}
+              style={styles.forgotPassword}
+            >
               <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
             </TouchableOpacity>
 
@@ -145,7 +161,12 @@ export default function Login() {
             >
               {loading ? (
                 <View style={styles.loadingContainer}>
-                  <Ionicons name="reload" size={20} color="#fff" style={styles.spinning} />
+                  <Ionicons
+                    name="reload"
+                    size={20}
+                    color="#fff"
+                    style={styles.spinning}
+                  />
                   <Text style={styles.primaryButtonText}>Signing In...</Text>
                 </View>
               ) : (
@@ -162,26 +183,38 @@ export default function Login() {
 
             {/* Google Sign In Button */}
             <TouchableOpacity
-              style={[styles.googleButton, googleLoading && styles.buttonDisabled]}
+              style={[
+                styles.googleButton,
+                googleLoading && styles.buttonDisabled,
+              ]}
               onPress={handleGoogleSignIn}
               disabled={googleLoading}
             >
               {googleLoading ? (
                 <View style={styles.loadingContainer}>
-                  <Ionicons name="reload" size={20} color="#333" style={styles.spinning} />
+                  <Ionicons
+                    name="reload"
+                    size={20}
+                    color="#333"
+                    style={styles.spinning}
+                  />
                   <Text style={styles.googleButtonText}>Signing In...</Text>
                 </View>
               ) : (
                 <>
                   <Ionicons name="logo-google" size={20} color="#DB4437" />
-                  <Text style={styles.googleButtonText}>Continue with Google</Text>
+                  <Text style={styles.googleButtonText}>
+                    Continue with Google
+                  </Text>
                 </>
               )}
             </TouchableOpacity>
 
             {/* Sign Up Link */}
             <View style={styles.signupContainer}>
-              <Text style={styles.signupText}>Don&apos;t have an account? </Text>
+              <Text style={styles.signupText}>
+                Don&apos;t have an account?{' '}
+              </Text>
               <TouchableOpacity onPress={goToSignup}>
                 <Text style={styles.signupLink}>Sign Up</Text>
               </TouchableOpacity>
@@ -375,4 +408,3 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
 });
-
