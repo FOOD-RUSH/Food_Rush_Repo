@@ -13,17 +13,21 @@ import FavoritesScreen from '@/app/screens/customer/Profile/FavoritesScreen';
 import ProfileScreen from '@/app/screens/customer/Profile/ProfileScreen';
 import SearchScreen from '@/app/screens/customer/search/SearchScreen';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+// order is top bar stack Navigator
+
 import { Platform } from 'react-native';
 import { lightTheme } from '@/config/theme';
 import { Ionicons } from '@expo/vector-icons';
-import OrderScreen from '../screens/customer/Order/OrderScreen';
-import ProfileHomeScreen from '../screens/customer/Profile/ProfileHomeScreen';
+import ProfileHomeScreen from '../app/screens/customer/Profile/ProfileHomeScreen';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import CompletedOrderScreen from '@/app/screens/customer/Order/CompletedOrderScreen';
+import ActiveOrderScreen from '@/app/screens/customer/Order/ActiveOrderScreen';
 
 const CustomerTab = createBottomTabNavigator<CustomerTabParamList>();
 const CustomerHomeStack =
   createNativeStackNavigator<CustomerHomeStackParamList>();
 const CustomerOrderStack =
-  createNativeStackNavigator<CustomerOrderStackParamList>();
+  createMaterialTopTabNavigator<CustomerOrderStackParamList>();
 const CustomerProfileStack =
   createNativeStackNavigator<CustomerProfileStackParamList>();
 const CustomerSearchStack =
@@ -47,8 +51,16 @@ function CustomerHomeStackScreen() {
 
 function CustomerOrderStackScreen() {
   return (
-    <CustomerOrderStack.Navigator screenOptions={{ headerShown: false }}>
-      <CustomerOrderStack.Screen name="OrderScreen" component={OrderScreen} />
+    <CustomerOrderStack.Navigator initialRouteName="CompletedOrdersScreen">
+      <CustomerOrderStack.Screen
+        name="CompletedOrdersScreen"
+        component={CompletedOrderScreen}
+      />
+      <CustomerOrderStack.Screen
+        name="PendingOrdersScreen"
+        component={ActiveOrderScreen}
+      />
+
       {/* Add more screens related to cart if needed */}
     </CustomerOrderStack.Navigator>
   );

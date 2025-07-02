@@ -4,10 +4,9 @@ import * as SplashScreen from 'expo-splash-screen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useEffect } from 'react';
 import LoadingScreen from '@/components/common/LoadingScreen';
-import { PaperProvider } from 'react-native-paper';
-import { StatusBar } from 'expo-status-bar';
-import { lightTheme } from '@/config/theme';
-import { AuthProvider } from '@/contexts/AuthContext';
+import { ThemeProvider } from '@/components/ThemeProvider';
+import { Provider } from 'react-redux';
+import { store } from '@/store';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -25,13 +24,12 @@ export default function RootLayout() {
   }
 
   return (
-    <AuthProvider>
+    <Provider store={store}>
       <SafeAreaProvider>
-        <PaperProvider theme={lightTheme}>
-        <StatusBar style="auto" />
+        <ThemeProvider>
           <RootLayout />
-        </PaperProvider>
+        </ThemeProvider>
       </SafeAreaProvider>
-    </AuthProvider>
+    </Provider>
   );
 }

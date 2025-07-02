@@ -5,7 +5,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { Button, TextInput, HelperText, IconButton } from 'react-native-paper';
-
+import { goBack } from '@/navigation/navigationHelpers';
 // Validation schema
 const schema = yup.object({
   email: yup
@@ -47,11 +47,6 @@ const ForgotPasswordScreen = () => {
     setValue('email', '', { shouldValidate: false });
   }, [setValue]);
 
-  const goBack = useCallback(() => {
-    // Handle navigation back
-    console.log('Go back');
-  }, []);
-
   return (
     <SafeAreaView className="flex-1 bg-white">
       <View className="flex-1 px-6 pt-2">
@@ -72,7 +67,8 @@ const ForgotPasswordScreen = () => {
             Reset Password
           </Text>
           <Text className="text-sm text-gray-600 text-center leading-5">
-            Enter your email address and we'll send you a{'\n'}code to reset your password
+            Enter your email address and we will send you a{'\n'}code to reset
+            your password
           </Text>
         </View>
 
@@ -93,27 +89,28 @@ const ForgotPasswordScreen = () => {
                 autoComplete="email"
                 autoCorrect={false}
                 style={{ backgroundColor: 'white' }}
-                outlineStyle={{ 
-                  borderRadius: 12, 
+                outlineStyle={{
+                  borderRadius: 12,
                   borderWidth: 1,
-                  borderColor: errors.email ? '#ef4444' : '#e5e7eb'
+                  borderColor: errors.email ? '#ef4444' : '#e5e7eb',
                 }}
-                contentStyle={{ 
-                  paddingHorizontal: 16, 
-                  paddingVertical: 16 
+                contentStyle={{
+                  paddingHorizontal: 16,
+                  paddingVertical: 16,
                 }}
                 error={!!errors.email}
                 left={<TextInput.Icon icon="lock-outline" />}
                 right={
                   value ? (
-                    <TextInput.Icon
-                      icon="eye"
-                      onPress={clearEmail}
-                    />
+                    <TextInput.Icon icon="eye" onPress={clearEmail} />
                   ) : null
                 }
               />
-              <HelperText type="error" visible={!!errors.email} className="text-xs mt-1">
+              <HelperText
+                type="error"
+                visible={!!errors.email}
+                className="text-xs mt-1"
+              >
                 {errors.email?.message}
               </HelperText>
               <Text className="text-xs text-gray-500 mt-1">

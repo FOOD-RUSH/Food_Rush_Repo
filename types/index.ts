@@ -13,12 +13,7 @@ export interface AppState {
 
 }
 //theme State
-export type ThemeMode = 'light' | 'dark' | 'system';
 
-export interface ThemeState {
-  mode: ThemeMode;
-  isLoading: boolean;
-}
 
 // Onboarding slides 
 export interface OnboardingSlide {

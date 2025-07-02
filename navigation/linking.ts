@@ -1,8 +1,8 @@
 import { LinkingOptions } from "@react-navigation/native";
-import { RootStackParamList } from "@/app/navigation/types";
+import { RootStackParamList } from "@/navigation/types";
 
-export const linking: LinkingOptions <RootStackParamList> = {
-    prefixes: ['fooddeliveryapp://', 'https://foodRush.com'],
+export const linking: LinkingOptions<RootStackParamList> = {
+  prefixes: ['fooddeliveryapp://', 'https://foodRush.com'],
   config: {
     screens: {
       Auth: {
@@ -35,10 +35,8 @@ export const linking: LinkingOptions <RootStackParamList> = {
           },
           Orders: {
             screens: {
-              OrdersScreen: 'orders',
-              OrderDetails: 'order/:orderId',
-              RateOrder: 'order/:orderId/rate',
-              ReorderScreen: 'order/:orderId/reorder',
+              CompletedOrderScreen: 'orders/completedOrders',
+              PendingOrderScreen: 'orders/pendingOrders'
             },
           },
           Profile: {

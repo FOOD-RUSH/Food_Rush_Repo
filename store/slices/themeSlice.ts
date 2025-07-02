@@ -1,8 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Appearance } from "react-native";
-import { ThemeState, ThemeMode } from "@/types";
-
+import { ThemeState, ThemeMode } from "@/config/theme";
 const THEME_STORAGE_KEY= '@app_theme';
 
 // async thunk to load theme from async storage

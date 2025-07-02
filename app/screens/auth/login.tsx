@@ -14,7 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'expo-router';
-import { navigate } from '../../navigation/navigationHelpers';
+import { navigate } from '../../../navigation/navigationHelpers';
 
 export default function Login() {
   const [email, setEmail] = useState('');

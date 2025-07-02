@@ -6,12 +6,11 @@ import { AppDispatch, RootState } from '@/store';
 import OnboardingScreen from '@/components/onBoardingScreen';
 import { OnboardingSlides } from '@/utils/onboardingData';
 import { setOnboardingComplete } from '@/store/slices/appSlice';
-import { createStackNavigator } from '@react-navigation/stack';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { RootStackParamList } from './types';
 import { NavigationContainer } from '@react-navigation/native';
-import { navigationRef } from './navigationHelpers';
-import { linking } from '@/utils/linking';
+import { navigate, navigationRef } from './navigationHelpers';
+import { linking } from '@/navigation/linking';
 import AuthNavigator from './AuthNavigator';
 import CustomerNavigator from './CustomerNavigator';
 import RestaurantNavigator from './RestaurantNavigator';
@@ -43,9 +42,15 @@ const RootNavigator: React.FC = () => {
           dispatch(setOnboardingComplete(true));
           // Navigate to appropriate screen based on userType
         }}
-        onLogin={() => {
+        onLogin={(userType) => {
           // Handle login navigation
           console.log('Navigate to login screen');
+          navigate('Auth', {
+            screen: 'LoginScreen',
+            params: {
+              userType: userType,
+            },
+          });
         }}
       />
     );
@@ -73,7 +78,7 @@ const RootNavigator: React.FC = () => {
       >
         <Stack.Screen name="Auth" component={AuthNavigator} />
         <Stack.Screen name="CustomerApp" component={CustomerNavigator} />
-        <Stack.Screen name="Auth" component={RestaurantNavigator} />
+        <Stack.Screen name="RestaurantApp" component={RestaurantNavigator} />
       </Stack.Navigator>
     </NavigationContainer>
   );

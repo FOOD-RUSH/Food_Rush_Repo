@@ -3,6 +3,12 @@ import { useFonts } from '@expo-google-fonts/inter';
 import { MD3LightTheme, MD3DarkTheme } from 'react-native-paper';
 import { fontConfig } from 'react-native-paper/lib/typescript/styles/fonts';
 
+export type ThemeMode = 'light' | 'dark' | 'system';
+
+export interface ThemeState {
+  mode: ThemeMode;
+  isLoading: boolean;
+}
 export const lightTheme = {
   ...MD3LightTheme,
 

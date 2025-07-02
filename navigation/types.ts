@@ -1,75 +1,75 @@
 // Root Stack
 
 import { NavigatorScreenParams } from "@react-navigation/native";
-import {StackScreenProps} from '@react-navigation/stack'
+import { StackScreenProps } from '@react-navigation/stack'
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
+import { MaterialTopTabScreenProps } from '@react-navigation/material-top-tabs';
 export type RootStackParamList = {
-    Auth: undefined;
-    CustomerApp: undefined;
-    RestaurantApp: undefined;
+  Auth: undefined;
+  CustomerApp: undefined;
+  RestaurantApp: undefined;
 }
 
 
 export type AuthStackParamList = {
 
-    SignIn: { userType: 'customer' | 'restaurant' };
-    SignUp: { userType: 'customer' | 'restaurant' };
-    ForgotPassword: undefined;
-    OTPVerification: undefined // left undefined for the moment
-    ResetPassword: { token: string };
+  SignIn: { userType: 'customer' | 'restaurant' };
+  SignUp: { userType: 'customer' | 'restaurant' };
+  ForgotPassword: undefined;
+  OTPVerification: undefined // left undefined for the moment
+  ResetPassword: { token: string };
 }
 
 // Customer Tab Navigator
 
 export type CustomerTabParamList = {
-    Home: NavigatorScreenParams<CustomerHomeStackParamList>;
-    Orders: NavigatorScreenParams<CustomerOrderStackParamList>;
-    Search: NavigatorScreenParams<CustomerSearchStackParamList>;
-    Profile: NavigatorScreenParams<CustomerProfileStackParamList>;
+  Home: NavigatorScreenParams<CustomerHomeStackParamList>;
+  Orders: NavigatorScreenParams<CustomerOrderStackParamList>;
+  Search: NavigatorScreenParams<CustomerSearchStackParamList>;
+  Profile: NavigatorScreenParams<CustomerProfileStackParamList>;
 }
 
 // Customer App screens 
 
 export type CustomerHomeStackParamList = {
-    HomeScreen: undefined;
-    FoodDetails: { foodID: string, categoryID: string };
-    RestaurantDetails: { restaurantID: string };
-    MenuCategory: { categoryID: string, restaurantId: string };
-    Notifications: undefined;
-    Promotions: undefined;
+  HomeScreen: undefined;
+  FoodDetails: { foodID: string, categoryID: string };
+  RestaurantDetails: { restaurantID: string };
+  MenuCategory: { categoryID: string, restaurantId: string };
+  Notifications: undefined;
+  Promotions: undefined;
 }
 export type CustomerSearchStackParamList = {
-    SearchScreen: undefined;
-    FilterOptions: undefined;
-    SearchResult: undefined;
+  SearchScreen: undefined;
+  FilterOptions: undefined;
+  SearchResult: undefined;
 
 }
 export type CustomerOrderStackParamList = {
-    OrderScreen: undefined
-    FoodDetails: { foodID: string, categoryID: string };
-    ReviewFood: {foodId: string, restaurantID: string};
 
+  CompletedOrdersScreen: undefined;
+  PendingOrdersScreen: undefined;
 
 
 }
 
 export type CustomerProfileStackParamList = {
-    FavoriteRestaurantScreen: undefined;
-    ProfileScreen: undefined;
-    AdressScreen: undefined;
-    LanguageScreen: undefined;
-    ProfileHome: undefined
+  FavoriteRestaurantScreen: undefined;
+  ProfileScreen: undefined;
+  AdressScreen: undefined;
+  LanguageScreen: undefined;
+  ProfileHome: undefined
 
 }
 
 export type RestaurantTabParamList = {
-    Orders: undefined;
-    Menu: undefined;
-    Analytics: undefined;
-    Profile: undefined;
+  Orders: undefined;
+  Menu: undefined;
+  Analytics: undefined;
+  Profile: undefined;
 }
- // TODO: DEVELOPER WORKING ON RESTAURANT PAGES
- export type RestaurantOrdersStackParamList = {
+// TODO: DEVELOPER WORKING ON RESTAURANT PAGES
+export type RestaurantOrdersStackParamList = {
   OrdersScreen: undefined;
   OrderDetails: { orderId: string };
   OrderHistory: undefined;
@@ -111,3 +111,6 @@ export type CustomerTabScreenProps<T extends keyof CustomerTabParamList> =
 
 export type RestaurantTabScreenProps<T extends keyof RestaurantTabParamList> =
   BottomTabScreenProps<RestaurantTabParamList, T>;
+
+export type CustomerOrderScreenProps<T extends keyof CustomerOrderStackParamList> =
+  MaterialTopTabScreenProps<CustomerOrderStackParamList, T>

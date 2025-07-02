@@ -5,6 +5,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { Button, TextInput, HelperText, IconButton } from 'react-native-paper';
+import { navigate } from '@/navigation/navigationHelpers';
 
 // Validation schema
 const validationSchema = yup.object({
@@ -56,11 +57,11 @@ const ResetPasswordScreen = () => {
   }, []);
 
   const togglePasswordVisibility = useCallback(() => {
-    setShowPassword(prev => !prev);
+    setShowPassword((prev) => !prev);
   }, []);
 
   const toggleConfirmPasswordVisibility = useCallback(() => {
-    setShowConfirmPassword(prev => !prev);
+    setShowConfirmPassword((prev) => !prev);
   }, []);
 
   const goBack = useCallback(() => {
@@ -89,7 +90,8 @@ const ResetPasswordScreen = () => {
               Reset Password
             </Text>
             <Text className="text-sm text-gray-600 text-center leading-5">
-              Enter your email address and we'll send you a{'\n'}code to reset your password
+              Enter your email address and we will send you a{'\n'}code to reset
+              your password
             </Text>
           </View>
 
@@ -109,14 +111,14 @@ const ResetPasswordScreen = () => {
                   autoCapitalize="none"
                   autoComplete="new-password"
                   style={{ backgroundColor: 'white' }}
-                  outlineStyle={{ 
-                    borderRadius: 12, 
+                  outlineStyle={{
+                    borderRadius: 12,
                     borderWidth: 1,
-                    borderColor: errors.password ? '#ef4444' : '#e5e7eb'
+                    borderColor: errors.password ? '#ef4444' : '#e5e7eb',
                   }}
-                  contentStyle={{ 
-                    paddingHorizontal: 16, 
-                    paddingVertical: 16 
+                  contentStyle={{
+                    paddingHorizontal: 16,
+                    paddingVertical: 16,
                   }}
                   error={!!errors.password}
                   left={<TextInput.Icon icon="lock-outline" />}
@@ -127,7 +129,11 @@ const ResetPasswordScreen = () => {
                     />
                   }
                 />
-                <HelperText type="error" visible={!!errors.password} className="text-xs mt-1">
+                <HelperText
+                  type="error"
+                  visible={!!errors.password}
+                  className="text-xs mt-1"
+                >
                   {errors.password?.message}
                 </HelperText>
                 <Text className="text-xs text-gray-500 mt-1">
@@ -153,14 +159,14 @@ const ResetPasswordScreen = () => {
                   autoCapitalize="none"
                   autoComplete="new-password"
                   style={{ backgroundColor: 'white' }}
-                  outlineStyle={{ 
-                    borderRadius: 12, 
+                  outlineStyle={{
+                    borderRadius: 12,
                     borderWidth: 1,
-                    borderColor: errors.confirmPassword ? '#ef4444' : '#1E90FF'
+                    borderColor: errors.confirmPassword ? '#ef4444' : '#1E90FF',
                   }}
-                  contentStyle={{ 
-                    paddingHorizontal: 16, 
-                    paddingVertical: 16 
+                  contentStyle={{
+                    paddingHorizontal: 16,
+                    paddingVertical: 16,
                   }}
                   error={!!errors.confirmPassword}
                   left={<TextInput.Icon icon="lock-outline" />}
@@ -171,7 +177,11 @@ const ResetPasswordScreen = () => {
                     />
                   }
                 />
-                <HelperText type="error" visible={!!errors.confirmPassword} className="text-xs mt-1">
+                <HelperText
+                  type="error"
+                  visible={!!errors.confirmPassword}
+                  className="text-xs mt-1"
+                >
                   {errors.confirmPassword?.message}
                 </HelperText>
                 <Text className="text-xs text-gray-500 mt-1">

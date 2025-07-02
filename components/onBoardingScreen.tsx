@@ -61,7 +61,7 @@ const OnboardingWelcome = ({ onComplete }: { onComplete: () => void }) => {
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, [fadeAnim, onComplete, slideAnim]);
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -238,15 +238,14 @@ const UserTypeSelectionScreen = ({
     'customer' | 'restaurant' | null
   >(null);
 
-  const handleSelectType = useCallback((type: 'customer' | 'restaurant') => {
-    setSelectedType(type);
-  }, []);
-  const handleContinue = useCallback(() => {
-    if (selectedType) {
-      onSelectUserType?.(selectedType);
-      console.log('Selected user type:', selectedType);
-    }
-  }, [selectedType, onSelectUserType]);
+  const handleSelectType = useCallback(
+    (type: 'customer' | 'restaurant') => {
+      setSelectedType(type);
+      // Optionally update userType string here if you want to sync with parent or context
+      onSelectUserType?.(type);
+    },
+    [onSelectUserType],
+  );
 
   const handleLogin = useCallback(() => {
     onLogin?.();
@@ -263,40 +262,81 @@ const UserTypeSelectionScreen = ({
           </Text>
         </View>
 
-        {/* User Type Cards */}
-        <View className="flex-1 mb-8">
+        {/* User Type Cards - vertically flexed */}
+        <View className="flex-1 justify-center items-center">
           {userTypes.map((type, index) => (
             <TouchableOpacity
               key={type.id}
               onPress={() => handleSelectType(type.id)}
-              className={`mb-6 ${index === userTypes.length - 1 ? 'mb-0' : ''}`}
-              activeOpacity={0.7}
+              activeOpacity={0.8}
+              style={{
+                marginBottom: index === userTypes.length - 1 ? 0 : 32,
+                width: '80%',
+                alignItems: 'center',
+              }}
             >
               <Card
-                className={`${
-                  selectedType === type.id
-                    ? 'border-2 border-blue-500 bg-blue-50'
-                    : 'border border-gray-200 bg-white'
-                }`}
-                style={{ borderRadius: 16 }}
+                style={{
+                  borderRadius: 16,
+                  borderWidth: selectedType === type.id ? 2 : 1,
+                  borderColor: selectedType === type.id ? '#1E90FF' : '#e5e7eb',
+                  backgroundColor:
+                    selectedType === type.id ? '#e6f0fa' : '#fff',
+                  width: '100%',
+                  alignItems: 'center',
+                  elevation: selectedType === type.id ? 4 : 1,
+                }}
               >
-                <Card.Content className="p-6">
-                  {/* Illustration Area */}
-                  <ImageBackground
-                    source={type.image}
-                    height={screenWidth * 0.7}
-                    width={screenWidth * 0.7}
-                    className="mx-2"
+                <Card.Content style={{ alignItems: 'center', padding: 20 }}>
+                  <View
+                    style={{
+                      position: 'relative',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
                   >
+                    <Image
+                      source={type.image}
+                      style={{
+                        width: 120,
+                        height: 120,
+                        borderRadius: 60,
+                        borderWidth: selectedType === type.id ? 2 : 0,
+                        borderColor:
+                          selectedType === type.id ? '#1E90FF' : 'transparent',
+                      }}
+                      resizeMode="cover"
+                    />
                     {selectedType === type.id && (
-                      <View className="flex-col justify-end align-bottom pl-2">
+                      <View
+                        style={{
+                          position: 'absolute',
+                          top: 8,
+                          right: 8,
+                          backgroundColor: 'white',
+                          borderRadius: 12,
+                          padding: 2,
+                        }}
+                      >
                         <Ionicons
-                          name="checkmark-circle-outline"
-                          color={'#007aff'}
+                          name="checkmark-circle"
+                          size={28}
+                          color="#1E90FF"
                         />
                       </View>
                     )}
-                  </ImageBackground>
+                  </View>
+                  <Text
+                    style={{
+                      marginTop: 16,
+                      fontSize: 18,
+                      fontWeight: '600',
+                      color: selectedType === type.id ? '#1E90FF' : '#222',
+                      textTransform: 'capitalize',
+                    }}
+                  >
+                    {type.id}
+                  </Text>
                 </Card.Content>
               </Card>
             </TouchableOpacity>
@@ -304,22 +344,7 @@ const UserTypeSelectionScreen = ({
         </View>
 
         {/* Action Buttons */}
-        <View className="space-y-4">
-          {/* Continue Button */}
-          <Button
-            mode="contained"
-            onPress={handleContinue}
-            disabled={!selectedType}
-            buttonColor="#1E90FF"
-            textColor="white"
-            contentStyle={{ paddingVertical: 8 }}
-            style={{ borderRadius: 25 }}
-            labelStyle={{ fontSize: 16, fontWeight: '600' }}
-          >
-            Get Started
-          </Button>
-
-          {/* Login Button */}
+        <View className="mt-6">
           <Button
             mode="outlined"
             onPress={handleLogin}
@@ -335,12 +360,6 @@ const UserTypeSelectionScreen = ({
             Login
           </Button>
         </View>
-
-        {/* Bottom Indicator */}
-        <View className="flex-row justify-center mt-6">
-          <View className="w-8 h-1 bg-blue-500 rounded-full mr-2" />
-          <View className="w-8 h-1 bg-blue-500 rounded-full" />
-        </View>
       </View>
     </SafeAreaView>
   );
@@ -354,7 +373,7 @@ const OnboardingScreen = ({
 }: {
   OnboardingSlides: OnboardingInfo[];
   onComplete: (userType?: 'customer' | 'restaurant') => void;
-  onLogin?: () => void;
+  onLogin?: (userType?: 'customer' | 'restaurant') => void;
 }) => {
   const [showWelcome, setShowWelcome] = useState(true);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);

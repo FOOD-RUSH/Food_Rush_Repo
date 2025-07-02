@@ -16,17 +16,17 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { loginSchema } from '@/utils/validation';
 import { TextButton } from '@/components/common/TextButton';
 import { useAuth } from '@/hooks/useAuth';
-import { useNavigation } from '@react-navigation/native';
+import { navigate } from '@/navigation/navigationHelpers';
+
 interface LoginFormData {
   email: string;
   password: string;
 }
 
-export default function LoginScreen( ) {
+export default function LoginScreen(userType: string) {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const navigation = useNavigation()
   const {
     control,
     handleSubmit,
@@ -44,53 +44,31 @@ export default function LoginScreen( ) {
 
   const onSubmit = async (data: LoginFormData) => {
     setLoading(true);
-    try {
-      await signIn(data.email, data.password, 'customer');
-      Alert.alert('Success', 'Welcome back' );
-    } catch (error: any) {
-      console.error('Login error:', error);
-      Alert.alert(
-        'Login Failed',
-        error.message || 'Please check your credentials',
-      );
-    } finally {
-      setLoading(false);
-    }
+    // TODO:
   };
 
   const handleGoogleSignIn = async () => {
-    try {
-      setLoading(true);
-      // TODO: Implement Google Sign-in
-      console.log('Google sign-in pressed');
-    } catch (error) {
-      Alert.alert('Error', 'Google sign-in failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    // TODO:
   };
 
   const handleAppleSignIn = async () => {
-    try {
-      setLoading(true);
-      // TODO: Implement Apple Sign-in
-      console.log('Apple sign-in pressed');
-    } catch (error) {
-      Alert.alert('Error', 'Apple sign-in failed. Please try again.');
-      alert(error)
-    } finally {
-      setLoading(false);
-    }
+    // TODO:
   };
 
   const handleForgotPassword = () => {
     // TODO: Navigate to forgot password screen
-    console.log('Navigate to forgot password');
+    console.log('Navigating to forgot password');
+    navigate('Auth', {
+      screen: 'ForgotPassword',
+    });
   };
 
   const handleSignUp = () => {
     // TODO: Navigate to signup screen
-    console.log('Navigate to signup');
+    console.log('Navigating to signup');
+    navigate('Auth', {
+      screen: 'SignUp',
+    });
   };
 
   return (
@@ -107,19 +85,18 @@ export default function LoginScreen( ) {
           {/* Welcome illustration */}
           <View className="items-center px-6 py-8">
             <View className="w-48 h-48 bg-blue-50 rounded-lg items-center justify-center mb-8">
-              {/* Placeholder for illustration - you can replace with actual image */}
               <Image className="w-32 h-32" source={WelcomeImage} />
             </View>
             <Text className="text-3xl font-bold text-gray-900 mb-2">
               Welcome Back
             </Text>
           </View>
-              {/* Error Message */}
-              {error && (
-                <Text className="text-red-500 bg-gray-400 text-center text-sm mt-2 h-10 w-40">
-                  {error}
-                </Text>
-              )}
+          {/* Error Message */}
+          {error && (
+            <Text className="text-red-500 bg-gray-400 text-center text-sm mt-2 h-10 w-40">
+              {error}
+            </Text>
+          )}
           {/* Form */}
           <View className="flex-1 px-6">
             <View className="space-y-4">
@@ -283,8 +260,6 @@ export default function LoginScreen( ) {
                 </Text>
                 <TextButton text="Login" onPress={handleSignUp} />
               </View>
-
-              
             </View>
           </View>
         </ScrollView>

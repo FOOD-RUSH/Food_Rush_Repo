@@ -16,9 +16,8 @@ import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { registerSchema } from '@/utils/validation';
 import { TextButton } from '@/components/common/TextButton';
-import { useAuth } from '@/hooks/useAuth';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from 'expo-router';
+import { navigate } from '@/navigation/navigationHelpers';
 // Country codes data
 const COUNTRY_CODES = [
   { code: '+237', country: 'Cameroon', flag: '🇨🇲' },
@@ -40,7 +39,9 @@ interface SignUpFormData {
 const SignupScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [selectedCountryCode, setSelectedCountryCode] = useState(COUNTRY_CODES[0]);
+  const [selectedCountryCode, setSelectedCountryCode] = useState(
+    COUNTRY_CODES[0],
+  );
   const [showCountryModal, setShowCountryModal] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
 
@@ -59,8 +60,6 @@ const SignupScreen = () => {
     },
   });
 
-  const { signUp, error } = useAuth();
-
   const onSubmit = async (data: SignUpFormData) => {
     if (!termsAccepted) {
       Alert.alert('Terms Required', 'Please accept the terms and conditions');
@@ -68,36 +67,11 @@ const SignupScreen = () => {
     }
 
     setLoading(true);
-    try {
-      const signupData = {
-        ...data,
-        phoneNumber: `${selectedCountryCode.code}${data.phoneNumber}`,
-      };
-
-      await signUp(signupData.email, signupData.password, 'customer', {
-        phoneNumber: signupData.phoneNumber,
-        userName: signupData.displayName,
-      });
-
-      Alert.alert('Success', 'Account created successfully!');
-    } catch (error: any) {
-      console.error('Signup error:', error);
-      Alert.alert('Signup Failed', error.message || 'Could not create account');
-    } finally {
-      setLoading(false);
-    }
+    // TODO:
   };
 
   const handleGoogleSignUp = async () => {
-    try {
-      setLoading(true);
-      // TODO: Implement Google Sign-up
-      console.log('Google sign-up pressed');
-    } catch (error) {
-      Alert.alert('Error', 'Google sign-up failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    // TODO:
   };
 
   const handleAppleSignUp = async () => {
@@ -115,20 +89,25 @@ const SignupScreen = () => {
   const handleLogin = () => {
     // TODO: Navigate to login screen
     console.log('Navigate to login');
+    navigate('Auth', {
+      screen: 'SignIn',
+    });
   };
 
-  const selectCountryCode = (country: typeof COUNTRY_CODES[0]) => {
+  const selectCountryCode = (country: (typeof COUNTRY_CODES)[0]) => {
     setSelectedCountryCode(country);
     setShowCountryModal(false);
   };
 
-  const renderCountryItem = ({ item }: { item: typeof COUNTRY_CODES[0] }) => (
+  const renderCountryItem = ({ item }: { item: (typeof COUNTRY_CODES)[0] }) => (
     <TouchableOpacity
       className="flex-row items-center py-4 px-6 border-b border-gray-100"
       onPress={() => selectCountryCode(item)}
     >
       <Text className="text-2xl mr-4">{item.flag}</Text>
-      <Text className="flex-1 text-base text-gray-900 font-medium">{item.country}</Text>
+      <Text className="flex-1 text-base text-gray-900 font-medium">
+        {item.country}
+      </Text>
       <Text className="text-base text-gray-600 font-semibold">{item.code}</Text>
     </TouchableOpacity>
   );
@@ -170,13 +149,19 @@ const SignupScreen = () => {
                         className="border border-gray-300 rounded-l-xl px-4 py-4 bg-gray-50 flex-row items-center min-w-[100px]"
                         onPress={() => setShowCountryModal(true)}
                       >
-                        <Text className="text-lg mr-2">{selectedCountryCode.flag}</Text>
+                        <Text className="text-lg mr-2">
+                          {selectedCountryCode.flag}
+                        </Text>
                         <Text className="text-base font-medium text-gray-700 mr-1">
                           {selectedCountryCode.code}
                         </Text>
-                        <Ionicons name="chevron-down" size={16} color="#9CA3AF" />
+                        <Ionicons
+                          name="chevron-down"
+                          size={16}
+                          color="#9CA3AF"
+                        />
                       </TouchableOpacity>
-                      
+
                       <TextInput
                         placeholder="+237 690 000 000"
                         onBlur={onBlur}
@@ -185,11 +170,14 @@ const SignupScreen = () => {
                         mode="outlined"
                         keyboardType="phone-pad"
                         autoComplete="tel"
+                        left={<TextInput.Icon icon="phone-outlined" />}
                         outlineStyle={{
                           borderRadius: 12,
                           borderTopLeftRadius: 0,
                           borderBottomLeftRadius: 0,
-                          borderColor: errors.phoneNumber ? '#EF4444' : '#E5E7EB',
+                          borderColor: errors.phoneNumber
+                            ? '#EF4444'
+                            : '#E5E7EB',
                         }}
                         style={{ backgroundColor: 'white', flex: 1 }}
                         contentStyle={{ paddingHorizontal: 16 }}
@@ -221,9 +209,9 @@ const SignupScreen = () => {
                       autoCapitalize="none"
                       autoComplete="email"
                       left={<TextInput.Icon icon="email-outline" />}
-                      outlineStyle={{ 
-                        borderRadius: 12, 
-                        borderColor: errors.email ? '#EF4444' : '#E5E7EB' 
+                      outlineStyle={{
+                        borderRadius: 12,
+                        borderColor: errors.email ? '#EF4444' : '#E5E7EB',
                       }}
                       style={{ backgroundColor: 'white' }}
                       contentStyle={{ paddingHorizontal: 16 }}
@@ -254,9 +242,9 @@ const SignupScreen = () => {
                       autoCapitalize="words"
                       autoComplete="name"
                       left={<TextInput.Icon icon="account-outline" />}
-                      outlineStyle={{ 
-                        borderRadius: 12, 
-                        borderColor: errors.displayName ? '#EF4444' : '#E5E7EB' 
+                      outlineStyle={{
+                        borderRadius: 12,
+                        borderColor: errors.displayName ? '#EF4444' : '#E5E7EB',
                       }}
                       style={{ backgroundColor: 'white' }}
                       contentStyle={{ paddingHorizontal: 16 }}
@@ -293,9 +281,9 @@ const SignupScreen = () => {
                           onPress={() => setShowPassword(!showPassword)}
                         />
                       }
-                      outlineStyle={{ 
-                        borderRadius: 12, 
-                        borderColor: errors.password ? '#EF4444' : '#E5E7EB' 
+                      outlineStyle={{
+                        borderRadius: 12,
+                        borderColor: errors.password ? '#EF4444' : '#E5E7EB',
                       }}
                       style={{ backgroundColor: 'white' }}
                       contentStyle={{ paddingHorizontal: 16 }}
@@ -400,18 +388,15 @@ const SignupScreen = () => {
                 <Text className="text-gray-600 text-base">
                   Already have an account?{' '}
                 </Text>
-                <TextButton 
-                  text="Login" 
-                  onPress={handleLogin}
-                />
+                <TextButton text="Login" onPress={handleLogin} />
               </View>
 
               {/* Error Message */}
-              {error && (
+              {/* {error && (
                 <Text className="text-red-500 text-center text-sm">
                   {error}
                 </Text>
-              )}
+              )} */}
             </View>
           </View>
         </ScrollView>
@@ -426,7 +411,9 @@ const SignupScreen = () => {
             <View className="flex-row items-center justify-between p-4 border-b border-gray-200">
               <Text className="text-lg font-semibold">Select Country</Text>
               <TouchableOpacity onPress={() => setShowCountryModal(false)}>
-                <Text className="text-blue-500 text-base font-medium">Done</Text>
+                <Text className="text-blue-500 text-base font-medium">
+                  Done
+                </Text>
               </TouchableOpacity>
             </View>
             <FlatList
@@ -443,4 +430,4 @@ const SignupScreen = () => {
 };
 
 export default SignupScreen;
-  // 10.7.0
+// 10.7.0

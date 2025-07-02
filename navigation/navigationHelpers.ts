@@ -76,3 +76,5 @@ export function navigateToFood(foodId: string, restaurantId: string) {
     }
   });
 }
+
+
