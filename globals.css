@@ -1,0 +1,9 @@
+@tailwind components;
+@tailwind base;
+@tailwind utilities;
+
+
+b {
+    position: relative;
+    background-color: #2563EB;
+}

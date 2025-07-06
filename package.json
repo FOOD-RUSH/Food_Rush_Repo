@@ -36,7 +36,6 @@
     "expo-haptics": "~14.1.4",
     "expo-image": "~2.3.0",
     "expo-linking": "~7.1.5",
-    "expo-router": "~5.1.0",
     "expo-splash-screen": "~0.30.9",
     "expo-status-bar": "~2.2.3",
     "expo-symbols": "~0.4.5",
@@ -49,6 +48,7 @@
     "react-hook-form": "^7.57.0",
     "react-native": "0.79.4",
     "react-native-gesture-handler": "~2.24.0",
+    "react-native-mmkv": "^3.3.0",
     "react-native-pager-view": "6.7.1",
     "react-native-paper": "^5.14.5",
     "react-native-reanimated": "~3.17.4",
@@ -61,7 +61,8 @@
     "react-native-webview": "13.13.5",
     "react-redux": "^9.2.0",
     "redux-persist": "^6.0.0",
-    "yup": "^1.6.1"
+    "yup": "^1.6.1",
+    "zustand": "^5.0.6"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

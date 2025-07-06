@@ -1,19 +1,19 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./app/**/*.{js,jsx,ts,tsx}"],
-  presets: [require("nativewind/preset")],
+  content: ['./src/**/*.{js,jsx,ts,tsx}', './App.{js,jsx,ts,tsx}'],
+  presets: [require('nativewind/preset')],
 
   theme: {
     extend: {
       colors: {
-        background_color: "#64748b",
-        primaryColor: "#007aff",
-        secondaryColor: "#fefce8",
-        warningColor: "#ff0000",
-        neutralColor: "64748b",
-        blueTextcolor: "#101828",
+        background_color: '#64748b',
+        primaryColor: '#007aff',
+        secondaryColor: '#fefce8',
+        warningColor: '#ff0000',
+        neutralColor: '64748b',
+        blueTextcolor: '#101828',
         primary: {
-          50: "#f0f9ff"
+          50: '#f0f9ff',
         },
         success: {
           50: '#f0fdf4',
@@ -27,7 +27,6 @@ module.exports = {
           800: '#166534',
           900: '#14532d',
         },
-
       },
     },
   },
