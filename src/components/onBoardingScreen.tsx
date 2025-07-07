@@ -11,11 +11,11 @@ import {
   StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Button, Card } from 'react-native-paper';
+import { Button } from 'react-native-paper';
 import { OnboardingSlide as OnboardingInfo } from '@/src/types';
 import { Ionicons } from '@expo/vector-icons';
 
-const { width: screenWidth } = Dimensions.get('window');
+const { width: screenWidth } = Dimensions.get('screen');
 
 // User Type Interface
 interface UserType {
@@ -61,8 +61,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   progressContainer: {
-    position: 'absolute',
-    bottom: 48,
     width: '100%',
     alignItems: 'center',
   },
@@ -350,6 +348,7 @@ const OnboardingSlide = ({
         barStyle="light-content"
         backgroundColor="transparent"
         translucent
+        
       />
       <ImageBackground
         style={styles.slideContainer}
@@ -386,12 +385,9 @@ const OnboardingSlide = ({
                     <Text style={styles.nextButtonText}>
                       {isLastSlide ? 'Next' : 'Next'}
                     </Text>
-                    <Text style={styles.nextButtonArrow}>→</Text>
                   </TouchableOpacity>
                 </View>
-              </View>
-
-              {/* Progress Indicator */}
+                {/* Progress Indicator */}
               <View style={styles.indicatorContainer}>
                 {Array.from({ length: totalSlides }).map((_, index) => (
                   <View
@@ -405,6 +401,9 @@ const OnboardingSlide = ({
                   />
                 ))}
               </View>
+              </View>
+
+              
             </Animated.View>
           </View>
         </View>
@@ -428,7 +427,6 @@ const UserTypeSelectionScreen = ({
   const handleSelectType = useCallback(
     (type: 'customer' | 'restaurant') => {
       setSelectedType(type);
-      // Complete onboarding immediately when type is selected
       onSelectUserType(type);
     },
     [onSelectUserType],
@@ -449,72 +447,99 @@ const UserTypeSelectionScreen = ({
         {/* User Type Cards */}
         <View style={styles.userTypeContainer}>
           {userTypes.map((type, index) => (
-            <TouchableOpacity
+            <View
               key={type.id}
-              onPress={() => handleSelectType(type.id)}
-              activeOpacity={0.8}
               style={[
-                styles.userTypeCard,
-                { marginBottom: index === userTypes.length - 1 ? 0 : 32 },
+                {
+                  width: '100%',
+                  height: 200,
+                  marginBottom: index === userTypes.length - 1 ? 0 : 32,
+                  position: 'relative',
+                },
               ]}
             >
-              <Card
+              <TouchableOpacity
+                activeOpacity={0.85}
                 style={{
+                  flex: 1,
                   borderRadius: 16,
                   borderWidth: selectedType === type.id ? 2 : 1,
                   borderColor: selectedType === type.id ? '#1E90FF' : '#e5e7eb',
                   backgroundColor:
                     selectedType === type.id ? '#e6f0fa' : '#fff',
+                  overflow: 'hidden',
                   width: '100%',
+                  height: '100%',
                   alignItems: 'center',
-                  elevation: selectedType === type.id ? 4 : 1,
+                  justifyContent: 'center',
                 }}
+                onPress={() => handleSelectType(type.id)}
               >
-                <Card.Content style={styles.cardContent}>
+                <Image
+                  source={type.image}
+                  style={{
+                    width: '100%',
+                    height: 200,
+                    resizeMode: 'contain',
+                    borderRadius: 16,
+                  }}
+                />
+                {selectedType === type.id && (
                   <View
                     style={{
-                      position: 'relative',
-                      alignItems: 'center',
-                      justifyContent: 'center',
+                      position: 'absolute',
+                      top: 12,
+                      right: 12,
+                      backgroundColor: 'white',
+                      borderRadius: 16,
+                      padding: 2,
+                      zIndex: 2,
                     }}
                   >
-                    <Image
-                      source={type.image}
-                      style={[
-                        styles.userImage,
-                        {
-                          borderWidth: selectedType === type.id ? 2 : 0,
-                          borderColor:
-                            selectedType === type.id
-                              ? '#1E90FF'
-                              : 'transparent',
-                        },
-                      ]}
-                      resizeMode="cover"
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={32}
+                      color="#1E90FF"
                     />
-                    {selectedType === type.id && (
-                      <View style={styles.checkmarkContainer}>
-                        <Ionicons
-                          name="checkmark-circle"
-                          size={28}
-                          color="#1E90FF"
-                        />
-                      </View>
-                    )}
                   </View>
+                )}
+                {/* Button at bottom right of the image */}
+                <TouchableOpacity
+                  style={{
+                    position: 'absolute',
+                    bottom: 16,
+                    right: 16,
+                    backgroundColor: '#1E90FF',
+                    borderRadius: 20,
+                    paddingVertical: 8,
+                    paddingHorizontal: 18,
+                    zIndex: 2,
+                    elevation: 2,
+                  }}
+                  onPress={() => handleSelectType(type.id)}
+                  activeOpacity={0.85}
+                >
                   <Text
-                    style={[
-                      styles.userTypeText,
-                      {
-                        color: selectedType === type.id ? '#1E90FF' : '#222',
-                      },
-                    ]}
+                    style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}
                   >
-                    {type.id}
+                    Select
                   </Text>
-                </Card.Content>
-              </Card>
-            </TouchableOpacity>
+                </TouchableOpacity>
+              </TouchableOpacity>
+              {/* User type label below the image */}
+              <Text
+                style={{
+                  marginTop: 12,
+                  fontSize: 18,
+                  fontWeight: '600',
+                  color: selectedType === type.id ? '#1E90FF' : '#222',
+                  textAlign: 'center',
+                  textTransform: 'capitalize',
+                }}
+              >
+                {type.id}
+              </Text>
+            </View>
           ))}
         </View>
 

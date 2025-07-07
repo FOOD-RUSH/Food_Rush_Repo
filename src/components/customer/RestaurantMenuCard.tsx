@@ -6,10 +6,13 @@ const RestaurantMenuCard = ({
   image,
   foodPrice,
   foodName,
+  foodCategory,
 }: {
+  
   image: any;
   foodName: any;
   foodPrice: number;
+  foodCategory: string;
 }) => {
   return (
     <Card
@@ -33,7 +36,7 @@ const RestaurantMenuCard = ({
           }}
         />
         {/* Price */}
-        <View className="flex-col justify-center ">
+        <View className="flex-col justify-center flex-1">
           <Text className="text-xl font-semibold ">{foodName}</Text>
           <Text className=" justify-center text-center items-center text-primaryColor">
             {foodPrice} FCFA

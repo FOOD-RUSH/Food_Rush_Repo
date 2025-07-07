@@ -1,7 +1,6 @@
-import { View, Text, TouchableOpacity } from 'react-native';
-import React, { useState } from 'react';
-import { Card } from 'react-native-paper';
-import { MaterialIcons, } from '@expo/vector-icons';
+import { View, Text, TouchableHighlight } from 'react-native';
+import React from 'react';
+import { Card, Divider } from 'react-native-paper';
 
 interface OrderItemCardProps {
   foodId: string;
@@ -9,6 +8,8 @@ interface OrderItemCardProps {
   foodName: string;
   image: any;
   foodPrice: string;
+  quantity: number;
+  orderStatus: 'pending' | 'delivered' | 'on the way';
 }
 
 const OrderItemCard = ({
@@ -17,50 +18,45 @@ const OrderItemCard = ({
   foodName,
   foodPrice,
   image,
+  orderStatus,
+  quantity,
 }: OrderItemCardProps) => {
-  const [showModal, setShowModal] = useState(false);
   return (
     <Card
       mode="outlined"
       style={{ padding: 10, margin: 10 }}
       contentStyle={{ flexDirection: 'row' }}
+      id={foodId}
     >
-      <View className="flex-row justify-start">
-        <Card.Cover
-          source={image}
-          width={50}
-          height={50}
-          borderRadius={15}
-          role="img"
-          resizeMode="contain"
-          style={{ flex: 1 }}
-        />
-        <Card.Content>
-          <View className="flex-1 flex-col">
-            <View className="flex-row justify-between">
-              <Text className="text-[20px]">{foodName}</Text>
-              <View className="border-solid border-primaryColor rounded-md">
-                <Text className="text-[12px] text-primaryColor">
-                  {/* Cart Implementation */}
-                  0X
-                </Text>
-              </View>
-            </View>
-            <View className="flex-row justify-between">
-              <Text className="text-[20px]">{foodPrice}</Text>
-              <TouchableOpacity onPress={() => {}}>
-                <MaterialIcons name="mode-edit" color="#007aff" />
-              </TouchableOpacity>
-            </View>
+      <View className="flex-row item-center p-4">
+        <Card.Cover source={image} height={100} width={100} borderRadius={10} />
+        <View className="flex-column flex-1 ml-2 justify-between items-start">
+          <Text className="text-xl font-bold text-center">{foodName}</Text>
+          <View className="flex-row my-2">
+            <Text className="text-gray-700 mr-2">{quantity}Items</Text>
+            <Text className="text-gray-700 mr-2">|</Text>
+            <Text className="text-gray-700 mr-2">2.7 km</Text>
           </View>
-        </Card.Content>
+          {/* price + state of card */}
+          <View className="flex-row justify-between ">
+            <Text className="text-xl">{foodPrice} F</Text>
+            <TouchableHighlight style={{ backgroundColor: '#007aff' }}>
+              <Text className="text-white">{orderStatus}</Text>
+            </TouchableHighlight>
+          </View>
+        </View>
+      </View>
+      <Divider style={{ outlineColor: 'grey' }} />
+      <View className="flex-row my-2 justify-between">
+        <TouchableHighlight className="border-primaryColor border-2 p-2 rounded-xl">
+          <Text className="">Leave a review</Text>
+        </TouchableHighlight>
+        <TouchableHighlight className="bg-primaryColor p-2 rounded-xl">
+          <Text className="text-[18px]">Order Again</Text>
+        </TouchableHighlight>
       </View>
     </Card>
   );
 };
 
 export default OrderItemCard;
-
-const EditFoodModal = () => {
-  return null;
-};

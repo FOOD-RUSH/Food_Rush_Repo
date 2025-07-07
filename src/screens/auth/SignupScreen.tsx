@@ -15,7 +15,6 @@ import { Button, Checkbox, HelperText, TextInput } from 'react-native-paper';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { registerSchema } from '@/src/utils/validation';
-import { TextButton } from '@/src/components/common/TextButton';
 import { Ionicons } from '@expo/vector-icons';
 import { navigate } from '@/src/navigation/navigationHelpers';
 // Country codes data
@@ -137,16 +136,16 @@ const SignupScreen = () => {
 
           {/* Form */}
           <View className="px-6">
-            <View className="space-y-4">
+            <View>
               {/* Country Code + Phone Number */}
               <Controller
                 control={control}
                 name="phoneNumber"
                 render={({ field: { onChange, onBlur, value } }) => (
-                  <View>
+                  <View className="mb-4">
                     <View className="flex-row">
                       <TouchableOpacity
-                        className="border border-gray-300 rounded-l-xl px-4 py-4 bg-gray-50 flex-row items-center min-w-[100px]"
+                        className="border border-gray-300 rounded-l-xl px-4 py-4 bg-gray-100 flex-row items-center min-w-[100px]"
                         onPress={() => setShowCountryModal(true)}
                       >
                         <Text className="text-lg mr-2">
@@ -155,11 +154,7 @@ const SignupScreen = () => {
                         <Text className="text-base font-medium text-gray-700 mr-1">
                           {selectedCountryCode.code}
                         </Text>
-                        <Ionicons
-                          name="chevron-down"
-                          size={16}
-                          color="#9CA3AF"
-                        />
+                        <Ionicons name="chevron-down" size={16} color="#222" />
                       </TouchableOpacity>
 
                       <TextInput
@@ -170,7 +165,9 @@ const SignupScreen = () => {
                         mode="outlined"
                         keyboardType="phone-pad"
                         autoComplete="tel"
-                        left={<TextInput.Icon icon="phone-outlined" />}
+                        left={
+                          <TextInput.Icon icon="phone-outline" color="#222" />
+                        }
                         outlineStyle={{
                           borderRadius: 12,
                           borderTopLeftRadius: 0,
@@ -179,7 +176,7 @@ const SignupScreen = () => {
                             ? '#EF4444'
                             : '#E5E7EB',
                         }}
-                        style={{ backgroundColor: 'white', flex: 1 }}
+                        style={{ backgroundColor: '#f3f4f6', flex: 1 }}
                         contentStyle={{ paddingHorizontal: 16 }}
                         error={!!errors.phoneNumber}
                       />
@@ -198,7 +195,7 @@ const SignupScreen = () => {
                 control={control}
                 name="email"
                 render={({ field: { onChange, onBlur, value } }) => (
-                  <View>
+                  <View className="mb-4">
                     <TextInput
                       placeholder="Email"
                       onBlur={onBlur}
@@ -208,12 +205,14 @@ const SignupScreen = () => {
                       keyboardType="email-address"
                       autoCapitalize="none"
                       autoComplete="email"
-                      left={<TextInput.Icon icon="email-outline" />}
+                      left={
+                        <TextInput.Icon icon="email-outline" color="#222" />
+                      }
                       outlineStyle={{
                         borderRadius: 12,
                         borderColor: errors.email ? '#EF4444' : '#E5E7EB',
                       }}
-                      style={{ backgroundColor: 'white' }}
+                      style={{ backgroundColor: '#f3f4f6' }}
                       contentStyle={{ paddingHorizontal: 16 }}
                       error={!!errors.email}
                     />
@@ -231,7 +230,7 @@ const SignupScreen = () => {
                 control={control}
                 name="displayName"
                 render={({ field: { onChange, onBlur, value } }) => (
-                  <View>
+                  <View className="mb-4">
                     <TextInput
                       placeholder="Full Name"
                       onBlur={onBlur}
@@ -241,12 +240,14 @@ const SignupScreen = () => {
                       keyboardType="default"
                       autoCapitalize="words"
                       autoComplete="name"
-                      left={<TextInput.Icon icon="account-outline" />}
+                      left={
+                        <TextInput.Icon icon="account-outline" color="#222" />
+                      }
                       outlineStyle={{
                         borderRadius: 12,
                         borderColor: errors.displayName ? '#EF4444' : '#E5E7EB',
                       }}
-                      style={{ backgroundColor: 'white' }}
+                      style={{ backgroundColor: '#f3f4f6' }}
                       contentStyle={{ paddingHorizontal: 16 }}
                       error={!!errors.displayName}
                     />
@@ -264,7 +265,7 @@ const SignupScreen = () => {
                 control={control}
                 name="password"
                 render={({ field: { onChange, onBlur, value } }) => (
-                  <View>
+                  <View className="mb-4">
                     <TextInput
                       placeholder="Password"
                       onBlur={onBlur}
@@ -274,18 +275,19 @@ const SignupScreen = () => {
                       secureTextEntry={!showPassword}
                       autoCapitalize="none"
                       autoComplete="new-password"
-                      left={<TextInput.Icon icon="lock-outline" />}
+                      left={<TextInput.Icon icon="lock-outline" color="#222" />}
                       right={
                         <TextInput.Icon
                           icon={showPassword ? 'eye-off' : 'eye'}
                           onPress={() => setShowPassword(!showPassword)}
+                          color="#222"
                         />
                       }
                       outlineStyle={{
                         borderRadius: 12,
                         borderColor: errors.password ? '#EF4444' : '#E5E7EB',
                       }}
-                      style={{ backgroundColor: 'white' }}
+                      style={{ backgroundColor: '#f3f4f6' }}
                       contentStyle={{ paddingHorizontal: 16 }}
                       error={!!errors.password}
                     />
@@ -299,25 +301,33 @@ const SignupScreen = () => {
               />
 
               {/* Terms and Privacy */}
-              <View className="flex-row items-start mt-4">
-                <Checkbox
-                  status={termsAccepted ? 'checked' : 'unchecked'}
-                  onPress={() => setTermsAccepted(!termsAccepted)}
-                  color="#007AFF"
-                />
-                <View className="flex-1 ml-2">
-                  <Text className="text-sm text-gray-700 leading-5">
-                    I Agree with{' '}
-                    <TextButton
-                      text="Terms of Service"
-                      onPress={() => console.log('Show terms')}
-                    />{' '}
-                    and{' '}
-                    <TextButton
-                      text="Privacy Policy"
-                      onPress={() => console.log('Show privacy policy')}
-                    />
-                  </Text>
+              <View className="items-center justify-center mt-4 mb-4">
+                <View className="flex-row items-center">
+                  <Checkbox
+                    status={termsAccepted ? 'checked' : 'unchecked'}
+                    onPress={() => setTermsAccepted(!termsAccepted)}
+                    color="#007AFF"
+                  />
+                  <View className="flex-1 ml-2">
+                    <Text className="text-sm text-gray-700 leading-5 text-center">
+                      I Agree with{' '}
+                      <TouchableOpacity
+                        onPress={() => console.log('Show terms')}
+                      >
+                        <Text className="text-blue-600 underline">
+                          Terms of Service
+                        </Text>
+                      </TouchableOpacity>{' '}
+                      and{' '}
+                      <TouchableOpacity
+                        onPress={() => console.log('Show privacy policy')}
+                      >
+                        <Text className="text-blue-600 underline">
+                          Privacy Policy
+                        </Text>
+                      </TouchableOpacity>
+                    </Text>
+                  </View>
                 </View>
               </View>
 
@@ -329,7 +339,7 @@ const SignupScreen = () => {
                 disabled={loading || !termsAccepted}
                 buttonColor="#007AFF"
                 contentStyle={{ paddingVertical: 12 }}
-                style={{ borderRadius: 25, marginTop: 16 }}
+                style={{ borderRadius: 25, marginTop: 8 }}
                 labelStyle={{ fontSize: 16, fontWeight: '600', color: 'white' }}
               >
                 {loading ? 'Creating Account...' : 'Sign up'}
@@ -388,7 +398,11 @@ const SignupScreen = () => {
                 <Text className="text-gray-600 text-base">
                   Already have an account?{' '}
                 </Text>
-                <TextButton text="Login" onPress={handleLogin} />
+                <TouchableOpacity onPress={handleLogin}>
+                  <Text className="text-blue-600 underline font-semibold">
+                    Login
+                  </Text>
+                </TouchableOpacity>
               </View>
 
               {/* Error Message */}
@@ -430,4 +444,4 @@ const SignupScreen = () => {
 };
 
 export default SignupScreen;
-// 10.7.0
+// 10.7.

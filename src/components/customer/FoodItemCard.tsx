@@ -1,4 +1,3 @@
-import { formatCurrency } from '@/src/utils/formatters';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { View, TouchableOpacity } from 'react-native';

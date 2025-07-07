@@ -11,7 +11,7 @@ const HomeScreen = () => {
     <CommonView>
       <ScrollView>
         <View style={styles.headerContainer}>
-          <Avatar.Image source={{}} style={styles.avatarStyle} />
+          <Avatar.Image source={{}} style={styles.avatarStyle}  />
           <View style={styles.ColumnStyle}>
             <Text style={{ fontSize: 20, color: 'gray' }}>Deliver to</Text>
             <Text style={{ fontSize: 30, fontWeight: 'semibold' }}>

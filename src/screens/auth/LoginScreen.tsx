@@ -1,5 +1,5 @@
 import '@/src/config/firebase';
-import React, { useState } from 'react';
+import React, { useLayoutEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -23,6 +23,8 @@ interface LoginFormData {
 }
 
 export default function LoginScreen() {
+  useLayoutEffect(()=> {
+  })
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
@@ -48,6 +50,7 @@ export default function LoginScreen() {
   const onSubmit = async (data: LoginFormData) => {
     setLoading(true);
     // TODO:
+    console.log('Usertype: ' + userType);
   };
 
   const handleGoogleSignIn = async () => {
@@ -262,9 +265,9 @@ export default function LoginScreen() {
               {/* Sign Up Link */}
               <View className="flex-row justify-center items-center mt-8 mb-4">
                 <Text className="text-gray-600 text-base">
-                  Already have an account?{' '}
+                  Dont Already have an account?{' '}
                 </Text>
-                <TextButton text="Login" onPress={handleSignUp} />
+                <TextButton text="Sign UP" onPress={handleSignUp} />
               </View>
             </View>
           </View>
