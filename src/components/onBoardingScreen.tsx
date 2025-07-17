@@ -8,226 +8,42 @@ import {
   Dimensions,
   StatusBar,
   Animated,
-  StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from 'react-native-paper';
 import { OnboardingSlide as OnboardingInfo } from '@/src/types';
 import { Ionicons } from '@expo/vector-icons';
+import { images } from '@/assets/images';
 
-const { width: screenWidth } = Dimensions.get('screen');
+const { width: screenWidth, height: screenHeight } = Dimensions.get('screen');
 
-// User Type Interface
 interface UserType {
   id: 'customer' | 'restaurant';
   image: any;
+  title: string;
 }
 
 const userTypes: UserType[] = [
   {
     id: 'customer',
-    image: require('@/assets/images/userImage.png'),
+    image: images.customerImg,
+    title: 'Looking For Some Good Food',
   },
   {
     id: 'restaurant',
-    image: require('@/assets/images/RestaurantImage.png'),
+    image:images.restaurantImg,
+    title: 'Create A Restaurant',
   },
 ];
 
-// Styles object to replace Tailwind classes
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'white',
-  },
-  centerContent: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 32,
-  },
-  welcomeText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#111827',
-    marginBottom: 16,
-    textAlign: 'center',
-  },
-  subtitleText: {
-    fontSize: 16,
-    color: '#6B7280',
-    textAlign: 'center',
-    lineHeight: 24,
-    paddingHorizontal: 16,
-  },
-  progressContainer: {
-    width: '100%',
-    alignItems: 'center',
-  },
-  progressBar: {
-    width: 128,
-    height: 4,
-    backgroundColor: '#E5E7EB',
-    borderRadius: 2,
-  },
-  progressFill: {
-    height: 4,
-    backgroundColor: '#007aff',
-    borderRadius: 2,
-  },
-  slideContainer: {
-    flex: 1,
-  },
-  overlay: {
-    flex: 1,
-  },
-  slideContent: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    marginBottom: 42,
-    paddingBottom: 8,
-  },
-  slideCard: {
-    backgroundColor: '#007aff',
-    borderRadius: 20,
-    padding: 24,
-    marginBottom: 16,
-    marginHorizontal: 24,
-    marginRight: 10,
-    marginLeft: 10,
-  },
-  slideTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: 'white',
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  slideDescription: {
-    fontSize: 16,
-    color: '#DBEAFE',
-    textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: 24,
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  skipButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-  },
-  skipButtonText: {
-    color: '#DBEAFE',
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  nextButton: {
-    backgroundColor: 'white',
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-    borderRadius: 24,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  nextButtonText: {
-    color: '#007aff',
-    fontSize: 16,
-    fontWeight: '600',
-    marginRight: 8,
-  },
-  nextButtonArrow: {
-    color: '#007aff',
-    fontSize: 18,
-  },
-  indicatorContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginHorizontal: 8,
-  },
-  indicator: {
-    height: 8,
-    borderRadius: 4,
-    marginHorizontal: 4,
-  },
-  indicatorActive: {
-    backgroundColor: 'white',
-    width: 32,
-  },
-  indicatorInactive: {
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
-    width: 8,
-  },
-  userSelectionContainer: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingVertical: 32,
-  },
-  headerText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'black',
-    textAlign: 'left',
-    marginBottom: 8,
-  },
-  userTypeContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  userTypeCard: {
-    width: '80%',
-    alignItems: 'center',
-    marginBottom: 32,
-  },
-  cardContent: {
-    alignItems: 'center',
-    padding: 20,
-  },
-  userImage: {
-    width: '100%',
-    height: '100%',
-  },
-  checkmarkContainer: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 2,
-  },
-  userTypeText: {
-    marginTop: 16,
-    fontSize: 18,
-    fontWeight: '600',
-    textTransform: 'capitalize',
-  },
-  loginButton: {
-    borderRadius: 25,
-    borderColor: '#1E90FF',
-    borderWidth: 1,
-    marginTop: 24,
-  },
-  loginButtonContent: {
-    paddingVertical: 8,
-  },
-  loginButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-});
-
 // Welcome Screen Component (Page 1)
 const OnboardingWelcome = ({ onComplete }: { onComplete: () => void }) => {
-  const relayLogo = require('@/assets/images/Foodrushlogo.png');
+  const foodRushLogo = require('@/assets/images/Foodrushlogo.png');
   const gif = require('@/assets/images/Delivery.gif');
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
 
   useEffect(() => {
-    // Animate entrance
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -241,7 +57,6 @@ const OnboardingWelcome = ({ onComplete }: { onComplete: () => void }) => {
       }),
     ]).start();
 
-    // Auto-transition after 3 seconds
     const timer = setTimeout(() => {
       onComplete();
     }, 3000);
@@ -250,66 +65,43 @@ const OnboardingWelcome = ({ onComplete }: { onComplete: () => void }) => {
   }, [fadeAnim, onComplete, slideAnim]);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView className="flex-1 bg-white">
       <StatusBar barStyle="dark-content" backgroundColor="white" />
       <Animated.View
-        style={[
-          styles.centerContent,
-          {
-            opacity: fadeAnim,
-            transform: [{ translateY: slideAnim }],
-          },
-        ]}
+        style={{
+          opacity: fadeAnim,
+          transform: [{ translateY: slideAnim }],
+        }}
+        className="flex-1 justify-center items-center px-3"
       >
-        {/* Main Content Container */}
-        <View style={styles.centerContent}>
-          {/* Logo */}
-          <View style={{ marginBottom: 48 }}>
+        <View className="flex-1 justify-center items-center">
+          <View className="flex-1 flex-col items-center justify-between mb-8 ">
             <Image
-              source={relayLogo}
+              source={foodRushLogo}
               style={{
-                width: screenWidth * 0.7,
-                height: screenWidth * 0.7,
+                width: screenWidth * 0.25,
+                height: screenHeight * 0.25,
               }}
               resizeMode="contain"
             />
-          </View>
 
-          {/* Animated GIF */}
-          <View style={{ marginBottom: 48 }}>
             <Image
               source={gif}
               style={{
-                width: screenWidth * 0.6,
-                height: screenWidth * 0.4,
+                width: screenWidth * 0.9,
+                height: screenHeight * 0.55,
               }}
               resizeMode="contain"
             />
-          </View>
 
-          {/* Welcome Text */}
-          <View style={{ alignItems: 'center', marginBottom: 32 }}>
-            <Text style={styles.welcomeText}>Welcome to Food Rush!</Text>
-            <Text style={styles.subtitleText}>
-              Healthy meals delivered locally{'\n'}within a tap of a button.
-            </Text>
-          </View>
-        </View>
-
-        {/* Bottom Progress Indicator */}
-        <View style={styles.progressContainer}>
-          <View style={styles.progressBar}>
-            <Animated.View
-              style={[
-                styles.progressFill,
-                {
-                  width: fadeAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: ['0%', '100%'],
-                  }),
-                },
-              ]}
-            />
+            <View className="items-center">
+              <Text className="text-3xl font-bold text-gray-900 mb-4 text-center">
+                Welcome to Food Rush!
+              </Text>
+              <Text className="text-lg text-gray-600 text-center leading-7 px-4">
+                Healthy meals delivered locally{'\n'}within a tap of a button.
+              </Text>
+            </View>
           </View>
         </View>
       </Animated.View>
@@ -333,6 +125,7 @@ const OnboardingSlide = ({
 }) => {
   const isLastSlide = currentIndex === totalSlides - 1;
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const foodRushLogo = require('@/assets/images/Foodrushlogo.png');
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -343,72 +136,76 @@ const OnboardingSlide = ({
   }, [currentIndex, fadeAnim]);
 
   return (
-    <SafeAreaView style={styles.slideContainer}>
+    <>
       <StatusBar
         barStyle="light-content"
         backgroundColor="transparent"
         translucent
-        
       />
       <ImageBackground
-        style={styles.slideContainer}
+        className="flex-1"
         source={slide.image}
         resizeMode="cover"
       >
-        {/* Dark Overlay */}
-        <View style={styles.overlay}>
-          {/* Content positioned at bottom */}
-          <View style={styles.slideContent}>
+        <View className="flex-1">
+          <View className="flex-1 justify-between pb-16">
+            <View className="pt-12 pl-6">
+              <Image
+                source={foodRushLogo}
+                style={{
+                  width: 80,
+                  height: 80,
+                }}
+                resizeMode="contain"
+              />
+            </View>
             <Animated.View style={{ opacity: fadeAnim }}>
-              {/* Main Content Card */}
-              <View style={styles.slideCard}>
-                <Text style={styles.slideTitle}>{slide.title}</Text>
-                <Text style={styles.slideDescription}>{slide.description}</Text>
-
-                {/* Action Buttons */}
-                <View style={styles.buttonRow}>
-                  {/* Skip Button */}
+              <View className="bg-blue-600/95 rounded-2xl p-6 mx-6 shadow-lg backdrop-blur-sm">
+                <Text className="text-2xl font-bold text-white mb-4 text-left">
+                  {slide.title}
+                </Text>
+                <Text className="text-base text-white/90 text-left leading-6 mb-8">
+                  {slide.description}
+                </Text>
+                <View className="flex-row justify-between items-center mb-6">
                   <TouchableOpacity
                     onPress={onSkip}
-                    style={styles.skipButton}
+                    className="py-3 px-4"
                     activeOpacity={0.7}
                   >
-                    <Text style={styles.skipButtonText}>Skip</Text>
-                  </TouchableOpacity>
-
-                  {/* Next Button */}
-                  <TouchableOpacity
-                    onPress={onNext}
-                    style={styles.nextButton}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={styles.nextButtonText}>
-                      {isLastSlide ? 'Next' : 'Next'}
+                    <Text className="text-white/80 text-base font-medium">
+                      Skip
                     </Text>
                   </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={onNext}
+                    className="bg-white py-3 px-6 rounded-full flex-row items-center min-w-[90px] justify-center shadow-md"
+                    activeOpacity={0.8}
+                  >
+                    <Text className="text-blue-600 text-base font-semibold mr-2">
+                      {isLastSlide ? 'Next' : 'Next'}
+                    </Text>
+                    <Ionicons name="arrow-forward" size={16} color="#4285F4" />
+                  </TouchableOpacity>
                 </View>
-                {/* Progress Indicator */}
-              <View style={styles.indicatorContainer}>
-                {Array.from({ length: totalSlides }).map((_, index) => (
-                  <View
-                    key={index}
-                    style={[
-                      styles.indicator,
-                      index === currentIndex
-                        ? styles.indicatorActive
-                        : styles.indicatorInactive,
-                    ]}
-                  />
-                ))}
+                <View className="flex-row justify-center">
+                  {Array.from({ length: totalSlides }).map((_, index) => (
+                    <View
+                      key={index}
+                      className={`h-2 rounded-full mx-1 transition-all duration-300 ${
+                        index === currentIndex
+                          ? 'bg-white w-6'
+                          : 'bg-white/40 w-2'
+                      }`}
+                    />
+                  ))}
+                </View>
               </View>
-              </View>
-
-              
             </Animated.View>
           </View>
         </View>
       </ImageBackground>
-    </SafeAreaView>
+    </>
   );
 };
 
@@ -416,145 +213,139 @@ const OnboardingSlide = ({
 const UserTypeSelectionScreen = ({
   onSelectUserType,
   onLogin,
+  selectedType,
 }: {
   onSelectUserType: (userType: 'customer' | 'restaurant') => void;
   onLogin: () => void;
+  selectedType: 'customer' | 'restaurant' | null;
 }) => {
-  const [selectedType, setSelectedType] = useState<
-    'customer' | 'restaurant' | null
-  >(null);
+  const scaleAnims = useRef<Record<string, Animated.Value>>({
+    customer: new Animated.Value(1),
+    restaurant: new Animated.Value(1),
+  }).current;
 
-  const handleSelectType = useCallback(
-    (type: 'customer' | 'restaurant') => {
-      setSelectedType(type);
-      onSelectUserType(type);
-    },
-    [onSelectUserType],
-  );
+  const handleUserTypePress = (userType: 'customer' | 'restaurant') => {
+    // Animate only the selected card
+    Animated.sequence([
+      Animated.timing(scaleAnims[userType], {
+        toValue: 0.95,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnims[userType], {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
 
-  const handleLogin = useCallback(() => {
-    onLogin();
-  }, [onLogin]);
+    onSelectUserType(userType);
+  };
+
+  // Create button style based on selectedType to avoid reading animated value during render
+  const getButtonStyle = useCallback((isSelected: boolean) => {
+    return {
+      borderRadius: 30,
+      backgroundColor: isSelected ? '#4285F4' : '#E5E7EB',
+      elevation: isSelected ? 4 : 0,
+      shadowColor: isSelected ? '#4285F4' : 'transparent',
+      shadowOffset: { width: 0, height: isSelected ? 2 : 0 },
+      shadowOpacity: isSelected ? 0.3 : 0,
+      shadowRadius: isSelected ? 4 : 0,
+    };
+  }, []);
+
+  const getButtonLabelStyle = useCallback((isSelected: boolean) => {
+    return {
+      fontSize: 18,
+      fontWeight: '600' as const,
+      color: isSelected ? 'white' : '#9CA3AF',
+    };
+  }, []);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.userSelectionContainer}>
+    <SafeAreaView className="flex-1 bg-gray-50">
+      <StatusBar barStyle="dark-content" backgroundColor="#F8F9FA" />
+      <View className="flex-1 bg-gray-50 px-6 pt-8 pb-10">
         {/* Header */}
-        <View>
-          <Text style={styles.headerText}>What are your needs?</Text>
+        <View className="mb-8">
+          <Text className="text-3xl font-bold text-gray-900 mb-2">
+            What are your needs?
+          </Text>
+          <Text className="text-lg text-gray-600">
+            Choose your role to get started
+          </Text>
         </View>
 
         {/* User Type Cards */}
-        <View style={styles.userTypeContainer}>
+        <View className="flex-1 justify-center">
           {userTypes.map((type, index) => (
-            <View
+            <Animated.View
               key={type.id}
-              style={[
-                {
-                  width: '100%',
-                  height: 200,
-                  marginBottom: index === userTypes.length - 1 ? 0 : 32,
-                  position: 'relative',
-                },
-              ]}
+              style={{
+                transform: [
+                  { scale: selectedType === type.id ? scaleAnims[type.id] : 1 },
+                ],
+              }}
+              className="mb-6"
             >
               <TouchableOpacity
-                activeOpacity={0.85}
-                style={{
-                  flex: 1,
-                  borderRadius: 16,
-                  borderWidth: selectedType === type.id ? 2 : 1,
-                  borderColor: selectedType === type.id ? '#1E90FF' : '#e5e7eb',
-                  backgroundColor:
-                    selectedType === type.id ? '#e6f0fa' : '#fff',
-                  overflow: 'hidden',
-                  width: '100%',
-                  height: '100%',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-                onPress={() => handleSelectType(type.id)}
+                activeOpacity={0.8}
+                className={`bg-gray-200 rounded-2xl border-2 shadow-lg overflow-hidden transition-all duration-300  p-2 ${
+                  selectedType === type.id
+                    ? 'border-blue-500 shadow-blue-200'
+                    : 'border-gray-200 shadow-gray-100'
+                }`}
+                style={{ height: screenHeight/3.7,  width: screenWidth - 48 }}
+                onPress={() => handleUserTypePress(type.id)}
               >
-                <Image
-                  source={type.image}
-                  style={{
-                    width: '100%',
-                    height: 200,
-                    resizeMode: 'contain',
-                    borderRadius: 16,
-                  }}
-                />
-                {selectedType === type.id && (
-                  <View
-                    style={{
-                      position: 'absolute',
-                      top: 12,
-                      right: 12,
-                      backgroundColor: 'white',
-                      borderRadius: 16,
-                      padding: 2,
-                      zIndex: 2,
-                    }}
-                  >
-                    <Ionicons
-                      name="checkmark-circle"
-                      size={32}
-                      color="#1E90FF"
-                    />
-                  </View>
-                )}
-                {/* Button at bottom right of the image */}
-                <TouchableOpacity
-                  style={{
-                    position: 'absolute',
-                    bottom: 16,
-                    right: 16,
-                    backgroundColor: '#1E90FF',
-                    borderRadius: 20,
-                    paddingVertical: 8,
-                    paddingHorizontal: 18,
-                    zIndex: 2,
-                    elevation: 2,
-                  }}
-                  onPress={() => handleSelectType(type.id)}
-                  activeOpacity={0.85}
-                >
-                  <Text
-                    style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}
-                  >
-                    Select
-                  </Text>
-                </TouchableOpacity>
+                <View className="flex-1 ">
+                  <Image
+                    source={type.image}
+                    className="w-full h-full"
+                    resizeMode="cover"
+                  />
+
+                  {/* Overlay gradient for better text visibility */}
+                  <View className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+
+                  {/* Selection indicator */}
+                  {selectedType === type.id && (
+                    <View className="absolute top-4 right-4 bg-blue-500 rounded-full p-2 shadow-lg">
+                      <Ionicons name="checkmark" size={20} color="white" />
+                    </View>
+                  )}
+
+                    
+                  
+                </View>
+                <Text className=" text-xl font-bold drop-shadow-lg text-center mt-2">
+                      {type.title}
+                    </Text>
               </TouchableOpacity>
-              {/* User type label below the image */}
-              <Text
-                style={{
-                  marginTop: 12,
-                  fontSize: 18,
-                  fontWeight: '600',
-                  color: selectedType === type.id ? '#1E90FF' : '#222',
-                  textAlign: 'center',
-                  textTransform: 'capitalize',
-                }}
-              >
-                {type.id}
-              </Text>
-            </View>
+            </Animated.View>
           ))}
         </View>
 
-        {/* Action Buttons */}
-        <View>
+        {/* Login Button */}
+        <View className="pt-6">
           <Button
-            mode="outlined"
-            onPress={handleLogin}
-            textColor="#1E90FF"
-            contentStyle={styles.loginButtonContent}
-            style={styles.loginButton}
-            labelStyle={styles.loginButtonText}
+            mode="contained"
+            onPress={onLogin}
+            disabled={!selectedType}
+            contentStyle={{ paddingVertical: 14 }}
+            style={getButtonStyle(!!selectedType)}
+            labelStyle={getButtonLabelStyle(!!selectedType)}
           >
-            Login
+            {selectedType ? 'Continue' : 'Select a user type'}
           </Button>
+
+          {selectedType && (
+            <Text className="text-center text-gray-500 mt-3 text-sm">
+              You selected:{' '}
+              {selectedType === 'customer' ? 'Customer' : 'Restaurant'}
+            </Text>
+          )}
         </View>
       </View>
     </SafeAreaView>
@@ -569,11 +360,14 @@ const OnboardingScreen = ({
 }: {
   OnboardingSlides: OnboardingInfo[];
   onComplete: (userType: 'customer' | 'restaurant') => void;
-  onLogin: () => void;
+  onLogin: (selectedUserType: 'customer' | 'restaurant' | null) => void;
 }) => {
   const [showWelcome, setShowWelcome] = useState(true);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [showUserSelection, setShowUserSelection] = useState(false);
+  const [selectedType, setSelectedType] = useState<
+    'customer' | 'restaurant' | null
+  >(null);
 
   const handleWelcomeComplete = () => {
     setShowWelcome(false);
@@ -583,41 +377,42 @@ const OnboardingScreen = ({
     if (currentSlideIndex < OnboardingSlides.length - 1) {
       setCurrentSlideIndex(currentSlideIndex + 1);
     } else {
-      // Last slide completed, show user selection
       setShowUserSelection(true);
     }
   };
 
   const handleSkip = () => {
-    // Skip to user selection
     setShowUserSelection(true);
   };
 
+  // Only update selectedType, do not complete onboarding yet
   const handleUserTypeSelection = (userType: 'customer' | 'restaurant') => {
-    // Complete onboarding with selected user type
-    onComplete(userType);
+    setSelectedType(userType);
+    console.log('User type selected:', userType);
   };
 
+  // Only complete onboarding when Login is pressed and a type is selected
   const handleLogin = () => {
-    onLogin();
+    if (selectedType) {
+      console.log('Completing onboarding for:', selectedType);
+      onComplete(selectedType);
+    }
   };
 
-  // Show welcome screen first
   if (showWelcome) {
     return <OnboardingWelcome onComplete={handleWelcomeComplete} />;
   }
 
-  // Show user selection after onboarding slides
   if (showUserSelection) {
     return (
       <UserTypeSelectionScreen
         onSelectUserType={handleUserTypeSelection}
         onLogin={handleLogin}
+        selectedType={selectedType}
       />
     );
   }
 
-  // Show onboarding slides
   return (
     <OnboardingSlide
       slide={OnboardingSlides[currentSlideIndex]}

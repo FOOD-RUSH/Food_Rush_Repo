@@ -1,15 +1,15 @@
-import { View, Text, TouchableHighlight } from 'react-native';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import React from 'react';
-import { Card, Divider } from 'react-native-paper';
 
-interface OrderItemCardProps {
+export interface OrderItemCardProps {
   foodId: string;
   restaurantId: string;
   foodName: string;
   image: any;
   foodPrice: string;
   quantity: number;
-  orderStatus: 'pending' | 'delivered' | 'on the way';
+  orderStatus: 'active' | 'completed';
+  distance?: string;
 }
 
 const OrderItemCard = ({
@@ -20,42 +20,125 @@ const OrderItemCard = ({
   image,
   orderStatus,
   quantity,
+  distance = '2.4 km',
 }: OrderItemCardProps) => {
   return (
-    <Card
-      mode="outlined"
-      style={{ padding: 10, margin: 10 }}
-      contentStyle={{ flexDirection: 'row' }}
-      id={foodId}
+    <View
+      className="bg-white rounded-2xl mx-4 mb-4 shadow-sm"
+      style={{
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 3,
+      }}
     >
-      <View className="flex-row item-center p-4">
-        <Card.Cover source={image} height={100} width={100} borderRadius={10} />
-        <View className="flex-column flex-1 ml-2 justify-between items-start">
-          <Text className="text-xl font-bold text-center">{foodName}</Text>
-          <View className="flex-row my-2">
-            <Text className="text-gray-700 mr-2">{quantity}Items</Text>
-            <Text className="text-gray-700 mr-2">|</Text>
-            <Text className="text-gray-700 mr-2">2.7 km</Text>
+      {/* Main Content */}
+      <View className="p-4">
+        <View className="flex-row items-center">
+          {/* Food Image */}
+          <View className="mr-4">
+            <Image
+              source={image}
+              className="w-16 h-16 rounded-xl"
+              style={{ width: 64, height: 64 }}
+            />
           </View>
-          {/* price + state of card */}
-          <View className="flex-row justify-between ">
-            <Text className="text-xl">{foodPrice} F</Text>
-            <TouchableHighlight style={{ backgroundColor: '#007aff' }}>
-              <Text className="text-white">{orderStatus}</Text>
-            </TouchableHighlight>
+
+          {/* Food Details */}
+          <View className="flex-1">
+            <Text className="text-lg font-bold text-gray-900 mb-1">
+              {foodName}
+            </Text>
+            <View className="flex-row items-center mb-2">
+              <Text className="text-gray-600 text-sm mr-2 font-medium">
+                {quantity} items
+              </Text>
+              <Text className="text-gray-400 text-sm mr-2 font-medium">|</Text>
+              <Text className="text-gray-600 text-sm font-medium">{distance}</Text>
+            </View>
+
+            {/* Price and Status */}
+            <View className="flex-row items-center justify-between">
+              <Text className="text-lg font-bold text-primaryColor">
+                {foodPrice} F
+              </Text>
+              <View
+                className={`px-3 py-1 rounded-full ${
+                  orderStatus === 'active' ? 'bg-blue-100' : 'bg-primaryColor rounded-full'
+                }`}
+              >
+                <Text
+                  className={`text-sm font-medium ${
+                    orderStatus === 'active'
+                      ? 'text-blue-600'
+                      : 'text-white'
+                  }`}
+                >
+                  {orderStatus === 'active' ? 'Paid' : 'Completed'}
+                </Text>
+              </View>
+            </View>
           </View>
         </View>
       </View>
-      <Divider style={{ outlineColor: 'grey' }} />
-      <View className="flex-row my-2 justify-between">
-        <TouchableHighlight className="border-primaryColor border-2 p-2 rounded-xl">
-          <Text className="">Leave a review</Text>
-        </TouchableHighlight>
-        <TouchableHighlight className="bg-primaryColor p-2 rounded-xl">
-          <Text className="text-[18px]">Order Again</Text>
-        </TouchableHighlight>
+      {/* DIVIDER */}
+      <View className="bg-gray-300 h-[1px] mb-3 mx-2" /> 
+      {/* Action Buttons */}
+      <View className="px-4 pb-4">
+        <View className="flex-row justify-between space-x-3">
+          {orderStatus === 'active' ? (
+            <>
+              <TouchableOpacity
+                className="flex-1 border border-blue-500 rounded-full py-3 mr-2"
+                onPress={() => {
+                  // Handle cancel order logic here
+                }}
+              >
+                <Text className="text-blue-500 font-medium text-center">
+                  Cancel Order
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                className="flex-1 bg-blue-500 rounded-full py-3 ml-2"
+                onPress={() => {
+                  // Handle track driver logic here
+                }}
+              >
+                <Text className="text-white font-medium text-center">
+                  Track Driver
+                </Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              <TouchableOpacity
+                className="flex-1 border border-blue-500 rounded-full py-3 mr-2"
+                onPress={() => {
+                  // Handle leave review logic here
+                }}
+              >
+                <Text className="text-blue-500 font-medium text-center">
+                  Leave a review
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                className="flex-1 bg-blue-500 rounded-full py-3 ml-2"
+                onPress={() => {
+                  // Handle order again logic here
+                }}
+              >
+                <Text className="text-white font-medium text-center">
+                  Order Again
+                </Text>
+              </TouchableOpacity>
+            </>
+          )}
+        </View>
       </View>
-    </Card>
+    </View>
   );
 };
 

@@ -1,3 +1,5 @@
+import { TextInputProps } from "react-native-paper";
+
 export interface User {
   uid: string;
   email: string;
@@ -15,14 +17,14 @@ export interface AppState {
 //Properties of Food
 
 export interface FoodProps {
-  id: string;
-  restaurantID: string;
-  name: string;
-  price: number;
+  id?: string;
+  restaurantID?: string;
+  name?: string;
+  price?: number;
   ratings?: number;
-  addedOn: Date;
+  addedOn?: Date;
   distance?: number;
-  image: string
+  image?: any;
 
 }
 
@@ -106,6 +108,16 @@ export interface OrderItem {
   specialInstructions?: string;
   price: number;
 }
+export declare interface InputFieldProps extends TextInputProps {
+    label?: string;
+    icon?: any;
+    secureTextEntry?: boolean;
+    labelStyle?: string;
+    containerStyle?: string;
+    inputStyle?: string;
+    iconStyle?: string;
+    className?: string;
+}
 
 export type OrderStatus =
   | 'pending'
@@ -145,3 +157,15 @@ export interface PaymentTransaction {
   transactionId?: string;
   createdAt: Date;
 }
+
+interface FoodClass {
+  id: string;
+  restaurantId: string;
+  name: string;
+  price: string;
+  category: string;
+  description: string;
+  ingredient: string;
+}
+
+

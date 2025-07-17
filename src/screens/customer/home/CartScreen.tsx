@@ -1,11 +1,12 @@
 import { View, Text } from 'react-native';
 import React from 'react';
+import CommonView from '@/src/components/common/CommonView';
 
 const CartScreen = () => {
   return (
-    <View className="justify-center items-center flex-1">
-      <Text className="justify-items-center">CartScreen</Text>
-    </View>
+    <CommonView backgroundColor='#fff'> 
+    <Text>Order Screen</Text>
+    </CommonView>
   );
 };
 

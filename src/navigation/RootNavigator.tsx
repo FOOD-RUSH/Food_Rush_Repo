@@ -57,18 +57,33 @@ const RootNavigator: React.FC = () => {
     // AsyncStorage.setItem('userType', selectedUserType);
   };
 
-  const handleLogin = () => {
-    console.log('Login pressed from onboarding');
-    // Navigate to auth screen - set onboarding complete first
-    setIsOnboardingComplete(true);
-    // The navigation will handle showing the Auth screen
+  const handleLogin = (selectedUserType: 'customer' | 'restaurant' | null) => {
+    if (!selectedUserType) {
+      console.warn('No user type selected during login');
+      return;
+    }
+    console.log('Login attempted for user type:', selectedUserType);
+    setUserType(selectedUserType);
+    setIsAuthenticated(true);
+    // Save to AsyncStorage
+    // AsyncStorage.setItem('isAuthenticated', 'true');
+    // AsyncStorage.setItem('userType', selectedUserType);
   };
 
   const getInitialRouteName = (): keyof RootStackParamList => {
-    if (!isAuthenticated) {
-      return 'Auth';
+    // if (!isAuthenticated) {
+    //   return 'Auth';
+    // }
+
+    // Navigate based on user type
+    if (userType === 'customer') {
+      return 'CustomerApp';
+    } else if (userType === 'restaurant') {
+      return 'RestaurantApp';
     }
-    return userType === 'restaurant' ? 'RestaurantApp' : 'CustomerApp';
+
+    // Default fallback
+    return 'CustomerApp';
   };
 
   if (isLoading) {
@@ -96,6 +111,7 @@ const RootNavigator: React.FC = () => {
         screenOptions={{
           headerShown: false,
           gestureEnabled: false,
+          animation: 'slide_from_right',
         }}
       >
         <Stack.Screen name="Auth" component={AuthNavigator} />

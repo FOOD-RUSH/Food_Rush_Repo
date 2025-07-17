@@ -36,7 +36,7 @@ const FoodItemCard = ({
   >
     {/* Card content with horizontal layout */}
     <View
-      style={{
+      style={{ 
         flexDirection: 'row',
         padding: 16,
         alignItems: 'center',

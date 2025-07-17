@@ -1,7 +1,7 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
-
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   RestaurantAnalyticsStackParamList,
   RestaurantMenuStackParamList,
@@ -94,6 +94,7 @@ function RestaurantProfileStackScreen() {
 }
 
 export default function RestaurantNavigator() {
+  const insets = useSafeAreaInsets();
   return (
     <RestaurantTab.Navigator
       screenOptions={({ route }) => ({
@@ -120,8 +121,8 @@ export default function RestaurantNavigator() {
         tabBarStyle: {
           backgroundColor: '#fff',
           borderTopColor: '#e0e0e0',
-          height: Platform.OS === 'ios' ? 90 : 70,
-          paddingBottom: Platform.OS === 'ios' ? 25 : 10,
+          height:( Platform.OS === 'ios' ? 90 : 70) + insets.bottom,
+          paddingBottom: (Platform.OS === 'ios' ? 25 : 10)+ insets.bottom,
           paddingTop: 10,
         },
         headerStyle: {

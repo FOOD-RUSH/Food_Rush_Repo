@@ -66,7 +66,10 @@ const RestaurantCard = ({
         </TouchableOpacity>
 
         {/* Promotional Badges */}
-       
+       <View className='absolute top-3 left-2'>
+        <Text className='font-bold text-white'>- 25% off </Text>
+
+       </View>
 
         {/* Bottom badges */}
         <View

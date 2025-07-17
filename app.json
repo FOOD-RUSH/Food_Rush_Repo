@@ -8,12 +8,17 @@
     "scheme": "foodrush",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/SplashScreen.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/splash-icon.png",
+        "foregroundImage": "./assets/images/Foodrushlogo.png",
         "backgroundColor": "#06102b"
       },
       "edgeToEdgeEnabled": true
@@ -25,16 +30,7 @@
     },
     "plugins": [
       // "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#06102b"
-          
-        }
-      ],
+      
       "expo-font",
       "expo-asset",
       "expo-web-browser"

@@ -6,22 +6,35 @@ import {
   CustomerProfileStackParamList,
   CustomerTabParamList,
   CustomerOrderStackParamList,
+  CustomerHelpCenterStackParamsList,
 } from './types';
 import HomeScreen from '../screens/customer/home/HomeScreen';
-import FoodDetailScreen from '../screens/customer/home/FoodDetailScreen';
 import FavoritesScreen from '../screens/customer/Profile/FavoritesScreen';
 import ProfileScreen from '../screens/customer/Profile/ProfileScreen';
 import SearchScreen from '../screens/customer/search/SearchScreen';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 // order is top bar stack Navigator
 
-import { Platform } from 'react-native';
+import {
+  Image,
+  Platform,
+  Pressable,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
 import { lightTheme } from '@/src/config/theme';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import ProfileHomeScreen from '../screens/customer/Profile/ProfileHomeScreen';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import CompletedOrderScreen from '../screens/customer/Order/CompletedOrderScreen';
 import ActiveOrderScreen from '../screens/customer/Order/ActiveOrderScreen';
+import { icons } from '@/assets/images';
+import CategoryItems from '../screens/customer/home/CategoryItems';
+import { goBack } from './navigationHelpers';
+import FoodDetailScreen from '../screens/customer/home/RestaurantDetailScreen';
+import FAQ from '../screens/customer/Profile/FAQ';
+import ContactUs from '../screens/customer/Profile/ContactUs';
 
 const CustomerTab = createBottomTabNavigator<CustomerTabParamList>();
 const CustomerHomeStack =
@@ -32,17 +45,60 @@ const CustomerProfileStack =
   createNativeStackNavigator<CustomerProfileStackParamList>();
 const CustomerSearchStack =
   createNativeStackNavigator<CustomerSearchStackParamList>();
-
+const CustomerHelpStack =
+  createNativeStackNavigator<CustomerHelpCenterStackParamsList>();
 //  Stack Screens for Customer Home
 function CustomerHomeStackScreen() {
   return (
-    <CustomerHomeStack.Navigator screenOptions={{ headerShown: false }}>
-      <CustomerHomeStack.Screen name="HomeScreen" component={HomeScreen} />
-      {/* <CustomerHomeStack.Screen
+    <CustomerHomeStack.Navigator>
+      <CustomerHomeStack.Screen
+        name="HomeScreen"
+        component={HomeScreen}
+        options={{ headerShown: false }}
+      />
+      <CustomerHomeStack.Screen
         name="FoodDetails"
         component={FoodDetailScreen}
-      /> */}
+        options={{
+          headerTransparent: true,
+          headerTitle: '',
+          headerLeft: () => (
+            <Pressable onPress={() => {}}>
+              <MaterialIcons name="arrow-back" size={20} color={'white'} />
+            </Pressable>
+          ),
+          headerRight: () => (
+            <View className="flex-row">
+              <Ionicons
+                name="heart-circle-outline"
+                color={'white'}
+                size={18}
+                className="mr-1"
+              />
+              <MaterialIcons
+                name="telegram"
+                color={'white'}
+                size={18}
+                className="mr-2"
+              />
+            </View>
+          ),
+        }}
+      />
       {/* TODO: to add more files */}
+      <CustomerHomeStack.Screen
+        name="Category"
+        component={CategoryItems}
+        options={{
+          headerTitle: 'More Category',
+          headerTitleAlign: 'left',
+          headerLeft: () => (
+            <TouchableWithoutFeedback onPress={goBack}>
+              <Ionicons name="arrow-back" />
+            </TouchableWithoutFeedback>
+          ),
+        }}
+      />
     </CustomerHomeStack.Navigator>
   );
 }
@@ -51,7 +107,16 @@ function CustomerHomeStackScreen() {
 
 function CustomerOrderStackScreen() {
   return (
-    <CustomerOrderStack.Navigator initialRouteName="CompletedOrdersScreen">
+    <CustomerOrderStack.Navigator
+      initialRouteName="CompletedOrdersScreen"
+      screenOptions={{
+        tabBarActiveTintColor: lightTheme.colors.primary,
+        tabBarInactiveTintColor: '#808080',
+        tabBarStyle: {
+          borderTopColor: 'white',
+        },
+      }}
+    >
       <CustomerOrderStack.Screen
         name="CompletedOrdersScreen"
         component={CompletedOrderScreen}
@@ -68,10 +133,18 @@ function CustomerOrderStackScreen() {
   );
 }
 // Stack Screens for Customer Profile
+function CustomerHelpCenterStackScreen() {
+  return (
+    <CustomerHelpStack.Navigator initialRouteName="FAQ">
+      <CustomerHelpStack.Screen name="FAQ" component={FAQ} />
+      <CustomerHelpStack.Screen name="ContactUs" component={ContactUs} />
+    </CustomerHelpStack.Navigator>
+  );
+}
 
 function CustomerProfileStackScreen() {
   return (
-    <CustomerProfileStack.Navigator screenOptions={{ headerShown: false }}>
+    <CustomerProfileStack.Navigator>
       <CustomerProfileStack.Screen
         name="ProfileScreen"
         component={ProfileScreen}
@@ -79,11 +152,25 @@ function CustomerProfileStackScreen() {
       <CustomerProfileStack.Screen
         name="FavoriteRestaurantScreen"
         component={FavoritesScreen}
+        options={{ headerShown: false }}
       />
       <CustomerProfileStack.Screen
         name="ProfileHome"
         component={ProfileHomeScreen}
+        options={{ headerShown: false }}
       />
+      <CustomerProfileStack.Screen
+        name="Help"
+        component={CustomerHelpCenterStackScreen}
+        options={{ headerTitle: 'Help Center', 
+          headerRight: () => (
+            <MaterialIcons name='more' size={18} /> 
+          )
+
+
+        }}
+      />
+
       {/* Add more screens related to profile if needed */}
     </CustomerProfileStack.Navigator>
   );
@@ -104,6 +191,8 @@ function CustomerSearchStackScreen() {
 }
 
 export default function CustomerNavigator() {
+  const insets = useSafeAreaInsets();
+
   return (
     <CustomerTab.Navigator
       screenOptions={({ route }) => ({
@@ -112,7 +201,7 @@ export default function CustomerNavigator() {
 
           switch (route.name) {
             case 'Home':
-              iconName = focused ? 'home' : 'home-outline';
+              iconName = focused ? 'home' : 'home-outline'; // antesign home is cool
               break;
             case 'Search':
               iconName = focused ? 'search' : 'search-outline';
@@ -134,39 +223,92 @@ export default function CustomerNavigator() {
         tabBarStyle: {
           backgroundColor: '#fff',
           borderTopColor: '#e0e0e0',
-          height: Platform.OS === 'ios' ? 90 : 70,
-          paddingBottom: Platform.OS === 'ios' ? 25 : 10,
-          paddingTop: 10,
+          height: (Platform.OS === 'ios' ? 90 : 70) + insets.bottom,
+          paddingBottom: (Platform.OS === 'ios' ? 25 : 10) + insets.bottom,
+          borderTopRightRadius: 5,
+          borderTopLeftRadius: 5,
         },
         headerStyle: {
-          backgroundColor: '#007AFF',
+          backgroundColor: 'white',
+          marginTop: Platform.OS === 'ios' ? 0 : -20,
+          height: 60 + insets.top,
+          paddingTop: insets.top,
+          borderBottomWidth: 0, // Remove bottom border
+          shadowColor: 'transparent', // Remove shadow on Android
+          elevation: 0, // Remove shadow on Android
+          borderBottomLeftRadius: 10,
+          borderBottomRightRadius: 10,
         },
-        headerTintColor: '#fff',
+
+        headerTintColor: 'black',
         headerTitleStyle: {
           fontWeight: 'bold',
         },
-        headerTitleAlign: 'center',
+        headerTitleAlign: 'left',
       })}
     >
       <CustomerTab.Screen
         name="Home"
         component={CustomerHomeStackScreen}
-        options={{ tabBarLabel: 'Home' }}
+        options={{ tabBarLabel: 'Home', headerShown: false }}
       />
       <CustomerTab.Screen
         name="Search"
         component={CustomerSearchStackScreen}
-        options={{ tabBarLabel: 'Search' }}
+        options={{ tabBarLabel: 'Search', headerShown: false }}
       />
       <CustomerTab.Screen
         name="Orders"
         component={CustomerOrderStackScreen}
-        options={{ tabBarLabel: 'Cart' }}
+        options={{
+          tabBarLabel: 'Orders',
+          headerRight: () => (
+            <Ionicons
+              name="search-outline"
+              size={25}
+              style={{ marginRight: 20 }}
+              onPress={() => {
+                // Replace this with your desired action, e.g., open a modal
+                console.log('Search icon pressed');
+              }}
+            />
+          ),
+          headerLeft: () => (
+            <Image
+              source={icons.R_logo}
+              style={{ height: 30, width: 30, marginLeft: 10 }}
+              resizeMode="contain"
+            />
+          ),
+
+          headerTitleAlign: 'left',
+          headerTitleStyle: {
+            marginLeft: 20,
+            fontWeight: 'light',
+          },
+        }}
       />
       <CustomerTab.Screen
         name="Profile"
         component={CustomerProfileStackScreen}
-        options={{ tabBarLabel: 'Profile' }}
+        options={{
+          tabBarLabel: 'Profile',
+          headerLeft: () => (
+            <Image
+              source={icons.R_logo}
+              style={{ height: 30, width: 30, marginLeft: 10, marginRight: 20 }}
+              resizeMode="contain"
+            />
+          ),
+          headerTitleAlign: 'left',
+          headerRight: () => (
+            <Ionicons
+              name="settings-outline"
+              size={25}
+              style={{ marginRight: 8 }}
+            />
+          ),
+        }}
       />
     </CustomerTab.Navigator>
   );

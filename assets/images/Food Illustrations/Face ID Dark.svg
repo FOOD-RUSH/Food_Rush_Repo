@@ -1,0 +1,12 @@
+<svg width="340" height="340" viewBox="0 0 340 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="170" cy="170" r="170" fill="#298FFF" fill-opacity="0.35"/>
+<circle cx="170" cy="169.5" r="110" fill="#7ABAFF"/>
+<circle cx="170" cy="169.5" r="70" fill="url(#paint0_linear_3286_38861)"/>
+<path d="M145 182V194.5H157.5M182.5 194.5H195V182M182.5 144.5H195V157M157.5 144.5H145V157M160 182C160 182 163.75 185.75 170 185.75C176.25 185.75 180 182 180 182M170 157V168.25C170 170.75 167.5 173.25 165 173.25H163.75M182.5 157V159.5M157.5 157V159.5" stroke="white" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<defs>
+<linearGradient id="paint0_linear_3286_38861" x1="240" y1="239.5" x2="73.4126" y2="191.2" gradientUnits="userSpaceOnUse">
+<stop stop-color="#007AFF"/>
+<stop offset="1" stop-color="#6BA9EC"/>
+</linearGradient>
+</defs>
+</svg>

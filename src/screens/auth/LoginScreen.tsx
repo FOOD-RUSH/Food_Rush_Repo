@@ -108,13 +108,13 @@ export default function LoginScreen() {
           )} */}
           {/* Form */}
           <View className="flex-1 px-6">
-            <View className="space-y-4">
+            <View className="space-y-4 mb-2">
               {/* Email Input */}
               <Controller
                 control={control}
                 name="email"
                 render={({ field: { onChange, onBlur, value } }) => (
-                  <View>
+                  <View className='mb-4'>
                     <TextInput
                       placeholder="Email"
                       onBlur={onBlur}
@@ -124,13 +124,13 @@ export default function LoginScreen() {
                       keyboardType="email-address"
                       autoCapitalize="none"
                       autoComplete="email"
-                      left={<TextInput.Icon icon="email-outline" />}
+                      left={<TextInput.Icon icon="email" color="#222" />}
                       outlineStyle={{
-                        borderRadius: 12,
-                        borderColor: errors.email ? '#EF4444' : '#E5E7EB',
+                        borderRadius: 16,
+                        borderColor: errors.email ? '#EF4444' : '#f3f4f6',
                       }}
-                      style={{ backgroundColor: 'white' }}
-                      contentStyle={{ paddingHorizontal: 16 }}
+                      style={{ backgroundColor: '#f3f4f6',  }}
+                      contentStyle={{ paddingHorizontal: 16, }}
                       error={!!errors.email}
                     />
                     {errors.email && (
@@ -157,7 +157,7 @@ export default function LoginScreen() {
                       secureTextEntry={!showPassword}
                       autoCapitalize="none"
                       autoComplete="password"
-                      left={<TextInput.Icon icon="lock-outline" />}
+                      left={<TextInput.Icon icon="lock" color="#222" />}
                       right={
                         <TextInput.Icon
                           icon={showPassword ? 'eye-off' : 'eye'}
@@ -166,9 +166,9 @@ export default function LoginScreen() {
                       }
                       outlineStyle={{
                         borderRadius: 12,
-                        borderColor: errors.password ? '#EF4444' : '#E5E7EB',
+                        borderColor: errors.password ? '#EF4444' : '#f3f4f6',
                       }}
-                      style={{ backgroundColor: 'white' }}
+                      style={{ backgroundColor: '#f3f4f6' }}
                       contentStyle={{ paddingHorizontal: 16 }}
                       error={!!errors.password}
                     />
@@ -189,7 +189,7 @@ export default function LoginScreen() {
                     onPress={() => setRememberMe(!rememberMe)}
                     color="#007AFF"
                   />
-                  <Text className="text-sm text-gray-600 ml-2">
+                  <Text className="text-[18px] text-gray-600 ml-2">
                     Remember me
                   </Text>
                 </View>
@@ -235,7 +235,7 @@ export default function LoginScreen() {
                   style={{
                     flex: 1,
                     borderRadius: 25,
-                    borderColor: '#E5E7EB',
+                    borderColor: '#f3f4f6',
                     borderWidth: 1,
                   }}
                   labelStyle={{ fontSize: 14, color: '#374151' }}
@@ -253,7 +253,7 @@ export default function LoginScreen() {
                   style={{
                     flex: 1,
                     borderRadius: 25,
-                    borderColor: '#E5E7EB',
+                    borderColor: '#f3f4f6',
                     borderWidth: 1,
                   }}
                   labelStyle={{ fontSize: 14, color: '#374151' }}
@@ -265,9 +265,9 @@ export default function LoginScreen() {
               {/* Sign Up Link */}
               <View className="flex-row justify-center items-center mt-8 mb-4">
                 <Text className="text-gray-600 text-base">
-                  Dont Already have an account?{' '}
+                  Don&apos;t Already have an account?{' '}
                 </Text>
-                <TextButton text="Sign UP" onPress={handleSignUp} />
+                <TextButton text="Sign Up" onPress={handleSignUp} />
               </View>
             </View>
           </View>

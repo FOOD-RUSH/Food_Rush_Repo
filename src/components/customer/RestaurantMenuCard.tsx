@@ -8,7 +8,6 @@ const RestaurantMenuCard = ({
   foodName,
   foodCategory,
 }: {
-  
   image: any;
   foodName: any;
   foodPrice: number;
@@ -18,7 +17,6 @@ const RestaurantMenuCard = ({
     <Card
       mode="outlined"
       style={{
-        padding: 10,
         margin: 10,
         borderRadius: 10,
       }}
@@ -27,16 +25,15 @@ const RestaurantMenuCard = ({
         <Card.Cover
           source={image}
           style={{
-            position: 'relative',
-            left: 3,
             height: 100,
             width: 100,
             borderRadius: 10,
             overflow: 'hidden',
+            objectFit: 'cover',
           }}
         />
         {/* Price */}
-        <View className="flex-col justify-center flex-1">
+        <View className="flex-col justify-center flex-1 ml-2">
           <Text className="text-xl font-semibold ">{foodName}</Text>
           <Text className=" justify-center text-center items-center text-primaryColor">
             {foodPrice} FCFA

@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import LoadingScreen from '@/src/components/common/LoadingScreen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import RootNavigator from '@/src/navigation/RootNavigator';
+import { StatusBar } from 'expo-status-bar';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -25,6 +26,7 @@ export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
+        <StatusBar style="auto" />
         <RootNavigator />
       </SafeAreaProvider>
     </GestureHandlerRootView>

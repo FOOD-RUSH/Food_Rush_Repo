@@ -17,10 +17,10 @@ export type AuthStackParamList = {
   SignIn: { userType?: 'customer' | 'restaurant' };
   SignUp: { userType?: 'customer' | 'restaurant' };
   ForgotPassword: undefined;
-  OTPVerification: { 
-    email?: string; 
-    phone?: string; 
-    type: 'email' | 'phone' | 'reset_password' 
+  OTPVerification: {
+    email?: string;
+    phone?: string;
+    type: 'email' | 'phone' | 'reset_password'
   };
   ResetPassword: { token: string };
 };
@@ -75,6 +75,10 @@ export type CustomerProfileStackParamList = {
   Help: undefined;
   About: undefined;
 };
+export type CustomerHelpCenterStackParamsList = {
+  FAQ: undefined;
+  ContactUs: undefined;
+}
 
 // Restaurant Tab Navigator
 export type RestaurantTabParamList = {
@@ -144,6 +148,9 @@ export type CustomerSearchStackScreenProps<T extends keyof CustomerSearchStackPa
 export type CustomerOrderScreenProps<T extends keyof CustomerOrderStackParamList> =
   MaterialTopTabScreenProps<CustomerOrderStackParamList, T>;
 
+export type CustomerHelpCenterStackScreenProps<T extends keyof CustomerHelpCenterStackParamsList> =
+  MaterialTopTabScreenProps<CustomerHelpCenterStackParamsList, T>
+
 export type CustomerProfileStackScreenProps<T extends keyof CustomerProfileStackParamList> =
   NativeStackScreenProps<CustomerProfileStackParamList, T>;
 
@@ -158,4 +165,3 @@ export type RestaurantAnalyticsStackScreenProps<T extends keyof RestaurantAnalyt
 
 export type RestaurantProfileStackScreenProps<T extends keyof RestaurantProfileStackParamList> =
   NativeStackScreenProps<RestaurantProfileStackParamList, T>;
-  

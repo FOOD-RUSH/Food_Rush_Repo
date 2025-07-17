@@ -3,8 +3,9 @@
 @tailwind utilities;
 
 
-b {
-    position: relative;
-    background-color: #E5E7EB;
-    color: #f3f4f6;
+
+body {
+    background-color: #cde2f5;
+    flex-wrap: wrap;
+    color: #ffbb00
 }

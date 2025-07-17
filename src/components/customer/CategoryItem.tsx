@@ -1,4 +1,4 @@
-import { View, Text, TouchableHighlight, Image } from 'react-native';
+import { View, Text, Image, Pressable } from 'react-native';
 import React from 'react';
 
 const CategoryItem = ({
@@ -6,18 +6,18 @@ const CategoryItem = ({
   title,
   image,
 }: {
-  onPress: () => string;
+  onPress: () => void;
   title: string;
   image: any;
 }) => {
   return (
-    <TouchableHighlight onPress={onPress}>
-      <View className="h-6 w-6 rounded-lg p-2 justify-center items-center">
+    <Pressable onPress={onPress}>
+      <View className="rounded-lg m-2 justify-center items-center flex-col p-2 ">
         {/* Replace with actual icons */}
-        <Image source={image} height={20} width={20} resizeMode="contain" />
-        <Text className="text-[14px] font-semibold">{title}</Text>
+        <Image source={image} className="h-[49px] w-[49px]" />
+        <Text className="text-[14px] font-semibold text-center">{title}</Text>
       </View>
-    </TouchableHighlight>
+    </Pressable>
   );
 };
 
