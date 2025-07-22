@@ -8,9 +8,8 @@ import RowView from '@/src/components/common/RowView';
 
 const ProfileScreen = () => {
   return (
-    <CommonView>
-      <ScrollView
-        className="flex h-full bg-white pt-0 mt-0"
+    <ScrollView
+        className="flex h-full bg-white pt-0 mt-0 px-2"
         showsVerticalScrollIndicator={false}
       >
         {/* profile pic and stuff */}
@@ -74,10 +73,8 @@ const ProfileScreen = () => {
             <Ionicons name="eye-sharp" />
             <Text className="Dark Mode" />
           </View>
-          <Switch value={false} />
         </View>
       </ScrollView>
-    </CommonView>
   );
 };
 

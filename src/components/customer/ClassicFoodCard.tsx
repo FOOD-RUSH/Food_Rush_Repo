@@ -9,7 +9,7 @@ const ClassicFoodCard = () => {
     <Card
       mode="outlined"
       onPress={() => {}}
-      className="shadow-sm p-2 border border-gray-200 overflow-hidden elevation-[2px]"
+      className="shadow-sm p-2 border border-gray-200 overflow-hidden "
     >
       <View className="px-2 py-3">
         <View className="relative justify-center item-center">

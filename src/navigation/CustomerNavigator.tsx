@@ -35,6 +35,7 @@ import { goBack } from './navigationHelpers';
 import FoodDetailScreen from '../screens/customer/home/RestaurantDetailScreen';
 import FAQ from '../screens/customer/Profile/FAQ';
 import ContactUs from '../screens/customer/Profile/ContactUs';
+import SearchModal from '../screens/customer/home/SearchModal';
 
 const CustomerTab = createBottomTabNavigator<CustomerTabParamList>();
 const CustomerHomeStack =
@@ -99,6 +100,15 @@ function CustomerHomeStackScreen() {
           ),
         }}
       />
+      <CustomerHomeStack.Screen
+        name="Search"
+        component={SearchModal}
+        options={{
+          presentation: 'fullScreenModal',
+          animationTypeForReplace: 'push',
+          headerShown: false,
+        }}
+      />
     </CustomerHomeStack.Navigator>
   );
 }
@@ -114,6 +124,7 @@ function CustomerOrderStackScreen() {
         tabBarInactiveTintColor: '#808080',
         tabBarStyle: {
           borderTopColor: 'white',
+          marginBottom: -50,
         },
       }}
     >
@@ -148,6 +159,7 @@ function CustomerProfileStackScreen() {
       <CustomerProfileStack.Screen
         name="ProfileScreen"
         component={ProfileScreen}
+        options={{ headerShown: false }}
       />
       <CustomerProfileStack.Screen
         name="FavoriteRestaurantScreen"
@@ -162,12 +174,9 @@ function CustomerProfileStackScreen() {
       <CustomerProfileStack.Screen
         name="Help"
         component={CustomerHelpCenterStackScreen}
-        options={{ headerTitle: 'Help Center', 
-          headerRight: () => (
-            <MaterialIcons name='more' size={18} /> 
-          )
-
-
+        options={{
+          headerTitle: 'Help Center',
+          headerRight: () => <MaterialIcons name="more" size={18} />,
         }}
       />
 
@@ -222,22 +231,23 @@ export default function CustomerNavigator() {
         tabBarInactiveTintColor: '#808080',
         tabBarStyle: {
           backgroundColor: '#fff',
-          borderTopColor: '#e0e0e0',
+          borderColor: '#e0e0e0',
           height: (Platform.OS === 'ios' ? 90 : 70) + insets.bottom,
           paddingBottom: (Platform.OS === 'ios' ? 25 : 10) + insets.bottom,
-          borderTopRightRadius: 5,
-          borderTopLeftRadius: 5,
+          borderTopRightRadius: 30,
+          borderTopLeftRadius: 30,
+          marginTop: -50, // Adjust this value to control the overlap with the header
+          paddingTop: 10, // Add padding to the top of the tab bar
         },
         headerStyle: {
           backgroundColor: 'white',
-          marginTop: Platform.OS === 'ios' ? 0 : -20,
           height: 60 + insets.top,
-          paddingTop: insets.top,
           borderBottomWidth: 0, // Remove bottom border
           shadowColor: 'transparent', // Remove shadow on Android
           elevation: 0, // Remove shadow on Android
-          borderBottomLeftRadius: 10,
+          borderBottomLeftRadius: 50,
           borderBottomRightRadius: 10,
+          marginBottom: 0, // Ensure no margin at the bottompa
         },
 
         headerTintColor: 'black',
@@ -276,7 +286,7 @@ export default function CustomerNavigator() {
           headerLeft: () => (
             <Image
               source={icons.R_logo}
-              style={{ height: 30, width: 30, marginLeft: 10 }}
+              className="h-[30px] w-[30px] ml-3"
               resizeMode="contain"
             />
           ),

@@ -1,17 +1,17 @@
 import { View, Text,  TouchableWithoutFeedback } from 'react-native';
 import React from 'react';
-import { AntDesign, Ionicons } from '@expo/vector-icons';
+import { AntDesign, Ionicons, MaterialIcons } from '@expo/vector-icons';
 
 interface rowView {
   leftIconName: keyof typeof Ionicons.glyphMap;
   onPress: () => void;
-  rightIconName?: any;
+  rightIconName?: keyof typeof MaterialIcons.glyphMap;
   title: string;
 }
 const RowView = ({
   leftIconName,
   onPress,
-  rightIconName = 'arrowright',
+  rightIconName = 'arrow-forward-ios',
   title,
 }: rowView) => {
   return (
@@ -20,7 +20,7 @@ const RowView = ({
 
       <Text className='font-semibold text-[16px]'>{title}</Text>
       <TouchableWithoutFeedback onPress={onPress}>
-        <AntDesign name={rightIconName} size={20} />
+        <MaterialIcons name={rightIconName} size={20} />
       </TouchableWithoutFeedback>
     </View>
   );

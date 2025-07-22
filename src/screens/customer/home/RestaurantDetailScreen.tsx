@@ -61,7 +61,7 @@ const RestaurantDetailScreen = ({
         <View className="bg-gray-300 h-[1px] mb-2" />
 
         <View className="flex-row justify-between mb-2 py-2">
-          <Ionicons name="location" color={'#007aff'} />
+          <Ionicons name="location-outline" color={'#007aff'} />
           <View className="flex-col">
             <Text className="font-semibold text-[15px]">{distance}</Text>
             <View className="flex-col justify-between">

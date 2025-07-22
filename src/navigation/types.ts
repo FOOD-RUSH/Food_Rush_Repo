@@ -45,6 +45,7 @@ export type CustomerHomeStackParamList = {
   Checkout: undefined;
   OrderTracking: { orderId: string };
   Category: { categoryId: string };
+  Search: undefined
 };
 
 export type CustomerSearchStackParamList = {

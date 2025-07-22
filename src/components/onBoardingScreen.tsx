@@ -74,7 +74,7 @@ const OnboardingWelcome = ({ onComplete }: { onComplete: () => void }) => {
         }}
         className="flex-1 justify-center items-center px-3"
       >
-        <View className="flex-1 justify-center items-center">
+        <View className="flex-1 justify-center items-center mb-3">
           <View className="flex-1 flex-col items-center justify-between mb-8 ">
             <Image
               source={foodRushLogo}

@@ -53,7 +53,7 @@ import card from '@/assets/images/Varant=Outline, Type=credit-card.svg'
 import gift from '@/assets/images/Varant=Outline, Type=gift.svg'
 import calendar from '@/assets/images/Varant=Outline, Type=calendar.svg'
 import order from '@/assets/images/Varant=Outline, Type=clipboard-list.svg'
-
+import not_found from '@/assets/images/Food Illustrations/Not found darck.png'
 
 export const images = {
     deliveryGif,
@@ -66,6 +66,8 @@ export const images = {
     NoOrdersLight,
     customerImg,
     restaurantImg,
+    not_found
+
 
 
 }
@@ -77,7 +79,7 @@ export const icons = {
     order,
     calendar,
     cancel,
-    card, gift, profile, profile_bold, notification, show, show_bold, star, search, security, home, filter, more, lock, lock_bold, location, back, email, email_solid, hide_bold, hide
+    card, gift, profile, profile_bold, notification, show, show_bold, star, search, security, home, filter, more, lock, lock_bold,back, email, email_solid, hide_bold, hide
 }
 
 export const FoodCategory = {
