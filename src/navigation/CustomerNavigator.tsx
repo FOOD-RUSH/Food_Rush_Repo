@@ -2,16 +2,13 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import {
   CustomerHomeStackParamList,
-  CustomerSearchStackParamList,
   CustomerProfileStackParamList,
   CustomerTabParamList,
   CustomerOrderStackParamList,
   CustomerHelpCenterStackParamsList,
 } from './types';
 import HomeScreen from '../screens/customer/home/HomeScreen';
-import FavoritesScreen from '../screens/customer/Profile/FavoritesScreen';
-import ProfileScreen from '../screens/customer/Profile/ProfileScreen';
-import SearchScreen from '../screens/customer/search/SearchScreen';
+import FavoritesFoodScreen from '../screens/customer/Profile/FavoritesFoodScreen';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 // order is top bar stack Navigator
@@ -20,12 +17,12 @@ import {
   Image,
   Platform,
   Pressable,
+  TouchableOpacity,
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
 import { lightTheme } from '@/src/config/theme';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import ProfileHomeScreen from '../screens/customer/Profile/ProfileHomeScreen';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import CompletedOrderScreen from '../screens/customer/Order/CompletedOrderScreen';
 import ActiveOrderScreen from '../screens/customer/Order/ActiveOrderScreen';
@@ -35,7 +32,12 @@ import { goBack } from './navigationHelpers';
 import FoodDetailScreen from '../screens/customer/home/RestaurantDetailScreen';
 import FAQ from '../screens/customer/Profile/FAQ';
 import ContactUs from '../screens/customer/Profile/ContactUs';
-import SearchModal from '../screens/customer/home/SearchModal';
+import SearchScreen from '../screens/customer/home/SearchScreen';
+import ProfileHomeScreen from '../screens/customer/Profile/ProfileHomeScreen';
+import Language from '../screens/customer/Profile/Language';
+import EditProfileScreen from '../screens/customer/Profile/EditProfileScreen';
+import CartScreen from '../screens/customer/home/CartScreen';
+import FavoriteRestaurants from '../screens/customer/Profile/FavoriteRestaurants';
 
 const CustomerTab = createBottomTabNavigator<CustomerTabParamList>();
 const CustomerHomeStack =
@@ -44,8 +46,8 @@ const CustomerOrderStack =
   createMaterialTopTabNavigator<CustomerOrderStackParamList>();
 const CustomerProfileStack =
   createNativeStackNavigator<CustomerProfileStackParamList>();
-const CustomerSearchStack =
-  createNativeStackNavigator<CustomerSearchStackParamList>();
+// const CustomerSearchStack =
+//   createNativeStackNavigator<CustomerSearchStackParamList>();
 const CustomerHelpStack =
   createNativeStackNavigator<CustomerHelpCenterStackParamsList>();
 //  Stack Screens for Customer Home
@@ -101,12 +103,41 @@ function CustomerHomeStackScreen() {
         }}
       />
       <CustomerHomeStack.Screen
-        name="Search"
-        component={SearchModal}
+        name="SearchScreen"
+        component={SearchScreen}
         options={{
           presentation: 'fullScreenModal',
           animationTypeForReplace: 'push',
           headerShown: false,
+        }}
+      />
+      <CustomerHomeStack.Screen
+        name="Cart"
+        component={CartScreen}
+        options={{
+          headerTitle: 'My Cart',
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={goBack}
+              className="rounded-full p-3 mr-3 focus:bg-gray-400"
+            >
+              <MaterialIcons
+                name={
+                  Platform.OS === 'ios' ? 'arrow-back-ios-new' : 'arrow-back'
+                }
+                size={20}
+              />
+            </TouchableOpacity>
+          ),
+          headerRight: () => (
+            <TouchableOpacity className="rounded-full p-3 mr-2 focus:bg-primaryColor">
+              <Image
+                source={icons.more}
+                tintColor={'#007aff'}
+                className="h-5 w-5 "
+              />
+            </TouchableOpacity>
+          ),
         }}
       />
     </CustomerHomeStack.Navigator>
@@ -155,22 +186,48 @@ function CustomerHelpCenterStackScreen() {
 
 function CustomerProfileStackScreen() {
   return (
-    <CustomerProfileStack.Navigator>
-      <CustomerProfileStack.Screen
-        name="ProfileScreen"
-        component={ProfileScreen}
-        options={{ headerShown: false }}
-      />
-      <CustomerProfileStack.Screen
-        name="FavoriteRestaurantScreen"
-        component={FavoritesScreen}
-        options={{ headerShown: false }}
-      />
+    <CustomerProfileStack.Navigator initialRouteName="ProfileHome">
       <CustomerProfileStack.Screen
         name="ProfileHome"
         component={ProfileHomeScreen}
-        options={{ headerShown: false }}
+        options={{
+          headerTitle: 'Profile',
+          headerLeft: () => (
+            <Image
+              source={icons.R_logo}
+              style={{ height: 30, width: 30, marginLeft: 10, marginRight: 20 }}
+              resizeMode="contain"
+            />
+          ),
+          headerTitleAlign: 'left',
+          headerRight: () => (
+            <Ionicons
+              name="settings-outline"
+              size={25}
+              style={{ marginRight: 8 }}
+            />
+          ),
+        }}
       />
+      <CustomerProfileStack.Screen
+        name="FavoriteRestaurantScreen"
+        component={FavoriteRestaurants}
+        options={{
+          headerTitle: 'Your Favorite Restaurants ',
+          headerRight: () => (
+            <TouchableOpacity onPress={goBack} activeOpacity={0.7}>
+              <MaterialIcons
+                name={
+                  Platform.OS === 'ios' ? 'arrow-back-ios-new' : 'arrow-back'
+                }
+                size={20}
+                selectionColor={'#007aff'}
+              />
+            </TouchableOpacity>
+          ),
+        }}
+      />
+
       <CustomerProfileStack.Screen
         name="Help"
         component={CustomerHelpCenterStackScreen}
@@ -179,25 +236,32 @@ function CustomerProfileStackScreen() {
           headerRight: () => <MaterialIcons name="more" size={18} />,
         }}
       />
-
+      <CustomerProfileStack.Screen
+        name="LanguageScreen"
+        component={Language}
+        options={{
+          headerTitle: 'Language',
+        }}
+      />
+      <CustomerProfileStack.Screen
+        name="EditProfile"
+        component={EditProfileScreen}
+        options={{
+          headerTitle: 'Edit Profile',
+          headerLeft: () => (
+            <TouchableWithoutFeedback onPress={goBack} className="mx-2 ">
+              <Ionicons name="arrow-back" size={28} />
+            </TouchableWithoutFeedback>
+          ),
+          headerTitleAlign: 'center',
+        }}
+      />
       {/* Add more screens related to profile if needed */}
     </CustomerProfileStack.Navigator>
   );
 }
 
 // Stack Screens for Customer Search
-
-function CustomerSearchStackScreen() {
-  return (
-    <CustomerSearchStack.Navigator screenOptions={{ headerShown: false }}>
-      <CustomerSearchStack.Screen
-        name="SearchScreen"
-        component={SearchScreen}
-      />
-      {/* Add more screens related to search if needed */}
-    </CustomerSearchStack.Navigator>
-  );
-}
 
 export default function CustomerNavigator() {
   const insets = useSafeAreaInsets();
@@ -234,8 +298,8 @@ export default function CustomerNavigator() {
           borderColor: '#e0e0e0',
           height: (Platform.OS === 'ios' ? 90 : 70) + insets.bottom,
           paddingBottom: (Platform.OS === 'ios' ? 25 : 10) + insets.bottom,
-          borderTopRightRadius: 30,
-          borderTopLeftRadius: 30,
+          borderTopRightRadius: 40,
+          borderTopLeftRadius: 40,
           marginTop: -50, // Adjust this value to control the overlap with the header
           paddingTop: 10, // Add padding to the top of the tab bar
         },
@@ -247,7 +311,6 @@ export default function CustomerNavigator() {
           elevation: 0, // Remove shadow on Android
           borderBottomLeftRadius: 50,
           borderBottomRightRadius: 10,
-          marginBottom: 0, // Ensure no margin at the bottompa
         },
 
         headerTintColor: 'black',
@@ -262,11 +325,11 @@ export default function CustomerNavigator() {
         component={CustomerHomeStackScreen}
         options={{ tabBarLabel: 'Home', headerShown: false }}
       />
-      <CustomerTab.Screen
+      {/* <CustomerTab.Screen
         name="Search"
         component={CustomerSearchStackScreen}
-        options={{ tabBarLabel: 'Search', headerShown: false }}
-      />
+        options={{ tabBarLabel: 'S', headerShown: false }}
+      /> */}
       <CustomerTab.Screen
         name="Orders"
         component={CustomerOrderStackScreen}
@@ -303,21 +366,7 @@ export default function CustomerNavigator() {
         component={CustomerProfileStackScreen}
         options={{
           tabBarLabel: 'Profile',
-          headerLeft: () => (
-            <Image
-              source={icons.R_logo}
-              style={{ height: 30, width: 30, marginLeft: 10, marginRight: 20 }}
-              resizeMode="contain"
-            />
-          ),
-          headerTitleAlign: 'left',
-          headerRight: () => (
-            <Ionicons
-              name="settings-outline"
-              size={25}
-              style={{ marginRight: 8 }}
-            />
-          ),
+          headerShown: false,
         }}
       />
     </CustomerTab.Navigator>

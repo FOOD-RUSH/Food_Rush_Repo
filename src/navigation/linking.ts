@@ -28,16 +28,21 @@ export const linking: LinkingOptions<RootStackParamList> = {
               MenuCategory: 'restaurant/:restaurantId/category/:categoryId',
               Notifications: 'notifications',
               Promotions: 'promotions',
-            },
-          },
-          Search: {
-            screens: {
+              OrderSummary: 'order-reciept',
               SearchScreen: 'search',
               SearchResults: 'search/results',
               FilterScreen: 'search/filters',
               FilterOptions: 'search/filter-options',
             },
           },
+          // Search: {
+          //   screens: {
+          //     SearchScreen: 'search',
+          //     SearchResults: 'search/results',
+          //     FilterScreen: 'search/filters',
+          //     FilterOptions: 'search/filter-options',
+          //   },
+          // },
           Orders: {
             screens: {
               CompletedOrdersScreen: 'orders/completed',
@@ -48,7 +53,6 @@ export const linking: LinkingOptions<RootStackParamList> = {
           Profile: {
             screens: {
               ProfileScreen: 'profile',
-              ProfileHome: 'profile/home',
               EditProfile: 'profile/edit',
               AddressScreen: 'profile/addresses',
               AddAddress: 'profile/address/add',

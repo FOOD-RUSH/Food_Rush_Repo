@@ -57,7 +57,7 @@ const CompletedOrderScreen = () => {
 
   return (
     <CommonView backgroundColor="#fff">
-      <View className="flex-1 h-full ">
+      <View className="flex-1 h-full">
         <FlatList
           data={orderItems}
           renderItem={({ item }) => (
@@ -82,6 +82,7 @@ const CompletedOrderScreen = () => {
           }}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={renderEmptyComponent}
+          className='pt-10 '
         />
       </View>
     </CommonView>

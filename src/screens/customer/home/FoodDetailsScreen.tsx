@@ -1,14 +1,27 @@
 import { View, StatusBar, Image, Dimensions, Pressable } from 'react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView } from 'react-native-gesture-handler';
 import { Text, TouchableRipple } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
+import { useRoute } from '@react-navigation/native';
+
 const { width: screenWidth, height: screenHeight } = Dimensions.get('screen');
+
 const FoodDetailsScreen = () => {
+  const route = useRoute();
+  const { restaurantID, foodID } = route.params;
+  // const [foodDetails, setFoodDetails] = useState(null);
+
+  useEffect(() => {
+    console.log('this is the restaurant-id: ' + restaurantID);
+    // fetching all the data of food details screen
+    // setting the data to the variable
+  }, [restaurantID]);
+
   return (
     <>
       <StatusBar backgroundColor="transparent" translucent />
-      <ScrollView >
+      <ScrollView>
         <View className="relative">
           <Image
             height={screenHeight * 0.6}

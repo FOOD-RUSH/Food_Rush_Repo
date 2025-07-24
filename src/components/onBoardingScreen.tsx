@@ -72,9 +72,9 @@ const OnboardingWelcome = ({ onComplete }: { onComplete: () => void }) => {
           opacity: fadeAnim,
           transform: [{ translateY: slideAnim }],
         }}
-        className="flex-1 justify-center items-center px-3"
+        className="flex-1 justify-center items-center px-3 mb-8"
       >
-        <View className="flex-1 justify-center items-center mb-3">
+        <View className="flex-1 justify-center items-center mb-8">
           <View className="flex-1 flex-col items-center justify-between mb-8 ">
             <Image
               source={foodRushLogo}
@@ -94,11 +94,11 @@ const OnboardingWelcome = ({ onComplete }: { onComplete: () => void }) => {
               resizeMode="contain"
             />
 
-            <View className="items-center">
+            <View className="items-center mb-8">
               <Text className="text-3xl font-bold text-gray-900 mb-4 text-center">
                 Welcome to Food Rush!
               </Text>
-              <Text className="text-lg text-gray-600 text-center leading-7 px-4">
+              <Text className="text-lg text-gray-600 text-center leading-7 px-4 ">
                 Healthy meals delivered locally{'\n'}within a tap of a button.
               </Text>
             </View>

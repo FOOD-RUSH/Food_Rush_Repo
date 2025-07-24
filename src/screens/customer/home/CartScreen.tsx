@@ -4,8 +4,8 @@ import CommonView from '@/src/components/common/CommonView';
 
 const CartScreen = () => {
   return (
-    <CommonView backgroundColor='#fff'> 
-    <Text>Order Screen</Text>
+    <CommonView backgroundColor="#fff">
+      <Text className="place-items-center text-center">Order Screen</Text>
     </CommonView>
   );
 };

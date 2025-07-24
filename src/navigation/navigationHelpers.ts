@@ -1,14 +1,14 @@
 import { RootStackParamList } from "./types";
-import { 
-  createNavigationContainerRef, 
-  StackActions, 
+import {
+  createNavigationContainerRef,
+  StackActions,
 } from "@react-navigation/native";
 
 export const navigationRef = createNavigationContainerRef<RootStackParamList>();
 
 export function navigate(name: keyof RootStackParamList, params?: any) {
   if (navigationRef.isReady()) {
-    navigationRef.navigate(name , params as never);
+    navigationRef.navigate(name, params as never);
   }
 }
 
@@ -71,11 +71,32 @@ export function navigateToRestaurant(restaurantId: string) {
     } as never);
   }
 }
+export function navigateToEditProfile(){
+  if (navigationRef.isReady()) {
+    navigationRef.navigate('CustomerApp', {
+      screen: 'Profile',
+      params: {
+        screen: 'EditProfile'
+      }
+    } as never);
+  }
+}
+export function navigateToSearch() {
+  if (navigationRef.isReady()) {
+    console.log('moving to search screen')
 
+    navigationRef.navigate('CustomerApp', {
+      screen: 'Home',
+      params: {
+        screen: 'SearchScreen'
+      }
+    } as never);
+  }
+}
 export function navigateToOrder(orderId: string, userType: 'customer' | 'restaurant') {
   if (navigationRef.isReady()) {
     if (userType === 'customer') {
-      navigationRef.navigate('CustomerApp' , {
+      navigationRef.navigate('CustomerApp', {
         screen: 'Orders',
         params: {
           screen: 'OrderDetails',
@@ -83,7 +104,7 @@ export function navigateToOrder(orderId: string, userType: 'customer' | 'restaur
         }
       } as never);
     } else {
-      navigationRef.navigate('RestaurantApp' , {
+      navigationRef.navigate('RestaurantApp', {
         screen: 'Orders',
         params: {
           screen: 'OrderDetails',

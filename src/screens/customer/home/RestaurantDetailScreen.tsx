@@ -42,9 +42,9 @@ const RestaurantDetailScreen = ({
 
       <View className="bg-white flex h-full px-3 ">
         <View className="flex-row justify-between mb-2 py-2">
-          <Text className="font-semibold text-2xl">{name}</Text>
+          <Text className="font-semibold text-2xl">{name} Le Famous</Text>
           <Pressable onPress={() => {}}>
-            <AntDesign name="arrowsalt" />
+            <MaterialIcons name="arrow-forward-ios" />
           </Pressable>
         </View>
         <View className="bg-gray-300 h-[1px] mb-2" />
@@ -55,7 +55,7 @@ const RestaurantDetailScreen = ({
             <Text className="font-semibold text-[15px]">{ratings}</Text>
             <Text className="font-light text-gray-500">(4.8k reviews)</Text>
           </View>
-          <AntDesign name="arrowsalt" />
+          <MaterialIcons name="arrow-forward-ios" />
         </View>
 
         <View className="bg-gray-300 h-[1px] mb-2" />
@@ -66,11 +66,11 @@ const RestaurantDetailScreen = ({
             <Text className="font-semibold text-[15px]">{distance}</Text>
             <View className="flex-col justify-between">
               <Text className="text-gray-500 text-[13px]">Delivery Now</Text>
-              <Text className="text-gray-500 text-[13px]">| </Text>
+              <Text className="text-gray-500 text-[13px]"> | </Text>
               <Ionicons name="car" size={20} />
               <Text className="text-gray-500 text-[13px]">{price}</Text>
             </View>
-            <Ionicons name="arrow-forward" />
+            <MaterialIcons name="arrow-forward-ios" />
           </View>
         </View>
 
@@ -92,6 +92,7 @@ const RestaurantDetailScreen = ({
 
         <Text className="text-[20px] pl-3 font-bold">Menu</Text>
         {/* Menu Items from Same Restaurant */}
+        
       </View>
     </ScrollView>
   );

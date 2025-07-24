@@ -4,6 +4,7 @@ import OrderItemCard, {
   OrderItemCardProps,
 } from '@/src/components/customer/OrderItemCard';
 import CommonView from '@/src/components/common/CommonView';
+import { images } from '@/assets/images';
 
 const orderItems: OrderItemCardProps[] = [
   {
@@ -14,27 +15,27 @@ const orderItems: OrderItemCardProps[] = [
     foodPrice: '12.99',
     quantity: 2,
     orderStatus: 'active',
-    distance: '2.4 km'
+    distance: '2.4 km',
   },
   {
     foodId: '2',
     restaurantId: '102',
     foodName: 'Spaghetti Carbonara',
-    image: require('@/assets/images/apple.png'),
+    image: images.restaurantImg,
     foodPrice: '10.99',
     quantity: 1,
     orderStatus: 'active',
-    distance: '1.8 km'
+    distance: '1.8 km',
   },
   {
     foodId: '3',
     restaurantId: '103',
     foodName: 'Caesar Salad',
-    image: require('@/assets/images/apple.png'),
+    image: images.onboarding1,
     foodPrice: '8.99',
     quantity: 3,
     orderStatus: 'active',
-    distance: '3.2 km'
+    distance: '3.2 km',
   },
 ];
 
@@ -59,6 +60,7 @@ const ActiveOrderScreen = () => {
     <CommonView backgroundColor="#fff">
       <View className="flex-1">
         <FlatList
+          className="pt-10"
           data={orderItems}
           renderItem={({ item }) => (
             <OrderItemCard
@@ -73,10 +75,10 @@ const ActiveOrderScreen = () => {
             />
           )}
           keyExtractor={(item) => item.foodId}
-          contentContainerStyle={{ 
+          contentContainerStyle={{
             paddingTop: 8,
             paddingBottom: 20,
-            flexGrow: 1
+            flexGrow: 1,
           }}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={renderEmptyComponent}

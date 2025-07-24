@@ -1,6 +1,6 @@
-import { View, Text,  TouchableWithoutFeedback } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import React from 'react';
-import { AntDesign, Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 
 interface rowView {
   leftIconName: keyof typeof Ionicons.glyphMap;
@@ -15,14 +15,14 @@ const RowView = ({
   title,
 }: rowView) => {
   return (
-    <View className="flex-row justify-between mb-4 items-center px-4 py-2">
-      <Ionicons name={leftIconName} size={20}/>
+    <TouchableOpacity onPress={onPress}>
+      <View className="flex-row justify-between mb-4 items-center px-4 py-2">
+        <Ionicons name={leftIconName} size={22} />
 
-      <Text className='font-semibold text-[16px]'>{title}</Text>
-      <TouchableWithoutFeedback onPress={onPress}>
-        <MaterialIcons name={rightIconName} size={20} />
-      </TouchableWithoutFeedback>
-    </View>
+        <Text className="font-semibold text-[16px]">{title}</Text>
+        <MaterialIcons name={rightIconName} size={18} />
+      </View>
+    </TouchableOpacity>
   );
 };
 

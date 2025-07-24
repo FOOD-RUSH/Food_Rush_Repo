@@ -12,22 +12,22 @@ import { InputFieldProps } from '@/src/types';
 import { TextInput } from 'react-native-paper';
 
 const InputField = ({
-  label,
-  labelStyle,
+      label,
+      labelStyle,
   icon,
   secureTextEntry = false,
-  containerStyle,
-  inputStyle,
+      containerStyle,
+      inputStyle,
   iconStyle,
   className,
-  ...props
+      ...props
 }: InputFieldProps) => {
-  return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <TouchableNativeFeedback onPress={Keyboard.dismiss}>
-        <View className="my-2 w-full">
+    return (
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      >
+      <TouchableNativeFeedback onPress={Keyboard.dismiss} className='flex-1'>
+        <View className="my-2 w-full flex-1">
           <Text className={`text-lg mb-3 ${labelStyle}`}>{label}</Text>
           <View
             className={`bg-neutral-100 rounded-full 
@@ -35,14 +35,15 @@ const InputField = ({
           `}
           >
             <TextInput
+            mode='outlined'
               className={`p-5 text-[15px] flex-1 ${inputStyle} text-left`}
               secureTextEntry={secureTextEntry}
             />
           </View>
         </View>
       </TouchableNativeFeedback>
-    </KeyboardAvoidingView>
-  );
+      </KeyboardAvoidingView>
+    );
 };
 
 export default InputField;

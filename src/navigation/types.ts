@@ -45,7 +45,10 @@ export type CustomerHomeStackParamList = {
   Checkout: undefined;
   OrderTracking: { orderId: string };
   Category: { categoryId: string };
-  Search: undefined
+  SearchScreen: undefined;
+  FilterOptions: undefined;
+  SearchResults: { query?: string; filters?: any };
+  FilterScreen: undefined; OrderSummary: undefined;
 };
 
 export type CustomerSearchStackParamList = {
@@ -63,7 +66,6 @@ export type CustomerOrderStackParamList = {
 
 export type CustomerProfileStackParamList = {
   FavoriteRestaurantScreen: undefined;
-  ProfileScreen: undefined;
   AddressScreen: undefined;
   LanguageScreen: undefined;
   ProfileHome: undefined;

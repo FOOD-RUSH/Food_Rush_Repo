@@ -1,4 +1,4 @@
-import { View, Text, Pressable } from 'react-native'
+import { View, Text, TouchableOpacity } from 'react-native'
 import React from 'react'
 import { Avatar } from 'react-native-paper'
 import { icons } from '@/assets/images'
@@ -27,12 +27,12 @@ const HomeHeader = () => {
                 </View>
               </View>
               <View className="flex-row items-center flex-[0.4] justify-between ">
-                <Pressable className="p-2 ml-2 border-gray-400 hover: bg-slate-500" onPress={()=> {}}>
+                <TouchableOpacity className=' border border-black rounded-full active:bg-gray-200 p-2' onPress={()=> {}}>
                   <Ionicons name="notifications-outline" color="#000" size={24} />
-                </Pressable>
-                <Pressable className="p-2 ml-2">
+                </TouchableOpacity>
+                <TouchableOpacity className="p-2 ml-2 border border-solid border-black rounded-full p-2 active:bg-gray-200" onPress={()=> {}}>
                   <Ionicons name="bag-outline" color="#000" size={24} />
-                </Pressable>
+                </TouchableOpacity>
               </View>
             </View>
   )
