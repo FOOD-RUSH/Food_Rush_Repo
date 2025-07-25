@@ -1,19 +1,25 @@
-import { View,  StatusBar } from 'react-native';
+import { View, StatusBar, StatusBarStyle, StyleProp, ViewStyle } from 'react-native';
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface CommonViewProps {
   children: React.ReactNode;
   backgroundColor?: string;
-  statusBarStyle?: 'light-content' | 'dark-content';
+  statusBarStyle?: StatusBarStyle;
   showStatusBar?: boolean;
+  paddingHorizontal?: number;
+  safeAreaEdges?: Array<'top' | 'right' | 'bottom' | 'left'>;
+  style?: StyleProp<ViewStyle>;
 }
 
 const CommonView = ({ 
   children, 
-  backgroundColor = '#fff',
+  backgroundColor = '#ffffff',
   statusBarStyle = 'dark-content',
-  showStatusBar = true
+  showStatusBar = true,
+  paddingHorizontal = 16,
+  safeAreaEdges = ['top', 'right', 'bottom', 'left'],
+  style
 }: CommonViewProps) => {
   return (
     <>
@@ -25,10 +31,19 @@ const CommonView = ({
         />
       )}
       <SafeAreaView 
-        className="flex h-full "
-        style={{ backgroundColor }}
+        edges={safeAreaEdges}
+        style={[{ 
+          flex: 1, 
+          backgroundColor 
+        }, style]}
       >
-        <View className="flex-1 px-4 " style={{ backgroundColor }}>
+        <View 
+          style={[{ 
+            flex: 1, 
+            paddingHorizontal,
+            backgroundColor 
+          }, style]}
+        >
           {children}
         </View>
       </SafeAreaView>

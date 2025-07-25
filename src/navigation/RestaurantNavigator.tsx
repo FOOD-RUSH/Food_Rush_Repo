@@ -17,6 +17,7 @@ import OrderHistoryScreen from '../screens/restaurant/orders/OrderHistoryScreen'
 import OrderDetailsScreen from '../screens/restaurant/orders/OrderDetailsScreen';
 import { Platform } from 'react-native';
 import AnalyticsScreen from '../screens/restaurant/analytics/AnalyticsScreen';
+import DashboardScreen from '../screens/restaurant/analytics/DashboardScreen'; // Add this import
 
 const RestaurantTab = createBottomTabNavigator<RestaurantTabParamList>();
 const RestaurantOrdersStack =
@@ -34,7 +35,7 @@ function RestaurantOrdersStackScreen() {
     <RestaurantOrdersStack.Navigator>
       <RestaurantOrdersStack.Screen
         name="OrdersScreen"
-        component={OrderScreen}
+        component={OrderScreen} 
         options={{ title: 'Orders' }}
       />
       <RestaurantOrdersStack.Screen
@@ -73,6 +74,11 @@ function RestaurantAnalyticsStackScreen() {
         name="AnalyticsScreen"
         component={AnalyticsScreen}
         options={{ title: 'Analytics' }}
+      />
+      <RestaurantAnalyticsStack.Screen
+        name="DashboardScreen"
+        component={DashboardScreen}
+        options={{ title: 'Dashboard' }}
       />
       {/* <RestaurantAnalyticsStack.Screen name="SalesReport" component={SalesReportScreen} />
       <RestaurantAnalyticsStack.Screen name="CustomerInsights" component={CustomerInsightsScreen} />

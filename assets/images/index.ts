@@ -77,7 +77,7 @@ export const icons = {
     order,
     calendar,
     cancel,
-    card, gift, profile, profile_bold, notification, show, show_bold, star, search, security, home, filter, more, lock, lock_bold, location, back, email, email_solid, hide_bold, hide
+    card, gift, profile, profile_bold, notification, show, show_bold, star, search, security, home, filter, more, lock, lock_bold, back, email, email_solid, hide_bold, hide
 }
 
 export const FoodCategory = {

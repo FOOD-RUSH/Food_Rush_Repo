@@ -108,6 +108,7 @@ export type RestaurantMenuStackParamList = {
 
 export type RestaurantAnalyticsStackParamList = {
   AnalyticsScreen: undefined;
+  DashboardScreen: undefined;
   SalesReport: undefined;
   CustomerInsights: undefined;
   PopularItems: undefined;
