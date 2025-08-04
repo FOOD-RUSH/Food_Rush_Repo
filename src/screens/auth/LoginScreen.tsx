@@ -1,4 +1,3 @@
-import '@/src/config/firebase';
 import React, { useLayoutEffect, useState } from 'react';
 import {
   View,
@@ -8,23 +7,24 @@ import {
   ScrollView,
   Image,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, TextInput, HelperText, Checkbox } from 'react-native-paper';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { loginSchema } from '@/src/utils/validation';
 import { TextButton } from '@/src/components/common/TextButton';
-import { navigate } from '@/src/navigation/navigationHelpers';
-import { useRoute } from '@react-navigation/native';
+import { AuthStackScreenProps } from '@/src/navigation/types';
+import CommonView from '@/src/components/common/CommonView';
 
 interface LoginFormData {
   email: string;
   password: string;
 }
 
-export default function LoginScreen() {
-  useLayoutEffect(()=> {
-  })
+export const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
+  navigation,
+  route,
+}) => {
+  useLayoutEffect(() => {});
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
@@ -39,11 +39,9 @@ export default function LoginScreen() {
       password: '',
     },
   });
-  // getting usertype from params
-  const route = useRoute();
   // get usertype gotten from params
 
-  const userType = route.params;
+  const userType = route.params?.userType;
 
   const WelcomeImage = require('@/assets/images/Welcome.png');
 
@@ -64,24 +62,18 @@ export default function LoginScreen() {
   const handleForgotPassword = () => {
     // TODO: Navigate to forgot password screen
     console.log('Navigating to forgot password');
-    navigate('Auth', {
-      screen: 'ForgotPassword',
-      params: { userType: userType },
-    });
+    navigation.navigate('Auth', { screen: 'ForgotPassword' });
   };
 
   const handleSignUp = () => {
     // TODO: Navigate to signup screen
     console.log('Navigating to signup');
-    navigate('Auth', {
-      screen: 'SignUp',
-      params: { userType: userType },
-    });
+    navigation.navigate('SignUp', {userType: userType});
   };
 
   return (
     // ADD LOGIC FOR SIGNING IN USER AND SIGNING IN CUSTOMER
-    <SafeAreaView className="flex-1 bg-white">
+    <CommonView>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
@@ -114,7 +106,7 @@ export default function LoginScreen() {
                 control={control}
                 name="email"
                 render={({ field: { onChange, onBlur, value } }) => (
-                  <View className='mb-4'>
+                  <View className="mb-4">
                     <TextInput
                       placeholder="Email"
                       onBlur={onBlur}
@@ -129,8 +121,8 @@ export default function LoginScreen() {
                         borderRadius: 16,
                         borderColor: errors.email ? '#EF4444' : '#f3f4f6',
                       }}
-                      style={{ backgroundColor: '#f3f4f6',  }}
-                      contentStyle={{ paddingHorizontal: 16, }}
+                      style={{ backgroundColor: '#f3f4f6' }}
+                      contentStyle={{ paddingHorizontal: 16 }}
                       error={!!errors.email}
                     />
                     {errors.email && (
@@ -273,6 +265,6 @@ export default function LoginScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </CommonView>
   );
-}
+};

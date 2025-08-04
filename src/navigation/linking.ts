@@ -1,4 +1,4 @@
- import { LinkingOptions } from "@react-navigation/native";
+import { LinkingOptions } from "@react-navigation/native";
 import { RootStackParamList } from "./types";
 
 export const linking: LinkingOptions<RootStackParamList> = {
@@ -28,21 +28,13 @@ export const linking: LinkingOptions<RootStackParamList> = {
               MenuCategory: 'restaurant/:restaurantId/category/:categoryId',
               Notifications: 'notifications',
               Promotions: 'promotions',
-              OrderSummary: 'order-reciept',
+              OrderSummary: 'order-receipt',
               SearchScreen: 'search',
               SearchResults: 'search/results',
               FilterScreen: 'search/filters',
               FilterOptions: 'search/filter-options',
             },
           },
-          // Search: {
-          //   screens: {
-          //     SearchScreen: 'search',
-          //     SearchResults: 'search/results',
-          //     FilterScreen: 'search/filters',
-          //     FilterOptions: 'search/filter-options',
-          //   },
-          // },
           Orders: {
             screens: {
               CompletedOrdersScreen: 'orders/completed',
@@ -52,14 +44,19 @@ export const linking: LinkingOptions<RootStackParamList> = {
           },
           Profile: {
             screens: {
-              ProfileScreen: 'profile',
+              ProfileHome: 'profile',
               EditProfile: 'profile/edit',
               AddressScreen: 'profile/addresses',
               AddAddress: 'profile/address/add',
               PaymentMethods: 'profile/payments',
               AddPayment: 'profile/payment/add',
               Settings: 'profile/settings',
-              Help: 'profile/help',
+              Help: {
+                screens: {
+                  FAQ: 'profile/help/faq',
+                  ContactUs: 'profile/help/contact',
+                },
+              },
               About: 'profile/about',
               FavoriteRestaurantScreen: 'profile/favorites',
               LanguageScreen: 'profile/language',
@@ -115,4 +112,3 @@ export const linking: LinkingOptions<RootStackParamList> = {
     },
   },
 };
-

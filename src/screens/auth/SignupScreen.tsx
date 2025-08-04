@@ -17,7 +17,8 @@ import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { registerSchema } from '@/src/utils/validation';
 import { Ionicons } from '@expo/vector-icons';
-import { navigate } from '@/src/navigation/navigationHelpers';
+import CommonView from '@/src/components/common/CommonView';
+import { AuthStackScreenProps } from '@/src/navigation/types';
 
 // Optimized country codes data - moved outside component to prevent recreation
 const COUNTRY_CODES = [
@@ -37,29 +38,31 @@ interface SignUpFormData {
   confirmPassword: string;
 }
 
-type CountryCode = typeof COUNTRY_CODES[number];
+type CountryCode = (typeof COUNTRY_CODES)[number];
 
 // Memoized components for better performance
-const CountryItem = React.memo(({ 
-  item, 
-  onSelect 
-}: { 
-  item: CountryCode;
-  onSelect: (country: CountryCode) => void;
-}) => (
-  <TouchableOpacity
-    style={styles.countryItem}
-    onPress={() => onSelect(item)}
-    activeOpacity={0.7}
-  >
-    <Text style={styles.countryFlag}>{item.flag}</Text>
-    <Text style={styles.countryName}>{item.country}</Text>
-    <Text style={styles.countryCode}>{item.code}</Text>
-  </TouchableOpacity>
-));
+const CountryItem = React.memo(
+  ({
+    item,
+    onSelect,
+  }: {
+    item: CountryCode;
+    onSelect: (country: CountryCode) => void;
+  }) => (
+    <TouchableOpacity
+      style={styles.countryItem}
+      onPress={() => onSelect(item)}
+      activeOpacity={0.7}
+    >
+      <Text style={styles.countryFlag}>{item.flag}</Text>
+      <Text style={styles.countryName}>{item.country}</Text>
+      <Text style={styles.countryCode}>{item.code}</Text>
+    </TouchableOpacity>
+  ),
+);
 CountryItem.displayName = 'CountryItem';
 
-const SignupScreen = () => {
+const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({navigation, route}) => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedCountryCode, setSelectedCountryCode] = useState<CountryCode>(
@@ -85,29 +88,32 @@ const SignupScreen = () => {
   });
 
   // Optimized callbacks with useCallback to prevent unnecessary re-renders
-  const onSubmit = useCallback(async (data: SignUpFormData) => {
-    if (!termsAccepted) {
-      Alert.alert('Terms Required', 'Please accept the terms and conditions');
-      return;
-    }
+  const onSubmit = useCallback(
+    async (data: SignUpFormData) => {
+      if (!termsAccepted) {
+        Alert.alert('Terms Required', 'Please accept the terms and conditions');
+        return;
+      }
 
-    setLoading(true);
-    try {
-      // TODO: Implement actual signup logic
-      console.log('Signup data:', data);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Navigate to verification screen or home
-      Alert.alert('Success', 'Account created successfully!');
-    } catch (error) {
-      console.error('Signup error:', error);
-      Alert.alert('Error', 'Failed to create account. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  }, [termsAccepted]);
+      setLoading(true);
+      try {
+        // TODO: Implement actual signup logic
+        console.log('Signup data:', data);
+
+        // Simulate API call
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+
+        // Navigate to verification screen or home
+        Alert.alert('Success', 'Account created successfully!');
+      } catch (error) {
+        console.error('Signup error:', error);
+        Alert.alert('Error', 'Failed to create account. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [termsAccepted],
+  );
 
   const handleGoogleSignUp = useCallback(async () => {
     setLoading(true);
@@ -137,11 +143,7 @@ const SignupScreen = () => {
     }
   }, []);
 
-  const handleLogin = useCallback(() => {
-    navigate('Auth', {
-      screen: 'SignIn',
-    });
-  }, []);
+  
 
   const selectCountryCode = useCallback((country: CountryCode) => {
     setSelectedCountryCode(country);
@@ -149,11 +151,11 @@ const SignupScreen = () => {
   }, []);
 
   const togglePassword = useCallback(() => {
-    setShowPassword(prev => !prev);
+    setShowPassword((prev) => !prev);
   }, []);
 
   const toggleTerms = useCallback(() => {
-    setTermsAccepted(prev => !prev);
+    setTermsAccepted((prev) => !prev);
   }, []);
 
   const openTerms = useCallback(() => {
@@ -175,355 +177,371 @@ const SignupScreen = () => {
   }, []);
 
   // Memoized values to prevent unnecessary recalculations
-  const isSubmitDisabled = useMemo(() => 
-    loading || !termsAccepted || !isValid, 
-    [loading, termsAccepted, isValid]
+  const isSubmitDisabled = useMemo(
+    () => loading || !termsAccepted || !isValid,
+    [loading, termsAccepted, isValid],
   );
 
   const keyExtractor = useCallback((item: CountryCode) => item.code, []);
 
-  const renderCountryItem = useCallback(({ item }: { item: CountryCode }) => (
-    <CountryItem item={item} onSelect={selectCountryCode} />
-  ), [selectCountryCode]);
+  const renderCountryItem = useCallback(
+    ({ item }: { item: CountryCode }) => (
+      <CountryItem item={item} onSelect={selectCountryCode} />
+    ),
+    [selectCountryCode],
+  );
 
   // Optimized phone number placeholder
-  const phoneNumberPlaceholder = useMemo(() => 
-    `${selectedCountryCode.code} 690 000 000`, 
-    [selectedCountryCode.code]
+  const phoneNumberPlaceholder = useMemo(
+    () => `${selectedCountryCode.code} 690 000 000`,
+    [selectedCountryCode.code],
   );
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
-    >
-      <SafeAreaView style={styles.safeArea}>
-        <ScrollView 
-          style={styles.scrollView}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
+    <CommonView>
+      <ScrollView className='flex'>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.container}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
         >
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity onPress={() => console.log('Go back')}>
-              <Ionicons name="arrow-back" size={24} color="#000" />
-            </TouchableOpacity>
-          </View>
+          <SafeAreaView style={styles.safeArea}>
+            <ScrollView
+              style={styles.scrollView}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+            >
+              {/* Header */}
+              <View style={styles.header}>
+                <TouchableOpacity onPress={() => console.log('Go back')}>
+                  <Ionicons name="arrow-back" size={24} color="#000" />
+                </TouchableOpacity>
+              </View>
 
-          {/* Logo and Title */}
-          <View style={styles.logoContainer}>
-            <View style={styles.logo}>
-              <Text style={styles.logoText}>R</Text>
-            </View>
-            <Text style={styles.title}>Create New Account</Text>
-          </View>
-
-          {/* Form */}
-          <View style={styles.formContainer}>
-            {/* Country Code + Phone Number */}
-            <Controller
-              control={control}
-              name="phoneNumber"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <View style={styles.inputContainer}>
-                  <View style={styles.phoneInputRow}>
-                    <TouchableOpacity
-                      style={styles.countrySelector}
-                      onPress={openCountryModal}
-                      activeOpacity={0.7}
-                    >
-                      <Text style={styles.selectedCountryFlag}>
-                        {selectedCountryCode.flag}
-                      </Text>
-                      <Text style={styles.selectedCountryCode}>
-                        {selectedCountryCode.code}
-                      </Text>
-                      <Ionicons name="chevron-down" size={16} color="#666" />
-                    </TouchableOpacity>
-
-                    <TextInput
-                      placeholder={phoneNumberPlaceholder}
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value}
-                      mode="outlined"
-                      keyboardType="phone-pad"
-                      autoComplete="tel"
-                      outlineStyle={[
-                        styles.phoneInput,
-                        errors.phoneNumber && styles.inputError
-                      ]}
-                      style={[styles.textInput, styles.phoneTextInput]}
-                      contentStyle={styles.inputContent}
-                      error={!!errors.phoneNumber}
-                    />
-                  </View>
-                  {errors.phoneNumber && (
-                    <HelperText type="error" visible={!!errors.phoneNumber}>
-                      {errors.phoneNumber.message}
-                    </HelperText>
-                  )}
+              {/* Logo and Title */}
+              <View style={styles.logoContainer}>
+                <View style={styles.logo}>
+                  <Text style={styles.logoText}>R</Text>
                 </View>
-              )}
-            />
+                <Text style={styles.title}>Create New Account</Text>
+              </View>
 
-            {/* Email Input */}
-            <Controller
-              control={control}
-              name="email"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <View style={styles.inputContainer}>
-                  <TextInput
-                    placeholder="Email"
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    value={value}
-                    mode="outlined"
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    autoComplete="email"
-                    left={<TextInput.Icon icon="email" />}
-                    outlineStyle={[
-                      styles.inputOutline,
-                      errors.email && styles.inputError
-                    ]}
-                    style={styles.textInput}
-                    contentStyle={styles.inputContent}
-                    error={!!errors.email}
-                  />
-                  {errors.email && (
-                    <HelperText type="error" visible={!!errors.email}>
-                      {errors.email.message}
-                    </HelperText>
+              {/* Form */}
+              <View style={styles.formContainer}>
+                {/* Country Code + Phone Number */}
+                <Controller
+                  control={control}
+                  name="phoneNumber"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <View style={styles.inputContainer}>
+                      <View style={styles.phoneInputRow}>
+                        <TouchableOpacity
+                          style={styles.countrySelector}
+                          onPress={openCountryModal}
+                          activeOpacity={0.7}
+                        >
+                          <Text style={styles.selectedCountryFlag}>
+                            {selectedCountryCode.flag}
+                          </Text>
+                          <Text style={styles.selectedCountryCode}>
+                            {selectedCountryCode.code}
+                          </Text>
+                          <Ionicons
+                            name="chevron-down"
+                            size={16}
+                            color="#666"
+                          />
+                        </TouchableOpacity>
+
+                        <TextInput
+                          placeholder={phoneNumberPlaceholder}
+                          onBlur={onBlur}
+                          onChangeText={onChange}
+                          value={value}
+                          mode="outlined"
+                          keyboardType="phone-pad"
+                          autoComplete="tel"
+                          outlineStyle={[
+                            styles.phoneInput,
+                            errors.phoneNumber && styles.inputError,
+                          ]}
+                          style={[styles.textInput, styles.phoneTextInput]}
+                          contentStyle={styles.inputContent}
+                          error={!!errors.phoneNumber}
+                        />
+                      </View>
+                      {errors.phoneNumber && (
+                        <HelperText type="error" visible={!!errors.phoneNumber}>
+                          {errors.phoneNumber.message}
+                        </HelperText>
+                      )}
+                    </View>
                   )}
-                </View>
-              )}
-            />
-
-            {/* Full Name Input */}
-            <Controller
-              control={control}
-              name="displayName"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <View style={styles.inputContainer}>
-                  <TextInput
-                    placeholder="Full Name"
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    value={value}
-                    mode="outlined"
-                    keyboardType="default"
-                    autoCapitalize="words"
-                    autoComplete="name"
-                    left={<TextInput.Icon icon="account" />}
-                    outlineStyle={[
-                      styles.inputOutline,
-                      errors.displayName && styles.inputError
-                    ]}
-                    style={styles.textInput}
-                    contentStyle={styles.inputContent}
-                    error={!!errors.displayName}
-                  />
-                  {errors.displayName && (
-                    <HelperText type="error" visible={!!errors.displayName}>
-                      {errors.displayName.message}
-                    </HelperText>
-                  )}
-                </View>
-              )}
-            />
-
-            {/* Password Input */}
-            <Controller
-              control={control}
-              name="password"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <View style={styles.inputContainer}>
-                  <TextInput
-                    placeholder="Password"
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    value={value}
-                    mode="outlined"
-                    secureTextEntry={!showPassword}
-                    autoCapitalize="none"
-                    autoComplete="new-password"
-                    left={<TextInput.Icon icon="lock" />}
-                    right={
-                      <TextInput.Icon
-                        icon={showPassword ? 'eye-off' : 'eye'}
-                        onPress={togglePassword}
-                       
-                      />
-                    }
-                    outlineStyle={[
-                      styles.inputOutline,
-                      errors.password && styles.inputError
-                    ]}
-                    style={styles.textInput}
-                    contentStyle={styles.inputContent}
-                    error={!!errors.password}
-                  />
-                  {errors.password && (
-                    <HelperText type="error" visible={!!errors.password}>
-                      {errors.password.message}
-                    </HelperText>
-                  )}
-                </View>
-              )}
-            />
-
-            {/* Confirm Password Input */}
-            <Controller
-              control={control}
-              name="confirmPassword"
-              render={({ field: { onChange, onBlur, value } }) => (
-                <View style={styles.inputContainer}>
-                  <TextInput
-                    placeholder="Confirm Password"
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    value={value}
-                    mode="outlined"
-                    secureTextEntry={!showPassword}
-                    autoCapitalize="none"
-                    autoComplete="new-password"
-                    left={<TextInput.Icon icon="lock" />}
-                    outlineStyle={[
-                      styles.inputOutline,
-                      errors.confirmPassword && styles.inputError
-                    ]}
-                    style={styles.textInput}
-                    contentStyle={styles.inputContent}
-                    error={!!errors.confirmPassword}
-                  />
-                  {errors.confirmPassword && (
-                    <HelperText type="error" visible={!!errors.confirmPassword}>
-                      {errors.confirmPassword.message}
-                    </HelperText>
-                  )}
-                </View>
-              )}
-            />
-
-            {/* Terms and Privacy */}
-            <View style={styles.termsContainer}>
-              <View style={styles.termsRow}>
-                <Checkbox
-                  status={termsAccepted ? 'checked' : 'unchecked'}
-                  onPress={toggleTerms}
-                  uncheckedColor="#666"
-                  color="#007AFF"
                 />
-                <View style={styles.termsTextContainer}>
-                  <Text style={styles.termsText}>
-                    I Agree with{' '}
-                    <TouchableOpacity onPress={openTerms}>
-                      <Text style={styles.termsLink}>Terms of Service</Text>
-                    </TouchableOpacity>
-                    {' '}and{' '}
-                    <TouchableOpacity onPress={openPrivacyPolicy}>
-                      <Text style={styles.termsLink}>Privacy Policy</Text>
-                    </TouchableOpacity>
+
+                {/* Email Input */}
+                <Controller
+                  control={control}
+                  name="email"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <View style={styles.inputContainer}>
+                      <TextInput
+                        placeholder="Email"
+                        onBlur={onBlur}
+                        onChangeText={onChange}
+                        value={value}
+                        mode="outlined"
+                        keyboardType="email-address"
+                        autoCapitalize="none"
+                        autoComplete="email"
+                        left={<TextInput.Icon icon="email" />}
+                        outlineStyle={[
+                          styles.inputOutline,
+                          errors.email && styles.inputError,
+                        ]}
+                        style={styles.textInput}
+                        contentStyle={styles.inputContent}
+                        error={!!errors.email}
+                      />
+                      {errors.email && (
+                        <HelperText type="error" visible={!!errors.email}>
+                          {errors.email.message}
+                        </HelperText>
+                      )}
+                    </View>
+                  )}
+                />
+
+                {/* Full Name Input */}
+                <Controller
+                  control={control}
+                  name="displayName"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <View style={styles.inputContainer}>
+                      <TextInput
+                        placeholder="Full Name"
+                        onBlur={onBlur}
+                        onChangeText={onChange}
+                        value={value}
+                        mode="outlined"
+                        keyboardType="default"
+                        autoCapitalize="words"
+                        autoComplete="name"
+                        left={<TextInput.Icon icon="account" />}
+                        outlineStyle={[
+                          styles.inputOutline,
+                          errors.displayName && styles.inputError,
+                        ]}
+                        style={styles.textInput}
+                        contentStyle={styles.inputContent}
+                        error={!!errors.displayName}
+                      />
+                      {errors.displayName && (
+                        <HelperText type="error" visible={!!errors.displayName}>
+                          {errors.displayName.message}
+                        </HelperText>
+                      )}
+                    </View>
+                  )}
+                />
+
+                {/* Password Input */}
+                <Controller
+                  control={control}
+                  name="password"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <View style={styles.inputContainer}>
+                      <TextInput
+                        placeholder="Password"
+                        onBlur={onBlur}
+                        onChangeText={onChange}
+                        value={value}
+                        mode="outlined"
+                        secureTextEntry={!showPassword}
+                        autoCapitalize="none"
+                        autoComplete="new-password"
+                        left={<TextInput.Icon icon="lock" />}
+                        right={
+                          <TextInput.Icon
+                            icon={showPassword ? 'eye-off' : 'eye'}
+                            onPress={togglePassword}
+                          />
+                        }
+                        outlineStyle={[
+                          styles.inputOutline,
+                          errors.password && styles.inputError,
+                        ]}
+                        style={styles.textInput}
+                        contentStyle={styles.inputContent}
+                        error={!!errors.password}
+                      />
+                      {errors.password && (
+                        <HelperText type="error" visible={!!errors.password}>
+                          {errors.password.message}
+                        </HelperText>
+                      )}
+                    </View>
+                  )}
+                />
+
+                {/* Confirm Password Input */}
+                <Controller
+                  control={control}
+                  name="confirmPassword"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <View style={styles.inputContainer}>
+                      <TextInput
+                        placeholder="Confirm Password"
+                        onBlur={onBlur}
+                        onChangeText={onChange}
+                        value={value}
+                        mode="outlined"
+                        secureTextEntry={!showPassword}
+                        autoCapitalize="none"
+                        autoComplete="new-password"
+                        left={<TextInput.Icon icon="lock" />}
+                        outlineStyle={[
+                          styles.inputOutline,
+                          errors.confirmPassword && styles.inputError,
+                        ]}
+                        style={styles.textInput}
+                        contentStyle={styles.inputContent}
+                        error={!!errors.confirmPassword}
+                      />
+                      {errors.confirmPassword && (
+                        <HelperText
+                          type="error"
+                          visible={!!errors.confirmPassword}
+                        >
+                          {errors.confirmPassword.message}
+                        </HelperText>
+                      )}
+                    </View>
+                  )}
+                />
+
+                {/* Terms and Privacy */}
+                <View style={styles.termsContainer}>
+                  <View style={styles.termsRow}>
+                    <Checkbox
+                      status={termsAccepted ? 'checked' : 'unchecked'}
+                      onPress={toggleTerms}
+                      uncheckedColor="#666"
+                      color="#007AFF"
+                    />
+                    <View style={styles.termsTextContainer}>
+                      <Text style={styles.termsText}>
+                        I Agree with{' '}
+                        <TouchableOpacity onPress={openTerms}>
+                          <Text style={styles.termsLink}>Terms of Service</Text>
+                        </TouchableOpacity>{' '}
+                        and{' '}
+                        <TouchableOpacity onPress={openPrivacyPolicy}>
+                          <Text style={styles.termsLink}>Privacy Policy</Text>
+                        </TouchableOpacity>
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Sign Up Button */}
+                <Button
+                  mode="contained"
+                  onPress={handleSubmit(onSubmit)}
+                  loading={loading}
+                  disabled={isSubmitDisabled}
+                  buttonColor="#007AFF"
+                  contentStyle={styles.buttonContent}
+                  style={styles.signUpButton}
+                  labelStyle={styles.signUpButtonLabel}
+                >
+                  {loading ? 'Creating Account...' : 'Sign up'}
+                </Button>
+
+                {/* Divider */}
+                <View style={styles.dividerContainer}>
+                  <View style={styles.dividerLine} />
+                  <Text style={styles.dividerText}>or continue with</Text>
+                  <View style={styles.dividerLine} />
+                </View>
+
+                {/* Social Sign Up Buttons */}
+                <View style={styles.socialButtonsContainer}>
+                  <Button
+                    mode="outlined"
+                    onPress={handleGoogleSignUp}
+                    disabled={loading}
+                    icon="google"
+                    contentStyle={styles.socialButtonContent}
+                    style={styles.socialButton}
+                    labelStyle={styles.socialButtonLabel}
+                  >
+                    Google
+                  </Button>
+
+                  <Button
+                    mode="outlined"
+                    onPress={handleAppleSignUp}
+                    disabled={loading}
+                    icon="apple"
+                    contentStyle={styles.socialButtonContent}
+                    style={styles.socialButton}
+                    labelStyle={styles.socialButtonLabel}
+                  >
+                    Apple
+                  </Button>
+                </View>
+
+                {/* Login Link */}
+                <View style={styles.loginLinkContainer}>
+                  <Text style={styles.loginPrompt}>
+                    Already have an account?{' '}
                   </Text>
+                  <TouchableOpacity onPress={()=> {navigation.navigate('SignIn')}} activeOpacity={0.7}>
+                    <Text style={styles.loginLink}>Login</Text>
+                  </TouchableOpacity>
                 </View>
               </View>
-            </View>
+            </ScrollView>
 
-            {/* Sign Up Button */}
-            <Button
-              mode="contained"
-              onPress={handleSubmit(onSubmit)}
-              loading={loading}
-              disabled={isSubmitDisabled}
-              buttonColor="#007AFF"
-              contentStyle={styles.buttonContent}
-              style={styles.signUpButton}
-              labelStyle={styles.signUpButtonLabel}
+            {/* Country Code Modal */}
+            <Modal
+              visible={showCountryModal}
+              animationType="slide"
+              presentationStyle="pageSheet"
+              onRequestClose={closeCountryModal}
             >
-              {loading ? 'Creating Account...' : 'Sign up'}
-            </Button>
-
-            {/* Divider */}
-            <View style={styles.dividerContainer}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>or continue with</Text>
-              <View style={styles.dividerLine} />
-            </View>
-
-            {/* Social Sign Up Buttons */}
-            <View style={styles.socialButtonsContainer}>
-              <Button
-                mode="outlined"
-                onPress={handleGoogleSignUp}
-                disabled={loading}
-                icon="google"
-                contentStyle={styles.socialButtonContent}
-                style={styles.socialButton}
-                labelStyle={styles.socialButtonLabel}
-              >
-                Google
-              </Button>
-
-              <Button
-                mode="outlined"
-                onPress={handleAppleSignUp}
-                disabled={loading}
-                icon="apple"
-                contentStyle={styles.socialButtonContent}
-                style={styles.socialButton}
-                labelStyle={styles.socialButtonLabel}
-              >
-                Apple
-              </Button>
-            </View>
-
-            {/* Login Link */}
-            <View style={styles.loginLinkContainer}>
-              <Text style={styles.loginPrompt}>
-                Already have an account?{' '}
-              </Text>
-              <TouchableOpacity onPress={handleLogin} activeOpacity={0.7}>
-                <Text style={styles.loginLink}>Login</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </ScrollView>
-
-        {/* Country Code Modal */}
-        <Modal
-          visible={showCountryModal}
-          animationType="slide"
-          presentationStyle="pageSheet"
-          onRequestClose={closeCountryModal}
-        >
-          <SafeAreaView style={styles.modalContainer}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Select Country</Text>
-              <TouchableOpacity onPress={closeCountryModal} activeOpacity={0.7}>
-                <Text style={styles.modalDoneButton}>Done</Text>
-              </TouchableOpacity>
-            </View>
-            <FlatList
-              data={COUNTRY_CODES}
-              renderItem={renderCountryItem}
-              keyExtractor={keyExtractor}
-              showsVerticalScrollIndicator={false}
-              initialNumToRender={10}
-              maxToRenderPerBatch={10}
-              windowSize={10}
-              removeClippedSubviews={true}
-              getItemLayout={(data, index) => ({
-                length: 60,
-                offset: 60 * index,
-                index,
-              })}
-            />
+              <SafeAreaView style={styles.modalContainer}>
+                <View style={styles.modalHeader}>
+                  <Text style={styles.modalTitle}>Select Country</Text>
+                  <TouchableOpacity
+                    onPress={closeCountryModal}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.modalDoneButton}>Done</Text>
+                  </TouchableOpacity>
+                </View>
+                <FlatList
+                  data={COUNTRY_CODES}
+                  renderItem={renderCountryItem}
+                  keyExtractor={keyExtractor}
+                  showsVerticalScrollIndicator={false}
+                  initialNumToRender={10}
+                  maxToRenderPerBatch={10}
+                  windowSize={10}
+                  removeClippedSubviews={true}
+                  getItemLayout={(data, index) => ({
+                    length: 60,
+                    offset: 60 * index,
+                    index,
+                  })}
+                />
+              </SafeAreaView>
+            </Modal>
           </SafeAreaView>
-        </Modal>
-      </SafeAreaView>
-    </KeyboardAvoidingView>
+        </KeyboardAvoidingView>
+      </ScrollView>
+    </CommonView>
   );
 };
 

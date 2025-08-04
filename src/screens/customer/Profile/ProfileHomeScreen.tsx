@@ -1,12 +1,14 @@
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import React from 'react';
 import { Avatar } from 'react-native-paper';
-import { images } from '@/assets/images';
+import { icons, images } from '@/assets/images';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
 import RowView from '@/src/components/common/RowView';
-import { navigateToEditProfile } from '@/src/navigation/navigationHelpers';
+import { CustomerProfileStackScreenProps } from '@/src/navigation/types';
 
-const ProfileHomeScreen = () => {
+const ProfileHomeScreen = ({
+  navigation,
+}: CustomerProfileStackScreenProps<'ProfileHome'>) => {
   return (
     <ScrollView
       className="flex h-full bg-white py-3 mt-0 px-2"
@@ -15,7 +17,7 @@ const ProfileHomeScreen = () => {
       {/* profile pic and stuff */}
       <View className="flex-row justify-between items-center mb-3 px-3">
         <Avatar.Image
-          source={images.customerImg}
+          source={icons.ProfilePlogo}
           size={100}
           className="bg-gray-500"
         />
@@ -23,13 +25,19 @@ const ProfileHomeScreen = () => {
           <Text className="font-semibold text-[18px]">Dev-Guy UIX</Text>
           <Text className="text-[15px]">+237 650 100 131</Text>
         </View>
-        <AntDesign name="edit" color={'#007aff'} size={25} />
+        <TouchableOpacity activeOpacity={0.7} onPress={()=> {
+          navigation.navigate('EditProfile')
+        }}>
+          <AntDesign name="edit" color={'#007aff'} size={25} />
+        </TouchableOpacity>
       </View>
       {/* divider */}
       <View className="h-[1px] bg-gray-200 mx-3 my-4" />
       <RowView
         title=" My Favorite Restaurants"
-        onPress={() => {}}
+        onPress={() => {
+          navigation.navigate('FavoriteRestaurantScreen');
+        }}
         leftIconName="fast-food-outline"
       />
       <RowView
@@ -39,13 +47,17 @@ const ProfileHomeScreen = () => {
       />
       <RowView
         title="Payment Method"
-        onPress={() => {}}
+        onPress={() => {
+          navigation.navigate('PaymentMethods');
+        }}
         leftIconName="card-outline"
       />
       <View className="h-[1px] bg-gray-200 mx-3 mb-4" />
       <RowView
         title="Profile"
-        onPress={navigateToEditProfile}
+        onPress={() => {
+          navigation.navigate('EditProfile');
+        }}
         leftIconName="log-in-outline"
       />
       <RowView
@@ -53,6 +65,7 @@ const ProfileHomeScreen = () => {
         onPress={() => {}}
         leftIconName="location-outline"
       />
+      {/* notification settings */}
       <RowView
         title="Notification"
         onPress={() => {}}
@@ -64,16 +77,11 @@ const ProfileHomeScreen = () => {
         leftIconName="shield-checkmark-outline"
       />
       <RowView
-        title="Payment Method"
+        title="Language Screen"
         onPress={() => {}}
-        leftIconName="card-outline"
+        leftIconName="language-outline"
       />
-      <View className="flex-row justify-between">
-        <View className="flex-row flex-1 ">
-          <Ionicons name="eye-sharp" />
-          <Text className="Dark Mode" />
-        </View>
-      </View>
+      
     </ScrollView>
   );
 };

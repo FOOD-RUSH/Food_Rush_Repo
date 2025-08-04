@@ -40,27 +40,27 @@ const OrderItemCard = ({
           <View className="mr-4">
             <Image
               source={image}
-              className="w-16 h-16 rounded-xl"
-              style={{ width: 64, height: 64 }}
+              className="w-25 h-25 rounded-xl "
+              style={{ width: 100, height: 100 }}
             />
           </View>
 
           {/* Food Details */}
           <View className="flex-1">
-            <Text className="text-lg font-bold text-gray-900 mb-1">
+            <Text className="text-[20px] font-bold text-gray-900 mb-1" numberOfLines={1}>
               {foodName}
             </Text>
             <View className="flex-row items-center mb-2">
-              <Text className="text-gray-600 text-sm mr-2 font-medium">
+              <Text className="text-gray-600 text-lg mr-2 font-medium">
                 {quantity} items
               </Text>
-              <Text className="text-gray-400 text-sm mr-2 font-medium">|</Text>
-              <Text className="text-gray-600 text-sm font-medium">{distance}</Text>
+              <Text className="text-gray-400 text-lg mr-2 font-medium">|</Text>
+              <Text className="text-gray-600 text-lg font-medium">{distance}</Text>
             </View>
 
             {/* Price and Status */}
             <View className="flex-row items-center justify-between">
-              <Text className="text-lg font-bold text-primaryColor">
+              <Text className="text-xl font-bold text-primaryColor">
                 {foodPrice} F
               </Text>
               <View
@@ -95,7 +95,7 @@ const OrderItemCard = ({
                   // Handle cancel order logic here
                 }}
               >
-                <Text className="text-blue-500 font-medium text-center">
+                <Text className="text-blue-500 font-medium text-center text-lg">
                   Cancel Order
                 </Text>
               </TouchableOpacity>
@@ -106,12 +106,12 @@ const OrderItemCard = ({
                   // Handle track driver logic here
                 }}
               >
-                <Text className="text-white font-medium text-center">
+                <Text className="text-white font-medium text-center text-lg">
                   Track Driver
                 </Text>
               </TouchableOpacity>
             </>
-          ) : (
+          ) : ( 
             <>
               <TouchableOpacity
                 className="flex-1 border border-blue-500 rounded-full py-3 mr-2"
@@ -119,7 +119,7 @@ const OrderItemCard = ({
                   // Handle leave review logic here
                 }}
               >
-                <Text className="text-blue-500 font-medium text-center">
+                <Text className="text-blue-500 font-medium text-center text-lg">
                   Leave a review
                 </Text>
               </TouchableOpacity>
@@ -130,7 +130,7 @@ const OrderItemCard = ({
                   // Handle order again logic here
                 }}
               >
-                <Text className="text-white font-medium text-center">
+                <Text className="text-white font-medium text-center text-lg">
                   Order Again
                 </Text>
               </TouchableOpacity>

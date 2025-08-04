@@ -1,8 +1,10 @@
 import { View, Text } from 'react-native';
-import React from 'react';
+import React, { useState } from 'react';
 import CommonView from '@/src/components/common/CommonView';
 
 const CartScreen = () => {
+const [data, setData] = useState([]);
+  
   return (
     <CommonView backgroundColor="#fff">
       <Text className="place-items-center text-center">Order Screen</Text>
@@ -11,3 +13,5 @@ const CartScreen = () => {
 };
 
 export default CartScreen;
+
+

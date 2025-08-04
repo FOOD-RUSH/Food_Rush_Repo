@@ -5,7 +5,8 @@
 
 
 body {
-    background-color: #cde2f5;
+    background-color: rgba(230, 229, 229, 0.965);
     flex-wrap: wrap;
-    color: #ffbb00
+    color: #f5f3ee
+
 }

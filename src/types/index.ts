@@ -1,4 +1,8 @@
-import { TextInputProps } from "react-native-paper";
+import { PickerProps } from '@react-native-picker/picker';
+import { ReactNode } from 'react';
+import { TextInputProps } from 'react-native';
+
+// Basic props
 
 export interface User {
   uid: string;
@@ -11,20 +15,25 @@ export interface User {
 // app state
 export interface AppState {
   isOnboardingComplete: boolean;
-  language: string;
+  language: 'Eng' | 'Fre';
+  theme: "light" | "dark"
 
 }
-//Properties of Food
 
+//Properties of Food
 export interface FoodProps {
-  id?: string;
-  restaurantID?: string;
+  id: string;
+  restaurantID: string;
+  restaurantName?: string;
   name?: string;
   price?: number;
   ratings?: number;
   addedOn?: Date;
   distance?: number;
   image?: any;
+  category?: any;
+  discount?: any;
+  description: string;
 
 }
 
@@ -46,6 +55,8 @@ export interface CustomerProfile {
     dietary: string[];
     cuisineTypes: string[];
   };
+  favoriteRestaurants?: RestaurantProfile[];
+  favoriteFood?: FoodProps[];
 }
 //Restaurant profile
 export interface RestaurantProfile {
@@ -53,30 +64,23 @@ export interface RestaurantProfile {
   name: string;
   description: string;
   phone: string;
-  address: Address;
-  cuisine: string[];
-  hours: {
-    [key: string]: { open: string; close: string; isOpen: boolean };
-  };
-  isVerified: boolean;
-  rating: number;
-  images: [];
-  deliveryTime: number;
-  deliveryFee: number;
-  menu: MenuItem[]
+  address: string;
+  // address: Address
+  cuisine: string;
+  openTime: string;
+  isOpen: boolean;
+  isVerified?: boolean;
+  // ratings: number;
+  ratings: string;
+  reviewCount: string;
+  distance: string;
+  deliveryFee?: string
+  image: any;
+  deliveryTime?: string;
+  menu: FoodProps[];
+  discounts?: FoodProps[];
+  specialOffers?: string[];
 }
-// MENU ITEM INTERFace
-export interface MenuItem {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  image?: string;
-  isAvailable: boolean;
-  dietaryInfo: string[];
-}
-
 
 // Order Types
 export interface Order {
@@ -105,18 +109,29 @@ export interface AuthState {
 export interface OrderItem {
   menuItemId: string;
   quantity: number;
-  specialInstructions?: string;
   price: number;
 }
+
+
+
+
+
+
+
+
+
+
 export declare interface InputFieldProps extends TextInputProps {
-    label?: string;
-    icon?: any;
-    secureTextEntry?: boolean;
-    labelStyle?: string;
-    containerStyle?: string;
-    inputStyle?: string;
-    iconStyle?: string;
-    className?: string;
+  label?: string;
+
+  error?: boolean;
+  labelStyle?: string;
+  inputStyle?: string;
+  className?: string;
+  rightIcon?: ReactNode;
+  leftIcon?: ReactNode;
+  containerStyle?: string;
+
 }
 
 export type OrderStatus =
@@ -148,6 +163,8 @@ export type PaymentMethod =
   | 'mtn_mobile_money'
   | 'orange_money'
 
+
+
 export interface PaymentTransaction {
   id: string;
   orderId: string;
@@ -158,14 +175,10 @@ export interface PaymentTransaction {
   createdAt: Date;
 }
 
-interface FoodClass {
-  id: string;
-  restaurantId: string;
-  name: string;
-  price: string;
-  category: string;
-  description: string;
-  ingredient: string;
+
+
+export interface SelectProps extends PickerProps {
+  label?: string;
 }
 
 

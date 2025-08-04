@@ -59,7 +59,7 @@ const OnboardingWelcome = ({ onComplete }: { onComplete: () => void }) => {
 
     const timer = setTimeout(() => {
       onComplete();
-    }, 3000);
+    }, 7000);
 
     return () => clearTimeout(timer);
   }, [fadeAnim, onComplete, slideAnim]);
@@ -72,12 +72,11 @@ const OnboardingWelcome = ({ onComplete }: { onComplete: () => void }) => {
           opacity: fadeAnim,
           transform: [{ translateY: slideAnim }],
         }}
-        className="flex-1 justify-center items-center px-3 mb-8"
+        className="flex-1 px-3"
       >
-        <View className="flex-1 justify-center items-center mb-8">
-          <View className="flex-1 flex-col items-center justify-between mb-8 ">
+          <View className="flex-1 flex-col justify-between items-center mb-8">
             <Image
-              source={foodRushLogo}
+              source={images.ApplogoWhite}
               style={{
                 width: screenWidth * 0.25,
                 height: screenHeight * 0.25,
@@ -89,12 +88,12 @@ const OnboardingWelcome = ({ onComplete }: { onComplete: () => void }) => {
               source={gif}
               style={{
                 width: screenWidth * 0.9,
-                height: screenHeight * 0.55,
+                height: screenHeight * 0.4,
               }}
               resizeMode="contain"
             />
 
-            <View className="items-center mb-8">
+            <View className="items-center mb-10">
               <Text className="text-3xl font-bold text-gray-900 mb-4 text-center">
                 Welcome to Food Rush!
               </Text>
@@ -103,7 +102,6 @@ const OnboardingWelcome = ({ onComplete }: { onComplete: () => void }) => {
               </Text>
             </View>
           </View>
-        </View>
       </Animated.View>
     </SafeAreaView>
   );
@@ -160,11 +158,11 @@ const OnboardingSlide = ({
               />
             </View>
             <Animated.View style={{ opacity: fadeAnim }}>
-              <View className="bg-blue-600/95 rounded-2xl p-6 mx-6 shadow-lg backdrop-blur-sm">
-                <Text className="text-2xl font-bold text-white mb-4 text-left">
+              <View className="bg-blue-600/95 rounded-3xl p-6 mx-9 mb-5 shadow-lg backdrop-blur-sm">
+                <Text className="text-2xl font-bold text-white mb-4 text-center">
                   {slide.title}
                 </Text>
-                <Text className="text-base text-white/90 text-left leading-6 mb-8">
+                <Text className="text-base text-white/90 text-center leading-6 mb-8">
                   {slide.description}
                 </Text>
                 <View className="flex-row justify-between items-center mb-6">

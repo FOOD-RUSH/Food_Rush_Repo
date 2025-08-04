@@ -5,7 +5,7 @@ import { ActivityIndicator } from 'react-native-paper'
 const LoadingScreen = () => {
   return (
      <View className='flex-1 justify-center items-center'>
-    <ActivityIndicator size="large" color="#0000ff" />
+    <ActivityIndicator size="large" color="#0000ff" animating={true} />
   </View>
   )
 }

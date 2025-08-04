@@ -1,61 +1,65 @@
-
-import { NavigatorScreenParams } from "@react-navigation/native";
+// Updated types.ts - Moving full-screen screens to RootStack
+import { NavigatorScreenParams, CompositeScreenProps } from "@react-navigation/native";
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { MaterialTopTabScreenProps } from '@react-navigation/material-top-tabs';
 
-// Root Stack
+// Root Stack - Screens that should NOT show tabs (full-screen)
 export type RootStackParamList = {
   Onboarding: undefined;
   Auth: NavigatorScreenParams<AuthStackParamList>;
   CustomerApp: NavigatorScreenParams<CustomerTabParamList>;
   RestaurantApp: NavigatorScreenParams<RestaurantTabParamList>;
+
+  Cart: undefined;  // Full-screen modal/screens (NO TABS) - These are the screens you mentioned
+
+  Checkout: { cartId?: string };
+  OrderTracking: { orderId: string };
+  FoodDetails: { foodId: string; restaurantId: string };
+  RestaurantDetails: { restaurantId: string };
+  Notifications: undefined;
+  Category: { categoryId: string };
+  SearchScreen: { category?: string; categoryId?: string; type: "search" | "category" };
+  // profile screens
+  EditProfile: undefined;
+  AddressScreen: undefined;
+  AddAddress: { addressId?: string };
+  PaymentMethods: undefined;
+  AddPayment: { paymentId?: string };
+  Settings: undefined;
+  Help: NavigatorScreenParams<CustomerHelpCenterStackParamList>;
+  About: undefined;
+  FavoriteRestaurantScreen: undefined;
+  LanguageScreen: undefined;
+
+
 };
 
-// Auth Stack
+// Auth Stack (unchanged)
 export type AuthStackParamList = {
-  SignIn: { userType?: 'customer' | 'restaurant' };
-  SignUp: { userType?: 'customer' | 'restaurant' };
+  SignIn: { userType?: 'customer' | 'restaurant' } | undefined;
+  SignUp: { userType?: 'customer' | 'restaurant' } | undefined;
   ForgotPassword: undefined;
   OTPVerification: {
     email?: string;
     phone?: string;
-    type: 'email' | 'phone' | 'reset_password'
+    type: 'email' | 'phone' | 'reset_password';
   };
   ResetPassword: { token: string };
 };
 
-// Customer Tab Navigator
+// Customer Tab Navigator - Only core tab screens
 export type CustomerTabParamList = {
   Home: NavigatorScreenParams<CustomerHomeStackParamList>;
   Orders: NavigatorScreenParams<CustomerOrderStackParamList>;
-  Search: NavigatorScreenParams<CustomerSearchStackParamList>;
   Profile: NavigatorScreenParams<CustomerProfileStackParamList>;
 };
 
-// Customer Stack Param Lists
+// Customer Home Stack - Only screens that should show tabs
 export type CustomerHomeStackParamList = {
   HomeScreen: undefined;
-  FoodDetails: { foodId: string; restaurantId: string };
-  RestaurantDetails: { restaurantId: string };
-  MenuCategory: { categoryId: string; restaurantId: string };
-  Notifications: undefined;
-  Promotions: undefined;
-  Cart: undefined;
-  Checkout: undefined;
-  OrderTracking: { orderId: string };
-  Category: { categoryId: string };
-  SearchScreen: undefined;
-  FilterOptions: undefined;
-  SearchResults: { query?: string; filters?: any };
-  FilterScreen: undefined; OrderSummary: undefined;
-};
-
-export type CustomerSearchStackParamList = {
-  SearchScreen: undefined;
-  FilterOptions: undefined;
-  SearchResults: { query?: string; filters?: any };
-  FilterScreen: undefined;
+  // Removed: Cart, FoodDetails, RestaurantDetails, SearchScreen, etc.
+  // These are now in RootStack
 };
 
 export type CustomerOrderStackParamList = {
@@ -65,25 +69,16 @@ export type CustomerOrderStackParamList = {
 };
 
 export type CustomerProfileStackParamList = {
-  FavoriteRestaurantScreen: undefined;
-  AddressScreen: undefined;
-  LanguageScreen: undefined;
   ProfileHome: undefined;
-  EditProfile: undefined;
-  AddressBook: undefined;
-  AddAddress: undefined;
-  PaymentMethods: undefined;
-  AddPayment: undefined;
-  Settings: undefined;
-  Help: undefined;
-  About: undefined;
+
 };
-export type CustomerHelpCenterStackParamsList = {
+
+export type CustomerHelpCenterStackParamList = {
   FAQ: undefined;
   ContactUs: undefined;
-}
+};
 
-// Restaurant Tab Navigator
+// Restaurant types (unchanged)
 export type RestaurantTabParamList = {
   Orders: NavigatorScreenParams<RestaurantOrdersStackParamList>;
   Menu: NavigatorScreenParams<RestaurantMenuStackParamList>;
@@ -91,7 +86,6 @@ export type RestaurantTabParamList = {
   Profile: NavigatorScreenParams<RestaurantProfileStackParamList>;
 };
 
-// Restaurant Stack Param Lists
 export type RestaurantOrdersStackParamList = {
   OrdersScreen: undefined;
   OrderDetails: { orderId: string };
@@ -134,37 +128,77 @@ export type RootStackScreenProps<T extends keyof RootStackParamList> =
   NativeStackScreenProps<RootStackParamList, T>;
 
 export type AuthStackScreenProps<T extends keyof AuthStackParamList> =
-  NativeStackScreenProps<AuthStackParamList, T>;
+  CompositeScreenProps<
+    NativeStackScreenProps<AuthStackParamList, T>,
+    RootStackScreenProps<keyof RootStackParamList>
+  >;
 
 export type CustomerTabScreenProps<T extends keyof CustomerTabParamList> =
-  BottomTabScreenProps<CustomerTabParamList, T>;
+  CompositeScreenProps<
+    BottomTabScreenProps<CustomerTabParamList, T>,
+    RootStackScreenProps<keyof RootStackParamList>
+  >;
 
 export type RestaurantTabScreenProps<T extends keyof RestaurantTabParamList> =
-  BottomTabScreenProps<RestaurantTabParamList, T>;
+  CompositeScreenProps<
+    BottomTabScreenProps<RestaurantTabParamList, T>,
+    RootStackScreenProps<keyof RootStackParamList>
+  >;
 
 export type CustomerHomeStackScreenProps<T extends keyof CustomerHomeStackParamList> =
-  NativeStackScreenProps<CustomerHomeStackParamList, T>;
-
-export type CustomerSearchStackScreenProps<T extends keyof CustomerSearchStackParamList> =
-  NativeStackScreenProps<CustomerSearchStackParamList, T>;
+  CompositeScreenProps<
+    NativeStackScreenProps<CustomerHomeStackParamList, T>,
+    CustomerTabScreenProps<'Home'>
+  >;
 
 export type CustomerOrderScreenProps<T extends keyof CustomerOrderStackParamList> =
-  MaterialTopTabScreenProps<CustomerOrderStackParamList, T>;
-
-export type CustomerHelpCenterStackScreenProps<T extends keyof CustomerHelpCenterStackParamsList> =
-  MaterialTopTabScreenProps<CustomerHelpCenterStackParamsList, T>
+  CompositeScreenProps<
+    MaterialTopTabScreenProps<CustomerOrderStackParamList, T>,
+    CustomerTabScreenProps<'Orders'>
+  >;
 
 export type CustomerProfileStackScreenProps<T extends keyof CustomerProfileStackParamList> =
-  NativeStackScreenProps<CustomerProfileStackParamList, T>;
+  CompositeScreenProps<
+    NativeStackScreenProps<CustomerProfileStackParamList, T>,
+    CustomerTabScreenProps<'Profile'>
+  >;
+
+export type CustomerHelpCenterStackScreenProps<T extends keyof CustomerHelpCenterStackParamList> =
+  CompositeScreenProps<
+    NativeStackScreenProps<CustomerHelpCenterStackParamList, T>,
+    RootStackScreenProps<'Help'>
+  >;
 
 export type RestaurantOrdersStackScreenProps<T extends keyof RestaurantOrdersStackParamList> =
-  NativeStackScreenProps<RestaurantOrdersStackParamList, T>;
+  CompositeScreenProps<
+    NativeStackScreenProps<RestaurantOrdersStackParamList, T>,
+    RestaurantTabScreenProps<'Orders'>
+  >;
 
 export type RestaurantMenuStackScreenProps<T extends keyof RestaurantMenuStackParamList> =
-  NativeStackScreenProps<RestaurantMenuStackParamList, T>;
+  CompositeScreenProps<
+    NativeStackScreenProps<RestaurantMenuStackParamList, T>,
+    RestaurantTabScreenProps<'Menu'>
+  >;
 
 export type RestaurantAnalyticsStackScreenProps<T extends keyof RestaurantAnalyticsStackParamList> =
-  NativeStackScreenProps<RestaurantAnalyticsStackParamList, T>;
+  CompositeScreenProps<
+    NativeStackScreenProps<RestaurantAnalyticsStackParamList, T>,
+    RestaurantTabScreenProps<'Analytics'>
+  >;
 
 export type RestaurantProfileStackScreenProps<T extends keyof RestaurantProfileStackParamList> =
-  NativeStackScreenProps<RestaurantProfileStackParamList, T>;
+  CompositeScreenProps<
+    NativeStackScreenProps<RestaurantProfileStackParamList, T>,
+    RestaurantTabScreenProps<'Profile'>
+  >;
+
+// User type enum
+export type UserType = 'customer' | 'restaurant';
+
+// Global navigation state
+declare global {
+  namespace ReactNavigation {
+    interface RootParamList extends RootStackParamList { }
+  }
+}

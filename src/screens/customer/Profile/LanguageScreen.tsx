@@ -2,8 +2,11 @@ import { View, Text } from 'react-native';
 import React from 'react';
 import CommonView from '@/src/components/common/CommonView';
 import { Checkbox } from 'react-native-paper';
+import { RootStackScreenProps } from '@/src/navigation/types';
 
-const Language = () => {
+const LanguageScreen = ({
+  navigation,
+}: RootStackScreenProps<'LanguageScreen'>) => {
   return (
     <CommonView>
       <View className="py-3 space-y-4">
@@ -20,4 +23,4 @@ const Language = () => {
   );
 };
 
-export default Language;
+export default LanguageScreen;

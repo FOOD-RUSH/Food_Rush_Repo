@@ -3,47 +3,60 @@ import {
   Text,
   KeyboardAvoidingView,
   Platform,
-  TouchableNativeFeedback,
-  Image,
+  TouchableWithoutFeedback,
+  TextInput,
   Keyboard,
 } from 'react-native';
-import React from 'react';
+import React, { useState } from 'react';
 import { InputFieldProps } from '@/src/types';
-import { TextInput } from 'react-native-paper';
 
 const InputField = ({
-      label,
-      labelStyle,
-  icon,
-  secureTextEntry = false,
-      containerStyle,
-      inputStyle,
-  iconStyle,
-  className,
-      ...props
+  inputStyle,
+  labelStyle,
+  label,
+  error,
+  placeholder,
+  leftIcon,
+  rightIcon,
+  ...props
 }: InputFieldProps) => {
-    return (
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
-      <TouchableNativeFeedback onPress={Keyboard.dismiss} className='flex-1'>
-        <View className="my-2 w-full flex-1">
-          <Text className={`text-lg mb-3 ${labelStyle}`}>{label}</Text>
-          <View
-            className={`bg-neutral-100 rounded-full 
-          border border-neutral-100 focus:border-primaryColor ${containerStyle}
-          `}
-          >
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      className="flex-1"
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View className={`my-2 w-full`}>
+          {/* Label */}
+          {label && (
+            <Text
+              className={`text-base mb-2 font-semibold text-gray-700 ${labelStyle || ''}`}
+            >
+              {label}
+            </Text>
+          )}
+          <View className={`px-3 py-[10px] bg-gray-200 rounded-2xl mx-2 flex-row items-center ${inputStyle || ''}`}>
+            {leftIcon && (
+              <View className="mx-2">
+                {leftIcon}
+              </View>
+            )}
             <TextInput
-            mode='outlined'
-              className={`p-5 text-[15px] flex-1 ${inputStyle} text-left`}
-              secureTextEntry={secureTextEntry}
+              placeholder={placeholder}
+              autoCapitalize="none"
+             className='flex-1 text-lg bg-gray-200 '
             />
+            {rightIcon && (
+              <View className="mr-2">
+                {rightIcon}
+              </View>
+            )}
           </View>
+          {/* Input Container */}
         </View>
-      </TouchableNativeFeedback>
-      </KeyboardAvoidingView>
-    );
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
+  );
 };
 
 export default InputField;

@@ -1,61 +1,147 @@
-import { TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, View , Text} from 'react-native';
 import React from 'react';
-import { Card, Text } from 'react-native-paper';
+import { Card,  } from 'react-native-paper';
 import { images } from '@/assets/images';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { CustomerHomeStackScreenProps } from '@/src/navigation/types';
+import { useNavigation } from '@react-navigation/native';
 
-const ClassicFoodCard = () => {
+interface ClassicFoodCardProps {
+  id: string;
+  foodName?: string;
+  foodPrice?: number;
+  restaurantName?: string;
+  distance?: number;
+  rating?: number;
+  status?: string;
+}
+
+const ClassicFoodCard = ({
+  id,
+  foodName = 'Egg & Pasta',
+  foodPrice = 650,
+  restaurantName = 'Resto Chez Dialo',
+  distance = 190,
+  rating = 4.9,
+  status = 'PROMO'
+}: ClassicFoodCardProps) => {
+  const navigation =
+    useNavigation<CustomerHomeStackScreenProps<'HomeScreen'>['navigation']>();
+
   return (
-    <Card
-      mode="outlined"
-      onPress={() => {}}
-      className="shadow-sm p-2 border border-gray-200 overflow-hidden "
+    <TouchableOpacity
+      activeOpacity={0.8}
+      onPress={() => {
+        navigation.navigate('FoodDetails', { foodId: id, restaurantId: '1' });
+      }}
     >
-      <View className="px-2 py-3">
-        <View className="relative justify-center item-center">
-          <Card.Cover
-            src={images.onboarding2}
-            height={150}
-            width={150}
-            className="h-[150px] w-[150px] rounded-full"
-          />
-          <TouchableOpacity className="absolute top-4 right-8 bg-white">
-            <Ionicons
-              name="heart-circle-outline"
-              color={'pink'}
-              selectionColor={'#ce3b54'}
-              size={20}
+      <Card
+        mode="outlined"
+        className="overflow-hidden"
+        style={{
+          width: 200,
+          borderRadius: 16,
+          backgroundColor: 'white',
+          elevation: 4,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.15,
+          shadowRadius: 8,
+          borderWidth: 1,
+          borderColor: '#e8e8e8'
+        }}
+      >
+        <View className="p-3">
+          {/* Image with heart icon overlay */}
+          <View className="relative mb-3">
+            <Card.Cover
+              source={images.onboarding2}
+              style={{
+                height: 150,
+                width: 150,
+                borderRadius: 75,
+                alignSelf: 'center',
+              }}
             />
-          </TouchableOpacity>
-        </View>
-        <View className="flex-col item-center">
-          <Text variant="headlineLarge" className="mb-2">
-            Egg and Pasta
-          </Text>
-          <Text variant="headlineMedium" className="mb-2 text-gray-500">
-            Reste Chez Dialo
-          </Text>
-        </View>
+            <TouchableOpacity
+              className="absolute top-2 right-2 bg-white rounded-full p-1.5"
+              style={{
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 3,
+                elevation: 3,
+              }}
+            >
+              <Ionicons name="heart-outline" color={'#ff6b6b'} size={16} />
+            </TouchableOpacity>
 
-        <View className="flex-row justify-between">
-          <View className="flex-row">
-            <Ionicons name="star" size={18} color={'#ffbb00'} />
-            <Text>190m</Text>
+            {/* Status badge */}
+            <View className="absolute top-2 left-2 bg-blue-500 rounded-md px-2 py-1">
+              <Text
+                style={{ 
+                  color: 'white', 
+                  fontSize: 9, 
+                  fontWeight: 'bold',
+                  textAlign: 'center'
+                }}
+              >
+                {status}
+              </Text>
+            </View>
           </View>
-          <View className="flex-row">
-            <Ionicons name="map" size={18} color={'#007aff'} />
-            <Text>190m</Text>
+
+          {/* Food info */}
+          <View className="mb-2 self-center">
+            <Text
+              className="font-semibold text-gray-800 mb-1 text-center text-2xl"
+              numberOfLines={1}
+            >
+              {foodName}
+            </Text>
+            <Text
+              className="text-gray-500 mb-2 text-center text-lg"
+              numberOfLines={1}
+            >
+              {restaurantName}
+            </Text>
+          </View>
+
+          {/* Rating and distance */}
+          <View className="flex-row justify-between items-center mb-3">
+            <View className="flex-row items-center">
+              <Ionicons name="star" size={16} color={'#ffbb00'} />
+              <Text className="text-xs text-gray-600 ml-1" style={{ fontSize: 14 }}>
+                {rating}
+              </Text>
+            </View>
+            <View className="flex-row items-center">
+              <Ionicons name="location-outline" size={16} color={'#007aff'} />
+              <Text className="text-xs text-gray-600 ml-1" style={{ fontSize: 14 }}>
+                {distance}m
+              </Text>
+            </View>
+          </View>
+
+          {/* Price and delivery info */}
+          <View className="flex-row justify-between items-center">
+            <Text className="text-blue-600 font-bold" style={{ fontSize: 17 }}>
+              {foodPrice} FCFA
+            </Text>
+            <View className="flex-row items-center">
+              <MaterialIcons
+                name="delivery-dining"
+                color={'#007aff'}
+                size={18}
+              />
+              <Text className="text-gray-400 ml-1" style={{ fontSize: 12 }}>
+                SOLD OUT
+              </Text>
+            </View>
           </View>
         </View>
-        <View className="flex-row justify-between m-2">
-          <Text className="text-primaryColor">500 FCFA</Text>
-          <View className="flex-row">
-            <MaterialIcons name="bike-scooter" color={'#007aff'} size={20} />
-            <Text className="text-gray-400 text-[12px]">500.0F</Text>
-          </View>
-        </View>
-      </View>
-    </Card>
+      </Card>
+    </TouchableOpacity>
   );
 };
 
