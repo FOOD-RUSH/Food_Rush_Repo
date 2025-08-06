@@ -114,7 +114,6 @@ export function CustomerHelpCenterStackScreen() {
       <CustomerHelpStack.Screen
         name="FAQ"
         component={FAQ}
-        options={{ title: 'Frequently Asked Questions' }}
       />
       <CustomerHelpStack.Screen
         name="ContactUs"

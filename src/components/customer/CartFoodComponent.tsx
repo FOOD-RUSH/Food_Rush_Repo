@@ -9,10 +9,12 @@ const CartFoodComponent = () => {
       mode="outlined"
       style={{
         margin: 10,
-        borderRadius: 16,
-        overflow: 'hidden',
-        borderColor: '#e0e0e0',
-        boxShadow: '0 2px 3px 1px rgba(0,0,0,0.1)',
+          borderRadius: 16,
+          overflow: 'hidden',
+          backgroundColor: 'white',
+          marginVertical: 12,
+          borderColor: 'white',
+          boxShadow: '0px 1px 5px 3px rgba(0, 0, 0, 0.15)',
       }}
     >
       <View className="flex-row  flex items-center p-3">
@@ -23,7 +25,7 @@ const CartFoodComponent = () => {
           source={images.onboarding2}
           defaultSource={images.customerImg}
         />
-        <View className="space-y-2 flex-col flex-1 ml-3">
+        <View className="space-y-2 flex-col flex-1 ml-4">
           <Text className="text-[20px] font-semibold">Mixed Salad Bon...</Text>
           <View className="flex-row items-center ">
             <Text className="text-gray-500 font-semibold">3 items  </Text>

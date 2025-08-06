@@ -1,6 +1,5 @@
 import { View, Text, Image } from 'react-native';
 import React, { useState } from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScrollView } from 'react-native-gesture-handler';
 import { icons } from '@/assets/images';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
@@ -9,7 +8,6 @@ import { Dropdown } from 'react-native-element-dropdown';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import { Button } from 'react-native-paper';
 import CommonView from '@/src/components/common/CommonView';
-import { green } from 'react-native-reanimated/lib/typescript/Colors';
 
 const EditProfileScreen = ({
   navigation,
@@ -79,18 +77,19 @@ const EditProfileScreen = ({
           }
           placeholder="Phone Number"
         />
-        <Button
+       
+      </ScrollView>
+       <Button
           mode="contained"
           buttonColor={'#007Aff'}
           textColor="white"
           contentStyle={{ paddingVertical: 12 }}
           style={{ borderRadius: 25, marginTop: 16 }}
           labelStyle={{ fontSize: 16, fontWeight: '600', color: 'white' }}
-          className="active:opacity-75"
+          className="active:opacity-75 mb-2"
         >
           update
         </Button>
-      </ScrollView>
     </CommonView>
   );
 };

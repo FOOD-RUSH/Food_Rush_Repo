@@ -30,29 +30,6 @@ import NoOrdersLight from '@/assets/images/Food Illustrations/Clipboard light-1.
 import NoOrdersDark from '@/assets/images/Food Illustrations/Clipboard light.png';
 import ProfilePlogo from '@/assets/images/Food Illustrations/Type=Edit Avatar, Component=Avatar lIGHT.png'
 // Icons
-import profile from '@/assets/images/Varant=Outline, Type=user.svg';
-import profile_bold from '@/assets/images/Varant=Solid, Type=user.svg'
-import notification from '@/assets/images/Varant=Outline, Type=bell.svg';
-import email_solid from '@/assets/images/Varant=Solid, Type=mail.svg';
-import email from '@/assets/images/Varant=Outline, Type=mail.svg'
-import show from '@/assets/images/Varant=Outline, Type=eye.svg'
-import show_bold from '@/assets/images/Varant=Solid, Type=eye.svg'
-import hide from '@/assets/images/Varant=Solid, Type=eye-off.svg'
-import hide_bold from '@/assets/images/Varant=Outline, Type=eye-off.svg'
-import lock from '@/assets/images/Varant=Outline, Type=lock-closed.svg'
-import lock_bold from '@/assets/images/Varant=Solid, Type=lock-closed.svg'
-import more from '@/assets/images/Varant=Outline, Type=dots-circle-horizontal.svg'
-import back from '@/assets/images/Varant=Outline, Type=arrow-left.svg'
-import filter from '@/assets/images/Varant=Outline, Type=adjustments.svg'
-import home from '@/assets/images/Varant=Outline, Type=home.svg'
-import cancel from '@/assets/images/Varant=Outline, Type=x.svg'
-import search from '@/assets/images/Varant=Outline, Type=search.svg'
-import security from '@/assets/images/Varant=Outline, Type=shield-check.svg'
-import star from '@/assets/images/Varant=Outline, Type=sparkles.svg'
-import card from '@/assets/images/Varant=Outline, Type=credit-card.svg'
-import gift from '@/assets/images/Varant=Outline, Type=gift.svg'
-import calendar from '@/assets/images/Varant=Outline, Type=calendar.svg'
-import order from '@/assets/images/Varant=Outline, Type=clipboard-list.svg'
 import not_found from '@/assets/images/Food Illustrations/Not found darck.png'
 
 export const images = {
@@ -76,11 +53,7 @@ export const icons = {
     appleIcon,
     R_logo,
     ProfilePlogo,
-    order,
-    calendar,
-    cancel,
-    card, gift, profile, profile_bold, notification, show, show_bold, star, search, security, home, filter, more, lock, lock_bold,back, email, email_solid, hide_bold, hide
-}
+   }
 
 export const FoodCategory = {
     appleIcon,

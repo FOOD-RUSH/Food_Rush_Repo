@@ -1,8 +1,8 @@
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import React from 'react';
 import { Avatar } from 'react-native-paper';
-import { icons, images } from '@/assets/images';
-import { AntDesign, Ionicons } from '@expo/vector-icons';
+import { icons } from '@/assets/images';
+import { AntDesign } from '@expo/vector-icons';
 import RowView from '@/src/components/common/RowView';
 import { CustomerProfileStackScreenProps } from '@/src/navigation/types';
 import CommonView from '@/src/components/common/CommonView';

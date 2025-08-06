@@ -373,7 +373,7 @@ const RestaurantDetailScreen = ({
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ paddingRight: 16 }}
-              s
+              
 />
         </View>
 
@@ -392,7 +392,7 @@ const RestaurantDetailScreen = ({
                 <TouchableRipple
                   key={category}
                   onPress={() => setSelectedCategory(category)}
-                  className={`px-4 py-2 rounded-full ${
+                  className={`px-4 py-2 rounded-full mx-1 ${
                     selectedCategory === category
                       ? 'bg-primaryColor'
                       : 'bg-gray-100'

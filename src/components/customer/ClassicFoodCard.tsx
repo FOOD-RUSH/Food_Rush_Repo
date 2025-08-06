@@ -1,6 +1,6 @@
-import { TouchableOpacity, View , Text} from 'react-native';
+import { TouchableOpacity, View, Text } from 'react-native';
 import React from 'react';
-import { Card,  } from 'react-native-paper';
+import { Card } from 'react-native-paper';
 import { images } from '@/assets/images';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { CustomerHomeStackScreenProps } from '@/src/navigation/types';
@@ -23,7 +23,7 @@ const ClassicFoodCard = ({
   restaurantName = 'Resto Chez Dialo',
   distance = 190,
   rating = 4.9,
-  status = 'PROMO'
+  status = 'PROMO',
 }: ClassicFoodCardProps) => {
   const navigation =
     useNavigation<CustomerHomeStackScreenProps<'HomeScreen'>['navigation']>();
@@ -42,13 +42,14 @@ const ClassicFoodCard = ({
           width: 190,
           borderRadius: 16,
           backgroundColor: 'white',
-          elevation: 4,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: 4 },
           shadowOpacity: 0.15,
           shadowRadius: 8,
           borderWidth: 1,
-          borderColor: '#e8e8e8'
+          marginVertical: 12,
+          borderColor: 'white',
+          boxShadow: '0px 1px 5px 3px  rgba(0, 0, 0, 0.15)',
         }}
       >
         <View className="p-3">
@@ -79,11 +80,11 @@ const ClassicFoodCard = ({
             {/* Status badge */}
             <View className="absolute top-2 left-2 bg-blue-500 rounded-md px-2 py-1">
               <Text
-                style={{ 
-                  color: 'white', 
-                  fontSize: 11, 
+                style={{
+                  color: 'white',
+                  fontSize: 11,
                   fontWeight: 'bold',
-                  textAlign: 'center'
+                  textAlign: 'center',
                 }}
               >
                 {status}
@@ -111,13 +112,19 @@ const ClassicFoodCard = ({
           <View className="flex-row justify-between items-center mb-3">
             <View className="flex-row items-center">
               <Ionicons name="star" size={16} color={'#ffbb00'} />
-              <Text className="text-xs text-gray-600 ml-1" style={{ fontSize: 14 }}>
+              <Text
+                className="text-xs text-gray-600 ml-1"
+                style={{ fontSize: 14 }}
+              >
                 {rating}
               </Text>
             </View>
             <View className="flex-row items-center">
               <Ionicons name="location-outline" size={16} color={'#007aff'} />
-              <Text className="text-xs text-gray-600 ml-1" style={{ fontSize: 14 }}>
+              <Text
+                className="text-xs text-gray-600 ml-1"
+                style={{ fontSize: 14 }}
+              >
                 {distance}m
               </Text>
             </View>

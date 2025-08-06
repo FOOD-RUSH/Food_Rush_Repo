@@ -219,7 +219,9 @@ const FoodDetailsScreen = ({
         />
         </View>        
        
-<View className='px-4 mb-[100px]'>
+
+      </ScrollView>
+      <View className='px-4 pb-12 shadow-2xl bg-white '>
            <TouchableRipple
            
         onPress={handleAddToBasket}
@@ -235,8 +237,6 @@ const FoodDetailsScreen = ({
         </View>
       </TouchableRipple>
 </View>
-      </ScrollView>
-
      
     </>
   );

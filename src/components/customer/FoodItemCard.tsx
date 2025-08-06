@@ -19,7 +19,6 @@ export interface FoodItemCardProps {
 }
 
 const FoodItemCard = ({
-
   FoodName,
   FoodPrice,
   FoodImage,
@@ -49,9 +48,10 @@ const FoodItemCard = ({
           margin: 10,
           borderRadius: 16,
           overflow: 'hidden',
-          borderColor: '#e0e0e0',
-          boxShadow: '1px 1px 1px 1px rgba(0, 0, 0, 0.1)',
           backgroundColor: 'white',
+          marginVertical: 12,
+          borderColor: 'white',
+          boxShadow: '0px 1px 5px 3px  rgba(0, 0, 0, 0.15)',
         }}
       >
         {/* Card content with horizontal layout */}
@@ -148,7 +148,7 @@ const FoodItemCard = ({
                     fontWeight: 'bold',
                   }}
                 >
-                  {FoodPrice}  XAF
+                  {FoodPrice} XAF
                 </Text>
                 <Text style={{ color: '#A0A0A0', fontSize: 12, marginLeft: 5 }}>
                   |

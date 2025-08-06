@@ -44,12 +44,15 @@ export const RestaurantCard = ({
           margin: 10,
           borderRadius: 16,
           overflow: 'hidden',
-          borderColor: '#e0e0e0',
-          elevation: 2,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.1,
           shadowRadius: 4,
+          backgroundColor: 'white',
+          borderWidth: 1,
+          marginVertical: 12,
+          borderColor: 'white',
+          boxShadow: '0px 1px 5px 3px  rgba(0, 0, 0, 0.15)',
         
         }}
       >

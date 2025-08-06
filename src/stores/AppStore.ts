@@ -31,7 +31,7 @@ export const useAppStore = create<AppState & AppActions>()(
                 isOnboardingComplete: false,
                 _hasHydrated: false,
 
-                // actio
+                // action
                 resetApp: () => set({
                     userType: null,
                     theme: 'light',

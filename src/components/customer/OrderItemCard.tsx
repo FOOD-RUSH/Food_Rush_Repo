@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import React from 'react';
+import { Card } from 'react-native-paper';
 
 export interface OrderItemCardProps {
   foodId: string;
@@ -23,14 +24,15 @@ const OrderItemCard = ({
   distance = '2.4 km',
 }: OrderItemCardProps) => {
   return (
-    <View
-      className="bg-white rounded-2xl mx-4 mb-4 shadow-sm"
+    <Card
       style={{
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 3,
+        margin: 10,
+          borderRadius: 16,
+          overflow: 'hidden',
+          backgroundColor: 'white',
+          marginVertical: 12,
+          borderColor: 'white',
+          boxShadow: '0px 1px 5px 3px rgba(0, 0, 0, 0.15)',
       }}
     >
       {/* Main Content */}
@@ -90,7 +92,7 @@ const OrderItemCard = ({
           {orderStatus === 'active' ? (
             <>
               <TouchableOpacity
-                className="flex-1 border border-blue-500 rounded-full py-3 mr-2"
+                className="flex-1 border border-blue-500 rounded-full py-2 mr-2"
                 onPress={() => {
                   // Handle cancel order logic here
                 }}
@@ -101,7 +103,7 @@ const OrderItemCard = ({
               </TouchableOpacity>
 
               <TouchableOpacity
-                className="flex-1 bg-blue-500 rounded-full py-3 ml-2"
+                className="flex-1 bg-blue-500 rounded-full py-2 ml-2"
                 onPress={() => {
                   // Handle track driver logic here
                 }}
@@ -114,7 +116,7 @@ const OrderItemCard = ({
           ) : ( 
             <>
               <TouchableOpacity
-                className="flex-1 border border-blue-500 rounded-full py-3 mr-2"
+                className="flex-1 border border-blue-500 rounded-full py-2 mr-2"
                 onPress={() => {
                   // Handle leave review logic here
                 }}
@@ -125,7 +127,7 @@ const OrderItemCard = ({
               </TouchableOpacity>
 
               <TouchableOpacity
-                className="flex-1 bg-blue-500 rounded-full py-3 ml-2"
+                className="flex-1 bg-blue-500 rounded-full py-2 ml-2"
                 onPress={() => {
                   // Handle order again logic here
                 }}
@@ -138,7 +140,7 @@ const OrderItemCard = ({
           )}
         </View>
       </View>
-    </View>
+    </Card>
   );
 };
 

@@ -30,6 +30,7 @@ import PaymentScreen from '../screens/customer/Profile/PaymentScreen';
 import LanguageScreen from '../screens/customer/Profile/LanguageScreen';
 import { useAppStore } from '../stores/AppStore';
 import { useAuthStore } from '../stores/AuthStore';
+import { TouchableOpacity } from 'react-native';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -245,12 +246,7 @@ const RootNavigator: React.FC = () => {
               options={{
                 headerTitle: 'Checkout Order',
                 gestureEnabled: true,
-                headerLeft: () =>
-                  Platform.OS === 'ios' ? (
-                    <MaterialIcons name="arrow-back-ios-new" size={20} />
-                  ) : (
-                    <MaterialIcons name="arrow-back" size={20} />
-                  ),
+               
               }}
             />
 

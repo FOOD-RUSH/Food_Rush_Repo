@@ -21,9 +21,12 @@ const MenuItemCard = ({ id, restaurantID, name, price, image }: FoodProps) => {
           margin: 10,
           borderRadius: 16,
           overflow: 'hidden',
-          boxShadow: '2px 2px 2px 1px rgba(230, 229, 229, 0.965)',
-          borderColor: isSelect ? '#007aff' : '#e0e0e0',
           backgroundColor: 'white',
+          marginVertical: 12,
+          boxShadow: !isSelect
+            ? '0px 1px 5px 3px  rgba(0, 0, 0, 0.15)'
+            : ' 0px 1px 5px 3px rgba(0, 122, 255, 0.15)',
+          borderColor: isSelect ? '#007aff' : '#e0e0e0',
           elevation: 2,
         }}
         key={id}
