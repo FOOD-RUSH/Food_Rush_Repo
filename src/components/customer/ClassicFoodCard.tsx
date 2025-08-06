@@ -39,7 +39,7 @@ const ClassicFoodCard = ({
         mode="outlined"
         className="overflow-hidden"
         style={{
-          width: 200,
+          width: 190,
           borderRadius: 16,
           backgroundColor: 'white',
           elevation: 4,
@@ -73,7 +73,7 @@ const ClassicFoodCard = ({
                 elevation: 3,
               }}
             >
-              <Ionicons name="heart-outline" color={'#ff6b6b'} size={16} />
+              <Ionicons name="heart-outline" color={'#ff6b6b'} size={20} />
             </TouchableOpacity>
 
             {/* Status badge */}
@@ -81,7 +81,7 @@ const ClassicFoodCard = ({
               <Text
                 style={{ 
                   color: 'white', 
-                  fontSize: 9, 
+                  fontSize: 11, 
                   fontWeight: 'bold',
                   textAlign: 'center'
                 }}
@@ -94,13 +94,13 @@ const ClassicFoodCard = ({
           {/* Food info */}
           <View className="mb-2 self-center">
             <Text
-              className="font-semibold text-gray-800 mb-1 text-center text-2xl"
+              className="font-semibold text-gray-800 mb-1 text-center text-[20px]"
               numberOfLines={1}
             >
               {foodName}
             </Text>
             <Text
-              className="text-gray-500 mb-2 text-center text-lg"
+              className="text-gray-500 mb-2 text-center text-[16px]"
               numberOfLines={1}
             >
               {restaurantName}
@@ -125,7 +125,7 @@ const ClassicFoodCard = ({
 
           {/* Price and delivery info */}
           <View className="flex-row justify-between items-center">
-            <Text className="text-blue-600 font-bold" style={{ fontSize: 17 }}>
+            <Text className="text-blue-600 font-bold" style={{ fontSize: 16 }}>
               {foodPrice} FCFA
             </Text>
             <View className="flex-row items-center">

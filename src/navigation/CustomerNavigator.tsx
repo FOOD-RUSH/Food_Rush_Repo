@@ -21,9 +21,6 @@ import ProfileHomeScreen from '../screens/customer/Profile/ProfileHomeScreen';
 import CompletedOrderScreen from '../screens/customer/Order/CompletedOrderScreen';
 import ActiveOrderScreen from '../screens/customer/Order/ActiveOrderScreen';
 // import OrderDetailsScreen from '../screens/customer/Order/OrderDetailsScreen';
-import EditProfileScreen from '../screens/customer/Profile/EditProfileScreen';
-import Language from '../screens/customer/Profile/LanguageScreen';
-import FavoriteRestaurants from '../screens/customer/Profile/FavoriteRestaurants';
 import FAQ from '../screens/customer/Profile/FAQ';
 // import ContactUs from '../screens/customer/Profile/ContactUs';
 // import AddressScreen from '../screens/customer/Profile/AddressScreen';
@@ -47,7 +44,7 @@ const CustomerOrderStack =
 const CustomerProfileStack =
   createNativeStackNavigator<CustomerProfileStackParamList>();
 const CustomerHelpStack =
-  createNativeStackNavigator<CustomerHelpCenterStackParamList>();
+  createMaterialTopTabNavigator<CustomerHelpCenterStackParamList>();
 
 // Custom back button component
 
@@ -101,20 +98,18 @@ function CustomerOrderStackScreen() {
 }
 
 export function CustomerHelpCenterStackScreen() {
-  const commonScreenOptions = {
-    headerStyle: {
-      backgroundColor: lightTheme.colors.background,
-    },
-    headerTintColor: lightTheme.colors.primary,
-    headerTitleStyle: {
-      fontWeight: 'bold' as const,
-    },
-  };
 
   return (
     <CustomerHelpStack.Navigator
       initialRouteName="FAQ"
-      screenOptions={commonScreenOptions}
+      screenOptions={{
+        tabBarActiveTintColor: lightTheme.colors.primary,
+        tabBarInactiveTintColor: '#808080',
+        tabBarStyle: {
+          borderTopColor: 'white',
+        },
+        lazy: true, // Performance optimization
+      }}
     >
       <CustomerHelpStack.Screen
         name="FAQ"
@@ -131,18 +126,14 @@ export function CustomerHelpCenterStackScreen() {
 }
 
 function CustomerProfileStackScreen() {
-  const commonScreenOptions = {
-    headerStyle: {
-      backgroundColor: lightTheme.colors.background,
-    },
-    headerTintColor: lightTheme.colors.primary,
-    headerTitleAlign: 'center' as const,
-  };
+  
 
   return (
     <CustomerProfileStack.Navigator
       initialRouteName="ProfileHome"
-      screenOptions={commonScreenOptions}
+      screenOptions={{contentStyle: {
+        marginTop: -39
+      }}}
     >
       <CustomerProfileStack.Screen
         name="ProfileHome"
@@ -210,7 +201,7 @@ export default function CustomerNavigator() {
     () => ({
       backgroundColor: '#fff',
       borderColor: '#e0e0e0',
-      height: (Platform.OS === 'ios' ? 90 : 70) + insets.bottom,
+      height: (Platform.OS === 'ios' ? 80 : 60) + insets.bottom,
       paddingBottom: (Platform.OS === 'ios' ? 25 : 10) + insets.bottom,
       borderTopRightRadius: 40,
       borderTopLeftRadius: 40,

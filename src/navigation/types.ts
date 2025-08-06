@@ -165,7 +165,7 @@ export type CustomerProfileStackScreenProps<T extends keyof CustomerProfileStack
 
 export type CustomerHelpCenterStackScreenProps<T extends keyof CustomerHelpCenterStackParamList> =
   CompositeScreenProps<
-    NativeStackScreenProps<CustomerHelpCenterStackParamList, T>,
+    MaterialTopTabScreenProps<CustomerHelpCenterStackParamList, T>,
     RootStackScreenProps<'Help'>
   >;
 

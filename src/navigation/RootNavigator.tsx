@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
@@ -6,10 +6,11 @@ import { RootStackParamList } from './types';
 import { navigationRef, handleDeepLink } from './navigationHelpers';
 import { linking } from './linking';
 import { Linking, Platform } from 'react-native';
-
 // Import navigators
 import AuthNavigator from './AuthNavigator';
-import CustomerNavigator, { CustomerHelpCenterStackScreen } from './CustomerNavigator';
+import CustomerNavigator, {
+  CustomerHelpCenterStackScreen,
+} from './CustomerNavigator';
 import RestaurantNavigator from './RestaurantNavigator';
 
 // // Import full-screen screens (no tabs)
@@ -27,97 +28,43 @@ import EditProfileScreen from '../screens/customer/Profile/EditProfileScreen';
 import FavoriteRestaurants from '../screens/customer/Profile/FavoriteRestaurants';
 import PaymentScreen from '../screens/customer/Profile/PaymentScreen';
 import LanguageScreen from '../screens/customer/Profile/LanguageScreen';
+import { useAppStore } from '../stores/AppStore';
+import { useAuthStore } from '../stores/AuthStore';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-interface AppState {
-  isLoading: boolean;
-  isOnboardingComplete: boolean;
-  isAuthenticated: boolean;
-  userType: 'customer' | 'restaurant' | null;
-}
-
 const RootNavigator: React.FC = () => {
-  const [appState, setAppState] = useState<AppState>({
-    isLoading: true,
-    isOnboardingComplete: false,
-    isAuthenticated: false,
-    userType: null,
-  });
-
-  const initializeApp = useCallback(async () => {
-    try {
-      // TODO: Replace with actual AsyncStorage calls
-      // const onboardingStatus = await AsyncStorage.getItem('onboardingComplete');
-      // const authStatus = await AsyncStorage.getItem('isAuthenticated');
-      // const storedUserType = await AsyncStorage.getItem('userType') as 'customer' | 'restaurant' | null;
-
-      // For development - replace with actual storage logic
-      setAppState({
-        isLoading: false,
-        isOnboardingComplete: true,
-        isAuthenticated: true,
-        userType: 'customer',
-      });
-    } catch (error) {
-      console.error('Error initializing app:', error);
-      setAppState((prev) => ({ ...prev, isLoading: false }));
-    }
-  }, []);
-
-  useEffect(() => {
-    initializeApp();
-  }, [initializeApp]);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const _hasHydrated = useAppStore((state) => state._hasHydrated);
+  const completeOnboarding = useAppStore((state) => state.completeOnboarding);
+  const isOnboardingComplete = useAppStore(
+    (state) => state.isOnboardingComplete,
+  );
+  const userType = useAppStore((state) => state.userType);
+  const setUserType = useAppStore((state) => state.setUserType);
 
   const handleOnboardingComplete = useCallback(
-    async (selectedUserType: 'customer' | 'restaurant') => {
-      try {
-        setAppState((prev) => ({
-          ...prev,
-          userType: selectedUserType,
-          isOnboardingComplete: true,
-        }));
-
-        // TODO: Save to AsyncStorage
-        // await AsyncStorage.setItem('onboardingComplete', 'true');
-        // await AsyncStorage.setItem('userType', selectedUserType);
-      } catch (error) {
-        console.error('Error saving onboarding state:', error);
-      }
+    (selectedUserType: 'customer' | 'restaurant') => {
+      setUserType(selectedUserType);
+      completeOnboarding();
     },
-    [],
+    [completeOnboarding, setUserType],
   );
 
   const handleLogin = useCallback(
-    async (selectedUserType: 'customer' | 'restaurant' | null) => {
-      if (!selectedUserType) {
-        console.warn('No user type selected during login');
-        return;
-      }
-
-      try {
-        setAppState((prev) => ({
-          ...prev,
-          userType: selectedUserType,
-          isAuthenticated: true,
-        }));
-
-        // TODO: Save to AsyncStorage
-        // await AsyncStorage.setItem('isAuthenticated', 'true');
-        // await AsyncStorage.setItem('userType', selectedUserType);
-      } catch (error) {
-        console.error('Error saving authentication state:', error);
-      }
+    (selectedUserType: 'customer' | 'restaurant') => {
+      setUserType(selectedUserType);
     },
-    [],
+    [setUserType],
   );
 
   const getInitialRouteName = useCallback((): keyof RootStackParamList => {
-    if (!appState.isAuthenticated) {
-      return 'Auth';
+    console.log(isAuthenticated);
+    if (!isAuthenticated) {
+      return 'CustomerApp';
     }
 
-    switch (appState.userType) {
+    switch (userType) {
       case 'customer':
         return 'CustomerApp';
       case 'restaurant':
@@ -125,7 +72,7 @@ const RootNavigator: React.FC = () => {
       default:
         return 'Auth';
     }
-  }, [appState.isAuthenticated, appState.userType]);
+  }, [isAuthenticated, userType]);
 
   const handleNavigationReady = useCallback(() => {
     // Set up deep link listener
@@ -144,11 +91,10 @@ const RootNavigator: React.FC = () => {
     // Optimize for performance
     lazy: true,
     unmountOnBlur: false,
-     backgroundColor: 'white',
-      borderBottomWidth: 0,
-      shadowColor: 'transparent',
-      elevation: 0,
-       
+    backgroundColor: 'white',
+    borderBottomWidth: 0,
+    shadowColor: 'transparent',
+    elevation: 0,
   };
 
   const modalOptions = {
@@ -156,7 +102,6 @@ const RootNavigator: React.FC = () => {
     headerShown: true,
     headerTitleAlign: 'center' as const,
     animation: 'slide_from_bottom' as const,
-    
   };
 
   const cardOptions = {
@@ -167,11 +112,11 @@ const RootNavigator: React.FC = () => {
     animation: 'slide_from_right' as const,
   };
 
-  if (appState.isLoading) {
+  if (!_hasHydrated) {
     return <LoadingScreen />;
   }
 
-  if (!appState.isOnboardingComplete) {
+  if (!isOnboardingComplete) {
     return (
       <>
         <StatusBar style="auto" />
@@ -260,25 +205,31 @@ const RootNavigator: React.FC = () => {
                 headerTitle: '',
               }}
             />
-            <Stack.Screen 
-            name='EditProfile'
-            component={EditProfileScreen} 
+          </Stack.Group>
+          <Stack.Group
+            screenOptions={{
+              presentation: 'card',
+              headerShown: true,
+              headerTitleAlign: 'center',
+              animation: 'slide_from_left',
+              sheetElevation: 0,
+              headerShadowVisible: false,
+              contentStyle: {
+                marginBottom: -20,
+              },
+            }}
+          >
+            <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+            <Stack.Screen
+              name="Help"
+              component={CustomerHelpCenterStackScreen}
             />
             <Stack.Screen
-            name='Help'
-            component={CustomerHelpCenterStackScreen}
+              name="FavoriteRestaurantScreen"
+              component={FavoriteRestaurants}
             />
-            <Stack.Screen
-            name='FavoriteRestaurantScreen'
-            component={FavoriteRestaurants}
-            />
-            <Stack.Screen
-            name='PaymentMethods'
-            component={PaymentScreen}
-            /><Stack.Screen
-            name='LanguageScreen'
-            component={LanguageScreen}
-            />
+            <Stack.Screen name="PaymentMethods" component={PaymentScreen} />
+            <Stack.Screen name="LanguageScreen" component={LanguageScreen} />
           </Stack.Group>
 
           <Stack.Group
@@ -302,8 +253,8 @@ const RootNavigator: React.FC = () => {
                   ),
               }}
             />
-            
-{/* 
+
+            {/* 
             <Stack.Screen 
               name="OrderTracking" 
               component={OrderTrackingScreen}

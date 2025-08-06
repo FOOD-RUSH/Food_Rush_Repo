@@ -205,7 +205,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({navigation, rou
           style={styles.container}
           keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
         >
-          <SafeAreaView style={styles.safeArea}>
+        
             <ScrollView
               style={styles.scrollView}
               showsVerticalScrollIndicator={false}
@@ -538,7 +538,6 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({navigation, rou
                 />
               </SafeAreaView>
             </Modal>
-          </SafeAreaView>
         </KeyboardAvoidingView>
       </ScrollView>
     </CommonView>
@@ -590,7 +589,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   formContainer: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 8,
   },
   inputContainer: {
     marginBottom: 16,

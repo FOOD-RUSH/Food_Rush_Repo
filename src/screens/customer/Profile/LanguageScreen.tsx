@@ -9,13 +9,13 @@ const LanguageScreen = ({
 }: RootStackScreenProps<'LanguageScreen'>) => {
   return (
     <CommonView>
-      <View className="py-3 space-y-4">
+      <View className="py-5 space-y-4">
         <View className="flex-row justify-between">
           <Text>English (US)</Text>
           <Checkbox status={'checked'} color={'#007aff'} />
         </View>
         <View className="flex-row justify-between">
-          <Text>English (US)</Text>
+          <Text>French (FRE)</Text>
           <Checkbox status={'checked'} color={'#007aff'} />
         </View>
       </View>

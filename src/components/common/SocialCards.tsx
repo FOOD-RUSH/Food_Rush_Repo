@@ -1,4 +1,4 @@
-import { View, Text, Pressable } from 'react-native';
+import { View, Text, Pressable, TouchableHighlight } from 'react-native';
 import React from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { SocialDataProps } from '@/src/constants/SocialData';
@@ -14,29 +14,24 @@ const SocialCards = ({
   link,
 }: SocialDataProps) => {
   return (
-    <Pressable
-      className="bg-white border rounded-xl shadow-sm mb-2 px-3 py-1"
+    <TouchableHighlight
+      className="bg-white border border-gray-50 rounded-xl drop-shadow-lg my-2 px-3 py-3 "
+      underlayColor={'#bfdbfe'}
       id={id}
       onPress={() => {}}
-      style={({ pressed }) => [
-        {
-          borderColor: pressed ? '#007aff' : 'gray',
-          opacity: pressed ? 0.7 : 1,
-        },
-      ]}
     >
-      <View className="flex flex-row item-center">
+      <View className="flex flex-row item-center ">
         <Ionicons
           name={icon_name}
           color={'#007aff'}
-          size={18}
-          className="mr-2"
+          size={25}
+          className="mr-2 align-middle"
         />
-        <Text className="text-2xl font-bold flex-1 text-center">
+        <Text className="text-[20px] font-semibold flex-1 text-center">
           {social_platform}
         </Text>
       </View>
-    </Pressable>
+    </TouchableHighlight>
   );
 };
 

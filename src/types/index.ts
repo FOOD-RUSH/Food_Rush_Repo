@@ -13,12 +13,6 @@ export interface User {
 
 }
 // app state
-export interface AppState {
-  isOnboardingComplete: boolean;
-  language: 'Eng' | 'Fre';
-  theme: "light" | "dark"
-
-}
 
 //Properties of Food
 export interface FoodProps {
@@ -52,8 +46,8 @@ export interface CustomerProfile {
   phoneNumber: string;
   addresses?: Address[];
   preferences?: {
-    dietary: string[];
-    cuisineTypes: string[];
+    dietary?: string[];
+    cuisineTypes?: string[];
   };
   favoriteRestaurants?: RestaurantProfile[];
   favoriteFood?: FoodProps[];
@@ -111,14 +105,6 @@ export interface OrderItem {
   quantity: number;
   price: number;
 }
-
-
-
-
-
-
-
-
 
 
 export declare interface InputFieldProps extends TextInputProps {

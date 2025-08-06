@@ -35,7 +35,7 @@ const InputField = ({
               {label}
             </Text>
           )}
-          <View className={`px-3 py-[10px] bg-gray-200 rounded-2xl mx-2 flex-row items-center ${inputStyle || ''}`}>
+          <View className={`px-4 py-[10px] bg-gray-200 rounded-2xl mx-2 flex-row items-center ${inputStyle || ''}`}>
             {leftIcon && (
               <View className="mx-2">
                 {leftIcon}

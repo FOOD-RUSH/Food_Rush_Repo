@@ -4,8 +4,10 @@ import CommonView from '@/src/components/common/CommonView';
 import { ScrollView } from 'react-native-gesture-handler';
 import { MaterialIcons } from '@expo/vector-icons';
 import { lightTheme } from '@/src/config/theme';
+import { RootStackScreenProps } from '@/src/navigation/types';
 
-const CheckOutScreen = () => {
+const CheckOutScreen = ({navigation, route}: RootStackScreenProps<'Checkout'>) => {
+
   return (
     <CommonView>
       <ScrollView className="px-2 py-3 h-full flex-col space-y-2 ">
@@ -14,10 +16,10 @@ const CheckOutScreen = () => {
           <Text className="font-bold text-xl ">Delivery To</Text>
           <View className="h-[1px] bg-gray-500 w-full" />
           <View className="flex-row items-center justify-between">
-            <MaterialIcons name="location-city" color={'#007aff'} size={27} />
+            <MaterialIcons name="edit-location-alt" color={'#007aff'} size={27} />
             <View className="flex-col space-y-2">
               <View className="flex-row space-x-2">
-                <Text className="text-xl font-semibold">Home</Text>
+                <Text className="text-xl font-semibold mr-2">Home</Text>
                 <Text className="flex bg-blue-300 rounded-md px-2 py-1 text-primaryColor text-xs">
                   Default
                 </Text>

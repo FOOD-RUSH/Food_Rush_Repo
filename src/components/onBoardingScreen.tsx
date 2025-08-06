@@ -358,7 +358,7 @@ const OnboardingScreen = ({
 }: {
   OnboardingSlides: OnboardingInfo[];
   onComplete: (userType: 'customer' | 'restaurant') => void;
-  onLogin: (selectedUserType: 'customer' | 'restaurant' | null) => void;
+  onLogin: (selectedUserType: 'customer' | 'restaurant') => void;
 }) => {
   const [showWelcome, setShowWelcome] = useState(true);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);

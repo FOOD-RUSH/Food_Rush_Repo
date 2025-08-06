@@ -8,6 +8,8 @@ import InputField from '@/src/components/customer/InputField';
 import { Dropdown } from 'react-native-element-dropdown';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import { Button } from 'react-native-paper';
+import CommonView from '@/src/components/common/CommonView';
+import { green } from 'react-native-reanimated/lib/typescript/Colors';
 
 const EditProfileScreen = ({
   navigation,
@@ -24,8 +26,8 @@ const EditProfileScreen = ({
   ];
   const [selectedValue, setSelectedValue] = useState<string>('Male');
   return (
-    <SafeAreaView className="h-full bg-white flex">
-      <ScrollView className="h-full bg-white flex px-3 ">
+    <CommonView >
+      <ScrollView className="h-full bg-white pb-14  mt-[-39px] pt-4 pb-15" showsVerticalScrollIndicator={false}>
         <View className="flex-column px-2 justify-center items-center">
           <View className="relative mb-3 ">
             <Image
@@ -54,13 +56,16 @@ const EditProfileScreen = ({
           value={selectedValue}
           style={{
             height: 62,
-            borderColor: 'gray',
+            borderColor: '#e5e7eb',
             borderRadius: 8,
             paddingHorizontal: 10,
-            backgroundColor: '#d1d5db',
+            backgroundColor: '#e5e7eb',
             margin: 9,
+            
           }}
+          itemTextStyle={{color: 'gray'}}
           containerStyle={{ backgroundColor: '#d1d5db' }}
+          selectedTextStyle={{color:'gray'}}
           onChange={() => setSelectedValue((item) => item)}
         />
         <InputField
@@ -86,7 +91,7 @@ const EditProfileScreen = ({
           update
         </Button>
       </ScrollView>
-    </SafeAreaView>
+    </CommonView>
   );
 };
 

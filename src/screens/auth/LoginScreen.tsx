@@ -6,6 +6,7 @@ import {
   Platform,
   ScrollView,
   Image,
+  Alert,
 } from 'react-native';
 import { Button, TextInput, HelperText, Checkbox } from 'react-native-paper';
 import { Controller, useForm } from 'react-hook-form';
@@ -14,6 +15,8 @@ import { loginSchema } from '@/src/utils/validation';
 import { TextButton } from '@/src/components/common/TextButton';
 import { AuthStackScreenProps } from '@/src/navigation/types';
 import CommonView from '@/src/components/common/CommonView';
+import { useAppStore } from '@/src/stores/AppStore';
+import { useAuthStore } from '@/src/stores/AuthStore';
 
 interface LoginFormData {
   email: string;
@@ -44,11 +47,18 @@ export const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
   const userType = route.params?.userType;
 
   const WelcomeImage = require('@/assets/images/Welcome.png');
+  const loginUser = useAuthStore((state) => state.loginUser);
+  // const loginError = useAuthStore((state) => state.error);
 
   const onSubmit = async (data: LoginFormData) => {
     setLoading(true);
     // TODO:
     console.log('Usertype: ' + userType);
+    try {
+      await loginUser(userType, data.email, data.password);
+    } catch (error) {
+      Alert.alert('Login failed');
+    }
   };
 
   const handleGoogleSignIn = async () => {
@@ -62,13 +72,13 @@ export const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
   const handleForgotPassword = () => {
     // TODO: Navigate to forgot password screen
     console.log('Navigating to forgot password');
-    navigation.navigate('Auth', { screen: 'ForgotPassword' });
+    navigation.navigate('ForgotPassword');
   };
 
   const handleSignUp = () => {
     // TODO: Navigate to signup screen
     console.log('Navigating to signup');
-    navigation.navigate('SignUp', {userType: userType});
+    navigation.navigate('SignUp', { userType: userType });
   };
 
   return (
@@ -99,7 +109,7 @@ export const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
             </Text>
           )} */}
           {/* Form */}
-          <View className="flex-1 px-6">
+          <View className="flex-1 px-2">
             <View className="space-y-4 mb-2">
               {/* Email Input */}
               <Controller
@@ -139,7 +149,7 @@ export const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                 control={control}
                 name="password"
                 render={({ field: { onChange, onBlur, value } }) => (
-                  <View>
+                  <View className="mb-2">
                     <TextInput
                       placeholder="Password"
                       onBlur={onBlur}
