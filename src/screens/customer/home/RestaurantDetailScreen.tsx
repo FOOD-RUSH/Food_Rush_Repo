@@ -16,6 +16,8 @@ import MenuItemCard from '@/src/components/customer/MenuItemCard';
 import FoodItemCard from '@/src/components/customer/FoodItemCard';
 import ClassicFoodCard from '@/src/components/customer/ClassicFoodCard';
 
+import { useTheme } from '@/src/hooks/useTheme';
+
 const { width: screenWidth, height: screenHeight } = Dimensions.get('screen');
 
 // Get RESTAURANT details
@@ -28,8 +30,13 @@ const RestaurantDetailScreen = ({
   navigation,
   route,
 }: RootStackScreenProps<'RestaurantDetails'>) => {
-  // Get restaurant data from route params or props
   const { restaurantId } = route.params || {};
+  const { theme } = useTheme();
+  const backgroundColor = theme === 'light' ? 'bg-white' : 'bg-background';
+  const textColor = theme === 'light' ? 'text-gray-900' : 'text-text';
+  const secondaryTextColor =
+    theme === 'light' ? 'text-gray-600' : 'text-text-secondary';
+  const primaryColor = theme === 'light' ? '#007aff' : '#3b82f6';
 
   const [restaurantDetails, setRestaurantDetails] =
     useState<RestaurantProfile | null>(null);
@@ -195,24 +202,29 @@ const RestaurantDetailScreen = ({
       ? menuItems
       : menuItems.filter((item) => item.category === selectedCategory);
 
-
   if (loading) {
     return (
-      <View className="flex-1 justify-center items-center bg-white">
-        <ActivityIndicator size="large" color="#007aff" animating />
-        <Text className="mt-4">Loading restaurant details...</Text>
+      <View className={`flex-1 justify-center items-center ${backgroundColor}`}>
+        <ActivityIndicator size="large" color={primaryColor} animating />
+        <Text className={`mt-4 ${textColor}`}>
+          Loading restaurant details...
+        </Text>
       </View>
     );
   }
 
   if (!restaurantDetails) {
     return (
-      <View className="flex-1 justify-center items-center bg-white">
-        <Text>Failed to load restaurant details</Text>
+      <View className={`flex-1 justify-center items-center ${backgroundColor}`}>
+        <Text className={`${textColor}`}>
+          Failed to load restaurant details
+        </Text>
         <Button
           mode="contained"
           onPress={fetchRestaurantDetails}
           className="mt-4"
+          buttonColor={primaryColor}
+          textColor="white"
         >
           Retry
         </Button>
@@ -221,7 +233,7 @@ const RestaurantDetailScreen = ({
   }
 
   return (
-    <ScrollView className="flex-1 bg-white">
+    <ScrollView className={`flex-1 ${backgroundColor}`}>
       <StatusBar translucent backgroundColor="transparent" />
 
       {/* Header Image with Navigation */}
@@ -280,26 +292,30 @@ const RestaurantDetailScreen = ({
         {/* Restaurant Name and Basic Info */}
         <View className="mb-6">
           <View className="flex-row justify-between items-start mb-2">
-            <Text className="text-2xl font-bold flex-1">
+            <Text className={`text-2xl font-bold flex-1 ${textColor}`}>
               {restaurantDetails.name}
             </Text>
             <View className="flex-row items-center">
-              <Text className="text-gray-600 mr-1">
+              <Text className={`mr-1 ${secondaryTextColor}`}>
                 {restaurantDetails.cuisine}
               </Text>
-              <Text className="text-primaryColor font-semibold">
+              <Text className="font-semibold" style={{ color: primaryColor }}>
                 {/* {restaurantDetails.priceRange} */} 500FCFA
               </Text>
             </View>
           </View>
 
-          <Text className="text-gray-600 mb-4">
+          <Text className={`mb-4 ${secondaryTextColor}`}>
             {restaurantDetails.description}
           </Text>
 
           <View className="flex-row items-center mb-2">
-            <Ionicons name="time-outline" size={16} color="#666" />
-            <Text className="ml-2 text-gray-600">
+            <Ionicons
+              name="time-outline"
+              size={16}
+              color={theme === 'light' ? '#666' : 'white'}
+            />
+            <Text className={`ml-2 ${secondaryTextColor}`}>
               {restaurantDetails.openTime}
             </Text>
           </View>
@@ -310,14 +326,18 @@ const RestaurantDetailScreen = ({
           <View className="flex-row justify-between items-center py-4 border-b border-gray-200">
             <View className="flex-row items-center">
               <Ionicons name="star" color="#FFD700" size={20} />
-              <Text className="ml-2 font-semibold text-base">
+              <Text className={`ml-2 font-semibold text-base ${textColor}`}>
                 {restaurantDetails.ratings}
               </Text>
-              <Text className="ml-1 text-gray-500">
+              <Text className={`ml-1 ${secondaryTextColor}`}>
                 ({restaurantDetails.reviewCount} reviews)
               </Text>
             </View>
-            <MaterialIcons name="arrow-forward-ios" size={16} color="#666" />
+            <MaterialIcons
+              name="arrow-forward-ios"
+              size={16}
+              color={theme === 'light' ? '#666' : 'white'}
+            />
           </View>
         </TouchableRipple>
 
@@ -325,26 +345,47 @@ const RestaurantDetailScreen = ({
         <TouchableRipple onPress={handleViewLocation}>
           <View className="flex-row justify-between items-center py-4 border-b border-gray-200">
             <View className="flex-row items-center flex-1">
-              <Ionicons name="location-outline" color="#007aff" size={20} />
+              <Ionicons
+                name="location-outline"
+                color={primaryColor}
+                size={20}
+              />
               <View className="ml-3 flex-1">
-                <Text className="font-semibold text-base text-primaryColor">
+                <Text
+                  className={`font-semibold text-base`}
+                  style={{ color: primaryColor }}
+                >
                   {restaurantDetails.distance}
                 </Text>
                 <View className="flex-row items-center mt-1">
-                  <Text className="text-gray-500 text-sm">Delivery Now</Text>
-                  <Text className="text-gray-400 mx-2">|</Text>
-                  <Ionicons name="car" size={16} color="#666" />
-                  <Text className="ml-1 text-gray-500 text-sm">
+                  <Text className={`text-sm ${secondaryTextColor}`}>
+                    Delivery Now
+                  </Text>
+                  <Text className="mx-2" style={{ color: secondaryTextColor }}>
+                    |
+                  </Text>
+                  <Ionicons
+                    name="car"
+                    size={16}
+                    color={theme === 'light' ? '#666' : 'white'}
+                  />
+                  <Text className={`ml-1 text-sm ${secondaryTextColor}`}>
                     {restaurantDetails.deliveryFee}
                   </Text>
-                  <Text className="text-gray-400 mx-2">|</Text>
-                  <Text className="text-gray-500 text-sm">
+                  <Text className="mx-2" style={{ color: secondaryTextColor }}>
+                    |
+                  </Text>
+                  <Text className={`text-sm ${secondaryTextColor}`}>
                     {restaurantDetails.deliveryTime}
                   </Text>
                 </View>
               </View>
             </View>
-            <MaterialIcons name="arrow-forward-ios" size={16} color="#666" />
+            <MaterialIcons
+              name="arrow-forward-ios"
+              size={16}
+              color={theme === 'light' ? '#666' : 'white'}
+            />
           </View>
         </TouchableRipple>
 
@@ -352,18 +393,26 @@ const RestaurantDetailScreen = ({
         <TouchableRipple onPress={handleViewOffers}>
           <View className="flex-row justify-between items-center py-4 border-b border-gray-200">
             <View className="flex-row items-center">
-              <MaterialIcons name="local-offer" color="#007aff" size={20} />
-              <Text className="ml-3 font-semibold text-base">
+              <MaterialIcons
+                name="local-offer"
+                color={primaryColor}
+                size={20}
+              />
+              <Text className={`ml-3 font-semibold text-base ${textColor}`}>
                 Special Offers Available
               </Text>
             </View>
-            <MaterialIcons name="arrow-forward-ios" size={16}  />
+            <MaterialIcons
+              name="arrow-forward-ios"
+              size={16}
+              color={theme === 'light' ? '#666' : 'white'}
+            />
           </View>
         </TouchableRipple>
 
         {/* For You Section */}
         <View className="mt-8">
-          <Text className="text-xl font-bold mb-4">For You</Text>
+          <Text className={`text-xl font-bold mb-4 ${textColor}`}>For You</Text>
           <FlatList
             data={forYouItems}
             renderItem={({ item }) => (
@@ -373,13 +422,12 @@ const RestaurantDetailScreen = ({
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ paddingRight: 16 }}
-              
-/>
+          />
         </View>
 
         {/* Menu Section */}
         <View className="mt-8">
-          <Text className="text-xl font-bold mb-4">Menu</Text>
+          <Text className={`text-xl font-bold mb-4 ${textColor}`}>Menu</Text>
 
           {/* Category Filter */}
           <ScrollView
@@ -394,15 +442,17 @@ const RestaurantDetailScreen = ({
                   onPress={() => setSelectedCategory(category)}
                   className={`px-4 py-2 rounded-full mx-1 ${
                     selectedCategory === category
-                      ? 'bg-primaryColor'
-                      : 'bg-gray-100'
+                      ? theme === 'light'
+                        ? 'bg-primary'
+                        : 'bg-primary'
+                      : theme === 'light'
+                        ? 'bg-gray-bg-primary'
+                        : 'bg-secondary'
                   }`}
                 >
                   <Text
                     className={`${
-                      selectedCategory === category
-                        ? 'text-white'
-                        : 'text-gray-700'
+                      selectedCategory === category ? 'text-white' : textColor
                     } font-medium`}
                   >
                     {category}

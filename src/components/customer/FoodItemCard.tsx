@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { Card, Text } from 'react-native-paper';
+import { useTheme } from '@/src/hooks/useTheme';
 
 export interface FoodItemCardProps {
   foodId: string;
@@ -32,6 +33,12 @@ const FoodItemCard = ({
   const [foodID, setFoodID] = useState('fgfgfgfg');
   const navigation =
     useNavigation<CustomerHomeStackScreenProps<'HomeScreen'>['navigation']>();
+  const { theme } = useTheme();
+  const cardBackgroundColor = theme === 'light' ? 'white' : '#1e293b';
+  const textColor = theme === 'light' ? 'text-gray-900' : 'text-text';
+  const secondaryTextColor = theme === 'light' ? '#A0A0A0' : 'text-text-secondary';
+  const primaryColor = theme === 'light' ? '#007aff' : '#3b82f6';
+
   return (
     <TouchableOpacity
       onPress={() => {
@@ -48,10 +55,16 @@ const FoodItemCard = ({
           margin: 10,
           borderRadius: 16,
           overflow: 'hidden',
-          backgroundColor: 'white',
+          backgroundColor: cardBackgroundColor,
           marginVertical: 12,
-          borderColor: 'white',
-          boxShadow: '0px 1px 5px 3px  rgba(0, 0, 0, 0.15)',
+          borderColor: cardBackgroundColor,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.15,
+          shadowRadius: 3,
+          elevation: 3,
+          boxShadow: '1px 0px 10px rgba(0, 0, 0, 0.15)'
+          
         }}
       >
         {/* Card content with horizontal layout */}
@@ -78,7 +91,7 @@ const FoodItemCard = ({
                 position: 'absolute',
                 top: 6,
                 left: 6,
-                backgroundColor: '#007aff',
+                backgroundColor: primaryColor,
                 borderRadius: 6,
                 paddingHorizontal: 8,
                 paddingVertical: 2,
@@ -105,6 +118,7 @@ const FoodItemCard = ({
                 fontWeight: 'bold',
                 marginBottom: 10,
                 padding: 4,
+                color: textColor,
               }}
             >
               {FoodName}
@@ -118,16 +132,16 @@ const FoodItemCard = ({
                 marginBottom: 8,
               }}
             >
-              <Text className="text-[12px]">
+              <Text className={`text-[12px] ${secondaryTextColor}`}>
                 {distanceFromUser.toFixed(0)} km
               </Text>
               <Text
-                style={{ color: '#A0A0A0', fontSize: 12, marginHorizontal: 4 }}
+                style={{ color: secondaryTextColor, fontSize: 12, marginHorizontal: 4 }}
               >
                 |
               </Text>
               <Ionicons name="star" size={12} color="#FFD700" />
-              <Text style={{ color: '#A0A0A0', fontSize: 12, marginLeft: 2 }}>
+              <Text style={{ color: secondaryTextColor, fontSize: 12, marginLeft: 2 }}>
                 4.9 (1000)
               </Text>
             </View>
@@ -143,23 +157,23 @@ const FoodItemCard = ({
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Text
                   style={{
-                    color: '#007aff',
+                    color: primaryColor,
                     fontSize: 16,
                     fontWeight: 'bold',
                   }}
                 >
                   {FoodPrice} XAF
                 </Text>
-                <Text style={{ color: '#A0A0A0', fontSize: 12, marginLeft: 5 }}>
+                <Text style={{ color: secondaryTextColor, fontSize: 12, marginLeft: 5 }}>
                   |
                 </Text>
                 <Ionicons
                   name="car-sharp"
                   size={12}
-                  color="#007aff"
+                  color={primaryColor}
                   style={{ marginLeft: 5 }}
                 />
-                <Text style={{ color: '#A0A0A0', fontSize: 12, marginLeft: 5 }}>
+                <Text style={{ color: secondaryTextColor, fontSize: 12, marginLeft: 5 }}>
                   ${DeliveryPrice.toFixed(0)}
                 </Text>
               </View>
@@ -168,7 +182,7 @@ const FoodItemCard = ({
               <TouchableOpacity
                 onPress={onLike}
                 style={{
-                  backgroundColor: 'white',
+                  backgroundColor: cardBackgroundColor,
                   borderRadius: 20,
                   padding: 8,
                   elevation: 2,
@@ -178,7 +192,7 @@ const FoodItemCard = ({
                 <Ionicons
                   name={loved ? 'heart' : 'heart-outline'}
                   size={18}
-                  color={loved ? '#e0245e' : '#333'}
+                  color={loved ? '#e0245e' : (theme === 'light' ? '#333' : 'white')}
                 />
               </TouchableOpacity>
             </View>

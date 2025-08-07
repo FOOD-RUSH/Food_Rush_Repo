@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, Image, ImageSourcePropType } from 'react-native';
+import { useTheme } from '@/src/hooks/useTheme';
 
 interface PromotionCardProps {
   color: string;
@@ -18,15 +19,15 @@ const PromotionCard: React.FC<PromotionCardProps> = ({
   title = 'DISCOUNT ONLY',
   subtitle = 'VALID FOR TODAY!',
 }) => {
+  const { theme } = useTheme();
+
   // Generate color variants
   const getColorVariants = (baseColor: string) => {
-    // Convert hex to RGB for manipulation
     const hex = baseColor.replace('#', '').padStart(6, '0');
     const r = parseInt(hex.slice(0, 2), 16);
     const g = parseInt(hex.slice(2, 4), 16);
     const b = parseInt(hex.slice(4, 6), 16);
 
-    // Create lighter and darker variants
     const lighter = `rgb(${Math.min(255, r + 30)}, ${Math.min(255, g + 30)}, ${Math.min(255, b + 30)})`;
     const darker = `rgb(${Math.max(0, r - 30)}, ${Math.max(0, g - 30)}, ${Math.max(0, b - 30)})`;
     const lightest = `rgb(${Math.min(255, r + 50)}, ${Math.min(255, g + 50)}, ${Math.min(255, b + 50)})`;
@@ -40,7 +41,7 @@ const PromotionCard: React.FC<PromotionCardProps> = ({
     };
   };
 
-  const colorVariants = getColorVariants(color);
+  const colorVariants = getColorVariants(theme === 'light' ? color : '#3b82f6');
 
   return (
     <View className="mx-4 my-2">

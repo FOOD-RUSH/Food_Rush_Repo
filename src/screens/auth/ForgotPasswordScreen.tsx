@@ -6,6 +6,8 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { Button, TextInput, HelperText, IconButton } from 'react-native-paper';
 import { goBack } from '@/src/navigation/navigationHelpers';
+import { useTheme } from '@/src/hooks/useTheme';
+
 // Validation schema
 const schema = yup.object({
   email: yup
@@ -19,6 +21,14 @@ interface ForgotPasswordForm {
 }
 
 const ForgotPasswordScreen = () => {
+  const { theme } = useTheme();
+  const backgroundColor = theme === 'light' ? 'bg-white' : 'bg-background';
+  const textColor = theme === 'light' ? 'text-black' : 'text-text';
+  const secondaryTextColor = theme === 'light' ? 'text-gray-600' : 'text-text-secondary';
+  const inputBackgroundColor = theme === 'light' ? 'white' : '#1e293b';
+  const inputBorderColor = errors.email ? '#ef4444' : (theme === 'light' ? '#e5e7eb' : '#334155');
+  const primaryColor = theme === 'light' ? '#1E90FF' : '#3b82f6';
+
   const {
     control,
     handleSubmit,
@@ -48,14 +58,14 @@ const ForgotPasswordScreen = () => {
   }, [setValue]);
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className={`flex-1 ${backgroundColor}`}>
       <View className="flex-1 px-6 pt-2">
         {/* Back Button */}
         <View className="mb-6">
           <IconButton
             icon="arrow-left"
             size={24}
-            iconColor="#000000"
+            iconColor={theme === 'light' ? '#000000' : 'white'}
             className="self-start -ml-2"
             onPress={goBack}
           />
@@ -63,11 +73,12 @@ const ForgotPasswordScreen = () => {
 
         {/* Header Section */}
         <View className="mb-10">
-          <Text className="text-3xl font-bold text-black text-center mb-2">
+          <Text className={`text-3xl font-bold text-center mb-2 ${textColor}`}>
             Reset Password
           </Text>
-          <Text className="text-sm text-gray-600 text-center leading-5">
-            Enter your email address and we will send you a{'\n'}code to reset
+          <Text className={`text-sm text-center leading-5 ${secondaryTextColor}`}>
+            Enter your email address and we will send you a{
+}code to reset
             your password
           </Text>
         </View>
@@ -88,21 +99,21 @@ const ForgotPasswordScreen = () => {
                 autoCapitalize="none"
                 autoComplete="email"
                 autoCorrect={false}
-                style={{ backgroundColor: 'white' }}
+                style={{ backgroundColor: inputBackgroundColor }}
                 outlineStyle={{
                   borderRadius: 12,
                   borderWidth: 1,
-                  borderColor: errors.email ? '#ef4444' : '#e5e7eb',
+                  borderColor: inputBorderColor,
                 }}
                 contentStyle={{
                   paddingHorizontal: 16,
                   paddingVertical: 16,
                 }}
                 error={!!errors.email}
-                left={<TextInput.Icon icon="lock-outline" />}
+                left={<TextInput.Icon icon="lock-outline" color={theme === 'light' ? 'black' : 'white'} />}
                 right={
                   value ? (
-                    <TextInput.Icon icon="eye" onPress={clearEmail} />
+                    <TextInput.Icon icon="eye" onPress={clearEmail} color={theme === 'light' ? 'black' : 'white'} />
                   ) : null
                 }
               />
@@ -113,7 +124,7 @@ const ForgotPasswordScreen = () => {
               >
                 {errors.email?.message}
               </HelperText>
-              <Text className="text-xs text-gray-500 mt-1">
+              <Text className={`text-xs mt-1 ${secondaryTextColor}`}>
                 Must have at least 8 characters
               </Text>
             </View>
@@ -126,7 +137,7 @@ const ForgotPasswordScreen = () => {
           onPress={handleSubmit(handleForgotPassword)}
           loading={isSubmitting}
           disabled={isSubmitting || !emailValue}
-          buttonColor="#1E90FF"
+          buttonColor={primaryColor}
           textColor="white"
           contentStyle={{ paddingVertical: 8 }}
           style={{ borderRadius: 25 }}

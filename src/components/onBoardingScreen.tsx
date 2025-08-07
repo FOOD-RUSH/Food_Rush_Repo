@@ -37,7 +37,10 @@ const userTypes: UserType[] = [
 ];
 
 // Welcome Screen Component (Page 1)
+import { useTheme } from '@/src/hooks/useTheme';
+
 const OnboardingWelcome = ({ onComplete }: { onComplete: () => void }) => {
+  const { theme } = useTheme();
   const foodRushLogo = require('@/assets/images/Foodrushlogo.png');
   const gif = require('@/assets/images/Delivery.gif');
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -65,8 +68,8 @@ const OnboardingWelcome = ({ onComplete }: { onComplete: () => void }) => {
   }, [fadeAnim, onComplete, slideAnim]);
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <StatusBar barStyle="dark-content" backgroundColor="white" />
+    <SafeAreaView className={`flex-1 ${theme === 'light' ? 'bg-white' : 'bg-background'}`}>
+      <StatusBar barStyle={theme === 'light' ? 'dark-content' : 'light-content'} backgroundColor={theme === 'light' ? 'white' : '#0f172a'} />
       <Animated.View
         style={{
           opacity: fadeAnim,
@@ -77,27 +80,21 @@ const OnboardingWelcome = ({ onComplete }: { onComplete: () => void }) => {
           <View className="flex-1 flex-col justify-between items-center mb-8">
             <Image
               source={images.ApplogoWhite}
-              style={{
-                width: screenWidth * 0.25,
-                height: screenHeight * 0.25,
-              }}
+              className="w-1/4 h-1/4"
               resizeMode="contain"
             />
 
             <Image
               source={gif}
-              style={{
-                width: screenWidth * 0.9,
-                height: screenHeight * 0.4,
-              }}
+              className="w-11/12 h-2/5"
               resizeMode="contain"
             />
 
             <View className="items-center mb-10">
-              <Text className="text-3xl font-bold text-gray-900 mb-4 text-center">
+              <Text className={`text-3xl font-bold mb-4 text-center ${theme === 'light' ? 'text-gray-900' : 'text-text'}`}>
                 Welcome to Food Rush!
               </Text>
-              <Text className="text-lg text-gray-600 text-center leading-7 px-4 ">
+              <Text className={`text-lg text-center leading-7 px-4 ${theme === 'light' ? 'text-gray-600' : 'text-text-secondary'}`}>
                 Healthy meals delivered locally{'\n'}within a tap of a button.
               </Text>
             </View>
@@ -121,6 +118,7 @@ const OnboardingSlide = ({
   currentIndex: number;
   totalSlides: number;
 }) => {
+  const { theme } = useTheme();
   const isLastSlide = currentIndex === totalSlides - 1;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const foodRushLogo = require('@/assets/images/Foodrushlogo.png');
@@ -150,19 +148,16 @@ const OnboardingSlide = ({
             <View className="pt-12 pl-6">
               <Image
                 source={foodRushLogo}
-                style={{
-                  width: 80,
-                  height: 80,
-                }}
+                className="w-20 h-20"
                 resizeMode="contain"
               />
             </View>
             <Animated.View style={{ opacity: fadeAnim }}>
-              <View className="bg-blue-600/95 rounded-3xl p-6 mx-9 mb-5 shadow-lg backdrop-blur-sm">
-                <Text className="text-2xl font-bold text-white mb-4 text-center">
+              <View className={`rounded-3xl p-6 mx-9 mb-5 shadow-lg backdrop-blur-sm ${theme === 'light' ? 'bg-blue-600/95' : 'bg-secondary/95'}`}>
+                <Text className={`text-2xl font-bold mb-4 text-center ${theme === 'light' ? 'text-white' : 'text-text'}`}>
                   {slide.title}
                 </Text>
-                <Text className="text-base text-white/90 text-center leading-6 mb-8">
+                <Text className={`text-base text-center leading-6 mb-8 ${theme === 'light' ? 'text-white/90' : 'text-text-secondary'}`}>
                   {slide.description}
                 </Text>
                 <View className="flex-row justify-between items-center mb-6">
@@ -171,19 +166,19 @@ const OnboardingSlide = ({
                     className="py-3 px-4"
                     activeOpacity={0.7}
                   >
-                    <Text className="text-white/80 text-base font-medium">
+                    <Text className={`text-base font-medium ${theme === 'light' ? 'text-white/80' : 'text-text-secondary'}`}>
                       Skip
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     onPress={onNext}
-                    className="bg-white py-3 px-6 rounded-full flex-row items-center min-w-[90px] justify-center shadow-md"
+                    className={`py-3 px-6 rounded-full flex-row items-center min-w-[90px] justify-center shadow-md ${theme === 'light' ? 'bg-white' : 'bg-primary'}`}
                     activeOpacity={0.8}
                   >
-                    <Text className="text-blue-600 text-base font-semibold mr-2">
+                    <Text className={`text-base font-semibold mr-2 ${theme === 'light' ? 'text-blue-600' : 'text-white'}`}>
                       {isLastSlide ? 'Next' : 'Next'}
                     </Text>
-                    <Ionicons name="arrow-forward" size={16} color="#4285F4" />
+                    <Ionicons name="arrow-forward" size={16} color={theme === 'light' ? '#4285F4' : 'white'} />
                   </TouchableOpacity>
                 </View>
                 <View className="flex-row justify-center">
@@ -192,8 +187,8 @@ const OnboardingSlide = ({
                       key={index}
                       className={`h-2 rounded-full mx-1 transition-all duration-300 ${
                         index === currentIndex
-                          ? 'bg-white w-6'
-                          : 'bg-white/40 w-2'
+                          ? `w-6 ${theme === 'light' ? 'bg-white' : 'bg-primary'}`
+                          : `w-2 ${theme === 'light' ? 'bg-white/40' : 'bg-primary/40'}`
                       }`}
                     />
                   ))}
@@ -217,6 +212,7 @@ const UserTypeSelectionScreen = ({
   onLogin: () => void;
   selectedType: 'customer' | 'restaurant' | null;
 }) => {
+  const { theme } = useTheme();
   const scaleAnims = useRef<Record<string, Animated.Value>>({
     customer: new Animated.Value(1),
     restaurant: new Animated.Value(1),
@@ -244,33 +240,33 @@ const UserTypeSelectionScreen = ({
   const getButtonStyle = useCallback((isSelected: boolean) => {
     return {
       borderRadius: 30,
-      backgroundColor: isSelected ? '#4285F4' : '#E5E7EB',
+      backgroundColor: isSelected ? (theme === 'light' ? '#4285F4' : '#3b82f6') : (theme === 'light' ? '#E5E7EB' : '#334155'),
       elevation: isSelected ? 4 : 0,
-      shadowColor: isSelected ? '#4285F4' : 'transparent',
+      shadowColor: isSelected ? (theme === 'light' ? '#4285F4' : '#3b82f6') : 'transparent',
       shadowOffset: { width: 0, height: isSelected ? 2 : 0 },
       shadowOpacity: isSelected ? 0.3 : 0,
       shadowRadius: isSelected ? 4 : 0,
     };
-  }, []);
+  }, [theme]);
 
   const getButtonLabelStyle = useCallback((isSelected: boolean) => {
     return {
       fontSize: 18,
       fontWeight: '600' as const,
-      color: isSelected ? 'white' : '#9CA3AF',
+      color: isSelected ? 'white' : (theme === 'light' ? '#9CA3AF' : '#94a3b8'),
     };
-  }, []);
+  }, [theme]);
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <StatusBar barStyle="dark-content" backgroundColor="#F8F9FA" />
-      <View className="flex-1 bg-gray-50 px-6 pt-8 pb-10">
+    <SafeAreaView className={`flex-1 ${theme === 'light' ? 'bg-gray-50' : 'bg-background'}`}>
+      <StatusBar barStyle={theme === 'light' ? 'dark-content' : 'light-content'} backgroundColor={theme === 'light' ? '#F8F9FA' : '#0f172a'} />
+      <View className={`flex-1 px-6 pt-8 pb-10 ${theme === 'light' ? 'bg-gray-50' : 'bg-background'}`}>
         {/* Header */}
         <View className="mb-8">
-          <Text className="text-3xl font-bold text-gray-900 mb-2">
+          <Text className={`text-3xl font-bold mb-2 ${theme === 'light' ? 'text-gray-900' : 'text-text'}`}>
             What are your needs?
           </Text>
-          <Text className="text-lg text-gray-600">
+          <Text className={`text-lg ${theme === 'light' ? 'text-gray-600' : 'text-text-secondary'}`}>
             Choose your role to get started
           </Text>
         </View>
@@ -289,11 +285,11 @@ const UserTypeSelectionScreen = ({
             >
               <TouchableOpacity
                 activeOpacity={0.8}
-                className={`bg-gray-200 rounded-2xl border-2 shadow-lg overflow-hidden transition-all duration-300  p-2 ${
+                className={`rounded-2xl border-2 shadow-lg overflow-hidden transition-all duration-300 p-2 ${
                   selectedType === type.id
-                    ? 'border-blue-500 shadow-blue-200'
-                    : 'border-gray-200 shadow-gray-100'
-                }`}
+                    ? (theme === 'light' ? 'border-blue-500 shadow-blue-200' : 'border-primary shadow-primary/50')
+                    : (theme === 'light' ? 'border-gray-200 shadow-gray-100' : 'border-secondary shadow-secondary/20')
+                } ${theme === 'light' ? 'bg-gray-200' : 'bg-secondary'}`}
                 style={{ height: screenHeight/3.7,  width: screenWidth - 48 }}
                 onPress={() => handleUserTypePress(type.id)}
               >
@@ -309,7 +305,7 @@ const UserTypeSelectionScreen = ({
 
                   {/* Selection indicator */}
                   {selectedType === type.id && (
-                    <View className="absolute top-4 right-4 bg-blue-500 rounded-full p-2 shadow-lg">
+                    <View className={`absolute top-4 right-4 rounded-full p-2 shadow-lg ${theme === 'light' ? 'bg-blue-500' : 'bg-primary'}`}>
                       <Ionicons name="checkmark" size={20} color="white" />
                     </View>
                   )}
@@ -317,7 +313,7 @@ const UserTypeSelectionScreen = ({
                     
                   
                 </View>
-                <Text className=" text-xl font-bold drop-shadow-lg text-center mt-2">
+                <Text className={`text-xl font-bold drop-shadow-lg text-center mt-2 ${theme === 'light' ? 'text-gray-900' : 'text-text'}`}>
                       {type.title}
                     </Text>
               </TouchableOpacity>
@@ -339,7 +335,7 @@ const UserTypeSelectionScreen = ({
           </Button>
 
           {selectedType && (
-            <Text className="text-center text-gray-500 mt-3 text-sm">
+            <Text className={`text-center mt-3 text-sm ${theme === 'light' ? 'text-gray-500' : 'text-text-secondary'}`}>
               You selected:{' '}
               {selectedType === 'customer' ? 'Customer' : 'Restaurant'}
             </Text>

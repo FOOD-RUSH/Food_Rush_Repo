@@ -7,7 +7,7 @@ import { ScrollView } from 'react-native';
 const ContactUs = () => {
   return (
     <CommonView >
-      <ScrollView showsVerticalScrollIndicator={false} className='flex-1 space-y-4'>
+      <ScrollView showsVerticalScrollIndicator={false} className='flex-1 px-1'>
          {SocialData.map((data) => (
         <SocialCards
           id={data.id}

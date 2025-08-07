@@ -5,6 +5,7 @@ import { images } from '@/assets/images';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { CustomerHomeStackScreenProps } from '@/src/navigation/types';
 import { useNavigation } from '@react-navigation/native';
+import { useTheme } from '@/src/hooks/useTheme';
 
 interface ClassicFoodCardProps {
   id: string;
@@ -27,6 +28,12 @@ const ClassicFoodCard = ({
 }: ClassicFoodCardProps) => {
   const navigation =
     useNavigation<CustomerHomeStackScreenProps<'HomeScreen'>['navigation']>();
+  const { theme } = useTheme();
+  const cardBackgroundColor = theme === 'light' ? 'white' : '#1e293b';
+  const textColor = theme === 'light' ? 'text-gray-800' : 'text-text';
+  const secondaryTextColor =
+    theme === 'light' ? 'text-gray-500' : 'text-text-secondary';
+  const primaryColor = theme === 'light' ? '#007aff' : '#3b82f6';
 
   return (
     <TouchableOpacity
@@ -41,15 +48,15 @@ const ClassicFoodCard = ({
         style={{
           width: 190,
           borderRadius: 16,
-          backgroundColor: 'white',
+          backgroundColor: cardBackgroundColor,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: 4 },
           shadowOpacity: 0.15,
           shadowRadius: 8,
           borderWidth: 1,
           marginVertical: 12,
-          borderColor: 'white',
-          boxShadow: '0px 1px 5px 3px  rgba(0, 0, 0, 0.15)',
+          borderColor: cardBackgroundColor,
+          boxShadow: '1px 0px 10px rgba(0, 0, 0, 0.15)',
         }}
       >
         <View className="p-3">
@@ -95,13 +102,13 @@ const ClassicFoodCard = ({
           {/* Food info */}
           <View className="mb-2 self-center">
             <Text
-              className="font-semibold text-gray-800 mb-1 text-center text-[20px]"
+              className={`font-semibold mb-1 text-center text-lg ${textColor}`}
               numberOfLines={1}
             >
               {foodName}
             </Text>
             <Text
-              className="text-gray-500 mb-2 text-center text-[16px]"
+              className={`mb-2 text-center text-base ${secondaryTextColor}`}
               numberOfLines={1}
             >
               {restaurantName}
@@ -112,19 +119,17 @@ const ClassicFoodCard = ({
           <View className="flex-row justify-between items-center mb-3">
             <View className="flex-row items-center">
               <Ionicons name="star" size={16} color={'#ffbb00'} />
-              <Text
-                className="text-xs text-gray-600 ml-1"
-                style={{ fontSize: 14 }}
-              >
+              <Text className={`text-sm ml-1 ${secondaryTextColor}`}>
                 {rating}
               </Text>
             </View>
             <View className="flex-row items-center">
-              <Ionicons name="location-outline" size={16} color={'#007aff'} />
-              <Text
-                className="text-xs text-gray-600 ml-1"
-                style={{ fontSize: 14 }}
-              >
+              <Ionicons
+                name="location-outline"
+                size={16}
+                color={primaryColor}
+              />
+              <Text className={`text-sm ml-1 ${secondaryTextColor}`}>
                 {distance}m
               </Text>
             </View>
@@ -132,16 +137,19 @@ const ClassicFoodCard = ({
 
           {/* Price and delivery info */}
           <View className="flex-row justify-between items-center">
-            <Text className="text-blue-600 font-bold" style={{ fontSize: 16 }}>
+            <Text
+              className="font-bold text-base"
+              style={{ color: primaryColor }}
+            >
               {foodPrice} FCFA
             </Text>
             <View className="flex-row items-center">
               <MaterialIcons
                 name="delivery-dining"
-                color={'#007aff'}
+                color={primaryColor}
                 size={18}
               />
-              <Text className="text-gray-400 ml-1" style={{ fontSize: 12 }}>
+              <Text className={`ml-1 text-xs ${secondaryTextColor}`}>
                 SOLD OUT
               </Text>
             </View>

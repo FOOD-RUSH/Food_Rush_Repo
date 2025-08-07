@@ -5,6 +5,7 @@ import { FoodProps } from '@/src/types';
 import { images } from '@/assets/images';
 import { useNavigation } from '@react-navigation/native';
 import { RootStackScreenProps } from '@/src/navigation/types';
+import { useTheme } from '@/src/hooks/useTheme';
 
 const MenuItemCard = ({ id, restaurantID, name, price, image }: FoodProps) => {
   const [isSelect, setIsSelected] = useState(false);
@@ -13,6 +14,16 @@ const MenuItemCard = ({ id, restaurantID, name, price, image }: FoodProps) => {
   };
   const navigation =
     useNavigation<RootStackScreenProps<'RestaurantDetails'>['navigation']>();
+  const { theme } = useTheme();
+  const cardBackgroundColor = theme === 'light' ? 'white' : '#1e293b';
+  const textColor = theme === 'light' ? 'text-gray-900' : 'text-text';
+  const primaryColor = theme === 'light' ? '#007aff' : '#3b82f6';
+  const borderColor = isSelect
+    ? primaryColor
+    : theme === 'light'
+      ? '#e0e0e0'
+      : '#334155';
+
   return (
     <TouchableOpacity activeOpacity={0.8}>
       <Card
@@ -21,13 +32,13 @@ const MenuItemCard = ({ id, restaurantID, name, price, image }: FoodProps) => {
           margin: 10,
           borderRadius: 16,
           overflow: 'hidden',
-          backgroundColor: 'white',
+          backgroundColor: cardBackgroundColor,
           marginVertical: 12,
-          boxShadow: !isSelect
-            ? '0px 1px 5px 3px  rgba(0, 0, 0, 0.15)'
-            : ' 0px 1px 5px 3px rgba(0, 122, 255, 0.15)',
-          borderColor: isSelect ? '#007aff' : '#e0e0e0',
+          borderColor: borderColor,
           elevation: 2,
+          boxShadow: '1px 0px 10px rgba(0, 0, 0, 0.15)',
+          borderWidth: 2
+
         }}
         key={id}
         onPress={() => {
@@ -44,8 +55,11 @@ const MenuItemCard = ({ id, restaurantID, name, price, image }: FoodProps) => {
             style={{ height: 90, width: 90, borderRadius: 16 }}
           />
           <View className="flex-1 ml-3">
-            <Text className="font-semibold text-xl">{name}</Text>
-            <Text className="text-primaryColor text-xl font-semibold ">
+            <Text className={`font-semibold text-xl ${textColor} `} numberOfLines={1}>{name}</Text>
+            <Text
+              className="text-xl font-semibold"
+              style={{ color: primaryColor }}
+            >
               {price} XAF
             </Text>
           </View>

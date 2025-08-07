@@ -19,6 +19,7 @@ import { registerSchema } from '@/src/utils/validation';
 import { Ionicons } from '@expo/vector-icons';
 import CommonView from '@/src/components/common/CommonView';
 import { AuthStackScreenProps } from '@/src/navigation/types';
+import { useTheme } from '@/src/hooks/useTheme';
 
 // Optimized country codes data - moved outside component to prevent recreation
 const COUNTRY_CODES = [
@@ -63,6 +64,9 @@ const CountryItem = React.memo(
 CountryItem.displayName = 'CountryItem';
 
 const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({navigation, route}) => {
+  const { theme } = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedCountryCode, setSelectedCountryCode] = useState<CountryCode>(
@@ -75,7 +79,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({navigation, rou
     control,
     handleSubmit,
     formState: { errors, isValid },
-  } = useForm<SignUpFormData>({
+  } = useForm<SignUpFormData> ({
     resolver: yupResolver(registerSchema),
     mode: 'onChange', // Enable real-time validation
     defaultValues: {
@@ -214,7 +218,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({navigation, rou
               {/* Header */}
               <View style={styles.header}>
                 <TouchableOpacity onPress={() => console.log('Go back')}>
-                  <Ionicons name="arrow-back" size={24} color="#000" />
+                  <Ionicons name="arrow-back" size={24} color={theme === 'light' ? '#000' : 'white'} />
                 </TouchableOpacity>
               </View>
 
@@ -249,7 +253,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({navigation, rou
                           <Ionicons
                             name="chevron-down"
                             size={16}
-                            color="#666"
+                            color={theme === 'light' ? '#666' : 'white'}
                           />
                         </TouchableOpacity>
 
@@ -294,7 +298,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({navigation, rou
                         keyboardType="email-address"
                         autoCapitalize="none"
                         autoComplete="email"
-                        left={<TextInput.Icon icon="email" />}
+                        left={<TextInput.Icon icon="email" color={theme === 'light' ? 'black' : 'white'} />}
                         outlineStyle={[
                           styles.inputOutline,
                           errors.email && styles.inputError,
@@ -327,7 +331,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({navigation, rou
                         keyboardType="default"
                         autoCapitalize="words"
                         autoComplete="name"
-                        left={<TextInput.Icon icon="account" />}
+                        left={<TextInput.Icon icon="account" color={theme === 'light' ? 'black' : 'white'} />}
                         outlineStyle={[
                           styles.inputOutline,
                           errors.displayName && styles.inputError,
@@ -360,11 +364,12 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({navigation, rou
                         secureTextEntry={!showPassword}
                         autoCapitalize="none"
                         autoComplete="new-password"
-                        left={<TextInput.Icon icon="lock" />}
+                        left={<TextInput.Icon icon="lock" color={theme === 'light' ? 'black' : 'white'} />}
                         right={
                           <TextInput.Icon
                             icon={showPassword ? 'eye-off' : 'eye'}
                             onPress={togglePassword}
+                            color={theme === 'light' ? 'black' : 'white'}
                           />
                         }
                         outlineStyle={[
@@ -399,7 +404,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({navigation, rou
                         secureTextEntry={!showPassword}
                         autoCapitalize="none"
                         autoComplete="new-password"
-                        left={<TextInput.Icon icon="lock" />}
+                        left={<TextInput.Icon icon="lock" color={theme === 'light' ? 'black' : 'white'} />}
                         outlineStyle={[
                           styles.inputOutline,
                           errors.confirmPassword && styles.inputError,
@@ -426,8 +431,8 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({navigation, rou
                     <Checkbox
                       status={termsAccepted ? 'checked' : 'unchecked'}
                       onPress={toggleTerms}
-                      uncheckedColor="#666"
-                      color="#007AFF"
+                      uncheckedColor={theme === 'light' ? '#666' : 'white'}
+                      color={theme === 'light' ? '#007AFF' : '#3b82f6'}
                     />
                     <View style={styles.termsTextContainer}>
                       <Text style={styles.termsText}>
@@ -450,7 +455,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({navigation, rou
                   onPress={handleSubmit(onSubmit)}
                   loading={loading}
                   disabled={isSubmitDisabled}
-                  buttonColor="#007AFF"
+                  buttonColor={theme === 'light' ? '#007AFF' : '#3b82f6'}
                   contentStyle={styles.buttonContent}
                   style={styles.signUpButton}
                   labelStyle={styles.signUpButtonLabel}
@@ -545,13 +550,13 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({navigation, rou
 };
 
 // Optimized styles using StyleSheet.create for better performance
-const styles = StyleSheet.create({
+const createStyles = (theme: 'light' | 'dark') => StyleSheet.create({
   container: {
     flex: 1,
   },
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: theme === 'light' ? '#fff' : '#0f172a',
   },
   scrollView: {
     flex: 1,
@@ -571,7 +576,7 @@ const styles = StyleSheet.create({
   logo: {
     width: 64,
     height: 64,
-    backgroundColor: '#007AFF',
+    backgroundColor: theme === 'light' ? '#007AFF' : '#3b82f6',
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
@@ -585,7 +590,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#111',
+    color: theme === 'light' ? '#111' : 'white',
     marginBottom: 8,
   },
   formContainer: {
@@ -601,7 +606,7 @@ const styles = StyleSheet.create({
   countrySelector: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f3f4f6',
+    backgroundColor: theme === 'light' ? '#f3f4f6' : '#334155',
     paddingHorizontal: 16,
     paddingVertical: 16,
     borderRadius: 12,
@@ -609,7 +614,7 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 0,
     minWidth: 120,
     borderWidth: 1,
-    borderColor: '#f3f4f6',
+    borderColor: theme === 'light' ? '#f3f4f6' : '#475569',
   },
   selectedCountryFlag: {
     fontSize: 18,
@@ -617,7 +622,7 @@ const styles = StyleSheet.create({
   },
   selectedCountryCode: {
     fontSize: 16,
-    color: '#111',
+    color: theme === 'light' ? '#111' : 'white',
     marginRight: 8,
     fontWeight: '500',
   },
@@ -625,17 +630,17 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderTopLeftRadius: 0,
     borderBottomLeftRadius: 0,
-    borderColor: '#f3f4f6',
+    borderColor: theme === 'light' ? '#f3f4f6' : '#475569',
   },
   phoneTextInput: {
     flex: 1,
   },
   textInput: {
-    backgroundColor: '#f3f4f6',
+    backgroundColor: theme === 'light' ? '#f3f4f6' : '#334155',
   },
   inputOutline: {
     borderRadius: 12,
-    borderColor: '#f3f4f6',
+    borderColor: theme === 'light' ? '#f3f4f6' : '#475569',
   },
   inputError: {
     borderColor: '#EF4444',
@@ -659,11 +664,11 @@ const styles = StyleSheet.create({
   },
   termsText: {
     fontSize: 14,
-    color: '#666',
+    color: theme === 'light' ? '#666' : '#94a3b8',
     lineHeight: 20,
   },
   termsLink: {
-    color: '#007AFF',
+    color: theme === 'light' ? '#007AFF' : '#3b82f6',
     textDecorationLine: 'underline',
   },
   signUpButton: {
@@ -686,11 +691,11 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#d1d5db',
+    backgroundColor: theme === 'light' ? '#d1d5db' : '#475569',
   },
   dividerText: {
     paddingHorizontal: 16,
-    color: '#6b7280',
+    color: theme === 'light' ? '#6b7280' : '#94a3b8',
     fontSize: 14,
   },
   socialButtonsContainer: {
@@ -700,7 +705,7 @@ const styles = StyleSheet.create({
   socialButton: {
     flex: 1,
     borderRadius: 25,
-    borderColor: '#f3f4f6',
+    borderColor: theme === 'light' ? '#f3f4f6' : '#475569',
     borderWidth: 1,
   },
   socialButtonContent: {
@@ -708,7 +713,7 @@ const styles = StyleSheet.create({
   },
   socialButtonLabel: {
     fontSize: 14,
-    color: '#374151',
+    color: theme === 'light' ? '#374151' : 'white',
   },
   loginLinkContainer: {
     flexDirection: 'row',
@@ -718,17 +723,17 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   loginPrompt: {
-    color: '#666',
+    color: theme === 'light' ? '#666' : '#94a3b8',
     fontSize: 16,
   },
   loginLink: {
-    color: '#007AFF',
+    color: theme === 'light' ? '#007AFF' : '#3b82f6',
     textDecorationLine: 'underline',
     fontWeight: '600',
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: theme === 'light' ? '#fff' : '#0f172a',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -736,14 +741,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    borderBottomColor: theme === 'light' ? '#e5e7eb' : '#334155',
   },
   modalTitle: {
     fontSize: 18,
     fontWeight: '600',
+    color: theme === 'light' ? 'black' : 'white',
   },
   modalDoneButton: {
-    color: '#007AFF',
+    color: theme === 'light' ? '#007AFF' : '#3b82f6',
     fontSize: 16,
     fontWeight: '500',
   },
@@ -753,7 +759,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 24,
     borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
+    borderBottomColor: theme === 'light' ? '#f3f4f6' : '#334155',
   },
   countryFlag: {
     fontSize: 24,
@@ -762,14 +768,15 @@ const styles = StyleSheet.create({
   countryName: {
     flex: 1,
     fontSize: 16,
-    color: '#111',
+    color: theme === 'light' ? '#111' : 'white',
     fontWeight: '500',
   },
   countryCode: {
     fontSize: 16,
-    color: '#666',
+    color: theme === 'light' ? '#666' : '#94a3b8',
     fontWeight: '600',
   },
 });
 
 export default SignupScreen;
+

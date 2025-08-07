@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { TouchableOpacity, View } from 'react-native';
 import { Card, Text } from 'react-native-paper';
+import { useTheme } from '@/src/hooks/useTheme';
 
 interface RestaurantCardProps {
   deliveryFee: number;
@@ -31,6 +32,12 @@ export const RestaurantCard = ({
 }: RestaurantCardProps) => {
   const navigation =
     useNavigation<CustomerHomeStackScreenProps<'HomeScreen'>['navigation']>();
+  const { theme } = useTheme();
+  const cardBackgroundColor = theme === 'light' ? 'white' : '#1e293b';
+  const textColor = theme === 'light' ? '#333' : 'text-text';
+  const secondaryTextColor = theme === 'light' ? '#666' : 'text-text-secondary';
+  const primaryColor = theme === 'light' ? '#007aff' : '#3b82f6';
+
   return (
     <TouchableOpacity
       onPress={() => {
@@ -48,12 +55,11 @@ export const RestaurantCard = ({
           shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.1,
           shadowRadius: 4,
-          backgroundColor: 'white',
+          backgroundColor: cardBackgroundColor,
           borderWidth: 1,
           marginVertical: 12,
-          borderColor: 'white',
-          boxShadow: '0px 1px 5px 3px  rgba(0, 0, 0, 0.15)',
-        
+          borderColor: cardBackgroundColor,
+          boxShadow: '1px 0px 10px rgba(0, 0, 0, 0.15)',
         }}
       >
         <View style={{ position: 'relative' }}>
@@ -76,7 +82,7 @@ export const RestaurantCard = ({
               position: 'absolute',
               top: 12,
               right: 12,
-              backgroundColor: 'white',
+              backgroundColor: cardBackgroundColor,
               borderRadius: 20,
               padding: 8,
               elevation: 3,
@@ -87,7 +93,11 @@ export const RestaurantCard = ({
             }}
             activeOpacity={0.7}
           >
-            <Ionicons name="heart-outline" size={20} color="#333" />
+            <Ionicons
+              name="heart-outline"
+              size={20}
+              color={theme === 'light' ? '#333' : 'white'}
+            />
           </TouchableOpacity>
 
           {/* Discount Badge - Only show if discount prop is provided */}
@@ -133,14 +143,16 @@ export const RestaurantCard = ({
           >
             <View
               style={{
-                backgroundColor: 'white',
+                backgroundColor: cardBackgroundColor,
                 borderRadius: 16,
                 paddingHorizontal: 12,
                 paddingVertical: 6,
                 elevation: 2,
               }}
             >
-              <Text style={{ fontSize: 12, fontWeight: 'bold', color: '#333' }}>
+              <Text
+                style={{ fontSize: 12, fontWeight: 'bold', color: textColor }}
+              >
                 {deliveryFee}F
               </Text>
             </View>
@@ -164,7 +176,9 @@ export const RestaurantCard = ({
 
         <Card.Content style={{ padding: 16 }}>
           <View style={{ marginBottom: 12 }}>
-            <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#333' }}>
+            <Text
+              style={{ fontSize: 18, fontWeight: 'bold', color: textColor }}
+            >
               {restaurantName}
             </Text>
           </View>
@@ -184,18 +198,22 @@ export const RestaurantCard = ({
                   marginBottom: 4,
                 }}
               >
-                <Ionicons name="location" size={14} color="#007aff" />
-                <Text style={{ fontSize: 14, color: '#007aff', marginLeft: 4 }}>
+                <Ionicons name="location" size={14} color={primaryColor} />
+                <Text
+                  style={{ fontSize: 14, color: primaryColor, marginLeft: 4 }}
+                >
                   {distanceFromUser}km
                 </Text>
               </View>
-              <Text style={{ fontSize: 12, color: '#666' }}>
+              <Text style={{ fontSize: 12, color: secondaryTextColor }}>
                 {deliveryFee}FCFA Delivery Fee
               </Text>
             </View>
 
             <View style={{ alignItems: 'flex-end' }}>
-              <Text style={{ fontSize: 14, color: '#333', fontWeight: '500' }}>
+              <Text
+                style={{ fontSize: 14, fontWeight: '500', color: textColor }}
+              >
                 {estimatedTime}
               </Text>
             </View>

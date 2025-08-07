@@ -18,10 +18,9 @@ export interface User {
 export interface FoodProps {
   id: string;
   restaurantID: string;
-  restaurantName?: string;
   name?: string;
   price?: number;
-  ratings?: number;
+  ratings?: number ;
   addedOn?: Date;
   distance?: number;
   image?: any;
@@ -101,6 +100,7 @@ export interface AuthState {
 }
 // Order item
 export interface OrderItem {
+  restaurantId: string;
   menuItemId: string;
   quantity: number;
   price: number;

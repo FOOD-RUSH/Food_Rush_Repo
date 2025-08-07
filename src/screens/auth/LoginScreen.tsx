@@ -15,8 +15,8 @@ import { loginSchema } from '@/src/utils/validation';
 import { TextButton } from '@/src/components/common/TextButton';
 import { AuthStackScreenProps } from '@/src/navigation/types';
 import CommonView from '@/src/components/common/CommonView';
-import { useAppStore } from '@/src/stores/AppStore';
 import { useAuthStore } from '@/src/stores/AuthStore';
+import { useTheme } from '@/src/hooks/useTheme';
 
 interface LoginFormData {
   email: string;
@@ -27,6 +27,13 @@ export const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
   navigation,
   route,
 }) => {
+  const { theme } = useTheme();
+  const textColor = theme === 'light' ? 'text-gray-900' : 'text-text';
+  const secondaryTextColor = theme === 'light' ? 'text-gray-600' : 'text-text-secondary';
+  const inputBackgroundColor = theme === 'light' ? '#f3f4f6' : '#334155';
+  const inputBorderColor = (error: boolean) => error ? '#EF4444' : (theme === 'light' ? '#f3f4f6' : '#475569');
+  const primaryColor = theme === 'light' ? '#007AFF' : '#3b82f6';
+
   useLayoutEffect(() => {});
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -98,7 +105,7 @@ export const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
             <View className="w-48 h-48 bg-blue-50 rounded-lg items-center justify-center mb-8">
               <Image className="w-32 h-32" source={WelcomeImage} />
             </View>
-            <Text className="text-3xl font-bold text-gray-900 mb-2">
+            <Text className={`text-3xl font-bold mb-2 ${textColor}`}>
               Welcome Back
             </Text>
           </View>
@@ -126,12 +133,12 @@ export const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                       keyboardType="email-address"
                       autoCapitalize="none"
                       autoComplete="email"
-                      left={<TextInput.Icon icon="email" color="#222" />}
+                      left={<TextInput.Icon icon="email" color={theme === 'light' ? '#222' : 'white'} />}
                       outlineStyle={{
                         borderRadius: 16,
-                        borderColor: errors.email ? '#EF4444' : '#f3f4f6',
+                        borderColor: inputBorderColor(!!errors.email),
                       }}
-                      style={{ backgroundColor: '#f3f4f6' }}
+                      style={{ backgroundColor: inputBackgroundColor }}
                       contentStyle={{ paddingHorizontal: 16 }}
                       error={!!errors.email}
                     />
@@ -159,18 +166,19 @@ export const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                       secureTextEntry={!showPassword}
                       autoCapitalize="none"
                       autoComplete="password"
-                      left={<TextInput.Icon icon="lock" color="#222" />}
+                      left={<TextInput.Icon icon="lock" color={theme === 'light' ? '#222' : 'white'} />}
                       right={
                         <TextInput.Icon
                           icon={showPassword ? 'eye-off' : 'eye'}
                           onPress={() => setShowPassword(!showPassword)}
+                          color={theme === 'light' ? '#222' : 'white'}
                         />
                       }
                       outlineStyle={{
                         borderRadius: 12,
-                        borderColor: errors.password ? '#EF4444' : '#f3f4f6',
+                        borderColor: inputBorderColor(!!errors.password),
                       }}
-                      style={{ backgroundColor: '#f3f4f6' }}
+                      style={{ backgroundColor: inputBackgroundColor }}
                       contentStyle={{ paddingHorizontal: 16 }}
                       error={!!errors.password}
                     />
@@ -189,9 +197,9 @@ export const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                   <Checkbox
                     status={rememberMe ? 'checked' : 'unchecked'}
                     onPress={() => setRememberMe(!rememberMe)}
-                    color="#007AFF"
+                    color={primaryColor}
                   />
-                  <Text className="text-[18px] text-gray-600 ml-2">
+                  <Text className={`text-base ml-2 ${secondaryTextColor}`}>
                     Remember me
                   </Text>
                 </View>
@@ -208,7 +216,7 @@ export const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                 onPress={handleSubmit(onSubmit)}
                 loading={loading}
                 disabled={loading}
-                buttonColor="#007AFF"
+                buttonColor={primaryColor}
                 contentStyle={{ paddingVertical: 12 }}
                 style={{ borderRadius: 25, marginTop: 16 }}
                 labelStyle={{ fontSize: 16, fontWeight: '600', color: 'white' }}
@@ -218,11 +226,11 @@ export const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
 
               {/* Divider */}
               <View className="flex-row items-center my-6">
-                <View className="flex-1 h-px bg-gray-300" />
-                <Text className="px-4 text-gray-500 text-sm">
+                <View className={`flex-1 h-px ${theme === 'light' ? 'bg-gray-300' : 'bg-gray-700'}`} />
+                <Text className={`px-4 text-sm ${secondaryTextColor}`}>
                   or continue with
                 </Text>
-                <View className="flex-1 h-px bg-gray-300" />
+                <View className={`flex-1 h-px ${theme === 'light' ? 'bg-gray-300' : 'bg-gray-700'}`} />
               </View>
 
               {/* Social Login Buttons */}
@@ -237,10 +245,10 @@ export const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                   style={{
                     flex: 1,
                     borderRadius: 25,
-                    borderColor: '#f3f4f6',
+                    borderColor: theme === 'light' ? '#f3f4f6' : '#475569',
                     borderWidth: 1,
                   }}
-                  labelStyle={{ fontSize: 14, color: '#374151' }}
+                  labelStyle={{ fontSize: 14, color: theme === 'light' ? '#374151' : 'white' }}
                 >
                   Google
                 </Button>
@@ -255,10 +263,10 @@ export const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                   style={{
                     flex: 1,
                     borderRadius: 25,
-                    borderColor: '#f3f4f6',
+                    borderColor: theme === 'light' ? '#f3f4f6' : '#475569',
                     borderWidth: 1,
                   }}
-                  labelStyle={{ fontSize: 14, color: '#374151' }}
+                  labelStyle={{ fontSize: 14, color: theme === 'light' ? '#374151' : 'white' }}
                 >
                   Apple
                 </Button>
@@ -266,7 +274,7 @@ export const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
 
               {/* Sign Up Link */}
               <View className="flex-row justify-center items-center mt-8 mb-4">
-                <Text className="text-gray-600 text-base">
+                <Text className={`text-base ${secondaryTextColor}`}>
                   Don&apos;t Already have an account?{' '}
                 </Text>
                 <TextButton text="Sign Up" onPress={handleSignUp} />

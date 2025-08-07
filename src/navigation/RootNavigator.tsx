@@ -23,17 +23,14 @@ import CartScreen from '../screens/customer/home/CartScreen';
 import NotificationsScreen from '../screens/restaurant/profile/NotificationsScreen';
 import FoodDetailsScreen from '../screens/customer/home/FoodDetailsScreen';
 import RestaurantDetailScreen from '../screens/customer/home/RestaurantDetailScreen';
-import { MaterialIcons } from '@expo/vector-icons';
 import EditProfileScreen from '../screens/customer/Profile/EditProfileScreen';
 import FavoriteRestaurants from '../screens/customer/Profile/FavoriteRestaurants';
 import PaymentScreen from '../screens/customer/Profile/PaymentScreen';
 import LanguageScreen from '../screens/customer/Profile/LanguageScreen';
 import { useAppStore } from '../stores/AppStore';
 import { useAuthStore } from '../stores/AuthStore';
-import { TouchableOpacity } from 'react-native';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
-
 const RootNavigator: React.FC = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const _hasHydrated = useAppStore((state) => state._hasHydrated);
@@ -64,7 +61,7 @@ const RootNavigator: React.FC = () => {
     if (!isAuthenticated) {
       return 'CustomerApp';
     }
-
+    
     switch (userType) {
       case 'customer':
         return 'CustomerApp';
@@ -246,7 +243,6 @@ const RootNavigator: React.FC = () => {
               options={{
                 headerTitle: 'Checkout Order',
                 gestureEnabled: true,
-               
               }}
             />
 

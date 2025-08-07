@@ -57,7 +57,7 @@ const ActiveOrderScreen = () => {
   );
 
   return (
-    <CommonView backgroundColor="#fff">
+    <CommonView >
       <View className="flex-1">
         <FlatList
           className="pt-10"
