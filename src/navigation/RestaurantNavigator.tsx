@@ -17,7 +17,22 @@ import OrderHistoryScreen from '../screens/restaurant/orders/OrderHistoryScreen'
 import OrderDetailsScreen from '../screens/restaurant/orders/OrderDetailsScreen';
 import { Platform } from 'react-native';
 import AnalyticsScreen from '../screens/restaurant/analytics/AnalyticsScreen';
-import DashboardScreen from '../screens/restaurant/analytics/DashboardScreen'; // Add this import
+import DashboardScreen from '../screens/restaurant/analytics/DashboardScreen';
+import ProfileEditScreen from '../screens/restaurant/profile/ProfileEditScreen';
+import PaymentBillingScreen from '../screens/restaurant/profile/PaymentBillingScreen';
+import NotificationScreen from '../screens/restaurant/profile/NotificationScreen';
+import AccountSettingsScreen from '../screens/restaurant/profile/AccountSettingsScreen';
+import SupportScreen from '../screens/restaurant/profile/SupportScreen';
+import AboutScreen from '../screens/restaurant/profile/AboutScreen';
+import RestaurantSettingsScreen from '../screens/restaurant/profile/RestaurantSettingsScreen';
+
+// Import the menu-related screens
+import AddFoodScreen from '../screens/restaurant/menu/AddFoodScreen';
+import EditFoodScreen from '../screens/restaurant/menu/EditFoodScreen';
+import FoodCategoriesScreen from '../screens/restaurant/menu/FoodCategoriesScreen';
+import MenuListScreen from '../screens/restaurant/menu/MenuListScreen';
+import MenuSettingsScreen from '../screens/restaurant/menu/MenuSettingsScreen';
+import AddCategoryScreen from '../screens/restaurant/menu/AddCategoryScreen';
 
 const RestaurantTab = createBottomTabNavigator<RestaurantTabParamList>();
 const RestaurantOrdersStack =
@@ -41,10 +56,12 @@ function RestaurantOrdersStackScreen() {
       <RestaurantOrdersStack.Screen
         name="OrderDetails"
         component={OrderDetailsScreen}
+        options={{ title: 'Order Details' }}
       />
       <RestaurantOrdersStack.Screen
         name="OrderHistory"
         component={OrderHistoryScreen}
+        options={{ title: 'Order History' }}
       />
     </RestaurantOrdersStack.Navigator>
   );
@@ -52,17 +69,87 @@ function RestaurantOrdersStackScreen() {
 
 function RestaurantMenuStackScreen() {
   return (
-    <RestaurantMenuStack.Navigator>
+    <RestaurantMenuStack.Navigator
+      screenOptions={{
+        headerShown: false, // Hide default headers since screens have custom headers
+      }}
+    >
       <RestaurantMenuStack.Screen
         name="MenuScreen"
         component={MenuScreen}
-        options={{ title: 'Menu' }}
+        options={{ title: 'Menu Management' }}
       />
-      {/* <RestaurantMenuStack.Screen name="AddMenuItem" component={AddMenuItemScreen} />
-      <RestaurantMenuStack.Screen name="EditMenuItem" component={EditMenuItemScreen} />
-      <RestaurantMenuStack.Screen name="Categories" component={CategoriesScreen} />
-      <RestaurantMenuStack.Screen name="AddCategory" component={AddCategoryScreen} />
-      <RestaurantMenuStack.Screen name="EditCategory" component={EditCategoryScreen} /> */}
+      <RestaurantMenuStack.Screen 
+        name="AddMenuItem" 
+        component={AddFoodScreen}
+        options={{ 
+          title: 'Add Menu Item',
+          headerShown: true,
+          headerStyle: { backgroundColor: '#007AFF' },
+          headerTintColor: '#fff',
+          headerTitleStyle: { fontWeight: 'bold' },
+        }}
+      />
+      <RestaurantMenuStack.Screen 
+        name="EditMenuItem" 
+        component={EditFoodScreen}
+        options={{ 
+          title: 'Edit Menu Item',
+          presentation: 'modal',
+        }}
+      />
+      <RestaurantMenuStack.Screen 
+        name="Categories" 
+        component={FoodCategoriesScreen}
+        options={{ 
+          title: 'Menu Categories',
+          headerShown: true,
+          headerStyle: { backgroundColor: '#007AFF' },
+          headerTintColor: '#fff',
+          headerTitleStyle: { fontWeight: 'bold' },
+        }}
+      />
+      <RestaurantMenuStack.Screen 
+        name="AddCategory" 
+        component={AddCategoryScreen}
+        options={{ 
+          title: 'Add Category',
+          headerShown: true,
+          headerStyle: { backgroundColor: '#007AFF' },
+          headerTintColor: '#fff',
+          headerTitleStyle: { fontWeight: 'bold' },
+        }}
+      />
+      <RestaurantMenuStack.Screen 
+        name="EditCategory" 
+        component={FoodCategoriesScreen} // Can reuse or create EditCategoryScreen
+        options={{ 
+          title: 'Edit Category',
+          presentation: 'modal',
+        }}
+      />
+      <RestaurantMenuStack.Screen 
+        name="MenuSettings" 
+        component={MenuSettingsScreen}
+        options={{ 
+          title: 'Menu Settings',
+          headerShown: true,
+          headerStyle: { backgroundColor: '#007AFF' },
+          headerTintColor: '#fff',
+          headerTitleStyle: { fontWeight: 'bold' },
+        }}
+      />
+      <RestaurantMenuStack.Screen 
+        name="MenuList" 
+        component={MenuListScreen}
+        options={{ 
+          title: 'Menu Items',
+          headerShown: true,
+          headerStyle: { backgroundColor: '#007AFF' },
+          headerTintColor: '#fff',
+          headerTitleStyle: { fontWeight: 'bold' },
+        }}
+      />
     </RestaurantMenuStack.Navigator>
   );
 }
@@ -89,11 +176,54 @@ function RestaurantAnalyticsStackScreen() {
 
 function RestaurantProfileStackScreen() {
   return (
-    <RestaurantProfileStack.Navigator>
+    <RestaurantProfileStack.Navigator
+      screenOptions={{
+        headerShown: false, // Hide headers for a cleaner look since the edit screen has its own header
+      }}
+    >
       <RestaurantProfileStack.Screen
         name="ProfileScreen"
         component={ProfileScreen}
         options={{ title: 'Profile' }}
+      />
+      <RestaurantProfileStack.Screen
+        name="ProfileEditProfile"
+        component={ProfileEditScreen}
+        options={{
+          presentation: 'modal', // Modal style for a nice UX
+          animation: 'slide_from_bottom', // Smooth animation
+        }}
+      />
+      {/* New Profile Option Screens */}
+      <RestaurantProfileStack.Screen
+        name="PaymentBilling"
+        component={PaymentBillingScreen}
+        options={{ title: 'Payment & Billing', animation: 'slide_from_right' }}
+      />
+      <RestaurantProfileStack.Screen
+        name="Notification"
+        component={NotificationScreen}
+        options={{ title: 'Notifications', animation: 'slide_from_right' }}
+      />
+      <RestaurantProfileStack.Screen
+        name="AccountSettings"
+        component={AccountSettingsScreen}
+        options={{ title: 'Account & Settings', animation: 'slide_from_right' }}
+      />
+      <RestaurantProfileStack.Screen
+        name="Support"
+        component={SupportScreen}
+        options={{ title: 'Support', animation: 'slide_from_right' }}
+      />
+      <RestaurantProfileStack.Screen
+        name="About"
+        component={AboutScreen}
+        options={{ title: 'About', animation: 'slide_from_right' }}
+      />
+      <RestaurantProfileStack.Screen
+        name="RestaurantSettings"
+        component={RestaurantSettingsScreen}
+        options={{ title: 'Restaurant Settings', animation: 'slide_from_right' }}
       />
     </RestaurantProfileStack.Navigator>
   );

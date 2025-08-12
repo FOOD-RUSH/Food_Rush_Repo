@@ -9,11 +9,15 @@ import {
   StyleSheet, 
   Modal,
   SafeAreaView,
-  FlatList
+  FlatList,
+  PanResponder
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Button, Avatar, Divider, Badge } from 'react-native-paper';
 import CommonView from '@/src/components/common/CommonView';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+// CHANGE THIS PATH TO MATCH YOUR PROJECT STRUCTURE
+import { RestaurantProfileStackScreenProps } from '../../../navigation/types';
 
 // Type definitions
 type NotificationType = 'order' | 'inventory' | 'payment' | 'schedule';
@@ -62,7 +66,10 @@ interface ProfileOption {
   onPress: () => void;
 }
 
-const ProfileScreen: React.FC = () => {
+// Add proper typing for the component
+type ProfileScreenProps = RestaurantProfileStackScreenProps<'ProfileScreen'>;
+
+const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   // State management
   const [user] = useState<UserProfile>({
     name: 'Restaurant Owner',
@@ -138,40 +145,40 @@ const ProfileScreen: React.FC = () => {
   // Profile options configuration
   const profileOptions: ProfileOption[] = [
     {
-      title: 'Restaurant Settings',
-      subtitle: 'Manage restaurant information',
-      icon: 'store-cog',
-      onPress: () => Alert.alert('Coming Soon', 'Restaurant settings feature is coming soon!'),
-    },
-    {
-      title: 'Account Settings',
-      subtitle: 'Update personal information',
-      icon: 'account-cog',
-      onPress: () => Alert.alert('Coming Soon', 'Account settings feature is coming soon!'),
+      title: 'Payment & Billing',
+      subtitle: 'Manage your payment methods and billing info',
+      icon: 'credit-card-outline',
+      onPress: () => navigation.navigate('PaymentBilling'), 
     },
     {
       title: 'Notifications',
-      subtitle: 'Configure notification preferences',
+      subtitle: 'View and manage your notifications',
       icon: 'bell-outline',
-      onPress: () => Alert.alert('Coming Soon', 'Notification settings feature is coming soon!'),
+      onPress: () => navigation.navigate('Notification'),
     },
     {
-      title: 'Payment & Billing',
-      subtitle: 'Manage payment methods',
-      icon: 'credit-card-outline',
-      onPress: () => Alert.alert('Coming Soon', 'Payment settings feature is coming soon!'),
+      title: 'Account & Settings',
+      subtitle: 'Update your account information and preferences',
+      icon: 'account-cog-outline',
+      onPress: () => navigation.navigate('AccountSettings'), 
+    },
+    {
+      title: 'Restaurant Settings',
+      subtitle: 'Edit your restaurant details and preferences',
+      icon: 'store-cog-outline',
+      onPress: () => navigation.navigate('RestaurantSettings'),
     },
     {
       title: 'Support',
-      subtitle: 'Get help and support',
-      icon: 'help-circle-outline',
-      onPress: () => Alert.alert('Support', 'For support, please contact us at support@restaurant.com'),
+      subtitle: 'Get help or contact support',
+      icon: 'lifebuoy',
+      onPress: () => navigation.navigate('Support'),
     },
     {
       title: 'About',
-      subtitle: 'App version and information',
+      subtitle: 'Learn more about this app',
       icon: 'information-outline',
-      onPress: () => Alert.alert('About', 'Restaurant Management App v1.0.0\nBuilt with React Native'),
+      onPress: () => navigation.navigate('About'),
     },
   ];
 
@@ -239,6 +246,45 @@ const ProfileScreen: React.FC = () => {
 
   const handleNotificationPress = (item: NotificationItem) => {
     Alert.alert('Notification', item.message);
+  };
+
+  // Diamond button position state and pan responder
+  const pan = useRef(new Animated.ValueXY()).current;
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderGrant: () => {
+        pan.setOffset({
+          x: (pan.x as unknown as { _value: number })._value,
+          y: (pan.y as unknown as { _value: number })._value,
+        });
+      },
+      onPanResponderMove: Animated.event(
+        [null, { dx: pan.x, dy: pan.y }],
+        { useNativeDriver: false }
+      ),
+      onPanResponderRelease: () => {
+        pan.flattenOffset();
+      },
+    })
+  ).current;
+
+  // FIXED: This function now properly navigates to the edit screen with data
+  const openEditProfile = () => {
+    // Pass current user data to the edit screen
+    const userProfile = {
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      restaurantName: user.restaurantName,
+      address: user.address,
+      bio: '', // Add if you have this data
+      website: '', // Add if you have this data
+      cuisine: restaurant.cuisine, // Using restaurant data for cuisine
+    };
+
+    navigation.navigate('ProfileEditProfile', { userProfile });
   };
 
   // Render functions
@@ -400,6 +446,55 @@ const ProfileScreen: React.FC = () => {
   // Main render
   return (
     <CommonView>
+      {/* Draggable Diamond Button - FIXED */}
+      <Animated.View
+        style={[
+          {
+            position: 'absolute',
+            top: 30,
+            right: 20,
+            zIndex: 100,
+          },
+          {
+            transform: [
+              { translateX: pan.x },
+              { translateY: pan.y },
+            ],
+          },
+        ]}
+        {...panResponder.panHandlers}
+      >
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={openEditProfile}
+          style={{
+            width: 44,
+            height: 44,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <View
+            style={{
+              width: 36,
+              height: 36,
+              backgroundColor: '#764ba2',
+              transform: [{ rotate: '45deg' }],
+              borderRadius: 8,
+              alignItems: 'center',
+              justifyContent: 'center',
+              shadowColor: '#764ba2',
+              shadowOpacity: 0.25,
+              shadowOffset: { width: 0, height: 4 },
+              shadowRadius: 8,
+              elevation: 8,
+            }}
+          >
+            <Ionicons name="pencil" size={22} color="white" style={{ transform: [{ rotate: '-45deg' }] }} />
+          </View>
+        </TouchableOpacity>
+      </Animated.View>
+
       {/* Top Action Buttons */}
       <View style={styles.topButtons}>
         <TouchableOpacity
@@ -473,6 +568,20 @@ const ProfileScreen: React.FC = () => {
             <Text style={styles.infoText}>Member since {user.joinDate}</Text>
           </View>
         </Animated.View>
+
+        <TouchableOpacity
+          style={{
+            marginTop: 16,
+            marginHorizontal: 24,
+            paddingVertical: 12,
+            backgroundColor: '#764ba2',
+            borderRadius: 8,
+            alignItems: 'center',
+          }}
+          onPress={openEditProfile}
+        >
+          <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>Edit Profile</Text>
+        </TouchableOpacity>
 
         <Divider style={styles.divider} />
 

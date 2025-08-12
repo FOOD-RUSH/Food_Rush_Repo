@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import CommonView from '@/src/components/common/CommonView';
+import { useFocusEffect } from '@react-navigation/native';
 
 const AnalyticsScreen = ({ navigation }: any) => {
   const [timeRange, setTimeRange] = useState('week');
@@ -79,6 +80,39 @@ const AnalyticsScreen = ({ navigation }: any) => {
       })
     ).start();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      // Reset or refresh your state/data here as needed
+      // For demonstration, we'll reset selectedMetric and timeRange
+      setSelectedMetric('revenue');
+      setTimeRange('week');
+      // Optionally, restart animations
+      fadeAnim.setValue(0);
+      slideAnim.setValue(50);
+      scaleAnim.setValue(0.9);
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+          easing: Easing.out(Easing.cubic),
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 800,
+          useNativeDriver: true,
+          easing: Easing.out(Easing.back(1.2)),
+        }),
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+          easing: Easing.out(Easing.back(1.1)),
+        }),
+      ]).start();
+    }, [])
+  );
 
   const analyticsData = {
     revenue: {

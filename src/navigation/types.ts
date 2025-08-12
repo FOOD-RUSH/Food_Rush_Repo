@@ -1,4 +1,3 @@
-
 import { NavigatorScreenParams } from "@react-navigation/native";
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
@@ -75,6 +74,7 @@ export type CustomerProfileStackParamList = {
   Help: undefined;
   About: undefined;
 };
+
 export type CustomerHelpCenterStackParamsList = {
   FAQ: undefined;
   ContactUs: undefined;
@@ -104,6 +104,7 @@ export type RestaurantMenuStackParamList = {
   AddCategory: undefined;
   EditCategory: { categoryId: string };
   MenuSettings: undefined;
+  MenuList: undefined; // Add this for the menu list view
 };
 
 export type RestaurantAnalyticsStackParamList = {
@@ -117,14 +118,25 @@ export type RestaurantAnalyticsStackParamList = {
 
 export type RestaurantProfileStackParamList = {
   ProfileScreen: undefined;
-  EditProfile: undefined;
+  ProfileEditProfile: {
+    userProfile?: {
+      name: string;
+      email: string;
+      phone: string;
+      restaurantName: string;
+      address: string;
+      bio?: string;
+      website?: string;
+      cuisine?: string;
+    };
+  };
   RestaurantSettings: undefined;
-  BusinessHours: undefined;
-  DeliverySettings: undefined;
-  Notifications: undefined;
-  Help: undefined;
+  AccountSettings: undefined;
+  About: undefined;
+  Notification: undefined;
+  Support: undefined;
   BusinessSettings: undefined;
-  PayoutSettings: undefined;
+  PaymentBilling: undefined;
 };
 
 // Navigation Prop Types

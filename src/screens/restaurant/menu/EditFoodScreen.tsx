@@ -7,7 +7,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
 import CommonView from '@/src/components/common/CommonView';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '@/src/navigation/types';
+import { RestaurantMenuStackParamList } from '@/src/navigation/types';
 
 const { width, height } = Dimensions.get('window');
 
@@ -20,26 +20,34 @@ interface FoodItem {
   image: string;
 }
 
-type EditFoodScreenProps = NativeStackScreenProps<RootStackParamList> & {
-  route: {
-    params: {
-      foodItem: FoodItem;
-    };
-  };
-};
+type EditFoodScreenProps = NativeStackScreenProps<
+  RestaurantMenuStackParamList, 
+  'EditMenuItem'
+>;
 
 const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
   const navigation = useNavigation();
-  const { foodItem } = route.params || {
-    foodItem: {
-      id: '1',
-      name: 'Sample Food',
+  
+  // FIXED: Use itemId from route params and create a mock food item
+  // In a real app, you would fetch the item data using the itemId
+  const { itemId } = route.params;
+  
+  // Mock function to get food item by ID (replace with your actual data fetching logic)
+  const getFoodItemById = (id: string): FoodItem => {
+    // This would typically be a database call or API request
+    // For now, return mock data
+    return {
+      id: id,
+      name: 'Sample Food Item',
       price: '12.99',
-      description: 'Delicious sample food',
+      description: 'A delicious sample food item',
       category: 'Main Course',
       image: 'https://via.placeholder.com/300x200'
-    }
+    };
   };
+
+  // Get the food item using the itemId
+  const foodItem = getFoodItemById(itemId);
 
   const [name, setName] = useState(foodItem.name);
   const [price, setPrice] = useState(foodItem.price);
@@ -202,8 +210,18 @@ const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
       }),
     ]).start();
 
-    console.log('Saving changes...');
-    // Add your save logic here
+    // Create updated food item
+    const updatedFoodItem: FoodItem = {
+      id: itemId,
+      name,
+      price,
+      description,
+      category,
+      image,
+    };
+
+    console.log('Saving changes for item:', itemId, updatedFoodItem);
+    // Add your save logic here - typically an API call to update the item
   };
 
   const handleCancel = () => {
