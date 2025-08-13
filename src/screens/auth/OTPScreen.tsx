@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button, IconButton } from 'react-native-paper';
-import { useTheme } from '@/src/hooks/useTheme';
+import { useTheme } from 'react-native-paper';
 
 interface OTPScreenProps {
   phoneNumber?: string;
@@ -10,21 +10,12 @@ interface OTPScreenProps {
   onResendOTP?: () => void;
 }
 
-const OTPScreen: React.FC<OTPScreenProps> = ({ 
-  phoneNumber = "+237 6*****31", 
+const OTPScreen: React.FC<OTPScreenProps> = ({
+  phoneNumber = '+237 6*****31',
   onVerifyOTP,
-  onResendOTP 
+  onResendOTP,
 }) => {
-  const { theme } = useTheme();
-  const backgroundColor = theme === 'light' ? 'bg-white' : 'bg-background';
-  const textColor = theme === 'light' ? 'text-black' : 'text-text';
-  const secondaryTextColor = theme === 'light' ? 'text-gray-600' : 'text-text-secondary';
-  const otpInputStyle = (digit: string) => `w-12 h-12 mx-2 text-center text-lg font-semibold border-2 rounded-lg ${
-    digit 
-      ? (theme === 'light' ? 'border-blue-500 bg-blue-50' : 'border-primary bg-secondary') 
-      : (theme === 'light' ? 'border-gray-300 bg-white' : 'border-gray-600 bg-secondary')
-  }`;
-  const primaryColor = theme === 'light' ? '#1E90FF' : '#3b82f6';
+  const { colors } = useTheme();
 
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [timer, setTimer] = useState(65);
@@ -44,25 +35,31 @@ const OTPScreen: React.FC<OTPScreenProps> = ({
     }
   }, [timer]);
 
-  const handleOtpChange = useCallback((value: string, index: number) => {
-    // Only allow numeric input
-    if (!/^\d*$/.test(value)) return;
+  const handleOtpChange = useCallback(
+    (value: string, index: number) => {
+      // Only allow numeric input
+      if (!/^\d*$/.test(value)) return;
 
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
+      const newOtp = [...otp];
+      newOtp[index] = value;
+      setOtp(newOtp);
 
-    // Auto-focus next input
-    if (value && index < 5) {
-      inputRefs.current[index + 1]?.focus();
-    }
-  }, [otp]);
+      // Auto-focus next input
+      if (value && index < 5) {
+        inputRefs.current[index + 1]?.focus();
+      }
+    },
+    [otp],
+  );
 
-  const handleKeyPress = useCallback((key: string, index: number) => {
-    if (key === 'Backspace' && !otp[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
-  }, [otp]);
+  const handleKeyPress = useCallback(
+    (key: string, index: number) => {
+      if (key === 'Backspace' && !otp[index] && index > 0) {
+        inputRefs.current[index - 1]?.focus();
+      }
+    },
+    [otp],
+  );
 
   const handleVerify = useCallback(async () => {
     const otpString = otp.join('');
@@ -70,7 +67,7 @@ const OTPScreen: React.FC<OTPScreenProps> = ({
 
     setIsVerifying(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
       onVerifyOTP?.(otpString);
       console.log('OTP Verified:', otpString);
     } catch (error) {
@@ -98,21 +95,21 @@ const OTPScreen: React.FC<OTPScreenProps> = ({
     console.log('Go back');
   }, []);
 
-  const otpComplete = otp.every(digit => digit !== '');
+  const otpComplete = otp.every((digit) => digit !== '');
 
   return (
-    <SafeAreaView className={`flex-1 ${backgroundColor}`}>
+    <SafeAreaView className={`flex-1 bg-[${colors.background}]`}>
       <View className="flex-1 px-6 pt-2">
         {/* Header */}
         <View className="flex-row items-center justify-between mb-8">
           <IconButton
             icon="arrow-left"
             size={24}
-            iconColor={theme === 'light' ? '#000000' : 'white'}
+            iconColor={colors.onSurface}
             className="-ml-2"
             onPress={goBack}
           />
-          <Text className={`text-lg font-semibold ${textColor}`}>
+          <Text className={`text-lg font-semibold text-[${colors.onSurface}]`}>
             OTP Code Verification
           </Text>
           <View className="w-10" />
@@ -120,7 +117,8 @@ const OTPScreen: React.FC<OTPScreenProps> = ({
 
         {/* Description */}
         <View className="mb-12">
-          <Text className={`text-sm text-center leading-5 ${secondaryTextColor}`}>
+          <Text
+            className={`text-sm text-center leading-5 text-[${colors.onSurface}]`}>
             Code has been sent to {phoneNumber}
           </Text>
         </View>
@@ -130,11 +128,17 @@ const OTPScreen: React.FC<OTPScreenProps> = ({
           {otp.map((digit, index) => (
             <TextInput
               key={index}
-              ref={ref => inputRefs.current[index] = ref}
-              className={otpInputStyle(digit)}
+              ref={(ref) => (inputRefs.current[index] = ref)}
+              className={`w-12 h-12 mx-2 text-center text-lg font-semibold border-2 rounded-lg ${
+                digit
+                  ? `border-[${colors.primary}] bg-[${colors.surfaceVariant}]`
+                  : `border-[${colors.outline}] bg-[${colors.surface}]`
+              }`}
               value={digit}
               onChangeText={(value) => handleOtpChange(value, index)}
-              onKeyPress={({ nativeEvent }) => handleKeyPress(nativeEvent.key, index)}
+              onKeyPress={({ nativeEvent }) =>
+                handleKeyPress(nativeEvent.key, index)
+              }
               keyboardType="numeric"
               maxLength={1}
               selectTextOnFocus
@@ -144,10 +148,11 @@ const OTPScreen: React.FC<OTPScreenProps> = ({
 
         {/* Resend Timer */}
         <View className="mb-8">
-          <Text className={`text-sm text-center ${secondaryTextColor}`}>
+          <Text className={`text-sm text-center text-[${colors.secondary}]`}>
             Resend code in{' '}
-            <Text className="font-medium" style={{ color: primaryColor }}>
-              {Math.floor(timer / 60)}:{(timer % 60).toString().padStart(2, '0')} s
+            <Text className="font-medium" style={{ color: colors.primary }}>
+              {Math.floor(timer / 60)}:
+              {(timer % 60).toString().padStart(2, '0')} s
             </Text>
           </Text>
         </View>
@@ -158,7 +163,7 @@ const OTPScreen: React.FC<OTPScreenProps> = ({
           onPress={handleVerify}
           loading={isVerifying}
           disabled={!otpComplete || isVerifying}
-          buttonColor={primaryColor}
+          buttonColor={colors.primary}
           textColor="white"
           contentStyle={{ paddingVertical: 8 }}
           style={{ borderRadius: 25, marginBottom: 20 }}
@@ -173,9 +178,13 @@ const OTPScreen: React.FC<OTPScreenProps> = ({
           disabled={!isResendEnabled}
           className="self-center"
         >
-          <Text className={`text-sm font-medium ${
-            isResendEnabled ? (theme === 'light' ? 'text-blue-500' : 'text-primary') : 'text-gray-400'
-          }`}>
+          <Text
+            className={`text-sm font-medium ${
+              isResendEnabled
+                ? `text-[${colors.primary}]`
+                : `text-[${colors.outline}]`
+            }`}
+          >
             Resend Code
           </Text>
         </TouchableOpacity>

@@ -1,37 +1,37 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import React from 'react';
-import { Avatar, Button } from 'react-native-paper';
+import { Avatar, useTheme } from 'react-native-paper';
 import { icons } from '@/assets/images';
 import { Ionicons } from '@expo/vector-icons';
 import { CustomerHomeStackScreenProps } from '@/src/navigation/types';
 import { useNavigation } from '@react-navigation/native';
-import { useTheme } from '@/src/hooks/useTheme';
 
 const HomeHeader = () => {
   const navigation =
     useNavigation<CustomerHomeStackScreenProps<'HomeScreen'>['navigation']>();
-  const { theme} = useTheme();
-  const backgroundColor = theme === 'light' ? 'bg-white' : 'bg-background';
-  const textColor = theme === 'light' ? 'text-black' : 'text-text';
-  const secondaryTextColor = theme === 'light' ? 'text-gray-500' : 'text-text-secondary';
-  const iconColor = theme === 'light' ? '#000' : 'white';
+  const { colors } = useTheme();
+  const backgroundColor = colors.tertiary;
 
   return (
-    <View className={`flex-row justify-between items-center px-4 py-3 ${backgroundColor}`}>
+    <View
+      className={`flex-row justify-between items-cent400er px-4 py-3 bg-[${backgroundColor}]`}
+    >
       <View className="flex-row items-center flex-1">
         <Avatar.Image
           source={icons.appleIcon}
           size={70}
-          style={{ backgroundColor: theme === 'light' ? '#f0f0f0' : '#334155' }}
+          style={{ backgroundColor: colors.surfaceVariant }}
         />
         <View className="ml-3 flex-1">
-          <Text className={`text-sm mb-1 ${secondaryTextColor}`}>Deliver to</Text>
+          <Text className={`text-sm mb-1 `} style={{ color: colors.onSurface }}>Deliver to</Text>
           <View className="flex-row items-center">
-            <Text className={`text-lg font-bold ${textColor}`}>Byiem Assi</Text>
+            <Text className={`text-lg font-bold `} style={{ color: colors.onSurface }}>
+              Byiem Assi
+            </Text>
             <Ionicons
               name="chevron-down"
               size={16}
-              color={iconColor}
+              color={colors.onSurface}
               className="ml-1"
             />
           </View>
@@ -45,16 +45,24 @@ const HomeHeader = () => {
           }}
           activeOpacity={0.7}
         >
-          <Ionicons name="notifications-outline" color={iconColor} size={24} />
+          <Ionicons
+            name="notifications-outline"
+            color={colors.onSurface}
+            size={25}
+          />
         </TouchableOpacity>
         <TouchableOpacity
-          className="ml-2 border border-solid border-gray-300 rounded-full p-2 active:bg-gray-200"
+          className="ml-2 border border-solid border-gray-300 rounded-full p-2 active:bg-gray-200 relative"
           onPress={() => {
             navigation.navigate('Cart');
           }}
           activeOpacity={0.7}
         >
-          <Ionicons name="bag-outline" color={iconColor} size={24} />
+          {/* indicator for cart items */}
+          <View className=" rounded-2xl bg-red-900 absolute bottom-[-4px] right-0 h-6 w-6 items-center">
+            <Text className="text-white text-sm text-center font-bold ">1</Text>
+          </View>
+          <Ionicons name="bag-outline" color={colors.onSurface} size={25} />
         </TouchableOpacity>
       </View>
     </View>

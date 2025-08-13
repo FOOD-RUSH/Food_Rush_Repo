@@ -1,18 +1,17 @@
-
 import * as yup from 'yup';
 
 export const loginSchema = yup.object().shape({
-  email: yup
-    .string()
-    .email('Invalid email')
-    .required('Email required'),
+  email: yup.string().email('Invalid email').required('Email required'),
   password: yup
     .string()
     .min(8, 'Password must contain atleast 8 characters')
     .required('Password required'),
 });
 //email validation schema
-export const emailValidation = yup.string().email('Invalid email').required('Email is required')
+export const emailValidation = yup
+  .string()
+  .email('Invalid email')
+  .required('Email is required');
 
 export const registerSchema = yup.object().shape({
   displayName: yup
@@ -32,7 +31,4 @@ export const registerSchema = yup.object().shape({
     .string()
     .oneOf([yup.ref('password')], 'Password do not match')
     .required('Confirmation required'),
-   
-
 });
-

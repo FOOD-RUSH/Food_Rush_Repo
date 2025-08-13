@@ -1,12 +1,11 @@
 import React, { useCallback } from 'react';
 import { View, Text } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import { Button, TextInput, HelperText, IconButton } from 'react-native-paper';
+import { Button, TextInput, HelperText, IconButton, useTheme } from 'react-native-paper';
 import { goBack } from '@/src/navigation/navigationHelpers';
-import { useTheme } from '@/src/hooks/useTheme';
+import CommonView from '@/src/components/common/CommonView';
 
 // Validation schema
 const schema = yup.object({
@@ -21,13 +20,7 @@ interface ForgotPasswordForm {
 }
 
 const ForgotPasswordScreen = () => {
-  const { theme } = useTheme();
-  const backgroundColor = theme === 'light' ? 'bg-white' : 'bg-background';
-  const textColor = theme === 'light' ? 'text-black' : 'text-text';
-  const secondaryTextColor = theme === 'light' ? 'text-gray-600' : 'text-text-secondary';
-  const inputBackgroundColor = theme === 'light' ? 'white' : '#1e293b';
-  const inputBorderColor = errors.email ? '#ef4444' : (theme === 'light' ? '#e5e7eb' : '#334155');
-  const primaryColor = theme === 'light' ? '#1E90FF' : '#3b82f6';
+  const { colors } = useTheme();
 
   const {
     control,
@@ -58,14 +51,14 @@ const ForgotPasswordScreen = () => {
   }, [setValue]);
 
   return (
-    <SafeAreaView className={`flex-1 ${backgroundColor}`}>
+    <CommonView>
       <View className="flex-1 px-6 pt-2">
         {/* Back Button */}
         <View className="mb-6">
           <IconButton
             icon="arrow-left"
             size={24}
-            iconColor={theme === 'light' ? '#000000' : 'white'}
+            iconColor={colors.onSurface}
             className="self-start -ml-2"
             onPress={goBack}
           />
@@ -73,13 +66,16 @@ const ForgotPasswordScreen = () => {
 
         {/* Header Section */}
         <View className="mb-10">
-          <Text className={`text-3xl font-bold text-center mb-2 ${textColor}`}>
+          <Text
+            className={`text-3xl font-bold text-center mb-2 text-[${colors.onSurface}]`}
+          >
             Reset Password
           </Text>
-          <Text className={`text-sm text-center leading-5 ${secondaryTextColor}`}>
-            Enter your email address and we will send you a{
-}code to reset
-            your password
+          <Text
+            className={`text-sm text-center leading-5 text-[${colors.onSurface}]`}
+          >
+            Enter your email address and we will send you a{}code to reset your
+            password
           </Text>
         </View>
 
@@ -99,21 +95,30 @@ const ForgotPasswordScreen = () => {
                 autoCapitalize="none"
                 autoComplete="email"
                 autoCorrect={false}
-                style={{ backgroundColor: inputBackgroundColor }}
+                style={{ backgroundColor: colors.surfaceVariant }}
                 outlineStyle={{
                   borderRadius: 12,
                   borderWidth: 1,
-                  borderColor: inputBorderColor,
+                  borderColor: errors.email ? colors.error : colors.outline,
                 }}
                 contentStyle={{
                   paddingHorizontal: 16,
                   paddingVertical: 16,
                 }}
                 error={!!errors.email}
-                left={<TextInput.Icon icon="lock-outline" color={theme === 'light' ? 'black' : 'white'} />}
+                left={
+                  <TextInput.Icon
+                    icon="lock-outline"
+                    color={colors.onSurface}
+                  />
+                }
                 right={
                   value ? (
-                    <TextInput.Icon icon="eye" onPress={clearEmail} color={theme === 'light' ? 'black' : 'white'} />
+                    <TextInput.Icon
+                      icon="eye"
+                      onPress={clearEmail}
+                      color={colors.onSurface}
+                    />
                   ) : null
                 }
               />
@@ -124,7 +129,7 @@ const ForgotPasswordScreen = () => {
               >
                 {errors.email?.message}
               </HelperText>
-              <Text className={`text-xs mt-1 ${secondaryTextColor}`}>
+              <Text className={`text-xs mt-1 text-[${colors.onSurface}]`}>
                 Must have at least 8 characters
               </Text>
             </View>
@@ -137,7 +142,7 @@ const ForgotPasswordScreen = () => {
           onPress={handleSubmit(handleForgotPassword)}
           loading={isSubmitting}
           disabled={isSubmitting || !emailValue}
-          buttonColor={primaryColor}
+          buttonColor={colors.primary}
           textColor="white"
           contentStyle={{ paddingVertical: 8 }}
           style={{ borderRadius: 25 }}
@@ -146,7 +151,7 @@ const ForgotPasswordScreen = () => {
           Continue
         </Button>
       </View>
-    </SafeAreaView>
+    </CommonView>
   );
 };
 

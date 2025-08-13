@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { Card, Text } from 'react-native-paper';
-import { useTheme } from '@/src/hooks/useTheme';
+import { useTheme } from 'react-native-paper';
 
 export interface FoodItemCardProps {
   foodId: string;
@@ -33,11 +33,9 @@ const FoodItemCard = ({
   const [foodID, setFoodID] = useState('fgfgfgfg');
   const navigation =
     useNavigation<CustomerHomeStackScreenProps<'HomeScreen'>['navigation']>();
-  const { theme } = useTheme();
-  const cardBackgroundColor = theme === 'light' ? 'white' : '#1e293b';
-  const textColor = theme === 'light' ? 'text-gray-900' : 'text-text';
-  const secondaryTextColor = theme === 'light' ? '#A0A0A0' : 'text-text-secondary';
-  const primaryColor = theme === 'light' ? '#007aff' : '#3b82f6';
+  const { colors } = useTheme();
+  
+  const primaryColor = colors.primary;
 
   return (
     <TouchableOpacity
@@ -55,16 +53,15 @@ const FoodItemCard = ({
           margin: 10,
           borderRadius: 16,
           overflow: 'hidden',
-          backgroundColor: cardBackgroundColor,
+          backgroundColor: colors.surface,
           marginVertical: 12,
-          borderColor: cardBackgroundColor,
+          borderColor: colors.surface,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: 1 },
           shadowOpacity: 0.15,
           shadowRadius: 3,
           elevation: 3,
-          boxShadow: '1px 0px 10px rgba(0, 0, 0, 0.15)'
-          
+          boxShadow: '1px 0px 10px rgba(0, 0, 0, 0.15)',
         }}
       >
         {/* Card content with horizontal layout */}
@@ -91,7 +88,7 @@ const FoodItemCard = ({
                 position: 'absolute',
                 top: 6,
                 left: 6,
-                backgroundColor: primaryColor,
+                backgroundColor: colors.primary,
                 borderRadius: 6,
                 paddingHorizontal: 8,
                 paddingVertical: 2,
@@ -118,7 +115,7 @@ const FoodItemCard = ({
                 fontWeight: 'bold',
                 marginBottom: 10,
                 padding: 4,
-                color: textColor,
+                color: colors.onSurface,
               }}
             >
               {FoodName}
@@ -132,16 +129,26 @@ const FoodItemCard = ({
                 marginBottom: 8,
               }}
             >
-              <Text className={`text-[12px] ${secondaryTextColor}`}>
+              <Text className={`text-[12px] ${colors.onSurface}`}>
                 {distanceFromUser.toFixed(0)} km
               </Text>
               <Text
-                style={{ color: secondaryTextColor, fontSize: 12, marginHorizontal: 4 }}
+                style={{
+                  color: colors.onSurface,
+                  fontSize: 12,
+                  marginHorizontal: 4,
+                }}
               >
                 |
               </Text>
               <Ionicons name="star" size={12} color="#FFD700" />
-              <Text style={{ color: secondaryTextColor, fontSize: 12, marginLeft: 2 }}>
+              <Text
+                style={{
+                  color: colors.onSurface,
+                  fontSize: 12,
+                  marginLeft: 2,
+                }}
+              >
                 4.9 (1000)
               </Text>
             </View>
@@ -157,14 +164,20 @@ const FoodItemCard = ({
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Text
                   style={{
-                    color: primaryColor,
+                    color: colors.primary,
                     fontSize: 16,
                     fontWeight: 'bold',
                   }}
                 >
                   {FoodPrice} XAF
                 </Text>
-                <Text style={{ color: secondaryTextColor, fontSize: 12, marginLeft: 5 }}>
+                <Text
+                  style={{
+                    color: colors.onSurface,
+                    fontSize: 12,
+                    marginLeft: 5,
+                  }}
+                >
                   |
                 </Text>
                 <Ionicons
@@ -173,7 +186,13 @@ const FoodItemCard = ({
                   color={primaryColor}
                   style={{ marginLeft: 5 }}
                 />
-                <Text style={{ color: secondaryTextColor, fontSize: 12, marginLeft: 5 }}>
+                <Text
+                  style={{
+                    color: colors.onSurface,
+                    fontSize: 12,
+                    marginLeft: 5,
+                  }}
+                >
                   ${DeliveryPrice.toFixed(0)}
                 </Text>
               </View>
@@ -182,7 +201,7 @@ const FoodItemCard = ({
               <TouchableOpacity
                 onPress={onLike}
                 style={{
-                  backgroundColor: cardBackgroundColor,
+                  backgroundColor: colors.surface,
                   borderRadius: 20,
                   padding: 8,
                   elevation: 2,
@@ -192,7 +211,9 @@ const FoodItemCard = ({
                 <Ionicons
                   name={loved ? 'heart' : 'heart-outline'}
                   size={18}
-                  color={loved ? '#e0245e' : (theme === 'light' ? '#333' : 'white')}
+                  color={
+                    loved ? '#e0245e' : colors.onSurface
+                  }
                 />
               </TouchableOpacity>
             </View>

@@ -5,11 +5,12 @@ import { useAppStore } from '@/src/stores/AppStore';
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const theme = useAppStore((state) => state.theme);
+  
+  // Memoize theme selection to avoid unnecessary re-computations
+  const selectedTheme = useMemo(() => {
+    return theme === 'light' ? lightTheme : darkTheme;
+  }, [theme]);
 
-  const paperTheme = useMemo(
-    () => (theme === 'light' ? lightTheme : darkTheme),
-    [theme],
-  );
-
-  return <PaperProvider theme={paperTheme}>{children}</PaperProvider>;
+  // Only re-render when theme actually changes
+  return <PaperProvider theme={selectedTheme}>{children}</PaperProvider>;
 };

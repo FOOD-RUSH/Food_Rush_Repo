@@ -5,7 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { RootStackParamList } from './types';
 import { navigationRef, handleDeepLink } from './navigationHelpers';
 import { linking } from './linking';
-import { Linking, Platform } from 'react-native';
+import { Linking } from 'react-native';
 // Import navigators
 import AuthNavigator from './AuthNavigator';
 import CustomerNavigator, {
@@ -27,8 +27,11 @@ import EditProfileScreen from '../screens/customer/Profile/EditProfileScreen';
 import FavoriteRestaurants from '../screens/customer/Profile/FavoriteRestaurants';
 import PaymentScreen from '../screens/customer/Profile/PaymentScreen';
 import LanguageScreen from '../screens/customer/Profile/LanguageScreen';
+import AddressScreen from '../screens/customer/Profile/AdressScreen';
 import { useAppStore } from '../stores/AppStore';
 import { useAuthStore } from '../stores/AuthStore';
+import { useTheme } from 'react-native-paper';
+import { Ionicons } from '@expo/vector-icons';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const RootNavigator: React.FC = () => {
@@ -40,6 +43,8 @@ const RootNavigator: React.FC = () => {
   );
   const userType = useAppStore((state) => state.userType);
   const setUserType = useAppStore((state) => state.setUserType);
+
+  const { colors } = useTheme();
 
   const handleOnboardingComplete = useCallback(
     (selectedUserType: 'customer' | 'restaurant') => {
@@ -61,7 +66,7 @@ const RootNavigator: React.FC = () => {
     if (!isAuthenticated) {
       return 'CustomerApp';
     }
-    
+
     switch (userType) {
       case 'customer':
         return 'CustomerApp';
@@ -89,7 +94,9 @@ const RootNavigator: React.FC = () => {
     // Optimize for performance
     lazy: true,
     unmountOnBlur: false,
-    backgroundColor: 'white',
+    contentStyle: {
+      backgroundColor: colors.background,
+    },
     borderBottomWidth: 0,
     shadowColor: 'transparent',
     elevation: 0,
@@ -100,6 +107,9 @@ const RootNavigator: React.FC = () => {
     headerShown: true,
     headerTitleAlign: 'center' as const,
     animation: 'slide_from_bottom' as const,
+    contentStyle: {
+      backgroundColor: colors.background,
+    },
   };
 
   const cardOptions = {
@@ -108,6 +118,9 @@ const RootNavigator: React.FC = () => {
     headerTransparent: true,
     headerBackTitleVisible: false,
     animation: 'slide_from_right' as const,
+    contentStyle: {
+      backgroundColor: colors.background,
+    },
   };
 
   if (!_hasHydrated) {
@@ -165,7 +178,19 @@ const RootNavigator: React.FC = () => {
               name="Cart"
               component={CartScreen}
               options={{
-                headerTitle: 'Shopping Cart',
+                headerTitle: 'My Cart',
+
+                contentStyle: {
+                  marginTop: -40,
+                },
+
+                headerRight: () => (
+                  <>
+                    <Ionicons name="options" size={23} className="ml-[-10px]" />
+                  </>
+                ),
+                sheetElevation: 0,
+                gestureDirection: 'vertical'
               }}
             />
 
@@ -203,6 +228,7 @@ const RootNavigator: React.FC = () => {
                 headerTitle: '',
               }}
             />
+            <Stack.Screen name="AddressScreen" component={AddressScreen} />
           </Stack.Group>
           <Stack.Group
             screenOptions={{
@@ -212,8 +238,10 @@ const RootNavigator: React.FC = () => {
               animation: 'slide_from_left',
               sheetElevation: 0,
               headerShadowVisible: false,
+
               contentStyle: {
                 marginBottom: -20,
+                backgroundColor: colors.background,
               },
             }}
           >
@@ -235,6 +263,11 @@ const RootNavigator: React.FC = () => {
               headerShown: true,
               headerTitleAlign: 'center' as const,
               animation: 'slide_from_right' as const,
+              contentStyle: {
+                backgroundColor: colors.background,
+                marginBottom: -20,
+              },
+              sheetElevation: 0,
             }}
           >
             <Stack.Screen

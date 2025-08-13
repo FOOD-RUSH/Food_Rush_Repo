@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import React from 'react';
 import { InputFieldProps } from '@/src/types';
-import { useTheme } from '@/src/hooks/useTheme';
+import { useTheme } from 'react-native-paper';
 
 const InputField = ({
   inputStyle,
@@ -21,10 +21,10 @@ const InputField = ({
   rightIcon,
   ...props
 }: InputFieldProps) => {
-  const { theme } = useTheme();
-  const backgroundColor = theme === 'light' ? 'bg-gray-200' : 'bg-secondary';
-  const textColor = theme === 'light' ? 'text-gray-700' : 'text-text';
-  const placeholderTextColor = theme === 'light' ? '#6b7280' : '#94a3b8';
+  const { colors } = useTheme();
+  const backgroundColor = colors.tertiary;
+  const textColor = colors.onBackground;
+  const placeholderTextColor = colors.onBackground;
 
   return (
     <KeyboardAvoidingView
@@ -36,27 +36,23 @@ const InputField = ({
           {/* Label */}
           {label && (
             <Text
-              className={`text-base mb-2 font-semibold ${labelStyle || ''} ${textColor}`}>
+              className={`text-base mb-2 font-semibold ${labelStyle || ''} text-[${textColor}]`}
+            >
               {label}
             </Text>
           )}
-          <View className={`px-4 py-[10px] rounded-2xl mx-2 flex-row items-center ${inputStyle || ''} ${backgroundColor}`}>
-            {leftIcon && (
-              <View className="mx-2">
-                {leftIcon}
-              </View>
-            )}
+          <View
+            className={`px-4 py-[10px] rounded-2xl mx-2 flex-row items-center ${inputStyle || ''} `}
+            style={{backgroundColor: backgroundColor}}
+          >
+            {leftIcon && <View className="mx-2">{leftIcon}</View>}
             <TextInput
               placeholder={placeholder}
               placeholderTextColor={placeholderTextColor}
               autoCapitalize="none"
-              className={`flex-1 text-lg ${backgroundColor} ${textColor}`}
+              className={`flex-1 text-lg bg-[${backgroundColor}] text-[${textColor}]`}
             />
-            {rightIcon && (
-              <View className="mr-2">
-                {rightIcon}
-              </View>
-            )}
+            {rightIcon && <View className="mr-2">{rightIcon}</View>}
           </View>
           {/* Input Container */}
         </View>

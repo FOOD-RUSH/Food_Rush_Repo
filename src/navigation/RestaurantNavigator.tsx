@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Platform } from 'react-native';
+import { useTheme } from 'react-native-paper';
 
 import {
   RestaurantAnalyticsStackParamList,
@@ -23,20 +24,24 @@ import AnalyticsScreen from '../screens/restaurant/analytics/AnalyticsScreen';
 
 // Create navigators
 const RestaurantTab = createBottomTabNavigator<RestaurantTabParamList>();
-const RestaurantOrdersStack = createNativeStackNavigator<RestaurantOrdersStackParamList>();
-const RestaurantMenuStack = createNativeStackNavigator<RestaurantMenuStackParamList>();
-const RestaurantAnalyticsStack = createNativeStackNavigator<RestaurantAnalyticsStackParamList>();
-const RestaurantProfileStack = createNativeStackNavigator<RestaurantProfileStackParamList>();
+const RestaurantOrdersStack =
+  createNativeStackNavigator<RestaurantOrdersStackParamList>();
+const RestaurantMenuStack =
+  createNativeStackNavigator<RestaurantMenuStackParamList>();
+const RestaurantAnalyticsStack =
+  createNativeStackNavigator<RestaurantAnalyticsStackParamList>();
+const RestaurantProfileStack =
+  createNativeStackNavigator<RestaurantProfileStackParamList>();
 
 // Stack Screen Components
 function RestaurantOrdersStackScreen() {
+  const { colors } = useTheme();
   return (
     <RestaurantOrdersStack.Navigator
       screenOptions={{
         headerStyle: {
-          backgroundColor: '#007AFF',
+          backgroundColor: colors.primary,
         },
-        headerTintColor: '#fff',
         headerTitleStyle: {
           fontWeight: 'bold',
         },
@@ -72,13 +77,13 @@ function RestaurantOrdersStackScreen() {
 }
 
 function RestaurantMenuStackScreen() {
+  const { colors } = useTheme();
   return (
     <RestaurantMenuStack.Navigator
       screenOptions={{
         headerStyle: {
-          backgroundColor: '#007AFF',
+          backgroundColor: colors.primary,
         },
-        headerTintColor: '#fff',
         headerTitleStyle: {
           fontWeight: 'bold',
         },
@@ -104,13 +109,13 @@ function RestaurantMenuStackScreen() {
 }
 
 function RestaurantAnalyticsStackScreen() {
+  const { colors } = useTheme();
   return (
     <RestaurantAnalyticsStack.Navigator
       screenOptions={{
         headerStyle: {
-          backgroundColor: '#007AFF',
+          backgroundColor: colors.primary,
         },
-        headerTintColor: '#fff',
         headerTitleStyle: {
           fontWeight: 'bold',
         },
@@ -134,13 +139,13 @@ function RestaurantAnalyticsStackScreen() {
 }
 
 function RestaurantProfileStackScreen() {
+  const { colors } = useTheme();
   return (
     <RestaurantProfileStack.Navigator
       screenOptions={{
         headerStyle: {
-          backgroundColor: '#007AFF',
+          backgroundColor: colors.primary,
         },
-        headerTintColor: '#fff',
         headerTitleStyle: {
           fontWeight: 'bold',
         },
@@ -169,7 +174,8 @@ function RestaurantProfileStackScreen() {
 
 export default function RestaurantNavigator() {
   const insets = useSafeAreaInsets();
-  
+  const { colors } = useTheme();
+
   return (
     <RestaurantTab.Navigator
       screenOptions={({ route }) => ({
@@ -195,12 +201,12 @@ export default function RestaurantNavigator() {
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: '#007AFF',
-        tabBarInactiveTintColor: '#8E8E93',
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.secondaryContainer,
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#fff',
-          borderTopColor: '#e0e0e0',
+          backgroundColor: colors.background,
+          borderTopColor: colors.background,
           height: (Platform.OS === 'ios' ? 90 : 70) + insets.bottom,
           paddingBottom: (Platform.OS === 'ios' ? 25 : 10) + insets.bottom,
           paddingTop: 10,
@@ -226,15 +232,15 @@ export default function RestaurantNavigator() {
           tabBarLabel: 'Orders',
         }}
       />
-      
-      <RestaurantTab.Screen 
-        name="Menu" 
+
+      <RestaurantTab.Screen
+        name="Menu"
         component={RestaurantMenuStackScreen}
         options={{
           tabBarLabel: 'Menu',
         }}
       />
-      
+
       <RestaurantTab.Screen
         name="Analytics"
         component={RestaurantAnalyticsStackScreen}
@@ -242,7 +248,7 @@ export default function RestaurantNavigator() {
           tabBarLabel: 'Analytics',
         }}
       />
-      
+
       <RestaurantTab.Screen
         name="Profile"
         component={RestaurantProfileStackScreen}

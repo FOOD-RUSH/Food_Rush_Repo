@@ -14,29 +14,29 @@ const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 const AuthNavigator: React.FC = () => {
   return (
     <AuthStack.Navigator
-      screenOptions={{ 
-        headerShown: false, 
+      screenOptions={{
+        headerShown: false,
         gestureEnabled: true,
         animation: 'slide_from_right',
       }}
       initialRouteName="SignIn"
     >
-      <AuthStack.Screen 
-        name="SignIn" 
+      <AuthStack.Screen
+        name="SignIn"
         component={LoginScreen}
         options={{
           gestureEnabled: true,
         }}
       />
-      
-      <AuthStack.Screen 
-        name="SignUp" 
+
+      <AuthStack.Screen
+        name="SignUp"
         component={SignupScreen}
         options={{
           gestureEnabled: true,
         }}
       />
-      
+
       <AuthStack.Screen
         name="ForgotPassword"
         component={ForgotPasswordScreen}
@@ -44,18 +44,18 @@ const AuthNavigator: React.FC = () => {
           gestureEnabled: true,
         }}
       />
-      
-      <AuthStack.Screen 
-        name="ResetPassword" 
+
+      <AuthStack.Screen
+        name="ResetPassword"
         component={ResetPasswordScreen}
         options={{
           gestureEnabled: true,
         }}
       />
-      
-      <AuthStack.Screen 
-        name="OTPVerification" 
-        component={OTPScreen} 
+
+      <AuthStack.Screen
+        name="OTPVerification"
+        component={OTPScreen}
         options={{
           gestureEnabled: false, // Prevent going back during OTP verification
         }}
@@ -66,17 +66,3 @@ const AuthNavigator: React.FC = () => {
 
 export default AuthNavigator;
 
-
-
-
-// const FoodCard = ({ food }) => {
-//   const navigation = useNavigation<CustomerHomeStackScreenProps<'HomeScreen'>['navigation']>();
-  
-//   const handlePress = () => {
-//     navigation.navigate('FoodDetails', {
-//       foodId: food.id,
-//       restaurantId: food.restaurantId,
-//     });
-//   };
-//   // ...
-// };

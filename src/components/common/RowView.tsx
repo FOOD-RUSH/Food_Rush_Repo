@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import React from 'react';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import { useTheme } from '@/src/hooks/useTheme';
+import { useTheme } from 'react-native-paper';
 
 interface rowView {
   leftIconName: keyof typeof Ionicons.glyphMap;
@@ -15,17 +15,14 @@ const RowView = ({
   rightIconName = 'arrow-forward-ios',
   title,
 }: rowView) => {
-  const { theme } = useTheme();
-  const iconColor = theme === 'light' ? 'black' : 'white';
-  const textColor = theme === 'light' ? 'text-gray-900' : 'text-text';
-
+  const { colors } = useTheme();
   return (
     <TouchableOpacity onPress={onPress}>
       <View className="flex-row justify-between mb-4 items-center px-4 py-2">
-        <Ionicons name={leftIconName} size={22} color={iconColor} />
+        <Ionicons name={leftIconName} size={22} color={colors.onSurface} />
 
-        <Text className={`font-semibold text-base ${textColor}`}>{title}</Text>
-        <MaterialIcons name={rightIconName} size={18} color={iconColor} />
+        <Text className={`font-semibold text-base `} style={{color: colors.onSurface}}>{title}</Text>
+        <MaterialIcons name={rightIconName} size={18} color={colors.onSurface} />
       </View>
     </TouchableOpacity>
   );

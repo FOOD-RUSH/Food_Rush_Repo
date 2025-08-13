@@ -8,6 +8,7 @@ import { Dropdown } from 'react-native-element-dropdown';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import { Button } from 'react-native-paper';
 import CommonView from '@/src/components/common/CommonView';
+import { useAppStore } from '@/src/stores/AppStore';
 
 const EditProfileScreen = ({
   navigation,
@@ -23,9 +24,13 @@ const EditProfileScreen = ({
     { id: 2, type: 'female', label: 'FeMale' },
   ];
   const [selectedValue, setSelectedValue] = useState<string>('Male');
+  const resetApp = useAppStore((state) => state.resetApp);
   return (
-    <CommonView >
-      <ScrollView className="h-full bg-white pb-14  mt-[-39px] pt-4 pb-15" showsVerticalScrollIndicator={false}>
+    <CommonView>
+      <ScrollView
+        className="h-full bg-white pb-14  mt-[-39px] pt-4 pb-15"
+        showsVerticalScrollIndicator={false}
+      >
         <View className="flex-column px-2 justify-center items-center">
           <View className="relative mb-3 ">
             <Image
@@ -59,11 +64,10 @@ const EditProfileScreen = ({
             paddingHorizontal: 10,
             backgroundColor: '#e5e7eb',
             margin: 9,
-            
           }}
-          itemTextStyle={{color: 'gray'}}
+          itemTextStyle={{ color: 'gray' }}
           containerStyle={{ backgroundColor: '#d1d5db' }}
-          selectedTextStyle={{color:'gray'}}
+          selectedTextStyle={{ color: 'gray' }}
           onChange={() => setSelectedValue((item) => item)}
         />
         <InputField
@@ -77,19 +81,19 @@ const EditProfileScreen = ({
           }
           placeholder="Phone Number"
         />
-       
       </ScrollView>
-       <Button
-          mode="contained"
-          buttonColor={'#007Aff'}
-          textColor="white"
-          contentStyle={{ paddingVertical: 12 }}
-          style={{ borderRadius: 25, marginTop: 16 }}
-          labelStyle={{ fontSize: 16, fontWeight: '600', color: 'white' }}
-          className="active:opacity-75 mb-2"
-        >
-          update
-        </Button>
+      <Button
+        mode="contained"
+        buttonColor={'#007Aff'}
+        textColor="white"
+        contentStyle={{ paddingVertical: 12 }}
+        style={{ borderRadius: 25, marginTop: 16 }}
+        labelStyle={{ fontSize: 16, fontWeight: '600', color: 'white' }}
+        className="active:opacity-75 mb-2"
+        onPress={resetApp}
+      >
+        update
+      </Button>
     </CommonView>
   );
 };

@@ -27,7 +27,7 @@
   }
 
   .dark {
-    --background: rgb(19 24 37);
+    --background: #1e293b;
     /* Slate 900 */
     --primary: rgb(59 130 246);
     /* Blue 500 */
@@ -50,8 +50,6 @@
   }
 }
 
-.background {
-  background-color: rgb(0, 91, 193);
-  accent-color: rgb(0, 46, 105);
-  color: rgba(103, 80, 164, 1);
+.fldlf {
+  background-color: #f8fafc;
 }

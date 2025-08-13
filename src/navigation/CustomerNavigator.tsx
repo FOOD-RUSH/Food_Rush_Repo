@@ -1,11 +1,10 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image, Platform, TouchableOpacity } from 'react-native';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { Ionicons } from '@expo/vector-icons';
 
 import {
   CustomerHomeStackParamList,
@@ -22,18 +21,11 @@ import CompletedOrderScreen from '../screens/customer/Order/CompletedOrderScreen
 import ActiveOrderScreen from '../screens/customer/Order/ActiveOrderScreen';
 // import OrderDetailsScreen from '../screens/customer/Order/OrderDetailsScreen';
 import FAQ from '../screens/customer/Profile/FAQ';
-// import ContactUs from '../screens/customer/Profile/ContactUs';
-// import AddressScreen from '../screens/customer/Profile/AddressScreen';
-// import AddAddressScreen from '../screens/customer/Profile/AddAddressScreen';
-// import PaymentMethodsScreen from '../screens/customer/Profile/PaymentMethodsScreen';
-// import AddPaymentScreen from '../screens/customer/Profile/AddPaymentScreen';
-// import SettingsScreen from '../screens/customer/Profile/SettingsScreen';
-// import AboutScreen from '../screens/customer/Profile/AboutScreen';
 
 // Import theme and assets
-import { lightTheme } from '@/src/config/theme';
 import { icons } from '@/assets/images';
 import ContactUs from '../screens/customer/Profile/ContactUs';
+import { useTheme } from 'react-native-paper';
 
 // Create navigators
 const CustomerTab = createBottomTabNavigator<CustomerTabParamList>();
@@ -47,8 +39,6 @@ const CustomerHelpStack =
   createMaterialTopTabNavigator<CustomerHelpCenterStackParamList>();
 
 // Custom back button component
-
-
 
 // Stack Screen Components
 function CustomerHomeStackScreen() {
@@ -65,15 +55,16 @@ function CustomerHomeStackScreen() {
 }
 
 function CustomerOrderStackScreen() {
+  const { colors } = useTheme();
   return (
     <CustomerOrderStack.Navigator
       initialRouteName="CompletedOrdersScreen"
       screenOptions={{
-        tabBarActiveTintColor: lightTheme.colors.primary,
-        tabBarInactiveTintColor: '#808080',
+        tabBarActiveTintColor: colors.primary,
         tabBarStyle: {
-          borderTopColor: 'white',
+          borderTopColor: colors.background,
           marginBottom: -50,
+
         },
         lazy: true, // Performance optimization
       }}
@@ -98,23 +89,19 @@ function CustomerOrderStackScreen() {
 }
 
 export function CustomerHelpCenterStackScreen() {
-
+  const { colors } = useTheme();
   return (
     <CustomerHelpStack.Navigator
       initialRouteName="FAQ"
       screenOptions={{
-        tabBarActiveTintColor: lightTheme.colors.primary,
-        tabBarInactiveTintColor: '#808080',
+        tabBarActiveTintColor: colors.primary,
         tabBarStyle: {
-          borderTopColor: 'white',
+          borderTopColor: colors.background,
         },
         lazy: true, // Performance optimization
       }}
     >
-      <CustomerHelpStack.Screen
-        name="FAQ"
-        component={FAQ}
-      />
+      <CustomerHelpStack.Screen name="FAQ" component={FAQ} />
       <CustomerHelpStack.Screen
         name="ContactUs"
         component={ContactUs}
@@ -125,14 +112,15 @@ export function CustomerHelpCenterStackScreen() {
 }
 
 function CustomerProfileStackScreen() {
-  
-
+  const { colors } = useTheme();
   return (
     <CustomerProfileStack.Navigator
       initialRouteName="ProfileHome"
-      screenOptions={{contentStyle: {
-        marginTop: -39
-      }}}
+      screenOptions={{
+        contentStyle: {
+          marginTop: -39,
+        },
+      }}
     >
       <CustomerProfileStack.Screen
         name="ProfileHome"
@@ -148,21 +136,13 @@ function CustomerProfileStackScreen() {
           ),
           headerTitleAlign: 'left',
           headerRight: () => (
-            <TouchableOpacity
-              onPress={() => {}}
-              style={{ marginRight: 8 }}
-            >
-              <Ionicons
-                name="settings-outline"
-                size={25}
-                color={lightTheme.colors.primary}
-              />
+            <TouchableOpacity onPress={() => {}} style={{ marginRight: 8 }}>
+              <Ionicons name="settings-outline" size={25} color={colors.primary} />
             </TouchableOpacity>
           ),
+          headerTitleStyle: { color: colors.onBackground },
         })}
       />
-
-      
     </CustomerProfileStack.Navigator>
   );
 }
@@ -193,13 +173,16 @@ const TabBarIcon: React.FC<{
   return <Ionicons name={iconName} size={size} color={color} />;
 });
 
+TabBarIcon.displayName = 'TabBarIcon';
+
 export default function CustomerNavigator() {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
 
   const tabBarStyle = React.useMemo(
     () => ({
-      backgroundColor: '#fff',
-      borderColor: '#e0e0e0',
+      backgroundColor: colors.background,
+      borderColor: colors.background,
       height: (Platform.OS === 'ios' ? 80 : 60) + insets.bottom,
       paddingBottom: (Platform.OS === 'ios' ? 25 : 10) + insets.bottom,
       borderTopRightRadius: 40,
@@ -207,12 +190,12 @@ export default function CustomerNavigator() {
       marginTop: -50,
       paddingTop: 10,
     }),
-    [insets.bottom],
+    [insets.bottom, colors.background],
   );
 
   const headerStyle = React.useMemo(
     () => ({
-      backgroundColor: 'white',
+      backgroundColor: colors.background,
       height: 60 + insets.top,
       borderBottomWidth: 0,
       shadowColor: 'transparent',
@@ -220,7 +203,7 @@ export default function CustomerNavigator() {
       borderBottomLeftRadius: 50,
       borderBottomRightRadius: 10,
     }),
-    [insets.top],
+    [insets.top, colors.background],
   );
 
   return (
@@ -234,11 +217,9 @@ export default function CustomerNavigator() {
             size={size}
           />
         ),
-        tabBarActiveTintColor: lightTheme.colors.primary,
-        tabBarInactiveTintColor: '#808080',
+        tabBarActiveTintColor: colors.primary,
         tabBarStyle,
         headerStyle,
-        headerTintColor: 'black',
         headerTitleStyle: {
           fontWeight: 'bold',
         },
@@ -246,6 +227,8 @@ export default function CustomerNavigator() {
         // Performance optimizations
         lazy: true,
         unmountOnBlur: false,
+        tabBarHideOnKeyboard: true
+        
       })}
     >
       <CustomerTab.Screen
@@ -273,11 +256,7 @@ export default function CustomerNavigator() {
               }}
               style={{ marginRight: 20 }}
             >
-              <Ionicons
-                name="search-outline"
-                size={25}
-                color={lightTheme.colors.primary}
-              />
+              <Ionicons name="search-outline" size={25} color={colors.primary} />
             </TouchableOpacity>
           ),
           headerLeft: () => (
@@ -299,6 +278,7 @@ export default function CustomerNavigator() {
         name="Profile"
         component={CustomerProfileStackScreen}
         options={{
+
           tabBarLabel: 'Profile',
           headerShown: false,
         }}

@@ -1,15 +1,11 @@
 import React from 'react';
 import CommonView from '@/src/components/common/CommonView';
-import { TextInput } from 'react-native-paper';
+import { TextInput, useTheme } from 'react-native-paper';
 import { CategoryFilters, images } from '@/assets/images';
 import CategoryItem from '@/src/components/customer/CategoryItem';
 import HomeHeader from '@/src/components/customer/HomeHeader';
 import FoodItemCard from '@/src/components/customer/FoodItemCard';
-import {
-  ScrollView,
-  View,
-  Dimensions,
-} from 'react-native';
+import { ScrollView, View, Dimensions } from 'react-native';
 import { CustomerHomeStackScreenProps } from '@/src/navigation/types';
 import { RestaurantCard } from '@/src/components/customer/RestaurantCard';
 import HomeScreenHeaders from '@/src/components/customer/HomeScreenHeaders';
@@ -19,18 +15,13 @@ import Animated, {
 } from 'react-native-reanimated';
 import Carousel from 'react-native-reanimated-carousel';
 import ClassicFoodCard from '@/src/components/customer/ClassicFoodCard';
-import { useTheme } from '@/src/hooks/useTheme';
 
 const { width } = Dimensions.get('window');
 
 const HomeScreen = ({
   navigation,
 }: CustomerHomeStackScreenProps<'HomeScreen'>) => {
-  const { theme } = useTheme();
-  const backgroundColor = theme === 'light' ? 'bg-white' : 'bg-background';
-  const searchBackgroundColor = theme === 'light' ? 'rgb(202, 221, 240)' : '#1e293b';
-  const searchPlaceholderColor = theme === 'light' ? '#999' : '#94a3b8';
-  const searchIconColor = theme === 'light' ? 'black' : 'white';
+  const { colors } = useTheme();
 
   //get user state in the home screen
 
@@ -177,45 +168,47 @@ const HomeScreen = ({
   };
 
   return (
-    <CommonView >
+    <CommonView>
       <ScrollView
-        className={`${backgroundColor}`}
+        className={`bg-${colors.background}`}
         showsVerticalScrollIndicator={false}
         stickyHeaderIndices={[0]}
+        stickyHeaderHiddenOnScroll={true}
       >
         <HomeHeader />
 
-        <View className={`px-1 py-2 ${backgroundColor}`}>
-          
-            <TextInput
-              placeholder="Search your craving"
-              left={
-                <TextInput.Icon
-                  icon="magnify"
-                  size={30}
-                  color={searchIconColor}
-                  background={searchBackgroundColor}
-                  className="pt-3 pl-2"
-                />
-              }
-              mode="outlined"
-              outlineStyle={{
-                borderColor: theme === 'light' ? '#c4def8' : '#475569',
-                borderWidth: 1,
-                borderRadius: 20,
-              }}
-              style={{
-                backgroundColor: searchBackgroundColor,
-                paddingTop: 5,
-                paddingBottom: 5,
-                paddingRight: 10,
-                paddingLeft: 10,
-              }}
-              placeholderTextColor={searchPlaceholderColor}
-              onPressIn={() => {navigation.navigate('SearchScreen', { type: 'search' })}}
-            />
+        <View className={`px-1 py-2 bg-[${colors.background}]`}>
+          <TextInput
+            placeholder="Search your craving"
+            left={
+              <TextInput.Icon
+                icon="magnify"
+                size={30}
+                color={colors.onSurface}
+                background={colors.surfaceVariant}
+                className="pt-3 pl-2"
+              />
+            }
+            mode="outlined"
+            outlineStyle={{
+              borderColor: colors.outline,
+              borderWidth: 1,
+              borderRadius: 20,
+            }}
+            style={{
+              backgroundColor: colors.outline,
+              paddingTop: 5,
+              paddingBottom: 5,
+              paddingRight: 10,
+              paddingLeft: 10,
+            }}
+            placeholderTextColor={colors.onBackground}
+            onPressIn={() => {
+              navigation.navigate('SearchScreen', { type: 'search' });
+            }}
+          />
         </View>
-        
+
         {/* Promotions section */}
         <HomeScreenHeaders title="Promotion" onPress={() => {}} />
 
@@ -229,20 +222,21 @@ const HomeScreen = ({
         {/* Discounts Guaranteed - Carousel Section */}
         <HomeScreenHeaders title="Discount Guaranteed! 👋" onPress={() => {}} />
 
-        <View style={{ marginBottom: 20}}>
+        <View style={{ marginBottom: 20 }}>
           <Carousel
             width={width * 0.65} // Show approximately 1.8 cards at once
             height={300}
             autoPlay={true}
             autoPlayInterval={4000}
             data={foodItems}
-            scrollAnimationDuration={600}
+            scrollAnimationDuration={1000}
             renderItem={RenderDiscountCarouselItem}
             style={{
               width: width,
               height: 300,
-              backgroundColor: theme === 'light' ? '#f5f3ee' : '#1e293b',
+              backgroundColor: colors.surfaceVariant,
               marginLeft: 0,
+                borderRadius: 10
             }}
             pagingEnabled={false}
             snapEnabled={true}

@@ -5,7 +5,6 @@ import { Text, View, StatusBar, Dimensions, Image, Alert } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import {
   TouchableRipple,
-  Card,
   Chip,
   Button,
   ActivityIndicator,
@@ -13,30 +12,16 @@ import {
 import { RootStackScreenProps } from '@/src/navigation/types';
 import { images } from '@/assets/images';
 import MenuItemCard from '@/src/components/customer/MenuItemCard';
-import FoodItemCard from '@/src/components/customer/FoodItemCard';
 import ClassicFoodCard from '@/src/components/customer/ClassicFoodCard';
+import { useTheme } from 'react-native-paper';
 
-import { useTheme } from '@/src/hooks/useTheme';
-
-const { width: screenWidth, height: screenHeight } = Dimensions.get('screen');
-
-// Get RESTAURANT details
-// Get Menu with data
-// User must be able to like, select food to command
-// view rating details
-//
+const { width: screenWidth } = Dimensions.get('window');
 
 const RestaurantDetailScreen = ({
   navigation,
   route,
 }: RootStackScreenProps<'RestaurantDetails'>) => {
-  const { restaurantId } = route.params || {};
-  const { theme } = useTheme();
-  const backgroundColor = theme === 'light' ? 'bg-white' : 'bg-background';
-  const textColor = theme === 'light' ? 'text-gray-900' : 'text-text';
-  const secondaryTextColor =
-    theme === 'light' ? 'text-gray-600' : 'text-text-secondary';
-  const primaryColor = theme === 'light' ? '#007aff' : '#3b82f6';
+  const { colors } = useTheme();
 
   const [restaurantDetails, setRestaurantDetails] =
     useState<RestaurantProfile | null>(null);
@@ -186,13 +171,6 @@ const RestaurantDetailScreen = ({
 
   const handleViewOffers = () => {};
 
-  const handleFoodItemPress = (item: FoodProps) => {
-    navigation.navigate('FoodDetails', {
-      restaurantId: restaurantId,
-      foodId: item.id,
-    });
-  };
-
   const categories = [
     'All',
     ...new Set(menuItems.map((item) => item.category)),
@@ -204,9 +182,11 @@ const RestaurantDetailScreen = ({
 
   if (loading) {
     return (
-      <View className={`flex-1 justify-center items-center ${backgroundColor}`}>
-        <ActivityIndicator size="large" color={primaryColor} animating />
-        <Text className={`mt-4 ${textColor}`}>
+      <View
+        className={`flex-1 justify-center items-center ${colors.background}`}
+      >
+        <ActivityIndicator size="large" color={colors.primary} animating />
+        <Text className={`mt-4 `} style={{ color: colors.onSurface }}>
           Loading restaurant details...
         </Text>
       </View>
@@ -215,15 +195,17 @@ const RestaurantDetailScreen = ({
 
   if (!restaurantDetails) {
     return (
-      <View className={`flex-1 justify-center items-center ${backgroundColor}`}>
-        <Text className={`${textColor}`}>
+      <View
+        className={`flex-1 justify-center items-center ${colors.background}`}
+      >
+        <Text className={`${colors.onSurface}`}>
           Failed to load restaurant details
         </Text>
         <Button
           mode="contained"
           onPress={fetchRestaurantDetails}
           className="mt-4"
-          buttonColor={primaryColor}
+          buttonColor={colors.primary}
           textColor="white"
         >
           Retry
@@ -231,9 +213,11 @@ const RestaurantDetailScreen = ({
       </View>
     );
   }
-
+  const seperator = () => {
+    return <View className="w-[5px]" />;
+  };
   return (
-    <ScrollView className={`flex-1 ${backgroundColor}`}>
+    <ScrollView className={`flex-1 ${colors.background}`}>
       <StatusBar translucent backgroundColor="transparent" />
 
       {/* Header Image with Navigation */}
@@ -292,30 +276,29 @@ const RestaurantDetailScreen = ({
         {/* Restaurant Name and Basic Info */}
         <View className="mb-6">
           <View className="flex-row justify-between items-start mb-2">
-            <Text className={`text-2xl font-bold flex-1 ${textColor}`}>
+            <Text className={`text-2xl font-bold flex-1 `}
+            style={{ color: colors.primary }} >
               {restaurantDetails.name}
             </Text>
             <View className="flex-row items-center">
-              <Text className={`mr-1 ${secondaryTextColor}`}>
+              <Text className={`mr-1 `}
+              style={{ color: colors.primary }}
+              >
                 {restaurantDetails.cuisine}
               </Text>
-              <Text className="font-semibold" style={{ color: primaryColor }}>
+              <Text className="font-semibold" style={{ color: colors.primary }}>
                 {/* {restaurantDetails.priceRange} */} 500FCFA
               </Text>
             </View>
           </View>
 
-          <Text className={`mb-4 ${secondaryTextColor}`}>
+          <Text className={`mb-4 `} style={{ color: colors.onSurface }}>
             {restaurantDetails.description}
           </Text>
 
           <View className="flex-row items-center mb-2">
-            <Ionicons
-              name="time-outline"
-              size={16}
-              color={theme === 'light' ? '#666' : 'white'}
-            />
-            <Text className={`ml-2 ${secondaryTextColor}`}>
+            <Ionicons name="time-outline" size={16} color={colors.onSurface} />
+            <Text className={`ml-2 `} style={{ color: colors.onSurface }}>
               {restaurantDetails.openTime}
             </Text>
           </View>
@@ -326,17 +309,20 @@ const RestaurantDetailScreen = ({
           <View className="flex-row justify-between items-center py-4 border-b border-gray-200">
             <View className="flex-row items-center">
               <Ionicons name="star" color="#FFD700" size={20} />
-              <Text className={`ml-2 font-semibold text-base ${textColor}`}>
+              <Text
+                className={`ml-2 font-semibold text-base `}
+                style={{ color: colors.onSurface }}
+              >
                 {restaurantDetails.ratings}
               </Text>
-              <Text className={`ml-1 ${secondaryTextColor}`}>
+              <Text className={`ml-1 `} style={{ color: colors.onSurface }}>
                 ({restaurantDetails.reviewCount} reviews)
               </Text>
             </View>
             <MaterialIcons
               name="arrow-forward-ios"
               size={16}
-              color={theme === 'light' ? '#666' : 'white'}
+              color={colors.onSurface}
             />
           </View>
         </TouchableRipple>
@@ -347,35 +333,29 @@ const RestaurantDetailScreen = ({
             <View className="flex-row items-center flex-1">
               <Ionicons
                 name="location-outline"
-                color={primaryColor}
+                color={colors.primary}
                 size={20}
               />
               <View className="ml-3 flex-1">
                 <Text
                   className={`font-semibold text-base`}
-                  style={{ color: primaryColor }}
+                  style={{ color: colors.primary }}
                 >
                   {restaurantDetails.distance}
                 </Text>
                 <View className="flex-row items-center mt-1">
-                  <Text className={`text-sm ${secondaryTextColor}`}>
-                    Delivery Now
-                  </Text>
-                  <Text className="mx-2" style={{ color: secondaryTextColor }}>
+                  <Text className={`text-sm `} style={{ color: colors.onSurface }}>Delivery Now</Text>
+                  <Text className="mx-2" style={{ color: colors.onSurface }}>
                     |
                   </Text>
-                  <Ionicons
-                    name="car"
-                    size={16}
-                    color={theme === 'light' ? '#666' : 'white'}
-                  />
-                  <Text className={`ml-1 text-sm ${secondaryTextColor}`}>
+                  <Ionicons name="car" size={16} color={colors.onSurface} />
+                  <Text className={`ml-1 text-sm `} style={{ color: colors.onSurface }}>
                     {restaurantDetails.deliveryFee}
                   </Text>
-                  <Text className="mx-2" style={{ color: secondaryTextColor }}>
+                  <Text className="mx-2" style={{ color: colors.onSurface }}>
                     |
                   </Text>
-                  <Text className={`text-sm ${secondaryTextColor}`}>
+                  <Text className={`text-sm `} style={{ color: colors.onSurface }}>
                     {restaurantDetails.deliveryTime}
                   </Text>
                 </View>
@@ -384,7 +364,7 @@ const RestaurantDetailScreen = ({
             <MaterialIcons
               name="arrow-forward-ios"
               size={16}
-              color={theme === 'light' ? '#666' : 'white'}
+              color={colors.onSurface}
             />
           </View>
         </TouchableRipple>
@@ -395,24 +375,26 @@ const RestaurantDetailScreen = ({
             <View className="flex-row items-center">
               <MaterialIcons
                 name="local-offer"
-                color={primaryColor}
+                color={colors.primary}
                 size={20}
               />
-              <Text className={`ml-3 font-semibold text-base ${textColor}`}>
+              <Text className={`ml-3 font-semibold text-base `} style={{ color: colors.onSurface }}>
                 Special Offers Available
               </Text>
             </View>
             <MaterialIcons
               name="arrow-forward-ios"
               size={16}
-              color={theme === 'light' ? '#666' : 'white'}
+              color={colors.onSurface}
             />
           </View>
         </TouchableRipple>
 
         {/* For You Section */}
         <View className="mt-8">
-          <Text className={`text-xl font-bold mb-4 ${textColor}`}>For You</Text>
+          <Text className={`text-xl font-bold mb-4`} style={{ color: colors.onSurface }}>
+            For You
+          </Text>
           <FlatList
             data={forYouItems}
             renderItem={({ item }) => (
@@ -422,12 +404,15 @@ const RestaurantDetailScreen = ({
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ paddingRight: 16 }}
+            ItemSeparatorComponent={seperator}
           />
         </View>
 
         {/* Menu Section */}
         <View className="mt-8">
-          <Text className={`text-xl font-bold mb-4 ${textColor}`}>Menu</Text>
+          <Text className={`text-xl font-bold mb-4 `} style={{ color: colors.onSurface }}>
+            Menu
+          </Text>
 
           {/* Category Filter */}
           <ScrollView
@@ -441,18 +426,12 @@ const RestaurantDetailScreen = ({
                   key={category}
                   onPress={() => setSelectedCategory(category)}
                   className={`px-4 py-2 rounded-full mx-1 ${
-                    selectedCategory === category
-                      ? theme === 'light'
-                        ? 'bg-primary'
-                        : 'bg-primary'
-                      : theme === 'light'
-                        ? 'bg-gray-bg-primary'
-                        : 'bg-secondary'
+                    selectedCategory === category ? `bg-primary` : `bg-blue-100`
                   }`}
                 >
                   <Text
                     className={`${
-                      selectedCategory === category ? 'text-white' : textColor
+                      selectedCategory === category ? 'text-white' : ``
                     } font-medium`}
                   >
                     {category}

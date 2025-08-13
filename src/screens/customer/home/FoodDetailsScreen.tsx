@@ -6,15 +6,21 @@ import {
   TouchableRipple,
   Button,
   ActivityIndicator,
+  useTheme,
 } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { images } from '@/assets/images';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import Seperator from '@/src/components/common/Seperator';
 import InputField from '@/src/components/customer/InputField';
-import { useTheme } from '@/src/hooks/useTheme';
 import { FoodProps } from '@/src/types';
 import { useCartStore } from '@/src/stores/cartStore';
+
+interface ExtraProps {
+  id: number;
+  name: string;
+  price: number;
+}
 
 interface FoodDetailProps {
   id: string;
@@ -28,28 +34,18 @@ interface FoodDetailProps {
   extras: ExtraProps[];
   preparationTime?: string;
 }
-interface ExtraProps {
-  id: number;
-  name: string;
-  price: number;
-}
+
 const FoodDetailsScreen = ({
   navigation,
   route,
 }: RootStackScreenProps<'FoodDetails'>) => {
   const { restaurantId, foodId } = route.params;
-  const { theme } = useTheme();
-  const backgroundColor = theme === 'light' ? 'bg-white' : 'bg-background';
-  const textColor = theme === 'light' ? 'text-gray-900' : 'text-text';
-  const secondaryTextColor =
-    theme === 'light' ? 'text-gray-500' : 'text-text-secondary';
-  const primaryColor = theme === 'light' ? '#007aff' : '#3b82f6';
+  const { colors } = useTheme();
 
   const [foodDetails, setFoodDetails] = useState<FoodDetailProps>();
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(0);
-  const [instructions, setInstruction] = useState<string>('');
-
+  const [instructions, setInstructions] = useState('');
   useEffect(() => {
     console.log('Restaurant ID: ' + restaurantId);
     console.log('Food ID: ' + foodId);
@@ -90,11 +86,6 @@ const FoodDetailsScreen = ({
     };
     fetchFoodDetails();
   }, [restaurantId, foodId]);
-
-  const handleShare = () => {
-    // Implement share functionality
-    Alert.alert('Share', 'Share functionality to be implemented');
-  };
   // store
   const addItemtoCart = useCartStore().addtoCart;
 
@@ -129,17 +120,21 @@ const FoodDetailsScreen = ({
 
   if (loading) {
     return (
-      <View className={`flex-1 justify-center items-center ${backgroundColor}`}>
-        <ActivityIndicator size="large" color={primaryColor} />
-        <Text className={`mt-4 ${textColor}`}>Loading food details...</Text>
+      <View
+        className={`flex-1 justify-center items-center ${colors.background}`}
+      >
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text className={`mt-4 `}>Loading food details...</Text>
       </View>
     );
   }
 
   if (!foodDetails) {
     return (
-      <View className={`flex-1 justify-center items-center ${backgroundColor}`}>
-        <Text className={`${textColor}`}>Failed to load food details</Text>
+      <View
+        className={`flex-1 justify-center items-center ${colors.background}`}
+      >
+        <Text className={``}>Failed to load food details</Text>
         <Button mode="contained" onPress={() => {}} className="mt-4">
           Retry
         </Button>
@@ -149,8 +144,8 @@ const FoodDetailsScreen = ({
 
   return (
     <>
-      <StatusBar backgroundColor="transparent" translucent />
-      <ScrollView className={`flex-1 ${backgroundColor} mb-15`}>
+      <StatusBar backgroundColor={'transparent'} translucent />
+      <ScrollView className={`flex-1 ${colors.background} mb-15`}>
         {/* Header Image with Navigation */}
         <View className="relative">
           <Image
@@ -163,7 +158,7 @@ const FoodDetailsScreen = ({
           <View className="absolute bottom-4 right-4 bg-white rounded-full px-3 py-1 flex-row items-center">
             <Ionicons name="star" color="#FFD700" size={16} />
             <Text className="ml-1 font-semibold">{foodDetails.rating}</Text>
-            <Text className="ml-1 text-gray-500">
+            <Text className={`ml-1 text-[${colors.secondary}]`}>
               ({foodDetails.reviewCount})
             </Text>
           </View>
@@ -177,7 +172,6 @@ const FoodDetailsScreen = ({
               variant="headlineMedium"
               style={{
                 fontWeight: 'bold',
-                color: theme === 'light' ? 'black' : 'white',
               }}
             >
               {foodDetails.name}
@@ -185,12 +179,7 @@ const FoodDetailsScreen = ({
 
             <Seperator />
 
-            <Text
-              variant="bodyLarge"
-              style={{ color: theme === 'light' ? 'black' : 'white' }}
-            >
-              {foodDetails.description}
-            </Text>
+            <Text variant="bodyLarge">{foodDetails.description}</Text>
           </View>
         </View>
         {/* QUANTITY NEEDED */}
@@ -202,18 +191,18 @@ const FoodDetailsScreen = ({
             <Ionicons
               name="remove"
               size={25}
-              color={primaryColor}
+              color={colors.primary}
               selectionColor={'#fff'}
             />
           </Pressable>
-          <Text className={`mx-4 text-2xl font-bold text-center ${textColor}`}>
+          <Text className={`mx-4 text-2xl font-bold text-center`}>
             {quantity}
           </Text>
           <Pressable
             onPress={() => handleQuantityChange(1)}
             className="rounded-full w-10 h-10 items-center justify-center active:bg-gray-200 border-gray-300 border"
           >
-            <Ionicons name="add" size={25} color={primaryColor} />
+            <Ionicons name="add" size={25} color={colors.primary} />
           </Pressable>
         </View>
 
@@ -223,7 +212,7 @@ const FoodDetailsScreen = ({
             multiline
             numberOfLines={3}
             style={{
-              backgroundColor: theme === 'light' ? '#f9f9f9' : '#1e293b',
+              backgroundColor: colors.background,
               marginRight: 16,
               marginLeft: 16,
               alignSelf: 'center',
@@ -233,12 +222,15 @@ const FoodDetailsScreen = ({
           />
         </View>
       </ScrollView>
-      <View className={`px-4 pb-12 shadow-2xl ${backgroundColor}`}>
+      <View className={`px-4 pb-12 shadow-2xl ${colors.background}`}>
         <TouchableRipple
           onPress={handleAddToBasket}
           disabled={quantity === 0 ? true : false}
           className="rounded-full py-4 px-6 my-4"
-          style={{ backgroundColor: primaryColor }}
+          style={{
+            backgroundColor: colors.primary,
+            opacity: quantity === 0 ? 0.5 : 1,
+          }}
         >
           <View className="flex-row justify-center items-center px-4">
             <Text className="font-semibold text-lg" style={{ color: 'white' }}>

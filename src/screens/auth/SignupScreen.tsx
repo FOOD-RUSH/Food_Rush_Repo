@@ -12,14 +12,19 @@ import {
   StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Button, Checkbox, HelperText, TextInput } from 'react-native-paper';
+import {
+  Button,
+  Checkbox,
+  HelperText,
+  TextInput,
+  useTheme,
+} from 'react-native-paper';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { registerSchema } from '@/src/utils/validation';
 import { Ionicons } from '@expo/vector-icons';
 import CommonView from '@/src/components/common/CommonView';
 import { AuthStackScreenProps } from '@/src/navigation/types';
-import { useTheme } from '@/src/hooks/useTheme';
 
 // Optimized country codes data - moved outside component to prevent recreation
 const COUNTRY_CODES = [
@@ -41,31 +46,34 @@ interface SignUpFormData {
 
 type CountryCode = (typeof COUNTRY_CODES)[number];
 
-// Memoized components for better performance
-const CountryItem = React.memo(
-  ({
-    item,
-    onSelect,
-  }: {
-    item: CountryCode;
-    onSelect: (country: CountryCode) => void;
-  }) => (
-    <TouchableOpacity
-      style={styles.countryItem}
-      onPress={() => onSelect(item)}
-      activeOpacity={0.7}
-    >
-      <Text style={styles.countryFlag}>{item.flag}</Text>
-      <Text style={styles.countryName}>{item.country}</Text>
-      <Text style={styles.countryCode}>{item.code}</Text>
-    </TouchableOpacity>
-  ),
-);
-CountryItem.displayName = 'CountryItem';
+const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
+  navigation,
+  route,
+}) => {
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
-const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({navigation, route}) => {
-  const { theme } = useTheme();
-  const styles = useMemo(() => createStyles(theme), [theme]);
+  // Memoized components for better performance
+  const CountryItem = React.memo(
+    ({
+      item,
+      onSelect,
+    }: {
+      item: CountryCode;
+      onSelect: (country: CountryCode) => void;
+    }) => (
+      <TouchableOpacity
+        style={styles.countryItem}
+        onPress={() => onSelect(item)}
+        activeOpacity={0.7}
+      >
+        <Text style={styles.countryFlag}>{item.flag}</Text>
+        <Text style={styles.countryName}>{item.country}</Text>
+        <Text style={styles.countryCode}>{item.code}</Text>
+      </TouchableOpacity>
+    ),
+  );
+  CountryItem.displayName = 'CountryItem';
 
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -79,7 +87,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({navigation, rou
     control,
     handleSubmit,
     formState: { errors, isValid },
-  } = useForm<SignUpFormData> ({
+  } = useForm<SignUpFormData>({
     resolver: yupResolver(registerSchema),
     mode: 'onChange', // Enable real-time validation
     defaultValues: {
@@ -147,8 +155,6 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({navigation, rou
     }
   }, []);
 
-  
-
   const selectCountryCode = useCallback((country: CountryCode) => {
     setSelectedCountryCode(country);
     setShowCountryModal(false);
@@ -192,7 +198,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({navigation, rou
     ({ item }: { item: CountryCode }) => (
       <CountryItem item={item} onSelect={selectCountryCode} />
     ),
-    [selectCountryCode],
+    [CountryItem, selectCountryCode],
   );
 
   // Optimized phone number placeholder
@@ -203,346 +209,365 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({navigation, rou
 
   return (
     <CommonView>
-      <ScrollView className='flex'>
+      <ScrollView className="flex">
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.container}
           keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
         >
-        
-            <ScrollView
-              style={styles.scrollView}
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-            >
-              {/* Header */}
-              <View style={styles.header}>
-                <TouchableOpacity onPress={() => console.log('Go back')}>
-                  <Ionicons name="arrow-back" size={24} color={theme === 'light' ? '#000' : 'white'} />
-                </TouchableOpacity>
+          <ScrollView
+            style={styles.scrollView}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            {/* Header */}
+            <View style={styles.header}>
+              <TouchableOpacity onPress={() => console.log('Go back')}>
+                <Ionicons
+                  name="arrow-back"
+                  size={24}
+                  color={colors.onSurface}
+                />
+              </TouchableOpacity>
+            </View>
+
+            {/* Logo and Title */}
+            <View style={styles.logoContainer}>
+              <View style={styles.logo}>
+                <Text style={styles.logoText}>R</Text>
               </View>
+              <Text style={styles.title}>Create New Account</Text>
+            </View>
 
-              {/* Logo and Title */}
-              <View style={styles.logoContainer}>
-                <View style={styles.logo}>
-                  <Text style={styles.logoText}>R</Text>
-                </View>
-                <Text style={styles.title}>Create New Account</Text>
-              </View>
-
-              {/* Form */}
-              <View style={styles.formContainer}>
-                {/* Country Code + Phone Number */}
-                <Controller
-                  control={control}
-                  name="phoneNumber"
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <View style={styles.inputContainer}>
-                      <View style={styles.phoneInputRow}>
-                        <TouchableOpacity
-                          style={styles.countrySelector}
-                          onPress={openCountryModal}
-                          activeOpacity={0.7}
-                        >
-                          <Text style={styles.selectedCountryFlag}>
-                            {selectedCountryCode.flag}
-                          </Text>
-                          <Text style={styles.selectedCountryCode}>
-                            {selectedCountryCode.code}
-                          </Text>
-                          <Ionicons
-                            name="chevron-down"
-                            size={16}
-                            color={theme === 'light' ? '#666' : 'white'}
-                          />
-                        </TouchableOpacity>
-
-                        <TextInput
-                          placeholder={phoneNumberPlaceholder}
-                          onBlur={onBlur}
-                          onChangeText={onChange}
-                          value={value}
-                          mode="outlined"
-                          keyboardType="phone-pad"
-                          autoComplete="tel"
-                          outlineStyle={[
-                            styles.phoneInput,
-                            errors.phoneNumber && styles.inputError,
-                          ]}
-                          style={[styles.textInput, styles.phoneTextInput]}
-                          contentStyle={styles.inputContent}
-                          error={!!errors.phoneNumber}
+            {/* Form */}
+            <View style={styles.formContainer}>
+              {/* Country Code + Phone Number */}
+              <Controller
+                control={control}
+                name="phoneNumber"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <View style={styles.inputContainer}>
+                    <View style={styles.phoneInputRow}>
+                      <TouchableOpacity
+                        style={styles.countrySelector}
+                        onPress={openCountryModal}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={styles.selectedCountryFlag}>
+                          {selectedCountryCode.flag}
+                        </Text>
+                        <Text style={styles.selectedCountryCode}>
+                          {selectedCountryCode.code}
+                        </Text>
+                        <Ionicons
+                          name="chevron-down"
+                          size={16}
+                          color={colors.onSurface}
                         />
-                      </View>
-                      {errors.phoneNumber && (
-                        <HelperText type="error" visible={!!errors.phoneNumber}>
-                          {errors.phoneNumber.message}
-                        </HelperText>
-                      )}
-                    </View>
-                  )}
-                />
+                      </TouchableOpacity>
 
-                {/* Email Input */}
-                <Controller
-                  control={control}
-                  name="email"
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <View style={styles.inputContainer}>
                       <TextInput
-                        placeholder="Email"
+                        placeholder={phoneNumberPlaceholder}
                         onBlur={onBlur}
                         onChangeText={onChange}
                         value={value}
                         mode="outlined"
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                        autoComplete="email"
-                        left={<TextInput.Icon icon="email" color={theme === 'light' ? 'black' : 'white'} />}
+                        keyboardType="phone-pad"
+                        autoComplete="tel"
                         outlineStyle={[
-                          styles.inputOutline,
-                          errors.email && styles.inputError,
+                          styles.phoneInput,
+                          errors.phoneNumber && styles.inputError,
                         ]}
-                        style={styles.textInput}
+                        style={[styles.textInput, styles.phoneTextInput]}
                         contentStyle={styles.inputContent}
-                        error={!!errors.email}
+                        error={!!errors.phoneNumber}
                       />
-                      {errors.email && (
-                        <HelperText type="error" visible={!!errors.email}>
-                          {errors.email.message}
-                        </HelperText>
-                      )}
                     </View>
-                  )}
-                />
+                    {errors.phoneNumber && (
+                      <HelperText type="error" visible={!!errors.phoneNumber}>
+                        {errors.phoneNumber.message}
+                      </HelperText>
+                    )}
+                  </View>
+                )}
+              />
 
-                {/* Full Name Input */}
-                <Controller
-                  control={control}
-                  name="displayName"
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <View style={styles.inputContainer}>
-                      <TextInput
-                        placeholder="Full Name"
-                        onBlur={onBlur}
-                        onChangeText={onChange}
-                        value={value}
-                        mode="outlined"
-                        keyboardType="default"
-                        autoCapitalize="words"
-                        autoComplete="name"
-                        left={<TextInput.Icon icon="account" color={theme === 'light' ? 'black' : 'white'} />}
-                        outlineStyle={[
-                          styles.inputOutline,
-                          errors.displayName && styles.inputError,
-                        ]}
-                        style={styles.textInput}
-                        contentStyle={styles.inputContent}
-                        error={!!errors.displayName}
-                      />
-                      {errors.displayName && (
-                        <HelperText type="error" visible={!!errors.displayName}>
-                          {errors.displayName.message}
-                        </HelperText>
-                      )}
-                    </View>
-                  )}
-                />
-
-                {/* Password Input */}
-                <Controller
-                  control={control}
-                  name="password"
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <View style={styles.inputContainer}>
-                      <TextInput
-                        placeholder="Password"
-                        onBlur={onBlur}
-                        onChangeText={onChange}
-                        value={value}
-                        mode="outlined"
-                        secureTextEntry={!showPassword}
-                        autoCapitalize="none"
-                        autoComplete="new-password"
-                        left={<TextInput.Icon icon="lock" color={theme === 'light' ? 'black' : 'white'} />}
-                        right={
-                          <TextInput.Icon
-                            icon={showPassword ? 'eye-off' : 'eye'}
-                            onPress={togglePassword}
-                            color={theme === 'light' ? 'black' : 'white'}
-                          />
-                        }
-                        outlineStyle={[
-                          styles.inputOutline,
-                          errors.password && styles.inputError,
-                        ]}
-                        style={styles.textInput}
-                        contentStyle={styles.inputContent}
-                        error={!!errors.password}
-                      />
-                      {errors.password && (
-                        <HelperText type="error" visible={!!errors.password}>
-                          {errors.password.message}
-                        </HelperText>
-                      )}
-                    </View>
-                  )}
-                />
-
-                {/* Confirm Password Input */}
-                <Controller
-                  control={control}
-                  name="confirmPassword"
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <View style={styles.inputContainer}>
-                      <TextInput
-                        placeholder="Confirm Password"
-                        onBlur={onBlur}
-                        onChangeText={onChange}
-                        value={value}
-                        mode="outlined"
-                        secureTextEntry={!showPassword}
-                        autoCapitalize="none"
-                        autoComplete="new-password"
-                        left={<TextInput.Icon icon="lock" color={theme === 'light' ? 'black' : 'white'} />}
-                        outlineStyle={[
-                          styles.inputOutline,
-                          errors.confirmPassword && styles.inputError,
-                        ]}
-                        style={styles.textInput}
-                        contentStyle={styles.inputContent}
-                        error={!!errors.confirmPassword}
-                      />
-                      {errors.confirmPassword && (
-                        <HelperText
-                          type="error"
-                          visible={!!errors.confirmPassword}
-                        >
-                          {errors.confirmPassword.message}
-                        </HelperText>
-                      )}
-                    </View>
-                  )}
-                />
-
-                {/* Terms and Privacy */}
-                <View style={styles.termsContainer}>
-                  <View style={styles.termsRow}>
-                    <Checkbox
-                      status={termsAccepted ? 'checked' : 'unchecked'}
-                      onPress={toggleTerms}
-                      uncheckedColor={theme === 'light' ? '#666' : 'white'}
-                      color={theme === 'light' ? '#007AFF' : '#3b82f6'}
+              {/* Email Input */}
+              <Controller
+                control={control}
+                name="email"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      placeholder="Email"
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      value={value}
+                      mode="outlined"
+                      keyboardType="email-address"
+                      autoCapitalize="none"
+                      autoComplete="email"
+                      left={
+                        <TextInput.Icon icon="email" color={colors.onSurface} />
+                      }
+                      outlineStyle={[
+                        styles.inputOutline,
+                        errors.email && styles.inputError,
+                      ]}
+                      style={styles.textInput}
+                      contentStyle={styles.inputContent}
+                      error={!!errors.email}
                     />
-                    <View style={styles.termsTextContainer}>
-                      <Text style={styles.termsText}>
-                        I Agree with{' '}
-                        <TouchableOpacity onPress={openTerms}>
-                          <Text style={styles.termsLink}>Terms of Service</Text>
-                        </TouchableOpacity>{' '}
-                        and{' '}
-                        <TouchableOpacity onPress={openPrivacyPolicy}>
-                          <Text style={styles.termsLink}>Privacy Policy</Text>
-                        </TouchableOpacity>
-                      </Text>
-                    </View>
+                    {errors.email && (
+                      <HelperText type="error" visible={!!errors.email}>
+                        {errors.email.message}
+                      </HelperText>
+                    )}
+                  </View>
+                )}
+              />
+
+              {/* Full Name Input */}
+              <Controller
+                control={control}
+                name="displayName"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      placeholder="Full Name"
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      value={value}
+                      mode="outlined"
+                      keyboardType="default"
+                      autoCapitalize="words"
+                      autoComplete="name"
+                      left={
+                        <TextInput.Icon
+                          icon="account"
+                          color={colors.onSurface}
+                        />
+                      }
+                      outlineStyle={[
+                        styles.inputOutline,
+                        errors.displayName && styles.inputError,
+                      ]}
+                      style={styles.textInput}
+                      contentStyle={styles.inputContent}
+                      error={!!errors.displayName}
+                    />
+                    {errors.displayName && (
+                      <HelperText type="error" visible={!!errors.displayName}>
+                        {errors.displayName.message}
+                      </HelperText>
+                    )}
+                  </View>
+                )}
+              />
+
+              {/* Password Input */}
+              <Controller
+                control={control}
+                name="password"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      placeholder="Password"
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      value={value}
+                      mode="outlined"
+                      secureTextEntry={!showPassword}
+                      autoCapitalize="none"
+                      autoComplete="new-password"
+                      left={
+                        <TextInput.Icon icon="lock" color={colors.onSurface} />
+                      }
+                      right={
+                        <TextInput.Icon
+                          icon={showPassword ? 'eye-off' : 'eye'}
+                          onPress={togglePassword}
+                          color={colors.onSurface}
+                        />
+                      }
+                      outlineStyle={[
+                        styles.inputOutline,
+                        errors.password && styles.inputError,
+                      ]}
+                      style={styles.textInput}
+                      contentStyle={styles.inputContent}
+                      error={!!errors.password}
+                    />
+                    {errors.password && (
+                      <HelperText type="error" visible={!!errors.password}>
+                        {errors.password.message}
+                      </HelperText>
+                    )}
+                  </View>
+                )}
+              />
+
+              {/* Confirm Password Input */}
+              <Controller
+                control={control}
+                name="confirmPassword"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      placeholder="Confirm Password"
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      value={value}
+                      mode="outlined"
+                      secureTextEntry={!showPassword}
+                      autoCapitalize="none"
+                      autoComplete="new-password"
+                      left={
+                        <TextInput.Icon icon="lock" color={colors.onSurface} />
+                      }
+                      outlineStyle={[
+                        styles.inputOutline,
+                        errors.confirmPassword && styles.inputError,
+                      ]}
+                      style={styles.textInput}
+                      contentStyle={styles.inputContent}
+                      error={!!errors.confirmPassword}
+                    />
+                    {errors.confirmPassword && (
+                      <HelperText
+                        type="error"
+                        visible={!!errors.confirmPassword}
+                      >
+                        {errors.confirmPassword.message}
+                      </HelperText>
+                    )}
+                  </View>
+                )}
+              />
+
+              {/* Terms and Privacy */}
+              <View style={styles.termsContainer}>
+                <View style={styles.termsRow}>
+                  <Checkbox
+                    status={termsAccepted ? 'checked' : 'unchecked'}
+                    onPress={toggleTerms}
+                    uncheckedColor={colors.onSurface}
+                    color={colors.primary}
+                  />
+                  <View style={styles.termsTextContainer}>
+                    <Text style={styles.termsText}>
+                      I Agree with{' '}
+                      <TouchableOpacity onPress={openTerms}>
+                        <Text style={styles.termsLink}>Terms of Service</Text>
+                      </TouchableOpacity>{' '}
+                      and{' '}
+                      <TouchableOpacity onPress={openPrivacyPolicy}>
+                        <Text style={styles.termsLink}>Privacy Policy</Text>
+                      </TouchableOpacity>
+                    </Text>
                   </View>
                 </View>
+              </View>
 
-                {/* Sign Up Button */}
+              {/* Sign Up Button */}
+              <Button
+                mode="contained"
+                onPress={handleSubmit(onSubmit)}
+                loading={loading}
+                disabled={isSubmitDisabled}
+                buttonColor={colors.primary}
+                contentStyle={styles.buttonContent}
+                style={styles.signUpButton}
+                labelStyle={styles.signUpButtonLabel}
+              >
+                {loading ? 'Creating Account...' : 'Sign up'}
+              </Button>
+
+              {/* Divider */}
+              <View style={styles.dividerContainer}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>or continue with</Text>
+                <View style={styles.dividerLine} />
+              </View>
+
+              {/* Social Sign Up Buttons */}
+              <View style={styles.socialButtonsContainer}>
                 <Button
-                  mode="contained"
-                  onPress={handleSubmit(onSubmit)}
-                  loading={loading}
-                  disabled={isSubmitDisabled}
-                  buttonColor={theme === 'light' ? '#007AFF' : '#3b82f6'}
-                  contentStyle={styles.buttonContent}
-                  style={styles.signUpButton}
-                  labelStyle={styles.signUpButtonLabel}
+                  mode="outlined"
+                  onPress={handleGoogleSignUp}
+                  disabled={loading}
+                  icon="google"
+                  contentStyle={styles.socialButtonContent}
+                  style={styles.socialButton}
+                  labelStyle={styles.socialButtonLabel}
                 >
-                  {loading ? 'Creating Account...' : 'Sign up'}
+                  Google
                 </Button>
 
-                {/* Divider */}
-                <View style={styles.dividerContainer}>
-                  <View style={styles.dividerLine} />
-                  <Text style={styles.dividerText}>or continue with</Text>
-                  <View style={styles.dividerLine} />
-                </View>
-
-                {/* Social Sign Up Buttons */}
-                <View style={styles.socialButtonsContainer}>
-                  <Button
-                    mode="outlined"
-                    onPress={handleGoogleSignUp}
-                    disabled={loading}
-                    icon="google"
-                    contentStyle={styles.socialButtonContent}
-                    style={styles.socialButton}
-                    labelStyle={styles.socialButtonLabel}
-                  >
-                    Google
-                  </Button>
-
-                  <Button
-                    mode="outlined"
-                    onPress={handleAppleSignUp}
-                    disabled={loading}
-                    icon="apple"
-                    contentStyle={styles.socialButtonContent}
-                    style={styles.socialButton}
-                    labelStyle={styles.socialButtonLabel}
-                  >
-                    Apple
-                  </Button>
-                </View>
-
-                {/* Login Link */}
-                <View style={styles.loginLinkContainer}>
-                  <Text style={styles.loginPrompt}>
-                    Already have an account?{' '}
-                  </Text>
-                  <TouchableOpacity onPress={()=> {navigation.navigate('SignIn')}} activeOpacity={0.7}>
-                    <Text style={styles.loginLink}>Login</Text>
-                  </TouchableOpacity>
-                </View>
+                <Button
+                  mode="outlined"
+                  onPress={handleAppleSignUp}
+                  disabled={loading}
+                  icon="apple"
+                  contentStyle={styles.socialButtonContent}
+                  style={styles.socialButton}
+                  labelStyle={styles.socialButtonLabel}
+                >
+                  Apple
+                </Button>
               </View>
-            </ScrollView>
 
-            {/* Country Code Modal */}
-            <Modal
-              visible={showCountryModal}
-              animationType="slide"
-              presentationStyle="pageSheet"
-              onRequestClose={closeCountryModal}
-            >
-              <SafeAreaView style={styles.modalContainer}>
-                <View style={styles.modalHeader}>
-                  <Text style={styles.modalTitle}>Select Country</Text>
-                  <TouchableOpacity
-                    onPress={closeCountryModal}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={styles.modalDoneButton}>Done</Text>
-                  </TouchableOpacity>
-                </View>
-                <FlatList
-                  data={COUNTRY_CODES}
-                  renderItem={renderCountryItem}
-                  keyExtractor={keyExtractor}
-                  showsVerticalScrollIndicator={false}
-                  initialNumToRender={10}
-                  maxToRenderPerBatch={10}
-                  windowSize={10}
-                  removeClippedSubviews={true}
-                  getItemLayout={(data, index) => ({
-                    length: 60,
-                    offset: 60 * index,
-                    index,
-                  })}
-                />
-              </SafeAreaView>
-            </Modal>
+              {/* Login Link */}
+              <View style={styles.loginLinkContainer}>
+                <Text style={styles.loginPrompt}>
+                  Already have an account?{' '}
+                </Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    navigation.navigate('SignIn');
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.loginLink}>Login</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </ScrollView>
+
+          {/* Country Code Modal */}
+          <Modal
+            visible={showCountryModal}
+            animationType="slide"
+            presentationStyle="pageSheet"
+            onRequestClose={closeCountryModal}
+          >
+            <SafeAreaView style={styles.modalContainer}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Select Country</Text>
+                <TouchableOpacity
+                  onPress={closeCountryModal}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.modalDoneButton}>Done</Text>
+                </TouchableOpacity>
+              </View>
+              <FlatList
+                data={COUNTRY_CODES}
+                renderItem={renderCountryItem}
+                keyExtractor={keyExtractor}
+                showsVerticalScrollIndicator={false}
+                initialNumToRender={10}
+                maxToRenderPerBatch={10}
+                windowSize={10}
+                removeClippedSubviews={true}
+                getItemLayout={(data, index) => ({
+                  length: 60,
+                  offset: 60 * index,
+                  index,
+                })}
+              />
+            </SafeAreaView>
+          </Modal>
         </KeyboardAvoidingView>
       </ScrollView>
     </CommonView>
@@ -550,233 +575,233 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({navigation, rou
 };
 
 // Optimized styles using StyleSheet.create for better performance
-const createStyles = (theme: 'light' | 'dark') => StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  safeArea: {
-    flex: 1,
-    backgroundColor: theme === 'light' ? '#fff' : '#0f172a',
-  },
-  scrollView: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  logoContainer: {
-    alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 32,
-  },
-  logo: {
-    width: 64,
-    height: 64,
-    backgroundColor: theme === 'light' ? '#007AFF' : '#3b82f6',
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 24,
-  },
-  logoText: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: theme === 'light' ? '#111' : 'white',
-    marginBottom: 8,
-  },
-  formContainer: {
-    paddingHorizontal: 8,
-  },
-  inputContainer: {
-    marginBottom: 16,
-  },
-  phoneInputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  countrySelector: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: theme === 'light' ? '#f3f4f6' : '#334155',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    borderRadius: 12,
-    borderTopRightRadius: 0,
-    borderBottomRightRadius: 0,
-    minWidth: 120,
-    borderWidth: 1,
-    borderColor: theme === 'light' ? '#f3f4f6' : '#475569',
-  },
-  selectedCountryFlag: {
-    fontSize: 18,
-    marginRight: 8,
-  },
-  selectedCountryCode: {
-    fontSize: 16,
-    color: theme === 'light' ? '#111' : 'white',
-    marginRight: 8,
-    fontWeight: '500',
-  },
-  phoneInput: {
-    borderRadius: 12,
-    borderTopLeftRadius: 0,
-    borderBottomLeftRadius: 0,
-    borderColor: theme === 'light' ? '#f3f4f6' : '#475569',
-  },
-  phoneTextInput: {
-    flex: 1,
-  },
-  textInput: {
-    backgroundColor: theme === 'light' ? '#f3f4f6' : '#334155',
-  },
-  inputOutline: {
-    borderRadius: 12,
-    borderColor: theme === 'light' ? '#f3f4f6' : '#475569',
-  },
-  inputError: {
-    borderColor: '#EF4444',
-  },
-  inputContent: {
-    paddingHorizontal: 16,
-  },
-  termsContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 16,
-    marginBottom: 16,
-  },
-  termsRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-  termsTextContainer: {
-    flex: 1,
-    marginLeft: 8,
-  },
-  termsText: {
-    fontSize: 14,
-    color: theme === 'light' ? '#666' : '#94a3b8',
-    lineHeight: 20,
-  },
-  termsLink: {
-    color: theme === 'light' ? '#007AFF' : '#3b82f6',
-    textDecorationLine: 'underline',
-  },
-  signUpButton: {
-    borderRadius: 25,
-    marginTop: 8,
-  },
-  buttonContent: {
-    paddingVertical: 12,
-  },
-  signUpButtonLabel: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
-  },
-  dividerContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 24,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: theme === 'light' ? '#d1d5db' : '#475569',
-  },
-  dividerText: {
-    paddingHorizontal: 16,
-    color: theme === 'light' ? '#6b7280' : '#94a3b8',
-    fontSize: 14,
-  },
-  socialButtonsContainer: {
-    flexDirection: 'row',
-    gap: 16,
-  },
-  socialButton: {
-    flex: 1,
-    borderRadius: 25,
-    borderColor: theme === 'light' ? '#f3f4f6' : '#475569',
-    borderWidth: 1,
-  },
-  socialButtonContent: {
-    paddingVertical: 12,
-  },
-  socialButtonLabel: {
-    fontSize: 14,
-    color: theme === 'light' ? '#374151' : 'white',
-  },
-  loginLinkContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 24,
-    marginBottom: 16,
-  },
-  loginPrompt: {
-    color: theme === 'light' ? '#666' : '#94a3b8',
-    fontSize: 16,
-  },
-  loginLink: {
-    color: theme === 'light' ? '#007AFF' : '#3b82f6',
-    textDecorationLine: 'underline',
-    fontWeight: '600',
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: theme === 'light' ? '#fff' : '#0f172a',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: theme === 'light' ? '#e5e7eb' : '#334155',
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: theme === 'light' ? 'black' : 'white',
-  },
-  modalDoneButton: {
-    color: theme === 'light' ? '#007AFF' : '#3b82f6',
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  countryItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 24,
-    borderBottomWidth: 1,
-    borderBottomColor: theme === 'light' ? '#f3f4f6' : '#334155',
-  },
-  countryFlag: {
-    fontSize: 24,
-    marginRight: 16,
-  },
-  countryName: {
-    flex: 1,
-    fontSize: 16,
-    color: theme === 'light' ? '#111' : 'white',
-    fontWeight: '500',
-  },
-  countryCode: {
-    fontSize: 16,
-    color: theme === 'light' ? '#666' : '#94a3b8',
-    fontWeight: '600',
-  },
-});
+const createStyles = (colors: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+    },
+    safeArea: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+    },
+    logoContainer: {
+      alignItems: 'center',
+      paddingHorizontal: 24,
+      paddingTop: 16,
+      paddingBottom: 32,
+    },
+    logo: {
+      width: 64,
+      height: 64,
+      backgroundColor: colors.primary,
+      borderRadius: 16,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 24,
+    },
+    logoText: {
+      color: '#fff',
+      fontSize: 24,
+      fontWeight: 'bold',
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: colors.onSurface,
+      marginBottom: 8,
+    },
+    formContainer: {
+      paddingHorizontal: 8,
+    },
+    inputContainer: {
+      marginBottom: 16,
+    },
+    phoneInputRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    countrySelector: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.tertiary,
+      paddingHorizontal: 16,
+      paddingVertical: 16,
+      borderRadius: 12,
+      borderTopRightRadius: 0,
+      borderBottomRightRadius: 0,
+      minWidth: 120,
+      borderWidth: 1,
+      borderColor: colors.outline,
+    },
+    selectedCountryFlag: {
+      fontSize: 18,
+      marginRight: 8,
+    },
+    selectedCountryCode: {
+      fontSize: 16,
+      color: colors.onSurface,
+      marginRight: 8,
+      fontWeight: '500',
+    },
+    phoneInput: {
+      borderRadius: 12,
+      borderTopLeftRadius: 0,
+      borderBottomLeftRadius: 0,
+      borderColor: colors.outline,
+    },
+    phoneTextInput: {
+      flex: 1,
+    },
+    textInput: {
+      backgroundColor: colors.tertiary,
+    },
+    inputOutline: {
+      borderRadius: 12,
+      borderColor: colors.outline,
+    },
+    inputError: {
+      borderColor: '#EF4444',
+    },
+    inputContent: {
+      paddingHorizontal: 16,
+    },
+    termsContainer: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: 16,
+      marginBottom: 16,
+    },
+    termsRow: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+    },
+    termsTextContainer: {
+      flex: 1,
+      marginLeft: 8,
+    },
+    termsText: {
+      fontSize: 14,
+      color: colors.onSurface,
+      lineHeight: 20,
+    },
+    termsLink: {
+      color: colors.primary,
+      textDecorationLine: 'underline',
+    },
+    signUpButton: {
+      borderRadius: 25,
+      marginTop: 8,
+    },
+    buttonContent: {
+      paddingVertical: 12,
+    },
+    signUpButtonLabel: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: '#fff',
+    },
+    dividerContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginVertical: 24,
+    },
+    dividerLine: {
+      flex: 1,
+      height: 1,
+      backgroundColor: colors.background,
+    },
+    dividerText: {
+      paddingHorizontal: 16,
+      color: colors.outline,
+      fontSize: 14,
+    },
+    socialButtonsContainer: {
+      flexDirection: 'row',
+      gap: 16,
+    },
+    socialButton: {
+      flex: 1,
+      borderRadius: 25,
+      borderColor: colors.outline,
+      borderWidth: 1,
+    },
+    socialButtonContent: {
+      paddingVertical: 12,
+    },
+    socialButtonLabel: {
+      fontSize: 14,
+      color: colors.onSurface,
+    },
+    loginLinkContainer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginTop: 24,
+      marginBottom: 16,
+    },
+    loginPrompt: {
+      color: colors.onSurface,
+      fontSize: 16,
+    },
+    loginLink: {
+      color: colors.primary,
+      textDecorationLine: 'underline',
+      fontWeight: '600',
+    },
+    modalContainer: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    modalHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.outline,
+    },
+    modalTitle: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: colors.onSurface,
+    },
+    modalDoneButton: {
+      color: colors.primary,
+      fontSize: 16,
+      fontWeight: '500',
+    },
+    countryItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 16,
+      paddingHorizontal: 24,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.inputBorder(false),
+    },
+    countryFlag: {
+      fontSize: 24,
+      marginRight: 16,
+    },
+    countryName: {
+      flex: 1,
+      fontSize: 16,
+      color: colors.onSurface,
+      fontWeight: '500',
+    },
+    countryCode: {
+      fontSize: 16,
+      color: colors.onSurface,
+      fontWeight: '600',
+    },
+  });
 
 export default SignupScreen;
-

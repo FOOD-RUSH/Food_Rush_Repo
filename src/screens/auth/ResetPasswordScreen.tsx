@@ -1,11 +1,10 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import { Button, TextInput, HelperText, IconButton } from 'react-native-paper';
-import { useTheme } from '@/src/hooks/useTheme';
+import { Button, TextInput, HelperText, IconButton, useTheme } from 'react-native-paper';
+import CommonView from '@/src/components/common/CommonView';
 
 // Validation schema
 const validationSchema = yup.object({
@@ -28,13 +27,7 @@ interface ResetPasswordForm {
 }
 
 const ResetPasswordScreen = () => {
-  const { theme } = useTheme();
-  const backgroundColor = theme === 'light' ? 'bg-white' : 'bg-background';
-  const textColor = theme === 'light' ? 'text-black' : 'text-text';
-  const secondaryTextColor = theme === 'light' ? 'text-gray-600' : 'text-text-secondary';
-  const inputBackgroundColor = theme === 'light' ? 'white' : '#1e293b';
-  const inputBorderColor = (error: boolean) => error ? '#ef4444' : (theme === 'light' ? '#e5e7eb' : '#334155');
-  const primaryColor = theme === 'light' ? '#1E90FF' : '#3b82f6';
+  const { colors } = useTheme();
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -78,7 +71,7 @@ const ResetPasswordScreen = () => {
   }, []);
 
   return (
-    <SafeAreaView className={`flex-1 ${backgroundColor}`}>
+    <CommonView >
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         <View className="px-6 pt-2">
           {/* Back Button */}
@@ -86,7 +79,7 @@ const ResetPasswordScreen = () => {
             <IconButton
               icon="arrow-left"
               size={24}
-              iconColor={theme === 'light' ? '#000000' : 'white'}
+              iconColor={colors.onSurface}
               className="self-start -ml-2"
               onPress={goBack}
             />
@@ -94,12 +87,14 @@ const ResetPasswordScreen = () => {
 
           {/* Header Section */}
           <View className="mb-10">
-            <Text className={`text-3xl font-bold text-center mb-2 ${textColor}`}>
+            <Text
+              className={`text-3xl font-bold text-center mb-2 text-[${colors.onSurface}]`}>
               Reset Password
             </Text>
-            <Text className={`text-sm text-center leading-5 ${secondaryTextColor}`}>
-              Enter your email address and we will send you code to reset
-              your password
+            <Text
+              className={`text-sm text-center leading-5 text-[${colors.onSurface}]`}>
+              Enter your email address and we will send you code to reset your
+              password
             </Text>
           </View>
 
@@ -118,23 +113,28 @@ const ResetPasswordScreen = () => {
                   secureTextEntry={!showPassword}
                   autoCapitalize="none"
                   autoComplete="new-password"
-                  style={{ backgroundColor: inputBackgroundColor }}
+                  style={{ backgroundColor: colors.surfaceVariant }}
                   outlineStyle={{
                     borderRadius: 12,
                     borderWidth: 1,
-                    borderColor: inputBorderColor(!!errors.password),
+                    borderColor: errors.password ? colors.error : colors.outline,
                   }}
                   contentStyle={{
                     paddingHorizontal: 16,
                     paddingVertical: 16,
                   }}
                   error={!!errors.password}
-                  left={<TextInput.Icon icon="lock-outline" color={theme === 'light' ? 'black' : 'white'} />}
+                  left={
+                    <TextInput.Icon
+                      icon="lock-outline"
+                      color={colors.onSurface}
+                    />
+                  }
                   right={
                     <TextInput.Icon
                       icon={showPassword ? 'eye-off' : 'eye'}
                       onPress={togglePasswordVisibility}
-                      color={theme === 'light' ? 'black' : 'white'}
+                      color={colors.onSurface}
                     />
                   }
                 />
@@ -145,7 +145,7 @@ const ResetPasswordScreen = () => {
                 >
                   {errors.password?.message}
                 </HelperText>
-                <Text className={`text-xs mt-1 ${secondaryTextColor}`}>
+                <Text className={`text-xs mt-1 text-[${colors.onSurface}]`}>
                   Must have at least 8 characters
                 </Text>
               </View>
@@ -167,23 +167,28 @@ const ResetPasswordScreen = () => {
                   secureTextEntry={!showConfirmPassword}
                   autoCapitalize="none"
                   autoComplete="new-password"
-                  style={{ backgroundColor: inputBackgroundColor }}
+                  style={{ backgroundColor: colors.surfaceVariant }}
                   outlineStyle={{
                     borderRadius: 12,
                     borderWidth: 1,
-                    borderColor: inputBorderColor(!!errors.confirmPassword),
+                    borderColor: errors.confirmPassword ? colors.error : colors.outline,
                   }}
                   contentStyle={{
                     paddingHorizontal: 16,
                     paddingVertical: 16,
                   }}
                   error={!!errors.confirmPassword}
-                  left={<TextInput.Icon icon="lock-outline" color={theme === 'light' ? 'black' : 'white'} />}
+                  left={
+                    <TextInput.Icon
+                      icon="lock-outline"
+                      color={colors.onSurface}
+                    />
+                  }
                   right={
                     <TextInput.Icon
                       icon={showConfirmPassword ? 'eye-off' : 'eye'}
                       onPress={toggleConfirmPasswordVisibility}
-                      color={theme === 'light' ? 'black' : 'white'}
+                      color={colors.onSurface}
                     />
                   }
                 />
@@ -194,7 +199,7 @@ const ResetPasswordScreen = () => {
                 >
                   {errors.confirmPassword?.message}
                 </HelperText>
-                <Text className={`text-xs mt-1 ${secondaryTextColor}`}>
+                <Text className={`text-xs mt-1 text-[${colors.onSurface}]`}>
                   Both passwords must match
                 </Text>
               </View>
@@ -207,7 +212,7 @@ const ResetPasswordScreen = () => {
             onPress={handleSubmit(onSubmit)}
             loading={isSubmitting}
             disabled={isSubmitting || !passwordValue || !confirmPasswordValue}
-            buttonColor={primaryColor}
+            buttonColor={colors.primary}
             textColor="white"
             contentStyle={{ paddingVertical: 8 }}
             style={{ borderRadius: 25 }}
@@ -217,7 +222,7 @@ const ResetPasswordScreen = () => {
           </Button>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </CommonView>
   );
 };
 

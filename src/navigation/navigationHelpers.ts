@@ -1,9 +1,8 @@
-import { 
+import {
   createNavigationContainerRef,
-  StackActions,
-  CommonActions,
-} from "@react-navigation/native";
-import { RootStackParamList } from "./types";
+  
+} from '@react-navigation/native';
+import { RootStackParamList } from './types';
 
 export const navigationRef = createNavigationContainerRef<RootStackParamList>();
 
@@ -15,8 +14,8 @@ export const navigationRef = createNavigationContainerRef<RootStackParamList>();
 
 // Basic navigation functions - USE SPARINGLY
 export function navigate<T extends keyof RootStackParamList>(
-  name: T, 
-  params?: RootStackParamList[T]
+  name: T,
+  params?: RootStackParamList[T],
 ) {
   if (navigationRef.isReady()) {
     navigationRef.navigate(name, params);
@@ -30,8 +29,8 @@ export function goBack() {
 }
 
 export function reset<T extends keyof RootStackParamList>(
-  name: T, 
-  params?: RootStackParamList[T]
+  name: T,
+  params?: RootStackParamList[T],
 ) {
   if (navigationRef.isReady()) {
     navigationRef.reset({
@@ -59,12 +58,14 @@ export function getCurrentRouteName() {
 // Helper for programmatic navigation (use only when navigation prop is not available)
 export function navigateFromService<T extends keyof RootStackParamList>(
   name: T,
-  params?: RootStackParamList[T]
+  params?: RootStackParamList[T],
 ) {
   if (navigationRef.isReady()) {
-    navigationRef.navigate(name, params);
+    navigationRef.navigate(name , params);
   } else {
-    console.warn('Navigation not ready. This should only be called from services/utils.');
+    console.warn(
+      'Navigation not ready. This should only be called from services/utils.',
+    );
   }
 }
 
@@ -72,11 +73,11 @@ export function navigateFromService<T extends keyof RootStackParamList>(
 export function handleDeepLink(url: string) {
   // Parse URL and navigate accordingly
   console.log('Handling deep link:', url);
-  
+
   // Example implementation
   const parsedUrl = new URL(url);
   const path = parsedUrl.pathname;
-  
+
   if (path.startsWith('/restaurant/')) {
     const restaurantId = path.split('/')[2];
     if (restaurantId) {
@@ -98,26 +99,26 @@ export const ServiceNavigation = {
   goToOrderTracking: (orderId: string) => {
     navigateFromService('OrderTracking', { orderId });
   },
-  
+
   goToNotifications: () => {
     navigateFromService('Notifications');
   },
-  
+
   showCart: (fromScreen?: string) => {
     navigateFromService('Cart', { fromScreen });
   },
-  
+
   logout: () => {
     reset('Auth');
   },
-  
+
   switchToCustomerApp: () => {
     reset('CustomerApp');
   },
-  
+
   switchToRestaurantApp: () => {
     reset('RestaurantApp');
-  }
+  },
 };
 
 // Type-safe navigation helpers for components
@@ -176,13 +177,13 @@ export const createNavigationHelpers = <T extends any>(navigation: T) => ({
   goToHome: () => {
     (navigation as any).navigate('CustomerApp', {
       screen: 'Home',
-      params: { screen: 'HomeScreen' }
+      params: { screen: 'HomeScreen' },
     });
   },
 
   goToOrders: () => {
     (navigation as any).navigate('CustomerApp', {
-      screen: 'Orders'
+      screen: 'Orders',
     });
   },
 
@@ -191,25 +192,27 @@ export const createNavigationHelpers = <T extends any>(navigation: T) => ({
       screen: 'Orders',
       params: {
         screen: 'OrderDetails',
-        params: { orderId }
-      }
+        params: { orderId },
+      },
     });
   },
 
   goToProfile: () => {
     (navigation as any).navigate('CustomerApp', {
-      screen: 'Profile'
+      screen: 'Profile',
     });
-  }
+  },
 });
 
 // Hook for navigation helpers (preferred approach)
 export const useNavigationHelpers = () => {
   const navigation = navigationRef.current;
-  
+
   if (!navigation) {
-    throw new Error('useNavigationHelpers must be used within NavigationContainer');
+    throw new Error(
+      'useNavigationHelpers must be used within NavigationContainer',
+    );
   }
-  
+
   return createNavigationHelpers(navigation);
 };

@@ -1,7 +1,10 @@
 // Updated types.ts - Moving full-screen screens to RootStack
-import { NavigatorScreenParams, CompositeScreenProps } from "@react-navigation/native";
+import {
+  NavigatorScreenParams,
+  CompositeScreenProps,
+} from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
+import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { MaterialTopTabScreenProps } from '@react-navigation/material-top-tabs';
 
 // Root Stack - Screens that should NOT show tabs (full-screen)
@@ -11,7 +14,7 @@ export type RootStackParamList = {
   CustomerApp: NavigatorScreenParams<CustomerTabParamList>;
   RestaurantApp: NavigatorScreenParams<RestaurantTabParamList>;
 
-  Cart: undefined;  // Full-screen modal/screens (NO TABS) - These are the screens you mentioned
+  Cart: undefined; // Full-screen modal/screens (NO TABS) - These are the screens you mentioned
 
   Checkout: { cartId?: string };
   OrderTracking: { orderId: string };
@@ -19,7 +22,11 @@ export type RootStackParamList = {
   RestaurantDetails: { restaurantId: string };
   Notifications: undefined;
   Category: { categoryId: string };
-  SearchScreen: { category?: string; categoryId?: string; type: "search" | "category" };
+  SearchScreen: {
+    category?: string;
+    categoryId?: string;
+    type: 'search' | 'category';
+  };
   // profile screens
   EditProfile: undefined;
   AddressScreen: undefined;
@@ -31,8 +38,6 @@ export type RootStackParamList = {
   About: undefined;
   FavoriteRestaurantScreen: undefined;
   LanguageScreen: undefined;
-
-
 };
 
 // Auth Stack (unchanged)
@@ -70,7 +75,6 @@ export type CustomerOrderStackParamList = {
 
 export type CustomerProfileStackParamList = {
   ProfileHome: undefined;
-
 };
 
 export type CustomerHelpCenterStackParamList = {
@@ -145,53 +149,61 @@ export type RestaurantTabScreenProps<T extends keyof RestaurantTabParamList> =
     RootStackScreenProps<keyof RootStackParamList>
   >;
 
-export type CustomerHomeStackScreenProps<T extends keyof CustomerHomeStackParamList> =
-  CompositeScreenProps<
-    NativeStackScreenProps<CustomerHomeStackParamList, T>,
-    CustomerTabScreenProps<'Home'>
-  >;
+export type CustomerHomeStackScreenProps<
+  T extends keyof CustomerHomeStackParamList,
+> = CompositeScreenProps<
+  NativeStackScreenProps<CustomerHomeStackParamList, T>,
+  CustomerTabScreenProps<'Home'>
+>;
 
-export type CustomerOrderScreenProps<T extends keyof CustomerOrderStackParamList> =
-  CompositeScreenProps<
-    MaterialTopTabScreenProps<CustomerOrderStackParamList, T>,
-    CustomerTabScreenProps<'Orders'>
-  >;
+export type CustomerOrderScreenProps<
+  T extends keyof CustomerOrderStackParamList,
+> = CompositeScreenProps<
+  MaterialTopTabScreenProps<CustomerOrderStackParamList, T>,
+  CustomerTabScreenProps<'Orders'>
+>;
 
-export type CustomerProfileStackScreenProps<T extends keyof CustomerProfileStackParamList> =
-  CompositeScreenProps<
-    NativeStackScreenProps<CustomerProfileStackParamList, T>,
-    CustomerTabScreenProps<'Profile'>
-  >;
+export type CustomerProfileStackScreenProps<
+  T extends keyof CustomerProfileStackParamList,
+> = CompositeScreenProps<
+  NativeStackScreenProps<CustomerProfileStackParamList, T>,
+  CustomerTabScreenProps<'Profile'>
+>;
 
-export type CustomerHelpCenterStackScreenProps<T extends keyof CustomerHelpCenterStackParamList> =
-  CompositeScreenProps<
-    MaterialTopTabScreenProps<CustomerHelpCenterStackParamList, T>,
-    RootStackScreenProps<'Help'>
-  >;
+export type CustomerHelpCenterStackScreenProps<
+  T extends keyof CustomerHelpCenterStackParamList,
+> = CompositeScreenProps<
+  MaterialTopTabScreenProps<CustomerHelpCenterStackParamList, T>,
+  RootStackScreenProps<'Help'>
+>;
 
-export type RestaurantOrdersStackScreenProps<T extends keyof RestaurantOrdersStackParamList> =
-  CompositeScreenProps<
-    NativeStackScreenProps<RestaurantOrdersStackParamList, T>,
-    RestaurantTabScreenProps<'Orders'>
-  >;
+export type RestaurantOrdersStackScreenProps<
+  T extends keyof RestaurantOrdersStackParamList,
+> = CompositeScreenProps<
+  NativeStackScreenProps<RestaurantOrdersStackParamList, T>,
+  RestaurantTabScreenProps<'Orders'>
+>;
 
-export type RestaurantMenuStackScreenProps<T extends keyof RestaurantMenuStackParamList> =
-  CompositeScreenProps<
-    NativeStackScreenProps<RestaurantMenuStackParamList, T>,
-    RestaurantTabScreenProps<'Menu'>
-  >;
+export type RestaurantMenuStackScreenProps<
+  T extends keyof RestaurantMenuStackParamList,
+> = CompositeScreenProps<
+  NativeStackScreenProps<RestaurantMenuStackParamList, T>,
+  RestaurantTabScreenProps<'Menu'>
+>;
 
-export type RestaurantAnalyticsStackScreenProps<T extends keyof RestaurantAnalyticsStackParamList> =
-  CompositeScreenProps<
-    NativeStackScreenProps<RestaurantAnalyticsStackParamList, T>,
-    RestaurantTabScreenProps<'Analytics'>
-  >;
+export type RestaurantAnalyticsStackScreenProps<
+  T extends keyof RestaurantAnalyticsStackParamList,
+> = CompositeScreenProps<
+  NativeStackScreenProps<RestaurantAnalyticsStackParamList, T>,
+  RestaurantTabScreenProps<'Analytics'>
+>;
 
-export type RestaurantProfileStackScreenProps<T extends keyof RestaurantProfileStackParamList> =
-  CompositeScreenProps<
-    NativeStackScreenProps<RestaurantProfileStackParamList, T>,
-    RestaurantTabScreenProps<'Profile'>
-  >;
+export type RestaurantProfileStackScreenProps<
+  T extends keyof RestaurantProfileStackParamList,
+> = CompositeScreenProps<
+  NativeStackScreenProps<RestaurantProfileStackParamList, T>,
+  RestaurantTabScreenProps<'Profile'>
+>;
 
 // User type enum
 export type UserType = 'customer' | 'restaurant';
@@ -199,6 +211,6 @@ export type UserType = 'customer' | 'restaurant';
 // Global navigation state
 declare global {
   namespace ReactNavigation {
-    interface RootParamList extends RootStackParamList { }
+    interface RootParamList extends RootStackParamList {}
   }
 }

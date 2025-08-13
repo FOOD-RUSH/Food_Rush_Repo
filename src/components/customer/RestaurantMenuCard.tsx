@@ -1,7 +1,6 @@
 import React from 'react';
 import { Text, View } from 'react-native';
-import { Card } from 'react-native-paper';
-import { useTheme } from '@/src/hooks/useTheme';
+import { Card, useTheme } from 'react-native-paper';
 
 const RestaurantMenuCard = ({
   image,
@@ -14,10 +13,7 @@ const RestaurantMenuCard = ({
   foodPrice: number;
   foodCategory: string;
 }) => {
-  const { theme } = useTheme();
-  const cardBackgroundColor = theme === 'light' ? 'white' : '#1e293b';
-  const textColor = theme === 'light' ? 'text-gray-900' : 'text-text';
-  const primaryColor = theme === 'light' ? '#007aff' : '#3b82f6';
+  const { colors } = useTheme();
 
   return (
     <Card
@@ -25,7 +21,7 @@ const RestaurantMenuCard = ({
       style={{
         margin: 10,
         borderRadius: 10,
-        backgroundColor: cardBackgroundColor,
+        backgroundColor: colors.surface,
         boxShadow: '1px 0px 10px rgba(0, 0, 0, 0.15)',
       }}
     >
@@ -42,12 +38,12 @@ const RestaurantMenuCard = ({
         />
         {/* Price */}
         <View className="flex-col justify-center flex-1 ml-2">
-          <Text className={`text-xl font-semibold ${textColor}`}>
+          <Text className={`text-xl font-semibold ${colors.onSurface}`}>
             {foodName}
           </Text>
           <Text
             className="justify-center text-center items-center"
-            style={{ color: primaryColor }}
+            style={{ color: colors.primary }}
           >
             {foodPrice} FCFA
           </Text>

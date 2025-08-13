@@ -1,6 +1,6 @@
 import { Text, TouchableOpacity } from 'react-native';
 import React from 'react';
-import { useTheme } from '@/src/hooks/useTheme';
+import { useTheme } from 'react-native-paper';
 
 type TextButtonProps = {
   text: string;
@@ -8,15 +8,15 @@ type TextButtonProps = {
 };
 
 export const TextButton: React.FC<TextButtonProps> = ({ text, onPress }) => {
-  const { theme } = useTheme();
-  const textColor = theme === 'light' ? 'text-primary' : 'text-primary';
+  const { colors } = useTheme();
+  const textColor = colors.primary;
 
   return (
     <TouchableOpacity
       onPress={onPress}
       className="items-center justify-items-center"
     >
-      <Text className={`text-base font-medium ${textColor}`}>{text}</Text>
+      <Text className={`text-base font-medium text-[${textColor}]`}>{text}</Text>
     </TouchableOpacity>
   );
 };

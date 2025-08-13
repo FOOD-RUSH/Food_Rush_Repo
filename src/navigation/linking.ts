@@ -1,5 +1,5 @@
-import { LinkingOptions } from "@react-navigation/native";
-import { RootStackParamList } from "./types";
+import { LinkingOptions } from '@react-navigation/native';
+import { RootStackParamList } from './types';
 
 export const linking: LinkingOptions<RootStackParamList> = {
   prefixes: ['fooddeliveryapp://', 'https://foodrush.com'],

@@ -1,11 +1,10 @@
 import { TouchableOpacity, View, Text } from 'react-native';
 import React from 'react';
-import { Card } from 'react-native-paper';
+import { Card, useTheme } from 'react-native-paper';
 import { images } from '@/assets/images';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { CustomerHomeStackScreenProps } from '@/src/navigation/types';
 import { useNavigation } from '@react-navigation/native';
-import { useTheme } from '@/src/hooks/useTheme';
 
 interface ClassicFoodCardProps {
   id: string;
@@ -28,13 +27,7 @@ const ClassicFoodCard = ({
 }: ClassicFoodCardProps) => {
   const navigation =
     useNavigation<CustomerHomeStackScreenProps<'HomeScreen'>['navigation']>();
-  const { theme } = useTheme();
-  const cardBackgroundColor = theme === 'light' ? 'white' : '#1e293b';
-  const textColor = theme === 'light' ? 'text-gray-800' : 'text-text';
-  const secondaryTextColor =
-    theme === 'light' ? 'text-gray-500' : 'text-text-secondary';
-  const primaryColor = theme === 'light' ? '#007aff' : '#3b82f6';
-
+  const { colors } = useTheme();
   return (
     <TouchableOpacity
       activeOpacity={0.8}
@@ -48,14 +41,14 @@ const ClassicFoodCard = ({
         style={{
           width: 190,
           borderRadius: 16,
-          backgroundColor: cardBackgroundColor,
+          backgroundColor: colors.surface,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: 4 },
           shadowOpacity: 0.15,
           shadowRadius: 8,
           borderWidth: 1,
           marginVertical: 12,
-          borderColor: cardBackgroundColor,
+          borderColor: colors.surface,
           boxShadow: '1px 0px 10px rgba(0, 0, 0, 0.15)',
         }}
       >
@@ -102,13 +95,15 @@ const ClassicFoodCard = ({
           {/* Food info */}
           <View className="mb-2 self-center">
             <Text
-              className={`font-semibold mb-1 text-center text-lg ${textColor}`}
+              className={`font-semibold mb-1 text-center text-lg }`}
+              style={{ color: colors.onSurface }}
               numberOfLines={1}
             >
               {foodName}
             </Text>
             <Text
-              className={`mb-2 text-center text-base ${secondaryTextColor}`}
+              className={`mb-2 text-center text-base `}
+              style={{ color: colors.onSurface }}
               numberOfLines={1}
             >
               {restaurantName}
@@ -119,7 +114,10 @@ const ClassicFoodCard = ({
           <View className="flex-row justify-between items-center mb-3">
             <View className="flex-row items-center">
               <Ionicons name="star" size={16} color={'#ffbb00'} />
-              <Text className={`text-sm ml-1 ${secondaryTextColor}`}>
+              <Text
+                className={`text-sm ml-1 `}
+                style={{ color: colors.onSurface }}
+              >
                 {rating}
               </Text>
             </View>
@@ -127,9 +125,12 @@ const ClassicFoodCard = ({
               <Ionicons
                 name="location-outline"
                 size={16}
-                color={primaryColor}
+                color={colors.primary}
               />
-              <Text className={`text-sm ml-1 ${secondaryTextColor}`}>
+              <Text
+                className={`text-sm ml-1 `}
+                style={{ color: colors.onSurface }}
+              >
                 {distance}m
               </Text>
             </View>
@@ -139,17 +140,20 @@ const ClassicFoodCard = ({
           <View className="flex-row justify-between items-center">
             <Text
               className="font-bold text-base"
-              style={{ color: primaryColor }}
+              style={{ color: colors.primary }}
             >
               {foodPrice} FCFA
             </Text>
             <View className="flex-row items-center">
               <MaterialIcons
                 name="delivery-dining"
-                color={primaryColor}
+                color={colors.primary}
                 size={18}
               />
-              <Text className={`ml-1 text-xs ${secondaryTextColor}`}>
+              <Text
+                className={`ml-1 text-xs `}
+                style={{ color: colors.onSurface }}
+              >
                 SOLD OUT
               </Text>
             </View>

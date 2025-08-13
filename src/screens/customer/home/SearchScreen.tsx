@@ -8,7 +8,7 @@ import {
   Modal,
   Alert,
 } from 'react-native';
-import React, { useState, useCallback, useMemo, ReactNode } from 'react';
+import React, { useState, useCallback, useMemo, ReactNode, memo } from 'react';
 import { TextInput, Checkbox, RadioButton, Button } from 'react-native-paper';
 import {
   MaterialIcons,
@@ -20,15 +20,113 @@ import { goBack } from '@/src/navigation/navigationHelpers';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScrollView } from 'react-native-gesture-handler';
 import { lightTheme } from '@/src/config/theme';
-import {
-  RootStackScreenProps,
-} from '@/src/navigation/types';
+import { RootStackScreenProps } from '@/src/navigation/types';
+
+// Static data moved outside component to prevent recreation on every render
+const CUISINE_TYPES = [
+  { id: 'african', name: 'African', icon: '🍲' },
+  { id: 'cameroon', name: 'Cameroon Traditional', icon: '🇨🇲' },
+  { id: 'fastfood', name: 'Fast Food', icon: '🍔' },
+  { id: 'bakery', name: 'Bakery & Pastries', icon: '🥐' },
+] as const;
+
+const PRICE_RANGES = [
+  { id: 'budget', label: 'Budget (< 2,000 XAF)', value: '0-2000' },
+  { id: 'moderate', label: 'Moderate (2,000 - 5,000 XAF)', value: '2000-5000' },
+  { id: 'premium', label: 'Premium (5,000 - 10,000 XAF)', value: '5000-10000' },
+  { id: 'luxury', label: 'Luxury (> 10,000 XAF)', value: '10000+' },
+] as const;
+
+const PROMO_OPTIONS = [
+  { id: 'discount', name: 'Discounts Available', icon: '💰' },
+  { id: 'buy-one-get-one', name: 'Buy 1 Get 1', icon: '🎁' },
+  { id: 'new-customer', name: 'New Customer Offers', icon: '✨' },
+] as const;
+
+const SORT_OPTIONS = [
+  { id: 'delivery-time', label: 'Fastest Delivery' },
+  { id: 'price-low', label: 'Price: Low to High' },
+  { id: 'price-high', label: 'Price: High to Low' },
+  { id: 'distance', label: 'Nearest First' },
+] as const;
+
+// Memoized FilterSection component
+const FilterSection = memo(({ title, children }: { title: string; children: ReactNode }) => (
+  <View className="bg-white mb-2 mx-3 p-4 rounded-xl border-gray-200 border-solid">
+    <Text className="text-lg font-semibold mb-3 text-gray-800">{title}</Text>
+    <View className="h-[1px] bg-gray-200 flex mx-2 mb-3" />
+    {children}
+  </View>
+));
+FilterSection.displayName = 'FilterSection';
+
+// Memoized RadioButtonItem component
+const RadioButtonItem = memo(({ 
+  item, 
+  selectedValue, 
+  onSelect, 
+  renderLabel 
+}: {
+  item: { id: string; [key: string]: any };
+  selectedValue: string;
+  onSelect: (value: string) => void;
+  renderLabel: (item: any) => ReactNode;
+}) => {
+  const handlePress = useCallback(() => {
+    onSelect(item.id);
+  }, [item.id, onSelect]);
+
+  return (
+    <TouchableOpacity
+      onPress={handlePress}
+      className="flex-row items-center justify-between px-3 py-3 rounded-lg mb-1"
+    >
+      {renderLabel(item)}
+      <RadioButton value={item.id} color="#077aff" />
+    </TouchableOpacity>
+  );
+});
+RadioButtonItem.displayName = 'RadioButtonItem';
+
+// Memoized CheckboxItem component
+const CheckboxItem = memo(({
+  item,
+  isSelected,
+  onToggle,
+}: {
+  item: { id: string; name: string; icon: string };
+  isSelected: boolean;
+  onToggle: (id: string) => void;
+}) => {
+  const handlePress = useCallback(() => {
+    onToggle(item.id);
+  }, [item.id, onToggle]);
+
+  return (
+    <TouchableOpacity
+      onPress={handlePress}
+      className="flex-row items-center justify-between px-3 py-4 rounded-lg mb-1"
+    >
+      <View className="flex-row items-center space-x-2">
+        <Text className="mr-2 text-lg">{item.icon}</Text>
+        <Text className="text-base">{item.name}</Text>
+      </View>
+      <Checkbox
+        status={isSelected ? 'checked' : 'unchecked'}
+        onPress={handlePress}
+        color="#077aff"
+      />
+    </TouchableOpacity>
+  );
+});
+CheckboxItem.displayName = 'CheckboxItem';
 
 const SearchScreen: React.FC<RootStackScreenProps<'SearchScreen'>> = ({
   navigation,
   route,
 }) => {
   const { type, category, categoryId } = route.params;
+  
   // Modal visibility states
   const [filterVisible, setFilterVisible] = useState(false);
   const [promoVisible, setPromoVisible] = useState(false);
@@ -40,52 +138,27 @@ const SearchScreen: React.FC<RootStackScreenProps<'SearchScreen'>> = ({
   const [selectedPriceRange, setSelectedPriceRange] = useState('');
   const [selectedDeliveryTime, setSelectedDeliveryTime] = useState('');
   const [selectedRating, setSelectedRating] = useState('');
-  const [selectedDietaryRestrictions, setSelectedDietaryRestrictions] =
-    useState([]);
-  const [selectedPromoFilters, setSelectedPromoFilters] = useState([]);
+  const [selectedDietaryRestrictions, setSelectedDietaryRestrictions] = useState<string[]>([]);
+  const [selectedPromoFilters, setSelectedPromoFilters] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState('relevance');
-  // Static data - memoized for performance
-  const cuisineTypes = [
-    { id: 'african', name: 'African', icon: '🍲' },
-    { id: 'cameroon', name: 'Cameroon Traditional', icon: '🇨🇲' },
-    { id: 'fastfood', name: 'Fast Food', icon: '🍔' },
-    { id: 'bakery', name: 'Bakery & Pastries', icon: '🥐' },
-  ];
-  const priceRanges = [
-    { id: 'budget', label: 'Budget (< 2,000 XAF)', value: '0-2000' },
-    {
-      id: 'moderate',
-      label: 'Moderate (2,000 - 5,000 XAF)',
-      value: '2000-5000',
-    },
-    {
-      id: 'premium',
-      label: 'Premium (5,000 - 10,000 XAF)',
-      value: '5000-10000',
-    },
-    { id: 'luxury', label: 'Luxury (> 10,000 XAF)', value: '10000+' },
-  ];
 
-  const promoOptions = [
-    { id: 'discount', name: 'Discounts Available', icon: '💰' },
-    { id: 'buy-one-get-one', name: 'Buy 1 Get 1', icon: '🎁' },
-    { id: 'new-customer', name: 'New Customer Offers', icon: '✨' },
-  ];
-
-  const sortOptions = [
-    { id: 'delivery-time', label: 'Fastest Delivery' },
-    { id: 'price-low', label: 'Price: Low to High' },
-    { id: 'price-high', label: 'Price: High to Low' },
-    { id: 'distance', label: 'Nearest First' },
-  ];
-
-  // Optimized toggle functions
- 
-
+  // Optimized callbacks
   const togglePromoFilter = useCallback((id: string) => {
     setSelectedPromoFilters((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
     );
+  }, []);
+
+  const handleCuisineSelect = useCallback((cuisine: string) => {
+    setSelectedCuisine(cuisine);
+  }, []);
+
+  const handlePriceRangeSelect = useCallback((range: string) => {
+    setSelectedPriceRange(range);
+  }, []);
+
+  const handleSortSelect = useCallback((sort: string) => {
+    setSortBy(sort);
   }, []);
 
   // Check if any filters are active
@@ -115,6 +188,10 @@ const SearchScreen: React.FC<RootStackScreenProps<'SearchScreen'>> = ({
     setSortBy('relevance');
   }, []);
 
+  const clearPromoFilters = useCallback(() => {
+    setSelectedPromoFilters([]);
+  }, []);
+
   const applyFilters = useCallback(() => {
     Alert.alert(
       'Filters Applied',
@@ -130,23 +207,32 @@ const SearchScreen: React.FC<RootStackScreenProps<'SearchScreen'>> = ({
     Keyboard.dismiss();
   }, []);
 
-  // Reusable section component
-  const FilterSection = ({
-    title,
-    children,
-  }: {
-    title: string;
-    children: ReactNode;
-  }) => (
-    <View className="bg-white mb-2 mx-3 p-4 rounded-xl border-gray-200 border-solid">
-      <Text className="text-lg font-semibold mb-3 text-gray-800">{title}</Text>
-      <View className="h-[1px] bg-gray-200 flex mx-2 mb-3" />
-      {children}
-    </View>
-  );
+  const closeFilterModal = useCallback(() => setFilterVisible(false), []);
+  const closeSortModal = useCallback(() => setSortVisible(false), []);
+  const closePromoModal = useCallback(() => setPromoVisible(false), []);
 
-  // Filter Modal
-  const FilterModal = () => (
+  const openFilterModal = useCallback(() => setFilterVisible(true), []);
+  const openSortModal = useCallback(() => setSortVisible(true), []);
+  const openPromoModal = useCallback(() => setPromoVisible(true), []);
+
+  // Memoized render functions
+  const renderCuisineLabel = useCallback((cuisine: typeof CUISINE_TYPES[0]) => (
+    <View className="flex-row items-center space-x-2">
+      <Text className="mr-1">{cuisine.icon}</Text>
+      <Text className="text-sm">{cuisine.name}</Text>
+    </View>
+  ), []);
+
+  const renderPriceLabel = useCallback((range: typeof PRICE_RANGES[0]) => (
+    <Text>{range.label}</Text>
+  ), []);
+
+  const renderSortLabel = useCallback((option: typeof SORT_OPTIONS[0]) => (
+    <Text className="text-base">{option.label}</Text>
+  ), []);
+
+  // Memoized components
+  const FilterModal = useMemo(() => (
     <Modal
       visible={filterVisible}
       animationType="slide"
@@ -155,7 +241,7 @@ const SearchScreen: React.FC<RootStackScreenProps<'SearchScreen'>> = ({
       <SafeAreaView className="flex-1 bg-gray-50">
         <View className="flex-row justify-between items-center p-4 bg-white border-b border-gray-200">
           <TouchableOpacity
-            onPress={() => setFilterVisible(false)}
+            onPress={closeFilterModal}
             className="p-2"
           >
             <MaterialIcons name="close" size={24} color="#666" />
@@ -167,43 +253,36 @@ const SearchScreen: React.FC<RootStackScreenProps<'SearchScreen'>> = ({
         </View>
 
         <ScrollView className="flex-1 p-4">
-          {/* Cuisine Types */}
           <FilterSection title="Cuisine Type">
             <RadioButton.Group
-              onValueChange={setSelectedCuisine}
+              onValueChange={handleCuisineSelect}
               value={selectedCuisine}
             >
-              {cuisineTypes.map((cuisine) => (
-                <TouchableOpacity
+              {CUISINE_TYPES.map((cuisine) => (
+                <RadioButtonItem
                   key={cuisine.id}
-                  onPress={() => setSelectedCuisine(cuisine.id)}
-                  className="flex-row items-center justify-between px-3 py-3 rounded-lg mb-1 "
-                >
-                  <View className="flex-row items-center space-x-2">
-                    <Text className="mr-1">{cuisine.icon}</Text>
-                    <Text className="text-sm ">{cuisine.name}</Text>
-                  </View>
-                  <RadioButton value={cuisine.id} color="#077aff" />
-                </TouchableOpacity>
+                  item={cuisine}
+                  selectedValue={selectedCuisine}
+                  onSelect={handleCuisineSelect}
+                  renderLabel={renderCuisineLabel}
+                />
               ))}
             </RadioButton.Group>
           </FilterSection>
 
-          {/* Price Range */}
           <FilterSection title="Price Range">
             <RadioButton.Group
-              onValueChange={setSelectedPriceRange}
+              onValueChange={handlePriceRangeSelect}
               value={selectedPriceRange}
             >
-              {priceRanges.map((range) => (
-                <TouchableOpacity
+              {PRICE_RANGES.map((range) => (
+                <RadioButtonItem
                   key={range.id}
-                  onPress={() => setSelectedPriceRange(range.value)}
-                  className="flex-row items-center justify-between px-3 py-3 rounded-lg mb-1 "
-                >
-                  <Text>{range.label}</Text>
-                  <RadioButton value={range.value} color="#077aff" />
-                </TouchableOpacity>
+                  item={range}
+                  selectedValue={selectedPriceRange}
+                  onSelect={handlePriceRangeSelect}
+                  renderLabel={renderPriceLabel}
+                />
               ))}
             </RadioButton.Group>
           </FilterSection>
@@ -221,10 +300,9 @@ const SearchScreen: React.FC<RootStackScreenProps<'SearchScreen'>> = ({
         </View>
       </SafeAreaView>
     </Modal>
-  );
+  ), [filterVisible, selectedCuisine, selectedPriceRange, closeFilterModal, clearAllFilters, applyFilters, handleCuisineSelect, handlePriceRangeSelect, renderCuisineLabel, renderPriceLabel]);
 
-  // Sort Modal
-  const SortModal = () => (
+  const SortModal = useMemo(() => (
     <Modal
       visible={sortVisible}
       animationType="slide"
@@ -232,7 +310,7 @@ const SearchScreen: React.FC<RootStackScreenProps<'SearchScreen'>> = ({
     >
       <SafeAreaView className="flex-1 bg-white">
         <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-          <TouchableOpacity onPress={() => setSortVisible(false)}>
+          <TouchableOpacity onPress={closeSortModal}>
             <MaterialIcons name="close" size={24} color="#666" />
           </TouchableOpacity>
           <Text className="text-lg font-bold text-gray-800">Sort By</Text>
@@ -240,16 +318,15 @@ const SearchScreen: React.FC<RootStackScreenProps<'SearchScreen'>> = ({
         </View>
 
         <ScrollView className="flex-1 p-4">
-          <RadioButton.Group onValueChange={setSortBy} value={sortBy}>
-            {sortOptions.map((option) => (
-              <TouchableOpacity
+          <RadioButton.Group onValueChange={handleSortSelect} value={sortBy}>
+            {SORT_OPTIONS.map((option) => (
+              <RadioButtonItem
                 key={option.id}
-                onPress={() => setSortBy(option.id)}
-                className={`flex-row items-center justify-between px-3 py-4 rounded-lg mb-1 `}
-              >
-                <Text className={`text-base `}>{option.label}</Text>
-                <RadioButton value={option.id} color="#077aff" />
-              </TouchableOpacity>
+                item={option}
+                selectedValue={sortBy}
+                onSelect={handleSortSelect}
+                renderLabel={renderSortLabel}
+              />
             ))}
           </RadioButton.Group>
         </ScrollView>
@@ -266,10 +343,9 @@ const SearchScreen: React.FC<RootStackScreenProps<'SearchScreen'>> = ({
         </View>
       </SafeAreaView>
     </Modal>
-  );
+  ), [sortVisible, sortBy, closeSortModal, applyFilters, handleSortSelect, renderSortLabel]);
 
-  // Promo Modal
-  const PromoModal = () => (
+  const PromoModal = useMemo(() => (
     <Modal
       visible={promoVisible}
       animationType="slide"
@@ -277,11 +353,11 @@ const SearchScreen: React.FC<RootStackScreenProps<'SearchScreen'>> = ({
     >
       <SafeAreaView className="flex-1 bg-white">
         <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-          <TouchableOpacity onPress={() => setPromoVisible(false)}>
+          <TouchableOpacity onPress={closePromoModal}>
             <MaterialIcons name="close" size={24} color="#666" />
           </TouchableOpacity>
           <Text className="text-lg font-bold text-gray-800">Promotions</Text>
-          <TouchableOpacity onPress={() => setSelectedPromoFilters([])}>
+          <TouchableOpacity onPress={clearPromoFilters}>
             <Text className="text-primaryColor font-semibold">Clear</Text>
           </TouchableOpacity>
         </View>
@@ -291,26 +367,13 @@ const SearchScreen: React.FC<RootStackScreenProps<'SearchScreen'>> = ({
             Select the types of promotions you&apos;re interested in:
           </Text>
 
-          {promoOptions.map((promo) => (
-            <TouchableOpacity
+          {PROMO_OPTIONS.map((promo) => (
+            <CheckboxItem
               key={promo.id}
-              onPress={() => togglePromoFilter(promo.id)}
-              className={`flex-row items-center justify-between px-3 py-4 rounded-lg mb-1 `}
-            >
-              <View className="flex-row items-center space-x-2">
-                <Text className="mr-2 text-lg">{promo.icon}</Text>
-                <Text className={`text-base `}>{promo.name}</Text>
-              </View>
-              <Checkbox
-                status={
-                  selectedPromoFilters.includes(promo.id)
-                    ? 'checked'
-                    : 'unchecked'
-                }
-                onPress={() => togglePromoFilter(promo.id)}
-                color="#077aff"
-              />
-            </TouchableOpacity>
+              item={promo}
+              isSelected={selectedPromoFilters.includes(promo.id)}
+              onToggle={togglePromoFilter}
+            />
           ))}
         </ScrollView>
 
@@ -326,13 +389,14 @@ const SearchScreen: React.FC<RootStackScreenProps<'SearchScreen'>> = ({
         </View>
       </SafeAreaView>
     </Modal>
-  );
-  // Search Header
-  const SearchHeader = () => (
+  ), [promoVisible, selectedPromoFilters, closePromoModal, clearPromoFilters, applyFilters, togglePromoFilter]);
+
+  // Memoized SearchHeader
+  const SearchHeader = useMemo(() => (
     <View className="flex-row px-2 items-center py-3 bg-white">
       <TouchableOpacity
         onPress={goBack}
-        className="bg-primaryColor rounded-full p-2"
+        className="bg-primary rounded-full p-2"
       >
         <MaterialIcons name="arrow-back" size={25} color="#fff" />
       </TouchableOpacity>
@@ -351,7 +415,7 @@ const SearchScreen: React.FC<RootStackScreenProps<'SearchScreen'>> = ({
             borderRadius: 20,
           }}
           style={{
-            backgroundColor: 'rgb(202, 221, 240)',
+            backgroundColor: 'rgb(202, 221, 247)',
             paddingTop: 5,
             paddingBottom: 5,
             paddingRight: 10,
@@ -382,11 +446,14 @@ const SearchScreen: React.FC<RootStackScreenProps<'SearchScreen'>> = ({
         />
       </KeyboardAvoidingView>
     </View>
-  );
-  // Category Header
-  const CategoryHeader = ({ title }: { title?: string }) => {
+  ), [searchQuery, clearSearch]);
+
+  // Memoized CategoryHeader
+  const CategoryHeader = useMemo(() => {
+    if (type !== 'category') return null;
+    
     return (
-      <View className="flex-row items-center  px-4 py-2 bg-white   mb-4">
+      <View className="flex-row items-center px-4 py-2 bg-white mb-4">
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           activeOpacity={0.8}
@@ -398,65 +465,67 @@ const SearchScreen: React.FC<RootStackScreenProps<'SearchScreen'>> = ({
             color={lightTheme.colors.primary}
           />
         </TouchableOpacity>
-        <Text className="text-[20px] font-semibold text-gray-800 flex-1 text-center">{title}</Text>
+        <Text className="text-[20px] font-semibold text-gray-800 flex-1 text-center">
+          {category}
+        </Text>
       </View>
     );
-  };
+  }, [type, category, navigation]);
+
+  // Memoized filter buttons
+  const filterButtons = useMemo(() => (
+    <View className="flex-row justify-around items-center my-3 space-x-1 px-2">
+      <TouchableOpacity
+        className={`flex-row items-center border-[2px] border-solid border-primary p-2 shadow-sm rounded-full ${
+          hasActiveFilters ? 'bg-primary' : 'bg-white'
+        }`}
+        onPress={openFilterModal}
+      >
+        <Feather
+          name="sliders"
+          size={18}
+          color={hasActiveFilters ? '#fff' : '#077aff'}
+        />
+        <Text
+          className={`ml-1 ${hasActiveFilters ? 'text-white' : 'text-primaryColor'}`}
+        >
+          Filter
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        className={`border-[2px] border-solid border-primary p-2 shadow-sm rounded-full ${
+          sortBy !== 'relevance' ? 'bg-primary' : 'bg-white'
+        }`}
+        onPress={openSortModal}
+      >
+        <Text
+          className={`${sortBy !== 'relevance' ? 'text-white' : 'text-primary'}`}
+        >
+          Sort By
+        </Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        className={`border-[2px] border-solid border-primary p-2 shadow-sm rounded-full ${
+          selectedPromoFilters.length > 0 ? 'bg-primary' : 'bg-white'
+        }`}
+        onPress={openPromoModal}
+      >
+        <Text
+          className={`${selectedPromoFilters.length > 0 ? 'text-white' : 'text-primary'}`}
+        >
+          Promo
+        </Text>
+      </TouchableOpacity>
+    </View>
+  ), [hasActiveFilters, sortBy, selectedPromoFilters.length, openFilterModal, openSortModal, openPromoModal]);
 
   return (
     <CommonView>
-      {/* Header with Search */}
-      {type === 'category' ? (
-        <CategoryHeader title={category} />
-      ) : (
-        <SearchHeader />
-      )}
-      {/* Filter Buttons */}
-      <View className="flex-row justify-around items-center my-3 space-x-1 px-2">
-        <TouchableOpacity
-          className={`flex-row items-center border-[2px] border-solid border-primaryColor p-2 shadow-sm rounded-full ${
-            hasActiveFilters ? 'bg-primaryColor' : 'bg-white'
-          }`}
-          onPress={() => setFilterVisible(true)}
-        >
-          <Feather
-            name="sliders"
-            size={18}
-            color={hasActiveFilters ? '#fff' : '#077aff'}
-          />
-          <Text
-            className={`ml-1 ${hasActiveFilters ? 'text-white' : 'text-primaryColor'}`}
-          >
-            Filter
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          className={`border-[2px] border-solid border-primaryColor p-2 shadow-sm rounded-full ${
-            sortBy !== 'relevance' ? 'bg-primaryColor' : 'bg-white'
-          }`}
-          onPress={() => setSortVisible(true)}
-        >
-          <Text
-            className={`${sortBy !== 'relevance' ? 'text-white' : 'text-primaryColor'}`}
-          >
-            Sort By
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          className={`border-[2px] border-solid border-primaryColor p-2 shadow-sm rounded-full ${
-            selectedPromoFilters.length > 0 ? 'bg-primaryColor' : 'bg-white'
-          }`}
-          onPress={() => setPromoVisible(true)}
-        >
-          <Text
-            className={`${selectedPromoFilters.length > 0 ? 'text-white' : 'text-primaryColor'}`}
-          >
-            Promo
-          </Text>
-        </TouchableOpacity>
-      </View>
+      {type === 'category' ? CategoryHeader : SearchHeader}
+      
+      {filterButtons}
 
       {/* Search Results Placeholder */}
       <View className="flex-1 items-center justify-center">
@@ -469,9 +538,9 @@ const SearchScreen: React.FC<RootStackScreenProps<'SearchScreen'>> = ({
         </Text>
       </View>
 
-      <FilterModal />
-      <SortModal />
-      <PromoModal />
+      {FilterModal}
+      {SortModal}
+      {PromoModal}
     </CommonView>
   );
 };

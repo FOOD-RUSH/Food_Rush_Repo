@@ -1,12 +1,12 @@
 import { View } from 'react-native';
 import React from 'react';
-import { useTheme } from '@/src/hooks/useTheme';
+import { useTheme } from 'react-native-paper';
 
 const Seperator = () => {
-  const { theme } = useTheme();
-  const backgroundColor = theme === 'light' ? 'bg-gray-200' : 'bg-gray-700';
+  const { colors } = useTheme();
+  const backgroundColor = 'gray-400';
 
-  return <View className={`h-[1px] my-3 ${backgroundColor}`} />;
+  return <View className={`h-[1px] my-3 bg-[${backgroundColor}]`} />;
 };
 
 export default Seperator;

@@ -1,6 +1,6 @@
 import { TouchableOpacity, Text } from 'react-native';
 import React from 'react';
-import { useTheme } from '@/src/hooks/useTheme';
+import { useTheme } from 'react-native-paper';
 
 type ButtonProps = {
   label: string;
@@ -8,11 +8,11 @@ type ButtonProps = {
 };
 
 const OpacityButton = ({ label, onpress }: ButtonProps) => {
-  const { theme } = useTheme();
+  const { colors } = useTheme();
 
   return (
     <TouchableOpacity
-      className={`h-10 w-full rounded-[20px] m-2 ${theme === 'light' ? 'bg-primary' : 'bg-primary'}`}
+      className={`h-10 w-full rounded-[20px] m-2 bg-[${colors.primary}]`}
       onPress={onpress}
       activeOpacity={0.5}
     >
@@ -22,4 +22,3 @@ const OpacityButton = ({ label, onpress }: ButtonProps) => {
 };
 
 export default OpacityButton;
-

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, Image, ImageSourcePropType } from 'react-native';
-import { useTheme } from '@/src/hooks/useTheme';
+import { useTheme } from 'react-native-paper';
 
 interface PromotionCardProps {
   color: string;
@@ -19,7 +19,7 @@ const PromotionCard: React.FC<PromotionCardProps> = ({
   title = 'DISCOUNT ONLY',
   subtitle = 'VALID FOR TODAY!',
 }) => {
-  const { theme } = useTheme();
+  const { colors } = useTheme();
 
   // Generate color variants
   const getColorVariants = (baseColor: string) => {
@@ -41,7 +41,7 @@ const PromotionCard: React.FC<PromotionCardProps> = ({
     };
   };
 
-  const colorVariants = getColorVariants(theme === 'light' ? color : '#3b82f6');
+  const colorVariants = getColorVariants(colors.primary);
 
   return (
     <View className="mx-4 my-2">

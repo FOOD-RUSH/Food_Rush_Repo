@@ -44,7 +44,6 @@ const ActiveOrderScreen = () => {
     <View className="flex-1 items-center justify-center px-8 py-12">
       <Image
         source={require('@/assets/images/NoOrdersLight.png')}
-        className="w-48 h-48 mb-6"
         resizeMode="contain"
       />
       <Text className="text-gray-500 text-lg text-center">
@@ -57,7 +56,7 @@ const ActiveOrderScreen = () => {
   );
 
   return (
-    <CommonView >
+    <CommonView>
       <View className="flex-1">
         <FlatList
           className="pt-10"

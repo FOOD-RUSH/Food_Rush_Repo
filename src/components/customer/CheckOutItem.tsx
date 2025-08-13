@@ -1,58 +1,209 @@
-import { View, Text, Image, TouchableOpacity } from 'react-native';
-import React from 'react';
-import { AntDesign } from '@expo/vector-icons';
+import React, { useState, useCallback, useMemo } from 'react';
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  Pressable,
+  Modal,
+} from 'react-native';
+import { AntDesign, Ionicons } from '@expo/vector-icons';
 import { images } from '@/assets/images';
-import { Card } from 'react-native-paper';
-import { useTheme } from '@/src/hooks/useTheme';
+import { Card, Button, useTheme } from 'react-native-paper';
+import { useCartStore, CartItem } from '@/src/stores/cartStore';
 
-interface CheckOutItemProps {
-  foodId: string;
-  restaurantID: string;
-  foodName: string;
-  foodPrice: number;
-  quantity: number;
-  foodImage: any;
-}
-const CheckOutItem = ({
-  foodId,
-  foodName,
-  foodPrice,
+interface CheckOutItemProps extends CartItem {}
+
+const CheckOutItem: React.FC<CheckOutItemProps> = React.memo(({
+  id,
+  ItemtotalPrice,
+  menuItem,
   quantity,
-  restaurantID,
-  foodImage,
-}: CheckOutItemProps) => {
-  const { theme } = useTheme();
-  const cardBackgroundColor = theme === 'light' ? 'white' : '#1e293b';
-  const textColor = theme === 'light' ? 'text-gray-900' : 'text-text';
-  const primaryColor = theme === 'light' ? '#007aff' : '#3b82f6';
+}) => {
+  const { colors } = useTheme();
+  const [showModal, setShowModal] = useState(false);
+  const [stateQuantity, setStateQuantity] = useState(quantity);
+  
+  const modifyCart = useCartStore((state) => state.modifyCart);
+
+  // Memoize formatted price
+  const formattedPrice = useMemo(() => 
+    (ItemtotalPrice || 0).toLocaleString('fr-FR', { 
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2 
+    }), [ItemtotalPrice]
+  );
+
+  // Handle opening modal
+  const handleEditPress = useCallback(() => {
+    setStateQuantity(quantity);
+    setShowModal(true);
+  }, [quantity]);
+
+  // Handle closing modal
+  const handleCloseModal = useCallback(() => {
+    setShowModal(false);
+    setStateQuantity(quantity); // Reset to original quantity
+  }, [quantity]);
+
+  // Handle quantity change
+  const handleQuantityChange = useCallback((newQuantity: number) => {
+    setStateQuantity(Math.max(1, newQuantity));
+  }, []);
+
+  // Handle save quantity
+  const handleSaveQuantity = useCallback(() => {
+    if (stateQuantity > 0) {
+      modifyCart(id, stateQuantity);
+      setShowModal(false);
+    }
+  }, [id, stateQuantity, modifyCart]);
 
   return (
-    <Card mode="contained" style={{ backgroundColor: cardBackgroundColor }}>
-      <View className="flex-row px-2 py-2">
-        <Image
-          source={images.customerImg}
-          className="h-[80px] w-[80px] rounded-[10px]"
-        />
-        <View className="flex-col justify-center items-center flex-1">
-          <Text className={`text-xl font-semibold text-start mb-2 ${textColor}`}>{foodName}</Text>
-          <Text className="font-semibold text-xl" style={{ color: primaryColor }}>
-            FCFA {foodPrice.toFixed(2)}
-          </Text>
-        </View>
-        <View className="flex-col justify-center items-center">
-          <View className="p-1 rounded-md border-solid border mb-2" style={{ borderColor: primaryColor }}>
-            <Text className="text-[14px] font-semibold text-start" style={{ color: primaryColor }}>
-              {quantity}
-               X
+    <>
+      <Card 
+        mode="contained" 
+        style={{ 
+          backgroundColor: colors.surface,
+          marginVertical: 4,
+          elevation: 1,
+        }}
+      >
+        <View className="flex-row px-3 py-3 items-center">
+          <View className="rounded-lg overflow-hidden">
+            <Image
+              source={menuItem.image || images.customerImg}
+              defaultSource={images.customerImg}
+              className="h-[70px] w-[70px]"
+              resizeMode="cover"
+            />
+          </View>
+          
+          <View className="flex-col justify-center flex-1 ml-3">
+            <Text 
+              numberOfLines={2}
+              className="text-base font-semibold mb-1"
+              style={{ color: colors.onSurface }}
+            >
+              {menuItem.name || 'Unknown Item'}
+            </Text>
+            <Text
+              className="font-semibold text-sm"
+              style={{ color: colors.primary }}
+            >
+              {formattedPrice} FCFA
             </Text>
           </View>
-          <TouchableOpacity className="rounded-full p-2 active:bg-gray transition">
-            <AntDesign name="edit" color={primaryColor} size={20}/>
-          </TouchableOpacity>
+          
+          <View className="flex-col justify-center items-center ml-2">
+            <View
+              className="px-2 py-1 rounded-md border mb-2"
+              style={{ borderColor: colors.primary }}
+            >
+              <Text
+                className="text-sm font-semibold"
+                style={{ color: colors.primary }}
+              >
+                {quantity}x
+              </Text>
+            </View>
+            
+            <TouchableOpacity
+              className="rounded-full p-2"
+              onPress={handleEditPress}
+              hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
+            >
+              <AntDesign name="edit" color={colors.primary} size={18} />
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-    </Card>
+      </Card>
+
+      {/* Quantity Edit Modal */}
+      <Modal
+        visible={showModal}
+        onRequestClose={handleCloseModal}
+        transparent
+        animationType="fade"
+        statusBarTranslucent
+      >
+        <Pressable
+          onPress={handleCloseModal}
+          className="flex-1 justify-center items-center px-4"
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+        >
+          <Pressable
+            className="p-6 rounded-2xl w-full max-w-[280px]"
+            style={{ backgroundColor: colors.surface }}
+            onPress={() => {}} // Prevent modal close when pressing inside
+          >
+            <Text
+              className="text-lg font-semibold text-center mb-6"
+              style={{ color: colors.onSurface }}
+            >
+              Update Quantity
+            </Text>
+            
+            <View className="flex-row items-center justify-center mb-6">
+              <Pressable
+                className="rounded-full w-12 h-12 items-center justify-center border"
+                style={{ borderColor: colors.outline }}
+                onPress={() => handleQuantityChange(stateQuantity - 1)}
+                disabled={stateQuantity <= 1}
+              >
+                <Ionicons
+                  name="remove"
+                  size={24}
+                  color={stateQuantity <= 1 ? colors.onSurfaceVariant : colors.primary}
+                />
+              </Pressable>
+              
+              <Text
+                className="mx-6 text-3xl font-bold text-center min-w-[50px]"
+                style={{ color: colors.onSurface }}
+              >
+                {stateQuantity}
+              </Text>
+              
+              <Pressable
+                className="rounded-full w-12 h-12 items-center justify-center border"
+                style={{ borderColor: colors.outline }}
+                onPress={() => handleQuantityChange(stateQuantity + 1)}
+              >
+                <Ionicons 
+                  name="add" 
+                  size={24} 
+                  color={colors.primary} 
+                />
+              </Pressable>
+            </View>
+
+            <View className="flex-row space-x-3">
+              <Button
+                mode="outlined"
+                onPress={handleCloseModal}
+                className="flex-1"
+                labelStyle={{ fontSize: 14 }}
+              >
+                Cancel
+              </Button>
+              
+              <Button
+                mode="contained"
+                onPress={handleSaveQuantity}
+                className="flex-1"
+                labelStyle={{ fontSize: 14 }}
+              >
+                Update
+              </Button>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+    </>
   );
-};
+});
+
+CheckOutItem.displayName = 'CheckOutItem';
 
 export default CheckOutItem;

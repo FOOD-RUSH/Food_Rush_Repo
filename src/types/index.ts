@@ -10,7 +10,6 @@ export interface User {
   userType: 'customer' | 'restaurant';
   profile?: CustomerProfile | RestaurantProfile;
   isEmailVerified: boolean;
-
 }
 // app state
 
@@ -20,23 +19,21 @@ export interface FoodProps {
   restaurantID: string;
   name?: string;
   price?: number;
-  ratings?: number ;
+  ratings?: number;
   addedOn?: Date;
   distance?: number;
   image?: any;
   category?: any;
   discount?: any;
   description: string;
-
 }
 
-// Onboarding slides 
+// Onboarding slides
 export interface OnboardingSlide {
-  id: number,
-  title: string,
+  id: number;
+  title: string;
   description: string;
-  image: any,
-
+  image: any;
 }
 
 // Customer profile
@@ -67,7 +64,7 @@ export interface RestaurantProfile {
   ratings: string;
   reviewCount: string;
   distance: string;
-  deliveryFee?: string
+  deliveryFee?: string;
   image: any;
   deliveryTime?: string;
   menu: FoodProps[];
@@ -89,7 +86,7 @@ export interface Order {
   createdAt: Date;
   estimatedDeliveryTime: Date;
 }
-//  Auth state 
+//  Auth state
 export interface AuthState {
   user: User | null;
   isLoading: boolean;
@@ -106,7 +103,6 @@ export interface OrderItem {
   price: number;
 }
 
-
 export declare interface InputFieldProps extends TextInputProps {
   label?: string;
 
@@ -117,7 +113,6 @@ export declare interface InputFieldProps extends TextInputProps {
   rightIcon?: ReactNode;
   leftIcon?: ReactNode;
   containerStyle?: string;
-
 }
 
 export type OrderStatus =
@@ -145,11 +140,7 @@ export interface Address {
 }
 
 // Payment Types
-export type PaymentMethod =
-  | 'mtn_mobile_money'
-  | 'orange_money'
-
-
+export type PaymentMethod = 'mtn_mobile_money' | 'orange_money';
 
 export interface PaymentTransaction {
   id: string;
@@ -161,10 +152,6 @@ export interface PaymentTransaction {
   createdAt: Date;
 }
 
-
-
 export interface SelectProps extends PickerProps {
   label?: string;
 }
-
-

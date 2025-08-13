@@ -1,43 +1,111 @@
-import { View, Text, TouchableHighlight } from 'react-native';
+import { View, Text, TouchableOpacity, Linking, Alert } from 'react-native';
 import React from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { SocialDataProps } from '@/src/constants/SocialData';
-import { useTheme } from '@/src/hooks/useTheme';
+import { useTheme } from 'react-native-paper';
+import { Card } from 'react-native-paper';
+
+interface SocialCardsProps {
+  id: number;
+  icon_name: keyof typeof Ionicons.glyphMap;
+  social_platform: string;
+  link?: string;
+}
 
 const SocialCards = ({
   id,
   icon_name,
   social_platform,
   link,
-}: SocialDataProps) => {
-  const { theme } = useTheme();
-  const cardBackgroundColor = theme === 'light' ? 'bg-white' : 'bg-secondary';
-  const textColor = theme === 'light' ? 'text-gray-900' : 'text-text';
-  const iconColor = theme === 'light' ? '#007aff' : '#3b82f6';
-  const underlayColor = theme === 'light' ? '#bfdbfe' : '#1e293b';
+}: SocialCardsProps) => {
+  const { colors } = useTheme();
+
+  const handlePress = async () => {
+    if (!link) {
+      Alert.alert('Info', 'Contact information not available');
+      return;
+    }
+
+    try {
+      const supported = await Linking.canOpenURL(link);
+      if (supported) {
+        await Linking.openURL(link);
+      } else {
+        Alert.alert('Error', `Cannot open ${social_platform}`);
+      }
+    } catch (error) {
+      Alert.alert('Error', `Failed to open ${social_platform}`);
+      console.error('Error opening link:', error);
+    }
+  };
 
   return (
-    <TouchableHighlight
-      className={`border border-gray-50 rounded-xl drop-shadow-lg my-2 px-3 py-3 ${cardBackgroundColor}`}
-      style={{ boxShadow: '1px 0px 10px rgba(0, 0, 0, 0.15)' }}
-      underlayColor={underlayColor}
-      id={id}
-      onPress={() => {}}
+    <Card 
+      mode="outlined" 
+      className="mb-3"
+      style={{ 
+        backgroundColor: colors.surface,
+        borderColor: colors.outline,
+        boxShadow: '2px 0px 3px rgba(0, 0, 0, 0.15)'
+      }}
     >
-      <View className="flex flex-row item-center ">
-        <Ionicons
-          name={icon_name}
-          color={iconColor}
-          size={25}
-          className="mr-2 align-middle"
-        />
-        <Text
-          className={`text-lg font-semibold flex-1 text-center ${textColor}`}
-        >
-          {social_platform}
-        </Text>
-      </View>
-    </TouchableHighlight>
+      <TouchableOpacity 
+        onPress={handlePress}
+        className="p-4"
+        activeOpacity={0.7}
+      >
+        <View className="flex-row items-center">
+          <View 
+            className="w-12 h-12 rounded-full items-center justify-center mr-4"
+            style={{ backgroundColor: colors.primaryContainer }}
+          >
+            <Ionicons
+              name={icon_name}
+              color={colors.primary}
+              size={24}
+            />
+          </View>
+          
+          <View className="flex-1">
+            <Text
+              className="text-lg font-semibold"
+              style={{ color: colors.onSurface }}
+            >
+              {social_platform}
+            </Text>
+            {social_platform === 'Customer Service' && (
+              <Text
+                className="text-sm mt-1"
+                style={{ color: colors.onSurfaceVariant }}
+              >
+                Tap to call support
+              </Text>
+            )}
+            {social_platform === 'WhatsApp' && (
+              <Text
+                className="text-sm mt-1"
+                style={{ color: colors.onSurfaceVariant }}
+              >
+                Chat with us
+              </Text>
+            )}
+            {['Website', 'Facebook', 'Twitter', 'Instagram'].includes(social_platform) && (
+              <Text
+                className="text-sm mt-1"
+                style={{ color: colors.onSurfaceVariant }}
+              >
+                Visit our {social_platform.toLowerCase()}
+              </Text>
+            )}
+          </View>
+          
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            color={colors.onSurfaceVariant}
+          />
+        </View>
+      </TouchableOpacity>
+    </Card>
   );
 };
 
