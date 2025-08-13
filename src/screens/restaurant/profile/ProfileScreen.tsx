@@ -10,13 +10,11 @@ import {
   Modal,
   SafeAreaView,
   FlatList,
-  PanResponder
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Button, Avatar, Divider, Badge } from 'react-native-paper';
 import CommonView from '@/src/components/common/CommonView';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-// CHANGE THIS PATH TO MATCH YOUR PROJECT STRUCTURE
 import { RestaurantProfileStackScreenProps } from '../../../navigation/types';
 
 // Type definitions
@@ -248,28 +246,6 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     Alert.alert('Notification', item.message);
   };
 
-  // Diamond button position state and pan responder
-  const pan = useRef(new Animated.ValueXY()).current;
-
-  const panResponder = useRef(
-    PanResponder.create({
-      onMoveShouldSetPanResponder: () => true,
-      onPanResponderGrant: () => {
-        pan.setOffset({
-          x: (pan.x as unknown as { _value: number })._value,
-          y: (pan.y as unknown as { _value: number })._value,
-        });
-      },
-      onPanResponderMove: Animated.event(
-        [null, { dx: pan.x, dy: pan.y }],
-        { useNativeDriver: false }
-      ),
-      onPanResponderRelease: () => {
-        pan.flattenOffset();
-      },
-    })
-  ).current;
-
   // FIXED: This function now properly navigates to the edit screen with data
   const openEditProfile = () => {
     // Pass current user data to the edit screen
@@ -443,58 +419,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     </Modal>
   );
 
-  // Main render
-  return (
-    <CommonView>
-      {/* Draggable Diamond Button - FIXED */}
-      <Animated.View
-        style={[
-          {
-            position: 'absolute',
-            top: 30,
-            right: 20,
-            zIndex: 100,
-          },
-          {
-            transform: [
-              { translateX: pan.x },
-              { translateY: pan.y },
-            ],
-          },
-        ]}
-        {...panResponder.panHandlers}
-      >
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={openEditProfile}
-          style={{
-            width: 44,
-            height: 44,
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <View
-            style={{
-              width: 36,
-              height: 36,
-              backgroundColor: '#764ba2',
-              transform: [{ rotate: '45deg' }],
-              borderRadius: 8,
-              alignItems: 'center',
-              justifyContent: 'center',
-              shadowColor: '#764ba2',
-              shadowOpacity: 0.25,
-              shadowOffset: { width: 0, height: 4 },
-              shadowRadius: 8,
-              elevation: 8,
-            }}
-          >
-            <Ionicons name="pencil" size={22} color="white" style={{ transform: [{ rotate: '-45deg' }] }} />
-          </View>
-        </TouchableOpacity>
-      </Animated.View>
 
+ return (
+    <CommonView>
       {/* Top Action Buttons */}
       <View style={styles.topButtons}>
         <TouchableOpacity

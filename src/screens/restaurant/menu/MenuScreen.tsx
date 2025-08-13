@@ -22,6 +22,61 @@ type MenuOption = {
   category: 'main' | 'items' | 'categories' | 'settings';
 };
 
+const menuOptions: MenuOption[] = [
+  {
+    title: 'Menu Items',
+    icon: 'food',
+    screen: 'MenuList',
+    description: 'View and manage menu items',
+    gradient: ['#4facfe', '#00f2fe'],
+    iconColor: '#ffffff',
+    isImplemented: true,
+    category: 'items'
+  },
+  {
+    title: 'Add New Item',
+    icon: 'plus-circle',
+    screen: 'AddMenuItem',
+    description: 'Add a new dish to your menu',
+    gradient: ['#43e97b', '#38f9d7'],
+    iconColor: '#ffffff',
+    isImplemented: true,
+    category: 'items'
+  },
+  {
+    title: 'Categories',
+    icon: 'tag-multiple',
+    screen: 'Categories',
+    description: 'Manage menu categories',
+    gradient: ['#fa709a', '#fee140'],
+    iconColor: '#ffffff',
+    isImplemented: true,
+    category: 'categories'
+  },
+  {
+    title: 'Add Category',
+    icon: 'playlist-plus',
+    screen: 'AddCategory',
+    description: 'Create new menu category',
+    gradient: ['#6a11cb', '#2575fc'],
+    iconColor: '#ffffff',
+    isImplemented: true,
+    category: 'categories'
+  },
+  {
+    title: 'Menu Settings',
+    icon: 'cog',
+    screen: 'MenuSettings',
+    description: 'Configure menu preferences',
+    gradient: ['#434343', '#000000'],
+    iconColor: '#ffffff',
+    isImplemented: true,
+    category: 'settings'
+  }
+];
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
 const MenuScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RestaurantMenuStackParamList>>();
   const [isLoaded, setIsLoaded] = useState(false);
@@ -168,86 +223,6 @@ const MenuScreen = () => {
     ).start();
   };
 
-  const menuOptions: MenuOption[] = [
-    // Main Menu Management
-    {
-      title: 'Menu Overview',
-      icon: 'food',
-      screen: 'MenuScreen',
-      description: 'View complete menu overview',
-      gradient: ['#667eea', '#764ba2'],
-      iconColor: '#ffffff',
-      isImplemented: true,
-      category: 'main',
-    },
-    
-    // Menu Items Management
-    {
-      title: 'Add Menu Item',
-      icon: 'plus-circle',
-      screen: 'AddMenuItem',
-      description: 'Create new delicious menu items',
-      gradient: ['#4facfe', '#00f2fe'],
-      iconColor: '#ffffff',
-      isImplemented: false, // Not implemented yet
-      category: 'items',
-    },
-    {
-      title: 'Edit Menu Item',
-      icon: 'pencil',
-      screen: 'EditMenuItem',
-      description: 'Edit existing food items',
-      gradient: ['#fa709a', '#fee140'],
-      iconColor: '#ffffff',
-      isImplemented: false, // Not implemented yet
-      category: 'items',
-    },
-    
-    // Categories Management
-    {
-      title: 'Categories',
-      icon: 'tag-multiple',
-      screen: 'Categories',
-      description: 'Organize menu into categories',
-      gradient: ['#f093fb', '#f5576c'],
-      iconColor: '#ffffff',
-      isImplemented: false, // Not implemented yet
-      category: 'categories',
-    },
-    {
-      title: 'Add Category',
-      icon: 'tag-plus',
-      screen: 'AddCategory',
-      description: 'Create new menu categories',
-      gradient: ['#43e97b', '#38f9d7'],
-      iconColor: '#ffffff',
-      isImplemented: false, // Not implemented yet
-      category: 'categories',
-    },
-    {
-      title: 'Edit Category',
-      icon: 'tag-edit',
-      screen: 'EditCategory',
-      description: 'Modify existing categories',
-      gradient: ['#ff9a9e', '#fecfef'],
-      iconColor: '#ffffff',
-      isImplemented: false, // Not implemented yet
-      category: 'categories',
-    },
-    
-    // Settings
-    {
-      title: 'Menu Settings',
-      icon: 'cog',
-      screen: 'MenuSettings',
-      description: 'Configure menu preferences',
-      gradient: ['#a8edea', '#fed6e3'],
-      iconColor: '#555555',
-      isImplemented: false, // Not implemented yet
-      category: 'settings',
-    },
-  ];
-
   const handleNavigation = (option: MenuOption) => {
     const buttonScale = new Animated.Value(1);
     Animated.sequence([
@@ -371,7 +346,7 @@ const MenuScreen = () => {
       <Text style={{ 
         fontSize: 18, 
         fontWeight: '700', 
-        color: '#ffffff', 
+        color: '#1a1a2e', // Changed from white to dark
         marginBottom: 16,
         paddingLeft: 4,
       }}>
@@ -483,39 +458,10 @@ const MenuScreen = () => {
 
   return (
     <>
-      <StatusBar barStyle="light-content" backgroundColor="#1a1a2e" />
-      <LinearGradient
-        colors={['#1a1a2e', '#16213e', '#0f3460'] as [ColorValue, ColorValue, ColorValue]}
-        style={{ flex: 1 }}
-      >
+      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+      <View style={{ flex: 1, backgroundColor: '#ffffff' }}>
         {/* @ts-ignore - CommonView with style prop workaround */}
-        <CommonView style={{ backgroundColor: 'transparent' }}>
-          {/* Decorative Background Elements */}
-          <Animated.View
-            style={{
-              position: 'absolute',
-              top: 50,
-              right: -50,
-              width: 200,
-              height: 200,
-              borderRadius: 100,
-              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-              transform: [{ rotate: rotateInterpolate }],
-            }}
-          />
-          <Animated.View
-            style={{
-              position: 'absolute',
-              bottom: 100,
-              left: -100,
-              width: 300,
-              height: 300,
-              borderRadius: 150,
-              backgroundColor: 'rgba(255, 255, 255, 0.03)',
-              transform: [{ rotate: rotateInterpolate }],
-            }}
-          />
-
+        <CommonView style={{ backgroundColor: '#ffffff' }}>
           {/* Header Section */}
           <Animated.View
             style={{
@@ -550,20 +496,85 @@ const MenuScreen = () => {
             <Text style={{ 
               fontSize: 32, 
               fontWeight: 'bold', 
-              color: '#ffffff',
+              color: '#1a1a2e',
               textAlign: 'center',
               marginBottom: 8,
             }}>
               Menu Management
             </Text>
             <Text style={{ 
-              color: 'rgba(255, 255, 255, 0.8)', 
+              color: '#666666', 
               fontSize: 16,
               textAlign: 'center',
               paddingHorizontal: 20,
             }}>
               Manage your restaurant menu with style
             </Text>
+          </Animated.View>
+
+          {/* Update Statistics Section background */}
+          <Animated.View style={{ 
+            opacity: fadeAnim,
+            backgroundColor: '#f5f5f5',
+            borderRadius: 16, // Reduced from 20
+            padding: 16, // Reduced from 20
+            borderWidth: 1,
+            borderColor: '#e0e0e0',
+            marginBottom: 16, // Reduced from 20
+          }}>
+            <Text style={{ 
+              fontSize: 16, // Reduced from 18
+              fontWeight: '600',
+              color: '#1a1a2e',
+              marginBottom: 12, // Reduced from 16
+              textAlign: 'center',
+            }}>
+              Menu Statistics
+            </Text>
+            
+            <View style={{ flexDirection: 'row', paddingHorizontal: 8 }}>
+              {[
+                { label: 'Menu Items', value: '45', color: '#4facfe', icon: 'food' },
+                { label: 'Categories', value: '8', color: '#43e97b', icon: 'tag-multiple' },
+                { label: 'Popular', value: '12', color: '#fa709a', icon: 'star' },
+              ].map((stat, index) => (
+                <Animated.View 
+                  key={stat.label}
+                  style={{ 
+                    flex: 1, 
+                    alignItems: 'center',
+                    opacity: statsAnimations[index],
+                  }}
+                >
+                  <View style={{
+                    width: 40, // Reduced from 50
+                    height: 40, // Reduced from 50
+                    borderRadius: 20,
+                    backgroundColor: stat.color,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: 6, // Reduced from 8
+                  }}>
+                    <MaterialCommunityIcons name={stat.icon as any} size={20} color="#ffffff" />
+                  </View>
+                  <Text style={{ 
+                    fontSize: 20, // Reduced from 24
+                    fontWeight: 'bold',
+                    color: '#1a1a2e',
+                    marginBottom: 2,
+                  }}>
+                    {stat.value}
+                  </Text>
+                  <Text style={{ 
+                    fontSize: 11,
+                    color: '#666666',
+                    textAlign: 'center',
+                  }}>
+                    {stat.label}
+                  </Text>
+                </Animated.View>
+              ))}
+            </View>
           </Animated.View>
 
           {/* Scrollable Content */}
@@ -604,7 +615,7 @@ const MenuScreen = () => {
               <Text style={{ 
                 fontSize: 18, 
                 fontWeight: '700', 
-                color: '#ffffff', 
+                color: '#1a2a2e', 
                 marginBottom: 16,
                 paddingLeft: 4,
               }}>
@@ -667,92 +678,9 @@ const MenuScreen = () => {
                 </TouchableOpacity>
               </View>
             </Animated.View>
-
-            {/* Statistics Section */}
-            <Animated.View style={{ 
-              opacity: fadeAnim,
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              borderRadius: 20,
-              padding: 20,
-              borderWidth: 1,
-              borderColor: 'rgba(255, 255, 255, 0.2)',
-              marginBottom: 20,
-            }}>
-              <Text style={{ 
-                fontSize: 18, 
-                fontWeight: '700', 
-                color: '#ffffff', 
-                marginBottom: 16,
-                textAlign: 'center',
-              }}>
-                Menu Statistics
-              </Text>
-              
-              <View style={{ flexDirection: 'row' }}>
-                {[
-                  { label: 'Menu Items', value: '45', color: '#4facfe', icon: 'food' as const },
-                  { label: 'Categories', value: '8', color: '#43e97b', icon: 'tag-multiple' as const },
-                  { label: 'Popular', value: '12', color: '#fa709a', icon: 'star' as const },
-                ].map((stat, index) => (
-                  <Animated.View 
-                    key={stat.label}
-                    style={{ 
-                      flex: 1, 
-                      alignItems: 'center',
-                      opacity: statsAnimations[index],
-                      transform: [{
-                        translateY: statsAnimations[index].interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [30, 0],
-                        })
-                      }]
-                    }}
-                  >
-                    <View style={{
-                      width: 50,
-                      height: 50,
-                      borderRadius: 25,
-                      backgroundColor: stat.color,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginBottom: 8,
-                    }}>
-                      <MaterialCommunityIcons name={stat.icon} size={24} color="#ffffff" />
-                    </View>
-                    <Text style={{ 
-                      fontSize: 24, 
-                      fontWeight: 'bold', 
-                      color: '#ffffff',
-                      marginBottom: 4,
-                    }}>
-                      {stat.value}
-                    </Text>
-                    <Text style={{ 
-                      fontSize: 12, 
-                      color: 'rgba(255, 255, 255, 0.8)',
-                      textAlign: 'center',
-                    }}>
-                      {stat.label}
-                    </Text>
-                    
-                    {index < 2 && (
-                      <View style={{ 
-                        position: 'absolute',
-                        right: -10,
-                        top: '50%',
-                        width: 1, 
-                        height: 60,
-                        backgroundColor: 'rgba(255, 255, 255, 0.2)', 
-                        transform: [{ translateY: -30 }]
-                      }} />
-                    )}
-                  </Animated.View>
-                ))}
-              </View>
-            </Animated.View>
           </Animated.ScrollView>
         </CommonView>
-      </LinearGradient>
+      </View>
       {renderFoodModal()}
     </>
   );
@@ -810,7 +738,7 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     marginTop: 16,
-    backgroundColor: '#1a1a2e',
+    backgroundColor: '#1a2a2e',
     borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 24,

@@ -259,21 +259,35 @@ const OrderScreen = () => {
             placeholder="Search orders..."
             onChangeText={setSearchQuery}
             value={searchQuery}
-            className="mb-4 rounded-xl"
-            iconColor="#6B7280"
-            inputStyle={{ color: '#374151' }}
-            placeholderTextColor="#9CA3AF"
+            className="mb-8 rounded-xl"
+            iconColor="#ed0808ff"
+            inputStyle={{ color: '#181717ff',
+              height:40,
+              paddingVertical:8,
+              fontSize:16
+             }}
+            placeholderTextColor="#4cbb0cff"
+            elevation={2}
+            style={{
+              backgroundColor: 'white',
+              borderRadius: 12,
+              height:45,
+              marginHorizontal: 4,
+              marginBottom: 16
+            }}
           />
         </Animated.View>
 
         <Animated.View 
           style={{ opacity: fadeAnim }}
-          className="mb-4"
+          className="mb-4 mt-2"
         >
           <ScrollView 
             horizontal 
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 2 }}
+            contentContainerStyle={{ paddingHorizontal: 2,
+              paddingVertical:8
+             }}
           >
             {['all', 'pending', 'preparing', 'ready', 'delivered', 'cancelled'].map((filter) => (
               <Chip

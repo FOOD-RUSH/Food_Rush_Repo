@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { View, Text, FlatList, Animated, TouchableOpacity, Image, StatusBar, Dimensions, ViewStyle } from 'react-native';
+import { View, Text, FlatList, Animated, TouchableOpacity, Image, StatusBar, Dimensions, ViewStyle, Platform } from 'react-native';
 import { FAB, Searchbar } from 'react-native-paper';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -19,9 +19,17 @@ interface MenuItem {
   rating?: number;
 }
 
+interface FilterButton {
+  label: string;
+  icon: string;
+  color: string;
+  gradient: string[];
+}
+
 const MenuListScreen = () => {
   const navigation = useNavigation();
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeFilter, setActiveFilter] = useState('all');
   const [menuItems, setMenuItems] = useState<MenuItem[]>([
     {
       id: '1',
@@ -194,7 +202,12 @@ const MenuListScreen = () => {
       }),
     ]).start();
 
-    navigation.navigate('AddFood' as never);
+    // Navigate to add menu item screen - you'll need to define this route
+    console.log('Navigate to AddFood screen');
+  };
+
+  const handleFilterPress = (filter: string) => {
+    setActiveFilter(filter);
   };
 
   const toggleAvailability = (itemId: string) => {
@@ -399,16 +412,59 @@ const MenuListScreen = () => {
     <MenuItemRow item={item} index={index} />
   );
 
-  const filteredItems = menuItems.filter(item =>
-    item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter items based on search query and active filter
+  const getFilteredItems = () => {
+    let filtered = menuItems.filter(item =>
+      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.category.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    switch (activeFilter) {
+      case 'available':
+        return filtered.filter(item => item.isAvailable);
+      case 'popular':
+        return filtered.filter(item => item.isPopular);
+      case 'sold out':
+        return filtered.filter(item => !item.isAvailable);
+      default:
+        return filtered;
+    }
+  };
+
+  const filteredItems = getFilteredItems();
+
+  const filterButtons: FilterButton[] = [
+    {
+      label: 'All',
+      icon: 'food-fork-drink',
+      color: '#4facfe',
+      gradient: ['#4facfe', '#00f2fe']
+    },
+    {
+      label: 'Available',
+      icon: 'check-circle',
+      color: '#34c759',
+      gradient: ['#34c759', '#2ecc71']
+    },
+    {
+      label: 'Popular',
+      icon: 'star',
+      color: '#ffd700',
+      gradient: ['#ffd700', '#ffa000']
+    },
+    {
+      label: 'Sold Out',
+      icon: 'close-circle',
+      color: '#ff3b30',
+      gradient: ['#ff3b30', '#dc3545']
+    }
+  ];
 
   return (
     <>
       <StatusBar barStyle="light-content" backgroundColor="#1a1a2e" />
       <LinearGradient
-        colors={['#1a1a2e', '#16213e', '#0f3460']}
+        colors={['#000002ff', '#090909ff', '#e1e7efff']}
         style={{ flex: 1 }}
       >
         <CommonView style={{ flex: 1, backgroundColor: 'transparent' }}>
@@ -672,11 +728,82 @@ const MenuListScreen = () => {
             />
           </Animated.View>
 
-          {/* Floating Action Button */}
+          {/* Bottom Filter Buttons */}
           <Animated.View
             style={{
               position: 'absolute',
-              bottom: 30,
+              bottom: 0,
+              left: 0,
+              right: 0,
+              backgroundColor: 'white',
+              paddingBottom: Platform.OS === 'ios' ? 34 : 16,
+              paddingTop: 16,
+              elevation: 8,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: -2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 3,
+              opacity: fabAnim,
+              transform: [{
+                translateY: fabAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [100, 0],
+                })
+              }]
+            }}
+          >
+            <View style={{ 
+              flexDirection: 'row', 
+              justifyContent: 'space-evenly',
+              paddingHorizontal: 16
+            }}>
+              {filterButtons.map((button, index) => (
+                <TouchableOpacity
+                  key={button.label}
+                  onPress={() => handleFilterPress(button.label.toLowerCase())}
+                >
+                  <LinearGradient
+                    colors={button.gradient as any}
+                    style={{
+                      width: 65,
+                      height: 65,
+                      borderRadius: 32.5,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      elevation: 4,
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.2,
+                      shadowRadius: 3,
+                      opacity: activeFilter === button.label.toLowerCase() ? 1 : 0.7,
+                    }}
+                  >
+                    <MaterialCommunityIcons 
+                      name={button.icon as any} 
+                      size={22} 
+                      color="#fff" 
+                    />
+                    <Text 
+                      style={{ 
+                        color: '#fff', 
+                        fontSize: 11, 
+                        marginTop: 4,
+                        fontWeight: '600'
+                      }}
+                    >
+                      {button.label}
+                    </Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </Animated.View>
+
+          {/* Update FAB position to be above filter buttons */}
+          <Animated.View
+            style={{
+              position: 'absolute',
+              bottom: Platform.OS === 'ios' ? 120 : 100,
               right: 20,
               opacity: fabAnim,
               transform: [{
@@ -684,77 +811,16 @@ const MenuListScreen = () => {
                   inputRange: [0, 1],
                   outputRange: [0, 1],
                 })
-              }, {
-                rotate: fabAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: ['180deg', '0deg'],
-                })
               }]
             }}
           >
-            <TouchableOpacity
+            <FAB
+              icon="plus"
+              style={{
+                backgroundColor: '#007AFF',
+              }}
               onPress={handleAddFood}
-              activeOpacity={0.8}
-            >
-              <LinearGradient
-                colors={['#667eea', '#764ba2']}
-                style={{
-                  width: 60,
-                  height: 60,
-                  borderRadius: 30,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  shadowColor: '#667eea',
-                  shadowOffset: { width: 0, height: 8 },
-                  shadowOpacity: 0.4,
-                  shadowRadius: 15,
-                  elevation: 10,
-                }}
-              >
-                <MaterialCommunityIcons name="plus" size={28} color="#ffffff" />
-              </LinearGradient>
-            </TouchableOpacity>
-          </Animated.View>
-
-          {/* Quick Filter Pills */}
-          <Animated.View
-            style={{
-              position: 'absolute',
-              bottom: 110,
-              left: 20,
-              right: 20,
-              opacity: fabAnim,
-              transform: [{
-                translateY: fabAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [50, 0],
-                })
-              }]
-            }}
-          >
-            <View style={{ flexDirection: 'row', gap: 8 }}>
-              {['All', 'Available', 'Popular', 'Sold Out'].map((filter, index) => (
-                <TouchableOpacity
-                  key={filter}
-                  style={{
-                    paddingHorizontal: 16,
-                    paddingVertical: 8,
-                    borderRadius: 20,
-                    backgroundColor: index === 0 ? 'rgba(79, 172, 254, 0.3)' : 'rgba(255, 255, 255, 0.1)',
-                    borderWidth: 1,
-                    borderColor: index === 0 ? 'rgba(79, 172, 254, 0.5)' : 'rgba(255, 255, 255, 0.2)',
-                  }}
-                >
-                  <Text style={{
-                    color: index === 0 ? '#4facfe' : 'rgba(255, 255, 255, 0.8)',
-                    fontSize: 12,
-                    fontWeight: '600',
-                  }}>
-                    {filter}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+            />
           </Animated.View>
         </CommonView>
       </LinearGradient>
