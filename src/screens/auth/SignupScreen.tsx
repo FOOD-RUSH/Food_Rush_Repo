@@ -25,6 +25,8 @@ import { registerSchema } from '@/src/utils/validation';
 import { Ionicons } from '@expo/vector-icons';
 import CommonView from '@/src/components/common/CommonView';
 import { AuthStackScreenProps } from '@/src/navigation/types';
+import { useAuthStore } from '@/src/stores/customerStores/AuthStore';
+import { TextButton } from '@/src/components/common/TextButton';
 
 // Optimized country codes data - moved outside component to prevent recreation
 const COUNTRY_CODES = [
@@ -52,7 +54,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
 }) => {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-
+  const registerUser = useAuthStore((state) => state.registerUser);
   // Memoized components for better performance
   const CountryItem = React.memo(
     ({
@@ -113,8 +115,13 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
         console.log('Signup data:', data);
 
         // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-
+        await registerUser({
+          email: data.email,
+          fullName: data.displayName,
+          password: data.password,
+          phoneNumber: data.phoneNumber,
+          role: 'customer',
+        });
         // Navigate to verification screen or home
         Alert.alert('Success', 'Account created successfully!');
       } catch (error) {
@@ -124,7 +131,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
         setLoading(false);
       }
     },
-    [termsAccepted],
+    [registerUser, termsAccepted],
   );
 
   const handleGoogleSignUp = useCallback(async () => {
@@ -209,7 +216,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
 
   return (
     <CommonView>
-      <ScrollView className="flex">
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.container}
@@ -222,7 +229,12 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
           >
             {/* Header */}
             <View style={styles.header}>
-              <TouchableOpacity onPress={() => console.log('Go back')}>
+              <TouchableOpacity
+                onPress={() => {
+                  console.log('Go back');
+                  navigation.goBack();
+                }}
+              >
                 <Ionicons
                   name="arrow-back"
                   size={24}
@@ -455,16 +467,15 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                     color={colors.primary}
                   />
                   <View style={styles.termsTextContainer}>
-                    <Text style={styles.termsText}>
-                      I Agree with{' '}
-                      <TouchableOpacity onPress={openTerms}>
-                        <Text style={styles.termsLink}>Terms of Service</Text>
-                      </TouchableOpacity>{' '}
-                      and{' '}
-                      <TouchableOpacity onPress={openPrivacyPolicy}>
-                        <Text style={styles.termsLink}>Privacy Policy</Text>
-                      </TouchableOpacity>
-                    </Text>
+                    <Text style={styles.termsText}>I Agree with </Text>
+                    <TextButton onPress={openTerms} text="Term of service" />
+                    <Text> and </Text>
+
+                    <TextButton
+                      onPress={openPrivacyPolicy}
+                      text="privacy policy
+                      "
+                    />
                   </View>
                 </View>
               </View>
@@ -522,14 +533,10 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                 <Text style={styles.loginPrompt}>
                   Already have an account?{' '}
                 </Text>
-                <TouchableOpacity
-                  onPress={() => {
-                    navigation.navigate('SignIn');
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.loginLink}>Login</Text>
-                </TouchableOpacity>
+                <TextButton
+                  onPress={() => navigation.navigate('SignIn')}
+                  text="Login"
+                />
               </View>
             </View>
           </ScrollView>
@@ -632,7 +639,7 @@ const createStyles = (colors: any) =>
     countrySelector: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: colors.tertiary,
+      backgroundColor: colors.surfaceVariant,
       paddingHorizontal: 16,
       paddingVertical: 16,
       borderRadius: 12,
@@ -640,7 +647,7 @@ const createStyles = (colors: any) =>
       borderBottomRightRadius: 0,
       minWidth: 120,
       borderWidth: 1,
-      borderColor: colors.outline,
+      borderColor: colors.surfaceVariant,
     },
     selectedCountryFlag: {
       fontSize: 18,
@@ -656,17 +663,17 @@ const createStyles = (colors: any) =>
       borderRadius: 12,
       borderTopLeftRadius: 0,
       borderBottomLeftRadius: 0,
-      borderColor: colors.outline,
+      borderColor: colors.surfaceVariant,
     },
     phoneTextInput: {
       flex: 1,
     },
     textInput: {
-      backgroundColor: colors.tertiary,
+      backgroundColor: colors.surfaceVariant,
     },
     inputOutline: {
       borderRadius: 12,
-      borderColor: colors.outline,
+      borderColor: colors.surfaceVariant,
     },
     inputError: {
       borderColor: '#EF4444',
@@ -785,7 +792,7 @@ const createStyles = (colors: any) =>
       paddingVertical: 16,
       paddingHorizontal: 24,
       borderBottomWidth: 1,
-      borderBottomColor: colors.inputBorder(false),
+      borderBottomColor: colors.outline,
     },
     countryFlag: {
       fontSize: 24,
@@ -805,3 +812,20 @@ const createStyles = (colors: any) =>
   });
 
 export default SignupScreen;
+// {
+//   "status_code": 201,
+//   "message": "OTP verified successfully",
+//   "data": {
+//     "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0NTg4ZTc2Mi03YTMwLTQ4MmMtOTIwMS02M2M4MTNjZTQ1MzciLCJlbWFpbCI6InRvY2h1a3d1cGF1bDIxQGdtYWlsLmNvbSIsInJvbGUiOiJjdXN0b21lciIsImlhdCI6MTc1NTA1MzkzMCwiZXhwIjoxNzU1MDYxMTMwfQ.urCQ28O0tRFj_E-Mrpegzm_-4cmYrXSZlCi9MHjeZ6c",
+//     "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0NTg4ZTc2Mi03YTMwLTQ4MmMtOTIwMS02M2M4MTNjZTQ1MzciLCJlbWFpbCI6InRvY2h1a3d1cGF1bDIxQGdtYWlsLmNvbSIsInJvbGUiOiJjdXN0b21lciIsImlhdCI6MTc1NTA1MzkzMCwiZXhwIjoxNzU1NjU4NzMwfQ._w0APGSaPxMWdGTDqX8wFZP6WnFnet0iFIF95wcxwvA",
+//     "user": {
+//       "id": "4588e762-7a30-482c-9201-63c813ce4537",
+//       "email": "tochukwupaul21@gmail.com",
+//       "fullName": "paul@example",
+//       "role": "customer",
+//       "status": "active",
+//       "isEmailVerified": true,
+//       "isPhoneVerified": false
+//     }
+//   }
+// }

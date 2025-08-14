@@ -1,4 +1,4 @@
-mport React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import {
   View,
   Text,
@@ -8,21 +8,35 @@ import {
   Dimensions,
   StatusBar,
   Animated,
+  ImageSourcePropType,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme, Button } from 'react-native-paper';
-import { OnboardingSlide as OnboardingInfo } from '@/src/types';
 import { Ionicons } from '@expo/vector-icons';
 import { images } from '@/assets/images';
+import { OnboardingSlide as OnboardingInfo } from '@/src/types';
 
-const { width: screenWidth, height: screenHeight } = Dimensions.get('screen');
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('screen');
 
+// Constants
+const WELCOME_TIMEOUT = 7000;
+const ANIMATION_DURATION = 800;
+const CARD_ANIMATION_DURATION = 100;
+
+// Types
 interface UserType {
   id: 'customer' | 'restaurant';
-  image: any;
+  image: ImageSourcePropType;
   title: string;
 }
 
+interface OnboardingScreenProps {
+  OnboardingSlides: OnboardingInfo[];
+  onComplete: (userType: 'customer' | 'restaurant') => void;
+  onLogin: (selectedUserType: 'customer' | 'restaurant') => void;
+}
+
+// User types configuration
 const userTypes: UserType[] = [
   {
     id: 'customer',
@@ -36,67 +50,92 @@ const userTypes: UserType[] = [
   },
 ];
 
-// Welcome Screen Component (Page 1)
-
-const OnboardingWelcome = ({ onComplete }: { onComplete: () => void }) => {
+// Welcome Screen Component
+const OnboardingWelcome = memo(({ onComplete }: { onComplete: () => void }) => {
   const { colors } = useTheme();
-  const gif = require('@/assets/images/Delivery.gif');
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
 
   useEffect(() => {
+    // Start animations
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 800,
+        duration: ANIMATION_DURATION,
         useNativeDriver: true,
       }),
       Animated.timing(slideAnim, {
         toValue: 0,
-        duration: 800,
+        duration: ANIMATION_DURATION,
         useNativeDriver: true,
       }),
     ]).start();
 
-    const timer = setTimeout(() => {
-      onComplete();
-    }, 7000);
-
+    // Auto-advance timer
+    const timer = setTimeout(onComplete, WELCOME_TIMEOUT);
     return () => clearTimeout(timer);
-  }, [fadeAnim, onComplete, slideAnim]);
+  }, [fadeAnim, slideAnim, onComplete]);
 
   return (
-    <SafeAreaView className={`flex-1 bg-[${colors.background}]`}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       <StatusBar
         barStyle={
           colors.onSurface === '#1e293b' ? 'dark-content' : 'light-content'
         }
         backgroundColor={colors.background}
       />
+
       <Animated.View
         style={{
+          flex: 1,
+          paddingHorizontal: 12,
           opacity: fadeAnim,
           transform: [{ translateY: slideAnim }],
         }}
-        className="flex-1 px-3"
       >
-        <View className="flex-1 flex-col justify-between items-center mb-8">
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 32,
+          }}
+        >
+          {/* Logo */}
           <Image
             source={images.ApplogoWhite}
-            className="w-1/4 h-1/4"
+            style={{ width: SCREEN_WIDTH * 0.25, height: SCREEN_HEIGHT * 0.25 }}
             resizeMode="contain"
           />
 
-          <Image source={gif} className="w-11/12 h-2/5" resizeMode="contain" />
+          {/* Animation */}
+          <Image
+            source={require('@/assets/images/Delivery.gif')}
+            style={{ width: SCREEN_WIDTH * 0.92, height: SCREEN_HEIGHT * 0.4 }}
+            resizeMode="contain"
+          />
 
-          <View className="items-center mb-10">
+          {/* Welcome text */}
+          <View style={{ alignItems: 'center', marginBottom: 40 }}>
             <Text
-              className={`text-3xl font-bold mb-4 text-center ${colors.onSurface}`}
+              style={{
+                fontSize: 24,
+                fontWeight: 'bold',
+                marginBottom: 16,
+                textAlign: 'center',
+                color: colors.onSurface,
+              }}
             >
               Welcome to Food Rush!
             </Text>
             <Text
-              className={`text-lg text-center leading-7 px-4 ${colors.onSurface}`}
+              style={{
+                fontSize: 18,
+                textAlign: 'center',
+                lineHeight: 28,
+                paddingHorizontal: 16,
+                color: colors.onSurface,
+              }}
             >
               Healthy meals delivered locally{'\n'}within a tap of a button.
             </Text>
@@ -105,150 +144,227 @@ const OnboardingWelcome = ({ onComplete }: { onComplete: () => void }) => {
       </Animated.View>
     </SafeAreaView>
   );
-};
+});
 
 // Onboarding Slide Component
-const OnboardingSlide = ({
-  slide,
-  onNext,
-  onSkip,
-  currentIndex,
-  totalSlides,
-}: {
-  slide: OnboardingInfo;
-  onNext: () => void;
-  onSkip: () => void;
-  currentIndex: number;
-  totalSlides: number;
-}) => {
-  const { colors } = useTheme();
-  const isLastSlide = currentIndex === totalSlides - 1;
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const foodRushLogo = require('@/assets/images/Foodrushlogo.png');
+const OnboardingSlide = memo(
+  ({
+    slide,
+    onNext,
+    onSkip,
+    currentIndex,
+    totalSlides,
+  }: {
+    slide: OnboardingInfo;
+    onNext: () => void;
+    onSkip: () => void;
+    currentIndex: number;
+    totalSlides: number;
+  }) => {
+    const { colors } = useTheme();
+    const isLastSlide = currentIndex === totalSlides - 1;
+    const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 600,
-      useNativeDriver: true,
-    }).start();
-  }, [currentIndex, fadeAnim]);
+    useEffect(() => {
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
+      }).start();
+    }, [currentIndex, fadeAnim]);
 
-  return (
-    <>
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor="transparent"
-        translucent
-      />
-      <ImageBackground
-        className="flex-1"
-        source={slide.image}
-        resizeMode="cover"
-      >
-        <View className="flex-1">
-          <View className="flex-1 justify-between pb-16">
-            <View className="pt-12 pl-6">
+    return (
+      <>
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor="transparent"
+          translucent
+        />
+
+        <ImageBackground
+          style={{ flex: 1 }}
+          source={slide.image}
+          resizeMode="cover"
+        >
+          <View
+            style={{
+              flex: 1,
+              justifyContent: 'space-between',
+              paddingBottom: 64,
+            }}
+          >
+            {/* Logo */}
+            <View style={{ paddingTop: 48, paddingLeft: 24 }}>
               <Image
-                source={foodRushLogo}
-                className="w-20 h-20"
+                source={require('@/assets/images/Foodrushlogo.png')}
+                style={{ width: 80, height: 80 }}
                 resizeMode="contain"
               />
             </View>
+
+            {/* Content */}
             <Animated.View style={{ opacity: fadeAnim }}>
               <View
-                className={`rounded-3xl p-6 mx-9 mb-5 shadow-lg backdrop-blur-sm bg-primary`}
+                style={{
+                  borderRadius: 24,
+                  padding: 24,
+                  marginHorizontal: 36,
+                  marginBottom: 20,
+                  backgroundColor: colors.primary,
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 8,
+                  elevation: 8,
+                }}
               >
+                {/* Title and description */}
                 <Text
-                  className={`text-2xl font-bold mb-4 text-center text-white`}
+                  style={{
+                    fontSize: 20,
+                    fontWeight: 'bold',
+                    marginBottom: 16,
+                    textAlign: 'center',
+                    color: 'white',
+                  }}
                 >
                   {slide.title}
                 </Text>
+
                 <Text
-                  className={`text-base text-center leading-6 mb-8 text-white`}
+                  style={{
+                    fontSize: 16,
+                    textAlign: 'center',
+                    lineHeight: 24,
+                    marginBottom: 32,
+                    color: 'white',
+                  }}
                 >
                   {slide.description}
                 </Text>
-                <View className="flex-row justify-between items-center mb-6">
+
+                {/* Navigation buttons */}
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: 24,
+                  }}
+                >
                   <TouchableOpacity
                     onPress={onSkip}
-                    className="py-3 px-4"
+                    style={{ paddingVertical: 12, paddingHorizontal: 16 }}
                     activeOpacity={0.7}
                   >
-                    <Text className={`text-base font-medium text-white`}>
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        fontWeight: '500',
+                        color: 'white',
+                      }}
+                    >
                       Skip
                     </Text>
                   </TouchableOpacity>
+
                   <TouchableOpacity
                     onPress={onNext}
-                    className={`py-3 px-6 rounded-full flex-row items-center min-w-[90px] justify-center shadow-md ${colors.surface}`}
+                    style={{
+                      backgroundColor: colors.surface,
+                      paddingVertical: 12,
+                      paddingHorizontal: 24,
+                      borderRadius: 25,
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      minWidth: 90,
+                      justifyContent: 'center',
+                    }}
                     activeOpacity={0.8}
                   >
-                    <Text className={`text-base font-semibold mr-2 text-white`}>
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        fontWeight: '600',
+                        marginRight: 8,
+                        color: 'white',
+                      }}
+                    >
                       {isLastSlide ? 'Next' : 'Next'}
                     </Text>
-                    <Ionicons name="arrow-forward" size={16} color={'white'} />
+                    <Ionicons name="arrow-forward" size={16} color="white" />
                   </TouchableOpacity>
                 </View>
-                <View className="flex-row justify-center">
+
+                {/* Pagination indicators */}
+                <View
+                  style={{ flexDirection: 'row', justifyContent: 'center' }}
+                >
                   {Array.from({ length: totalSlides }).map((_, index) => (
                     <View
                       key={index}
-                      className={`h-2 rounded-full mx-1 transition-all duration-300 ${
-                        index === currentIndex
-                          ? `w-6 bg-white`
-                          : `w-2 bg-white/40`
-                      }`}
+                      style={{
+                        height: 8,
+                        borderRadius: 4,
+                        marginHorizontal: 4,
+                        backgroundColor:
+                          index === currentIndex
+                            ? 'white'
+                            : 'rgba(255,255,255,0.4)',
+                        width: index === currentIndex ? 24 : 8,
+                      }}
                     />
                   ))}
                 </View>
               </View>
             </Animated.View>
           </View>
-        </View>
-      </ImageBackground>
-    </>
-  );
-};
+        </ImageBackground>
+      </>
+    );
+  },
+);
 
-// User Type Selection Screen Component
-const UserTypeSelectionScreen = ({
-  onSelectUserType,
-  onLogin,
-  selectedType,
-}: {
-  onSelectUserType: (userType: 'customer' | 'restaurant') => void;
-  onLogin: () => void;
-  selectedType: 'customer' | 'restaurant' | null;
-}) => {
-  const { colors } = useTheme();
-  const scaleAnims = useRef<Record<string, Animated.Value>>({
-    customer: new Animated.Value(1),
-    restaurant: new Animated.Value(1),
-  }).current;
+// User Type Selection Screen
+const UserTypeSelectionScreen = memo(
+  ({
+    onSelectUserType,
+    onLogin,
+    selectedType,
+  }: {
+    onSelectUserType: (userType: 'customer' | 'restaurant') => void;
+    onLogin: () => void;
+    selectedType: 'customer' | 'restaurant' | null;
+  }) => {
+    const { colors } = useTheme();
+    const scaleAnims = useRef<Record<string, Animated.Value>>({
+      customer: new Animated.Value(1),
+      restaurant: new Animated.Value(1),
+    }).current;
 
-  const handleUserTypePress = (userType: 'customer' | 'restaurant') => {
-    // Animate only the selected card
-    Animated.sequence([
-      Animated.timing(scaleAnims[userType], {
-        toValue: 0.95,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-      Animated.timing(scaleAnims[userType], {
-        toValue: 1,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    const handleUserTypePress = useCallback(
+      (userType: 'customer' | 'restaurant') => {
+        // Animate card selection
+        Animated.sequence([
+          Animated.timing(scaleAnims[userType], {
+            toValue: 0.95,
+            duration: CARD_ANIMATION_DURATION,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scaleAnims[userType], {
+            toValue: 1,
+            duration: CARD_ANIMATION_DURATION,
+            useNativeDriver: true,
+          }),
+        ]).start();
 
-    onSelectUserType(userType);
-  };
+        onSelectUserType(userType);
+      },
+      [scaleAnims, onSelectUserType],
+    );
 
-  // Create button style based on selectedType to avoid reading animated value during render
-  const getButtonStyle = useCallback(
-    (isSelected: boolean) => {
-      return {
+    const getButtonStyle = useCallback(
+      (isSelected: boolean) => ({
         borderRadius: 30,
         backgroundColor: isSelected ? colors.primary : colors.surfaceVariant,
         elevation: isSelected ? 4 : 0,
@@ -256,138 +372,167 @@ const UserTypeSelectionScreen = ({
         shadowOffset: { width: 0, height: isSelected ? 2 : 0 },
         shadowOpacity: isSelected ? 0.3 : 0,
         shadowRadius: isSelected ? 4 : 0,
-      };
-    },
-    [colors.primary, colors.surfaceVariant],
-  );
+      }),
+      [colors],
+    );
 
-  const getButtonLabelStyle = useCallback((isSelected: boolean) => {
-    return {
-      fontSize: 18,
-      fontWeight: '600' as const,
-      color: isSelected ? 'white' : '#9CA3AF',
-    };
-  }, []);
+    const getButtonLabelStyle = useCallback(
+      (isSelected: boolean) => ({
+        fontSize: 18,
+        fontWeight: '600' as const,
+        color: isSelected ? 'white' : '#9CA3AF',
+      }),
+      [],
+    );
 
-  return (
-    <SafeAreaView
-      className={`flex-1`}
-      style={{ backgroundColor: colors.background }}
-    >
-      <StatusBar
-        barStyle={
-          colors.onSurface === '#1e293b' ? 'dark-content' : 'light-content'
-        }
-        backgroundColor={colors.background}
-      />
-      <View className={`flex-1 px-6 pt-8 pb-10 bg-gray-50`}>
-        {/* Header */}
-        <View className="mb-8">
-          <Text
-            className={`text-3xl font-bold mb-2 `}
-            style={{ backgroundColor: colors.background }}
-          >
-            What are your needs?
-          </Text>
-          <Text
-            className={`text-lg `}
-            style={{ backgroundColor: colors.background }}
-          >
-            Choose your role to get started
-          </Text>
-        </View>
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+        <StatusBar
+          barStyle={
+            colors.onSurface === '#1e293b' ? 'dark-content' : 'light-content'
+          }
+          backgroundColor={colors.background}
+        />
 
-        {/* User Type Cards */}
-        <View className="flex-1 justify-center">
-          {userTypes.map((type, index) => (
-            <Animated.View
-              key={type.id}
-              style={{
-                transform: [
-                  { scale: selectedType === type.id ? scaleAnims[type.id] : 1 },
-                ],
-              }}
-              className="mb-6"
-            >
-              <TouchableOpacity
-                activeOpacity={0.8}
-                className={`rounded-2xl border-2 shadow-lg overflow-hidden transition-all duration-300 p-2 `}
-                style={{
-                  height: screenHeight / 3.5,
-                  width: screenWidth - 48,
-                  backgroundColor: colors.surfaceVariant,
-                  borderColor:
-                    selectedType === type.id ? colors.primary : colors.outline,
-                }}
-                onPress={() => handleUserTypePress(type.id)}
-              >
-                <View className="flex-1 ">
-                  <Image
-                    source={type.image}
-                    className="w-full h-full"
-                    resizeMode="cover"
-                  />
-
-                  {/* Overlay gradient for better text visibility */}
-                  <View className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-
-                  {/* Selection indicator */}
-                  {selectedType === type.id && (
-                    <View
-                      className={`absolute top-4 right-4 rounded-full p-2 shadow-lg bg-primary`}
-                    >
-                      <Ionicons name="checkmark" size={20} color="white" />
-                    </View>
-                  )}
-                </View>
-                <Text
-                  className={`text-xl font-bold drop-shadow-lg text-center mt-2 `}
-                  style={{ color: colors.onSurface }}
-                >
-                  {type.title}
-                </Text>
-              </TouchableOpacity>
-            </Animated.View>
-          ))}
-        </View>
-
-        {/* Login Button */}
-        <View className="pt-6">
-          <Button
-            mode="contained"
-            onPress={onLogin}
-            disabled={!selectedType}
-            contentStyle={{ paddingVertical: 14 }}
-            style={getButtonStyle(!!selectedType)}
-            labelStyle={getButtonLabelStyle(!!selectedType)}
-          >
-            {selectedType ? 'Continue' : 'Select a user type'}
-          </Button>
-
-          {selectedType && (
+        <View
+          style={{
+            flex: 1,
+            paddingHorizontal: 24,
+            paddingTop: 32,
+            paddingBottom: 40,
+          }}
+        >
+          {/* Header */}
+          <View style={{ marginBottom: 32 }}>
             <Text
-              className={`text-center mt-3 text-sm }`}
-              style={{ color: colors.onSurface }}
+              style={{
+                fontSize: 28,
+                fontWeight: 'bold',
+                marginBottom: 8,
+                color: colors.onBackground,
+              }}
             >
-              You selected:{' '}
-              {selectedType === 'customer' ? 'Customer' : 'Restaurant'}
+              What are your needs?
             </Text>
-          )}
-        </View>
-      </View>
-    </SafeAreaView>
-  );
-};
+            <Text
+              style={{
+                fontSize: 18,
+                color: colors.onBackground,
+              }}
+            >
+              Choose your role to get started
+            </Text>
+          </View>
 
-// Main Onboarding Screen Component
-const OnboardingScreen = ({
+          {/* User Type Cards */}
+          <View style={{ flex: 1, justifyContent: 'center' }}>
+            {userTypes.map((type) => (
+              <Animated.View
+                key={type.id}
+                style={{
+                  transform: [
+                    {
+                      scale: selectedType === type.id ? scaleAnims[type.id] : 1,
+                    },
+                  ],
+                  marginBottom: 24,
+                }}
+              >
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  style={{
+                    borderRadius: 16,
+                    borderWidth: 2,
+                    borderColor:
+                      selectedType === type.id
+                        ? colors.primary
+                        : colors.outline,
+                    backgroundColor: colors.surfaceVariant,
+                    padding: 8,
+                    height: SCREEN_HEIGHT / 3.5,
+                    width: SCREEN_WIDTH - 48,
+                    overflow: 'hidden',
+                  }}
+                  onPress={() => handleUserTypePress(type.id)}
+                >
+                  <View style={{ flex: 1 }}>
+                    <Image
+                      source={type.image}
+                      style={{ width: '100%', height: '100%' }}
+                      resizeMode="cover"
+                    />
+
+                    {/* Selection indicator */}
+                    {selectedType === type.id && (
+                      <View
+                        style={{
+                          position: 'absolute',
+                          top: 16,
+                          right: 16,
+                          backgroundColor: colors.primary,
+                          borderRadius: 20,
+                          padding: 8,
+                        }}
+                      >
+                        <Ionicons name="checkmark" size={20} color="white" />
+                      </View>
+                    )}
+                  </View>
+
+                  <Text
+                    style={{
+                      fontSize: 20,
+                      fontWeight: 'bold',
+                      textAlign: 'center',
+                      marginTop: 8,
+                      color: colors.onSurface,
+                    }}
+                  >
+                    {type.title}
+                  </Text>
+                </TouchableOpacity>
+              </Animated.View>
+            ))}
+          </View>
+
+          {/* Continue Button */}
+          <View style={{ paddingTop: 24 }}>
+            <Button
+              mode="contained"
+              onPress={onLogin}
+              disabled={!selectedType}
+              contentStyle={{ paddingVertical: 14 }}
+              style={getButtonStyle(!!selectedType)}
+              labelStyle={getButtonLabelStyle(!!selectedType)}
+            >
+              {selectedType ? 'Continue' : 'Select a user type'}
+            </Button>
+
+            {selectedType && (
+              <Text
+                style={{
+                  textAlign: 'center',
+                  marginTop: 12,
+                  fontSize: 14,
+                  color: colors.onSurface,
+                }}
+              >
+                You selected:{' '}
+                {selectedType === 'customer' ? 'Customer' : 'Restaurant'}
+              </Text>
+            )}
+          </View>
+        </View>
+      </SafeAreaView>
+    );
+  },
+);
+
+// Main Onboarding Screen
+const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
   OnboardingSlides,
   onComplete,
   onLogin,
-}: {
-  OnboardingSlides: OnboardingInfo[];
-  onComplete: (userType: 'customer' | 'restaurant') => void;
-  onLogin: (selectedUserType: 'customer' | 'restaurant') => void;
 }) => {
   const [showWelcome, setShowWelcome] = useState(true);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
@@ -396,36 +541,36 @@ const OnboardingScreen = ({
     'customer' | 'restaurant' | null
   >(null);
 
-  const handleWelcomeComplete = () => {
+  const handleWelcomeComplete = useCallback(() => {
     setShowWelcome(false);
-  };
+  }, []);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (currentSlideIndex < OnboardingSlides.length - 1) {
-      setCurrentSlideIndex(currentSlideIndex + 1);
+      setCurrentSlideIndex((prev) => prev + 1);
     } else {
       setShowUserSelection(true);
     }
-  };
+  }, [currentSlideIndex, OnboardingSlides.length]);
 
-  const handleSkip = () => {
+  const handleSkip = useCallback(() => {
     setShowUserSelection(true);
-  };
+  }, []);
 
-  // Only update selectedType, do not complete onboarding yet
-  const handleUserTypeSelection = (userType: 'customer' | 'restaurant') => {
-    setSelectedType(userType);
-    console.log('User type selected:', userType);
-  };
+  const handleUserTypeSelection = useCallback(
+    (userType: 'customer' | 'restaurant') => {
+      setSelectedType(userType);
+    },
+    [],
+  );
 
-  // Only complete onboarding when Login is pressed and a type is selected
-  const handleLogin = () => {
+  const handleLogin = useCallback(() => {
     if (selectedType) {
-      console.log('Completing onboarding for:', selectedType);
-      onComplete(selectedType);
+      onLogin(selectedType);
     }
-  };
+  }, [selectedType, onLogin]);
 
+  // Render appropriate screen based on state
   if (showWelcome) {
     return <OnboardingWelcome onComplete={handleWelcomeComplete} />;
   }
@@ -451,4 +596,9 @@ const OnboardingScreen = ({
   );
 };
 
-export default OnboardingScreen;
+// Set display names for debugging
+OnboardingWelcome.displayName = 'OnboardingWelcome';
+OnboardingSlide.displayName = 'OnboardingSlide';
+UserTypeSelectionScreen.displayName = 'UserTypeSelectionScreen';
+
+export default memo(OnboardingScreen);

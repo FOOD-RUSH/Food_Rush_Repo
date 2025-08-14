@@ -16,7 +16,12 @@ export const TextButton: React.FC<TextButtonProps> = ({ text, onPress }) => {
       onPress={onPress}
       className="items-center justify-items-center"
     >
-      <Text className={`text-base font-medium text-[${textColor}]`}>{text}</Text>
+      <Text
+        className={`text-base font-medium `}
+        style={{ color: colors.primary }}
+      >
+        {text}
+      </Text>
     </TouchableOpacity>
   );
 };

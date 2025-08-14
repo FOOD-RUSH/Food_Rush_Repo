@@ -3,7 +3,13 @@ import { View, Text, ScrollView } from 'react-native';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import { Button, TextInput, HelperText, IconButton, useTheme } from 'react-native-paper';
+import {
+  Button,
+  TextInput,
+  HelperText,
+  IconButton,
+  useTheme,
+} from 'react-native-paper';
 import CommonView from '@/src/components/common/CommonView';
 
 // Validation schema
@@ -71,7 +77,7 @@ const ResetPasswordScreen = () => {
   }, []);
 
   return (
-    <CommonView >
+    <CommonView>
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         <View className="px-6 pt-2">
           {/* Back Button */}
@@ -88,11 +94,13 @@ const ResetPasswordScreen = () => {
           {/* Header Section */}
           <View className="mb-10">
             <Text
-              className={`text-3xl font-bold text-center mb-2 text-[${colors.onSurface}]`}>
+              className={`text-3xl font-bold text-center mb-2 text-[${colors.onSurface}]`}
+            >
               Reset Password
             </Text>
             <Text
-              className={`text-sm text-center leading-5 text-[${colors.onSurface}]`}>
+              className={`text-sm text-center leading-5 text-[${colors.onSurface}]`}
+            >
               Enter your email address and we will send you code to reset your
               password
             </Text>
@@ -117,7 +125,9 @@ const ResetPasswordScreen = () => {
                   outlineStyle={{
                     borderRadius: 12,
                     borderWidth: 1,
-                    borderColor: errors.password ? colors.error : colors.outline,
+                    borderColor: errors.password
+                      ? colors.error
+                      : colors.outline,
                   }}
                   contentStyle={{
                     paddingHorizontal: 16,
@@ -171,7 +181,9 @@ const ResetPasswordScreen = () => {
                   outlineStyle={{
                     borderRadius: 12,
                     borderWidth: 1,
-                    borderColor: errors.confirmPassword ? colors.error : colors.outline,
+                    borderColor: errors.confirmPassword
+                      ? colors.error
+                      : colors.outline,
                   }}
                   contentStyle={{
                     paddingHorizontal: 16,

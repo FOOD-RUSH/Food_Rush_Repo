@@ -8,11 +8,14 @@ import { Dropdown } from 'react-native-element-dropdown';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import { Button } from 'react-native-paper';
 import CommonView from '@/src/components/common/CommonView';
-import { useAppStore } from '@/src/stores/AppStore';
+import { useAuthUser } from '@/src/stores/customerStores/AuthStore';
 
 const EditProfileScreen = ({
   navigation,
+  route,
 }: RootStackScreenProps<'EditProfile'>) => {
+  const LoggedInUser = useAuthUser();
+
   interface GenderProps {
     id: number;
     type: string;
@@ -23,8 +26,30 @@ const EditProfileScreen = ({
     { id: 1, type: 'male', label: 'Male' },
     { id: 2, type: 'female', label: 'FeMale' },
   ];
-  const [selectedValue, setSelectedValue] = useState<string>('Male');
-  const resetApp = useAppStore((state) => state.resetApp);
+
+  const [fullName, setFullName] = useState(
+    LoggedInUser?.profile?.userName || '',
+  );
+  const [userName, setUserName] = useState(
+    LoggedInUser?.profile?.userName || '',
+  );
+  const [email, setEmail] = useState(LoggedInUser?.email || '');
+  const [phoneNumber, setPhoneNumber] = useState(
+    LoggedInUser?.profile?.phoneNumber || '',
+  );
+  const [genderValue, setGenderValue] = useState('Male');
+
+  const handleUpdate = () => {
+    console.log({
+      fullName,
+      userName,
+      email,
+      phoneNumber,
+      gender: genderValue,
+    });
+    // Here you would typically call an API to update the user profile
+  };
+
   return (
     <CommonView>
       <ScrollView
@@ -45,18 +70,28 @@ const EditProfileScreen = ({
             />
           </View>
         </View>
-        <InputField placeholder="Enter Name" />
-        <InputField placeholder="User Name" />
+        <InputField
+          placeholder="Enter Name"
+          value={fullName}
+          onChangeText={setFullName}
+        />
+        <InputField
+          placeholder="User Name"
+          value={userName}
+          onChangeText={setUserName}
+        />
         <InputField placeholder="mm/dd/yy" />
         <InputField
           placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
           rightIcon={<Ionicons size={23} name="mail-outline" />}
         />
         <Dropdown
           data={gender}
           valueField={'type'}
           labelField={'label'}
-          value={selectedValue}
+          value={genderValue}
           style={{
             height: 62,
             borderColor: '#e5e7eb',
@@ -68,7 +103,7 @@ const EditProfileScreen = ({
           itemTextStyle={{ color: 'gray' }}
           containerStyle={{ backgroundColor: '#d1d5db' }}
           selectedTextStyle={{ color: 'gray' }}
-          onChange={() => setSelectedValue((item) => item)}
+          onChange={(item) => setGenderValue(item.type)}
         />
         <InputField
           leftIcon={
@@ -80,6 +115,8 @@ const EditProfileScreen = ({
             </>
           }
           placeholder="Phone Number"
+          value={phoneNumber}
+          onChangeText={setPhoneNumber}
         />
       </ScrollView>
       <Button
@@ -90,7 +127,7 @@ const EditProfileScreen = ({
         style={{ borderRadius: 25, marginTop: 16 }}
         labelStyle={{ fontSize: 16, fontWeight: '600', color: 'white' }}
         className="active:opacity-75 mb-2"
-        onPress={resetApp}
+        onPress={handleUpdate}
       >
         update
       </Button>

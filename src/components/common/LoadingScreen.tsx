@@ -7,7 +7,10 @@ const LoadingScreen = () => {
   const indicatorColor = colors.primary;
 
   return (
-    <View className="flex-1 justify-center items-center">
+    <View
+      className="flex-1 justify-center items-center"
+      style={{ backgroundColor: colors.background }}
+    >
       <ActivityIndicator size="large" color={indicatorColor} animating={true} />
     </View>
   );

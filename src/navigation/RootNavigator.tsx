@@ -1,51 +1,166 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
+import { Linking } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+
+// Navigation types and helpers
 import { RootStackParamList } from './types';
 import { navigationRef, handleDeepLink } from './navigationHelpers';
 import { linking } from './linking';
-import { Linking } from 'react-native';
-// Import navigators
+
+// Stores
+import {
+  useAppStore,
+  useHasHydrated,
+  useOnboardingComplete,
+  useAppUserType,
+} from '../stores/customerStores/AppStore';
+import { useIsAuthenticated } from '../stores/customerStores/AuthStore';
+
+// Navigators
 import AuthNavigator from './AuthNavigator';
 import CustomerNavigator, {
   CustomerHelpCenterStackScreen,
 } from './CustomerNavigator';
 import RestaurantNavigator from './RestaurantNavigator';
 
-// // Import full-screen screens (no tabs)
-import CheckOutScreen from '../screens/customer/home/CheckOutScreen';
-import SearchScreen from '@/src/screens/customer/home/SearchScreen';
-import { OnboardingSlides } from '@/src/utils/onboardingData';
+// Components and screens
 import LoadingScreen from '../components/common/LoadingScreen';
 import OnboardingScreen from '../components/onBoardingScreen';
+
+// Full-screen screens (no tabs)
+import CheckOutScreen from '../screens/customer/home/CheckOutScreen';
+import SearchScreen from '@/src/screens/customer/home/SearchScreen';
 import CartScreen from '../screens/customer/home/CartScreen';
 import NotificationsScreen from '../screens/restaurant/profile/NotificationsScreen';
 import FoodDetailsScreen from '../screens/customer/home/FoodDetailsScreen';
 import RestaurantDetailScreen from '../screens/customer/home/RestaurantDetailScreen';
+
+// Profile screens
 import EditProfileScreen from '../screens/customer/Profile/EditProfileScreen';
 import FavoriteRestaurants from '../screens/customer/Profile/FavoriteRestaurants';
 import PaymentScreen from '../screens/customer/Profile/PaymentScreen';
 import LanguageScreen from '../screens/customer/Profile/LanguageScreen';
 import AddressScreen from '../screens/customer/Profile/AdressScreen';
-import { useAppStore } from '../stores/AppStore';
-import { useAuthStore } from '../stores/AuthStore';
-import { useTheme } from 'react-native-paper';
-import { Ionicons } from '@expo/vector-icons';
 
+// Data
+import { OnboardingSlides } from '@/src/utils/onboardingData';
+import { useAppTheme } from '../config/theme';
+
+// Stack navigator
 const Stack = createNativeStackNavigator<RootStackParamList>();
+
+// Screen option presets for better organization and reuse
+const createScreenOptions = (colors: any) => ({
+  default: {
+    headerShown: false,
+    gestureEnabled: true,
+    animation: 'slide_from_right' as const,
+    lazy: true,
+    unmountOnBlur: false,
+    contentStyle: {
+      backgroundColor: colors.background,
+    },
+    headerStyle: {
+      backgroundColor: colors.surface,
+      elevation: 0,
+      shadowOpacity: 0,
+    },
+    headerTintColor: colors.onSurface,
+  },
+
+  modal: {
+    presentation: 'modal' as const,
+    headerShown: true,
+    animation: 'slide_from_bottom' as const,
+    gestureDirection: 'vertical' as const,
+    contentStyle: {
+      backgroundColor: colors.background,
+    },
+    headerStyle: {
+      backgroundColor: colors.surface,
+      elevation: 0,
+      shadowOpacity: 0,
+    },
+    headerTintColor: colors.onSurface,
+  },
+
+  card: {
+    presentation: 'card' as const,
+    headerShown: true,
+    headerTransparent: true,
+    headerBackTitleVisible: false,
+    animation: 'slide_from_right' as const,
+    contentStyle: {
+      backgroundColor: colors.background,
+    },
+    headerTintColor: colors.onSurface,
+  },
+
+  profileCard: {
+    presentation: 'card' as const,
+    headerShown: true,
+    headerTitleAlign: 'center' as const,
+    animation: 'slide_from_left' as const,
+    headerShadowVisible: false,
+    contentStyle: {
+      backgroundColor: colors.background,
+    },
+    headerStyle: {
+      backgroundColor: colors.surface,
+      elevation: 0,
+      shadowOpacity: 0,
+    },
+    headerTintColor: colors.onSurface,
+  },
+
+  checkout: {
+    headerShown: true,
+    headerTitleAlign: 'center' as const,
+    animation: 'slide_from_right' as const,
+    gestureEnabled: true,
+    contentStyle: {
+      backgroundColor: colors.background,
+    },
+    headerStyle: {
+      backgroundColor: colors.surface,
+      elevation: 0,
+      shadowOpacity: 0,
+    },
+    headerTintColor: colors.onSurface,
+  },
+
+  fullScreen: {
+    presentation: 'fullScreenModal' as const,
+    headerShown: false,
+    gestureEnabled: true,
+    animation: 'slide_from_bottom' as const,
+  },
+});
+
 const RootNavigator: React.FC = () => {
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const _hasHydrated = useAppStore((state) => state._hasHydrated);
-  const completeOnboarding = useAppStore((state) => state.completeOnboarding);
-  const isOnboardingComplete = useAppStore(
-    (state) => state.isOnboardingComplete,
+  // Store hooks with performance-optimized selectors
+  const isAuthenticated = useIsAuthenticated();
+  const hasHydrated = useHasHydrated();
+  const isOnboardingComplete = useOnboardingComplete();
+  const userType = useAppUserType();
+  const themeMode = useAppStore((state) => state.theme);
+
+  // App store actions
+  const { completeOnboarding, setUserType } = useAppStore();
+
+  // Theme
+  const theme = useAppTheme(themeMode);
+
+  // Memoized screen options for better performance
+  const screenOptions = useMemo(
+    () => createScreenOptions(theme.colors),
+    [theme.colors],
   );
-  const userType = useAppStore((state) => state.userType);
-  const setUserType = useAppStore((state) => state.setUserType);
 
-  const { colors } = useTheme();
-
+  // Event handlers
   const handleOnboardingComplete = useCallback(
     (selectedUserType: 'customer' | 'restaurant') => {
       setUserType(selectedUserType);
@@ -57,14 +172,25 @@ const RootNavigator: React.FC = () => {
   const handleLogin = useCallback(
     (selectedUserType: 'customer' | 'restaurant') => {
       setUserType(selectedUserType);
+      completeOnboarding();
     },
-    [setUserType],
+    [completeOnboarding, setUserType],
   );
 
+  // Navigation ready handler
+  const handleNavigationReady = useCallback(() => {
+    const subscription = Linking.addEventListener('url', ({ url }) => {
+      handleDeepLink(url);
+    });
+
+    return () => subscription?.remove();
+  }, []);
+
+  // Determine initial route name based on app state
   const getInitialRouteName = useCallback((): keyof RootStackParamList => {
-    console.log(isAuthenticated);
     if (!isAuthenticated) {
-      return 'CustomerApp';
+      console.log('navigating to login');
+      return 'Auth';
     }
 
     switch (userType) {
@@ -77,56 +203,12 @@ const RootNavigator: React.FC = () => {
     }
   }, [isAuthenticated, userType]);
 
-  const handleNavigationReady = useCallback(() => {
-    // Set up deep link listener
-    const subscription = Linking.addEventListener('url', ({ url }) => {
-      handleDeepLink(url);
-    });
-
-    return () => subscription?.remove();
-  }, []);
-
-  // Screen options for better performance and UX
-  const screenOptions = {
-    headerShown: false,
-    gestureEnabled: true,
-    animation: 'slide_from_right' as const,
-    // Optimize for performance
-    lazy: true,
-    unmountOnBlur: false,
-    contentStyle: {
-      backgroundColor: colors.background,
-    },
-    borderBottomWidth: 0,
-    shadowColor: 'transparent',
-    elevation: 0,
-  };
-
-  const modalOptions = {
-    presentation: 'modal' as const,
-    headerShown: true,
-    headerTitleAlign: 'center' as const,
-    animation: 'slide_from_bottom' as const,
-    contentStyle: {
-      backgroundColor: colors.background,
-    },
-  };
-
-  const cardOptions = {
-    presentation: 'card' as const,
-    headerShown: true,
-    headerTransparent: true,
-    headerBackTitleVisible: false,
-    animation: 'slide_from_right' as const,
-    contentStyle: {
-      backgroundColor: colors.background,
-    },
-  };
-
-  if (!_hasHydrated) {
+  // Render loading screen while hydrating
+  if (!hasHydrated) {
     return <LoadingScreen />;
   }
 
+  // Render onboarding if not completed
   if (!isOnboardingComplete) {
     return (
       <>
@@ -140,9 +222,10 @@ const RootNavigator: React.FC = () => {
     );
   }
 
+  // Main app navigation
   return (
     <>
-      <StatusBar style="auto" />
+      <StatusBar style={theme.dark ? 'light' : 'dark'} />
       <NavigationContainer
         ref={navigationRef}
         linking={linking}
@@ -151,9 +234,9 @@ const RootNavigator: React.FC = () => {
       >
         <Stack.Navigator
           initialRouteName={getInitialRouteName()}
-          screenOptions={screenOptions}
+          screenOptions={screenOptions.default}
         >
-          {/* Main App Navigators (with tabs) */}
+          {/* Main App Navigators */}
           <Stack.Screen
             name="Auth"
             component={AuthNavigator}
@@ -172,25 +255,24 @@ const RootNavigator: React.FC = () => {
             options={{ headerShown: false }}
           />
 
-          {/* FULL-SCREEN SCREENS (NO TABS) */}
-          <Stack.Group screenOptions={modalOptions}>
+          {/* Modal Screens */}
+          <Stack.Group screenOptions={screenOptions.modal}>
             <Stack.Screen
               name="Cart"
               component={CartScreen}
               options={{
                 headerTitle: 'My Cart',
-
                 contentStyle: {
-                  marginTop: -40,
+                  backgroundColor: theme.colors.background,
                 },
-
                 headerRight: () => (
-                  <>
-                    <Ionicons name="options" size={23} className="ml-[-10px]" />
-                  </>
+                  <Ionicons
+                    name="options"
+                    size={24}
+                    color={theme.colors.onSurface}
+                    style={{ marginLeft: -10 }}
+                  />
                 ),
-                sheetElevation: 0,
-                gestureDirection: 'vertical'
               }}
             />
 
@@ -201,23 +283,26 @@ const RootNavigator: React.FC = () => {
                 headerTitle: 'Notifications',
               }}
             />
-            <Stack.Screen
-              name="SearchScreen"
-              component={SearchScreen}
-              options={{
-                presentation: 'fullScreenModal',
-                headerShown: false,
-                gestureEnabled: true,
-              }}
-            />
           </Stack.Group>
 
-          <Stack.Group screenOptions={cardOptions}>
+          {/* Full Screen Modal */}
+          <Stack.Screen
+            name="SearchScreen"
+            component={SearchScreen}
+            options={screenOptions.fullScreen}
+          />
+
+          {/* Card Presentation Screens */}
+          <Stack.Group screenOptions={screenOptions.card}>
             <Stack.Screen
               name="FoodDetails"
               component={FoodDetailsScreen}
               options={{
                 headerTitle: '',
+                headerTransparent: true,
+                headerStyle: {
+                  backgroundColor: 'transparent',
+                },
               }}
             />
 
@@ -226,71 +311,88 @@ const RootNavigator: React.FC = () => {
               component={RestaurantDetailScreen}
               options={{
                 headerTitle: '',
+                headerTransparent: true,
+                headerStyle: {
+                  backgroundColor: 'transparent',
+                },
               }}
             />
-            <Stack.Screen name="AddressScreen" component={AddressScreen} />
-          </Stack.Group>
-          <Stack.Group
-            screenOptions={{
-              presentation: 'card',
-              headerShown: true,
-              headerTitleAlign: 'center',
-              animation: 'slide_from_left',
-              sheetElevation: 0,
-              headerShadowVisible: false,
 
-              contentStyle: {
-                marginBottom: -20,
-                backgroundColor: colors.background,
-              },
-            }}
-          >
-            <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+            <Stack.Screen
+              name="AddressScreen"
+              component={AddressScreen}
+              options={{
+                headerTitle: 'Address',
+                headerBackVisible: true,
+              }}
+            />
+          </Stack.Group>
+
+          {/* Profile Screens */}
+          <Stack.Group screenOptions={screenOptions.profileCard}>
+            <Stack.Screen
+              name="EditProfile"
+              component={EditProfileScreen}
+              options={{
+                headerTitle: 'Edit Profile',
+              }}
+            />
+
             <Stack.Screen
               name="Help"
               component={CustomerHelpCenterStackScreen}
+              options={{
+                headerTitle: 'Help Center',
+              }}
             />
+
             <Stack.Screen
               name="FavoriteRestaurantScreen"
               component={FavoriteRestaurants}
+              options={{
+                headerTitle: 'Favorite Restaurants',
+              }}
             />
-            <Stack.Screen name="PaymentMethods" component={PaymentScreen} />
-            <Stack.Screen name="LanguageScreen" component={LanguageScreen} />
-          </Stack.Group>
 
-          <Stack.Group
-            screenOptions={{
-              headerShown: true,
-              headerTitleAlign: 'center' as const,
-              animation: 'slide_from_right' as const,
-              contentStyle: {
-                backgroundColor: colors.background,
-                marginBottom: -20,
-              },
-              sheetElevation: 0,
-            }}
-          >
             <Stack.Screen
-              name="Checkout"
-              component={CheckOutScreen}
+              name="PaymentMethods"
+              component={PaymentScreen}
               options={{
-                headerTitle: 'Checkout Order',
-                gestureEnabled: true,
+                headerTitle: 'Payment Methods',
               }}
             />
 
-            {/* 
-            <Stack.Screen 
-              name="OrderTracking" 
-              component={OrderTrackingScreen}
+            <Stack.Screen
+              name="LanguageScreen"
+              component={LanguageScreen}
               options={{
-                headerTitle: 'Track Order',
-                gestureEnabled: false, // Prevent swipe back during tracking
+                headerTitle: 'Language Settings',
               }}
             />
-
-*/}
           </Stack.Group>
+
+          {/* Checkout Screen */}
+          <Stack.Screen
+            name="Checkout"
+            component={CheckOutScreen}
+            options={{
+              ...screenOptions.checkout,
+              headerTitle: 'Checkout Order',
+            }}
+          />
+
+          {/* Future screens can be added here */}
+          {/* 
+          <Stack.Screen 
+            name="OrderTracking" 
+            component={OrderTrackingScreen}
+            options={{
+              ...screenOptions.checkout,
+              headerTitle: 'Track Order',
+              gestureEnabled: false, // Prevent swipe back during tracking
+            }}
+          />
+          */}
         </Stack.Navigator>
       </NavigationContainer>
     </>

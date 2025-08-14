@@ -14,7 +14,7 @@ import { RootStackScreenProps } from '@/src/navigation/types';
 import { Card, useTheme } from 'react-native-paper';
 import Seperator from '@/src/components/common/Seperator';
 import CheckOutItem from '@/src/components/customer/CheckOutItem';
-import { useCartStore, CartItem } from '@/src/stores/cartStore';
+import { useCartStore, CartItem } from '@/src/stores/customerStores/cartStore';
 
 const CheckOutScreen = ({
   navigation,

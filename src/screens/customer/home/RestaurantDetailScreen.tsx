@@ -276,14 +276,14 @@ const RestaurantDetailScreen = ({
         {/* Restaurant Name and Basic Info */}
         <View className="mb-6">
           <View className="flex-row justify-between items-start mb-2">
-            <Text className={`text-2xl font-bold flex-1 `}
-            style={{ color: colors.primary }} >
+            <Text
+              className={`text-2xl font-bold flex-1 `}
+              style={{ color: colors.primary }}
+            >
               {restaurantDetails.name}
             </Text>
             <View className="flex-row items-center">
-              <Text className={`mr-1 `}
-              style={{ color: colors.primary }}
-              >
+              <Text className={`mr-1 `} style={{ color: colors.primary }}>
                 {restaurantDetails.cuisine}
               </Text>
               <Text className="font-semibold" style={{ color: colors.primary }}>
@@ -344,18 +344,29 @@ const RestaurantDetailScreen = ({
                   {restaurantDetails.distance}
                 </Text>
                 <View className="flex-row items-center mt-1">
-                  <Text className={`text-sm `} style={{ color: colors.onSurface }}>Delivery Now</Text>
+                  <Text
+                    className={`text-sm `}
+                    style={{ color: colors.onSurface }}
+                  >
+                    Delivery Now
+                  </Text>
                   <Text className="mx-2" style={{ color: colors.onSurface }}>
                     |
                   </Text>
                   <Ionicons name="car" size={16} color={colors.onSurface} />
-                  <Text className={`ml-1 text-sm `} style={{ color: colors.onSurface }}>
+                  <Text
+                    className={`ml-1 text-sm `}
+                    style={{ color: colors.onSurface }}
+                  >
                     {restaurantDetails.deliveryFee}
                   </Text>
                   <Text className="mx-2" style={{ color: colors.onSurface }}>
                     |
                   </Text>
-                  <Text className={`text-sm `} style={{ color: colors.onSurface }}>
+                  <Text
+                    className={`text-sm `}
+                    style={{ color: colors.onSurface }}
+                  >
                     {restaurantDetails.deliveryTime}
                   </Text>
                 </View>
@@ -378,7 +389,10 @@ const RestaurantDetailScreen = ({
                 color={colors.primary}
                 size={20}
               />
-              <Text className={`ml-3 font-semibold text-base `} style={{ color: colors.onSurface }}>
+              <Text
+                className={`ml-3 font-semibold text-base `}
+                style={{ color: colors.onSurface }}
+              >
                 Special Offers Available
               </Text>
             </View>
@@ -392,7 +406,10 @@ const RestaurantDetailScreen = ({
 
         {/* For You Section */}
         <View className="mt-8">
-          <Text className={`text-xl font-bold mb-4`} style={{ color: colors.onSurface }}>
+          <Text
+            className={`text-xl font-bold mb-4`}
+            style={{ color: colors.onSurface }}
+          >
             For You
           </Text>
           <FlatList
@@ -410,7 +427,10 @@ const RestaurantDetailScreen = ({
 
         {/* Menu Section */}
         <View className="mt-8">
-          <Text className={`text-xl font-bold mb-4 `} style={{ color: colors.onSurface }}>
+          <Text
+            className={`text-xl font-bold mb-4 `}
+            style={{ color: colors.onSurface }}
+          >
             Menu
           </Text>
 

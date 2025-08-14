@@ -34,7 +34,7 @@ const FoodItemCard = ({
   const navigation =
     useNavigation<CustomerHomeStackScreenProps<'HomeScreen'>['navigation']>();
   const { colors } = useTheme();
-  
+
   const primaryColor = colors.primary;
 
   return (
@@ -211,9 +211,7 @@ const FoodItemCard = ({
                 <Ionicons
                   name={loved ? 'heart' : 'heart-outline'}
                   size={18}
-                  color={
-                    loved ? '#e0245e' : colors.onSurface
-                  }
+                  color={loved ? '#e0245e' : colors.onSurface}
                 />
               </TouchableOpacity>
             </View>

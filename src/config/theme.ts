@@ -66,11 +66,11 @@ export const darkTheme: MD3Theme = {
 // Hook to get the appropriate theme based on user preference and system settings
 export const useAppTheme = (themeMode: ThemeMode): MD3Theme => {
   const systemColorScheme = useColorScheme();
-  
+
   if (themeMode === 'system') {
     return systemColorScheme === 'dark' ? darkTheme : lightTheme;
   }
-  
+
   return themeMode === 'dark' ? darkTheme : lightTheme;
 };
 

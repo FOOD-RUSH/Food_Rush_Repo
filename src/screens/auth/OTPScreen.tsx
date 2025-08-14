@@ -1,24 +1,23 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Button, IconButton } from 'react-native-paper';
-import { useTheme } from 'react-native-paper';
+import { Button, IconButton, useTheme } from 'react-native-paper';
+import { AuthStackScreenProps } from '@/src/navigation/types';
+import { useAuthStore } from '@/src/stores/customerStores/AuthStore';
+import CommonView from '@/src/components/common/CommonView';
 
-interface OTPScreenProps {
-  phoneNumber?: string;
-  onVerifyOTP?: (otp: string) => void;
-  onResendOTP?: () => void;
-}
-
-const OTPScreen: React.FC<OTPScreenProps> = ({
-  phoneNumber = '+237 6*****31',
-  onVerifyOTP,
-  onResendOTP,
+const OTPScreen: React.FC<AuthStackScreenProps<'OTPVerification'>> = ({
+  navigation,
+  route,
 }) => {
   const { colors } = useTheme();
+  // getting all data from route,
+  const data = route.params;
+  // verfit otp function
+  const VerifyOTP = useAuthStore((state) => state.verifyOTP);
 
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
-  const [timer, setTimer] = useState(65);
+  const [otp, setOtp] = useState(['', '', '', '']);
+  const [timer, setTimer] = useState(30);
   const [isResendEnabled, setIsResendEnabled] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const inputRefs = useRef<(TextInput | null)[]>([]);
@@ -45,7 +44,7 @@ const OTPScreen: React.FC<OTPScreenProps> = ({
       setOtp(newOtp);
 
       // Auto-focus next input
-      if (value && index < 5) {
+      if (value && index < 3) {
         inputRefs.current[index + 1]?.focus();
       }
     },
@@ -60,22 +59,30 @@ const OTPScreen: React.FC<OTPScreenProps> = ({
     },
     [otp],
   );
+  //verification of OTP request
 
   const handleVerify = useCallback(async () => {
     const otpString = otp.join('');
-    if (otpString.length !== 6) return;
+    if (otpString.length !== 4) return;
 
     setIsVerifying(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
-      onVerifyOTP?.(otpString);
-      console.log('OTP Verified:', otpString);
+      await VerifyOTP({
+        otp: otpString,
+        type: 'email',
+        userId: data.userId,
+        email: data.email,
+        phoneNumber: data.phone,
+        userType: 'customer',
+      });
+      // proceeding to setting values
+      console.log('OTP Verified:' + otpString + 'Navigating to HomeScreen');
     } catch (error) {
       console.error('OTP verification failed:', error);
     } finally {
       setIsVerifying(false);
     }
-  }, [otp, onVerifyOTP]);
+  }, [VerifyOTP, data.email, data.phone, data.userId, otp]);
 
   const handleResend = useCallback(async () => {
     if (!isResendEnabled) return;
@@ -84,12 +91,11 @@ const OTPScreen: React.FC<OTPScreenProps> = ({
       setTimer(65);
       setIsResendEnabled(false);
       setOtp(['', '', '', '', '', '']);
-      onResendOTP?.();
       console.log('OTP Resent');
     } catch (error) {
       console.error('Resend failed:', error);
     }
-  }, [isResendEnabled, onResendOTP]);
+  }, [isResendEnabled]);
 
   const goBack = useCallback(() => {
     console.log('Go back');
@@ -98,18 +104,24 @@ const OTPScreen: React.FC<OTPScreenProps> = ({
   const otpComplete = otp.every((digit) => digit !== '');
 
   return (
-    <SafeAreaView className={`flex-1 bg-[${colors.background}]`}>
-      <View className="flex-1 px-6 pt-2">
+    <CommonView>
+      <View
+        className="flex-1 px-2 pt-2"
+        style={{ backgroundColor: colors.background }}
+      >
         {/* Header */}
         <View className="flex-row items-center justify-between mb-8">
           <IconButton
             icon="arrow-left"
             size={24}
-            iconColor={colors.onSurface}
+            iconColor={colors.onBackground}
             className="-ml-2"
             onPress={goBack}
           />
-          <Text className={`text-lg font-semibold text-[${colors.onSurface}]`}>
+          <Text
+            className={`text-lg font-semibold `}
+            style={{ color: colors.onBackground }}
+          >
             OTP Code Verification
           </Text>
           <View className="w-10" />
@@ -118,8 +130,10 @@ const OTPScreen: React.FC<OTPScreenProps> = ({
         {/* Description */}
         <View className="mb-12">
           <Text
-            className={`text-sm text-center leading-5 text-[${colors.onSurface}]`}>
-            Code has been sent to {phoneNumber}
+            className={`text-sm text-center leading-5 `}
+            style={{ color: colors.onBackground }}
+          >
+            Code has been sent to {data.phone}
           </Text>
         </View>
 
@@ -129,11 +143,11 @@ const OTPScreen: React.FC<OTPScreenProps> = ({
             <TextInput
               key={index}
               ref={(ref) => (inputRefs.current[index] = ref)}
-              className={`w-12 h-12 mx-2 text-center text-lg font-semibold border-2 rounded-lg ${
-                digit
-                  ? `border-[${colors.primary}] bg-[${colors.surfaceVariant}]`
-                  : `border-[${colors.outline}] bg-[${colors.surface}]`
-              }`}
+              className={`w-15 h-15 mx-2 text-center text-lg font-semibold border-2 rounded-lg`}
+              style={{
+                backgroundColor: digit ? colors.surfaceVariant : colors.surface,
+                borderColor: digit ? colors.primary : colors.surface,
+              }}
               value={digit}
               onChangeText={(value) => handleOtpChange(value, index)}
               onKeyPress={({ nativeEvent }) =>
@@ -189,7 +203,7 @@ const OTPScreen: React.FC<OTPScreenProps> = ({
           </Text>
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </CommonView>
   );
 };
 

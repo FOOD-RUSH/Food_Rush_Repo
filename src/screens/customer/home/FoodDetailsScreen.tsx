@@ -14,7 +14,7 @@ import { RootStackScreenProps } from '@/src/navigation/types';
 import Seperator from '@/src/components/common/Seperator';
 import InputField from '@/src/components/customer/InputField';
 import { FoodProps } from '@/src/types';
-import { useCartStore } from '@/src/stores/cartStore';
+import { useCartStore } from '@/src/stores/customerStores/cartStore';
 
 interface ExtraProps {
   id: number;
@@ -158,7 +158,7 @@ const FoodDetailsScreen = ({
           <View className="absolute bottom-4 right-4 bg-white rounded-full px-3 py-1 flex-row items-center">
             <Ionicons name="star" color="#FFD700" size={16} />
             <Text className="ml-1 font-semibold">{foodDetails.rating}</Text>
-            <Text className={`ml-1 text-[${colors.secondary}]`}>
+            <Text className={`ml-1 text-[${colors.onSurfaceVariant}]`}>
               ({foodDetails.reviewCount})
             </Text>
           </View>
@@ -212,7 +212,7 @@ const FoodDetailsScreen = ({
             multiline
             numberOfLines={3}
             style={{
-              backgroundColor: colors.background,
+              backgroundColor: colors.onBackground,
               marginRight: 16,
               marginLeft: 16,
               alignSelf: 'center',

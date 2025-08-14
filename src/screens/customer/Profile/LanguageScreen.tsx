@@ -1,7 +1,7 @@
 import { View, Text } from 'react-native';
 import React from 'react';
 import CommonView from '@/src/components/common/CommonView';
-import {  RadioButton } from 'react-native-paper';
+import { RadioButton } from 'react-native-paper';
 import { RootStackScreenProps } from '@/src/navigation/types';
 
 const LanguageScreen = ({

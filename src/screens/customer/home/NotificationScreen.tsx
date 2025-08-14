@@ -1,9 +1,9 @@
 import { View, Text } from 'react-native';
 import React from 'react';
-import { useAppStore } from '@/src/stores/AppStore';
+import { useAppStore } from '@/src/stores/customerStores/AppStore';
 
 const NotificationScreen = () => {
-  const  theme  = useAppStore((state) => state.theme);
+  const theme = useAppStore((state) => state.theme);
   const textColor = theme === 'light' ? 'text-gray-900' : 'text-text';
 
   return (

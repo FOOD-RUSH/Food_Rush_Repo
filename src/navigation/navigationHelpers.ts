@@ -1,14 +1,11 @@
-import {
-  createNavigationContainerRef,
-  
-} from '@react-navigation/native';
+import { createNavigationContainerRef } from '@react-navigation/native';
 import { RootStackParamList } from './types';
 
 export const navigationRef = createNavigationContainerRef<RootStackParamList>();
 
 // IMPORTANT: navigationRef should ONLY be used for navigation from:
 // 1. Outside React components (services, utils, push notifications)
-// 2. Redux middleware/sagas
+
 // 3. Global error handlers
 // For component navigation, ALWAYS use the navigation prop or useNavigation hook
 
@@ -61,7 +58,7 @@ export function navigateFromService<T extends keyof RootStackParamList>(
   params?: RootStackParamList[T],
 ) {
   if (navigationRef.isReady()) {
-    navigationRef.navigate(name , params);
+    navigationRef.navigate(name, params);
   } else {
     console.warn(
       'Navigation not ready. This should only be called from services/utils.',

@@ -25,13 +25,13 @@ const LogoutModal: React.FC<LogoutModalProps> = ({
     >
       <View className="items-center ">
         {/* Logout message */}
-        <Text 
+        <Text
           style={{ color: colors.onSurface }}
           className="text-center text-base mb-8 leading-6"
         >
           Are you sure you want to log out?
         </Text>
-        
+
         {/* Action buttons */}
         <View className="flex-row w-full gap-3">
           {/* Cancel button */}
@@ -41,14 +41,14 @@ const LogoutModal: React.FC<LogoutModalProps> = ({
             style={{ backgroundColor: colors.surfaceVariant }}
             activeOpacity={0.7}
           >
-            <Text 
+            <Text
               style={{ color: colors.onSurfaceVariant }}
               className="text-base font-medium"
             >
               Cancel
             </Text>
           </TouchableOpacity>
-          
+
           {/* Logout button */}
           <TouchableOpacity
             onPress={() => {

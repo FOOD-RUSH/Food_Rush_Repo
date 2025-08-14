@@ -8,7 +8,11 @@ const PageTitle = () => {
 
   return (
     <View className="flex-row flex-1 justify-between item-center px-2">
-      <MaterialIcons name="arrow-back-ios-new" size={20} color={colors.onSurface} />
+      <MaterialIcons
+        name="arrow-back-ios-new"
+        size={20}
+        color={colors.onSurface}
+      />
       <Text className={`font-bold ${colors.onSurface}`}>Title</Text>
     </View>
   );

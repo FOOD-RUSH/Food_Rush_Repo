@@ -46,8 +46,8 @@ const contactData = [
 const ContactUs = () => {
   return (
     <CommonView>
-      <ScrollView 
-        showsVerticalScrollIndicator={false} 
+      <ScrollView
+        showsVerticalScrollIndicator={false}
         className="flex-1 px-4 py-2"
         contentContainerStyle={{ paddingBottom: 20 }}
       >

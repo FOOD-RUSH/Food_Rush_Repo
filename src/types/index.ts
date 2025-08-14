@@ -1,14 +1,23 @@
 import { PickerProps } from '@react-native-picker/picker';
 import { ReactNode } from 'react';
 import { TextInputProps } from 'react-native';
-
+import { AddressData } from '../components/customer/AddressEditModal';
 // Basic props
 
 export interface User {
   uid: string;
   email: string;
   userType: 'customer' | 'restaurant';
-  profile?: CustomerProfile | RestaurantProfile;
+  profile?: CustomerProfile;
+  isEmailVerified: boolean;
+}
+
+// customer user
+export interface CustomerUser {
+  uid: string;
+  email: string;
+  userType: 'customer' | 'restaurant';
+  profile?: CustomerProfile;
   isEmailVerified: boolean;
 }
 // app state
@@ -38,9 +47,10 @@ export interface OnboardingSlide {
 
 // Customer profile
 export interface CustomerProfile {
+  image?: any;
   userName: string;
   phoneNumber: string;
-  addresses?: Address[];
+  addresses?: AddressData[];
   preferences?: {
     dietary?: string[];
     cuisineTypes?: string[];
@@ -81,7 +91,7 @@ export interface Order {
   items: OrderItem[];
   status: OrderStatus;
   totalAmount: number;
-  deliveryAddress: Address;
+  deliveryAddress: AddressData;
   paymentMethod: PaymentMethod;
   createdAt: Date;
   estimatedDeliveryTime: Date;
@@ -129,14 +139,6 @@ export interface Location {
   latitude: number;
   longitude: number;
   address?: string;
-}
-
-export interface Address {
-  street: string;
-  city: string;
-  region: string;
-  landmark?: string;
-  instructions?: string;
 }
 
 // Payment Types

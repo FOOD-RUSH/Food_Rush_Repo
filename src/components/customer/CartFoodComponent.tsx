@@ -2,7 +2,7 @@ import React, { useCallback, useMemo } from 'react';
 import { View, Text, Image, Pressable, StyleSheet, Alert } from 'react-native';
 import { images } from '@/assets/images';
 import { useTheme, Card } from 'react-native-paper';
-import { CartItem, useCartStore } from '@/src/stores/cartStore';
+import { CartItem, useCartStore } from '@/src/stores/customerStores/cartStore';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useSharedValue,

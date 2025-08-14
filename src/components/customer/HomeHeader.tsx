@@ -23,9 +23,14 @@ const HomeHeader = () => {
           style={{ backgroundColor: colors.surfaceVariant }}
         />
         <View className="ml-3 flex-1">
-          <Text className={`text-sm mb-1 `} style={{ color: colors.onSurface }}>Deliver to</Text>
+          <Text className={`text-sm mb-1 `} style={{ color: colors.onSurface }}>
+            Deliver to
+          </Text>
           <View className="flex-row items-center">
-            <Text className={`text-lg font-bold `} style={{ color: colors.onSurface }}>
+            <Text
+              className={`text-lg font-bold `}
+              style={{ color: colors.onSurface }}
+            >
               Byiem Assi
             </Text>
             <Ionicons

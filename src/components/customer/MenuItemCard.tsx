@@ -1,11 +1,11 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import React, { useState } from 'react';
-import { Card , useTheme} from 'react-native-paper';
+import { Card, useTheme } from 'react-native-paper';
 import { FoodProps } from '@/src/types';
 import { images } from '@/assets/images';
 import { useNavigation } from '@react-navigation/native';
 import { RootStackScreenProps } from '@/src/navigation/types';
-import { useCartStore } from '@/src/stores/cartStore';
+import { useCartStore } from '@/src/stores/customerStores/cartStore';
 
 const MenuItemCard = ({
   id,
@@ -72,7 +72,9 @@ const MenuItemCard = ({
           />
           <View className="flex-1 ml-3">
             <Text
-              className={`font-semibold text-xl  `} style={{ color: colors.onSurface }}>
+              className={`font-semibold text-xl  `}
+              style={{ color: colors.onSurface }}
+            >
               {name}
             </Text>
             <Text

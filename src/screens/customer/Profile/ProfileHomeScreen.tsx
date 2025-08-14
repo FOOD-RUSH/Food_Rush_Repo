@@ -6,25 +6,36 @@ import { AntDesign, MaterialIcons } from '@expo/vector-icons';
 import RowView from '@/src/components/common/RowView';
 import { CustomerProfileStackScreenProps } from '@/src/navigation/types';
 import CommonView from '@/src/components/common/CommonView';
-import { useAppStore } from '@/src/stores/AppStore';
+import { useAppStore } from '@/src/stores/customerStores/AppStore';
 import LogoutModal from '@/src/components/customer/LogoutModal';
-import { useAuthStore } from '@/src/stores/AuthStore';
+import { useAuthStore } from '@/src/stores/customerStores/AuthStore';
+import { authApi } from '@/src/services/customer/authApi';
+import { useQuery } from '@tanstack/react-query';
 
 const ProfileHomeScreen = ({
   navigation,
 }: CustomerProfileStackScreenProps<'ProfileHome'>) => {
+  const { data } = useQuery({
+    queryKey: ['userData'],
+    queryFn: () => {
+      console.log('fetching profile data ....');
+      return authApi.getProfile();
+    },
+    staleTime: 5 * 60,
+  });
+
   const { colors } = useTheme();
   const theme = useAppStore((state) => state.theme);
   const setTheme = useAppStore((state) => state.setTheme);
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
   const logoutUser = useAuthStore((state) => state.logoutUser);
-
   const handleLogout = () => {
     console.log('User logged out');
     logoutUser();
   };
 
   const showLogoutModal = () => {
+    console.log(data);
     setLogoutModalVisible(true);
   };
 
@@ -55,21 +66,24 @@ const ProfileHomeScreen = ({
           />
           <View className="flex-col items-center justify-center flex-1 mx-2">
             <Text
-              style={{ color: colors.onSurface }}
+              style={{ color: colors.onBackground }}
               className="font-semibold text-[18px]"
             >
-              Dev-Guy UIX
+              {data?.data!.email} 124
             </Text>
+
             <Text
               style={{ color: colors.onSurfaceVariant }}
               className="text-[15px]"
             >
-              +237 650 100 131
+              {/* {formatPhoneNumber(LoggedInUser.data.phoneNumner)} */}
+              {data?.data!.role}
             </Text>
           </View>
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={() => {
+              console.log(data?.data!);
               navigation.navigate('EditProfile');
             }}
           >
@@ -108,13 +122,6 @@ const ProfileHomeScreen = ({
           style={{ backgroundColor: colors.outline }}
         />
 
-        <RowView
-          title="Profile"
-          onPress={() => {
-            navigation.navigate('EditProfile');
-          }}
-          leftIconName="log-in-outline"
-        />
         <RowView
           title="Address"
           onPress={() => {

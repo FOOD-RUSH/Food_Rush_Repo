@@ -21,14 +21,13 @@ import { loginSchema } from '@/src/utils/validation';
 import { TextButton } from '@/src/components/common/TextButton';
 import { AuthStackScreenProps } from '@/src/navigation/types';
 import CommonView from '@/src/components/common/CommonView';
-import { useAuthStore } from '@/src/stores/AuthStore';
+import { useAuthStore } from '@/src/stores/customerStores/AuthStore';
 
 interface LoginFormData {
   email: string;
   password: string;
 }
-
-export const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
+const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
   navigation,
   route,
 }) => {
@@ -62,9 +61,18 @@ export const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
     // TODO:
     console.log('Usertype: ' + userType);
     try {
-      await loginUser(userType, data.email, data.password);
+      await loginUser('customer', data.email.trim(), data.password);
+      // navigate to homer
+      navigation.navigate('CustomerApp', {
+        screen: 'Home',
+        params: {
+          screen: 'HomeScreen',
+        },
+      });
     } catch (error) {
-      Alert.alert('Login failed');
+      Alert.alert('Login failed' + error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -106,7 +114,8 @@ export const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
               <Image className="w-32 h-32" source={WelcomeImage} />
             </View>
             <Text
-              className={`text-3xl font-bold mb-2 text-[${colors.onSurface}]`}
+              className={`text-3xl font-bold mb-2 `}
+              style={{ color: colors.onSurface }}
             >
               Welcome Back
             </Text>
@@ -142,10 +151,13 @@ export const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                         borderRadius: 16,
                         borderColor: errors.email
                           ? colors.error
-                          : colors.outline,
+                          : colors.surfaceVariant,
                       }}
-                      style={{ backgroundColor: colors.tertiary }}
-                      contentStyle={{ paddingHorizontal: 16 }}
+                      style={{ backgroundColor: colors.surfaceVariant }}
+                      contentStyle={{
+                        paddingHorizontal: 16,
+                        color: colors.onSurfaceVariant,
+                      }}
                       error={!!errors.email}
                     />
                     {errors.email && (
@@ -183,12 +195,12 @@ export const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                         />
                       }
                       outlineStyle={{
-                        borderRadius: 12,
-                        borderColor: errors.password
+                        borderRadius: 16,
+                        borderColor: errors.email
                           ? colors.error
-                          : colors.outline,
+                          : colors.surfaceVariant,
                       }}
-                      style={{ backgroundColor: colors.tertiary }}
+                      style={{ backgroundColor: colors.surfaceVariant }}
                       contentStyle={{ paddingHorizontal: 16 }}
                       error={!!errors.password}
                     />
@@ -209,7 +221,10 @@ export const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                     onPress={() => setRememberMe(!rememberMe)}
                     color={colors.primary}
                   />
-                  <Text className={`text-base ml-2 text-[${colors.onSurface}]`}>
+                  <Text
+                    className={`text-base ml-2 `}
+                    style={{ color: colors.onSurface }}
+                  >
                     Remember me
                   </Text>
                 </View>
@@ -229,23 +244,33 @@ export const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                 buttonColor={colors.primary}
                 contentStyle={{ paddingVertical: 12 }}
                 style={{ borderRadius: 25, marginTop: 16 }}
-                labelStyle={{ fontSize: 16, fontWeight: '600', color: 'white' }}
+                labelStyle={{
+                  fontSize: 16,
+                  fontWeight: '600',
+                  color: 'white',
+                }}
               >
                 {loading ? 'Logging in...' : 'Login'}
               </Button>
 
               {/* Divider */}
               <View className="flex-row items-center my-6">
-                <View className={`flex-1 h-px bg-[${colors.outline}]`} />
+                <View
+                  className={`flex-1 h-px`}
+                  style={{ backgroundColor: colors.outline }}
+                />
                 <Text className={`px-4 text-sm text-[${colors.onSurface}]`}>
                   {' '}
                   or Sign in{' '}
                 </Text>
-                <View className={`flex-1 h-px bg-[${colors.outline}]`} />
+                <View
+                  className={`flex-1 h-px`}
+                  style={{ backgroundColor: colors.outline }}
+                />
               </View>
 
               {/* Social Login Buttons */}
-              <View className="flex-row space-x-4">
+              <View className="flex-row justify-between">
                 {/* Google */}
                 <Button
                   mode="outlined"
@@ -258,6 +283,7 @@ export const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                     borderRadius: 25,
                     borderColor: colors.outline,
                     borderWidth: 1,
+                    marginHorizontal: 2,
                   }}
                   labelStyle={{
                     fontSize: 14,
@@ -279,6 +305,7 @@ export const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                     borderRadius: 25,
                     borderColor: colors.outline,
                     borderWidth: 1,
+                    marginHorizontal: 2,
                   }}
                   labelStyle={{
                     fontSize: 14,
@@ -303,3 +330,4 @@ export const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
     </CommonView>
   );
 };
+export default LoginScreen;

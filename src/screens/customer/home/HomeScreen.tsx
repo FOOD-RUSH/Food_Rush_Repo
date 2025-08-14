@@ -185,7 +185,7 @@ const HomeScreen = ({
                 icon="magnify"
                 size={30}
                 color={colors.onSurface}
-                background={colors.surfaceVariant}
+                background={colors.surface}
                 className="pt-3 pl-2"
               />
             }
@@ -196,7 +196,7 @@ const HomeScreen = ({
               borderRadius: 20,
             }}
             style={{
-              backgroundColor: colors.outline,
+              backgroundColor: colors.surface,
               paddingTop: 5,
               paddingBottom: 5,
               paddingRight: 10,
@@ -236,7 +236,7 @@ const HomeScreen = ({
               height: 300,
               backgroundColor: colors.surfaceVariant,
               marginLeft: 0,
-                borderRadius: 10
+              borderRadius: 10,
             }}
             pagingEnabled={false}
             snapEnabled={true}

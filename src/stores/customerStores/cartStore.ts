@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
 import { create } from 'zustand';
 import { createJSONStorage, devtools, persist } from 'zustand/middleware';
-import { FoodProps } from '../types';
+import { FoodProps } from '../../types';
 
 interface cartStore {
   CartID: string | null;
@@ -42,25 +42,25 @@ export const useCartStore = create<cartStore & cartActions>()(
 
         addtoCart: (item, quantity, specialInstructions) => {
           const { restaurantID, items } = get();
-          
+
           // Check if adding from different restaurant
           if (restaurantID && item.restaurantID !== restaurantID) {
             Alert.alert(
               'Different Restaurant',
               'You are trying to add food from a different restaurant. Do you want to clear your cart and add this item?',
               [
-                { 
-                  text: 'Cancel', 
-                  style: 'cancel' 
+                {
+                  text: 'Cancel',
+                  style: 'cancel',
                 },
                 {
                   text: 'Clear & Add',
                   onPress: () => {
-                    set({ 
+                    set({
                       items: [],
                       restaurantID: item.restaurantID,
                       CartID: `${Date.now()}-${item.restaurantID}`,
-                      totalprice: 0 
+                      totalprice: 0,
                     });
                     get().addtoCart(item, quantity, specialInstructions);
                   },
@@ -79,15 +79,17 @@ export const useCartStore = create<cartStore & cartActions>()(
 
           if (existingItemIndex >= 0) {
             // Update existing item
-            newItems = items.map((cartItem, index) => 
-              index === existingItemIndex 
+            newItems = items.map((cartItem, index) =>
+              index === existingItemIndex
                 ? {
                     ...cartItem,
                     quantity: cartItem.quantity + quantity,
-                    specialInstructions: specialInstructions || cartItem.specialInstructions,
-                    ItemtotalPrice: (cartItem.quantity + quantity) * cartItem.menuItem.price!,
+                    specialInstructions:
+                      specialInstructions || cartItem.specialInstructions,
+                    ItemtotalPrice:
+                      (cartItem.quantity + quantity) * cartItem.menuItem.price!,
                   }
-                : cartItem
+                : cartItem,
             );
           } else {
             // Add new item
@@ -110,7 +112,7 @@ export const useCartStore = create<cartStore & cartActions>()(
           }
 
           set({ items: newItems });
-          
+
           // Calculate total after setting items
           const totalPrice = newItems.reduce(
             (sum, cartItem) => sum + cartItem.ItemtotalPrice,
@@ -134,17 +136,15 @@ export const useCartStore = create<cartStore & cartActions>()(
 
         deleteCart: (cartItemId) => {
           const { items } = get();
-          const filteredItems = items.filter(
-            (item) => item.id !== cartItemId,
-          );
+          const filteredItems = items.filter((item) => item.id !== cartItemId);
 
           // If no items left, clear everything
           if (filteredItems.length === 0) {
-            set({ 
-              items: [], 
-              restaurantID: null, 
-              totalprice: 0, 
-              CartID: null 
+            set({
+              items: [],
+              restaurantID: null,
+              totalprice: 0,
+              CartID: null,
             });
             return;
           }
@@ -154,16 +154,16 @@ export const useCartStore = create<cartStore & cartActions>()(
             (sum, item) => sum + item.ItemtotalPrice,
             0,
           );
-          
-          set({ 
+
+          set({
             items: filteredItems,
-            totalprice: totalPrice 
+            totalprice: totalPrice,
           });
         },
 
         modifyCart: (CartItemId, quantity) => {
           const { items } = get();
-          
+
           // Remove item if quantity is 0 or less
           if (quantity <= 0) {
             get().deleteCart(CartItemId);
@@ -185,18 +185,18 @@ export const useCartStore = create<cartStore & cartActions>()(
             0,
           );
 
-          set({ 
+          set({
             items: newItems,
-            totalprice: totalPrice 
+            totalprice: totalPrice,
           });
         },
 
         clearCart: () => {
-          set({ 
-            items: [], 
-            restaurantID: null, 
-            totalprice: 0, 
-            CartID: null 
+          set({
+            items: [],
+            restaurantID: null,
+            totalprice: 0,
+            CartID: null,
           });
         },
       }),

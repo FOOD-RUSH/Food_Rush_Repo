@@ -1,3 +1,5 @@
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '@/src/services/customer/queryClient';
 import './globals.css';
 import { Inter_900Black, useFonts } from '@expo-google-fonts/inter';
 import * as SplashScreen from 'expo-splash-screen';
@@ -25,7 +27,7 @@ export default function App() {
   }
 
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <ThemeProvider>
           <SafeAreaProvider>
@@ -34,6 +36,6 @@ export default function App() {
           </SafeAreaProvider>
         </ThemeProvider>
       </GestureHandlerRootView>
-    </>
+    </QueryClientProvider>
   );
 }

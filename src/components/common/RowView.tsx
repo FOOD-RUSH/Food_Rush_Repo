@@ -21,8 +21,17 @@ const RowView = ({
       <View className="flex-row justify-between mb-4 items-center px-4 py-2">
         <Ionicons name={leftIconName} size={22} color={colors.onSurface} />
 
-        <Text className={`font-semibold text-base `} style={{color: colors.onSurface}}>{title}</Text>
-        <MaterialIcons name={rightIconName} size={18} color={colors.onSurface} />
+        <Text
+          className={`font-semibold text-base `}
+          style={{ color: colors.onSurface }}
+        >
+          {title}
+        </Text>
+        <MaterialIcons
+          name={rightIconName}
+          size={18}
+          color={colors.onSurface}
+        />
       </View>
     </TouchableOpacity>
   );

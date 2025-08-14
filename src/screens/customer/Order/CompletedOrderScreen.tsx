@@ -56,7 +56,7 @@ const CompletedOrderScreen = () => {
   );
 
   return (
-    <CommonView >
+    <CommonView>
       <View className="flex-1 h-full">
         <FlatList
           data={orderItems}

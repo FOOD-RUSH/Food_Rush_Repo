@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { TouchableOpacity, View } from 'react-native';
-import { useTheme,Card, Text } from 'react-native-paper';
+import { useTheme, Card, Text } from 'react-native-paper';
 
 interface RestaurantCardProps {
   deliveryFee: number;
@@ -87,11 +87,7 @@ export const RestaurantCard = ({
             }}
             activeOpacity={0.7}
           >
-            <Ionicons
-              name="heart-outline"
-              size={20}
-              color={colors.onSurface}
-            />
+            <Ionicons name="heart-outline" size={20} color={colors.onSurface} />
           </TouchableOpacity>
 
           {/* Discount Badge - Only show if discount prop is provided */}
@@ -145,7 +141,11 @@ export const RestaurantCard = ({
               }}
             >
               <Text
-                style={{ fontSize: 12, fontWeight: 'bold', color: colors.onSurface }}
+                style={{
+                  fontSize: 12,
+                  fontWeight: 'bold',
+                  color: colors.onSurface,
+                }}
               >
                 {deliveryFee}F
               </Text>
@@ -171,7 +171,11 @@ export const RestaurantCard = ({
         <Card.Content style={{ padding: 16 }}>
           <View style={{ marginBottom: 12 }}>
             <Text
-              style={{ fontSize: 18, fontWeight: 'bold', color: colors.onSurface }}
+              style={{
+                fontSize: 18,
+                fontWeight: 'bold',
+                color: colors.onSurface,
+              }}
             >
               {restaurantName}
             </Text>
@@ -206,7 +210,11 @@ export const RestaurantCard = ({
 
             <View style={{ alignItems: 'flex-end' }}>
               <Text
-                style={{ fontSize: 14, fontWeight: '500', color: colors.onSurface }}
+                style={{
+                  fontSize: 14,
+                  fontWeight: '500',
+                  color: colors.onSurface,
+                }}
               >
                 {estimatedTime}
               </Text>

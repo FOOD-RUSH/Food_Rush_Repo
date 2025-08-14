@@ -3,7 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AuthStackParamList } from './types';
 
 // Import screens
-import { LoginScreen } from '../screens/auth/LoginScreen';
+import LoginScreen from '../screens/auth/LoginScreen';
 import SignupScreen from '../screens/auth/SignupScreen';
 import ResetPasswordScreen from '../screens/auth/ResetPasswordScreen';
 import OTPScreen from '../screens/auth/OTPScreen';
@@ -65,4 +65,3 @@ const AuthNavigator: React.FC = () => {
 };
 
 export default AuthNavigator;
-

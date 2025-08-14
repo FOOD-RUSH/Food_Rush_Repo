@@ -5,6 +5,7 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image, Platform, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from 'react-native-paper';
 
 import {
   CustomerHomeStackParamList,
@@ -19,13 +20,13 @@ import HomeScreen from '../screens/customer/home/HomeScreen';
 import ProfileHomeScreen from '../screens/customer/Profile/ProfileHomeScreen';
 import CompletedOrderScreen from '../screens/customer/Order/CompletedOrderScreen';
 import ActiveOrderScreen from '../screens/customer/Order/ActiveOrderScreen';
-// import OrderDetailsScreen from '../screens/customer/Order/OrderDetailsScreen';
 import FAQ from '../screens/customer/Profile/FAQ';
 
 // Import theme and assets
 import { icons } from '@/assets/images';
 import ContactUs from '../screens/customer/Profile/ContactUs';
-import { useTheme } from 'react-native-paper';
+import { useAppTheme } from '../config/theme';
+import { useAppStore } from '../stores/customerStores/AppStore';
 
 // Create navigators
 const CustomerTab = createBottomTabNavigator<CustomerTabParamList>();
@@ -38,15 +39,12 @@ const CustomerProfileStack =
 const CustomerHelpStack =
   createMaterialTopTabNavigator<CustomerHelpCenterStackParamList>();
 
-// Custom back button component
-
 // Stack Screen Components
 function CustomerHomeStackScreen() {
   return (
     <CustomerHomeStack.Navigator
       screenOptions={{
         headerShown: false,
-        // Performance optimizations
       }}
     >
       <CustomerHomeStack.Screen name="HomeScreen" component={HomeScreen} />
@@ -61,12 +59,14 @@ function CustomerOrderStackScreen() {
       initialRouteName="CompletedOrdersScreen"
       screenOptions={{
         tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.onBackground,
         tabBarStyle: {
           borderTopColor: colors.background,
           marginBottom: -50,
-
+          backgroundColor: colors.background,
         },
-        lazy: true, // Performance optimization
+
+        lazy: true,
       }}
     >
       <CustomerOrderStack.Screen
@@ -79,17 +79,13 @@ function CustomerOrderStackScreen() {
         component={ActiveOrderScreen}
         options={{ title: 'Pending' }}
       />
-      {/* <CustomerOrderStack.Screen
-        name="OrderDetails"
-        component={OrderDetailsScreen}
-        options={{ title: 'Order Details' }}
-      /> */}
     </CustomerOrderStack.Navigator>
   );
 }
 
 export function CustomerHelpCenterStackScreen() {
   const { colors } = useTheme();
+
   return (
     <CustomerHelpStack.Navigator
       initialRouteName="FAQ"
@@ -97,8 +93,9 @@ export function CustomerHelpCenterStackScreen() {
         tabBarActiveTintColor: colors.primary,
         tabBarStyle: {
           borderTopColor: colors.background,
+          backgroundColor: colors.background,
         },
-        lazy: true, // Performance optimization
+        lazy: true,
       }}
     >
       <CustomerHelpStack.Screen name="FAQ" component={FAQ} />
@@ -113,12 +110,16 @@ export function CustomerHelpCenterStackScreen() {
 
 function CustomerProfileStackScreen() {
   const { colors } = useTheme();
+
   return (
     <CustomerProfileStack.Navigator
       initialRouteName="ProfileHome"
       screenOptions={{
         contentStyle: {
           marginTop: -39,
+        },
+        headerStyle: {
+          backgroundColor: colors.background,
         },
       }}
     >
@@ -137,7 +138,11 @@ function CustomerProfileStackScreen() {
           headerTitleAlign: 'left',
           headerRight: () => (
             <TouchableOpacity onPress={() => {}} style={{ marginRight: 8 }}>
-              <Ionicons name="settings-outline" size={25} color={colors.primary} />
+              <Ionicons
+                name="settings-outline"
+                size={25}
+                color={colors.onBackground}
+              />
             </TouchableOpacity>
           ),
           headerTitleStyle: { color: colors.onBackground },
@@ -190,20 +195,18 @@ export default function CustomerNavigator() {
       marginTop: -50,
       paddingTop: 10,
     }),
-    [insets.bottom, colors.background],
+    [colors.background, insets.bottom],
   );
 
   const headerStyle = React.useMemo(
     () => ({
-      backgroundColor: colors.background,
+      backgroundColor: colors.surface,
       height: 60 + insets.top,
       borderBottomWidth: 0,
       shadowColor: 'transparent',
       elevation: 0,
-      borderBottomLeftRadius: 50,
-      borderBottomRightRadius: 10,
     }),
-    [insets.top, colors.background],
+    [colors.surface, insets.top],
   );
 
   return (
@@ -222,13 +225,12 @@ export default function CustomerNavigator() {
         headerStyle,
         headerTitleStyle: {
           fontWeight: 'bold',
+          color: colors.onSurface,
         },
         headerTitleAlign: 'left',
-        // Performance optimizations
         lazy: true,
         unmountOnBlur: false,
-        tabBarHideOnKeyboard: true
-        
+        tabBarHideOnKeyboard: true,
       })}
     >
       <CustomerTab.Screen
@@ -248,7 +250,6 @@ export default function CustomerNavigator() {
           headerRight: () => (
             <TouchableOpacity
               onPress={() => {
-                // Navigate to search using the root navigation
                 const rootNavigation = navigation.getParent() as any;
                 if (rootNavigation) {
                   rootNavigation.navigate('SearchScreen');
@@ -256,7 +257,11 @@ export default function CustomerNavigator() {
               }}
               style={{ marginRight: 20 }}
             >
-              <Ionicons name="search-outline" size={25} color={colors.primary} />
+              <Ionicons
+                name="search-outline"
+                size={25}
+                color={colors.primary}
+              />
             </TouchableOpacity>
           ),
           headerLeft: () => (
@@ -270,6 +275,7 @@ export default function CustomerNavigator() {
           headerTitleStyle: {
             marginLeft: 20,
             fontWeight: 'normal',
+            color: colors.onSurface,
           },
         })}
       />
@@ -278,7 +284,6 @@ export default function CustomerNavigator() {
         name="Profile"
         component={CustomerProfileStackScreen}
         options={{
-
           tabBarLabel: 'Profile',
           headerShown: false,
         }}

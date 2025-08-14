@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  ScrollView,
+} from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import ReusableModal from './ReusableModal';
@@ -66,9 +72,8 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Address Label */}
         <View className="mb-4">
-          <Text 
+          <Text
             style={{ color: colors.onSurface }}
-            
             className="text-base font-medium mb-2"
           >
             Label
@@ -79,7 +84,7 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
             placeholder="e.g., Home, Office, etc."
             placeholderTextColor={colors.onSurfaceVariant}
             className="px-4 py-3 rounded-xl text-base"
-            style={{ 
+            style={{
               backgroundColor: colors.surfaceVariant,
               color: colors.onSurface,
             }}
@@ -88,7 +93,7 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
 
         {/* Full Address */}
         <View className="mb-4">
-          <Text 
+          <Text
             style={{ color: colors.onSurface }}
             className="text-base font-medium mb-2"
           >
@@ -103,7 +108,7 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
             numberOfLines={3}
             textAlignVertical="top"
             className="px-4 py-3 rounded-xl text-base"
-            style={{ 
+            style={{
               backgroundColor: colors.surfaceVariant,
               color: colors.onSurface,
               minHeight: 80,
@@ -116,22 +121,20 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
           onPress={() => setIsDefault(!isDefault)}
           className="flex-row items-center justify-between mb-6"
         >
-          <Text 
+          <Text
             style={{ color: colors.onSurface }}
             className="text-base font-medium"
           >
             Set as default address
           </Text>
-          <View 
+          <View
             className="w-6 h-6 rounded-full border-2 items-center justify-center"
-            style={{ 
+            style={{
               borderColor: isDefault ? '#007aff' : colors.outline,
               backgroundColor: isDefault ? '#007aff' : 'transparent',
             }}
           >
-            {isDefault && (
-              <Ionicons name="checkmark" size={16} color="white" />
-            )}
+            {isDefault && <Ionicons name="checkmark" size={16} color="white" />}
           </View>
         </TouchableOpacity>
 
@@ -143,27 +146,33 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
             style={{ backgroundColor: colors.surfaceVariant }}
             activeOpacity={0.7}
           >
-            <Text 
+            <Text
               style={{ color: colors.onSurfaceVariant }}
               className="text-base font-medium"
             >
               Cancel
             </Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity
             onPress={handleSave}
             className="flex-1 py-4 rounded-xl items-center justify-center"
-            style={{ 
-              backgroundColor: (label.trim() && fullAddress.trim()) ? '#007aff' : colors.surfaceVariant 
+            style={{
+              backgroundColor:
+                label.trim() && fullAddress.trim()
+                  ? '#007aff'
+                  : colors.surfaceVariant,
             }}
             activeOpacity={0.7}
             disabled={!label.trim() || !fullAddress.trim()}
           >
-            <Text 
+            <Text
               className="text-base font-medium"
-              style={{ 
-                color: (label.trim() && fullAddress.trim()) ? 'white' : colors.onSurfaceVariant 
+              style={{
+                color:
+                  label.trim() && fullAddress.trim()
+                    ? 'white'
+                    : colors.onSurfaceVariant,
               }}
             >
               {mode === 'add' ? 'Add Address' : 'Update'}

@@ -17,22 +17,26 @@ const faqData: FAQItem[] = [
   {
     id: 1,
     title: 'What is FoodRush?',
-    description: 'FoodRush is a comprehensive food delivery platform that connects you with your favorite restaurants and delivers fresh meals right to your doorstep. We partner with local restaurants to bring you a wide variety of cuisines at competitive prices.',
+    description:
+      'FoodRush is a comprehensive food delivery platform that connects you with your favorite restaurants and delivers fresh meals right to your doorstep. We partner with local restaurants to bring you a wide variety of cuisines at competitive prices.',
   },
   {
     id: 2,
     title: 'How I can make a payment?',
-    description: 'We accept multiple payment methods including credit/debit cards, digital wallets like PayPal, Apple Pay, Google Pay, and cash on delivery. All online payments are secured with industry-standard encryption.',
+    description:
+      'We accept multiple payment methods including credit/debit cards, digital wallets like PayPal, Apple Pay, Google Pay, and cash on delivery. All online payments are secured with industry-standard encryption.',
   },
   {
     id: 3,
     title: 'How do I can cancel orders?',
-    description: 'You can cancel your order within 5 minutes of placing it through the app. Go to "My Orders", select the order you want to cancel, and tap "Cancel Order". If the restaurant has already started preparing your food, cancellation may not be possible.',
+    description:
+      'You can cancel your order within 5 minutes of placing it through the app. Go to "My Orders", select the order you want to cancel, and tap "Cancel Order". If the restaurant has already started preparing your food, cancellation may not be possible.',
   },
   {
     id: 4,
     title: 'How do I can delete my account?',
-    description: 'To delete your account, go to Settings > Account Settings > Delete Account. Please note that this action is irreversible and will permanently remove all your order history, saved addresses, and preferences.',
+    description:
+      'To delete your account, go to Settings > Account Settings > Delete Account. Please note that this action is irreversible and will permanently remove all your order history, saved addresses, and preferences.',
   },
 ];
 
@@ -51,7 +55,7 @@ const FAQ = () => {
 
   return (
     <CommonView>
-      <ScrollView 
+      <ScrollView
         showsVerticalScrollIndicator={false}
         className="flex-1 px-4 py-2"
       >
@@ -80,33 +84,33 @@ const QuestionCard = ({ item, isExpanded, onToggle }: QuestionCardProps) => {
   const { colors } = useTheme();
 
   return (
-    <Card 
-      mode="outlined" 
+    <Card
+      mode="outlined"
       className="mb-3"
-      style={{ 
+      style={{
         backgroundColor: colors.surface,
         borderColor: colors.outline,
       }}
     >
       <TouchableOpacity onPress={onToggle} className="p-5">
         <View className="flex-row justify-between items-center">
-          <Text 
+          <Text
             className="text-base font-semibold flex-1 pr-3"
             style={{ color: colors.onSurface }}
           >
             {item.title}
           </Text>
           <MaterialIcons
-            name={isExpanded ? "keyboard-arrow-up" : "keyboard-arrow-down"}
+            name={isExpanded ? 'keyboard-arrow-up' : 'keyboard-arrow-down'}
             size={24}
             color={colors.primary}
           />
         </View>
-        
+
         {isExpanded && (
           <>
             <Seperator />
-            <Text 
+            <Text
               className="text-sm leading-5 mt-3"
               style={{ color: colors.onSurfaceVariant }}
             >

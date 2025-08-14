@@ -46,9 +46,11 @@ export type AuthStackParamList = {
   SignUp: { userType?: 'customer' | 'restaurant' } | undefined;
   ForgotPassword: undefined;
   OTPVerification: {
-    email?: string;
-    phone?: string;
+    email: string;
+    phone: string;
     type: 'email' | 'phone' | 'reset_password';
+    userId: string;
+    userType: 'customer' | 'restaurant';
   };
   ResetPassword: { token: string };
 };

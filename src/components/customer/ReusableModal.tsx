@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Modal, Dimensions,  } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, Dimensions } from 'react-native';
 import { Card, useTheme } from 'react-native-paper';
 
 const screen_WIDTH = Dimensions.get('window').width;
@@ -29,7 +29,6 @@ const ReusableModal: React.FC<ReusableModalProps> = ({
       transparent={true}
       animationType="slide"
       onRequestClose={onDismiss}
-
     >
       <View
         className={`flex-1 justify-center items-center bg-black/50 px-6  ${containerStyle}`}

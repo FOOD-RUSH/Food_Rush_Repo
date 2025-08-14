@@ -58,21 +58,29 @@ const OrderItemCard = ({
 
           {/* Food Details */}
           <View className="flex-1">
-            <Text className={`text-lg font-bold mb-1 ${colors.onSurface}`}>
+            <Text
+              className={`text-lg font-bold mb-1 `}
+              style={{ color: colors.onSurface }}
+            >
               {foodName}
             </Text>
             <View className="flex-row items-center mb-2">
               <Text
-                className={`text-base mr-2 font-medium ${colors.onSurface}`}
+                className={`text-base mr-2 font-medium `}
+                style={{ color: colors.onSurface }}
               >
                 {quantity} items
               </Text>
               <Text
-                className={`text-base mr-2 font-medium ${colors.onSurface}`}
+                className={`text-base mr-2 font-medium `}
+                style={{ color: colors.onSurface }}
               >
                 |
               </Text>
-              <Text className={`text-base font-medium ${secondaryTextColor}`}>
+              <Text
+                className={`text-base font-medium `}
+                style={{ color: colors.onSurface }}
+              >
                 {distance}
               </Text>
             </View>
@@ -87,9 +95,7 @@ const OrderItemCard = ({
               </Text>
               <View
                 className={`px-3 py-1 rounded-full ${
-                  orderStatus === 'active'
-                    ? 'bg-green-100'
-                    : 'bg-blue-200'
+                  orderStatus === 'active' ? 'bg-green-100' : 'bg-blue-200'
                 }`}
               >
                 <Text

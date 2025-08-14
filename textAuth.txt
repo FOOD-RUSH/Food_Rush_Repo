@@ -50,7 +50,7 @@ The "auth not initialized" error you're experiencing is likely due to one of the
 // App.tsx
 import React from 'react';
 import './firebase'; // Import FIRST, before other components
-import { Provider } from 'react-redux';
+
 import { store } from './store/store';
 import MainNavigator from './navigation/MainNavigator';
 ```
