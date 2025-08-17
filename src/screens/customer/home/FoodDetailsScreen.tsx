@@ -212,13 +212,14 @@ const FoodDetailsScreen = ({
             multiline
             numberOfLines={3}
             style={{
-              backgroundColor: colors.onBackground,
+              backgroundColor: colors.surface,
               marginRight: 16,
               marginLeft: 16,
               alignSelf: 'center',
               height: 100,
             }}
             placeholder="Special instructions or preferences"
+            onChangeText={(text) => setInstructions(text)}
           />
         </View>
       </ScrollView>

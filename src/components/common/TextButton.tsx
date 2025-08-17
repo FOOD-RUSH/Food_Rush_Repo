@@ -9,7 +9,6 @@ type TextButtonProps = {
 
 export const TextButton: React.FC<TextButtonProps> = ({ text, onPress }) => {
   const { colors } = useTheme();
-  const textColor = colors.primary;
 
   return (
     <TouchableOpacity

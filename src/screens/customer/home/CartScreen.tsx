@@ -6,14 +6,18 @@ import { TouchableRipple, useTheme } from 'react-native-paper';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import { useCartStore, CartItem } from '@/src/stores/customerStores/cartStore';
 import { images } from '@/assets/images';
+import { useLanguage } from '@/src/contexts/LanguageContext';
+import Toast from 'react-native-toast-message';
 
 const CartScreen = ({ navigation }: RootStackScreenProps<'Cart'>) => {
   const { colors } = useTheme();
+  const { t } = useLanguage();
 
   // Subscribe to specific store slices to minimize re-renders
   const cartItems = useCartStore((state) => state.items);
   const totalPrice = useCartStore((state) => state.totalprice);
   const cartId = useCartStore((state) => state.CartID);
+  const clearCart = useCartStore((state) => state.clearCart);
 
   // Memoize formatted total price
   const formattedTotalPrice = useMemo(
@@ -33,10 +37,48 @@ const CartScreen = ({ navigation }: RootStackScreenProps<'Cart'>) => {
 
   // Handle navigation to checkout
   const handleCheckout = useCallback(() => {
+    if (cartItems.length === 0) {
+      Toast.show({
+        type: 'info',
+        text1: t('info'),
+        text2: t('cart_empty'),
+        position: 'top',
+      });
+      return;
+    }
+    
     if (cartId) {
       navigation.navigate('Checkout', { cartId });
+    } else {
+      Toast.show({
+        type: 'error',
+        text1: t('error'),
+        text2: 'Unable to proceed to checkout. Please try again.',
+        position: 'top',
+      });
     }
-  }, [navigation, cartId]);
+  }, [cartItems.length, cartId, navigation, t]);
+
+  // Handle clear cart
+  const handleClearCart = useCallback(() => {
+    if (cartItems.length === 0) {
+      Toast.show({
+        type: 'info',
+        text1: t('info'),
+        text2: t('cart_empty'),
+        position: 'top',
+      });
+      return;
+    }
+    
+    clearCart();
+    Toast.show({
+      type: 'success',
+      text1: t('success'),
+      text2: 'Cart cleared successfully',
+      position: 'top',
+    });
+  }, [cartItems.length, clearCart, t]);
 
   // Optimized render item with useCallback to prevent unnecessary re-renders
   const renderCartItem: ListRenderItem<CartItem> = useCallback(
@@ -71,17 +113,17 @@ const CartScreen = ({ navigation }: RootStackScreenProps<'Cart'>) => {
           className="text-xl font-semibold text-center mb-2"
           style={{ color: colors.onSurfaceVariant }}
         >
-          Your Cart is Empty
+          {t('cart_empty')}
         </Text>
         <Text
           className="text-sm text-center leading-5"
           style={{ color: colors.onSurfaceVariant }}
         >
-          Add some delicious items to your cart to get started
+          {t('cart_empty_description')}
         </Text>
       </View>
     ),
-    [colors.onSurfaceVariant],
+    [colors.onSurfaceVariant, t],
   );
 
   // Early return for empty cart
@@ -93,6 +135,26 @@ const CartScreen = ({ navigation }: RootStackScreenProps<'Cart'>) => {
     <CommonView>
       <View className="flex-1">
         {/* Cart Header */}
+        <View className="flex-row justify-between items-center px-4 py-3">
+          <Text
+            className="text-xl font-bold"
+            style={{ color: colors.onSurface }}
+          >
+            {t('cart')}
+          </Text>
+          <TouchableRipple
+            onPress={handleClearCart}
+            className="px-3 py-1 rounded-full"
+            style={{ backgroundColor: colors.surfaceVariant }}
+          >
+            <Text
+              className="text-sm font-medium"
+              style={{ color: colors.primary }}
+            >
+              {t('clear_cart')}
+            </Text>
+          </TouchableRipple>
+        </View>
 
         {/* Cart Items List */}
         <FlatList
@@ -102,7 +164,7 @@ const CartScreen = ({ navigation }: RootStackScreenProps<'Cart'>) => {
           ItemSeparatorComponent={ItemSeparator}
           contentContainerStyle={{
             paddingHorizontal: 16,
-            paddingVertical: 40,
+            paddingVertical: 20,
             paddingBottom: 120, // Space for checkout button
           }}
           showsVerticalScrollIndicator={false}
@@ -132,7 +194,6 @@ const CartScreen = ({ navigation }: RootStackScreenProps<'Cart'>) => {
           className="rounded-2xl py-4 px-6"
           style={{ backgroundColor: colors.primary }}
           onPress={handleCheckout}
-          disabled={!cartId}
         >
           <View className="flex-row justify-between items-center">
             <View>
@@ -140,7 +201,7 @@ const CartScreen = ({ navigation }: RootStackScreenProps<'Cart'>) => {
                 className="font-semibold text-base"
                 style={{ color: colors.onPrimary }}
               >
-                Checkout
+                {t('checkout')}
               </Text>
               <Text
                 className="text-sm opacity-90"

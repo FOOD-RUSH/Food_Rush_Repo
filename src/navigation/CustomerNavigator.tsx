@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
@@ -25,8 +25,6 @@ import FAQ from '../screens/customer/Profile/FAQ';
 // Import theme and assets
 import { icons } from '@/assets/images';
 import ContactUs from '../screens/customer/Profile/ContactUs';
-import { useAppTheme } from '../config/theme';
-import { useAppStore } from '../stores/customerStores/AppStore';
 
 // Create navigators
 const CustomerTab = createBottomTabNavigator<CustomerTabParamList>();
@@ -59,13 +57,15 @@ function CustomerOrderStackScreen() {
       initialRouteName="CompletedOrdersScreen"
       screenOptions={{
         tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.onBackground,
+        tabBarInactiveTintColor: colors.onSurfaceVariant,
         tabBarStyle: {
-          borderTopColor: colors.background,
+          backgroundColor: colors.surface,
+          borderTopColor: colors.surface,
           marginBottom: -50,
-          backgroundColor: colors.background,
         },
-
+        tabBarIndicatorStyle: {
+          backgroundColor: colors.primary,
+        },
         lazy: true,
       }}
     >
@@ -91,9 +91,13 @@ export function CustomerHelpCenterStackScreen() {
       initialRouteName="FAQ"
       screenOptions={{
         tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.onSurfaceVariant,
         tabBarStyle: {
-          borderTopColor: colors.background,
-          backgroundColor: colors.background,
+          backgroundColor: colors.surface,
+          borderTopColor: colors.surface,
+        },
+        tabBarIndicatorStyle: {
+          backgroundColor: colors.primary,
         },
         lazy: true,
       }}
@@ -115,11 +119,16 @@ function CustomerProfileStackScreen() {
     <CustomerProfileStack.Navigator
       initialRouteName="ProfileHome"
       screenOptions={{
-        contentStyle: {
-          marginTop: -39,
-        },
         headerStyle: {
+          backgroundColor: colors.surface,
+        },
+        headerTitleStyle: {
+          color: colors.onSurface,
+        },
+        contentStyle: {
           backgroundColor: colors.background,
+
+          marginTop: -39,
         },
       }}
     >
@@ -141,11 +150,10 @@ function CustomerProfileStackScreen() {
               <Ionicons
                 name="settings-outline"
                 size={25}
-                color={colors.onBackground}
+                color={colors.onSurface}
               />
             </TouchableOpacity>
           ),
-          headerTitleStyle: { color: colors.onBackground },
         })}
       />
     </CustomerProfileStack.Navigator>
@@ -184,10 +192,10 @@ export default function CustomerNavigator() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
 
-  const tabBarStyle = React.useMemo(
+  const tabBarStyle = useMemo(
     () => ({
-      backgroundColor: colors.background,
-      borderColor: colors.background,
+      backgroundColor: colors.surface,
+      borderColor: colors.surface,
       height: (Platform.OS === 'ios' ? 80 : 60) + insets.bottom,
       paddingBottom: (Platform.OS === 'ios' ? 25 : 10) + insets.bottom,
       borderTopRightRadius: 40,
@@ -195,10 +203,10 @@ export default function CustomerNavigator() {
       marginTop: -50,
       paddingTop: 10,
     }),
-    [colors.background, insets.bottom],
+    [colors.surface, insets.bottom],
   );
 
-  const headerStyle = React.useMemo(
+  const headerStyle = useMemo(
     () => ({
       backgroundColor: colors.surface,
       height: 60 + insets.top,
@@ -221,6 +229,7 @@ export default function CustomerNavigator() {
           />
         ),
         tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.onSurfaceVariant,
         tabBarStyle,
         headerStyle,
         headerTitleStyle: {
@@ -241,7 +250,6 @@ export default function CustomerNavigator() {
           headerShown: false,
         }}
       />
-
       <CustomerTab.Screen
         name="Orders"
         component={CustomerOrderStackScreen}
@@ -279,7 +287,6 @@ export default function CustomerNavigator() {
           },
         })}
       />
-
       <CustomerTab.Screen
         name="Profile"
         component={CustomerProfileStackScreen}

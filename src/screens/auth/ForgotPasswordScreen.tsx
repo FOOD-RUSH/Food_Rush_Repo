@@ -73,12 +73,14 @@ const ForgotPasswordScreen = () => {
         {/* Header Section */}
         <View className="mb-10">
           <Text
-            className={`text-3xl font-bold text-center mb-2 text-[${colors.onSurface}]`}
+            className={`text-3xl font-bold text-center mb-2 `}
+            style={{ color: colors.onBackground }}
           >
             Reset Password
           </Text>
           <Text
-            className={`text-sm text-center leading-5 text-[${colors.onSurface}]`}
+            className={`text-sm text-center leading-5 `}
+            style={{ color: colors.onBackground }}
           >
             Enter your email address and we will send you a{}code to reset your
             password
@@ -135,7 +137,10 @@ const ForgotPasswordScreen = () => {
               >
                 {errors.email?.message}
               </HelperText>
-              <Text className={`text-xs mt-1 text-[${colors.onSurface}]`}>
+              <Text
+                className={`text-xs mt-1 `}
+                style={{ color: colors.onBackground }}
+              >
                 Must have at least 8 characters
               </Text>
             </View>

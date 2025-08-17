@@ -1,45 +1,45 @@
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
-import React, { useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { Avatar, Switch, useTheme } from 'react-native-paper';
-import { icons } from '@/assets/images';
 import { AntDesign, MaterialIcons } from '@expo/vector-icons';
 import RowView from '@/src/components/common/RowView';
 import { CustomerProfileStackScreenProps } from '@/src/navigation/types';
 import CommonView from '@/src/components/common/CommonView';
 import { useAppStore } from '@/src/stores/customerStores/AppStore';
-import LogoutModal from '@/src/components/customer/LogoutModal';
 import { useAuthStore } from '@/src/stores/customerStores/AuthStore';
-import { authApi } from '@/src/services/customer/authApi';
-import { useQuery } from '@tanstack/react-query';
+import { useCurrentUser } from '@/src/hooks/customer/useAuthhooks';
+import { useBottomSheet } from '@/src/components/common/BottomSheet/BottomSheetContext';
+import LogoutContent from '@/src/components/common/BottomSheet/LogoutContent';
+import { icons } from '@/assets/images';
 
 const ProfileHomeScreen = ({
   navigation,
 }: CustomerProfileStackScreenProps<'ProfileHome'>) => {
-  const { data } = useQuery({
-    queryKey: ['userData'],
-    queryFn: () => {
-      console.log('fetching profile data ....');
-      return authApi.getProfile();
-    },
-    staleTime: 5 * 60,
-  });
-
+  const { data: user } = useCurrentUser();
   const { colors } = useTheme();
   const theme = useAppStore((state) => state.theme);
   const setTheme = useAppStore((state) => state.setTheme);
-  const [logoutModalVisible, setLogoutModalVisible] = useState(false);
   const logoutUser = useAuthStore((state) => state.logoutUser);
-  const handleLogout = () => {
-    console.log('User logged out');
+  const { present, dismiss } = useBottomSheet();
+
+  const handleLogout = useCallback(() => {
+    console.log('Logging out user');
     logoutUser();
-  };
+    dismiss();
+  }, [logoutUser, dismiss]);
 
-  const showLogoutModal = () => {
-    console.log(data);
-    setLogoutModalVisible(true);
-  };
+  const showLogoutModal = useCallback(() => {
+    present(
+      <LogoutContent onDismiss={dismiss} onConfirmLogout={handleLogout} />,
+      {
+        snapPoints: ['40%'],
+        enablePanDownToClose: true,
+        title: 'Confirm Logout',
+        showHandle: true,
+      },
+    );
+  }, [present, dismiss, handleLogout]);
 
-  // Memoized theme toggle handler for better performance
   const handleThemeToggle = useCallback(
     (value: boolean) => {
       const newTheme = value ? 'dark' : 'light';
@@ -50,15 +50,39 @@ const ProfileHomeScreen = ({
 
   const isDarkMode = theme === 'dark';
 
+  // Navigation handlers
+  const navigateToEditProfile = useCallback(() => {
+    navigation.navigate('EditProfile');
+  }, [navigation]);
+
+  const navigateToFavoriteRestaurants = useCallback(() => {
+    navigation.navigate('FavoriteRestaurantScreen');
+  }, [navigation]);
+
+  const navigateToPaymentMethods = useCallback(() => {
+    navigation.navigate('PaymentMethods');
+  }, [navigation]);
+
+  const navigateToAddress = useCallback(() => {
+    navigation.navigate('AddressScreen');
+  }, [navigation]);
+
+  const navigateToHelp = useCallback(() => {
+    navigation.navigate('Help', { screen: 'ContactUs' });
+  }, [navigation]);
+
+  const navigateToLanguage = useCallback(() => {
+    navigation.navigate('LanguageScreen');
+  }, [navigation]);
+
   return (
     <CommonView>
       <ScrollView
         className="flex-1 h-full py-3"
-        style={{ backgroundColor: colors.background }}
         showsVerticalScrollIndicator={false}
       >
-        {/* profile pic and stuff */}
-        <View className="flex-row justify-between items-center mb-3 px-3">
+        {/* Profile section */}
+        <View className="flex-row justify-between items-center mb-3 px-2">
           <Avatar.Image
             source={icons.ProfilePlogo}
             size={100}
@@ -69,39 +93,30 @@ const ProfileHomeScreen = ({
               style={{ color: colors.onBackground }}
               className="font-semibold text-[18px]"
             >
-              {data?.data!.email} 124
+              {user?.fullName}
             </Text>
-
             <Text
               style={{ color: colors.onSurfaceVariant }}
               className="text-[15px]"
             >
-              {/* {formatPhoneNumber(LoggedInUser.data.phoneNumner)} */}
-              {data?.data!.role}
+              ID: {user?.phoneNumber}
             </Text>
           </View>
-          <TouchableOpacity
-            activeOpacity={0.7}
-            onPress={() => {
-              console.log(data?.data!);
-              navigation.navigate('EditProfile');
-            }}
-          >
+          <TouchableOpacity activeOpacity={0.7} onPress={navigateToEditProfile}>
             <AntDesign name="edit" color={'#007aff'} size={25} />
           </TouchableOpacity>
         </View>
 
-        {/* divider */}
+        {/* Divider */}
         <View
           className="h-[1px] mx-3 my-4"
           style={{ backgroundColor: colors.outline }}
         />
 
+        {/* Menu items */}
         <RowView
           title=" My Favorite Restaurants"
-          onPress={() => {
-            navigation.navigate('FavoriteRestaurantScreen');
-          }}
+          onPress={navigateToFavoriteRestaurants}
           leftIconName="fast-food-outline"
         />
         <RowView
@@ -111,9 +126,7 @@ const ProfileHomeScreen = ({
         />
         <RowView
           title="Payment Method"
-          onPress={() => {
-            navigation.navigate('PaymentMethods');
-          }}
+          onPress={navigateToPaymentMethods}
           leftIconName="card-outline"
         />
 
@@ -124,13 +137,9 @@ const ProfileHomeScreen = ({
 
         <RowView
           title="Address"
-          onPress={() => {
-            navigation.navigate('AddressScreen');
-          }}
+          onPress={navigateToAddress}
           leftIconName="location-outline"
         />
-
-        {/* notification settings */}
         <RowView
           title="Notification"
           onPress={() => {}}
@@ -143,9 +152,7 @@ const ProfileHomeScreen = ({
         />
         <RowView
           title="Help"
-          onPress={() => {
-            navigation.navigate('Help', { screen: 'ContactUs' });
-          }}
+          onPress={navigateToHelp}
           leftIconName="help-circle-outline"
         />
 
@@ -172,9 +179,7 @@ const ProfileHomeScreen = ({
 
         <RowView
           title="Language Screen"
-          onPress={() => {
-            navigation.navigate('LanguageScreen');
-          }}
+          onPress={navigateToLanguage}
           leftIconName="language-outline"
         />
 
@@ -185,13 +190,6 @@ const ProfileHomeScreen = ({
           leftIconName="log-out-outline"
         />
       </ScrollView>
-
-      {/* Logout Modal */}
-      <LogoutModal
-        visible={logoutModalVisible}
-        onDismiss={() => setLogoutModalVisible(false)}
-        onConfirmLogout={handleLogout}
-      />
     </CommonView>
   );
 };

@@ -5,21 +5,31 @@ import { AddressData } from '../components/customer/AddressEditModal';
 // Basic props
 
 export interface User {
-  uid: string;
-  email: string;
-  userType: 'customer' | 'restaurant';
-  profile?: CustomerProfile;
-  isEmailVerified: boolean;
-}
 
-// customer user
-export interface CustomerUser {
-  uid: string;
+
+  id: string;
   email: string;
-  userType: 'customer' | 'restaurant';
-  profile?: CustomerProfile;
+  fullName: string;
+  phoneNumber: string;
+  role: 'customer';
   isEmailVerified: boolean;
+  profilePicture?: null | any
 }
+// {
+//   "status_code": 200,
+//   "message": "Authentication request successful",
+//   "data": {
+//     "sub": "9a14155d-5b82-44bf-b196-9dcec0f50be7",
+//     "id": "9a14155d-5b82-44bf-b196-9dcec0f50be7",
+//     "email": "tochukwupaul21@gmail.com",
+//     "fullName": "Dhdjsn",
+//     "phoneNumber": "+237239767981",
+//     "profilePicture": null,
+//     "role": "customer",
+//     "status": "active"
+//   }
+// }
+
 // app state
 
 //Properties of Food
@@ -35,6 +45,9 @@ export interface FoodProps {
   category?: any;
   discount?: any;
   description: string;
+  startAt?: any;
+  endAt?: any
+
 }
 
 // Onboarding slides
@@ -45,19 +58,6 @@ export interface OnboardingSlide {
   image: any;
 }
 
-// Customer profile
-export interface CustomerProfile {
-  image?: any;
-  userName: string;
-  phoneNumber: string;
-  addresses?: AddressData[];
-  preferences?: {
-    dietary?: string[];
-    cuisineTypes?: string[];
-  };
-  favoriteRestaurants?: RestaurantProfile[];
-  favoriteFood?: FoodProps[];
-}
 //Restaurant profile
 export interface RestaurantProfile {
   id: string;

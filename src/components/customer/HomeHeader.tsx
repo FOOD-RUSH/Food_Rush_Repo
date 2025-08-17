@@ -10,11 +10,11 @@ const HomeHeader = () => {
   const navigation =
     useNavigation<CustomerHomeStackScreenProps<'HomeScreen'>['navigation']>();
   const { colors } = useTheme();
-  const backgroundColor = colors.tertiary;
 
   return (
     <View
-      className={`flex-row justify-between items-cent400er px-4 py-3 bg-[${backgroundColor}]`}
+      className="flex-row justify-between items-center px-4 py-3"
+      style={{ backgroundColor: colors.background }}
     >
       <View className="flex-row items-center flex-1">
         <Avatar.Image

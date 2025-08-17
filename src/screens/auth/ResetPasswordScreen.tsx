@@ -11,6 +11,8 @@ import {
   useTheme,
 } from 'react-native-paper';
 import CommonView from '@/src/components/common/CommonView';
+import { useResetPassword } from '@/src/hooks/customer/useAuthhooks';
+import Toast from 'react-native-toast-message';
 
 // Validation schema
 const validationSchema = yup.object({
@@ -42,7 +44,7 @@ const ResetPasswordScreen = () => {
     control,
     handleSubmit,
     watch,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<ResetPasswordForm>({
     resolver: yupResolver(validationSchema),
     defaultValues: {
@@ -53,15 +55,34 @@ const ResetPasswordScreen = () => {
 
   const passwordValue = watch('password');
   const confirmPasswordValue = watch('confirmPassword');
+  const {
+    mutate: ResetPasswordMutation,
+    error,
+    isPending,
+  } = useResetPassword();
 
-  const onSubmit = useCallback(async (data: ResetPasswordForm) => {
-    try {
-      console.log('Password reset:', data);
-      // Add your password reset API call here
-    } catch (error) {
-      console.error('Password reset failed:', error);
-    }
-  }, []);
+  const onSubmit = useCallback(
+    async (data: ResetPasswordForm) => {
+      try {
+        console.log('Password reset:', data);
+        // Add your password reset API call here
+        ResetPasswordMutation(
+          { otp: '', email: '', newPassword: '' },
+          {
+            onSuccess: (response) => {
+              Toast.show({
+                text1: response.data.response,
+                type: 'success',
+              });
+            },
+          },
+        );
+      } catch (error) {
+        console.error('Password reset failed:', error);
+      }
+    },
+    [ResetPasswordMutation],
+  );
 
   const togglePasswordVisibility = useCallback(() => {
     setShowPassword((prev) => !prev);
@@ -94,12 +115,14 @@ const ResetPasswordScreen = () => {
           {/* Header Section */}
           <View className="mb-10">
             <Text
-              className={`text-3xl font-bold text-center mb-2 text-[${colors.onSurface}]`}
+              className={`text-3xl font-bold text-center mb-2`}
+              style={{ color: colors.background }}
             >
               Reset Password
             </Text>
             <Text
-              className={`text-sm text-center leading-5 text-[${colors.onSurface}]`}
+              className={`text-base text-center leading-5 `}
+              style={{ color: colors.background }}
             >
               Enter your email address and we will send you code to reset your
               password
@@ -113,6 +136,7 @@ const ResetPasswordScreen = () => {
             render={({ field: { onChange, onBlur, value } }) => (
               <View className="mb-6">
                 <TextInput
+                  disabled={isPending}
                   placeholder="Enter your password"
                   value={value}
                   onChangeText={onChange}
@@ -155,7 +179,10 @@ const ResetPasswordScreen = () => {
                 >
                   {errors.password?.message}
                 </HelperText>
-                <Text className={`text-xs mt-1 text-[${colors.onSurface}]`}>
+                <Text
+                  className={`text-xs mt-1`}
+                  style={{ color: colors.background }}
+                >
                   Must have at least 8 characters
                 </Text>
               </View>
@@ -169,6 +196,7 @@ const ResetPasswordScreen = () => {
             render={({ field: { onChange, onBlur, value } }) => (
               <View className="mb-8">
                 <TextInput
+                  disabled={isPending}
                   placeholder="Confirm your password"
                   value={value}
                   onChangeText={onChange}
@@ -211,7 +239,10 @@ const ResetPasswordScreen = () => {
                 >
                   {errors.confirmPassword?.message}
                 </HelperText>
-                <Text className={`text-xs mt-1 text-[${colors.onSurface}]`}>
+                <Text
+                  className={`text-xs mt-1`}
+                  style={{ color: colors.background }}
+                >
                   Both passwords must match
                 </Text>
               </View>
@@ -222,8 +253,8 @@ const ResetPasswordScreen = () => {
           <Button
             mode="contained"
             onPress={handleSubmit(onSubmit)}
-            loading={isSubmitting}
-            disabled={isSubmitting || !passwordValue || !confirmPasswordValue}
+            loading={isPending}
+            disabled={isPending || !passwordValue || !confirmPasswordValue}
             buttonColor={colors.primary}
             textColor="white"
             contentStyle={{ paddingVertical: 8 }}

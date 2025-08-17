@@ -6,7 +6,7 @@ import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import InputField from '@/src/components/customer/InputField';
 import { Dropdown } from 'react-native-element-dropdown';
 import { RootStackScreenProps } from '@/src/navigation/types';
-import { Button } from 'react-native-paper';
+import { Button, useTheme } from 'react-native-paper';
 import CommonView from '@/src/components/common/CommonView';
 import { useAuthUser } from '@/src/stores/customerStores/AuthStore';
 
@@ -49,7 +49,7 @@ const EditProfileScreen = ({
     });
     // Here you would typically call an API to update the user profile
   };
-
+  const { colors } = useTheme();
   return (
     <CommonView>
       <ScrollView
@@ -94,10 +94,10 @@ const EditProfileScreen = ({
           value={genderValue}
           style={{
             height: 62,
-            borderColor: '#e5e7eb',
+            borderColor: colors.surfaceVariant,
             borderRadius: 8,
             paddingHorizontal: 10,
-            backgroundColor: '#e5e7eb',
+            backgroundColor: colors.surfaceVariant,
             margin: 9,
           }}
           itemTextStyle={{ color: 'gray' }}

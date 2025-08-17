@@ -9,6 +9,7 @@ import {
 import { useTheme } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import ReusableModal from './ReusableModal';
+import { useLanguage } from '@/src/contexts/LanguageContext';
 
 export interface AddressData {
   id?: string;
@@ -33,6 +34,7 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
   mode,
 }) => {
   const { colors } = useTheme();
+  const { t } = useLanguage();
   const [label, setLabel] = useState('');
   const [fullAddress, setFullAddress] = useState('');
   const [isDefault, setIsDefault] = useState(false);
@@ -66,7 +68,7 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
     <ReusableModal
       visible={visible}
       onDismiss={onDismiss}
-      title={mode === 'add' ? 'Add Address' : 'Edit Address'}
+      title={mode === 'add' ? t('add_address') : t('edit_address')}
       showCloseButton={true}
     >
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -76,12 +78,12 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
             style={{ color: colors.onSurface }}
             className="text-base font-medium mb-2"
           >
-            Label
+            {t('label')}
           </Text>
           <TextInput
             value={label}
             onChangeText={setLabel}
-            placeholder="e.g., Home, Office, etc."
+            placeholder={t('address_label_placeholder')}
             placeholderTextColor={colors.onSurfaceVariant}
             className="px-4 py-3 rounded-xl text-base"
             style={{
@@ -97,12 +99,12 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
             style={{ color: colors.onSurface }}
             className="text-base font-medium mb-2"
           >
-            Full Address
+            {t('full_address')}
           </Text>
           <TextInput
             value={fullAddress}
             onChangeText={setFullAddress}
-            placeholder="Enter complete address"
+            placeholder={t('address_placeholder')}
             placeholderTextColor={colors.onSurfaceVariant}
             multiline={true}
             numberOfLines={3}
@@ -125,7 +127,7 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
             style={{ color: colors.onSurface }}
             className="text-base font-medium"
           >
-            Set as default address
+            {t('set_default_address')}
           </Text>
           <View
             className="w-6 h-6 rounded-full border-2 items-center justify-center"
@@ -150,7 +152,7 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
               style={{ color: colors.onSurfaceVariant }}
               className="text-base font-medium"
             >
-              Cancel
+              {t('cancel')}
             </Text>
           </TouchableOpacity>
 
@@ -175,7 +177,7 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
                     : colors.onSurfaceVariant,
               }}
             >
-              {mode === 'add' ? 'Add Address' : 'Update'}
+              {mode === 'add' ? t('add_address') : t('update')}
             </Text>
           </TouchableOpacity>
         </View>

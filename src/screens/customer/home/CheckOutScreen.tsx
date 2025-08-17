@@ -15,6 +15,8 @@ import { Card, useTheme } from 'react-native-paper';
 import Seperator from '@/src/components/common/Seperator';
 import CheckOutItem from '@/src/components/customer/CheckOutItem';
 import { useCartStore, CartItem } from '@/src/stores/customerStores/cartStore';
+import CheckoutContent from '@/src/components/common/BottomSheet/CheckoutContent';
+import { useBottomSheet } from '@/src/components/common/BottomSheet/BottomSheetContext';
 
 const CheckOutScreen = ({
   navigation,
@@ -30,6 +32,9 @@ const CheckOutScreen = ({
   // Constants for fees
   const DELIVERY_FEE = 2300;
   const DISCOUNT = 0; // Could be dynamic based on promo codes
+
+  // helper functions for bottom modal
+  const { present, dismiss } = useBottomSheet();
 
   // Memoized calculations
   const calculations = useMemo(() => {
@@ -92,25 +97,27 @@ const CheckOutScreen = ({
       Alert.alert('Error', 'Your cart is empty');
       return;
     }
-
-    Alert.alert(
-      'Confirm Order',
-      `Place order for ${calculations.finalTotalRaw} FCFA?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Place Order',
-          onPress: () => {
-            // Handle order placement
-            Alert.alert('Success', 'Order placed successfully!');
-            // Clear cart and navigate
-            // useCartStore.getState().clearCart();
-            // navigation.navigate('OrderTracking');
-          },
-        },
-      ],
+    present(
+      <CheckoutContent
+        onConfirm={confirmOrder}
+        onDismiss={dismiss}
+        totalAmount={calculations.finalTotal}
+      />,
+      {
+        snapPoints: ['50%'],
+        enablePanDownToClose: true,
+        title: 'Proceed to payement',
+        showHandle: true,
+      },
     );
-  }, [cartItems.length, calculations.finalTotalRaw]);
+  }, [calculations.finalTotal, cartItems.length, dismiss, present]);
+
+  const confirmOrder = () => {
+    Alert.alert('Success', 'Order placed successfully!');
+    // Clear cart and navigate
+    // useCartStore.getState().clearCart();
+    // navigation.navigate('OrderTracking');
+  };
 
   // Optimized render item
   const renderCheckoutItem: ListRenderItem<CartItem> = useCallback(

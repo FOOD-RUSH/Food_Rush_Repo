@@ -11,16 +11,20 @@ import { AntDesign, Ionicons } from '@expo/vector-icons';
 import { images } from '@/assets/images';
 import { Card, Button, useTheme } from 'react-native-paper';
 import { useCartStore, CartItem } from '@/src/stores/customerStores/cartStore';
+import { useLanguage } from '@/src/contexts/LanguageContext';
+import Toast from 'react-native-toast-message';
 
 interface CheckOutItemProps extends CartItem {}
 
 const CheckOutItem: React.FC<CheckOutItemProps> = React.memo(
   ({ id, ItemtotalPrice, menuItem, quantity }) => {
     const { colors } = useTheme();
+    const { t } = useLanguage();
     const [showModal, setShowModal] = useState(false);
     const [stateQuantity, setStateQuantity] = useState(quantity);
 
     const modifyCart = useCartStore((state) => state.modifyCart);
+    const deleteCart = useCartStore((state) => state.deleteCart);
 
     // Memoize formatted price
     const formattedPrice = useMemo(
@@ -54,8 +58,27 @@ const CheckOutItem: React.FC<CheckOutItemProps> = React.memo(
       if (stateQuantity > 0) {
         modifyCart(id, stateQuantity);
         setShowModal(false);
+        
+        Toast.show({
+          type: 'success',
+          text1: t('success'),
+          text2: 'Quantity updated successfully',
+          position: 'top',
+        });
       }
-    }, [id, stateQuantity, modifyCart]);
+    }, [id, stateQuantity, modifyCart, t]);
+
+    // Handle delete item
+    const handleDeleteItem = useCallback(() => {
+      deleteCart(id);
+      
+      Toast.show({
+        type: 'success',
+        text1: t('success'),
+        text2: 'Item removed from cart',
+        position: 'top',
+      });
+    }, [id, deleteCart, t]);
 
     return (
       <>
@@ -106,13 +129,23 @@ const CheckOutItem: React.FC<CheckOutItemProps> = React.memo(
                 </Text>
               </View>
 
-              <TouchableOpacity
-                className="rounded-full p-2"
-                onPress={handleEditPress}
-                hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
-              >
-                <AntDesign name="edit" color={colors.primary} size={18} />
-              </TouchableOpacity>
+              <View className="flex-row">
+                <TouchableOpacity
+                  className="rounded-full p-2 mr-1"
+                  onPress={handleEditPress}
+                  hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
+                >
+                  <AntDesign name="edit" color={colors.primary} size={18} />
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  className="rounded-full p-2 ml-1"
+                  onPress={handleDeleteItem}
+                  hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
+                >
+                  <AntDesign name="delete" color={colors.error} size={18} />
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </Card>
@@ -139,7 +172,7 @@ const CheckOutItem: React.FC<CheckOutItemProps> = React.memo(
                 className="text-lg font-semibold text-center mb-6"
                 style={{ color: colors.onSurface }}
               >
-                Update Quantity
+                {t('update_quantity')}
               </Text>
 
               <View className="flex-row items-center justify-center mb-6">
@@ -183,7 +216,7 @@ const CheckOutItem: React.FC<CheckOutItemProps> = React.memo(
                   className="flex-1"
                   labelStyle={{ fontSize: 14 }}
                 >
-                  Cancel
+                  {t('cancel')}
                 </Button>
 
                 <Button
@@ -192,7 +225,7 @@ const CheckOutItem: React.FC<CheckOutItemProps> = React.memo(
                   className="flex-1"
                   labelStyle={{ fontSize: 14 }}
                 >
-                  Update
+                  {t('save')}
                 </Button>
               </View>
             </Pressable>

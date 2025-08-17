@@ -41,7 +41,7 @@ const PromotionCard: React.FC<PromotionCardProps> = ({
     };
   };
 
-  const colorVariants = getColorVariants(colors.primary);
+  const colorVariants = getColorVariants(color);
 
   return (
     <View className="mx-4 my-2">
@@ -122,6 +122,7 @@ const PromotionCard: React.FC<PromotionCardProps> = ({
                 textShadowColor: 'rgba(0, 0, 0, 0.3)',
                 textShadowOffset: { width: 1, height: 1 },
                 textShadowRadius: 2,
+                color: colors.onSecondaryContainer,
               }}
             >
               {percentage}%
@@ -132,6 +133,7 @@ const PromotionCard: React.FC<PromotionCardProps> = ({
                 textShadowColor: 'rgba(0, 0, 0, 0.2)',
                 textShadowOffset: { width: 1, height: 1 },
                 textShadowRadius: 1,
+                color: 'white',
               }}
             >
               {title}
@@ -142,6 +144,7 @@ const PromotionCard: React.FC<PromotionCardProps> = ({
                 textShadowColor: 'rgba(0, 0, 0, 0.2)',
                 textShadowOffset: { width: 1, height: 1 },
                 textShadowRadius: 1,
+                color: 'white',
               }}
             >
               {subtitle}
@@ -153,6 +156,7 @@ const PromotionCard: React.FC<PromotionCardProps> = ({
                   textShadowColor: 'rgba(0, 0, 0, 0.2)',
                   textShadowOffset: { width: 1, height: 1 },
                   textShadowRadius: 1,
+                  color: 'white',
                 }}
               >
                 Valid for {days} days

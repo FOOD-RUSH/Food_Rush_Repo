@@ -1,5 +1,5 @@
 import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import CommonView from '@/src/components/common/CommonView';
 import { Card, useTheme, FAB } from 'react-native-paper';
@@ -7,6 +7,8 @@ import { AntDesign, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import AddressEditModal, {
   AddressData,
 } from '@/src/components/customer/AddressEditModal';
+import { useAddressStore } from '@/src/stores/customerStores/addressStore';
+import { useAuthUser } from '@/src/stores/customerStores/AuthStore';
 
 const AddressScreen = ({
   navigation,
@@ -17,40 +19,32 @@ const AddressScreen = ({
     null,
   );
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
+  
+  // Store hooks
+  const addresses = useAddressStore((state) => state.addresses);
+  const fetchAddresses = useAddressStore((state) => state.fetchAddresses);
+  const addAddress = useAddressStore((state) => state.addAddress);
+  const updateAddress = useAddressStore((state) => state.updateAddress);
+  const deleteAddress = useAddressStore((state) => state.deleteAddress);
+  const setDefaultAddress = useAddressStore((state) => state.setDefaultAddress);
+  const isLoading = useAddressStore((state) => state.isLoading);
+  const error = useAddressStore((state) => state.error);
+  const clearError = useAddressStore((state) => state.clearError);
+  
+  // Auth user
+  const user = useAuthUser();
 
-  // Mock addresses data - replace with your state management
-  const [addresses, setAddresses] = useState<AddressData[]>([
-    {
-      id: '1',
-      label: 'Home',
-      fullAddress: 'Biyemassi Acacia',
-      isDefault: true,
-    },
-    {
-      id: '2',
-      label: 'My Office',
-      fullAddress: 'Biyem Assi Acacia 123',
-      isDefault: false,
-    },
-    {
-      id: '3',
-      label: 'My Apartment',
-      fullAddress: 'Biyem Assi Acacia 456',
-      isDefault: false,
-    },
-    {
-      id: '4',
-      label: "Parent's House",
-      fullAddress: 'Biyem Assi Acacia 789',
-      isDefault: false,
-    },
-    {
-      id: '5',
-      label: 'My Villa',
-      fullAddress: 'Biyem Assi Acacia 101',
-      isDefault: false,
-    },
-  ]);
+  useEffect(() => {
+    if (user?.id) {
+      fetchAddresses();
+    }
+  }, [fetchAddresses, user?.id]);
+
+  useEffect(() => {
+    if (error) {
+      Alert.alert('Error', error, [{ text: 'OK', onPress: clearError }]);
+    }
+  }, [clearError, error]);
 
   const handleEditAddress = (address: AddressData) => {
     setSelectedAddress(address);
@@ -64,17 +58,20 @@ const AddressScreen = ({
     setModalVisible(true);
   };
 
-  const handleSaveAddress = (addressData: AddressData) => {
-    if (modalMode === 'add') {
-      const newAddress = {
-        ...addressData,
-        id: Date.now().toString(), // Simple ID generation
-      };
-      setAddresses((prev) => [...prev, newAddress]);
-    } else {
-      setAddresses((prev) =>
-        prev.map((addr) => (addr.id === addressData.id ? addressData : addr)),
-      );
+  const handleSaveAddress = async (addressData: AddressData) => {
+    try {
+      if (modalMode === 'add') {
+        await addAddress({
+          ...addressData,
+          isDefault: addressData.isDefault || false,
+        });
+      } else if (selectedAddress?.id) {
+        await updateAddress(selectedAddress.id, addressData);
+      }
+      
+      setModalVisible(false);
+    } catch (err) {
+      console.error('Error saving address:', err);
     }
   };
 
@@ -91,13 +88,15 @@ const AddressScreen = ({
           text: 'Delete',
           style: 'destructive',
           onPress: () => {
-            setAddresses((prev) =>
-              prev.filter((addr) => addr.id !== addressId),
-            );
+            deleteAddress(addressId);
           },
         },
       ],
     );
+  };
+
+  const handleSetDefaultAddress = (addressId: string) => {
+    setDefaultAddress(addressId);
   };
 
   const AddressComponent = ({ address }: { address: AddressData }) => {
@@ -165,6 +164,17 @@ const AddressScreen = ({
 
               {!address.isDefault && (
                 <TouchableOpacity
+                  onPress={() => handleSetDefaultAddress(address.id!)}
+                  className="p-2 rounded-full mr-2"
+                  style={{ backgroundColor: colors.surfaceVariant }}
+                  activeOpacity={0.7}
+                >
+                  <Ionicons name="star-outline" size={18} color="#007aff" />
+                </TouchableOpacity>
+              )}
+
+              {!address.isDefault && (
+                <TouchableOpacity
                   onPress={() => handleDeleteAddress(address.id!)}
                   className="p-2 rounded-full"
                   style={{ backgroundColor: colors.surfaceVariant }}
@@ -212,6 +222,7 @@ const AddressScreen = ({
           }}
           onPress={handleAddAddress}
           color="white"
+          loading={isLoading}
         />
 
         {/* Address Edit Modal */}

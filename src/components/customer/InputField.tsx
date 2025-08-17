@@ -22,7 +22,7 @@ const InputField = ({
   ...props
 }: InputFieldProps) => {
   const { colors } = useTheme();
-  const backgroundColor = colors.surface;
+  const backgroundColor = colors.surfaceVariant;
   const textColor = colors.onBackground;
   const placeholderTextColor = colors.onBackground;
 
@@ -36,7 +36,8 @@ const InputField = ({
           {/* Label */}
           {label && (
             <Text
-              className={`text-base mb-2 font-semibold ${labelStyle || ''} text-[${textColor}]`}
+              className={`text-base mb-2 font-semibold ${labelStyle || ''} `}
+              style={{ color: textColor }}
             >
               {label}
             </Text>

@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,7 +6,6 @@ import {
   Platform,
   ScrollView,
   Image,
-  Alert,
 } from 'react-native';
 import {
   Button,
@@ -22,21 +21,27 @@ import { TextButton } from '@/src/components/common/TextButton';
 import { AuthStackScreenProps } from '@/src/navigation/types';
 import CommonView from '@/src/components/common/CommonView';
 import { useAuthStore } from '@/src/stores/customerStores/AuthStore';
+import { useLogin } from '@/src/hooks/customer/useAuthhooks';
+import Toast from 'react-native-toast-message';
+import { useNetwork } from '@/src/contexts/NetworkContext';
+import { useLanguage } from '@/src/contexts/LanguageContext';
 
 interface LoginFormData {
   email: string;
   password: string;
 }
+
 const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
   navigation,
   route,
 }) => {
   const { colors } = useTheme();
+  const { t } = useLanguage();
+  const { isConnected, isInternetReachable } = useNetwork();
 
-  useLayoutEffect(() => {});
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+
   const {
     control,
     handleSubmit,
@@ -48,56 +53,143 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
       password: '',
     },
   });
-  // get usertype gotten from params
 
+  // get usertype gotten from params
   const userType = route.params?.userType;
 
   const WelcomeImage = require('@/assets/images/Welcome.png');
-  const loginUser = useAuthStore((state) => state.loginUser);
-  // const loginError = useAuthStore((state) => state.error);
+  const { clearError } = useAuthStore();
 
-  const onSubmit = async (data: LoginFormData) => {
-    setLoading(true);
-    // TODO:
-    console.log('Usertype: ' + userType);
-    try {
-      await loginUser('customer', data.email.trim(), data.password);
-      // navigate to homer
-      navigation.navigate('CustomerApp', {
-        screen: 'Home',
-        params: {
-          screen: 'HomeScreen',
+  // Using the hook for login
+  const { 
+    mutate: loginMutation, 
+    isPending, 
+    error: loginError 
+  } = useLogin();
+
+  const onSubmit = useCallback(
+    async (data: LoginFormData) => {
+      // Check network connectivity
+      if (!isConnected || !isInternetReachable) {
+        Toast.show({
+          type: 'error',
+          text1: t('error'),
+          text2: 'No internet connection. Please check your network settings.',
+          position: 'top',
+        });
+        return;
+      }
+
+      // Clear any previous errors
+      clearError();
+
+      console.log('Attempting login with email:', data.email);
+
+      loginMutation(
+        { 
+          email: data.email.trim().toLowerCase(), 
+          password: data.password 
         },
-      });
-    } catch (error) {
-      Alert.alert('Login failed' + error);
-    } finally {
-      setLoading(false);
-    }
-  };
+        {
+          onSuccess: () => {
+            console.log('Login successful, showing success toast');
+            
+            Toast.show({
+              type: 'success',
+              text1: t('success'),
+              text2: 'Login successful!',
+              position: 'top',
+            });
+
+            // Navigate to main app - auth state is already updated in the hook
+            navigation.navigate('CustomerApp', {
+              screen: 'Home',
+              params: { screen: 'HomeScreen' },
+            });
+          },
+          onError: (error: any) => {
+            console.error('Login failed in component:', error);
+            
+            // Determine error message
+            let errorMessage = 'Login failed. Please try again.';
+            
+            if (error?.message) {
+              errorMessage = error.message;
+            } else if (error?.status === 401) {
+              errorMessage = 'Invalid email or password. Please check your credentials.';
+            } else if (error?.status === 429) {
+              errorMessage = 'Too many login attempts. Please try again later.';
+            } else if (error?.code === 'NETWORK_ERROR') {
+              errorMessage = 'Network error. Please check your internet connection.';
+            }
+
+            Toast.show({
+              type: 'error',
+              text1: t('error'),
+              text2: errorMessage,
+              position: 'top',
+            });
+          },
+        },
+      );
+    },
+    [
+      isConnected,
+      isInternetReachable,
+      clearError,
+      t,
+      loginMutation,
+      navigation,
+    ],
+  );
 
   const handleGoogleSignIn = async () => {
-    // TODO:
+    if (!isConnected || !isInternetReachable) {
+      Toast.show({
+        type: 'error',
+        text1: t('error'),
+        text2: 'No internet connection. Please check your network settings.',
+        position: 'top',
+      });
+      return;
+    }
+
+    Toast.show({
+      type: 'info',
+      text1: t('info'),
+      text2: 'Google Sign In not implemented yet',
+      position: 'top',
+    });
   };
 
   const handleAppleSignIn = async () => {
-    // TODO:
+    if (!isConnected || !isInternetReachable) {
+      Toast.show({
+        type: 'error',
+        text1: t('error'),
+        text2: 'No internet connection. Please check your network settings.',
+        position: 'top',
+      });
+      return;
+    }
+
+    Toast.show({
+      type: 'info',
+      text1: t('info'),
+      text2: 'Apple Sign In not implemented yet',
+      position: 'top',
+    });
   };
 
   const handleForgotPassword = () => {
-    // TODO: Navigate to forgot password screen
-    console.log('Navigating to forgot password');
     navigation.navigate('ForgotPassword');
   };
 
   const handleSignUp = () => {
-    // TODO: Navigate to signup screen
-    console.log('Navigating to signup');
     navigation.navigate('SignUp', { userType: userType });
   };
 
   return (
-    // ADD LOGIC FOR SIGNING IN USER AND SIGNING IN CUSTOMER
     <CommonView>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -117,15 +209,10 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
               className={`text-3xl font-bold mb-2 `}
               style={{ color: colors.onSurface }}
             >
-              Welcome Back
+              {t('welcome_back')}
             </Text>
           </View>
-          {/* Error Message */}
-          {/* {error && (
-            <Text className="text-red-500 bg-gray-400 text-center text-sm mt-2 h-10 w-40">
-              {error}
-            </Text>
-          )} */}
+
           {/* Form */}
           <View className="flex-1 px-2">
             <View className="space-y-4 mb-2">
@@ -136,7 +223,7 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                 render={({ field: { onChange, onBlur, value } }) => (
                   <View className="mb-4">
                     <TextInput
-                      placeholder="Email"
+                      placeholder={t('email')}
                       onBlur={onBlur}
                       onChangeText={onChange}
                       value={value}
@@ -144,6 +231,7 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                       keyboardType="email-address"
                       autoCapitalize="none"
                       autoComplete="email"
+                      autoCorrect={false}
                       left={
                         <TextInput.Icon icon="email" color={colors.onSurface} />
                       }
@@ -176,7 +264,7 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                 render={({ field: { onChange, onBlur, value } }) => (
                   <View className="mb-2">
                     <TextInput
-                      placeholder="Password"
+                      placeholder={t('password')}
                       onBlur={onBlur}
                       onChangeText={onChange}
                       value={value}
@@ -184,6 +272,7 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                       secureTextEntry={!showPassword}
                       autoCapitalize="none"
                       autoComplete="password"
+                      autoCorrect={false}
                       left={
                         <TextInput.Icon icon="lock" color={colors.onSurface} />
                       }
@@ -196,7 +285,7 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                       }
                       outlineStyle={{
                         borderRadius: 16,
-                        borderColor: errors.email
+                        borderColor: errors.password
                           ? colors.error
                           : colors.surfaceVariant,
                       }}
@@ -225,12 +314,12 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                     className={`text-base ml-2 `}
                     style={{ color: colors.onSurface }}
                   >
-                    Remember me
+                    {t('remember_me')}
                   </Text>
                 </View>
 
                 <TextButton
-                  text="Forgot Password?"
+                  text={t('forgot_password')}
                   onPress={handleForgotPassword}
                 />
               </View>
@@ -239,8 +328,8 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
               <Button
                 mode="contained"
                 onPress={handleSubmit(onSubmit)}
-                loading={loading}
-                disabled={loading}
+                loading={isPending}
+                disabled={isPending}
                 buttonColor={colors.primary}
                 contentStyle={{ paddingVertical: 12 }}
                 style={{ borderRadius: 25, marginTop: 16 }}
@@ -250,7 +339,7 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                   color: 'white',
                 }}
               >
-                {loading ? 'Logging in...' : 'Login'}
+                {isPending ? t('logging_in') || 'Logging in...' : t('login')}
               </Button>
 
               {/* Divider */}
@@ -259,7 +348,10 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                   className={`flex-1 h-px`}
                   style={{ backgroundColor: colors.outline }}
                 />
-                <Text className={`px-4 text-sm text-[${colors.onSurface}]`}>
+                <Text
+                  className={`px-4 text-sm `}
+                  style={{ color: colors.onBackground }}
+                >
                   {' '}
                   or Sign in{' '}
                 </Text>
@@ -275,7 +367,7 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                 <Button
                   mode="outlined"
                   onPress={handleGoogleSignIn}
-                  disabled={loading}
+                  disabled={isPending}
                   icon="google"
                   contentStyle={{ paddingVertical: 12 }}
                   style={{
@@ -297,7 +389,7 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                 <Button
                   mode="outlined"
                   onPress={handleAppleSignIn}
-                  disabled={loading}
+                  disabled={isPending}
                   icon="apple"
                   contentStyle={{ paddingVertical: 12 }}
                   style={{
@@ -318,10 +410,13 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
 
               {/* Sign Up Link */}
               <View className="flex-row justify-center items-center mt-8 mb-4">
-                <Text className={`text-base text-[${colors.onSurface}]`}>
-                  Don&apos;t Already have an account?{' '}
+                <Text
+                  className={`text-base `}
+                  style={{ color: colors.onBackground }}
+                >
+                  {t('dont_have_account')}{' '}
                 </Text>
-                <TextButton text="Sign Up" onPress={handleSignUp} />
+                <TextButton text={t('sign_up')} onPress={handleSignUp} />
               </View>
             </View>
           </View>
@@ -330,4 +425,5 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
     </CommonView>
   );
 };
+
 export default LoginScreen;

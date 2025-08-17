@@ -15,6 +15,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Carousel from 'react-native-reanimated-carousel';
 import ClassicFoodCard from '@/src/components/customer/ClassicFoodCard';
+import PromotionCard from '@/src/components/customer/PromotionCard';
 
 const { width } = Dimensions.get('window');
 
@@ -177,15 +178,18 @@ const HomeScreen = ({
       >
         <HomeHeader />
 
-        <View className={`px-1 py-2 bg-[${colors.background}]`}>
+        <View
+          className={`px-1 py-2`}
+          style={{ backgroundColor: colors.background }}
+        >
           <TextInput
             placeholder="Search your craving"
             left={
               <TextInput.Icon
                 icon="magnify"
                 size={30}
-                color={colors.onSurface}
-                background={colors.surface}
+                color={colors.onSurfaceVariant}
+                background={colors.surfaceVariant}
                 className="pt-3 pl-2"
               />
             }
@@ -194,9 +198,10 @@ const HomeScreen = ({
               borderColor: colors.outline,
               borderWidth: 1,
               borderRadius: 20,
+              backgroundColor: colors.surfaceVariant,
             }}
             style={{
-              backgroundColor: colors.surface,
+              backgroundColor: colors.surfaceVariant,
               paddingTop: 5,
               paddingBottom: 5,
               paddingRight: 10,
@@ -211,6 +216,13 @@ const HomeScreen = ({
 
         {/* Promotions section */}
         <HomeScreenHeaders title="Promotion" onPress={() => {}} />
+
+        <PromotionCard
+          color={'pink'}
+          image={images.onboarding3}
+          percentage={40}
+          days={4}
+        />
 
         {/* Food sections */}
         <View className=" flex-row flex-wrap">

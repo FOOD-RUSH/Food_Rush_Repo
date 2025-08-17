@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Modal,
   FlatList,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -27,6 +26,10 @@ import CommonView from '@/src/components/common/CommonView';
 import { AuthStackScreenProps } from '@/src/navigation/types';
 import { useAuthStore } from '@/src/stores/customerStores/AuthStore';
 import { TextButton } from '@/src/components/common/TextButton';
+import Toast from 'react-native-toast-message';
+import { useNetwork } from '@/src/contexts/NetworkContext';
+import { useLanguage } from '@/src/contexts/LanguageContext';
+import { useRegister } from '@/src/hooks/customer/useAuthhooks';
 
 // Optimized country codes data - moved outside component to prevent recreation
 const COUNTRY_CODES = [
@@ -40,7 +43,7 @@ const COUNTRY_CODES = [
 
 interface SignUpFormData {
   email: string;
-  displayName: string;
+  fullName: string;
   phoneNumber: string;
   password: string;
   confirmPassword: string;
@@ -53,8 +56,15 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
   route,
 }) => {
   const { colors } = useTheme();
+  const { t } = useLanguage();
+  const { isConnected, isInternetReachable } = useNetwork();
+  const { mutate: registerUserMutation, isPending } = useRegister();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const registerUser = useAuthStore((state) => state.registerUser);
+  const { clearError, setError } = useAuthStore();
+
+  // get usertype gotten from params
+  const userType = route.params?.userType || 'customer';
+
   // Memoized components for better performance
   const CountryItem = React.memo(
     ({
@@ -78,7 +88,6 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
   CountryItem.displayName = 'CountryItem';
 
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [selectedCountryCode, setSelectedCountryCode] = useState<CountryCode>(
     COUNTRY_CODES[0],
   );
@@ -97,70 +106,142 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
       password: '',
       confirmPassword: '',
       phoneNumber: '',
-      displayName: '',
+      fullName: '',
     },
   });
 
   // Optimized callbacks with useCallback to prevent unnecessary re-renders
   const onSubmit = useCallback(
     async (data: SignUpFormData) => {
-      if (!termsAccepted) {
-        Alert.alert('Terms Required', 'Please accept the terms and conditions');
+      if (!isConnected || !isInternetReachable) {
+        Toast.show({
+          type: 'error',
+          text1: t('error'),
+          text2: 'No internet connection. Please check your network settings.',
+          position: 'top',
+        });
         return;
       }
 
-      setLoading(true);
-      try {
-        // TODO: Implement actual signup logic
-        console.log('Signup data:', data);
-
-        // Simulate API call
-        await registerUser({
-          email: data.email,
-          fullName: data.displayName,
-          password: data.password,
-          phoneNumber: data.phoneNumber,
-          role: 'customer',
+      if (!termsAccepted) {
+        Toast.show({
+          type: 'error',
+          text1: t('error'),
+          text2: 'Please accept the terms and conditions',
+          position: 'top',
         });
-        // Navigate to verification screen or home
-        Alert.alert('Success', 'Account created successfully!');
-      } catch (error) {
-        console.error('Signup error:', error);
-        Alert.alert('Error', 'Failed to create account. Please try again.');
-      } finally {
-        setLoading(false);
+        return;
+      }
+
+      clearError();
+
+      try {
+        // Prepare registration data
+        const registrationData = {
+          role: userType,
+          fullName: data.fullName.trim(),
+          phoneNumber: `${selectedCountryCode.code}${data.phoneNumber.trim()}`,
+          email: data.email.trim(),
+          password: data.password,
+        };
+
+        registerUserMutation(registrationData, {
+          onSuccess: (response) => {
+            Toast.show({
+              type: 'success',
+              text1: t('success'),
+              text2:
+                'Account created successfully! Please check your email for verification.',
+              position: 'top',
+            });
+            console.log(response.data.userId);
+
+            // Navigate to OTP verification screen with the response data
+            navigation.navigate('OTPVerification', {
+              userId: response.data.userId, // Handle different response structures
+              email: data.email.trim(),
+              phone: registrationData.phoneNumber,
+              userType,
+              type: 'email',
+            });
+          },
+          onError: (error: any) => {
+            const errorMessage =
+              error?.message || 'Failed to create account. Please try again.';
+            setError(errorMessage);
+
+            Toast.show({
+              type: 'error',
+              text1: t('error'),
+              text2: errorMessage,
+              position: 'top',
+            });
+          },
+        });
+      } catch (error: any) {
+        const errorMessage =
+          error?.message || 'Failed to create account. Please try again.';
+        setError(errorMessage);
+
+        Toast.show({
+          type: 'error',
+          text1: t('error'),
+          text2: errorMessage,
+          position: 'top',
+        });
       }
     },
-    [registerUser, termsAccepted],
+    [
+      isConnected,
+      isInternetReachable,
+      termsAccepted,
+      registerUserMutation,
+      clearError,
+      setError,
+      t,
+      selectedCountryCode,
+      userType,
+      navigation,
+    ],
   );
 
   const handleGoogleSignUp = useCallback(async () => {
-    setLoading(true);
-    try {
-      // TODO: Implement Google Sign-up
-      console.log('Google sign-up pressed');
-      Alert.alert('Info', 'Google sign-up not implemented yet');
-    } catch (error) {
-      console.error('Google signup error:', error);
-      Alert.alert('Error', 'Google sign-up failed. Please try again.');
-    } finally {
-      setLoading(false);
+    if (!isConnected || !isInternetReachable) {
+      Toast.show({
+        type: 'error',
+        text1: t('error'),
+        text2: 'No internet connection. Please check your network settings.',
+        position: 'top',
+      });
+      return;
     }
-  }, []);
+
+    Toast.show({
+      type: 'info',
+      text1: t('info'),
+      text2: 'Google sign-up not implemented yet',
+      position: 'top',
+    });
+  }, [isConnected, isInternetReachable, t]);
 
   const handleAppleSignUp = useCallback(async () => {
-    setLoading(true);
-    try {
-      // TODO: Implement Apple Sign-up
-      console.log('Apple sign-up pressed');
-      Alert.alert('Info', 'Apple sign-up not implemented yet');
-    } catch (error) {
-      console.error('Apple signup error:', error);
-      Alert.alert('Error', 'Apple sign-up failed. Please try again.');
-    } finally {
-      setLoading(false);
+    if (!isConnected || !isInternetReachable) {
+      Toast.show({
+        type: 'error',
+        text1: t('error'),
+        text2: 'No internet connection. Please check your network settings.',
+        position: 'top',
+      });
+      return;
     }
-  }, []);
+
+    Toast.show({
+      type: 'info',
+      text1: t('info'),
+      text2: 'Apple sign-up not implemented yet',
+      position: 'top',
+    });
+  }, [isConnected, isInternetReachable, t]);
 
   const selectCountryCode = useCallback((country: CountryCode) => {
     setSelectedCountryCode(country);
@@ -176,14 +257,22 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
   }, []);
 
   const openTerms = useCallback(() => {
-    console.log('Show terms');
-    // TODO: Navigate to terms screen
-  }, []);
+    Toast.show({
+      type: 'info',
+      text1: t('info'),
+      text2: 'Terms of service not implemented yet',
+      position: 'top',
+    });
+  }, [t]);
 
   const openPrivacyPolicy = useCallback(() => {
-    console.log('Show privacy policy');
-    // TODO: Navigate to privacy policy screen
-  }, []);
+    Toast.show({
+      type: 'info',
+      text1: t('info'),
+      text2: 'Privacy policy not implemented yet',
+      position: 'top',
+    });
+  }, [t]);
 
   const openCountryModal = useCallback(() => {
     setShowCountryModal(true);
@@ -195,8 +284,8 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
 
   // Memoized values to prevent unnecessary recalculations
   const isSubmitDisabled = useMemo(
-    () => loading || !termsAccepted || !isValid,
-    [loading, termsAccepted, isValid],
+    () => isPending || !termsAccepted || !isValid,
+    [isPending, termsAccepted, isValid],
   );
 
   const keyExtractor = useCallback((item: CountryCode) => item.code, []);
@@ -231,7 +320,6 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
             <View style={styles.header}>
               <TouchableOpacity
                 onPress={() => {
-                  console.log('Go back');
                   navigation.goBack();
                 }}
               >
@@ -248,7 +336,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
               <View style={styles.logo}>
                 <Text style={styles.logoText}>R</Text>
               </View>
-              <Text style={styles.title}>Create New Account</Text>
+              <Text style={styles.title}>{t('create_account')}</Text>
             </View>
 
             {/* Form */}
@@ -311,7 +399,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                 render={({ field: { onChange, onBlur, value } }) => (
                   <View style={styles.inputContainer}>
                     <TextInput
-                      placeholder="Email"
+                      placeholder={t('email')}
                       onBlur={onBlur}
                       onChangeText={onChange}
                       value={value}
@@ -342,11 +430,11 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
               {/* Full Name Input */}
               <Controller
                 control={control}
-                name="displayName"
+                name="fullName"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <View style={styles.inputContainer}>
                     <TextInput
-                      placeholder="Full Name"
+                      placeholder={t('full_name')}
                       onBlur={onBlur}
                       onChangeText={onChange}
                       value={value}
@@ -362,15 +450,15 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                       }
                       outlineStyle={[
                         styles.inputOutline,
-                        errors.displayName && styles.inputError,
+                        errors.fullName && styles.inputError,
                       ]}
                       style={styles.textInput}
                       contentStyle={styles.inputContent}
-                      error={!!errors.displayName}
+                      error={!!errors.fullName}
                     />
-                    {errors.displayName && (
-                      <HelperText type="error" visible={!!errors.displayName}>
-                        {errors.displayName.message}
+                    {errors.fullName && (
+                      <HelperText type="error" visible={!!errors.fullName}>
+                        {errors.fullName.message}
                       </HelperText>
                     )}
                   </View>
@@ -384,7 +472,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                 render={({ field: { onChange, onBlur, value } }) => (
                   <View style={styles.inputContainer}>
                     <TextInput
-                      placeholder="Password"
+                      placeholder={t('password')}
                       onBlur={onBlur}
                       onChangeText={onChange}
                       value={value}
@@ -426,7 +514,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                 render={({ field: { onChange, onBlur, value } }) => (
                   <View style={styles.inputContainer}>
                     <TextInput
-                      placeholder="Confirm Password"
+                      placeholder={t('confirm_password')}
                       onBlur={onBlur}
                       onChangeText={onChange}
                       value={value}
@@ -467,14 +555,17 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                     color={colors.primary}
                   />
                   <View style={styles.termsTextContainer}>
-                    <Text style={styles.termsText}>I Agree with </Text>
-                    <TextButton onPress={openTerms} text="Term of service" />
-                    <Text> and </Text>
-
+                    <Text style={styles.termsText}>
+                      {t('terms_agreement')}{' '}
+                    </Text>
+                    <TextButton
+                      onPress={openTerms}
+                      text={t('terms_of_service')}
+                    />
+                    <Text style={styles.termsText}> {t('and')} </Text>
                     <TextButton
                       onPress={openPrivacyPolicy}
-                      text="privacy policy
-                      "
+                      text={t('privacy_policy')}
                     />
                   </View>
                 </View>
@@ -484,14 +575,14 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
               <Button
                 mode="contained"
                 onPress={handleSubmit(onSubmit)}
-                loading={loading}
+                loading={isPending}
                 disabled={isSubmitDisabled}
                 buttonColor={colors.primary}
                 contentStyle={styles.buttonContent}
                 style={styles.signUpButton}
                 labelStyle={styles.signUpButtonLabel}
               >
-                {loading ? 'Creating Account...' : 'Sign up'}
+                {isPending ? 'Creating Account...' : t('sign_up')}
               </Button>
 
               {/* Divider */}
@@ -506,7 +597,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                 <Button
                   mode="outlined"
                   onPress={handleGoogleSignUp}
-                  disabled={loading}
+                  disabled={isPending}
                   icon="google"
                   contentStyle={styles.socialButtonContent}
                   style={styles.socialButton}
@@ -518,7 +609,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                 <Button
                   mode="outlined"
                   onPress={handleAppleSignUp}
-                  disabled={loading}
+                  disabled={isPending}
                   icon="apple"
                   contentStyle={styles.socialButtonContent}
                   style={styles.socialButton}
@@ -531,11 +622,11 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
               {/* Login Link */}
               <View style={styles.loginLinkContainer}>
                 <Text style={styles.loginPrompt}>
-                  Already have an account?{' '}
+                  {t('already_have_account')}{' '}
                 </Text>
                 <TextButton
-                  onPress={() => navigation.navigate('SignIn')}
-                  text="Login"
+                  onPress={() => navigation.navigate('SignIn', { userType })}
+                  text={t('login')}
                 />
               </View>
             </View>
@@ -555,7 +646,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                   onPress={closeCountryModal}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.modalDoneButton}>Done</Text>
+                  <Text style={styles.modalDoneButton}>{t('ok')}</Text>
                 </TouchableOpacity>
               </View>
               <FlatList
@@ -694,15 +785,14 @@ const createStyles = (colors: any) =>
     termsTextContainer: {
       flex: 1,
       marginLeft: 8,
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      alignItems: 'center',
     },
     termsText: {
       fontSize: 14,
       color: colors.onSurface,
       lineHeight: 20,
-    },
-    termsLink: {
-      color: colors.primary,
-      textDecorationLine: 'underline',
     },
     signUpButton: {
       borderRadius: 25,
@@ -724,7 +814,7 @@ const createStyles = (colors: any) =>
     dividerLine: {
       flex: 1,
       height: 1,
-      backgroundColor: colors.background,
+      backgroundColor: colors.outline,
     },
     dividerText: {
       paddingHorizontal: 16,
@@ -758,11 +848,6 @@ const createStyles = (colors: any) =>
     loginPrompt: {
       color: colors.onSurface,
       fontSize: 16,
-    },
-    loginLink: {
-      color: colors.primary,
-      textDecorationLine: 'underline',
-      fontWeight: '600',
     },
     modalContainer: {
       flex: 1,
@@ -812,20 +897,3 @@ const createStyles = (colors: any) =>
   });
 
 export default SignupScreen;
-// {
-//   "status_code": 201,
-//   "message": "OTP verified successfully",
-//   "data": {
-//     "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0NTg4ZTc2Mi03YTMwLTQ4MmMtOTIwMS02M2M4MTNjZTQ1MzciLCJlbWFpbCI6InRvY2h1a3d1cGF1bDIxQGdtYWlsLmNvbSIsInJvbGUiOiJjdXN0b21lciIsImlhdCI6MTc1NTA1MzkzMCwiZXhwIjoxNzU1MDYxMTMwfQ.urCQ28O0tRFj_E-Mrpegzm_-4cmYrXSZlCi9MHjeZ6c",
-//     "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0NTg4ZTc2Mi03YTMwLTQ4MmMtOTIwMS02M2M4MTNjZTQ1MzciLCJlbWFpbCI6InRvY2h1a3d1cGF1bDIxQGdtYWlsLmNvbSIsInJvbGUiOiJjdXN0b21lciIsImlhdCI6MTc1NTA1MzkzMCwiZXhwIjoxNzU1NjU4NzMwfQ._w0APGSaPxMWdGTDqX8wFZP6WnFnet0iFIF95wcxwvA",
-//     "user": {
-//       "id": "4588e762-7a30-482c-9201-63c813ce4537",
-//       "email": "tochukwupaul21@gmail.com",
-//       "fullName": "paul@example",
-//       "role": "customer",
-//       "status": "active",
-//       "isEmailVerified": true,
-//       "isPhoneVerified": false
-//     }
-//   }
-// }
