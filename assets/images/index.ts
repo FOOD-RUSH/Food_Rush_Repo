@@ -46,11 +46,12 @@ export const images = {
   not_found,
 };
 
-export const icons = {
+export const icons = 
   appleIcon,
   R_logo,
   ProfilePlogo,
 };
+
 
 export const FoodCategory = {
   appleIcon,

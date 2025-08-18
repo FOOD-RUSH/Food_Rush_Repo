@@ -41,7 +41,8 @@
       "router": {},
       "eas": {
         "projectId": "08bd6b92-2717-47f7-b11c-ed37f5126c0e"
-      }
+      },
+      "API_BASE_URL": "https://your-backend.example.com"
     },
     "owner": "mr_calculus"
   }

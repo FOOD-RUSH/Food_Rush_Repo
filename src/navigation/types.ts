@@ -1,3 +1,4 @@
+
 // Updated types.ts - Moving full-screen screens to RootStack
 import {
   NavigatorScreenParams,
@@ -73,11 +74,15 @@ export type CustomerOrderStackParamList = {
   CompletedOrdersScreen: undefined;
   PendingOrdersScreen: undefined;
   OrderDetails: { orderId: string };
+  OrderConfirmation: {
+    status?: 'CONFIRMED' | 'CANCELLED' | string;
+  };
 };
 
 export type CustomerProfileStackParamList = {
   ProfileHome: undefined;
 };
+
 
 export type CustomerHelpCenterStackParamList = {
   FAQ: undefined;
@@ -97,6 +102,8 @@ export type RestaurantOrdersStackParamList = {
   OrderDetails: { orderId: string };
   OrderHistory: undefined;
   LiveOrders: undefined;
+  RejectOrder: { id: string };
+  ConfirmOrder: { id: string };
 };
 
 export type RestaurantMenuStackParamList = {
@@ -107,10 +114,12 @@ export type RestaurantMenuStackParamList = {
   AddCategory: undefined;
   EditCategory: { categoryId: string };
   MenuSettings: undefined;
+  MenuList: undefined; // Add this for the menu list view
 };
 
 export type RestaurantAnalyticsStackParamList = {
   AnalyticsScreen: undefined;
+  DashboardScreen: undefined;
   SalesReport: undefined;
   CustomerInsights: undefined;
   PopularItems: undefined;
@@ -119,14 +128,25 @@ export type RestaurantAnalyticsStackParamList = {
 
 export type RestaurantProfileStackParamList = {
   ProfileScreen: undefined;
-  EditProfile: undefined;
+  ProfileEditProfile: {
+    userProfile?: {
+      name: string;
+      email: string;
+      phone: string;
+      restaurantName: string;
+      address: string;
+      bio?: string;
+      website?: string;
+      cuisine?: string;
+    };
+  };
   RestaurantSettings: undefined;
-  BusinessHours: undefined;
-  DeliverySettings: undefined;
-  Notifications: undefined;
-  Help: undefined;
+  AccountSettings: undefined;
+  About: undefined;
+  Notification: undefined;
+  Support: undefined;
   BusinessSettings: undefined;
-  PayoutSettings: undefined;
+  PaymentBilling: undefined;
 };
 
 // Navigation Prop Types
@@ -146,6 +166,7 @@ export type CustomerTabScreenProps<T extends keyof CustomerTabParamList> =
   >;
 
 export type RestaurantTabScreenProps<T extends keyof RestaurantTabParamList> =
+
   CompositeScreenProps<
     BottomTabScreenProps<RestaurantTabParamList, T>,
     RootStackScreenProps<keyof RootStackParamList>
