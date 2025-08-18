@@ -1,13 +1,19 @@
-import { View, Text } from 'react-native'
-import React from 'react'
-import { ActivityIndicator } from 'react-native-paper'
+import { View } from 'react-native';
+import React from 'react';
+import { ActivityIndicator, useTheme } from 'react-native-paper';
 
 const LoadingScreen = () => {
-  return (
-     <View className='flex-1 justify-center items-center'>
-    <ActivityIndicator size="large" color="#0000ff" />
-  </View>
-  )
-}
+  const { colors } = useTheme();
+  const indicatorColor = colors.primary;
 
-export default LoadingScreen
+  return (
+    <View
+      className="flex-1 justify-center items-center"
+      style={{ backgroundColor: colors.background }}
+    >
+      <ActivityIndicator size="large" color={indicatorColor} animating={true} />
+    </View>
+  );
+};
+
+export default LoadingScreen;

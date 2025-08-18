@@ -1,124 +1,401 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
-import { RootStackParamList } from './types';
-import { navigationRef } from './navigationHelpers';
-import { linking } from './linking';
-// Import navigators
-import AuthNavigator from './AuthNavigator';
-import CustomerNavigator from './CustomerNavigator';
-import RestaurantNavigator from './RestaurantNavigator';
-// Import screens
-import OnboardingScreen from '@/src/components/onBoardingScreen';
-import LoadingScreen from '@/src/components/common/LoadingScreen';
-import { OnboardingSlides } from '@/src/utils/onboardingData';
+import { StatusBar } from 'expo-status-bar';
+import { Linking } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
+// Navigation types and helpers
+import { RootStackParamList } from './types';
+import { navigationRef, handleDeepLink } from './navigationHelpers';
+import { linking } from './linking';
+
+// Stores
+import {
+  useAppStore,
+  useHasHydrated,
+  useOnboardingComplete,
+  useAppUserType,
+} from '../stores/customerStores/AppStore';
+import { useIsAuthenticated } from '../stores/customerStores/AuthStore';
+
+// Navigators
+import AuthNavigator from './AuthNavigator';
+import CustomerNavigator, {
+  CustomerHelpCenterStackScreen,
+} from './CustomerNavigator';
+import RestaurantNavigator from './RestaurantNavigator';
+
+// Components and screens
+import LoadingScreen from '../components/common/LoadingScreen';
+import OnboardingScreen from '../components/onBoardingScreen';
+
+// Full-screen screens (no tabs)
+import CheckOutScreen from '../screens/customer/home/CheckOutScreen';
+import SearchScreen from '@/src/screens/customer/home/SearchScreen';
+import CartScreen from '../screens/customer/home/CartScreen';
+import NotificationsScreen from '../screens/restaurant/profile/NotificationsScreen';
+import FoodDetailsScreen from '../screens/customer/home/FoodDetailsScreen';
+import RestaurantDetailScreen from '../screens/customer/home/RestaurantDetailScreen';
+
+// Profile screens
+import EditProfileScreen from '../screens/customer/Profile/EditProfileScreen';
+import FavoriteRestaurants from '../screens/customer/Profile/FavoriteRestaurants';
+import PaymentScreen from '../screens/customer/Profile/PaymentScreen';
+import LanguageScreen from '../screens/customer/Profile/LanguageScreen';
+import AddressScreen from '../screens/customer/Profile/AdressScreen';
+
+// Data
+import { OnboardingSlides } from '@/src/utils/onboardingData';
+import { useAppTheme } from '../config/theme';
+
+// Stack navigator
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
+// Screen option presets for better organization and reuse
+const createScreenOptions = (colors: any) => ({
+  default: {
+    headerShown: false,
+    gestureEnabled: true,
+    animation: 'slide_from_right' as const,
+    lazy: true,
+    unmountOnBlur: false,
+    contentStyle: {
+      backgroundColor: colors.background,
+    },
+    headerStyle: {
+      backgroundColor: colors.surface,
+      elevation: 0,
+      shadowOpacity: 0,
+    },
+    headerTintColor: colors.onSurface,
+  },
+
+  modal: {
+    presentation: 'modal' as const,
+    headerShown: true,
+    animation: 'slide_from_bottom' as const,
+    gestureDirection: 'vertical' as const,
+    contentStyle: {
+      backgroundColor: colors.background,
+    },
+    headerStyle: {
+      backgroundColor: colors.surface,
+      elevation: 0,
+      shadowOpacity: 0,
+    },
+    headerTintColor: colors.onSurface,
+  },
+
+  card: {
+    presentation: 'card' as const,
+    headerShown: true,
+    headerTransparent: true,
+    headerBackTitleVisible: false,
+    animation: 'slide_from_right' as const,
+    contentStyle: {
+      backgroundColor: colors.background,
+    },
+    headerTintColor: colors.onSurface,
+  },
+
+  profileCard: {
+    presentation: 'card' as const,
+    headerShown: true,
+    headerTitleAlign: 'center' as const,
+    animation: 'slide_from_left' as const,
+    headerShadowVisible: false,
+    contentStyle: {
+      backgroundColor: colors.background,
+    },
+    headerStyle: {
+      backgroundColor: colors.surface,
+      elevation: 0,
+      shadowOpacity: 0,
+    },
+    headerTintColor: colors.onSurface,
+  },
+
+  checkout: {
+    headerShown: true,
+    headerTitleAlign: 'center' as const,
+    animation: 'slide_from_right' as const,
+    gestureEnabled: true,
+    contentStyle: {
+      backgroundColor: colors.background,
+    },
+    headerStyle: {
+      backgroundColor: colors.surface,
+      elevation: 0,
+      shadowOpacity: 0,
+    },
+    headerTintColor: colors.onSurface,
+  },
+
+  fullScreen: {
+    presentation: 'fullScreenModal' as const,
+    headerShown: false,
+    gestureEnabled: true,
+    animation: 'slide_from_bottom' as const,
+  },
+});
+
 const RootNavigator: React.FC = () => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [isOnboardingComplete, setIsOnboardingComplete] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userType, setUserType] = useState<'customer' | 'restaurant' | null>(
-    null,
+  // Store hooks with performance-optimized selectors
+  const isAuthenticated = useIsAuthenticated();
+  const hasHydrated = useHasHydrated();
+  const isOnboardingComplete = useOnboardingComplete();
+  const userType = useAppUserType();
+  const themeMode = useAppStore((state) => state.theme);
+
+  // App store actions
+  const { completeOnboarding, setUserType } = useAppStore();
+
+  // Theme
+  const theme = useAppTheme(themeMode);
+
+  // Memoized screen options for better performance
+  const screenOptions = useMemo(
+    () => createScreenOptions(theme.colors),
+    [theme.colors],
   );
 
-  useEffect(() => {
-    // Simulate checking async storage or authentication state
-    const checkAppState = async () => {
-      try {
-        // Check if onboarding is complete
-        // const onboardingStatus = await AsyncStorage.getItem('onboardingComplete');
-        // const authStatus = await AsyncStorage.getItem('isAuthenticated');
-        // const storedUserType = await AsyncStorage.getItem('userType');
+  // Event handlers
+  const handleOnboardingComplete = useCallback(
+    (selectedUserType: 'customer' | 'restaurant') => {
+      setUserType(selectedUserType);
+      completeOnboarding();
+    },
+    [completeOnboarding, setUserType],
+  );
 
-        // For now, using local state - replace with actual storage logic
-        setIsOnboardingComplete(false); // Set to true if onboarding is complete
-        setIsAuthenticated(false); // Set to true if user is authenticated
-        setUserType(null); // Set to 'customer' or 'restaurant' based on stored data
-      } catch (error) {
-        console.error('Error checking app state:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const handleLogin = useCallback(
+    (selectedUserType: 'customer' | 'restaurant') => {
+      setUserType(selectedUserType);
+      completeOnboarding();
+    },
+    [completeOnboarding, setUserType],
+  );
 
-    checkAppState();
+  // Navigation ready handler
+  const handleNavigationReady = useCallback(() => {
+    const subscription = Linking.addEventListener('url', ({ url }) => {
+      handleDeepLink(url);
+    });
+
+    return () => subscription?.remove();
   }, []);
 
-  const handleOnboardingComplete = (
-    selectedUserType: 'customer' | 'restaurant',
-  ) => {
-    console.log('Onboarding completed for user type:', selectedUserType);
-    setUserType(selectedUserType);
-    setIsOnboardingComplete(true);
-    // Save to AsyncStorage
-    // AsyncStorage.setItem('onboardingComplete', 'true');
-    // AsyncStorage.setItem('userType', selectedUserType);
-  };
-
-  const handleLogin = (selectedUserType: 'customer' | 'restaurant' | null) => {
-    if (!selectedUserType) {
-      console.warn('No user type selected during login');
-      return;
-    }
-    console.log('Login attempted for user type:', selectedUserType);
-    setUserType(selectedUserType);
-    setIsAuthenticated(true);
-    // Save to AsyncStorage
-    // AsyncStorage.setItem('isAuthenticated', 'true');
-    // AsyncStorage.setItem('userType', selectedUserType);
-  };
-
-  const getInitialRouteName = (): keyof RootStackParamList => {
-    // if (!isAuthenticated) {
-    //   return 'Auth';
-    // }
-
-    // Navigate based on user type
-    if (userType === 'customer') {
-      return 'CustomerApp';
-    } else if (userType === 'restaurant') {
-      return 'RestaurantApp';
+  // Determine initial route name based on app state
+  const getInitialRouteName = useCallback((): keyof RootStackParamList => {
+    if (!isAuthenticated) {
+      console.log('navigating to login');
+      return 'Auth';
     }
 
-    // Default fallback
-    return 'CustomerApp';
-  };
+    switch (userType) {
+      case 'customer':
+        return 'CustomerApp';
+      case 'restaurant':
+        return 'RestaurantApp';
+      default:
+        return 'Auth';
+    }
+  }, [isAuthenticated, userType]);
 
-  if (isLoading) {
+  // Render loading screen while hydrating
+  if (!hasHydrated) {
     return <LoadingScreen />;
   }
 
+  // Render onboarding if not completed
   if (!isOnboardingComplete) {
     return (
-      <OnboardingScreen
-        OnboardingSlides={OnboardingSlides}
-        onComplete={handleOnboardingComplete}
-        onLogin={handleLogin}
-      />
+      <>
+        <StatusBar style="auto" />
+        <OnboardingScreen
+          OnboardingSlides={OnboardingSlides}
+          onComplete={handleOnboardingComplete}
+          onLogin={handleLogin}
+        />
+      </>
     );
   }
 
+  // Main app navigation
   return (
-    <NavigationContainer
-      ref={navigationRef}
-      linking={linking}
-      fallback={<LoadingScreen />}
-    >
-      <Stack.Navigator
-        initialRouteName={getInitialRouteName()}
-        screenOptions={{
-          headerShown: false,
-          gestureEnabled: false,
-          animation: 'slide_from_right',
-        }}
+    <>
+      <StatusBar style={theme.dark ? 'light' : 'dark'} />
+      <NavigationContainer
+        ref={navigationRef}
+        linking={linking}
+        fallback={<LoadingScreen />}
+        onReady={handleNavigationReady}
       >
-        <Stack.Screen name="Auth" component={AuthNavigator} />
-        <Stack.Screen name="CustomerApp" component={CustomerNavigator} />
-        <Stack.Screen name="RestaurantApp" component={RestaurantNavigator} />
-      </Stack.Navigator>
-    </NavigationContainer>
+        <Stack.Navigator
+          initialRouteName={getInitialRouteName()}
+          screenOptions={screenOptions.default}
+        >
+          {/* Main App Navigators */}
+          <Stack.Screen
+            name="Auth"
+            component={AuthNavigator}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
+            name="CustomerApp"
+            component={CustomerNavigator}
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen
+            name="RestaurantApp"
+            component={RestaurantNavigator}
+            options={{ headerShown: false }}
+          />
+
+          {/* Modal Screens */}
+          <Stack.Group screenOptions={screenOptions.modal}>
+            <Stack.Screen
+              name="Cart"
+              component={CartScreen}
+              options={{
+                headerTitle: 'My Cart',
+                contentStyle: {
+                  backgroundColor: theme.colors.background,
+                },
+                headerRight: () => (
+                  <Ionicons
+                    name="options"
+                    size={24}
+                    color={theme.colors.onSurface}
+                    style={{ marginLeft: -10 }}
+                  />
+                ),
+              }}
+            />
+
+            <Stack.Screen
+              name="Notifications"
+              component={NotificationsScreen}
+              options={{
+                headerTitle: 'Notifications',
+              }}
+            />
+          </Stack.Group>
+
+          {/* Full Screen Modal */}
+          <Stack.Screen
+            name="SearchScreen"
+            component={SearchScreen}
+            options={screenOptions.fullScreen}
+          />
+
+          {/* Card Presentation Screens */}
+          <Stack.Group screenOptions={screenOptions.card}>
+            <Stack.Screen
+              name="FoodDetails"
+              component={FoodDetailsScreen}
+              options={{
+                headerTitle: '',
+                headerTransparent: true,
+                headerStyle: {
+                  backgroundColor: 'transparent',
+                },
+              }}
+            />
+
+            <Stack.Screen
+              name="RestaurantDetails"
+              component={RestaurantDetailScreen}
+              options={{
+                headerTitle: '',
+                headerTransparent: true,
+                headerStyle: {
+                  backgroundColor: 'transparent',
+                },
+              }}
+            />
+
+            <Stack.Screen
+              name="AddressScreen"
+              component={AddressScreen}
+              options={{
+                headerTitle: 'Address',
+                headerBackVisible: true,
+              }}
+            />
+          </Stack.Group>
+
+          {/* Profile Screens */}
+          <Stack.Group screenOptions={screenOptions.profileCard}>
+            <Stack.Screen
+              name="EditProfile"
+              component={EditProfileScreen}
+              options={{
+                headerTitle: 'Edit Profile',
+              }}
+            />
+
+            <Stack.Screen
+              name="Help"
+              component={CustomerHelpCenterStackScreen}
+              options={{
+                headerTitle: 'Help Center',
+              }}
+            />
+
+            <Stack.Screen
+              name="FavoriteRestaurantScreen"
+              component={FavoriteRestaurants}
+              options={{
+                headerTitle: 'Favorite Restaurants',
+              }}
+            />
+
+            <Stack.Screen
+              name="PaymentMethods"
+              component={PaymentScreen}
+              options={{
+                headerTitle: 'Payment Methods',
+              }}
+            />
+
+            <Stack.Screen
+              name="LanguageScreen"
+              component={LanguageScreen}
+              options={{
+                headerTitle: 'Language Settings',
+              }}
+            />
+          </Stack.Group>
+
+          {/* Checkout Screen */}
+          <Stack.Screen
+            name="Checkout"
+            component={CheckOutScreen}
+            options={{
+              ...screenOptions.checkout,
+              headerTitle: 'Checkout Order',
+            }}
+          />
+
+          {/* Future screens can be added here */}
+          {/* 
+          <Stack.Screen 
+            name="OrderTracking" 
+            component={OrderTrackingScreen}
+            options={{
+              ...screenOptions.checkout,
+              headerTitle: 'Track Order',
+              gestureEnabled: false, // Prevent swipe back during tracking
+            }}
+          />
+          */}
+        </Stack.Navigator>
+      </NavigationContainer>
+    </>
   );
 };
 

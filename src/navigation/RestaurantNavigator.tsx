@@ -1,7 +1,11 @@
+import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Platform } from 'react-native';
+import { useTheme } from 'react-native-paper';
+
 import {
   RestaurantAnalyticsStackParamList,
   RestaurantMenuStackParamList,
@@ -10,6 +14,7 @@ import {
   RestaurantProfileStackParamList,
 } from './types';
 
+// Import screens
 import ProfileScreen from '../screens/restaurant/profile/ProfileScreen';
 import OrderScreen from '../screens/restaurant/orders/OrderScreen';
 import MenuScreen from '../screens/restaurant/menu/MenuScreen';
@@ -18,6 +23,7 @@ import OrderDetailsScreen from '../screens/restaurant/orders/OrderDetailsScreen'
 import ConfirmOrder from '../screens/restaurant/orders/ConfirmOrder';
 import RejectOrder from '../screens/restaurant/orders/RejectOrder';
 import { Platform } from 'react-native';
+
 import AnalyticsScreen from '../screens/restaurant/analytics/AnalyticsScreen';
 import DashboardScreen from '../screens/restaurant/analytics/DashboardScreen';
 import ProfileEditScreen from '../screens/restaurant/profile/ProfileEditScreen';
@@ -36,6 +42,7 @@ import MenuListScreen from '../screens/restaurant/menu/MenuListScreen';
 import MenuSettingsScreen from '../screens/restaurant/menu/MenuSettingsScreen';
 import AddCategoryScreen from '../screens/restaurant/menu/AddCategoryScreen';
 
+// Create navigators
 const RestaurantTab = createBottomTabNavigator<RestaurantTabParamList>();
 const RestaurantOrdersStack =
   createNativeStackNavigator<RestaurantOrdersStackParamList>();
@@ -48,8 +55,19 @@ const RestaurantProfileStack =
 
 // Stack Screen Components
 function RestaurantOrdersStackScreen() {
+  const { colors } = useTheme();
   return (
-    <RestaurantOrdersStack.Navigator>
+    <RestaurantOrdersStack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: colors.primary,
+        },
+        headerTitleStyle: {
+          fontWeight: 'bold',
+        },
+        headerTitleAlign: 'center',
+      }}
+    >
       <RestaurantOrdersStack.Screen
         name="OrdersScreen"
         component={OrderScreen} 
@@ -59,6 +77,7 @@ function RestaurantOrdersStackScreen() {
         name="OrderDetails"
         component={OrderDetailsScreen}
         options={{ title: 'Order Details' }}
+
       />
 
       {/* Added screens for Confirm / Reject flows */}
@@ -85,16 +104,20 @@ function RestaurantOrdersStackScreen() {
         name="OrderHistory"
         component={OrderHistoryScreen}
         options={{ title: 'Order History' }}
+
       />
+
     </RestaurantOrdersStack.Navigator>
   );
 }
 
 function RestaurantMenuStackScreen() {
+  const { colors } = useTheme();
   return (
     <RestaurantMenuStack.Navigator
       screenOptions={{
         headerShown: false, // Hide default headers since screens have custom headers
+
       }}
     >
       <RestaurantMenuStack.Screen
@@ -173,13 +196,25 @@ function RestaurantMenuStackScreen() {
           headerTitleStyle: { fontWeight: 'bold' },
         }}
       />
+
     </RestaurantMenuStack.Navigator>
   );
 }
 
 function RestaurantAnalyticsStackScreen() {
+  const { colors } = useTheme();
   return (
-    <RestaurantAnalyticsStack.Navigator>
+    <RestaurantAnalyticsStack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: colors.primary,
+        },
+        headerTitleStyle: {
+          fontWeight: 'bold',
+        },
+        headerTitleAlign: 'center',
+      }}
+    >
       <RestaurantAnalyticsStack.Screen
         name="AnalyticsScreen"
         component={AnalyticsScreen}
@@ -191,17 +226,18 @@ function RestaurantAnalyticsStackScreen() {
         options={{ title: 'Dashboard' }}
       />
       {/* <RestaurantAnalyticsStack.Screen name="SalesReport" component={SalesReportScreen} />
-      <RestaurantAnalyticsStack.Screen name="CustomerInsights" component={CustomerInsightsScreen} />
-      <RestaurantAnalyticsStack.Screen name="PopularItems" component={PopularItemsScreen} /> */}
+     
     </RestaurantAnalyticsStack.Navigator>
   );
 }
 
 function RestaurantProfileStackScreen() {
+  const { colors } = useTheme();
   return (
     <RestaurantProfileStack.Navigator
       screenOptions={{
         headerShown: false, // Hide headers for a cleaner look since the edit screen has its own header
+
       }}
     >
       <RestaurantProfileStack.Screen
@@ -248,64 +284,94 @@ function RestaurantProfileStackScreen() {
         component={RestaurantSettingsScreen}
         options={{ title: 'Restaurant Settings', animation: 'slide_from_right' }}
       />
+
     </RestaurantProfileStack.Navigator>
   );
 }
 
 export default function RestaurantNavigator() {
   const insets = useSafeAreaInsets();
+  const { colors } = useTheme();
+
   return (
     <RestaurantTab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           let iconName: keyof typeof Ionicons.glyphMap;
 
-          if (route.name === 'Orders') {
-            iconName = focused ? 'receipt' : 'receipt-outline';
-          } else if (route.name === 'Menu') {
-            iconName = focused ? 'restaurant' : 'restaurant-outline';
-          } else if (route.name === 'Analytics') {
-            iconName = focused ? 'bar-chart' : 'bar-chart-outline';
-          } else if (route.name === 'Profile') {
-            iconName = focused ? 'person' : 'person-outline';
-          } else {
-            iconName = 'help-outline';
+          switch (route.name) {
+            case 'Orders':
+              iconName = focused ? 'receipt' : 'receipt-outline';
+              break;
+            case 'Menu':
+              iconName = focused ? 'restaurant' : 'restaurant-outline';
+              break;
+            case 'Analytics':
+              iconName = focused ? 'bar-chart' : 'bar-chart-outline';
+              break;
+            case 'Profile':
+              iconName = focused ? 'person' : 'person-outline';
+              break;
+            default:
+              iconName = 'help-outline';
           }
 
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: '#007AFF',
-        tabBarInactiveTintColor: 'gray',
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.secondaryContainer,
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#fff',
-          borderTopColor: '#e0e0e0',
-          height:( Platform.OS === 'ios' ? 90 : 70) + insets.bottom,
-          paddingBottom: (Platform.OS === 'ios' ? 25 : 10)+ insets.bottom,
+          backgroundColor: colors.background,
+          borderTopColor: colors.background,
+          height: (Platform.OS === 'ios' ? 90 : 70) + insets.bottom,
+          paddingBottom: (Platform.OS === 'ios' ? 25 : 10) + insets.bottom,
           paddingTop: 10,
+          shadowColor: '#000',
+          shadowOffset: {
+            width: 0,
+            height: -2,
+          },
+          shadowOpacity: 0.1,
+          shadowRadius: 3,
+          elevation: 8,
         },
-        headerStyle: {
-          backgroundColor: '#007AFF',
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '500',
         },
-        headerTintColor: '#fff',
-        headerTitleStyle: {
-          fontWeight: 'bold',
-        },
-        headerTitleAlign: 'center',
       })}
     >
       <RestaurantTab.Screen
         name="Orders"
         component={RestaurantOrdersStackScreen}
+        options={{
+          tabBarLabel: 'Orders',
+        }}
       />
-      <RestaurantTab.Screen name="Menu" component={RestaurantMenuStackScreen} />
+
+      <RestaurantTab.Screen
+        name="Menu"
+        component={RestaurantMenuStackScreen}
+        options={{
+          tabBarLabel: 'Menu',
+        }}
+      />
+
       <RestaurantTab.Screen
         name="Analytics"
         component={RestaurantAnalyticsStackScreen}
+        options={{
+          tabBarLabel: 'Analytics',
+        }}
       />
+
       <RestaurantTab.Screen
         name="Profile"
         component={RestaurantProfileStackScreen}
+        options={{
+          tabBarLabel: 'Profile',
+        }}
       />
     </RestaurantTab.Navigator>
   );

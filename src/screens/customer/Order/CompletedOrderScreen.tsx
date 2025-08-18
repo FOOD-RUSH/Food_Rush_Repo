@@ -14,7 +14,7 @@ const orderItems: OrderItemCardProps[] = [
     foodPrice: '12.99',
     quantity: 2,
     orderStatus: 'completed',
-    distance: '2.4 km'
+    distance: '2.4 km',
   },
   {
     foodId: '2',
@@ -24,7 +24,7 @@ const orderItems: OrderItemCardProps[] = [
     foodPrice: '10.99',
     quantity: 1,
     orderStatus: 'completed',
-    distance: '1.8 km'
+    distance: '1.8 km',
   },
   {
     foodId: '3',
@@ -34,7 +34,7 @@ const orderItems: OrderItemCardProps[] = [
     foodPrice: '8.99',
     quantity: 3,
     orderStatus: 'completed',
-    distance: '3.2 km'
+    distance: '3.2 km',
   },
 ];
 
@@ -56,8 +56,8 @@ const CompletedOrderScreen = () => {
   );
 
   return (
-    <CommonView backgroundColor="#fff">
-      <View className="flex-1 h-full ">
+    <CommonView>
+      <View className="flex-1 h-full">
         <FlatList
           data={orderItems}
           renderItem={({ item }) => (
@@ -73,15 +73,16 @@ const CompletedOrderScreen = () => {
             />
           )}
           keyExtractor={(item) => item.foodId}
-          contentContainerStyle={{ 
+          contentContainerStyle={{
             marginTop: 0,
             paddingTop: 8,
             elevation: 3,
             paddingBottom: 20,
-            flexGrow: 1
+            flexGrow: 1,
           }}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={renderEmptyComponent}
+          className="pt-10 "
         />
       </View>
     </CommonView>

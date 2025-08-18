@@ -1,28 +1,39 @@
-import { View, Text,  TouchableWithoutFeedback } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import React from 'react';
-import { AntDesign, Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { useTheme } from 'react-native-paper';
 
 interface rowView {
   leftIconName: keyof typeof Ionicons.glyphMap;
   onPress: () => void;
-  rightIconName?: any;
+  rightIconName?: keyof typeof MaterialIcons.glyphMap;
   title: string;
 }
 const RowView = ({
   leftIconName,
   onPress,
-  rightIconName = 'arrowright',
+  rightIconName = 'arrow-forward-ios',
   title,
 }: rowView) => {
+  const { colors } = useTheme();
   return (
-    <View className="flex-row justify-between mb-4 items-center px-4 py-2">
-      <Ionicons name={leftIconName} size={20}/>
+    <TouchableOpacity onPress={onPress}>
+      <View className="flex-row justify-between mb-4 items-center px-4 py-2">
+        <Ionicons name={leftIconName} size={22} color={colors.onSurface} />
 
-      <Text className='font-semibold text-[16px]'>{title}</Text>
-      <TouchableWithoutFeedback onPress={onPress}>
-        <AntDesign name={rightIconName} size={20} />
-      </TouchableWithoutFeedback>
-    </View>
+        <Text
+          className={`font-semibold text-base `}
+          style={{ color: colors.onSurface }}
+        >
+          {title}
+        </Text>
+        <MaterialIcons
+          name={rightIconName}
+          size={18}
+          color={colors.onSurface}
+        />
+      </View>
+    </TouchableOpacity>
   );
 };
 

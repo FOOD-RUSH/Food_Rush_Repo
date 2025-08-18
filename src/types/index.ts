@@ -1,82 +1,86 @@
-import { TextInputProps } from "react-native-paper";
+import { PickerProps } from '@react-native-picker/picker';
+import { ReactNode } from 'react';
+import { TextInputProps } from 'react-native';
+import { AddressData } from '../components/customer/AddressEditModal';
+// Basic props
 
 export interface User {
-  uid: string;
+
+
+  id: string;
   email: string;
-  userType: 'customer' | 'restaurant';
-  profile?: CustomerProfile | RestaurantProfile;
+  fullName: string;
+  phoneNumber: string;
+  role: 'customer';
   isEmailVerified: boolean;
-
+  profilePicture?: null | any
 }
+// {
+//   "status_code": 200,
+//   "message": "Authentication request successful",
+//   "data": {
+//     "sub": "9a14155d-5b82-44bf-b196-9dcec0f50be7",
+//     "id": "9a14155d-5b82-44bf-b196-9dcec0f50be7",
+//     "email": "tochukwupaul21@gmail.com",
+//     "fullName": "Dhdjsn",
+//     "phoneNumber": "+237239767981",
+//     "profilePicture": null,
+//     "role": "customer",
+//     "status": "active"
+//   }
+// }
+
 // app state
-export interface AppState {
-  isOnboardingComplete: boolean;
-  language: string;
 
-}
 //Properties of Food
-
 export interface FoodProps {
-  id?: string;
-  restaurantID?: string;
+  id: string;
+  restaurantID: string;
   name?: string;
   price?: number;
   ratings?: number;
   addedOn?: Date;
   distance?: number;
   image?: any;
-
-}
-
-// Onboarding slides 
-export interface OnboardingSlide {
-  id: number,
-  title: string,
+  category?: any;
+  discount?: any;
   description: string;
-  image: any,
+  startAt?: any;
+  endAt?: any
 
 }
 
-// Customer profile
-export interface CustomerProfile {
-  userName: string;
-  phoneNumber: string;
-  addresses?: Address[];
-  preferences?: {
-    dietary: string[];
-    cuisineTypes: string[];
-  };
+// Onboarding slides
+export interface OnboardingSlide {
+  id: number;
+  title: string;
+  description: string;
+  image: any;
 }
+
 //Restaurant profile
 export interface RestaurantProfile {
   id: string;
   name: string;
   description: string;
   phone: string;
-  address: Address;
-  cuisine: string[];
-  hours: {
-    [key: string]: { open: string; close: string; isOpen: boolean };
-  };
-  isVerified: boolean;
-  rating: number;
-  images: [];
-  deliveryTime: number;
-  deliveryFee: number;
-  menu: MenuItem[]
+  address: string;
+  // address: Address
+  cuisine: string;
+  openTime: string;
+  isOpen: boolean;
+  isVerified?: boolean;
+  // ratings: number;
+  ratings: string;
+  reviewCount: string;
+  distance: string;
+  deliveryFee?: string;
+  image: any;
+  deliveryTime?: string;
+  menu: FoodProps[];
+  discounts?: FoodProps[];
+  specialOffers?: string[];
 }
-// MENU ITEM INTERFace
-export interface MenuItem {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  image?: string;
-  isAvailable: boolean;
-  dietaryInfo: string[];
-}
-
 
 // Order Types
 export interface Order {
@@ -87,12 +91,12 @@ export interface Order {
   items: OrderItem[];
   status: OrderStatus;
   totalAmount: number;
-  deliveryAddress: Address;
+  deliveryAddress: AddressData;
   paymentMethod: PaymentMethod;
   createdAt: Date;
   estimatedDeliveryTime: Date;
 }
-//  Auth state 
+//  Auth state
 export interface AuthState {
   user: User | null;
   isLoading: boolean;
@@ -103,20 +107,22 @@ export interface AuthState {
 }
 // Order item
 export interface OrderItem {
+  restaurantId: string;
   menuItemId: string;
   quantity: number;
-  specialInstructions?: string;
   price: number;
 }
+
 export declare interface InputFieldProps extends TextInputProps {
-    label?: string;
-    icon?: any;
-    secureTextEntry?: boolean;
-    labelStyle?: string;
-    containerStyle?: string;
-    inputStyle?: string;
-    iconStyle?: string;
-    className?: string;
+  label?: string;
+
+  error?: boolean;
+  labelStyle?: string;
+  inputStyle?: string;
+  className?: string;
+  rightIcon?: ReactNode;
+  leftIcon?: ReactNode;
+  containerStyle?: string;
 }
 
 export type OrderStatus =
@@ -135,18 +141,8 @@ export interface Location {
   address?: string;
 }
 
-export interface Address {
-  street: string;
-  city: string;
-  region: string;
-  landmark?: string;
-  instructions?: string;
-}
-
 // Payment Types
-export type PaymentMethod =
-  | 'mtn_mobile_money'
-  | 'orange_money'
+export type PaymentMethod = 'mtn_mobile_money' | 'orange_money';
 
 export interface PaymentTransaction {
   id: string;
@@ -158,14 +154,6 @@ export interface PaymentTransaction {
   createdAt: Date;
 }
 
-interface FoodClass {
-  id: string;
-  restaurantId: string;
-  name: string;
-  price: string;
-  category: string;
-  description: string;
-  ingredient: string;
+export interface SelectProps extends PickerProps {
+  label?: string;
 }
-
-

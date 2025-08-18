@@ -1,23 +1,33 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Button, IconButton } from 'react-native-paper';
+import { Button, IconButton, useTheme } from 'react-native-paper';
+import { AuthStackScreenProps } from '@/src/navigation/types';
+import { useAuthStore } from '@/src/stores/customerStores/AuthStore';
+import CommonView from '@/src/components/common/CommonView';
+import Toast from 'react-native-toast-message';
+import { useNetwork } from '@/src/contexts/NetworkContext';
+import { useLanguage } from '@/src/contexts/LanguageContext';
+import { useVerifyOTP, useResendOTP } from '@/src/hooks/customer/useAuthhooks';
 
-interface OTPScreenProps {
-  phoneNumber?: string;
-  onVerifyOTP?: (otp: string) => void;
-  onResendOTP?: () => void;
-}
-
-const OTPScreen: React.FC<OTPScreenProps> = ({ 
-  phoneNumber = "+237 6*****31", 
-  onVerifyOTP,
-  onResendOTP 
+const OTPScreen: React.FC<AuthStackScreenProps<'OTPVerification'>> = ({
+  navigation,
+  route,
 }) => {
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
-  const [timer, setTimer] = useState(65);
+  const { colors } = useTheme();
+  const { t } = useLanguage();
+  const { isConnected, isInternetReachable } = useNetwork();
+
+  // getting all data from route
+  const data = route.params;
+
+  // verify otp function
+  const { mutate: verifyOTPMutation, isPending: isVerifying } = useVerifyOTP();
+  const { mutate: resendOTPMutation, isPending: isResending } = useResendOTP();
+  const { clearError, setError } = useAuthStore();
+
+  const [otp, setOtp] = useState(['', '', '', '']);
+  const [timer, setTimer] = useState(30);
   const [isResendEnabled, setIsResendEnabled] = useState(false);
-  const [isVerifying, setIsVerifying] = useState(false);
   const inputRefs = useRef<(TextInput | null)[]>([]);
 
   // Timer countdown effect
@@ -32,84 +42,228 @@ const OTPScreen: React.FC<OTPScreenProps> = ({
     }
   }, [timer]);
 
-  const handleOtpChange = useCallback((value: string, index: number) => {
-    // Only allow numeric input
-    if (!/^\d*$/.test(value)) return;
+  const handleOtpChange = useCallback(
+    (value: string, index: number) => {
+      // Only allow numeric input
+      if (!/^\d*$/.test(value)) return;
 
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
+      const newOtp = [...otp];
+      newOtp[index] = value;
+      setOtp(newOtp);
 
-    // Auto-focus next input
-    if (value && index < 5) {
-      inputRefs.current[index + 1]?.focus();
-    }
-  }, [otp]);
+      // Auto-focus next input
+      if (value && index < 3) {
+        inputRefs.current[index + 1]?.focus();
+      }
+    },
+    [otp],
+  );
 
-  const handleKeyPress = useCallback((key: string, index: number) => {
-    if (key === 'Backspace' && !otp[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
-  }, [otp]);
+  const handleKeyPress = useCallback(
+    (key: string, index: number) => {
+      if (key === 'Backspace' && !otp[index] && index > 0) {
+        inputRefs.current[index - 1]?.focus();
+      }
+    },
+    [otp],
+  );
 
+  // verification of OTP request
   const handleVerify = useCallback(async () => {
-    const otpString = otp.join('');
-    if (otpString.length !== 6) return;
-
-    setIsVerifying(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-      onVerifyOTP?.(otpString);
-      console.log('OTP Verified:', otpString);
-    } catch (error) {
-      console.error('OTP verification failed:', error);
-    } finally {
-      setIsVerifying(false);
+    if (!isConnected || !isInternetReachable) {
+      Toast.show({
+        type: 'error',
+        text1: t('error'),
+        text2: 'No internet connection. Please check your network settings.',
+        position: 'top',
+      });
+      return;
     }
-  }, [otp, onVerifyOTP]);
+
+    const otpString = otp.join('');
+    if (otpString.length !== 4) {
+      Toast.show({
+        type: 'error',
+        text1: t('error'),
+        text2: 'Please enter a complete 4-digit code',
+        position: 'top',
+      });
+      return;
+    }
+
+    clearError();
+
+    try {
+      console.log(
+        `data: \n otp: ${otpString} type: ${'email'}, userId: ${data.userId}`,
+      );
+      verifyOTPMutation(
+        {
+          otp: otpString,
+          type: 'email',
+          userId: data.userId,
+        },
+        {
+          onSuccess: () => {
+            Toast.show({
+              type: 'success',
+              text1: t('success'),
+              text2: 'OTP verified successfully!',
+              position: 'top',
+            });
+
+            // Navigate to main app - auth state is already updated in the hook
+            navigation.navigate('CustomerApp', {
+              screen: 'Home',
+              params: { screen: 'HomeScreen' },
+            });
+          },
+          onError: (error: any) => {
+            const errorMessage =
+              error?.message || 'OTP verification failed. Please try again.';
+            setError(errorMessage);
+
+            Toast.show({
+              type: 'error',
+              text1: t('error'),
+              text2: errorMessage,
+              position: 'top',
+            });
+
+            // Clear OTP inputs on error to allow retry
+            setOtp(['', '', '', '']);
+            inputRefs.current[0]?.focus();
+          },
+        },
+      );
+    } catch (error: any) {
+      const errorMessage =
+        error?.message || 'OTP verification failed. Please try again.';
+      setError(errorMessage);
+
+      Toast.show({
+        type: 'error',
+        text1: t('error'),
+        text2: errorMessage,
+        position: 'top',
+      });
+    }
+  }, [
+    verifyOTPMutation,
+    clearError,
+    setError,
+    data.userId,
+    isConnected,
+    isInternetReachable,
+    otp,
+    t,
+    navigation,
+  ]);
 
   const handleResend = useCallback(async () => {
+    if (!isConnected || !isInternetReachable) {
+      Toast.show({
+        type: 'error',
+        text1: t('error'),
+        text2: 'No internet connection. Please check your network settings.',
+        position: 'top',
+      });
+      return;
+    }
+
     if (!isResendEnabled) return;
 
+    clearError();
+
     try {
-      setTimer(65);
-      setIsResendEnabled(false);
-      setOtp(['', '', '', '', '', '']);
-      onResendOTP?.();
-      console.log('OTP Resent');
-    } catch (error) {
-      console.error('Resend failed:', error);
+      resendOTPMutation(data.email, {
+        onSuccess: () => {
+          setTimer(30);
+          setIsResendEnabled(false);
+          setOtp(['', '', '', '']);
+          inputRefs.current[0]?.focus();
+
+          Toast.show({
+            type: 'success',
+            text1: t('success'),
+            text2: 'OTP resent successfully',
+            position: 'bottom',
+          });
+        },
+        onError: (error: any) => {
+          const errorMessage =
+            error?.message || 'Failed to resend OTP. Please try again.';
+          setError(errorMessage);
+
+          Toast.show({
+            type: 'error',
+            text1: t('error'),
+            text2: errorMessage,
+            position: 'bottom',
+            visibilityTime: 5000,
+          });
+        },
+      });
+    } catch (error: any) {
+      const errorMessage =
+        error?.message || 'Failed to resend OTP. Please try again.';
+      setError(errorMessage);
+
+      Toast.show({
+        type: 'error',
+        text1: t('error'),
+        text2: errorMessage,
+        position: 'top',
+      });
     }
-  }, [isResendEnabled, onResendOTP]);
+  }, [
+    isConnected,
+    isInternetReachable,
+    isResendEnabled,
+    resendOTPMutation,
+    clearError,
+    setError,
+    data.email,
+    t,
+  ]);
 
   const goBack = useCallback(() => {
-    console.log('Go back');
-  }, []);
+    navigation.goBack();
+  }, [navigation]);
 
-  const otpComplete = otp.every(digit => digit !== '');
+  const otpComplete = otp.every((digit) => digit !== '');
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <View className="flex-1 px-6 pt-2">
+    <CommonView>
+      <View
+        className="flex-1 px-2 pt-2"
+        style={{ backgroundColor: colors.background }}
+      >
         {/* Header */}
         <View className="flex-row items-center justify-between mb-8">
           <IconButton
             icon="arrow-left"
             size={24}
-            iconColor="#000000"
+            iconColor={colors.onBackground}
             className="-ml-2"
             onPress={goBack}
           />
-          <Text className="text-lg font-semibold text-black">
-            OTP Code Verification
+          <Text
+            className={`text-lg font-semibold `}
+            style={{ color: colors.onBackground }}
+          >
+            {t('otp_verification')}
           </Text>
           <View className="w-10" />
         </View>
 
         {/* Description */}
         <View className="mb-12">
-          <Text className="text-sm text-gray-600 text-center leading-5">
-            Code has been sent to {phoneNumber}
+          <Text
+            className={`text-sm text-center leading-5 `}
+            style={{ color: colors.onBackground }}
+          >
+            {t('otp_sent')} {data.phone || data.email}
           </Text>
         </View>
 
@@ -118,29 +272,49 @@ const OTPScreen: React.FC<OTPScreenProps> = ({
           {otp.map((digit, index) => (
             <TextInput
               key={index}
-              ref={ref => inputRefs.current[index] = ref}
-              className={`w-12 h-12 mx-2 text-center text-lg font-semibold border-2 rounded-lg ${
-                digit 
-                  ? 'border-blue-500 bg-blue-50' 
-                  : 'border-gray-300 bg-white'
-              }`}
+              ref={(ref) => {
+                inputRefs.current[index] = ref;
+              }}
+              className={`w-15 h-15 mx-2 text-center text-2xl font-semibold border-2 rounded-lg`}
+              style={{
+                backgroundColor: digit ? colors.surfaceVariant : colors.surface,
+                borderColor: digit ? colors.primary : colors.surface,
+                color: colors.onSurface,
+                width: 60,
+                height: 100,
+              }}
               value={digit}
               onChangeText={(value) => handleOtpChange(value, index)}
-              onKeyPress={({ nativeEvent }) => handleKeyPress(nativeEvent.key, index)}
+              onKeyPress={({ nativeEvent }) =>
+                handleKeyPress(nativeEvent.key, index)
+              }
               keyboardType="numeric"
               maxLength={1}
               selectTextOnFocus
+              editable={!isVerifying}
             />
           ))}
         </View>
 
         {/* Resend Timer */}
         <View className="mb-8">
-          <Text className="text-sm text-gray-600 text-center">
-            Resend code in{' '}
-            <Text className="text-blue-500 font-medium">
-              {Math.floor(timer / 60)}:{(timer % 60).toString().padStart(2, '0')} s
-            </Text>
+          <Text
+            className={`text-sm text-center`}
+            style={{ color: colors.onSurface }}
+          >
+            {isResendEnabled ? (
+              <Text style={{ color: colors.primary }}>
+                You can now resend the code
+              </Text>
+            ) : (
+              <>
+                {t('resend_code')} in{' '}
+                <Text className="font-medium" style={{ color: colors.primary }}>
+                  {Math.floor(timer / 60)}:
+                  {(timer % 60).toString().padStart(2, '0')} s
+                </Text>
+              </>
+            )}
           </Text>
         </View>
 
@@ -150,29 +324,50 @@ const OTPScreen: React.FC<OTPScreenProps> = ({
           onPress={handleVerify}
           loading={isVerifying}
           disabled={!otpComplete || isVerifying}
-          buttonColor="#1E90FF"
+          buttonColor={colors.primary}
           textColor="white"
           contentStyle={{ paddingVertical: 8 }}
           style={{ borderRadius: 25, marginBottom: 20 }}
           labelStyle={{ fontSize: 16, fontWeight: '600' }}
         >
-          Verify
+          {isVerifying ? 'Verifying...' : t('verify')}
         </Button>
 
         {/* Resend Button */}
         <TouchableOpacity
           onPress={handleResend}
-          disabled={!isResendEnabled}
+          disabled={!isResendEnabled || isResending}
           className="self-center"
         >
-          <Text className={`text-sm font-medium ${
-            isResendEnabled ? 'text-blue-500' : 'text-gray-400'
-          }`}>
-            Resend Code
+          <Text
+            className={`text-sm font-medium ${
+              isResendEnabled && !isResending
+                ? `text-[${colors.primary}]`
+                : `text-[${colors.outline}]`
+            }`}
+            style={{
+              color:
+                isResendEnabled && !isResending
+                  ? colors.primary
+                  : colors.outline,
+            }}
+          >
+            {isResending ? 'Resending...' : t('resend_code')}
           </Text>
         </TouchableOpacity>
+
+        {/* Additional Info */}
+        <View className="mt-8">
+          <Text
+            className="text-xs text-center"
+            style={{ color: colors.onSurface, opacity: 0.7 }}
+          >
+            Didn&apos;t receive the code? Check your spam folder or try
+            resending.
+          </Text>
+        </View>
       </View>
-    </SafeAreaView>
+    </CommonView>
   );
 };
 

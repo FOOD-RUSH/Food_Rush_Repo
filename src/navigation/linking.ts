@@ -1,5 +1,5 @@
- import { LinkingOptions } from "@react-navigation/native";
-import { RootStackParamList } from "./types";
+import { LinkingOptions } from '@react-navigation/native';
+import { RootStackParamList } from './types';
 
 export const linking: LinkingOptions<RootStackParamList> = {
   prefixes: ['fooddeliveryapp://', 'https://foodrush.com'],
@@ -28,10 +28,7 @@ export const linking: LinkingOptions<RootStackParamList> = {
               MenuCategory: 'restaurant/:restaurantId/category/:categoryId',
               Notifications: 'notifications',
               Promotions: 'promotions',
-            },
-          },
-          Search: {
-            screens: {
+              OrderSummary: 'order-receipt',
               SearchScreen: 'search',
               SearchResults: 'search/results',
               FilterScreen: 'search/filters',
@@ -47,15 +44,19 @@ export const linking: LinkingOptions<RootStackParamList> = {
           },
           Profile: {
             screens: {
-              ProfileScreen: 'profile',
-              ProfileHome: 'profile/home',
+              ProfileHome: 'profile',
               EditProfile: 'profile/edit',
               AddressScreen: 'profile/addresses',
               AddAddress: 'profile/address/add',
               PaymentMethods: 'profile/payments',
               AddPayment: 'profile/payment/add',
               Settings: 'profile/settings',
-              Help: 'profile/help',
+              Help: {
+                screens: {
+                  FAQ: 'profile/help/faq',
+                  ContactUs: 'profile/help/contact',
+                },
+              },
               About: 'profile/about',
               FavoriteRestaurantScreen: 'profile/favorites',
               LanguageScreen: 'profile/language',
@@ -111,4 +112,3 @@ export const linking: LinkingOptions<RootStackParamList> = {
     },
   },
 };
-

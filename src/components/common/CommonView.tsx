@@ -1,49 +1,36 @@
-import { View, StatusBar, StatusBarStyle, StyleProp, ViewStyle } from 'react-native';
+
+import { View, StatusBar } from 'react-native';
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme } from 'react-native-paper';
 
 interface CommonViewProps {
   children: React.ReactNode;
-  backgroundColor?: string;
-  statusBarStyle?: StatusBarStyle;
+
   showStatusBar?: boolean;
   paddingHorizontal?: number;
   safeAreaEdges?: Array<'top' | 'right' | 'bottom' | 'left'>;
   style?: StyleProp<ViewStyle>;
 }
 
-const CommonView = ({ 
-  children, 
-  backgroundColor = '#ffffff',
-  statusBarStyle = 'dark-content',
-  showStatusBar = true,
-  paddingHorizontal = 16,
-  safeAreaEdges = ['top', 'right', 'bottom', 'left'],
-  style
-}: CommonViewProps) => {
+const CommonView = ({ children, showStatusBar = true }: CommonViewProps) => {
+  const { colors } = useTheme();
+  const backgroundColor = colors.background;
+  const statusBarStyle =
+    colors.onSurface === '#1e293b' ? 'dark-content' : 'light-content';
+
   return (
     <>
       {showStatusBar && (
-        <StatusBar 
-          barStyle={statusBarStyle} 
+        <StatusBar
+          barStyle={statusBarStyle}
           backgroundColor={backgroundColor}
           translucent={false}
         />
       )}
-      <SafeAreaView 
-        edges={safeAreaEdges}
-        style={[{ 
-          flex: 1, 
-          backgroundColor 
-        }, style]}
-      >
-        <View 
-          style={[{ 
-            flex: 1, 
-            paddingHorizontal,
-            backgroundColor 
-          }, style]}
-        >
+
+      <SafeAreaView className="flex-1 " style={{ backgroundColor }}>
+        <View className="flex-1 px-4" style={{ backgroundColor }}>
           {children}
         </View>
       </SafeAreaView>

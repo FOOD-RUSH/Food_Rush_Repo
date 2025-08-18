@@ -1,5 +1,4 @@
-import '@/src/config/firebase';
-import React, { useLayoutEffect, useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,26 +7,41 @@ import {
   ScrollView,
   Image,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Button, TextInput, HelperText, Checkbox } from 'react-native-paper';
+import {
+  Button,
+  TextInput,
+  HelperText,
+  Checkbox,
+  useTheme,
+} from 'react-native-paper';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { loginSchema } from '@/src/utils/validation';
 import { TextButton } from '@/src/components/common/TextButton';
-import { navigate } from '@/src/navigation/navigationHelpers';
-import { useRoute } from '@react-navigation/native';
+import { AuthStackScreenProps } from '@/src/navigation/types';
+import CommonView from '@/src/components/common/CommonView';
+import { useAuthStore } from '@/src/stores/customerStores/AuthStore';
+import { useLogin } from '@/src/hooks/customer/useAuthhooks';
+import Toast from 'react-native-toast-message';
+import { useNetwork } from '@/src/contexts/NetworkContext';
+import { useLanguage } from '@/src/contexts/LanguageContext';
 
 interface LoginFormData {
   email: string;
   password: string;
 }
 
-export default function LoginScreen() {
-  useLayoutEffect(()=> {
-  })
+const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
+  navigation,
+  route,
+}) => {
+  const { colors } = useTheme();
+  const { t } = useLanguage();
+  const { isConnected, isInternetReachable } = useNetwork();
+
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+
   const {
     control,
     handleSubmit,
@@ -39,49 +53,144 @@ export default function LoginScreen() {
       password: '',
     },
   });
-  // getting usertype from params
-  const route = useRoute();
-  // get usertype gotten from params
 
-  const userType = route.params;
+  // get usertype gotten from params
+  const userType = route.params?.userType;
 
   const WelcomeImage = require('@/assets/images/Welcome.png');
+  const { clearError } = useAuthStore();
 
-  const onSubmit = async (data: LoginFormData) => {
-    setLoading(true);
-    // TODO:
-    console.log('Usertype: ' + userType);
-  };
+  // Using the hook for login
+  const { 
+    mutate: loginMutation, 
+    isPending, 
+    error: loginError 
+  } = useLogin();
+
+  const onSubmit = useCallback(
+    async (data: LoginFormData) => {
+      // Check network connectivity
+      if (!isConnected || !isInternetReachable) {
+        Toast.show({
+          type: 'error',
+          text1: t('error'),
+          text2: 'No internet connection. Please check your network settings.',
+          position: 'top',
+        });
+        return;
+      }
+
+      // Clear any previous errors
+      clearError();
+
+      console.log('Attempting login with email:', data.email);
+
+      loginMutation(
+        { 
+          email: data.email.trim().toLowerCase(), 
+          password: data.password 
+        },
+        {
+          onSuccess: () => {
+            console.log('Login successful, showing success toast');
+            
+            Toast.show({
+              type: 'success',
+              text1: t('success'),
+              text2: 'Login successful!',
+              position: 'top',
+            });
+
+            // Navigate to main app - auth state is already updated in the hook
+            navigation.navigate('CustomerApp', {
+              screen: 'Home',
+              params: { screen: 'HomeScreen' },
+            });
+          },
+          onError: (error: any) => {
+            console.error('Login failed in component:', error);
+            
+            // Determine error message
+            let errorMessage = 'Login failed. Please try again.';
+            
+            if (error?.message) {
+              errorMessage = error.message;
+            } else if (error?.status === 401) {
+              errorMessage = 'Invalid email or password. Please check your credentials.';
+            } else if (error?.status === 429) {
+              errorMessage = 'Too many login attempts. Please try again later.';
+            } else if (error?.code === 'NETWORK_ERROR') {
+              errorMessage = 'Network error. Please check your internet connection.';
+            }
+
+            Toast.show({
+              type: 'error',
+              text1: t('error'),
+              text2: errorMessage,
+              position: 'top',
+            });
+          },
+        },
+      );
+    },
+    [
+      isConnected,
+      isInternetReachable,
+      clearError,
+      t,
+      loginMutation,
+      navigation,
+    ],
+  );
 
   const handleGoogleSignIn = async () => {
-    // TODO:
+    if (!isConnected || !isInternetReachable) {
+      Toast.show({
+        type: 'error',
+        text1: t('error'),
+        text2: 'No internet connection. Please check your network settings.',
+        position: 'top',
+      });
+      return;
+    }
+
+    Toast.show({
+      type: 'info',
+      text1: t('info'),
+      text2: 'Google Sign In not implemented yet',
+      position: 'top',
+    });
   };
 
   const handleAppleSignIn = async () => {
-    // TODO:
+    if (!isConnected || !isInternetReachable) {
+      Toast.show({
+        type: 'error',
+        text1: t('error'),
+        text2: 'No internet connection. Please check your network settings.',
+        position: 'top',
+      });
+      return;
+    }
+
+    Toast.show({
+      type: 'info',
+      text1: t('info'),
+      text2: 'Apple Sign In not implemented yet',
+      position: 'top',
+    });
   };
 
   const handleForgotPassword = () => {
-    // TODO: Navigate to forgot password screen
-    console.log('Navigating to forgot password');
-    navigate('Auth', {
-      screen: 'ForgotPassword',
-      params: { userType: userType },
-    });
+    navigation.navigate('ForgotPassword');
   };
 
   const handleSignUp = () => {
-    // TODO: Navigate to signup screen
-    console.log('Navigating to signup');
-    navigate('Auth', {
-      screen: 'SignUp',
-      params: { userType: userType },
-    });
+    navigation.navigate('SignUp', { userType: userType });
   };
 
   return (
-    // ADD LOGIC FOR SIGNING IN USER AND SIGNING IN CUSTOMER
-    <SafeAreaView className="flex-1 bg-white">
+    <CommonView>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1"
@@ -96,27 +205,25 @@ export default function LoginScreen() {
             <View className="w-48 h-48 bg-blue-50 rounded-lg items-center justify-center mb-8">
               <Image className="w-32 h-32" source={WelcomeImage} />
             </View>
-            <Text className="text-3xl font-bold text-gray-900 mb-2">
-              Welcome Back
+            <Text
+              className={`text-3xl font-bold mb-2 `}
+              style={{ color: colors.onSurface }}
+            >
+              {t('welcome_back')}
             </Text>
           </View>
-          {/* Error Message */}
-          {/* {error && (
-            <Text className="text-red-500 bg-gray-400 text-center text-sm mt-2 h-10 w-40">
-              {error}
-            </Text>
-          )} */}
+
           {/* Form */}
-          <View className="flex-1 px-6">
+          <View className="flex-1 px-2">
             <View className="space-y-4 mb-2">
               {/* Email Input */}
               <Controller
                 control={control}
                 name="email"
                 render={({ field: { onChange, onBlur, value } }) => (
-                  <View className='mb-4'>
+                  <View className="mb-4">
                     <TextInput
-                      placeholder="Email"
+                      placeholder={t('email')}
                       onBlur={onBlur}
                       onChangeText={onChange}
                       value={value}
@@ -124,13 +231,21 @@ export default function LoginScreen() {
                       keyboardType="email-address"
                       autoCapitalize="none"
                       autoComplete="email"
-                      left={<TextInput.Icon icon="email" color="#222" />}
+                      autoCorrect={false}
+                      left={
+                        <TextInput.Icon icon="email" color={colors.onSurface} />
+                      }
                       outlineStyle={{
                         borderRadius: 16,
-                        borderColor: errors.email ? '#EF4444' : '#f3f4f6',
+                        borderColor: errors.email
+                          ? colors.error
+                          : colors.surfaceVariant,
                       }}
-                      style={{ backgroundColor: '#f3f4f6',  }}
-                      contentStyle={{ paddingHorizontal: 16, }}
+                      style={{ backgroundColor: colors.surfaceVariant }}
+                      contentStyle={{
+                        paddingHorizontal: 16,
+                        color: colors.onSurfaceVariant,
+                      }}
                       error={!!errors.email}
                     />
                     {errors.email && (
@@ -147,9 +262,9 @@ export default function LoginScreen() {
                 control={control}
                 name="password"
                 render={({ field: { onChange, onBlur, value } }) => (
-                  <View>
+                  <View className="mb-2">
                     <TextInput
-                      placeholder="Password"
+                      placeholder={t('password')}
                       onBlur={onBlur}
                       onChangeText={onChange}
                       value={value}
@@ -157,18 +272,24 @@ export default function LoginScreen() {
                       secureTextEntry={!showPassword}
                       autoCapitalize="none"
                       autoComplete="password"
-                      left={<TextInput.Icon icon="lock" color="#222" />}
+                      autoCorrect={false}
+                      left={
+                        <TextInput.Icon icon="lock" color={colors.onSurface} />
+                      }
                       right={
                         <TextInput.Icon
                           icon={showPassword ? 'eye-off' : 'eye'}
                           onPress={() => setShowPassword(!showPassword)}
+                          color={colors.onSurface}
                         />
                       }
                       outlineStyle={{
-                        borderRadius: 12,
-                        borderColor: errors.password ? '#EF4444' : '#f3f4f6',
+                        borderRadius: 16,
+                        borderColor: errors.password
+                          ? colors.error
+                          : colors.surfaceVariant,
                       }}
-                      style={{ backgroundColor: '#f3f4f6' }}
+                      style={{ backgroundColor: colors.surfaceVariant }}
                       contentStyle={{ paddingHorizontal: 16 }}
                       error={!!errors.password}
                     />
@@ -187,15 +308,18 @@ export default function LoginScreen() {
                   <Checkbox
                     status={rememberMe ? 'checked' : 'unchecked'}
                     onPress={() => setRememberMe(!rememberMe)}
-                    color="#007AFF"
+                    color={colors.primary}
                   />
-                  <Text className="text-[18px] text-gray-600 ml-2">
-                    Remember me
+                  <Text
+                    className={`text-base ml-2 `}
+                    style={{ color: colors.onSurface }}
+                  >
+                    {t('remember_me')}
                   </Text>
                 </View>
 
                 <TextButton
-                  text="Forgot Password?"
+                  text={t('forgot_password')}
                   onPress={handleForgotPassword}
                 />
               </View>
@@ -204,41 +328,59 @@ export default function LoginScreen() {
               <Button
                 mode="contained"
                 onPress={handleSubmit(onSubmit)}
-                loading={loading}
-                disabled={loading}
-                buttonColor="#007AFF"
+                loading={isPending}
+                disabled={isPending}
+                buttonColor={colors.primary}
                 contentStyle={{ paddingVertical: 12 }}
                 style={{ borderRadius: 25, marginTop: 16 }}
-                labelStyle={{ fontSize: 16, fontWeight: '600', color: 'white' }}
+                labelStyle={{
+                  fontSize: 16,
+                  fontWeight: '600',
+                  color: 'white',
+                }}
               >
-                {loading ? 'Logging in...' : 'Login'}
+                {isPending ? t('logging_in') || 'Logging in...' : t('login')}
               </Button>
 
               {/* Divider */}
               <View className="flex-row items-center my-6">
-                <View className="flex-1 h-px bg-gray-300" />
-                <Text className="px-4 text-gray-500 text-sm">
-                  or continue with
+                <View
+                  className={`flex-1 h-px`}
+                  style={{ backgroundColor: colors.outline }}
+                />
+                <Text
+                  className={`px-4 text-sm `}
+                  style={{ color: colors.onBackground }}
+                >
+                  {' '}
+                  or Sign in{' '}
                 </Text>
-                <View className="flex-1 h-px bg-gray-300" />
+                <View
+                  className={`flex-1 h-px`}
+                  style={{ backgroundColor: colors.outline }}
+                />
               </View>
 
               {/* Social Login Buttons */}
-              <View className="flex-row space-x-4">
+              <View className="flex-row justify-between">
                 {/* Google */}
                 <Button
                   mode="outlined"
                   onPress={handleGoogleSignIn}
-                  disabled={loading}
+                  disabled={isPending}
                   icon="google"
                   contentStyle={{ paddingVertical: 12 }}
                   style={{
                     flex: 1,
                     borderRadius: 25,
-                    borderColor: '#f3f4f6',
+                    borderColor: colors.outline,
                     borderWidth: 1,
+                    marginHorizontal: 2,
                   }}
-                  labelStyle={{ fontSize: 14, color: '#374151' }}
+                  labelStyle={{
+                    fontSize: 14,
+                    color: colors.onSurface,
+                  }}
                 >
                   Google
                 </Button>
@@ -247,16 +389,20 @@ export default function LoginScreen() {
                 <Button
                   mode="outlined"
                   onPress={handleAppleSignIn}
-                  disabled={loading}
+                  disabled={isPending}
                   icon="apple"
                   contentStyle={{ paddingVertical: 12 }}
                   style={{
                     flex: 1,
                     borderRadius: 25,
-                    borderColor: '#f3f4f6',
+                    borderColor: colors.outline,
                     borderWidth: 1,
+                    marginHorizontal: 2,
                   }}
-                  labelStyle={{ fontSize: 14, color: '#374151' }}
+                  labelStyle={{
+                    fontSize: 14,
+                    color: colors.onSurface,
+                  }}
                 >
                   Apple
                 </Button>
@@ -264,15 +410,20 @@ export default function LoginScreen() {
 
               {/* Sign Up Link */}
               <View className="flex-row justify-center items-center mt-8 mb-4">
-                <Text className="text-gray-600 text-base">
-                  Don&apos;t Already have an account?{' '}
+                <Text
+                  className={`text-base `}
+                  style={{ color: colors.onBackground }}
+                >
+                  {t('dont_have_account')}{' '}
                 </Text>
-                <TextButton text="Sign Up" onPress={handleSignUp} />
+                <TextButton text={t('sign_up')} onPress={handleSignUp} />
               </View>
             </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </CommonView>
   );
-}
+};
+
+export default LoginScreen;

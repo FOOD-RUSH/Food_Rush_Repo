@@ -1,5 +1,6 @@
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import React from 'react';
+import { useTheme, Card } from 'react-native-paper';
 
 export interface OrderItemCardProps {
   foodId: string;
@@ -22,14 +23,23 @@ const OrderItemCard = ({
   quantity,
   distance = '2.4 km',
 }: OrderItemCardProps) => {
+  const { colors } = useTheme();
+
   return (
-    <View
-      className="bg-white rounded-2xl mx-4 mb-4 shadow-sm"
+    <Card
       style={{
+        margin: 10,
+        borderRadius: 16,
+        overflow: 'hidden',
+        backgroundColor: colors.surface,
+        marginVertical: 12,
+        borderColor: colors.surface,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.15,
+        shadowRadius: 3,
+        boxShadow: '1px 0px 10px rgba(0, 0, 0, 0.15)',
+
         elevation: 3,
       }}
     >
@@ -40,39 +50,56 @@ const OrderItemCard = ({
           <View className="mr-4">
             <Image
               source={image}
-              className="w-16 h-16 rounded-xl"
-              style={{ width: 64, height: 64 }}
+              className="w-25 h-25 rounded-xl"
+              style={{ width: 100, height: 100 }}
             />
           </View>
 
           {/* Food Details */}
           <View className="flex-1">
-            <Text className="text-lg font-bold text-gray-900 mb-1">
+            <Text
+              className={`text-lg font-bold mb-1 `}
+              style={{ color: colors.onSurface }}
+            >
               {foodName}
             </Text>
             <View className="flex-row items-center mb-2">
-              <Text className="text-gray-600 text-sm mr-2 font-medium">
+              <Text
+                className={`text-base mr-2 font-medium `}
+                style={{ color: colors.onSurface }}
+              >
                 {quantity} items
               </Text>
-              <Text className="text-gray-400 text-sm mr-2 font-medium">|</Text>
-              <Text className="text-gray-600 text-sm font-medium">{distance}</Text>
+              <Text
+                className={`text-base mr-2 font-medium `}
+                style={{ color: colors.onSurface }}
+              >
+                |
+              </Text>
+              <Text
+                className={`text-base font-medium `}
+                style={{ color: colors.onSurface }}
+              >
+                {distance}
+              </Text>
             </View>
 
             {/* Price and Status */}
             <View className="flex-row items-center justify-between">
-              <Text className="text-lg font-bold text-primaryColor">
+              <Text
+                className="text-lg font-bold"
+                style={{ color: colors.primary }}
+              >
                 {foodPrice} F
               </Text>
               <View
                 className={`px-3 py-1 rounded-full ${
-                  orderStatus === 'active' ? 'bg-blue-100' : 'bg-primaryColor rounded-full'
+                  orderStatus === 'active' ? 'bg-green-100' : 'bg-blue-200'
                 }`}
               >
                 <Text
                   className={`text-sm font-medium ${
-                    orderStatus === 'active'
-                      ? 'text-blue-600'
-                      : 'text-white'
+                    orderStatus === 'active' ? colors.primary : colors.onPrimary
                   }`}
                 >
                   {orderStatus === 'active' ? 'Paid' : 'Completed'}
@@ -83,30 +110,35 @@ const OrderItemCard = ({
         </View>
       </View>
       {/* DIVIDER */}
-      <View className="bg-gray-300 h-[1px] mb-3 mx-2" /> 
+      <View className={`h-[1px] mb-3 mx-2 bg-gray-400`} />
       {/* Action Buttons */}
       <View className="px-4 pb-4">
         <View className="flex-row justify-between space-x-3">
           {orderStatus === 'active' ? (
             <>
               <TouchableOpacity
-                className="flex-1 border border-blue-500 rounded-full py-3 mr-2"
+                className="flex-1 border rounded-full py-2 mr-2"
+                style={{ borderColor: colors.primary }}
                 onPress={() => {
                   // Handle cancel order logic here
                 }}
               >
-                <Text className="text-blue-500 font-medium text-center">
+                <Text
+                  className="font-medium text-center text-lg"
+                  style={{ color: colors.primary }}
+                >
                   Cancel Order
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                className="flex-1 bg-blue-500 rounded-full py-3 ml-2"
+                className="flex-1 rounded-full py-2 ml-2"
+                style={{ backgroundColor: colors.primary }}
                 onPress={() => {
                   // Handle track driver logic here
                 }}
               >
-                <Text className="text-white font-medium text-center">
+                <Text className="text-white font-medium text-center text-lg">
                   Track Driver
                 </Text>
               </TouchableOpacity>
@@ -114,23 +146,28 @@ const OrderItemCard = ({
           ) : (
             <>
               <TouchableOpacity
-                className="flex-1 border border-blue-500 rounded-full py-3 mr-2"
+                className="flex-1 border rounded-full py-2 mr-2"
+                style={{ borderColor: colors.primary }}
                 onPress={() => {
                   // Handle leave review logic here
                 }}
               >
-                <Text className="text-blue-500 font-medium text-center">
+                <Text
+                  className="font-medium text-center text-lg"
+                  style={{ color: colors.primary }}
+                >
                   Leave a review
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                className="flex-1 bg-blue-500 rounded-full py-3 ml-2"
+                className="flex-1 rounded-full py-2 ml-2"
+                style={{ backgroundColor: colors.primary }}
                 onPress={() => {
                   // Handle order again logic here
                 }}
               >
-                <Text className="text-white font-medium text-center">
+                <Text className="text-white font-medium text-center text-lg">
                   Order Again
                 </Text>
               </TouchableOpacity>
@@ -138,7 +175,7 @@ const OrderItemCard = ({
           )}
         </View>
       </View>
-    </View>
+    </Card>
   );
 };
 

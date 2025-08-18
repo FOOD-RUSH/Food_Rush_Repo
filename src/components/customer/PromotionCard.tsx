@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, Image, ImageSourcePropType } from 'react-native';
+import { useTheme } from 'react-native-paper';
 
 interface PromotionCardProps {
   color: string;
@@ -18,15 +19,15 @@ const PromotionCard: React.FC<PromotionCardProps> = ({
   title = 'DISCOUNT ONLY',
   subtitle = 'VALID FOR TODAY!',
 }) => {
+  const { colors } = useTheme();
+
   // Generate color variants
   const getColorVariants = (baseColor: string) => {
-    // Convert hex to RGB for manipulation
     const hex = baseColor.replace('#', '').padStart(6, '0');
     const r = parseInt(hex.slice(0, 2), 16);
     const g = parseInt(hex.slice(2, 4), 16);
     const b = parseInt(hex.slice(4, 6), 16);
 
-    // Create lighter and darker variants
     const lighter = `rgb(${Math.min(255, r + 30)}, ${Math.min(255, g + 30)}, ${Math.min(255, b + 30)})`;
     const darker = `rgb(${Math.max(0, r - 30)}, ${Math.max(0, g - 30)}, ${Math.max(0, b - 30)})`;
     const lightest = `rgb(${Math.min(255, r + 50)}, ${Math.min(255, g + 50)}, ${Math.min(255, b + 50)})`;
@@ -121,6 +122,7 @@ const PromotionCard: React.FC<PromotionCardProps> = ({
                 textShadowColor: 'rgba(0, 0, 0, 0.3)',
                 textShadowOffset: { width: 1, height: 1 },
                 textShadowRadius: 2,
+                color: colors.onSecondaryContainer,
               }}
             >
               {percentage}%
@@ -131,6 +133,7 @@ const PromotionCard: React.FC<PromotionCardProps> = ({
                 textShadowColor: 'rgba(0, 0, 0, 0.2)',
                 textShadowOffset: { width: 1, height: 1 },
                 textShadowRadius: 1,
+                color: 'white',
               }}
             >
               {title}
@@ -141,6 +144,7 @@ const PromotionCard: React.FC<PromotionCardProps> = ({
                 textShadowColor: 'rgba(0, 0, 0, 0.2)',
                 textShadowOffset: { width: 1, height: 1 },
                 textShadowRadius: 1,
+                color: 'white',
               }}
             >
               {subtitle}
@@ -152,6 +156,7 @@ const PromotionCard: React.FC<PromotionCardProps> = ({
                   textShadowColor: 'rgba(0, 0, 0, 0.2)',
                   textShadowOffset: { width: 1, height: 1 },
                   textShadowRadius: 1,
+                  color: 'white',
                 }}
               >
                 Valid for {days} days

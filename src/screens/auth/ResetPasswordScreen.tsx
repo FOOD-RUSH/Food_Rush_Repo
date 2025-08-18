@@ -1,14 +1,25 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import { Button, TextInput, HelperText, IconButton } from 'react-native-paper';
-import { navigate } from '@/src/navigation/navigationHelpers';
+import {
+  Button,
+  TextInput,
+  HelperText,
+  IconButton,
+  useTheme,
+} from 'react-native-paper';
+import CommonView from '@/src/components/common/CommonView';
+import { useResetPassword } from '@/src/hooks/customer/useAuthhooks';
+import Toast from 'react-native-toast-message';
+import { useBottomSheet } from '@/src/components/common/BottomSheet/BottomSheetContext';
+import ResettingPassword from '@/src/components/auth/ResettingPassword';
+import { AuthStackScreenProps } from '@/src/navigation/types';
 
 // Validation schema
 const validationSchema = yup.object({
+  otp: yup.string().required('OTP is required'),
   password: yup
     .string()
     .min(8, 'Password must be at least 8 characters')
@@ -23,11 +34,18 @@ const validationSchema = yup.object({
 });
 
 interface ResetPasswordForm {
+  otp: string;
   password: string;
   confirmPassword: string;
 }
 
-const ResetPasswordScreen = () => {
+const ResetPasswordScreen = ({
+  navigation,
+  route,
+}: AuthStackScreenProps<'ResetPassword'>) => {
+  const { colors } = useTheme();
+  const { present, dismiss } = useBottomSheet();
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -35,10 +53,11 @@ const ResetPasswordScreen = () => {
     control,
     handleSubmit,
     watch,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<ResetPasswordForm>({
     resolver: yupResolver(validationSchema),
     defaultValues: {
+      otp: '',
       password: '',
       confirmPassword: '',
     },
@@ -46,15 +65,53 @@ const ResetPasswordScreen = () => {
 
   const passwordValue = watch('password');
   const confirmPasswordValue = watch('confirmPassword');
+  const {
+    mutate: ResetPasswordMutation,
+    error,
+    isPending,
+  } = useResetPassword();
 
-  const onSubmit = useCallback(async (data: ResetPasswordForm) => {
-    try {
-      console.log('Password reset:', data);
-      // Add your password reset API call here
-    } catch (error) {
-      console.error('Password reset failed:', error);
-    }
-  }, []);
+  const onSubmit = useCallback(
+    async (data: ResetPasswordForm) => {
+      present(<ResettingPassword isPending={isPending} />);
+      const { email } = route.params;
+      try {
+        ResetPasswordMutation(
+          { otp: data.otp, email, newPassword: data.password },
+          {
+            onSuccess: (res) => {
+              dismiss();
+              Toast.show({
+                text1: res.data?.message || 'Password reset successfully',
+                type: 'success',
+              });
+              // Redirect to login screen
+              navigation.navigate('SignIn', { userType: 'customer' });
+            },
+            onError: (error: any) => {
+              dismiss();
+              Toast.show({
+                text1: 'An error occurred',
+                text2: error.message || 'Failed to reset password',
+                type: 'error',
+              });
+            },
+          },
+        );
+      } catch (error) {
+        dismiss();
+        console.error('Password reset failed:', error);
+      }
+    },
+    [
+      present,
+      isPending,
+      route.params,
+      ResetPasswordMutation,
+      dismiss,
+      navigation,
+    ],
+  );
 
   const togglePasswordVisibility = useCallback(() => {
     setShowPassword((prev) => !prev);
@@ -70,7 +127,7 @@ const ResetPasswordScreen = () => {
   }, []);
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <CommonView>
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         <View className="px-6 pt-2">
           {/* Back Button */}
@@ -78,7 +135,7 @@ const ResetPasswordScreen = () => {
             <IconButton
               icon="arrow-left"
               size={24}
-              iconColor="#000000"
+              iconColor={colors.onSurface}
               className="self-start -ml-2"
               onPress={goBack}
             />
@@ -86,14 +143,64 @@ const ResetPasswordScreen = () => {
 
           {/* Header Section */}
           <View className="mb-10">
-            <Text className="text-3xl font-bold text-black text-center mb-2">
+            <Text
+              className={`text-3xl font-bold text-center mb-2`}
+              style={{ color: colors.background }}
+            >
               Reset Password
             </Text>
-            <Text className="text-sm text-gray-600 text-center leading-5">
-              Enter your email address and we will send you a{'\n'}code to reset
-              your password
+            <Text
+              className={`text-base text-center leading-5 `}
+              style={{ color: colors.background }}
+            >
+              Enter your email address and we will send you code to reset your
+              password
             </Text>
           </View>
+
+          {/* OTP Input */}
+          <Controller
+            control={control}
+            name="otp"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <View className="mb-6">
+                <TextInput
+                  disabled={isPending}
+                  placeholder="Enter your OTP"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  mode="outlined"
+                  autoCapitalize="none"
+                  style={{ backgroundColor: colors.surfaceVariant }}
+                  outlineStyle={{
+                    borderRadius: 12,
+                    borderWidth: 1,
+                    borderColor: errors.otp ? colors.error : colors.outline,
+                  }}
+                  contentStyle={{
+                    paddingHorizontal: 16,
+                    paddingVertical: 16,
+                  }}
+                  error={!!errors.otp}
+                  left={
+                    <TextInput.Icon
+                      icon="key-variant"
+                      color={colors.onSurface}
+                    />
+                  }
+                  maxLength={4}
+                />
+                <HelperText
+                  type="error"
+                  visible={!!errors.otp}
+                  className="text-xs mt-1"
+                >
+                  {errors.otp?.message}
+                </HelperText>
+              </View>
+            )}
+          />
 
           {/* Password Input */}
           <Controller
@@ -102,6 +209,7 @@ const ResetPasswordScreen = () => {
             render={({ field: { onChange, onBlur, value } }) => (
               <View className="mb-6">
                 <TextInput
+                  disabled={isPending}
                   placeholder="Enter your password"
                   value={value}
                   onChangeText={onChange}
@@ -110,22 +218,30 @@ const ResetPasswordScreen = () => {
                   secureTextEntry={!showPassword}
                   autoCapitalize="none"
                   autoComplete="new-password"
-                  style={{ backgroundColor: 'white' }}
+                  style={{ backgroundColor: colors.surfaceVariant }}
                   outlineStyle={{
                     borderRadius: 12,
                     borderWidth: 1,
-                    borderColor: errors.password ? '#ef4444' : '#e5e7eb',
+                    borderColor: errors.password
+                      ? colors.error
+                      : colors.outline,
                   }}
                   contentStyle={{
                     paddingHorizontal: 16,
                     paddingVertical: 16,
                   }}
                   error={!!errors.password}
-                  left={<TextInput.Icon icon="lock-outline" />}
+                  left={
+                    <TextInput.Icon
+                      icon="lock-outline"
+                      color={colors.onSurface}
+                    />
+                  }
                   right={
                     <TextInput.Icon
                       icon={showPassword ? 'eye-off' : 'eye'}
                       onPress={togglePasswordVisibility}
+                      color={colors.onSurface}
                     />
                   }
                 />
@@ -136,7 +252,10 @@ const ResetPasswordScreen = () => {
                 >
                   {errors.password?.message}
                 </HelperText>
-                <Text className="text-xs text-gray-500 mt-1">
+                <Text
+                  className={`text-xs mt-1`}
+                  style={{ color: colors.background }}
+                >
                   Must have at least 8 characters
                 </Text>
               </View>
@@ -150,6 +269,7 @@ const ResetPasswordScreen = () => {
             render={({ field: { onChange, onBlur, value } }) => (
               <View className="mb-8">
                 <TextInput
+                  disabled={isPending}
                   placeholder="Confirm your password"
                   value={value}
                   onChangeText={onChange}
@@ -158,22 +278,30 @@ const ResetPasswordScreen = () => {
                   secureTextEntry={!showConfirmPassword}
                   autoCapitalize="none"
                   autoComplete="new-password"
-                  style={{ backgroundColor: 'white' }}
+                  style={{ backgroundColor: colors.surfaceVariant }}
                   outlineStyle={{
                     borderRadius: 12,
                     borderWidth: 1,
-                    borderColor: errors.confirmPassword ? '#ef4444' : '#1E90FF',
+                    borderColor: errors.confirmPassword
+                      ? colors.error
+                      : colors.outline,
                   }}
                   contentStyle={{
                     paddingHorizontal: 16,
                     paddingVertical: 16,
                   }}
                   error={!!errors.confirmPassword}
-                  left={<TextInput.Icon icon="lock-outline" />}
+                  left={
+                    <TextInput.Icon
+                      icon="lock-outline"
+                      color={colors.onSurface}
+                    />
+                  }
                   right={
                     <TextInput.Icon
                       icon={showConfirmPassword ? 'eye-off' : 'eye'}
                       onPress={toggleConfirmPasswordVisibility}
+                      color={colors.onSurface}
                     />
                   }
                 />
@@ -184,7 +312,10 @@ const ResetPasswordScreen = () => {
                 >
                   {errors.confirmPassword?.message}
                 </HelperText>
-                <Text className="text-xs text-gray-500 mt-1">
+                <Text
+                  className={`text-xs mt-1`}
+                  style={{ color: colors.background }}
+                >
                   Both passwords must match
                 </Text>
               </View>
@@ -195,9 +326,9 @@ const ResetPasswordScreen = () => {
           <Button
             mode="contained"
             onPress={handleSubmit(onSubmit)}
-            loading={isSubmitting}
-            disabled={isSubmitting || !passwordValue || !confirmPasswordValue}
-            buttonColor="#1E90FF"
+            loading={isPending}
+            disabled={isPending || !passwordValue || !confirmPasswordValue}
+            buttonColor={colors.primary}
             textColor="white"
             contentStyle={{ paddingVertical: 8 }}
             style={{ borderRadius: 25 }}
@@ -207,7 +338,7 @@ const ResetPasswordScreen = () => {
           </Button>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </CommonView>
   );
 };
 
