@@ -44,6 +44,7 @@ export const useAllRestaurants = (query: RestaurantQuery = {}) => {
         staleTime: CACHE_CONFIG.STALE_TIME,
         gcTime: CACHE_CONFIG.CACHE_TIME,
         retry: CACHE_CONFIG.MAX_RETRIES,
+        
     })
 };
 
@@ -60,6 +61,7 @@ export const useGetAllMenu = () => {
     return useQuery({
         queryKey: ['All_menu'],
         queryFn: () => restaurantApi.getAllMenu().then((res) => res.data)
+        
     })
 }
 

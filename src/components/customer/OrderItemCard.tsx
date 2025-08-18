@@ -24,7 +24,6 @@ const OrderItemCard = ({
   distance = '2.4 km',
 }: OrderItemCardProps) => {
   const { colors } = useTheme();
-  const secondaryTextColor = colors.onSurface;
 
   return (
     <Card

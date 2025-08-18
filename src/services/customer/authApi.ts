@@ -42,7 +42,6 @@ export interface OTPCredentials {
 
 export interface ResetPasswordRequest {
   email: string;
-  phoneNumber: string;
 }
 
 export interface ChangePasswordRequest {
@@ -96,7 +95,7 @@ export const authApi = {
   },
   // FOROGT PASSWORD
   resetPassword: (data: ChangePasswordRequest) => {
-    return apiClient.post<void>('/auth/reset-password', { ...data });
+    return apiClient.post<ChangePasswordResponse>('/auth/reset-password', { ...data });
   },
 
   // changePassword: (data: ChangePasswordRequest) => {

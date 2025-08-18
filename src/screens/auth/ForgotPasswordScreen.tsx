@@ -12,6 +12,9 @@ import {
 } from 'react-native-paper';
 import { goBack } from '@/src/navigation/navigationHelpers';
 import CommonView from '@/src/components/common/CommonView';
+import { useRequestPasswordReset } from '@/src/hooks/customer/useAuthhooks';
+import Toast from 'react-native-toast-message';
+import { AuthStackScreenProps } from '@/src/navigation/types';
 
 // Validation schema
 const schema = yup.object({
@@ -25,7 +28,10 @@ interface ForgotPasswordForm {
   email: string;
 }
 
-const ForgotPasswordScreen = () => {
+const ForgotPasswordScreen = ({
+  navigation,
+  route,
+}: AuthStackScreenProps<'ForgotPassword'>) => {
   const { colors } = useTheme();
 
   const {
@@ -42,15 +48,40 @@ const ForgotPasswordScreen = () => {
   });
 
   const emailValue = watch('email');
+  const {
+    mutate: requestPasswordMutation,
+    isPending,
+    error,
+  } = useRequestPasswordReset();
 
-  const handleForgotPassword = useCallback(async (data: ForgotPasswordForm) => {
-    try {
-      console.log('Password reset requested for:', data.email);
-      // Add your password reset API call here
-    } catch (error) {
-      console.error('Password reset failed:', error);
-    }
-  }, []);
+  const handleForgotPassword = useCallback(
+    async (data: ForgotPasswordForm) => {
+      try {
+        console.log('Password reset requested for:', data.email);
+        // Add your password reset API call here
+        requestPasswordMutation(
+          { email: data.email },
+
+          {
+            onSuccess: (res) => {
+              Toast.show({ text1: res.message, visibilityTime: 5000 });
+              navigation.navigate('ResetPassword', { email: data.email });
+            },
+            onError: (error) => {
+              Toast.show({
+                text1: error.message,
+                visibilityTime: 5000,
+                type: 'error',
+              });
+            },
+          },
+        );
+      } catch (error) {
+        console.error('Password reset failed:', error);
+      }
+    },
+    [navigation, requestPasswordMutation],
+  );
 
   const clearEmail = useCallback(() => {
     setValue('email', '', { shouldValidate: false });
@@ -151,8 +182,8 @@ const ForgotPasswordScreen = () => {
         <Button
           mode="contained"
           onPress={handleSubmit(handleForgotPassword)}
-          loading={isSubmitting}
-          disabled={isSubmitting || !emailValue}
+          loading={isPending}
+          disabled={isPending || !emailValue}
           buttonColor={colors.primary}
           textColor="white"
           contentStyle={{ paddingVertical: 8 }}
@@ -161,6 +192,11 @@ const ForgotPasswordScreen = () => {
         >
           Continue
         </Button>
+        {error && (
+          <Text className="text-red-500 text-2xl font-semibold">
+            {error.message}
+          </Text>
+        )}
       </View>
     </CommonView>
   );

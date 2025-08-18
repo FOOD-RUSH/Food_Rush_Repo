@@ -1,11 +1,9 @@
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import React, { useState } from 'react';
 import CommonView from '@/src/components/common/CommonView';
-import { Card } from 'react-native-paper';
+import { Card, useTheme } from 'react-native-paper';
 import Seperator from '@/src/components/common/Seperator';
-import { lightTheme } from '@/src/config/theme';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useTheme } from 'react-native-paper';
 
 interface FAQItem {
   title: string;

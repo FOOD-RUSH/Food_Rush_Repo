@@ -13,9 +13,13 @@ import {
 import CommonView from '@/src/components/common/CommonView';
 import { useResetPassword } from '@/src/hooks/customer/useAuthhooks';
 import Toast from 'react-native-toast-message';
+import { useBottomSheet } from '@/src/components/common/BottomSheet/BottomSheetContext';
+import ResettingPassword from '@/src/components/auth/ResettingPassword';
+import { AuthStackScreenProps } from '@/src/navigation/types';
 
 // Validation schema
 const validationSchema = yup.object({
+  otp: yup.string().required('OTP is required'),
   password: yup
     .string()
     .min(8, 'Password must be at least 8 characters')
@@ -30,12 +34,17 @@ const validationSchema = yup.object({
 });
 
 interface ResetPasswordForm {
+  otp: string;
   password: string;
   confirmPassword: string;
 }
 
-const ResetPasswordScreen = () => {
+const ResetPasswordScreen = ({
+  navigation,
+  route,
+}: AuthStackScreenProps<'ResetPassword'>) => {
   const { colors } = useTheme();
+  const { present, dismiss } = useBottomSheet();
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -48,6 +57,7 @@ const ResetPasswordScreen = () => {
   } = useForm<ResetPasswordForm>({
     resolver: yupResolver(validationSchema),
     defaultValues: {
+      otp: '',
       password: '',
       confirmPassword: '',
     },
@@ -63,25 +73,44 @@ const ResetPasswordScreen = () => {
 
   const onSubmit = useCallback(
     async (data: ResetPasswordForm) => {
+      present(<ResettingPassword isPending={isPending} />);
+      const { email } = route.params;
       try {
-        console.log('Password reset:', data);
-        // Add your password reset API call here
         ResetPasswordMutation(
-          { otp: '', email: '', newPassword: '' },
+          { otp: data.otp, email, newPassword: data.password },
           {
-            onSuccess: (response) => {
+            onSuccess: (res) => {
+              dismiss();
               Toast.show({
-                text1: response.data.response,
+                text1: res.data?.message || 'Password reset successfully',
                 type: 'success',
+              });
+              // Redirect to login screen
+              navigation.navigate('SignIn', { userType: 'customer' });
+            },
+            onError: (error: any) => {
+              dismiss();
+              Toast.show({
+                text1: 'An error occurred',
+                text2: error.message || 'Failed to reset password',
+                type: 'error',
               });
             },
           },
         );
       } catch (error) {
+        dismiss();
         console.error('Password reset failed:', error);
       }
     },
-    [ResetPasswordMutation],
+    [
+      present,
+      isPending,
+      route.params,
+      ResetPasswordMutation,
+      dismiss,
+      navigation,
+    ],
   );
 
   const togglePasswordVisibility = useCallback(() => {
@@ -128,6 +157,50 @@ const ResetPasswordScreen = () => {
               password
             </Text>
           </View>
+
+          {/* OTP Input */}
+          <Controller
+            control={control}
+            name="otp"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <View className="mb-6">
+                <TextInput
+                  disabled={isPending}
+                  placeholder="Enter your OTP"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  mode="outlined"
+                  autoCapitalize="none"
+                  style={{ backgroundColor: colors.surfaceVariant }}
+                  outlineStyle={{
+                    borderRadius: 12,
+                    borderWidth: 1,
+                    borderColor: errors.otp ? colors.error : colors.outline,
+                  }}
+                  contentStyle={{
+                    paddingHorizontal: 16,
+                    paddingVertical: 16,
+                  }}
+                  error={!!errors.otp}
+                  left={
+                    <TextInput.Icon
+                      icon="key-variant"
+                      color={colors.onSurface}
+                    />
+                  }
+                  maxLength={4}
+                />
+                <HelperText
+                  type="error"
+                  visible={!!errors.otp}
+                  className="text-xs mt-1"
+                >
+                  {errors.otp?.message}
+                </HelperText>
+              </View>
+            )}
+          />
 
           {/* Password Input */}
           <Controller

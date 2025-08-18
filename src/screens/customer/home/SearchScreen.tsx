@@ -7,9 +7,16 @@ import {
   Platform,
   Modal,
   Alert,
+  FlatList,
 } from 'react-native';
 import React, { useState, useCallback, useMemo, ReactNode, memo } from 'react';
-import { TextInput, Checkbox, RadioButton, Button } from 'react-native-paper';
+import {
+  TextInput,
+  Checkbox,
+  RadioButton,
+  Button,
+  useTheme,
+} from 'react-native-paper';
 import {
   MaterialIcons,
   Feather,
@@ -21,6 +28,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScrollView } from 'react-native-gesture-handler';
 import { lightTheme } from '@/src/config/theme';
 import { RootStackScreenProps } from '@/src/navigation/types';
+import { useGetAllMenu } from '@/src/hooks/customer';
+import LoadingScreen from '@/src/components/common/LoadingScreen';
+import FoodItemCard from '@/src/components/customer/FoodItemCard';
 
 // Static data moved outside component to prevent recreation on every render
 const CUISINE_TYPES = [
@@ -131,7 +141,7 @@ const SearchScreen: React.FC<RootStackScreenProps<'SearchScreen'>> = ({
   navigation,
   route,
 }) => {
-  const { type, category, categoryId } = route.params;
+  const { type, category } = route.params;
 
   // Modal visibility states
   const [filterVisible, setFilterVisible] = useState(false);
@@ -441,7 +451,7 @@ const SearchScreen: React.FC<RootStackScreenProps<'SearchScreen'>> = ({
   // Memoized SearchHeader
   const SearchHeader = useMemo(
     () => (
-      <View className="flex-row px-2 items-center py-3 bg-white">
+      <View className="flex-row px-2 items-center py-3 " >
         <TouchableOpacity
           onPress={goBack}
           className="bg-primary rounded-full p-2"
@@ -581,22 +591,64 @@ const SearchScreen: React.FC<RootStackScreenProps<'SearchScreen'>> = ({
     ],
   );
 
+  const { data: MenuItems, isLoading, error } = useGetAllMenu();
+  const { colors } = useTheme();
+  if (error) {
+    return (
+      <CommonView>
+        <View
+          className="flex-1 px-1 py-3 h-full justify-center items-center"
+          style={{ backgroundColor: colors.background }}
+        >
+          <Text className="text-3xl font-semibold text-red-400">
+            {error.message}
+            {/* image to be added */}
+          </Text>
+        </View>
+      </CommonView>
+    );
+  }
+
   return (
     <CommonView>
       {type === 'category' ? CategoryHeader : SearchHeader}
 
       {filterButtons}
 
-      {/* Search Results Placeholder */}
-      <View className="flex-1 items-center justify-center">
-        <MaterialCommunityIcons name="food-variant" size={80} color="#ccc" />
-        <Text className="text-gray-500 text-lg mt-4">
-          Start typing to search for food
-        </Text>
-        <Text className="text-gray-400 text-sm mt-2">
-          Try &quot;Ndolé&quot;, &quot;Pizza&quot;, or &quot;Poulet DG&quot;
-        </Text>
-      </View>
+      {/* Search Results */}
+      {isLoading ? (
+        <LoadingScreen />
+      ) : MenuItems && MenuItems.length > 0 ? (
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View className="flex-1 flex-row flex-wrap justify-between px-2">
+            <FlatList
+              data={MenuItems}
+              renderItem={({ item }) => (
+                <FoodItemCard
+                  key={item.id}
+                  foodId={item.id}
+                  restarantId={item.restaurantID}
+                  FoodName={item.name}
+                  FoodPrice={item.price!}
+                  FoodImage={item.image}
+                  RestarantName={''}
+                  distanceFromUser={item.distance!}
+                  DeliveryPrice={4000}
+                />
+              )}
+              keyExtractor={(item) => item.id}
+            />
+          </View>
+        </ScrollView>
+      ) : (
+        <View className="flex-1 items-center justify-center">
+          <MaterialCommunityIcons name="food-off" size={80} color="#ccc" />
+          <Text className="text-gray-500 text-lg mt-4">No results found</Text>
+          <Text className="text-gray-400 text-sm mt-2">
+            Try a different search term or adjust your filters.
+          </Text>
+        </View>
+      )}
 
       {FilterModal}
       {SortModal}

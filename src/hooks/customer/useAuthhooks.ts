@@ -190,21 +190,26 @@ export const useResendOTP = () => {
     })
 }
 
-// export const useChangePassword = () => {
-//     return useMutation({
-//         mutationFn: (data: any) => authApi.changePassword(data),
-//     })
-// }
-
 export const useResetPassword = () => {
+    const queryClient = useQueryClient();
+    
     return useMutation({
         mutationFn: ({ otp, email, newPassword }: { otp: string, email: string, newPassword: string }) =>
-            authApi.resetPassword({ email, otp, newPassword }).then((res) => res.data),
+            authApi.resetPassword({ email, otp, newPassword }),
+        onSuccess: (response) => {
+            // Show success toast
+            // Note: We'll need to handle the navigation in the component
+            console.log('Password reset successful:', response.data?.message || 'Password reset successfully');
+        },
+        onError: (error: any) => {
+            console.error('Password reset failed:', error);
+            // Error will be handled by the component
+        }
     })
 }
 
 export const useRequestPasswordReset = () => {
     return useMutation({
-        mutationFn: (data: any) => authApi.requestPasswordReset(data),
+        mutationFn: (data: any) => authApi.requestPasswordReset(data).then((response) => response.data),
     })
 }

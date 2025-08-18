@@ -52,7 +52,7 @@ export type AuthStackParamList = {
     userId: string;
     userType: 'customer' | 'restaurant';
   };
-  ResetPassword: { token: string };
+  ResetPassword: { email: string };
 };
 
 // Customer Tab Navigator - Only core tab screens

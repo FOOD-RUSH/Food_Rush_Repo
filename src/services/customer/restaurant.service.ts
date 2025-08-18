@@ -23,7 +23,7 @@ export interface RestaurantQuery {
 export const restaurantApi = {
   // Get all Menus
   getAllMenu: () => {
-    return apiClient.get<FoodProps>('/menu/all')
+    return apiClient.get<FoodProps[]>('/menu/all')
   },
 
   // Get all restaurants with filtering and pagination
