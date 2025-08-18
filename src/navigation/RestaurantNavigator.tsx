@@ -15,6 +15,8 @@ import OrderScreen from '../screens/restaurant/orders/OrderScreen';
 import MenuScreen from '../screens/restaurant/menu/MenuScreen';
 import OrderHistoryScreen from '../screens/restaurant/orders/OrderHistoryScreen';
 import OrderDetailsScreen from '../screens/restaurant/orders/OrderDetailsScreen';
+import ConfirmOrder from '../screens/restaurant/orders/ConfirmOrder';
+import RejectOrder from '../screens/restaurant/orders/RejectOrder';
 import { Platform } from 'react-native';
 import AnalyticsScreen from '../screens/restaurant/analytics/AnalyticsScreen';
 import DashboardScreen from '../screens/restaurant/analytics/DashboardScreen';
@@ -58,6 +60,27 @@ function RestaurantOrdersStackScreen() {
         component={OrderDetailsScreen}
         options={{ title: 'Order Details' }}
       />
+
+      {/* Added screens for Confirm / Reject flows */}
+      <RestaurantOrdersStack.Screen
+        name="ConfirmOrder"
+        component={ConfirmOrder}
+        options={{
+          title: 'Confirm Order',
+          presentation: 'modal',
+          animation: 'slide_from_bottom',
+        }}
+      />
+      <RestaurantOrdersStack.Screen
+        name="RejectOrder"
+        component={RejectOrder}
+        options={{
+          title: 'Reject Order',
+          presentation: 'modal',
+          animation: 'slide_from_bottom',
+        }}
+      />
+
       <RestaurantOrdersStack.Screen
         name="OrderHistory"
         component={OrderHistoryScreen}

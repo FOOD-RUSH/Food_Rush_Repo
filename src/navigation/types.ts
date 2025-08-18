@@ -57,6 +57,9 @@ export type CustomerOrderStackParamList = {
   CompletedOrdersScreen: undefined;
   PendingOrdersScreen: undefined;
   OrderDetails: { orderId: string };
+  OrderConfirmation: {
+    status?: 'CONFIRMED' | 'CANCELLED' | string;
+  };
 };
 
 export type CustomerProfileStackParamList = {
@@ -94,6 +97,8 @@ export type RestaurantOrdersStackParamList = {
   OrderDetails: { orderId: string };
   OrderHistory: undefined;
   LiveOrders: undefined;
+  RejectOrder: { id: string };
+  ConfirmOrder: { id: string };
 };
 
 export type RestaurantMenuStackParamList = {
