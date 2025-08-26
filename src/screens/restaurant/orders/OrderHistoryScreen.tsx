@@ -1,10 +1,13 @@
 import { View, Text } from 'react-native';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const OrderHistoryScreen = () => {
+  const { t } = useTranslation('translation');
+
   return (
     <View>
-      <Text>OrderHistoryScreen</Text>
+      <Text>{t('order_history_screen')}</Text>
     </View>
   );
 };

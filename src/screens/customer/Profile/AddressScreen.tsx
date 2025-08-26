@@ -1,7 +1,9 @@
+import { useTranslation } from 'react-i18next';
 import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import CommonView from '@/src/components/common/CommonView';
+import { useLocation } from '@/src/location';
 import { Card, useTheme, FAB } from 'react-native-paper';
 import { AntDesign, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import AddressEditModal, {
@@ -13,36 +15,40 @@ import { useAuthUser } from '@/src/stores/customerStores/AuthStore';
 const AddressScreen = ({
   navigation,
 }: RootStackScreenProps<'AddressScreen'>) => {
+  const { t } = useTranslation('translation');
   const { colors } = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<AddressData | null>(
     null,
   );
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
-  
+
   // Store hooks
   const addresses = useAddressStore((state) => state.addresses);
-  const fetchAddresses = useAddressStore((state) => state.fetchAddresses);
   const addAddress = useAddressStore((state) => state.addAddress);
   const updateAddress = useAddressStore((state) => state.updateAddress);
   const deleteAddress = useAddressStore((state) => state.deleteAddress);
   const setDefaultAddress = useAddressStore((state) => state.setDefaultAddress);
-  const isLoading = useAddressStore((state) => state.isLoading);
   const error = useAddressStore((state) => state.error);
   const clearError = useAddressStore((state) => state.clearError);
-  
+
   // Auth user
   const user = useAuthUser();
 
-  useEffect(() => {
-    if (user?.id) {
-      fetchAddresses();
-    }
-  }, [fetchAddresses, user?.id]);
+  // Location data
+  const { location } = useLocation({
+    showPermissionAlert: false,
+    fallbackToYaounde: true,
+  });
+
+  const currentFullAddress =
+    location?.city && location?.region
+      ? `${location.city}, ${location.region}`
+      : t('current_location') || 'Current Location';
 
   useEffect(() => {
     if (error) {
-      Alert.alert('Error', error, [{ text: 'OK', onPress: clearError }]);
+      Alert.alert(t('error'), error, [{ text: 'OK', onPress: clearError }]);
     }
   }, [clearError, error]);
 
@@ -59,6 +65,8 @@ const AddressScreen = ({
   };
 
   const handleSaveAddress = async (addressData: AddressData) => {
+    // Navigate back to checkout screen after saving the address
+    navigation.goBack();
     try {
       if (modalMode === 'add') {
         await addAddress({
@@ -68,7 +76,7 @@ const AddressScreen = ({
       } else if (selectedAddress?.id) {
         await updateAddress(selectedAddress.id, addressData);
       }
-      
+
       setModalVisible(false);
     } catch (err) {
       console.error('Error saving address:', err);
@@ -77,15 +85,15 @@ const AddressScreen = ({
 
   const handleDeleteAddress = (addressId: string) => {
     Alert.alert(
-      'Delete Address',
-      'Are you sure you want to delete this address?',
+      t('delete_address'),
+      t('are_you_sure_you_want_to_delete_this_address'),
       [
         {
-          text: 'Cancel',
+          text: t('cancel'),
           style: 'cancel',
         },
         {
-          text: 'Delete',
+          text: t('delete'),
           style: 'destructive',
           onPress: () => {
             deleteAddress(addressId);
@@ -137,7 +145,7 @@ const AddressScreen = ({
                       style={{ backgroundColor: '#007aff' }}
                     >
                       <Text className="text-white text-xs font-medium">
-                        Default
+                        {t('default')}
                       </Text>
                     </View>
                   )}
@@ -194,21 +202,67 @@ const AddressScreen = ({
     );
   };
 
+  const EmptyAddressComponent = () => {
+    return (
+      <View className="flex-1 items-center justify-center px-6">
+        <Ionicons
+          name="location-outline"
+          size={80}
+          color={colors.onSurfaceVariant}
+        />
+        <Text
+          style={{ color: colors.onSurface }}
+          className="text-xl font-semibold mt-4 text-center"
+        >
+          {t('no_addresses_added')}
+        </Text>
+        <Text
+          style={{ color: colors.onSurfaceVariant }}
+          className="text-base mt-2 text-center leading-6"
+        >
+          {t('add_your_first_address_to_make_ordering_easier')}
+        </Text>
+
+        {location?.latitude && location?.longitude && (
+          <TouchableOpacity
+            onPress={() => {
+              setSelectedAddress(null);
+              setModalMode('add');
+              setModalVisible(true);
+            }}
+            className="mt-6 px-6 py-3 rounded-xl flex-row items-center"
+            style={{ backgroundColor: '#007aff' }}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="add" size={20} color="white" />
+            <Text className="text-white font-medium ml-2">
+              {t('add_current_location') || 'Add Current Location'}
+            </Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    );
+  };
+
   return (
     <CommonView>
       <View
         className="flex-1 pt-10"
         style={{ backgroundColor: colors.background }}
       >
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          className="py-4 "
-          contentContainerStyle={{ paddingBottom: 100 }}
-        >
-          {addresses.map((address) => (
-            <AddressComponent key={address.id} address={address} />
-          ))}
-        </ScrollView>
+        {addresses.length === 0 ? (
+          <EmptyAddressComponent />
+        ) : (
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            className="py-20 "
+            contentContainerStyle={{ paddingBottom: 100 }}
+          >
+            {addresses.map((address) => (
+              <AddressComponent key={address.id} address={address} />
+            ))}
+          </ScrollView>
+        )}
 
         {/* Add Address FAB */}
         <FAB
@@ -222,7 +276,7 @@ const AddressScreen = ({
           }}
           onPress={handleAddAddress}
           color="white"
-          loading={isLoading}
+          // loading={isLoading}
         />
 
         {/* Address Edit Modal */}

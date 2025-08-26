@@ -5,6 +5,7 @@ export * from './AppStore';
 export * from './AuthStore';
 export * from './cartStore';
 export * from './addressStore';
-export * from './geolocationStore';
+// Location store is now available at @/src/location
+// export { useLocationStore } from '@/src/location';
 export * from './paymentStore';
 export * from './notificationStore';

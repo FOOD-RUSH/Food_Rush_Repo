@@ -1,34 +1,38 @@
-import { RestaurantProfile, FoodProps } from '../../types';
+import { RestaurantCard, FoodProps, RestaurantProfile } from '../../types';
 import { apiClient } from './apiClient';
 
 // Restaurant query parameters
 export interface RestaurantQuery {
-  page?: number;
+  isOpen: boolean;
+  nearLat?: number;
+  nearLng?: number;
+  minDistanceKm?: number;
+  maxDistanceKm?: number;
+  radiusKm?: number;
+  distance?: 'distance' | 'createdAt';
+  sortDir?: 'ASC' | 'DESC';
   limit?: number;
-  search?: string;
-  sortBy?: 'rating' | 'deliveryTime' | 'deliveryFee' | 'distance';
-  sortOrder?: 'asc' | 'desc';
-  cuisine?: string[];
-  minRating?: number;
-  maxDeliveryTime?: number;
-  maxDeliveryFee?: number;
-  isOpen?: boolean;
-  coordinates?: {
-    latitude: number;
-    longitude: number;
-    radius?: number;
-  };
-}
 
+};
+interface foodItems {
+  data: FoodProps[]
+}
 export const restaurantApi = {
   // Get all Menus
-  getAllMenu: () => {
-    return apiClient.get<FoodProps[]>('/menu/all')
+  getAllMenu: async () => {
+    return apiClient.get<foodItems>('/menu/all').then((res) => {
+      console.log(res.data.data)
+      return res.data.data
+    })
   },
-
+  getMenuBrowseAll: async (query: RestaurantQuery) => {
+    return apiClient.get<FoodProps[]>('/menu/browse', { params: query }).then((res) =>
+      res.data
+    )
+  },
   // Get all restaurants with filtering and pagination
-  getAllRestaurants: (query?: RestaurantQuery) => {
-    return apiClient.get<RestaurantProfile[]>('/restaurants', { params: query });
+  getAllRestaurants: async (query?: RestaurantQuery) => {
+    return apiClient.get<RestaurantCard[]>('/restaurants/browse', { params: query }).then((res) => res.data);
   },
 
   // Get a specific restaurant by ID
@@ -50,24 +54,19 @@ export const restaurantApi = {
     longitude: number,
     radius: number = 5,
   ) => {
-    return apiClient.get<RestaurantProfile[]>(
-      `/restaurants/nearby?lat=${latitude}&lng=${longitude}&radius=${radius}`,
+    return apiClient.get<RestaurantCard[]>(
+      `/restaurants/nearby?nearLat=${latitude}&nearLng=${longitude}&radiusKm=${radius}`,
     );
   },
 
   // Get a specific menu item
   getMenuItemById: (restaurantId: string, menuId: string) => {
     return apiClient.get<FoodProps>(`/restaurants/${restaurantId}/menu/${menuId}`);
+
   },
 
-  
 
-  // Search restaurants
-  searchRestaurants: (query: string, filters?: Partial<RestaurantQuery>) => {
-    return apiClient.get<RestaurantProfile[]>('restaurants/search', {
-      params: { q: query, ...filters }
-    });
-  },
+
 
   // Get restaurant reviews
   getRestaurantReviews: (restaurantId: string, page: number = 1, limit: number = 10) => {
@@ -81,16 +80,11 @@ export const restaurantApi = {
     return apiClient.get<string[]>(`/restaurants/${restaurantId}/categories`);
   },
 
-  // Get popular restaurants
-  getPopularRestaurants: (limit: number = 10) => {
-    return apiClient.get<RestaurantProfile[]>('/restaurants/popular', {
-      params: { limit }
-    });
-  },
+
 
   // Get restaurant by cuisine
   getRestaurantsByCuisine: (cuisine: string, limit: number = 10) => {
-    return apiClient.get<RestaurantProfile[]>('/restaurants/cuisine', {
+    return apiClient.get<RestaurantCard[]>('/restaurants/cuisine', {
       params: { cuisine, limit }
     });
   },

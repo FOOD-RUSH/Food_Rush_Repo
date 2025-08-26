@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { View, Text, FlatList, Image } from 'react-native';
 import React from 'react';
 import CommonView from '@/src/components/common/CommonView';
@@ -39,6 +40,7 @@ const orderItems: OrderItemCardProps[] = [
 ];
 
 const CompletedOrderScreen = () => {
+  const { t } = useTranslation('translation');
   const renderEmptyComponent = () => (
     <View className="flex-1 items-center justify-center px-8 py-12">
       <Image
@@ -47,10 +49,10 @@ const CompletedOrderScreen = () => {
         resizeMode="contain"
       />
       <Text className="text-gray-500 text-lg text-center">
-        No completed orders found.
+        {t('no_completed_orders_found')}
       </Text>
       <Text className="text-gray-400 text-sm text-center mt-2">
-        Your completed orders will appear here
+        {t('your_completed_orders_will_appear_here')}
       </Text>
     </View>
   );
@@ -82,7 +84,7 @@ const CompletedOrderScreen = () => {
           }}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={renderEmptyComponent}
-          className="pt-10 "
+          className="pt-3"
         />
       </View>
     </CommonView>

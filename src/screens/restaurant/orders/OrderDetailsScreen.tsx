@@ -1,10 +1,13 @@
 import { View, Text } from 'react-native';
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const OrderDetailsScreen = () => {
+  const { t } = useTranslation('translation');
+
   return (
     <View>
-      <Text>OrderDetailsScreen</Text>
+      <Text>{t('order_details_screen')}</Text>
     </View>
   );
 };

@@ -1,0 +1,85 @@
+Changes to Info to recieve 
+
+Restaurant Details
+End-point: /Restaurants/id
+
+data expected as result:
+
+export interface RestaurantProfile {
+  id: string;
+  name: string;
+  description: string;
+  phone: string;
+  address: string;
+  // address: Address
+  openTime: string;
+  isOpen: boolean;
+  // ratings: number;
+  ratings?: string;
+  reviewCount?: string;
+  distance: string;
+  deliveryFee?: string;
+  image: any;
+  deliveryTime?: string;
+  menu: FoodProps[];
+  discounts?: FoodProps[];
+  specialOffers?: FoodProps[];
+}
+
+
+Food Details 
+end-point: 
+
+export interface FoodProps {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  image?: any;
+  category?: any; -- this needs to be discussed
+  isAvailable?: boolean
+
+  restaurant?: {
+    id: string;
+    name: string;
+    latitude?: string,
+    longitude?: string
+  },
+  distance?: number; 
+  
+}
+
+
+Question: I would love to discuss about how reviews are going to be made convering food, also is it neccessary 
+to like food
+
+
+Order Creation
+
+- optional special instructions on each food items the user wants to create
+- body:  {
+    "customerId": String,
+    "restaurantId": '',
+    "items": [
+        {
+            menuItem_id: '',
+            quantity: 2,
+            specialInstructions: ''
+        },
+        {
+            menuItem_id: '',
+            quantity: 2,
+            specialInstructions: ''
+        }
+    ],
+    'deliveryAddress': String,
+    deliveryLatitude: number,
+   deliveryLongitude: number, 
+
+}
+
+
+return for user 
+{
+  to discuss on this
+}

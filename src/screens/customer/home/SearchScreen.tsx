@@ -1,658 +1,327 @@
+import React, { useState, useCallback } from 'react';
 import {
-  TouchableOpacity,
-  Text,
   View,
-  KeyboardAvoidingView,
-  Keyboard,
-  Platform,
-  Modal,
-  Alert,
+  Text,
   FlatList,
+  TouchableOpacity,
+  RefreshControl,
 } from 'react-native';
-import React, { useState, useCallback, useMemo, ReactNode, memo } from 'react';
-import {
-  TextInput,
-  Checkbox,
-  RadioButton,
-  Button,
-  useTheme,
-} from 'react-native-paper';
-import {
-  MaterialIcons,
-  Feather,
-  MaterialCommunityIcons,
-} from '@expo/vector-icons';
-import CommonView from '@/src/components/common/CommonView';
-import { goBack } from '@/src/navigation/navigationHelpers';
+import { useTheme, ActivityIndicator } from 'react-native-paper';
+import { MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ScrollView } from 'react-native-gesture-handler';
-import { lightTheme } from '@/src/config/theme';
-import { RootStackScreenProps } from '@/src/navigation/types';
-import { useGetAllMenu } from '@/src/hooks/customer';
-import LoadingScreen from '@/src/components/common/LoadingScreen';
+import { useTranslation } from 'react-i18next';
+
+import CommonView from '@/src/components/common/CommonView';
 import FoodItemCard from '@/src/components/customer/FoodItemCard';
+import SearchInput from '@/src/components/customer/SearchInput';
+import FilterModal from '@/src/components/customer/FilterModal';
+import { RootStackScreenProps } from '@/src/navigation/types';
+import { FoodProps } from '@/src/types';
+import { useGetAllMenu } from '@/src/hooks/customer';
 
-// Static data moved outside component to prevent recreation on every render
-const CUISINE_TYPES = [
-  { id: 'african', name: 'African', icon: '🍲' },
-  { id: 'cameroon', name: 'Cameroon Traditional', icon: '🇨🇲' },
-  { id: 'fastfood', name: 'Fast Food', icon: '🍔' },
-  { id: 'bakery', name: 'Bakery & Pastries', icon: '🥐' },
-] as const;
+interface SearchScreenProps extends RootStackScreenProps<'SearchScreen'> {}
 
-const PRICE_RANGES = [
-  { id: 'budget', label: 'Budget (< 2,000 XAF)', value: '0-2000' },
-  { id: 'moderate', label: 'Moderate (2,000 - 5,000 XAF)', value: '2000-5000' },
-  { id: 'premium', label: 'Premium (5,000 - 10,000 XAF)', value: '5000-10000' },
-  { id: 'luxury', label: 'Luxury (> 10,000 XAF)', value: '10000+' },
-] as const;
+interface FilterOptions {
+  categories: string[];
+  priceRange: 'low' | 'medium' | 'high' | null;
+  sortBy: 'name' | 'price' | 'rating' | 'distance';
+}
 
-const PROMO_OPTIONS = [
-  { id: 'discount', name: 'Discounts Available', icon: '💰' },
-  { id: 'buy-one-get-one', name: 'Buy 1 Get 1', icon: '🎁' },
-  { id: 'new-customer', name: 'New Customer Offers', icon: '✨' },
-] as const;
+// Mock hook for MVP - replace with actual API call
+const useSearchFood = (query: string, filters: FilterOptions) => {
+  const { refetch, data: MenuItems, isPending, isRefetching } = useGetAllMenu();
 
-const SORT_OPTIONS = [
-  { id: 'delivery-time', label: 'Fastest Delivery' },
-  { id: 'price-low', label: 'Price: Low to High' },
-  { id: 'price-high', label: 'Price: High to Low' },
-  { id: 'distance', label: 'Nearest First' },
-] as const;
+  // Simple filtering logic
+  let filteredResults = MenuItems?.filter((item) =>
+    query ? item.name.toLowerCase().includes(query.toLowerCase()) : true,
+  );
 
-// Memoized FilterSection component
-const FilterSection = memo(
-  ({ title, children }: { title: string; children: ReactNode }) => (
-    <View className="bg-white mb-2 mx-3 p-4 rounded-xl border-gray-200 border-solid">
-      <Text className="text-lg font-semibold mb-3 text-gray-800">{title}</Text>
-      <View className="h-[1px] bg-gray-200 flex mx-2 mb-3" />
-      {children}
-    </View>
-  ),
-);
-FilterSection.displayName = 'FilterSection';
-
-// Memoized RadioButtonItem component
-const RadioButtonItem = memo(
-  ({
-    item,
-    selectedValue,
-    onSelect,
-    renderLabel,
-  }: {
-    item: { id: string; [key: string]: any };
-    selectedValue: string;
-    onSelect: (value: string) => void;
-    renderLabel: (item: any) => ReactNode;
-  }) => {
-    const handlePress = useCallback(() => {
-      onSelect(item.id);
-    }, [item.id, onSelect]);
-
-    return (
-      <TouchableOpacity
-        onPress={handlePress}
-        className="flex-row items-center justify-between px-3 py-3 rounded-lg mb-1"
-      >
-        {renderLabel(item)}
-        <RadioButton value={item.id} color="#077aff" />
-      </TouchableOpacity>
+  // Apply category filter
+  if (filters.categories.length > 0) {
+    // Mock category filtering - in real app, items would have categories
+    filteredResults = filteredResults?.filter(
+      (item) => filters.categories.includes('Fast Food'), // Mock logic
     );
-  },
-);
-RadioButtonItem.displayName = 'RadioButtonItem';
+  }
 
-// Memoized CheckboxItem component
-const CheckboxItem = memo(
-  ({
-    item,
-    isSelected,
-    onToggle,
-  }: {
-    item: { id: string; name: string; icon: string };
-    isSelected: boolean;
-    onToggle: (id: string) => void;
-  }) => {
-    const handlePress = useCallback(() => {
-      onToggle(item.id);
-    }, [item.id, onToggle]);
+  // Apply price filter
+  if (filters.priceRange) {
+    filteredResults = filteredResults?.filter((item) => {
+      switch (filters.priceRange) {
+        case 'low':
+          return item.price < 2000;
+        case 'medium':
+          return item.price >= 2000 && item.price <= 5000;
+        case 'high':
+          return item.price > 5000;
+        default:
+          return true;
+      }
+    });
+  }
 
-    return (
-      <TouchableOpacity
-        onPress={handlePress}
-        className="flex-row items-center justify-between px-3 py-4 rounded-lg mb-1"
-      >
-        <View className="flex-row items-center space-x-2">
-          <Text className="mr-2 text-lg">{item.icon}</Text>
-          <Text className="text-base">{item.name}</Text>
-        </View>
-        <Checkbox
-          status={isSelected ? 'checked' : 'unchecked'}
-          onPress={handlePress}
-          color="#077aff"
-        />
-      </TouchableOpacity>
-    );
-  },
-);
-CheckboxItem.displayName = 'CheckboxItem';
+  // Apply sorting
+  filteredResults?.sort((a, b) => {
+    switch (filters.sortBy) {
+      case 'name':
+        return a.name.localeCompare(b.name);
+      case 'price':
+        return a.price - b.price;
+      case 'distance':
+        return (a.distance || 0) - (b.distance || 0);
+      default:
+        return 0;
+    }
+  });
+  const refresh = useCallback(async () => {
+    try {
+      await refetch();
+    } catch (error) {
+      console.error('Error refreshing search results:', error);
+    }
+  }, [refetch]);
 
-const SearchScreen: React.FC<RootStackScreenProps<'SearchScreen'>> = ({
-  navigation,
-  route,
-}) => {
+  return {
+    results: filteredResults,
+    isPending,
+    isRefetching,
+    refetch: refresh,
+    availableCategories: ['Fast Food', 'Pizza', 'Burgers', 'Asian'],
+  };
+};
+
+const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
   const { type, category } = route.params;
-
-  // Modal visibility states
-  const [filterVisible, setFilterVisible] = useState(false);
-  const [promoVisible, setPromoVisible] = useState(false);
-  const [sortVisible, setSortVisible] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-
-  // Filter states
-  const [selectedCuisine, setSelectedCuisine] = useState('');
-  const [selectedPriceRange, setSelectedPriceRange] = useState('');
-  const [selectedDeliveryTime, setSelectedDeliveryTime] = useState('');
-  const [selectedRating, setSelectedRating] = useState('');
-  const [selectedDietaryRestrictions, setSelectedDietaryRestrictions] =
-    useState<string[]>([]);
-  const [selectedPromoFilters, setSelectedPromoFilters] = useState<string[]>(
-    [],
-  );
-  const [sortBy, setSortBy] = useState('relevance');
-
-  // Optimized callbacks
-  const togglePromoFilter = useCallback((id: string) => {
-    setSelectedPromoFilters((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
-    );
-  }, []);
-
-  const handleCuisineSelect = useCallback((cuisine: string) => {
-    setSelectedCuisine(cuisine);
-  }, []);
-
-  const handlePriceRangeSelect = useCallback((range: string) => {
-    setSelectedPriceRange(range);
-  }, []);
-
-  const handleSortSelect = useCallback((sort: string) => {
-    setSortBy(sort);
-  }, []);
-
-  // Check if any filters are active
-  const hasActiveFilters = useMemo(() => {
-    return (
-      selectedCuisine ||
-      selectedPriceRange ||
-      selectedDeliveryTime ||
-      selectedRating ||
-      selectedDietaryRestrictions.length > 0
-    );
-  }, [
-    selectedCuisine,
-    selectedPriceRange,
-    selectedDeliveryTime,
-    selectedRating,
-    selectedDietaryRestrictions,
-  ]);
-
-  const clearAllFilters = useCallback(() => {
-    setSelectedCuisine('');
-    setSelectedPriceRange('');
-    setSelectedDeliveryTime('');
-    setSelectedRating('');
-    setSelectedDietaryRestrictions([]);
-    setSelectedPromoFilters([]);
-    setSortBy('relevance');
-  }, []);
-
-  const clearPromoFilters = useCallback(() => {
-    setSelectedPromoFilters([]);
-  }, []);
-
-  const applyFilters = useCallback(() => {
-    Alert.alert(
-      'Filters Applied',
-      'Search results updated with your preferences!',
-    );
-    setFilterVisible(false);
-    setSortVisible(false);
-    setPromoVisible(false);
-  }, []);
-
-  const clearSearch = useCallback(() => {
-    setSearchQuery('');
-    Keyboard.dismiss();
-  }, []);
-
-  const closeFilterModal = useCallback(() => setFilterVisible(false), []);
-  const closeSortModal = useCallback(() => setSortVisible(false), []);
-  const closePromoModal = useCallback(() => setPromoVisible(false), []);
-
-  const openFilterModal = useCallback(() => setFilterVisible(true), []);
-  const openSortModal = useCallback(() => setSortVisible(true), []);
-  const openPromoModal = useCallback(() => setPromoVisible(true), []);
-
-  // Memoized render functions
-  const renderCuisineLabel = useCallback(
-    (cuisine: (typeof CUISINE_TYPES)[0]) => (
-      <View className="flex-row items-center space-x-2">
-        <Text className="mr-1">{cuisine.icon}</Text>
-        <Text className="text-sm">{cuisine.name}</Text>
-      </View>
-    ),
-    [],
-  );
-
-  const renderPriceLabel = useCallback(
-    (range: (typeof PRICE_RANGES)[0]) => <Text>{range.label}</Text>,
-    [],
-  );
-
-  const renderSortLabel = useCallback(
-    (option: (typeof SORT_OPTIONS)[0]) => (
-      <Text className="text-base">{option.label}</Text>
-    ),
-    [],
-  );
-
-  // Memoized components
-  const FilterModal = useMemo(
-    () => (
-      <Modal
-        visible={filterVisible}
-        animationType="slide"
-        presentationStyle="fullScreen"
-      >
-        <SafeAreaView className="flex-1 bg-gray-50">
-          <View className="flex-row justify-between items-center p-4 bg-white border-b border-gray-200">
-            <TouchableOpacity onPress={closeFilterModal} className="p-2">
-              <MaterialIcons name="close" size={24} color="#666" />
-            </TouchableOpacity>
-            <Text className="text-xl font-bold text-gray-800">Filters</Text>
-            <TouchableOpacity onPress={clearAllFilters}>
-              <Text className="text-primaryColor font-semibold">Clear All</Text>
-            </TouchableOpacity>
-          </View>
-
-          <ScrollView className="flex-1 p-4">
-            <FilterSection title="Cuisine Type">
-              <RadioButton.Group
-                onValueChange={handleCuisineSelect}
-                value={selectedCuisine}
-              >
-                {CUISINE_TYPES.map((cuisine) => (
-                  <RadioButtonItem
-                    key={cuisine.id}
-                    item={cuisine}
-                    selectedValue={selectedCuisine}
-                    onSelect={handleCuisineSelect}
-                    renderLabel={renderCuisineLabel}
-                  />
-                ))}
-              </RadioButton.Group>
-            </FilterSection>
-
-            <FilterSection title="Price Range">
-              <RadioButton.Group
-                onValueChange={handlePriceRangeSelect}
-                value={selectedPriceRange}
-              >
-                {PRICE_RANGES.map((range) => (
-                  <RadioButtonItem
-                    key={range.id}
-                    item={range}
-                    selectedValue={selectedPriceRange}
-                    onSelect={handlePriceRangeSelect}
-                    renderLabel={renderPriceLabel}
-                  />
-                ))}
-              </RadioButton.Group>
-            </FilterSection>
-          </ScrollView>
-
-          <View className="p-4 bg-white border-t border-gray-200">
-            <Button
-              mode="contained"
-              onPress={applyFilters}
-              buttonColor="#077aff"
-              className="py-1"
-            >
-              Apply Filters
-            </Button>
-          </View>
-        </SafeAreaView>
-      </Modal>
-    ),
-    [
-      filterVisible,
-      selectedCuisine,
-      selectedPriceRange,
-      closeFilterModal,
-      clearAllFilters,
-      applyFilters,
-      handleCuisineSelect,
-      handlePriceRangeSelect,
-      renderCuisineLabel,
-      renderPriceLabel,
-    ],
-  );
-
-  const SortModal = useMemo(
-    () => (
-      <Modal
-        visible={sortVisible}
-        animationType="slide"
-        presentationStyle="pageSheet"
-      >
-        <SafeAreaView className="flex-1 bg-white">
-          <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-            <TouchableOpacity onPress={closeSortModal}>
-              <MaterialIcons name="close" size={24} color="#666" />
-            </TouchableOpacity>
-            <Text className="text-lg font-bold text-gray-800">Sort By</Text>
-            <View style={{ width: 24 }} />
-          </View>
-
-          <ScrollView className="flex-1 p-4">
-            <RadioButton.Group onValueChange={handleSortSelect} value={sortBy}>
-              {SORT_OPTIONS.map((option) => (
-                <RadioButtonItem
-                  key={option.id}
-                  item={option}
-                  selectedValue={sortBy}
-                  onSelect={handleSortSelect}
-                  renderLabel={renderSortLabel}
-                />
-              ))}
-            </RadioButton.Group>
-          </ScrollView>
-
-          <View className="p-4 border-t border-gray-200">
-            <Button
-              mode="contained"
-              onPress={applyFilters}
-              buttonColor="#077aff"
-              className="py-1"
-            >
-              Apply Sort
-            </Button>
-          </View>
-        </SafeAreaView>
-      </Modal>
-    ),
-    [
-      sortVisible,
-      sortBy,
-      closeSortModal,
-      applyFilters,
-      handleSortSelect,
-      renderSortLabel,
-    ],
-  );
-
-  const PromoModal = useMemo(
-    () => (
-      <Modal
-        visible={promoVisible}
-        animationType="slide"
-        presentationStyle="pageSheet"
-      >
-        <SafeAreaView className="flex-1 bg-white">
-          <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-            <TouchableOpacity onPress={closePromoModal}>
-              <MaterialIcons name="close" size={24} color="#666" />
-            </TouchableOpacity>
-            <Text className="text-lg font-bold text-gray-800">Promotions</Text>
-            <TouchableOpacity onPress={clearPromoFilters}>
-              <Text className="text-primaryColor font-semibold">Clear</Text>
-            </TouchableOpacity>
-          </View>
-
-          <ScrollView className="flex-1 p-4">
-            <Text className="text-gray-600 mb-4">
-              Select the types of promotions you&apos;re interested in:
-            </Text>
-
-            {PROMO_OPTIONS.map((promo) => (
-              <CheckboxItem
-                key={promo.id}
-                item={promo}
-                isSelected={selectedPromoFilters.includes(promo.id)}
-                onToggle={togglePromoFilter}
-              />
-            ))}
-          </ScrollView>
-
-          <View className="p-4 border-t border-gray-200">
-            <Button
-              mode="contained"
-              onPress={applyFilters}
-              buttonColor="#077aff"
-              className="py-1"
-            >
-              Show Promotions
-            </Button>
-          </View>
-        </SafeAreaView>
-      </Modal>
-    ),
-    [
-      promoVisible,
-      selectedPromoFilters,
-      closePromoModal,
-      clearPromoFilters,
-      applyFilters,
-      togglePromoFilter,
-    ],
-  );
-
-  // Memoized SearchHeader
-  const SearchHeader = useMemo(
-    () => (
-      <View className="flex-row px-2 items-center py-3 " >
-        <TouchableOpacity
-          onPress={goBack}
-          className="bg-primary rounded-full p-2"
-        >
-          <MaterialIcons name="arrow-back" size={25} color="#fff" />
-        </TouchableOpacity>
-        <KeyboardAvoidingView
-          className="flex-1 ml-3"
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        >
-          <TextInput
-            placeholder="Search for your cravings.."
-            mode="outlined"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            outlineStyle={{
-              borderColor: '#c4def8',
-              borderWidth: 1,
-              borderRadius: 20,
-            }}
-            style={{
-              backgroundColor: 'rgb(202, 221, 247)',
-              paddingTop: 5,
-              paddingBottom: 5,
-              paddingRight: 10,
-              paddingLeft: 10,
-            }}
-            placeholderTextColor="#999"
-            left={
-              <TextInput.Icon
-                icon="magnify"
-                size={30}
-                color="black"
-                background="rgb(202, 221, 240)"
-                className="pt-3"
-              />
-            }
-            right={
-              searchQuery ? (
-                <TextInput.Icon
-                  icon="close"
-                  onPress={clearSearch}
-                  className="items-center pt-2"
-                />
-              ) : null
-            }
-            className="flex-1"
-            autoFocus={true}
-            contentStyle={{ marginRight: -10, marginLeft: 45 }}
-          />
-        </KeyboardAvoidingView>
-      </View>
-    ),
-    [searchQuery, clearSearch],
-  );
-
-  // Memoized CategoryHeader
-  const CategoryHeader = useMemo(() => {
-    if (type !== 'category') return null;
-
-    return (
-      <View className="flex-row items-center px-4 py-2 bg-white mb-4">
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          activeOpacity={0.8}
-          className="active:bg-gray-100 p-2 rounded-full"
-        >
-          <MaterialIcons
-            name="arrow-back-ios"
-            size={21}
-            color={lightTheme.colors.primary}
-          />
-        </TouchableOpacity>
-        <Text className="text-[20px] font-semibold text-gray-800 flex-1 text-center">
-          {category}
-        </Text>
-      </View>
-    );
-  }, [type, category, navigation]);
-
-  // Memoized filter buttons
-  const filterButtons = useMemo(
-    () => (
-      <View className="flex-row justify-around items-center my-3 space-x-1 px-2">
-        <TouchableOpacity
-          className={`flex-row items-center border-[2px] border-solid border-primary p-2 shadow-sm rounded-full ${
-            hasActiveFilters ? 'bg-primary' : 'bg-white'
-          }`}
-          onPress={openFilterModal}
-        >
-          <Feather
-            name="sliders"
-            size={18}
-            color={hasActiveFilters ? '#fff' : '#077aff'}
-          />
-          <Text
-            className={`ml-1 ${hasActiveFilters ? 'text-white' : 'text-primaryColor'}`}
-          >
-            Filter
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          className={`border-[2px] border-solid border-primary p-2 shadow-sm rounded-full ${
-            sortBy !== 'relevance' ? 'bg-primary' : 'bg-white'
-          }`}
-          onPress={openSortModal}
-        >
-          <Text
-            className={`${sortBy !== 'relevance' ? 'text-white' : 'text-primary'}`}
-          >
-            Sort By
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          className={`border-[2px] border-solid border-primary p-2 shadow-sm rounded-full ${
-            selectedPromoFilters.length > 0 ? 'bg-primary' : 'bg-white'
-          }`}
-          onPress={openPromoModal}
-        >
-          <Text
-            className={`${selectedPromoFilters.length > 0 ? 'text-white' : 'text-primary'}`}
-          >
-            Promo
-          </Text>
-        </TouchableOpacity>
-      </View>
-    ),
-    [
-      hasActiveFilters,
-      sortBy,
-      selectedPromoFilters.length,
-      openFilterModal,
-      openSortModal,
-      openPromoModal,
-    ],
-  );
-
-  const { data: MenuItems, isLoading, error } = useGetAllMenu();
   const { colors } = useTheme();
-  if (error) {
+  const { t } = useTranslation('translation');
+
+  // Simple state management
+  const [query, setQuery] = useState('');
+  const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
+  const [filters, setFilters] = useState<FilterOptions>({
+    categories: type === 'category' && category ? [category] : [],
+    priceRange: null,
+    sortBy: 'name',
+  });
+
+  const { results, isPending, isRefetching, refetch, availableCategories } =
+    useSearchFood(query, filters);
+
+  const handleGoBack = useCallback(() => {
+    navigation.goBack();
+  }, [navigation]);
+
+  const handleFilterPress = useCallback(() => {
+    setIsFilterModalVisible(true);
+  }, []);
+
+  const handleApplyFilters = useCallback((newFilters: FilterOptions) => {
+    setFilters(newFilters);
+  }, []);
+
+  const renderFoodItem = useCallback(
+    ({ item }: { item: FoodProps }) => (
+      <View style={{ paddingVertical: 4 }}>
+        <FoodItemCard
+          key={item.id}
+          foodId={item.id}
+          restarantId={item.restaurant?.id}
+          FoodName={item.name}
+          FoodPrice={item.price}
+          FoodImage={item.image}
+          RestarantName={item.restaurant?.name || ''}
+          distanceFromUser={item.distance || 0}
+          DeliveryPrice={2000} // Mock delivery price
+        />
+      </View>
+    ),
+    [],
+  );
+
+  const keyExtractor = useCallback((item: FoodProps) => item.id, []);
+
+  // Header component
+  const Header = () => {
+    if (type === 'category') {
+      return (
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingHorizontal: 16,
+            paddingVertical: 8,
+            backgroundColor: colors.surface,
+            borderBottomWidth: 1,
+            borderBottomColor: colors.outline,
+          }}
+        >
+          <TouchableOpacity
+            onPress={handleGoBack}
+            style={{
+              padding: 8,
+              borderRadius: 20,
+              backgroundColor: colors.primary,
+            }}
+          >
+            <MaterialIcons name="arrow-back" size={20} color="white" />
+          </TouchableOpacity>
+          <Text
+            style={{
+              flex: 1,
+              textAlign: 'center',
+              fontSize: 18,
+              fontWeight: '600',
+              color: colors.onSurface,
+              marginRight: 36, // Compensate for back button
+            }}
+          >
+            {category}
+          </Text>
+        </View>
+      );
+    }
+
+    return (
+      <View
+        style={{
+          paddingVertical: 8,
+          backgroundColor: colors.background,
+          borderBottomWidth: 1,
+          borderBottomColor: colors.outline,
+        }}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+          <TouchableOpacity
+            onPress={handleGoBack}
+            style={{
+              padding: 8,
+              borderRadius: 20,
+              backgroundColor: colors.primary,
+            }}
+          >
+            <MaterialIcons name="arrow-back" size={20} color="white" />
+          </TouchableOpacity>
+          <SearchInput
+            value={query}
+            onChangeText={setQuery}
+            showFilterButton={true}
+            onFilterPress={handleFilterPress}
+          />
+        </View>
+      </View>
+    );
+  };
+
+  // Loading state
+  if (isPending) {
     return (
       <CommonView>
-        <View
-          className="flex-1 px-1 py-3 h-full justify-center items-center"
-          style={{ backgroundColor: colors.background }}
-        >
-          <Text className="text-3xl font-semibold text-red-400">
-            {error.message}
-            {/* image to be added */}
-          </Text>
-        </View>
+        <SafeAreaView style={{ flex: 1 }}>
+          <Header />
+          <View
+            style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+          >
+            <ActivityIndicator size="large" color={colors.primary} />
+            <Text style={{ color: colors.onSurface, marginTop: 16 }}>
+              {t('searching') || 'Searching...'}
+            </Text>
+          </View>
+        </SafeAreaView>
       </CommonView>
     );
   }
 
   return (
     <CommonView>
-      {type === 'category' ? CategoryHeader : SearchHeader}
+      <Header />
 
-      {filterButtons}
-
-      {/* Search Results */}
-      {isLoading ? (
-        <LoadingScreen />
-      ) : MenuItems && MenuItems.length > 0 ? (
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <View className="flex-1 flex-row flex-wrap justify-between px-2">
-            <FlatList
-              data={MenuItems}
-              renderItem={({ item }) => (
-                <FoodItemCard
-                  key={item.id}
-                  foodId={item.id}
-                  restarantId={item.restaurantID}
-                  FoodName={item.name}
-                  FoodPrice={item.price!}
-                  FoodImage={item.image}
-                  RestarantName={''}
-                  distanceFromUser={item.distance!}
-                  DeliveryPrice={4000}
-                />
-              )}
-              keyExtractor={(item) => item.id}
-            />
-          </View>
-        </ScrollView>
-      ) : (
-        <View className="flex-1 items-center justify-center">
-          <MaterialCommunityIcons name="food-off" size={80} color="#ccc" />
-          <Text className="text-gray-500 text-lg mt-4">No results found</Text>
-          <Text className="text-gray-400 text-sm mt-2">
-            Try a different search term or adjust your filters.
+      {/* Results info */}
+      {results?.length! > 0 && (
+        <View
+          style={{
+            paddingHorizontal: 16,
+            paddingVertical: 8,
+            backgroundColor: colors.surface,
+          }}
+        >
+          <Text style={{ color: colors.onSurfaceVariant, fontSize: 14 }}>
+            {results?.length > 1
+              ? t('results_found_plural', { count: results.length }) ||
+                `${results.length} results found`
+              : t('results_found', { count: results.length }) ||
+                `${results.length} result found`}
           </Text>
         </View>
       )}
 
-      {FilterModal}
-      {SortModal}
-      {PromoModal}
+      {/* Content */}
+      {results?.length! > 0 ? (
+        <FlatList
+          data={results}
+          renderItem={renderFoodItem}
+          keyExtractor={keyExtractor}
+          contentContainerStyle={{
+            paddingBottom: 100,
+          }}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={refetch}
+              colors={[colors.primary]}
+            />
+          }
+        />
+      ) : (
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 32,
+          }}
+        >
+          <MaterialIcons
+            name="search-off"
+            size={64}
+            color={colors.onSurfaceVariant}
+          />
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: '600',
+              color: colors.onSurface,
+              marginTop: 16,
+              textAlign: 'center',
+            }}
+          >
+            {query
+              ? t('no_results_for', { query: query }) ||
+                `No results for "${query}"`
+              : t('start_searching_for_food') || 'Start searching for food'}
+          </Text>
+          <Text
+            style={{
+              fontSize: 14,
+              color: colors.onSurfaceVariant,
+              marginTop: 8,
+              textAlign: 'center',
+            }}
+          >
+            {query
+              ? t('try_adjusting_search_or_filters')
+              : t('enter_search_term_to_find_delicious_food')}
+          </Text>
+        </View>
+      )}
+
+      {/* Filter Modal */}
+      <FilterModal
+        visible={isFilterModalVisible}
+        onClose={() => setIsFilterModalVisible(false)}
+        onApply={handleApplyFilters}
+        availableCategories={availableCategories}
+      />
     </CommonView>
   );
 };

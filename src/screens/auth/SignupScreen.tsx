@@ -28,8 +28,9 @@ import { useAuthStore } from '@/src/stores/customerStores/AuthStore';
 import { TextButton } from '@/src/components/common/TextButton';
 import Toast from 'react-native-toast-message';
 import { useNetwork } from '@/src/contexts/NetworkContext';
-import { useLanguage } from '@/src/contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import { useRegister } from '@/src/hooks/customer/useAuthhooks';
+import ErrorDisplay from '@/src/components/auth/ErrorDisplay';
 
 // Optimized country codes data - moved outside component to prevent recreation
 const COUNTRY_CODES = [
@@ -56,11 +57,15 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
   route,
 }) => {
   const { colors } = useTheme();
-  const { t } = useLanguage();
+  const { t } = useTranslation('auth');
   const { isConnected, isInternetReachable } = useNetwork();
-  const { mutate: registerUserMutation, isPending } = useRegister();
+  const {
+    mutate: registerUserMutation,
+    isPending,
+    error: registerError,
+  } = useRegister();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { clearError, setError } = useAuthStore();
+  const { clearError, setError, error: authError } = useAuthStore();
 
   // get usertype gotten from params
   const userType = route.params?.userType || 'customer';
@@ -117,7 +122,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
         Toast.show({
           type: 'error',
           text1: t('error'),
-          text2: 'No internet connection. Please check your network settings.',
+          text2: t('no_internet_connection'),
           position: 'top',
         });
         return;
@@ -127,7 +132,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
         Toast.show({
           type: 'error',
           text1: t('error'),
-          text2: 'Please accept the terms and conditions',
+          text2: t('accept_terms'),
           position: 'top',
         });
         return;
@@ -150,8 +155,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
             Toast.show({
               type: 'success',
               text1: t('success'),
-              text2:
-                'Account created successfully! Please check your email for verification.',
+              text2: t('account_created_successfully'),
               position: 'top',
             });
             console.log(response.data.userId);
@@ -159,7 +163,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
             // Navigate to OTP verification screen with the response data
             navigation.navigate('OTPVerification', {
               userId: response.data.userId, // Handle different response structures
-              email: data.email.trim(),
+              email: data.email,
               phone: registrationData.phoneNumber,
               userType,
               type: 'email',
@@ -167,7 +171,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
           },
           onError: (error: any) => {
             const errorMessage =
-              error?.message || 'Failed to create account. Please try again.';
+              error?.message || t('failed_to_create_account');
             setError(errorMessage);
 
             Toast.show({
@@ -179,8 +183,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
           },
         });
       } catch (error: any) {
-        const errorMessage =
-          error?.message || 'Failed to create account. Please try again.';
+        const errorMessage = error?.message || t('failed_to_create_account');
         setError(errorMessage);
 
         Toast.show({
@@ -210,7 +213,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
       Toast.show({
         type: 'error',
         text1: t('error'),
-        text2: 'No internet connection. Please check your network settings.',
+        text2: t('no_internet_connection'),
         position: 'top',
       });
       return;
@@ -219,7 +222,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
     Toast.show({
       type: 'info',
       text1: t('info'),
-      text2: 'Google sign-up not implemented yet',
+      text2: t('google_signup_not_implemented'),
       position: 'top',
     });
   }, [isConnected, isInternetReachable, t]);
@@ -229,7 +232,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
       Toast.show({
         type: 'error',
         text1: t('error'),
-        text2: 'No internet connection. Please check your network settings.',
+        text2: t('no_internet_connection'),
         position: 'top',
       });
       return;
@@ -238,7 +241,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
     Toast.show({
       type: 'info',
       text1: t('info'),
-      text2: 'Apple sign-up not implemented yet',
+      text2: t('apple_signup_not_implemented'),
       position: 'top',
     });
   }, [isConnected, isInternetReachable, t]);
@@ -260,7 +263,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
     Toast.show({
       type: 'info',
       text1: t('info'),
-      text2: 'Terms of service not implemented yet',
+      text2: t('terms_not_implemented'),
       position: 'top',
     });
   }, [t]);
@@ -269,7 +272,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
     Toast.show({
       type: 'info',
       text1: t('info'),
-      text2: 'Privacy policy not implemented yet',
+      text2: t('privacy_policy_not_implemented'),
       position: 'top',
     });
   }, [t]);
@@ -571,6 +574,12 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                 </View>
               </View>
 
+              {/* Error Display */}
+              <ErrorDisplay
+                error={registerError?.message || authError}
+                visible={!!(registerError?.message || authError)}
+              />
+
               {/* Sign Up Button */}
               <Button
                 mode="contained"
@@ -582,13 +591,13 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                 style={styles.signUpButton}
                 labelStyle={styles.signUpButtonLabel}
               >
-                {isPending ? 'Creating Account...' : t('sign_up')}
+                {isPending ? t('creating_account') : t('signup')}
               </Button>
 
               {/* Divider */}
               <View style={styles.dividerContainer}>
                 <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>or continue with</Text>
+                <Text style={styles.dividerText}>{t('or_continue_with')}</Text>
                 <View style={styles.dividerLine} />
               </View>
 
@@ -641,7 +650,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
           >
             <SafeAreaView style={styles.modalContainer}>
               <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Select Country</Text>
+                <Text style={styles.modalTitle}>{t('select_country')}</Text>
                 <TouchableOpacity
                   onPress={closeCountryModal}
                   activeOpacity={0.7}

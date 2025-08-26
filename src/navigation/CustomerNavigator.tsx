@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image, Platform, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from 'react-native-paper';
+import { useTranslation } from 'react-i18next';
 
 import {
   CustomerHomeStackParamList,
@@ -52,6 +53,7 @@ function CustomerHomeStackScreen() {
 
 function CustomerOrderStackScreen() {
   const { colors } = useTheme();
+  const { t } = useTranslation('translation');
   return (
     <CustomerOrderStack.Navigator
       initialRouteName="CompletedOrdersScreen"
@@ -72,12 +74,12 @@ function CustomerOrderStackScreen() {
       <CustomerOrderStack.Screen
         name="CompletedOrdersScreen"
         component={CompletedOrderScreen}
-        options={{ title: 'Completed' }}
+        options={{ title: t('completed') }}
       />
       <CustomerOrderStack.Screen
         name="PendingOrdersScreen"
         component={ActiveOrderScreen}
-        options={{ title: 'Pending' }}
+        options={{ title: t('pending') }}
       />
     </CustomerOrderStack.Navigator>
   );
@@ -85,6 +87,7 @@ function CustomerOrderStackScreen() {
 
 export function CustomerHelpCenterStackScreen() {
   const { colors } = useTheme();
+  const { t } = useTranslation('translation');
 
   return (
     <CustomerHelpStack.Navigator
@@ -106,7 +109,7 @@ export function CustomerHelpCenterStackScreen() {
       <CustomerHelpStack.Screen
         name="ContactUs"
         component={ContactUs}
-        options={{ title: 'Contact Us' }}
+        options={{ title: t('contact_us') }}
       />
     </CustomerHelpStack.Navigator>
   );
@@ -114,6 +117,7 @@ export function CustomerHelpCenterStackScreen() {
 
 function CustomerProfileStackScreen() {
   const { colors } = useTheme();
+  const { t } = useTranslation('translation');
 
   return (
     <CustomerProfileStack.Navigator
@@ -136,7 +140,7 @@ function CustomerProfileStackScreen() {
         name="ProfileHome"
         component={ProfileHomeScreen}
         options={({ navigation }) => ({
-          headerTitle: 'Profile',
+          headerTitle: t('profile'),
           headerLeft: () => (
             <Image
               source={icons.R_logo}
@@ -191,6 +195,7 @@ TabBarIcon.displayName = 'TabBarIcon';
 export default function CustomerNavigator() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { t } = useTranslation('translation');
 
   const tabBarStyle = useMemo(
     () => ({
@@ -246,7 +251,7 @@ export default function CustomerNavigator() {
         name="Home"
         component={CustomerHomeStackScreen}
         options={{
-          tabBarLabel: 'Home',
+          tabBarLabel: t('home'),
           headerShown: false,
         }}
       />
@@ -254,7 +259,7 @@ export default function CustomerNavigator() {
         name="Orders"
         component={CustomerOrderStackScreen}
         options={({ navigation }) => ({
-          tabBarLabel: 'Orders',
+          tabBarLabel: t('orders'),
           headerRight: () => (
             <TouchableOpacity
               onPress={() => {
@@ -291,7 +296,7 @@ export default function CustomerNavigator() {
         name="Profile"
         component={CustomerProfileStackScreen}
         options={{
-          tabBarLabel: 'Profile',
+          tabBarLabel: t('profile'),
           headerShown: false,
         }}
       />

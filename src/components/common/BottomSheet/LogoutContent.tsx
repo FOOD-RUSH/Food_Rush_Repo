@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 
 interface LogoutContentProps {
   onDismiss: () => void;
@@ -13,14 +14,34 @@ const LogoutContent: React.FC<LogoutContentProps> = ({
   onConfirmLogout,
 }) => {
   const { colors } = useTheme();
+  const { t } = useTranslation('translation');
+
+  const handleConfirmAndDismiss = () => {
+    onConfirmLogout();
+    onDismiss();
+  };
 
   return (
-    <View className="flex-1 justify-between">
-      {/* Icon and message */}
-      <View className="items-center flex-1 justify-center">
+    <View style={{ flex: 1 }}>
+      {/* Content */}
+      <View
+        style={{
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: 32,
+          paddingVertical: 20,
+        }}
+      >
         <View
-          className="w-16 h-16 rounded-full items-center justify-center mb-4"
-          style={{ backgroundColor: colors.errorContainer }}
+          style={{
+            width: 64,
+            height: 64,
+            borderRadius: 32,
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: 16,
+            backgroundColor: colors.errorContainer,
+          }}
         >
           <MaterialIcons
             name="logout"
@@ -30,43 +51,80 @@ const LogoutContent: React.FC<LogoutContentProps> = ({
         </View>
 
         <Text
-          style={{ color: colors.onSurface }}
-          className="text-center text-base leading-6 px-2"
+          style={{
+            color: colors.onSurface,
+            fontSize: 16,
+            lineHeight: 24,
+            textAlign: 'center',
+            paddingHorizontal: 8,
+          }}
         >
-          Are you sure you want to log out of your account?
+          {t('logout_confirmation')}
         </Text>
       </View>
 
-      {/* Action buttons */}
-      <View className="flex-row gap-3 pt-4">
+      {/* Action Buttons */}
+      <View
+        style={{
+          flexDirection: 'row',
+          gap: 12,
+          paddingTop: 16,
+          borderTopWidth: 1,
+          borderTopColor: colors.outline + '30',
+        }}
+      >
         <TouchableOpacity
           onPress={onDismiss}
-          className="flex-1 py-3 rounded-lg items-center justify-center border"
           style={{
-            backgroundColor: 'transparent',
+            flex: 1,
+            paddingVertical: 14,
+            paddingHorizontal: 24,
+            borderRadius: 12,
+            backgroundColor: colors.surfaceVariant,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderWidth: 1,
             borderColor: colors.outline,
           }}
           activeOpacity={0.7}
         >
           <Text
-            style={{ color: colors.onSurface }}
-            className="text-base font-medium"
+            style={{
+              color: colors.onSurfaceVariant,
+              fontSize: 16,
+              fontWeight: '600',
+            }}
           >
-            Cancel
+            {t('cancel')}
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={onConfirmLogout}
-          className="flex-1 py-3 rounded-lg items-center justify-center"
-          style={{ backgroundColor: colors.error }}
-          activeOpacity={0.7}
+          onPress={handleConfirmAndDismiss}
+          style={{
+            flex: 1,
+            paddingVertical: 14,
+            paddingHorizontal: 24,
+            borderRadius: 12,
+            backgroundColor: colors.error,
+            alignItems: 'center',
+            justifyContent: 'center',
+            elevation: 2,
+            shadowColor: colors.error,
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.2,
+            shadowRadius: 4,
+          }}
+          activeOpacity={0.8}
         >
           <Text
-            style={{ color: colors.onError }}
-            className="text-base font-medium"
+            style={{
+              color: colors.onError,
+              fontSize: 16,
+              fontWeight: '600',
+            }}
           >
-            Log out
+            {t('log_out')}
           </Text>
         </TouchableOpacity>
       </View>

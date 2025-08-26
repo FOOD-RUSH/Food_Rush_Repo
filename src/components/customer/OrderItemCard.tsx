@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import React from 'react';
 import { useTheme, Card } from 'react-native-paper';
+import { useTranslation } from 'react-i18next';
 
 export interface OrderItemCardProps {
   foodId: string;
@@ -24,6 +25,7 @@ const OrderItemCard = ({
   distance = '2.4 km',
 }: OrderItemCardProps) => {
   const { colors } = useTheme();
+  const { t } = useTranslation('translation');
 
   return (
     <Card
@@ -68,13 +70,14 @@ const OrderItemCard = ({
                 className={`text-base mr-2 font-medium `}
                 style={{ color: colors.onSurface }}
               >
-                {quantity} items
+                {quantity}
+                {t('items')}
               </Text>
               <Text
                 className={`text-base mr-2 font-medium `}
                 style={{ color: colors.onSurface }}
               >
-                |
+                {t('pipe_separator')}
               </Text>
               <Text
                 className={`text-base font-medium `}
@@ -102,7 +105,7 @@ const OrderItemCard = ({
                     orderStatus === 'active' ? colors.primary : colors.onPrimary
                   }`}
                 >
-                  {orderStatus === 'active' ? 'Paid' : 'Completed'}
+                  {orderStatus === 'active' ? t('paid') : t('completed')}
                 </Text>
               </View>
             </View>
@@ -127,7 +130,7 @@ const OrderItemCard = ({
                   className="font-medium text-center text-lg"
                   style={{ color: colors.primary }}
                 >
-                  Cancel Order
+                  {t('cancel_order')}
                 </Text>
               </TouchableOpacity>
 
@@ -139,7 +142,7 @@ const OrderItemCard = ({
                 }}
               >
                 <Text className="text-white font-medium text-center text-lg">
-                  Track Driver
+                  {t('track_driver')}
                 </Text>
               </TouchableOpacity>
             </>
@@ -156,7 +159,7 @@ const OrderItemCard = ({
                   className="font-medium text-center text-lg"
                   style={{ color: colors.primary }}
                 >
-                  Leave a review
+                  {t('leave_a_review')}
                 </Text>
               </TouchableOpacity>
 
@@ -168,7 +171,7 @@ const OrderItemCard = ({
                 }}
               >
                 <Text className="text-white font-medium text-center text-lg">
-                  Order Again
+                  {t('order_again')}
                 </Text>
               </TouchableOpacity>
             </>

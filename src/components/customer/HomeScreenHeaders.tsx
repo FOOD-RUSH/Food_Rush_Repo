@@ -1,6 +1,7 @@
 import { View, Text } from 'react-native';
 import React from 'react';
 import { Button, useTheme } from 'react-native-paper';
+import { useTranslation } from 'react-i18next';
 
 interface HeaderProps {
   title: string;
@@ -8,6 +9,7 @@ interface HeaderProps {
 }
 const HomeScreenHeaders = ({ onPress, title }: HeaderProps) => {
   const { colors } = useTheme();
+  const { t } = useTranslation('translation');
   const primaryColor = colors.primary;
 
   return (
@@ -20,7 +22,7 @@ const HomeScreenHeaders = ({ onPress, title }: HeaderProps) => {
           {title}
         </Text>
         <Button onPress={onPress} style={{ marginLeft: 15 }}>
-          <Text className={`text-[${primaryColor}]`}>See More</Text>
+          <Text className={`text-[${primaryColor}]`}>{t('see_more')}</Text>
         </Button>
       </View>
     </View>

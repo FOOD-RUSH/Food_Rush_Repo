@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import React, { useCallback } from 'react';
 import { Avatar, Switch, useTheme } from 'react-native-paper';
 import { AntDesign, MaterialIcons } from '@expo/vector-icons';
@@ -7,38 +7,64 @@ import { CustomerProfileStackScreenProps } from '@/src/navigation/types';
 import CommonView from '@/src/components/common/CommonView';
 import { useAppStore } from '@/src/stores/customerStores/AppStore';
 import { useAuthStore } from '@/src/stores/customerStores/AuthStore';
-import { useCurrentUser } from '@/src/hooks/customer/useAuthhooks';
+import { useProfileManager } from '@/src/hooks/customer/useAuthhooks';
 import { useBottomSheet } from '@/src/components/common/BottomSheet/BottomSheetContext';
+import ProfileLoadingState from '@/src/components/profile/ProfileLoadingState';
+import ProfileErrorState from '@/src/components/profile/ProfileErrorState';
 import LogoutContent from '@/src/components/common/BottomSheet/LogoutContent';
 import { icons } from '@/assets/images';
+import { useTranslation } from 'react-i18next';
 
 const ProfileHomeScreen = ({
   navigation,
 }: CustomerProfileStackScreenProps<'ProfileHome'>) => {
-  const { data: user } = useCurrentUser();
+  const { user, isLoading, error, refreshProfile, isRefetching } =
+    useProfileManager();
   const { colors } = useTheme();
   const theme = useAppStore((state) => state.theme);
   const setTheme = useAppStore((state) => state.setTheme);
   const logoutUser = useAuthStore((state) => state.logoutUser);
-  const { present, dismiss } = useBottomSheet();
+  const { present, dismiss, isPresented } = useBottomSheet();
+  const { t } = useTranslation('translation');
 
   const handleLogout = useCallback(() => {
-    console.log('Logging out user');
-    logoutUser();
-    dismiss();
-  }, [logoutUser, dismiss]);
+    try {
+      console.log('Logging out user');
+      logoutUser();
+    } catch (error) {
+      console.error('Logout error:', error);
+      Alert.alert(t('error'), t('failed_to_logout'));
+    }
+  }, [logoutUser]);
 
   const showLogoutModal = useCallback(() => {
-    present(
-      <LogoutContent onDismiss={dismiss} onConfirmLogout={handleLogout} />,
-      {
-        snapPoints: ['40%'],
-        enablePanDownToClose: true,
-        title: 'Confirm Logout',
-        showHandle: true,
-      },
-    );
-  }, [present, dismiss, handleLogout]);
+    // Prevent multiple presentations
+    if (isPresented) {
+      return;
+    }
+
+    try {
+      console.log('Attempting to show logout modal...');
+
+      present(
+        <LogoutContent onDismiss={dismiss} onConfirmLogout={handleLogout} />,
+        {
+          snapPoints: ['50%'],
+          enablePanDownToClose: true,
+          title: t('confirm_logout'),
+          showHandle: true,
+          backdropOpacity: 0.5,
+        },
+      );
+    } catch (error) {
+      console.error('Failed to present logout modal:', error);
+      // Fallback to Alert
+      Alert.alert(t('confirm_logout'), t('are_you_sure_you_want_to_log_out'), [
+        { text: t('cancel'), style: 'cancel' },
+        { text: t('log_out'), style: 'destructive', onPress: handleLogout },
+      ]);
+    }
+  }, [isPresented, present, dismiss, handleLogout, t]);
 
   const handleThemeToggle = useCallback(
     (value: boolean) => {
@@ -75,6 +101,54 @@ const ProfileHomeScreen = ({
     navigation.navigate('LanguageScreen');
   }, [navigation]);
 
+  // Notification handler
+  const handleNotificationPress = useCallback(() => {
+    navigation.navigate('Notifications');
+  }, [navigation]);
+
+  // Placeholder handlers for incomplete features
+  const handleSpecialOffersPress = useCallback(() => {
+    Alert.alert(t('info'), t('special_offers_feature_coming_soon'));
+  }, []);
+
+  const handleSecurityPress = useCallback(() => {
+    Alert.alert(t('info'), t('security_settings_coming_soon'));
+  }, [t]);
+
+  // Handle retry for profile loading
+  const handleRetry = useCallback(async () => {
+    try {
+      await refreshProfile();
+    } catch (error) {
+      console.error('Failed to retry profile fetch:', error);
+    }
+  }, [refreshProfile]);
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <CommonView>
+        <ProfileLoadingState
+          message={t('loading_your_profile')}
+          showIcon={true}
+        />
+      </CommonView>
+    );
+  }
+
+  // Show error state
+  if (error && !user) {
+    return (
+      <CommonView>
+        <ProfileErrorState
+          error={error?.message || 'Failed to load profile. Please try again.'}
+          onRetry={handleRetry}
+          showRetryButton={true}
+        />
+      </CommonView>
+    );
+  }
+
   return (
     <CommonView>
       <ScrollView
@@ -99,7 +173,7 @@ const ProfileHomeScreen = ({
               style={{ color: colors.onSurfaceVariant }}
               className="text-[15px]"
             >
-              ID: {user?.phoneNumber}
+              {user?.phoneNumber}
             </Text>
           </View>
           <TouchableOpacity activeOpacity={0.7} onPress={navigateToEditProfile}>
@@ -115,17 +189,17 @@ const ProfileHomeScreen = ({
 
         {/* Menu items */}
         <RowView
-          title=" My Favorite Restaurants"
+          title={t('my_favorite_restaurants')}
           onPress={navigateToFavoriteRestaurants}
           leftIconName="fast-food-outline"
         />
         <RowView
-          title=" Special Offers and Promo"
-          onPress={() => {}}
+          title={t('special_offers_and_promo')}
+          onPress={handleSpecialOffersPress}
           leftIconName="gift-outline"
         />
         <RowView
-          title="Payment Method"
+          title={t('payment_method')}
           onPress={navigateToPaymentMethods}
           leftIconName="card-outline"
         />
@@ -136,22 +210,22 @@ const ProfileHomeScreen = ({
         />
 
         <RowView
-          title="Address"
+          title={t('address')}
           onPress={navigateToAddress}
           leftIconName="location-outline"
         />
         <RowView
-          title="Notification"
-          onPress={() => {}}
+          title={t('notification')}
+          onPress={handleNotificationPress}
           leftIconName="notifications-outline"
         />
         <RowView
-          title="Security"
-          onPress={() => {}}
+          title={t('security')}
+          onPress={handleSecurityPress}
           leftIconName="shield-checkmark-outline"
         />
         <RowView
-          title="Help"
+          title={t('help')}
           onPress={navigateToHelp}
           leftIconName="help-circle-outline"
         />
@@ -167,7 +241,7 @@ const ProfileHomeScreen = ({
             className="font-semibold text-base flex-1 text-center ml-3"
             style={{ color: colors.onSurface }}
           >
-            Dark Mode
+            {t('dark_mode')}
           </Text>
           <Switch
             value={isDarkMode}
@@ -178,14 +252,14 @@ const ProfileHomeScreen = ({
         </View>
 
         <RowView
-          title="Language Screen"
+          title={t('language_screen')}
           onPress={navigateToLanguage}
           leftIconName="language-outline"
         />
 
         {/* Logout Row */}
         <RowView
-          title="Logout"
+          title={t('logout')}
           onPress={showLogoutModal}
           leftIconName="log-out-outline"
         />

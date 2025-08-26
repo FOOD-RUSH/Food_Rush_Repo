@@ -14,7 +14,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme, Button } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { images } from '@/assets/images';
-import { OnboardingSlide as OnboardingInfo } from '@/src/types';
+import { useTranslation } from 'react-i18next';
+import { LanguageSelector } from './common/LanguageSelector';
+interface OnboardingInfo {
+  image: ImageSourcePropType;
+  title: string;
+  description: string;
+}
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('screen');
 
@@ -41,18 +47,19 @@ const userTypes: UserType[] = [
   {
     id: 'customer',
     image: images.customerImg,
-    title: 'Looking For Some Good Food',
+    title: 'looking_for_food',
   },
   {
     id: 'restaurant',
     image: images.restaurantImg,
-    title: 'Create A Restaurant',
+    title: 'create_a_restaurant',
   },
 ];
 
 // Welcome Screen Component
 const OnboardingWelcome = memo(({ onComplete }: { onComplete: () => void }) => {
   const { colors } = useTheme();
+  const { t } = useTranslation('translation');
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
 
@@ -126,7 +133,7 @@ const OnboardingWelcome = memo(({ onComplete }: { onComplete: () => void }) => {
                 color: colors.onSurface,
               }}
             >
-              Welcome to Food Rush!
+              {t('welcome_to_foodrush')}
             </Text>
             <Text
               style={{
@@ -137,8 +144,9 @@ const OnboardingWelcome = memo(({ onComplete }: { onComplete: () => void }) => {
                 color: colors.onSurface,
               }}
             >
-              Healthy meals delivered locally{'\n'}within a tap of a button.
+              {t('onboarding_welcome')}
             </Text>
+            <LanguageSelector showLabel={false} />
           </View>
         </View>
       </Animated.View>
@@ -162,6 +170,7 @@ const OnboardingSlide = memo(
     totalSlides: number;
   }) => {
     const { colors } = useTheme();
+    const { t } = useTranslation('translation');
     const isLastSlide = currentIndex === totalSlides - 1;
     const fadeAnim = useRef(new Animated.Value(0)).current;
 
@@ -264,7 +273,7 @@ const OnboardingSlide = memo(
                         color: 'white',
                       }}
                     >
-                      Skip
+                      {t('skip')}
                     </Text>
                   </TouchableOpacity>
 
@@ -290,7 +299,7 @@ const OnboardingSlide = memo(
                         color: 'white',
                       }}
                     >
-                      {isLastSlide ? 'Next' : 'Next'}
+                      {isLastSlide ? t('next') : t('next')}
                     </Text>
                     <Ionicons name="arrow-forward" size={16} color="white" />
                   </TouchableOpacity>
@@ -337,6 +346,7 @@ const UserTypeSelectionScreen = memo(
     selectedType: 'customer' | 'restaurant' | null;
   }) => {
     const { colors } = useTheme();
+    const { t } = useTranslation('translation');
     const scaleAnims = useRef<Record<string, Animated.Value>>({
       customer: new Animated.Value(1),
       restaurant: new Animated.Value(1),
@@ -412,7 +422,7 @@ const UserTypeSelectionScreen = memo(
                 color: colors.onBackground,
               }}
             >
-              What are your needs?
+              {t('what_are_your_needs')}
             </Text>
             <Text
               style={{
@@ -420,7 +430,7 @@ const UserTypeSelectionScreen = memo(
                 color: colors.onBackground,
               }}
             >
-              Choose your role to get started
+              {t('choose_your_role')}
             </Text>
           </View>
 
@@ -488,7 +498,7 @@ const UserTypeSelectionScreen = memo(
                       color: colors.onSurface,
                     }}
                   >
-                    {type.title}
+                    {/* {t(type.title)} */} {type.title}
                   </Text>
                 </TouchableOpacity>
               </Animated.View>
@@ -505,7 +515,7 @@ const UserTypeSelectionScreen = memo(
               style={getButtonStyle(!!selectedType)}
               labelStyle={getButtonLabelStyle(!!selectedType)}
             >
-              {selectedType ? 'Continue' : 'Select a user type'}
+              {selectedType ? t('continue') : t('select_user_type')}
             </Button>
 
             {selectedType && (
@@ -517,8 +527,8 @@ const UserTypeSelectionScreen = memo(
                   color: colors.onSurface,
                 }}
               >
-                You selected:{' '}
-                {selectedType === 'customer' ? 'Customer' : 'Restaurant'}
+                {t('you_selected')}
+                {selectedType === 'customer' ? t('customer') : t('restaurant')}
               </Text>
             )}
           </View>

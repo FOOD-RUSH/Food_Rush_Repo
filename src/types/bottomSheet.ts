@@ -1,5 +1,7 @@
+// src/types/bottomSheet.ts
+
 export interface BottomSheetConfig {
-  snapPoints?: (string | number)[];
+  snapPoints?: string[];
   enablePanDownToClose?: boolean;
   detached?: boolean;
   title?: string;

@@ -29,7 +29,14 @@ const SuccessModal = ({ isVisible, onClose, message }: SuccessModalProps) => {
             size={50}
             iconColor={colors.primary}
           />
-          <Text style={{ fontSize: 18, marginTop: 10, textAlign: 'center', color: colors.onSurface }}>
+          <Text
+            style={{
+              fontSize: 18,
+              marginTop: 10,
+              textAlign: 'center',
+              color: colors.onSurface,
+            }}
+          >
             {message}
           </Text>
         </Card.Content>

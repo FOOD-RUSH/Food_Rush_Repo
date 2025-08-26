@@ -69,7 +69,7 @@ export const authApi = {
   },
 
   verifyOTP: (data: OTPCredentials) => {
-    return apiClient.post<LoginResponse>('/auth/verify-otp', { ...data });
+    return apiClient.post<LoginResponseData>('/auth/verify-otp', { ...data });
   },
 
   logout: () => {

@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { TouchableOpacity, View } from 'react-native';
 import { useTheme, Card, Text } from 'react-native-paper';
+import { useTranslation } from 'react-i18next';
 
 interface RestaurantCardProps {
   deliveryFee: number;
@@ -32,10 +33,14 @@ export const RestaurantCard = ({
   const navigation =
     useNavigation<CustomerHomeStackScreenProps<'HomeScreen'>['navigation']>();
   const { colors } = useTheme();
+  const { t } = useTranslation('translation');
+
   return (
     <TouchableOpacity
       onPress={() => {
-        navigation.navigate('RestaurantDetails', { restaurantId: 'paulo' });
+        navigation.navigate('RestaurantDetails', {
+          restaurantId: restaurantID,
+        });
       }}
       activeOpacity={0.9}
     >
@@ -204,7 +209,8 @@ export const RestaurantCard = ({
                 </Text>
               </View>
               <Text style={{ fontSize: 12, color: colors.onSurface }}>
-                {deliveryFee}FCFA Delivery Fee
+                {deliveryFee}
+                {t('delivery_fee_unit')}
               </Text>
             </View>
 

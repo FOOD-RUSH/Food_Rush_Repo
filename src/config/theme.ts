@@ -79,7 +79,15 @@ export const getThemeColors = (isDark: boolean) => {
   return isDark ? darkTheme.colors : lightTheme.colors;
 };
 
-export const isSystemDarkMode = () => {
+// Custom hook to check if system is in dark mode
+export const useIsSystemDarkMode = () => {
   const systemColorScheme = useColorScheme();
   return systemColorScheme === 'dark';
+};
+
+// Utility function that doesn't use hooks (for non-component usage)
+export const getSystemColorScheme = () => {
+  // This should be used only when you can't use the hook version
+  // For most cases, use useIsSystemDarkMode instead
+  return 'light'; // Default fallback
 };

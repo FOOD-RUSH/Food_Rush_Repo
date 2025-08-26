@@ -15,7 +15,11 @@ export function navigate<T extends keyof RootStackParamList>(
   params?: RootStackParamList[T],
 ) {
   if (navigationRef.isReady()) {
-    navigationRef.navigate(name, params);
+    if (params) {
+      navigationRef.navigate(name, params);
+    } else {
+      navigationRef.navigate(name as any);
+    }
   }
 }
 
@@ -58,7 +62,11 @@ export function navigateFromService<T extends keyof RootStackParamList>(
   params?: RootStackParamList[T],
 ) {
   if (navigationRef.isReady()) {
-    navigationRef.navigate(name, params);
+    if (params) {
+      navigationRef.navigate(name, params);
+    } else {
+      navigationRef.navigate(name as any);
+    }
   } else {
     console.warn(
       'Navigation not ready. This should only be called from services/utils.',
@@ -102,7 +110,11 @@ export const ServiceNavigation = {
   },
 
   showCart: (fromScreen?: string) => {
-    navigateFromService('Cart', { fromScreen });
+    if (fromScreen) {
+      navigateFromService('Cart', { fromScreen });
+    } else {
+      navigateFromService('Cart');
+    }
   },
 
   logout: () => {

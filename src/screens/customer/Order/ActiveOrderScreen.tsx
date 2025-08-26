@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { View, Text, Image, FlatList } from 'react-native';
 import React from 'react';
 import OrderItemCard, {
@@ -40,6 +41,7 @@ const orderItems: OrderItemCardProps[] = [
 ];
 
 const ActiveOrderScreen = () => {
+  const { t } = useTranslation('translation');
   const renderEmptyComponent = () => (
     <View className="flex-1 items-center justify-center px-8 py-12">
       <Image
@@ -47,19 +49,18 @@ const ActiveOrderScreen = () => {
         resizeMode="contain"
       />
       <Text className="text-gray-500 text-lg text-center">
-        No active orders found.
+        {t('no_active_orders_found')}
       </Text>
       <Text className="text-gray-400 text-sm text-center mt-2">
-        Your active orders will appear here
+        {t('your_active_orders_will_appear_here')}
       </Text>
     </View>
   );
 
   return (
     <CommonView>
-      <View className="flex-1">
+      <View className="flex-1 h-full">
         <FlatList
-          className="pt-10"
           data={orderItems}
           renderItem={({ item }) => (
             <OrderItemCard

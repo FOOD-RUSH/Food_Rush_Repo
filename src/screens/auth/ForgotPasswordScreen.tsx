@@ -15,6 +15,7 @@ import CommonView from '@/src/components/common/CommonView';
 import { useRequestPasswordReset } from '@/src/hooks/customer/useAuthhooks';
 import Toast from 'react-native-toast-message';
 import { AuthStackScreenProps } from '@/src/navigation/types';
+import ErrorDisplay from '@/src/components/auth/ErrorDisplay';
 
 // Validation schema
 const schema = yup.object({
@@ -178,6 +179,9 @@ const ForgotPasswordScreen = ({
           )}
         />
 
+        {/* Error Display */}
+        <ErrorDisplay error={error?.message || null} visible={!!error} />
+
         {/* Continue Button */}
         <Button
           mode="contained"
@@ -192,11 +196,6 @@ const ForgotPasswordScreen = ({
         >
           Continue
         </Button>
-        {error && (
-          <Text className="text-red-500 text-2xl font-semibold">
-            {error.message}
-          </Text>
-        )}
       </View>
     </CommonView>
   );

@@ -6,24 +6,33 @@ import { useAuthStore } from '@/src/stores/customerStores/AuthStore';
 import CommonView from '@/src/components/common/CommonView';
 import Toast from 'react-native-toast-message';
 import { useNetwork } from '@/src/contexts/NetworkContext';
-import { useLanguage } from '@/src/contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import { useVerifyOTP, useResendOTP } from '@/src/hooks/customer/useAuthhooks';
+import ErrorDisplay from '@/src/components/auth/ErrorDisplay';
 
 const OTPScreen: React.FC<AuthStackScreenProps<'OTPVerification'>> = ({
   navigation,
   route,
 }) => {
   const { colors } = useTheme();
-  const { t } = useLanguage();
+  const { t } = useTranslation('auth');
   const { isConnected, isInternetReachable } = useNetwork();
 
   // getting all data from route
   const data = route.params;
 
   // verify otp function
-  const { mutate: verifyOTPMutation, isPending: isVerifying } = useVerifyOTP();
-  const { mutate: resendOTPMutation, isPending: isResending } = useResendOTP();
-  const { clearError, setError } = useAuthStore();
+  const {
+    mutate: verifyOTPMutation,
+    isPending: isVerifying,
+    error: verifyError,
+  } = useVerifyOTP();
+  const {
+    mutate: resendOTPMutation,
+    isPending: isResending,
+    error: resendError,
+  } = useResendOTP();
+  const { clearError, setError, error: authError } = useAuthStore();
 
   const [otp, setOtp] = useState(['', '', '', '']);
   const [timer, setTimer] = useState(30);
@@ -104,13 +113,14 @@ const OTPScreen: React.FC<AuthStackScreenProps<'OTPVerification'>> = ({
           userId: data.userId,
         },
         {
-          onSuccess: () => {
+          onSuccess: (response) => {
             Toast.show({
               type: 'success',
               text1: t('success'),
               text2: 'OTP verified successfully!',
               position: 'top',
             });
+            console.log(response.data);
 
             // Navigate to main app - auth state is already updated in the hook
             navigation.navigate('CustomerApp', {
@@ -137,6 +147,9 @@ const OTPScreen: React.FC<AuthStackScreenProps<'OTPVerification'>> = ({
         },
       );
     } catch (error: any) {
+      console.log(
+        `data: \n otp: ${otpString} type: ${'email'}, userId: ${data.userId}`,
+      );
       const errorMessage =
         error?.message || 'OTP verification failed. Please try again.';
       setError(errorMessage);
@@ -186,7 +199,7 @@ const OTPScreen: React.FC<AuthStackScreenProps<'OTPVerification'>> = ({
           Toast.show({
             type: 'success',
             text1: t('success'),
-            text2: 'OTP resent successfully',
+            text2: t('otp_resent_successfully'),
             position: 'bottom',
           });
         },
@@ -318,6 +331,14 @@ const OTPScreen: React.FC<AuthStackScreenProps<'OTPVerification'>> = ({
           </Text>
         </View>
 
+        {/* Error Display */}
+        <ErrorDisplay
+          error={verifyError?.message || resendError?.message || authError}
+          visible={
+            !!(verifyError?.message || resendError?.message || authError)
+          }
+        />
+
         {/* Verify Button */}
         <Button
           mode="contained"
@@ -330,7 +351,7 @@ const OTPScreen: React.FC<AuthStackScreenProps<'OTPVerification'>> = ({
           style={{ borderRadius: 25, marginBottom: 20 }}
           labelStyle={{ fontSize: 16, fontWeight: '600' }}
         >
-          {isVerifying ? 'Verifying...' : t('verify')}
+          {isVerifying ? t('verifying') : t('verify')}
         </Button>
 
         {/* Resend Button */}
@@ -352,7 +373,7 @@ const OTPScreen: React.FC<AuthStackScreenProps<'OTPVerification'>> = ({
                   : colors.outline,
             }}
           >
-            {isResending ? 'Resending...' : t('resend_code')}
+            {isResending ? t('resending') : t('resend_code')}
           </Text>
         </TouchableOpacity>
 

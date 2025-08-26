@@ -4,10 +4,9 @@
 export * from './apiClient';
 export * from './authApi';
 export * from './restaurant.service';
-export * from './address.service';
-export * from './geolocation.service';
 export * from './payment.service';
 export * from './notification.service';
+export * from './orders.service';
 
-// Export order service separately since it's not in the customer folder
-export { OrderApi } from '../orders.service';
+// Location service is now available at @/src/location
+// export { LocationService } from '@/src/location';

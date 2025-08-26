@@ -5,34 +5,46 @@ import { images } from '@/assets/images';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { CustomerHomeStackScreenProps } from '@/src/navigation/types';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 
 interface ClassicFoodCardProps {
   id: string;
+  restaurantId?: string;
   foodName?: string;
   foodPrice?: number;
   restaurantName?: string;
   distance?: number;
   rating?: number;
   status?: string;
+  imageUrl?: string;
+  deliveryStatus?: string;
 }
 
 const ClassicFoodCard = ({
   id,
+  restaurantId = '1',
   foodName = 'Egg & Pasta',
   foodPrice = 650,
   restaurantName = 'Resto Chez Dialo',
   distance = 190,
   rating = 4.9,
   status = 'PROMO',
+  imageUrl,
+  deliveryStatus = 'Available',
 }: ClassicFoodCardProps) => {
   const navigation =
     useNavigation<CustomerHomeStackScreenProps<'HomeScreen'>['navigation']>();
   const { colors } = useTheme();
+  const { t } = useTranslation('translation');
+
   return (
     <TouchableOpacity
       activeOpacity={0.8}
       onPress={() => {
-        navigation.navigate('FoodDetails', { foodId: id, restaurantId: '1' });
+        navigation.navigate('FoodDetails', {
+          foodId: id,
+          restaurantId: restaurantId,
+        });
       }}
     >
       <Card
@@ -56,7 +68,7 @@ const ClassicFoodCard = ({
           {/* Image with heart icon overlay */}
           <View className="relative mb-3">
             <Card.Cover
-              source={images.onboarding2}
+              source={imageUrl ? { uri: imageUrl } : images.onboarding2}
               style={{
                 height: 150,
                 width: 150,
@@ -131,7 +143,8 @@ const ClassicFoodCard = ({
                 className={`text-sm ml-1 `}
                 style={{ color: colors.onSurface }}
               >
-                {distance}m
+                {distance}
+                {t('meter_unit')}
               </Text>
             </View>
           </View>
@@ -142,7 +155,8 @@ const ClassicFoodCard = ({
               className="font-bold text-base"
               style={{ color: colors.primary }}
             >
-              {foodPrice} FCFA
+              {foodPrice}
+              {t('fcfa_suffix')}
             </Text>
             <View className="flex-row items-center">
               <MaterialIcons
@@ -154,7 +168,7 @@ const ClassicFoodCard = ({
                 className={`ml-1 text-xs `}
                 style={{ color: colors.onSurface }}
               >
-                SOLD OUT
+                {deliveryStatus}
               </Text>
             </View>
           </View>

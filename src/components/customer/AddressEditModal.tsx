@@ -9,12 +9,18 @@ import {
 import { useTheme } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import ReusableModal from './ReusableModal';
-import { useLanguage } from '@/src/contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
+import { useLocation } from '@/src/location';
 
 export interface AddressData {
   id?: string;
   label: string;
   fullAddress: string;
+  latitude?: number;
+  longitude?: number;
+  city?: string;
+  region?: string;
+  place?: string;
   isDefault?: boolean;
 }
 
@@ -34,10 +40,21 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
   mode,
 }) => {
   const { colors } = useTheme();
-  const { t } = useLanguage();
+  const { t } = useTranslation('translation');
   const [label, setLabel] = useState('');
   const [fullAddress, setFullAddress] = useState('');
   const [isDefault, setIsDefault] = useState(false);
+
+  // Get current location data
+  const { location } = useLocation({
+    showPermissionAlert: false,
+    fallbackToYaounde: true,
+  });
+
+  const currentFullAddress =
+    location?.city && location.region
+      ? `${location.city}, ${location.region}`
+      : 'Current Location';
 
   useEffect(() => {
     if (initialData) {
@@ -46,10 +63,13 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
       setIsDefault(initialData.isDefault || false);
     } else {
       setLabel('');
-      setFullAddress('');
+      // Auto-populate with current location if available
+      if (location?.latitude && location.longitude) {
+        setFullAddress(currentFullAddress);
+      }
       setIsDefault(false);
     }
-  }, [initialData, visible]);
+  }, [initialData, visible, currentFullAddress, location]);
 
   const handleSave = () => {
     if (label.trim() && fullAddress.trim()) {
@@ -57,6 +77,11 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
         id: initialData?.id,
         label: label.trim(),
         fullAddress: fullAddress.trim(),
+        latitude: location?.latitude || undefined,
+        longitude: location?.longitude || undefined,
+        city: location?.city || undefined,
+        region: location?.region || undefined,
+        place: undefined,
         isDefault,
       };
       onSave(addressData);
@@ -83,7 +108,7 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
           <TextInput
             value={label}
             onChangeText={setLabel}
-            placeholder={t('address_label_placeholder')}
+            placeholder={t('enter_new_address')}
             placeholderTextColor={colors.onSurfaceVariant}
             className="px-4 py-3 rounded-xl text-base"
             style={{
@@ -95,16 +120,31 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
 
         {/* Full Address */}
         <View className="mb-4">
-          <Text
-            style={{ color: colors.onSurface }}
-            className="text-base font-medium mb-2"
-          >
-            {t('full_address')}
-          </Text>
+          <View className="flex-row items-center justify-between mb-2">
+            <Text
+              style={{ color: colors.onSurface }}
+              className="text-base font-medium"
+            >
+              {t('full_address')}
+            </Text>
+            {location?.latitude && location.longitude && (
+              <TouchableOpacity
+                onPress={() => setFullAddress(currentFullAddress)}
+                className="flex-row items-center px-3 py-1 rounded-full"
+                style={{ backgroundColor: '#007aff' }}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="location" size={14} color="white" />
+                <Text className="text-white text-xs font-medium ml-1">
+                  {t('use_current')}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
           <TextInput
             value={fullAddress}
             onChangeText={setFullAddress}
-            placeholder={t('address_placeholder')}
+            placeholder={t('enter_address')}
             placeholderTextColor={colors.onSurfaceVariant}
             multiline={true}
             numberOfLines={3}
@@ -127,7 +167,7 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
             style={{ color: colors.onSurface }}
             className="text-base font-medium"
           >
-            {t('set_default_address')}
+            {t('set_to_default')}
           </Text>
           <View
             className="w-6 h-6 rounded-full border-2 items-center justify-center"
@@ -177,7 +217,9 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
                     : colors.onSurfaceVariant,
               }}
             >
-              {mode === 'add' ? t('add_address') : t('update')}
+              {mode === 'add'
+                ? t('add_address_button')
+                : t('update_address_button')}
             </Text>
           </TouchableOpacity>
         </View>

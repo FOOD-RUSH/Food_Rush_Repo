@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Platform } from 'react-native';
 import { useTheme } from 'react-native-paper';
+import { useTranslation } from 'react-i18next';
 
 import {
   RestaurantAnalyticsStackParamList,
@@ -36,6 +37,7 @@ const RestaurantProfileStack =
 // Stack Screen Components
 function RestaurantOrdersStackScreen() {
   const { colors } = useTheme();
+  const { t } = useTranslation('translation');
   return (
     <RestaurantOrdersStack.Navigator
       screenOptions={{
@@ -51,19 +53,19 @@ function RestaurantOrdersStackScreen() {
       <RestaurantOrdersStack.Screen
         name="OrdersScreen"
         component={OrderScreen}
-        options={{ title: 'Orders' }}
+        options={{ title: t('orders') }}
       />
       <RestaurantOrdersStack.Screen
         name="OrderDetails"
         component={OrderDetailsScreen}
         options={({ route }) => ({
-          title: `Order #${route.params.orderId.slice(-6)}`, // Show last 6 chars of order ID
+          title: `${t('order')} #${route.params.orderId.slice(-6)}`, // Show last 6 chars of order ID
         })}
       />
       <RestaurantOrdersStack.Screen
         name="OrderHistory"
         component={OrderHistoryScreen}
-        options={{ title: 'Order History' }}
+        options={{ title: t('order_history') }}
       />
       {/* 
       <RestaurantOrdersStack.Screen
@@ -78,6 +80,7 @@ function RestaurantOrdersStackScreen() {
 
 function RestaurantMenuStackScreen() {
   const { colors } = useTheme();
+  const { t } = useTranslation('translation');
   return (
     <RestaurantMenuStack.Navigator
       screenOptions={{
@@ -93,7 +96,7 @@ function RestaurantMenuStackScreen() {
       <RestaurantMenuStack.Screen
         name="MenuScreen"
         component={MenuScreen}
-        options={{ title: 'Menu' }}
+        options={{ title: t('menu') }}
       />
       {/* Add other menu screens as they're implemented */}
       {/*
@@ -110,6 +113,7 @@ function RestaurantMenuStackScreen() {
 
 function RestaurantAnalyticsStackScreen() {
   const { colors } = useTheme();
+  const { t } = useTranslation('translation');
   return (
     <RestaurantAnalyticsStack.Navigator
       screenOptions={{
@@ -125,7 +129,7 @@ function RestaurantAnalyticsStackScreen() {
       <RestaurantAnalyticsStack.Screen
         name="AnalyticsScreen"
         component={AnalyticsScreen}
-        options={{ title: 'Analytics' }}
+        options={{ title: t('analytics') }}
       />
       {/* Add other analytics screens as they're implemented */}
       {/*
@@ -140,6 +144,7 @@ function RestaurantAnalyticsStackScreen() {
 
 function RestaurantProfileStackScreen() {
   const { colors } = useTheme();
+  const { t } = useTranslation('translation');
   return (
     <RestaurantProfileStack.Navigator
       screenOptions={{
@@ -155,7 +160,7 @@ function RestaurantProfileStackScreen() {
       <RestaurantProfileStack.Screen
         name="ProfileScreen"
         component={ProfileScreen}
-        options={{ title: 'Profile' }}
+        options={{ title: t('profile') }}
       />
       {/* Add other profile screens as they're implemented */}
       {/*
@@ -175,6 +180,7 @@ function RestaurantProfileStackScreen() {
 export default function RestaurantNavigator() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { t } = useTranslation('translation');
 
   return (
     <RestaurantTab.Navigator
@@ -229,7 +235,7 @@ export default function RestaurantNavigator() {
         name="Orders"
         component={RestaurantOrdersStackScreen}
         options={{
-          tabBarLabel: 'Orders',
+          tabBarLabel: t('orders'),
         }}
       />
 
@@ -237,7 +243,7 @@ export default function RestaurantNavigator() {
         name="Menu"
         component={RestaurantMenuStackScreen}
         options={{
-          tabBarLabel: 'Menu',
+          tabBarLabel: t('menu'),
         }}
       />
 
@@ -245,7 +251,7 @@ export default function RestaurantNavigator() {
         name="Analytics"
         component={RestaurantAnalyticsStackScreen}
         options={{
-          tabBarLabel: 'Analytics',
+          tabBarLabel: t('analytics'),
         }}
       />
 
@@ -253,7 +259,7 @@ export default function RestaurantNavigator() {
         name="Profile"
         component={RestaurantProfileStackScreen}
         options={{
-          tabBarLabel: 'Profile',
+          tabBarLabel: t('profile'),
         }}
       />
     </RestaurantTab.Navigator>
