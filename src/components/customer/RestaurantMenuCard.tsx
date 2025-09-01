@@ -1,6 +1,7 @@
 import React from 'react';
 import { Text, View } from 'react-native';
 import { Card, useTheme } from 'react-native-paper';
+import { useTranslation } from 'react-i18next';
 
 const RestaurantMenuCard = ({
   image,
@@ -14,6 +15,7 @@ const RestaurantMenuCard = ({
   foodCategory: string;
 }) => {
   const { colors } = useTheme();
+  const { t } = useTranslation('translation');
 
   return (
     <Card
@@ -45,7 +47,8 @@ const RestaurantMenuCard = ({
             className="justify-center text-center items-center"
             style={{ color: colors.primary }}
           >
-            {foodPrice} FCFA
+            {foodPrice}
+            {t('fcfa_suffix')}
           </Text>
         </View>
       </View>

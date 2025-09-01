@@ -39,6 +39,8 @@ export type RootStackParamList = {
   About: undefined;
   FavoriteRestaurantScreen: undefined;
   LanguageScreen: undefined;
+  NearbyRestaurants: undefined;
+  OrderReceipt: { orderId: string };
 };
 
 // Auth Stack (unchanged)
@@ -66,6 +68,7 @@ export type CustomerTabParamList = {
 // Customer Home Stack - Only screens that should show tabs
 export type CustomerHomeStackParamList = {
   HomeScreen: undefined;
+ 
   // Removed: Cart, FoodDetails, RestaurantDetails, SearchScreen, etc.
   // These are now in RootStack
 };

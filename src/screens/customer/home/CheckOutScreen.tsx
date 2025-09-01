@@ -17,17 +17,23 @@ import CheckOutItem from '@/src/components/customer/CheckOutItem';
 import { useCartStore, CartItem } from '@/src/stores/customerStores/cartStore';
 import CheckoutContent from '@/src/components/common/BottomSheet/CheckoutContent';
 import { useBottomSheet } from '@/src/components/common/BottomSheet/BottomSheetContext';
+import { useSelectedPaymentMethod } from '@/src/stores/customerStores/paymentStore';
+import { useDefaultAddress } from '@/src/stores/customerStores/addressStore';
+
+import { useTranslation } from 'react-i18next';
 
 const CheckOutScreen = ({
   navigation,
   route,
 }: RootStackScreenProps<'Checkout'>) => {
   const { colors } = useTheme();
-
+  const { t } = useTranslation('translation');
   // Subscribe to specific store slices
   const cartItems = useCartStore((state) => state.items);
   const totalPrice = useCartStore((state) => state.totalprice);
-  const restaurantID = useCartStore((state) => state.restaurantID);
+  const clearCart = useCartStore((state) => state.clearCart);
+  const selectedPaymentMethod = useSelectedPaymentMethod();
+  const defaultAddress = useDefaultAddress();
 
   // Constants for fees
   const DELIVERY_FEE = 2300;
@@ -78,46 +84,57 @@ const CheckOutScreen = ({
   // Handle address selection
   const handleAddressPress = useCallback(() => {
     // Navigate to address selection screen
-    Alert.alert('Info', 'Address selection coming soon!');
-  }, []);
+    navigation.navigate('AddressScreen');
+  }, [navigation]);
 
   // Handle payment method selection
   const handlePaymentPress = useCallback(() => {
-    Alert.alert('Info', 'Payment method selection coming soon!');
-  }, []);
+    navigation.navigate('PaymentMethods');
+  }, [navigation]);
 
   // Handle promo code
   const handlePromoPress = useCallback(() => {
-    Alert.alert('Info', 'Promo code functionality coming soon!');
-  }, []);
+    Alert.alert(t('info'), t('promo_code_functionality_coming_soon'));
+  }, [t]);
 
-  // Handle place order
+  // Handle place order confirmation
+  const confirmOrder = useCallback(() => {
+    try {
+      // Simulate order processing
+      Alert.alert(t('success'), t('order_placed_successfully'), [
+        {
+          text: 'OK',
+          onPress: () => {
+            clearCart(); // Clear the cart after successful order
+            navigation.navigate('CustomerApp', {
+              screen: 'Home',
+              params: { screen: 'HomeScreen' },
+            }); // Navigate back to home
+          },
+        },
+      ]);
+    } catch (error) {
+      Alert.alert(t('error'), t('failed_to_place_order'));
+      console.error('Order placement error:', error);
+    }
+  }, [clearCart, navigation, t]);
+
+  // Handle place order - show bottom sheet
   const handlePlaceOrder = useCallback(() => {
     if (cartItems.length === 0) {
-      Alert.alert('Error', 'Your cart is empty');
+      Alert.alert(t('error'), t('your_cart_is_empty'));
       return;
     }
-    present(
-      <CheckoutContent
-        onConfirm={confirmOrder}
-        onDismiss={dismiss}
-        totalAmount={calculations.finalTotal}
-      />,
-      {
-        snapPoints: ['50%'],
-        enablePanDownToClose: true,
-        title: 'Proceed to payement',
-        showHandle: true,
-      },
-    );
-  }, [calculations.finalTotal, cartItems.length, dismiss, present]);
 
-  const confirmOrder = () => {
-    Alert.alert('Success', 'Order placed successfully!');
-    // Clear cart and navigate
-    // useCartStore.getState().clearCart();
-    // navigation.navigate('OrderTracking');
-  };
+    // Present the enhanced checkout content with cart management
+    present(<CheckoutContent onConfirm={confirmOrder} onDismiss={dismiss} />, {
+      snapPoints: ['50%', '95%'], // Allow for more content
+      enablePanDownToClose: true,
+      title: t('confirm_your_order'),
+      showHandle: true,
+      backdropOpacity: 0.5,
+    });
+  }, [cartItems.length, present, confirmOrder, dismiss, t]);
 
   // Optimized render item
   const renderCheckoutItem: ListRenderItem<CartItem> = useCallback(
@@ -147,7 +164,6 @@ const CheckOutScreen = ({
       shadowOpacity: 0.1,
       shadowRadius: 3,
       elevation: 2,
-      boxShadow: '1px 0px 10px rgba(0, 0, 0, 0.15)',
     }),
     [colors],
   );
@@ -158,13 +174,41 @@ const CheckOutScreen = ({
     [],
   );
 
+  // Handle empty cart state
   if (cartItems.length === 0) {
     return (
       <CommonView>
-        <View className="flex-1 items-center justify-center">
-          <Text className="text-lg" style={{ color: colors.onSurface }}>
-            No items in cart
+        <View className="flex-1 items-center justify-center px-6">
+          <MaterialIcons
+            name="shopping-cart"
+            size={80}
+            color={colors.onSurfaceVariant}
+          />
+          <Text
+            className="text-xl font-semibold mt-4 mb-2 text-center"
+            style={{ color: colors.onSurface }}
+          >
+            {t('your_cart_is_empty')}
           </Text>
+          <Text
+            className="text-base text-center mb-8"
+            style={{ color: colors.onSurfaceVariant }}
+          >
+            {t('add_some_delicious_items_to_get_started')}
+          </Text>
+          <TouchableOpacity
+            className="bg-blue-500 px-8 py-3 rounded-full"
+            style={{ backgroundColor: colors.primary }}
+            onPress={() => navigation.goBack()}
+            activeOpacity={0.8}
+          >
+            <Text
+              className="text-base font-semibold"
+              style={{ color: colors.onPrimary }}
+            >
+              {t('start_shopping')}
+            </Text>
+          </TouchableOpacity>
         </View>
       </CommonView>
     );
@@ -173,7 +217,7 @@ const CheckOutScreen = ({
   return (
     <CommonView>
       <ScrollView
-        className="flex-1 px-1 pt-2"
+        className="flex-1 px-1 py-3"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
       >
@@ -184,7 +228,7 @@ const CheckOutScreen = ({
               className="font-semibold text-lg mb-3"
               style={{ color: colors.onSurface }}
             >
-              Delivery Address
+              {t('delivery_address')}
             </Text>
 
             <View
@@ -206,26 +250,28 @@ const CheckOutScreen = ({
                       className="text-base font-semibold mr-2"
                       style={{ color: colors.onSurface }}
                     >
-                      Home
+                      {defaultAddress?.label || t('home')}
                     </Text>
-                    <View
-                      className="bg-blue-100 rounded-md px-2 py-1"
-                      style={{ backgroundColor: colors.primaryContainer }}
-                    >
-                      <Text
-                        className="text-xs font-medium"
-                        style={{ color: colors.primary }}
+                    {defaultAddress?.isDefault && (
+                      <View
+                        className="bg-blue-100 rounded-md px-2 py-1"
+                        style={{ backgroundColor: colors.primaryContainer }}
                       >
-                        Default
-                      </Text>
-                    </View>
+                        <Text
+                          className="text-xs font-medium"
+                          style={{ color: colors.primary }}
+                        >
+                          {t('default')}
+                        </Text>
+                      </View>
+                    )}
                   </View>
                   <Text
                     className="text-sm"
                     style={{ color: colors.onSurfaceVariant }}
                     numberOfLines={2}
                   >
-                    Time Square NYC, Manhattan
+                    {defaultAddress?.fullAddress || t('time_square_nyc')}
                   </Text>
                 </View>
               </View>
@@ -247,7 +293,7 @@ const CheckOutScreen = ({
                 className="font-semibold text-lg"
                 style={{ color: colors.onSurface }}
               >
-                Order Summary ({totalItems} items)
+                {t('order_summary')} ({totalItems} {t('items')})
               </Text>
 
               <TouchableOpacity
@@ -260,7 +306,7 @@ const CheckOutScreen = ({
                   className="font-semibold text-xs"
                   style={{ color: colors.primary }}
                 >
-                  Add Items
+                  {t('add_items')}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -298,7 +344,7 @@ const CheckOutScreen = ({
                   className="text-base ml-3 font-medium"
                   style={{ color: colors.onSurface }}
                 >
-                  Payment Method
+                  {t('payment_method')}
                 </Text>
               </View>
 
@@ -307,7 +353,9 @@ const CheckOutScreen = ({
                   className="text-sm mr-2"
                   style={{ color: colors.onSurfaceVariant }}
                 >
-                  E-Wallet
+                  {selectedPaymentMethod === 'mtn_mobile_money' ? 'MTN Mobile Money' : 
+                   selectedPaymentMethod === 'orange_money' ? 'Orange Mobile Money' : 
+                   t('e_wallet')}
                 </Text>
                 <MaterialIcons
                   name="arrow-forward-ios"
@@ -337,7 +385,7 @@ const CheckOutScreen = ({
                   className="text-base ml-3 font-medium"
                   style={{ color: colors.onSurface }}
                 >
-                  Promo Code
+                  {t('promo_code')}
                 </Text>
               </View>
 
@@ -346,7 +394,7 @@ const CheckOutScreen = ({
                   className="text-sm mr-2"
                   style={{ color: colors.onSurfaceVariant }}
                 >
-                  Add Code
+                  {t('add_code')}
                 </Text>
                 <MaterialIcons
                   name="arrow-forward-ios"
@@ -365,7 +413,7 @@ const CheckOutScreen = ({
               className="font-semibold text-lg mb-3"
               style={{ color: colors.onSurface }}
             >
-              Order Total
+              {t('order_total')}
             </Text>
 
             <View
@@ -379,13 +427,13 @@ const CheckOutScreen = ({
                   className="text-base"
                   style={{ color: colors.onSurfaceVariant }}
                 >
-                  Subtotal:
+                  {t('subtotal')}:
                 </Text>
                 <Text
                   className="font-semibold text-base"
                   style={{ color: colors.onSurface }}
                 >
-                  {calculations.subtotal} FCFA
+                  {calculations.subtotal} {t('fcfa_unit')}
                 </Text>
               </View>
 
@@ -394,13 +442,13 @@ const CheckOutScreen = ({
                   className="text-base"
                   style={{ color: colors.onSurfaceVariant }}
                 >
-                  Delivery Fee:
+                  {t('delivery_fee')}:
                 </Text>
                 <Text
                   className="font-semibold text-base"
                   style={{ color: colors.onSurface }}
                 >
-                  {calculations.deliveryFee} FCFA
+                  {calculations.deliveryFee} {t('fcfa_unit')}
                 </Text>
               </View>
 
@@ -408,12 +456,14 @@ const CheckOutScreen = ({
                 <>
                   <Seperator />
                   <View className="flex-row justify-between items-center">
-                    <Text style={{ color: colors.primary }}>Discount:</Text>
+                    <Text style={{ color: colors.primary }}>
+                      {t('discount')}:
+                    </Text>
                     <Text
                       className="font-semibold"
                       style={{ color: colors.primary }}
                     >
-                      -{calculations.discount} FCFA
+                      -{calculations.discount} {t('fcfa_unit')}
                     </Text>
                   </View>
                 </>
@@ -429,13 +479,13 @@ const CheckOutScreen = ({
                   className="text-lg font-bold"
                   style={{ color: colors.onSurface }}
                 >
-                  Total:
+                  {t('total')}:
                 </Text>
                 <Text
                   className="font-bold text-lg"
                   style={{ color: colors.primary }}
                 >
-                  {calculations.finalTotal} FCFA
+                  {calculations.finalTotal} {t('fcfa_unit')}
                 </Text>
               </View>
             </View>
@@ -463,7 +513,7 @@ const CheckOutScreen = ({
             className="text-lg font-bold text-center"
             style={{ color: colors.onPrimary }}
           >
-            Place Order - {calculations.finalTotal} FCFA
+            {t('review_order')} - {calculations.finalTotal} {t('fcfa_unit')}
           </Text>
         </TouchableOpacity>
       </View>

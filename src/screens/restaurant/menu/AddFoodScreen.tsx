@@ -112,7 +112,3 @@ const AddFoodScreen = () => {
         </Animated.View>
       </ScrollView>
     </CommonView>
-  );
-};
-
-export default AddFoodScreen;

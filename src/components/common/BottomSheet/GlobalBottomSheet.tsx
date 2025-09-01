@@ -159,14 +159,14 @@ const GlobalBottomSheet = forwardRef<
           flex: 1,
           paddingHorizontal: 20,
           paddingTop: title ? 8 : 16,
-          paddingBottom: 16,
+          paddingBottom: 16 + insets.bottom,
         }}
       >
         {title && (
           <View
             style={{
               alignItems: 'center',
-              marginBottom: 16,
+              marginBottom: 10,
               paddingBottom: 12,
               borderBottomWidth: 1,
               borderBottomColor: colors.outline + '15',

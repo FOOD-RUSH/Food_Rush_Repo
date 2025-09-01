@@ -1,660 +1,507 @@
+import React, { useState, useCallback, useMemo } from 'react';
 import {
-  TouchableOpacity,
-  Text,
   View,
-  KeyboardAvoidingView,
-  Keyboard,
-  Platform,
-  Modal,
-  Alert,
+  Text,
   FlatList,
+  TouchableOpacity,
+  RefreshControl,
+  StyleSheet,
 } from 'react-native';
-import React, { useState, useCallback, useMemo, ReactNode, memo } from 'react';
-import {
-  TextInput,
-  Checkbox,
-  RadioButton,
-  Button,
-  useTheme,
-} from 'react-native-paper';
-import {
-  MaterialIcons,
-  Feather,
-  MaterialCommunityIcons,
-} from '@expo/vector-icons';
-import CommonView from '@/src/components/common/CommonView';
-import { goBack } from '@/src/navigation/navigationHelpers';
+import { useTheme, ActivityIndicator } from 'react-native-paper';
+import { MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ScrollView } from 'react-native-gesture-handler';
-import { lightTheme } from '@/src/config/theme';
-import { RootStackScreenProps } from '@/src/navigation/types';
-import { useGetAllMenu } from '@/src/hooks/customer';
-import LoadingScreen from '@/src/components/common/LoadingScreen';
+import { useTranslation } from 'react-i18next';
+
+import CommonView from '@/src/components/common/CommonView';
 import FoodItemCard from '@/src/components/customer/FoodItemCard';
+import SearchInput from '@/src/components/customer/SearchInput';
+import FilterModal, { GeneralFilterOptions } from '@/src/components/customer/FilterModal';
+import { RootStackScreenProps } from '@/src/navigation/types';
+import { FoodProps } from '@/src/types';
+import { useGetAllMenu } from '@/src/hooks/customer';
+import ErrorDisplay from '@/src/components/common/ErrorDisplay';
+import SearchResultSkeleton from '@/src/components/customer/SearchResultSkeleton';
 
-// Static data moved outside component to prevent recreation on every render
-const CUISINE_TYPES = [
-  { id: 'african', name: 'African', icon: '🍲' },
-  { id: 'cameroon', name: 'Cameroon Traditional', icon: '🇨🇲' },
-  { id: 'fastfood', name: 'Fast Food', icon: '🍔' },
-  { id: 'bakery', name: 'Bakery & Pastries', icon: '🥐' },
-] as const;
+interface SearchScreenProps extends RootStackScreenProps<'SearchScreen'> {}
 
-const PRICE_RANGES = [
-  { id: 'budget', label: 'Budget (< 2,000 XAF)', value: '0-2000' },
-  { id: 'moderate', label: 'Moderate (2,000 - 5,000 XAF)', value: '2000-5000' },
-  { id: 'premium', label: 'Premium (5,000 - 10,000 XAF)', value: '5000-10000' },
-  { id: 'luxury', label: 'Luxury (> 10,000 XAF)', value: '10000+' },
-] as const;
+// Simplified search hook focusing on MVP filters only
+const useSearchFood = (query: string, filters: GeneralFilterOptions) => {
+  const { refetch, data: MenuItems, isPending, isRefetching, error } = useGetAllMenu();
 
-const PROMO_OPTIONS = [
-  { id: 'discount', name: 'Discounts Available', icon: '💰' },
-  { id: 'buy-one-get-one', name: 'Buy 1 Get 1', icon: '🎁' },
-  { id: 'new-customer', name: 'New Customer Offers', icon: '✨' },
-] as const;
+  const filteredResults = useMemo(() => {
+    if (!MenuItems) return [];
 
-const SORT_OPTIONS = [
-  { id: 'delivery-time', label: 'Fastest Delivery' },
-  { id: 'price-low', label: 'Price: Low to High' },
-  { id: 'price-high', label: 'Price: High to Low' },
-  { id: 'distance', label: 'Nearest First' },
-] as const;
+    let results = [...MenuItems];
 
-// Memoized FilterSection component
-const FilterSection = memo(
-  ({ title, children }: { title: string; children: ReactNode }) => (
-    <View className="bg-white mb-2 mx-3 p-4 rounded-xl border-gray-200 border-solid">
-      <Text className="text-lg font-semibold mb-3 text-gray-800">{title}</Text>
-      <View className="h-[1px] bg-gray-200 flex mx-2 mb-3" />
-      {children}
-    </View>
-  ),
-);
-FilterSection.displayName = 'FilterSection';
+    // Apply text search
+    if (query.trim()) {
+      const searchTerm = query.toLowerCase().trim();
+      results = results.filter((item) =>
+        item.name.toLowerCase().includes(searchTerm) ||
+        item.description?.toLowerCase().includes(searchTerm) ||
+        item.restaurant?.name.toLowerCase().includes(searchTerm)
+      );
+    }
 
-// Memoized RadioButtonItem component
-const RadioButtonItem = memo(
-  ({
-    item,
-    selectedValue,
-    onSelect,
-    renderLabel,
-  }: {
-    item: { id: string; [key: string]: any };
-    selectedValue: string;
-    onSelect: (value: string) => void;
-    renderLabel: (item: any) => ReactNode;
-  }) => {
-    const handlePress = useCallback(() => {
-      onSelect(item.id);
-    }, [item.id, onSelect]);
+    // Apply price range filter
+    if (filters.priceRange) {
+      results = results.filter((item) => {
+        switch (filters.priceRange) {
+          case 'budget':
+            return item.price < 2000;
+          case 'medium':
+            return item.price >= 2000 && item.price <= 5000;
+          case 'premium':
+            return item.price > 5000;
+          default:
+            return true;
+        }
+      });
+    }
 
-    return (
-      <TouchableOpacity
-        onPress={handlePress}
-        className="flex-row items-center justify-between px-3 py-3 rounded-lg mb-1"
-      >
-        {renderLabel(item)}
-        <RadioButton value={item.id} color="#077aff" />
-      </TouchableOpacity>
-    );
-  },
-);
-RadioButtonItem.displayName = 'RadioButtonItem';
+    // Apply distance filter
+    if (filters.distanceRange && filters.distanceRange !== 'any') {
+      results = results.filter((item) => {
+        const distance = item.distance || 0;
+        switch (filters.distanceRange) {
+          case '0-5':
+            return distance <= 5;
+          case '5-10':
+            return distance > 5 && distance <= 10;
+          case '10+':
+            return distance > 10;
+          default:
+            return true;
+        }
+      });
+    }
 
-// Memoized CheckboxItem component
-const CheckboxItem = memo(
-  ({
-    item,
-    isSelected,
-    onToggle,
-  }: {
-    item: { id: string; name: string; icon: string };
-    isSelected: boolean;
-    onToggle: (id: string) => void;
-  }) => {
-    const handlePress = useCallback(() => {
-      onToggle(item.id);
-    }, [item.id, onToggle]);
+    // Apply delivery time filter
+    if (filters.deliveryTime && filters.deliveryTime !== 'any') {
+      results = results.filter((item) => {
+        const dtRaw = (item.restaurant as any)?.deliveryTime ?? (item.restaurant as any)?.estimatedDeliveryTime;
+        if (!dtRaw) return true;
+        const match = String(dtRaw).match(/(\d+)/);
+        const mins = match ? parseInt(match[0], 10) : NaN;
+        if (Number.isNaN(mins)) return true;
+        switch (filters.deliveryTime) {
+          case 'under30':
+            return mins <= 30;
+          case '30-60':
+            return mins > 30 && mins <= 60;
+          case '60+':
+            return mins > 60;
+          default:
+            return true;
+        }
+      });
+    }
 
-    return (
-      <TouchableOpacity
-        onPress={handlePress}
-        className="flex-row items-center justify-between px-3 py-4 rounded-lg mb-1"
-      >
-        <View className="flex-row items-center space-x-2">
-          <Text className="mr-2 text-lg">{item.icon}</Text>
-          <Text className="text-base">{item.name}</Text>
-        </View>
-        <Checkbox
-          status={isSelected ? 'checked' : 'unchecked'}
-          onPress={handlePress}
-          color="#077aff"
+    // Apply delivery fee filter
+    if (filters.deliveryFee && filters.deliveryFee !== 'any') {
+      results = results.filter((item) => {
+        const feeRaw = (item as any).deliveryFee ?? item.deliveryPrice ?? 0;
+        const fee = Number(feeRaw) || 0;
+        switch (filters.deliveryFee) {
+          case 'free':
+            return fee === 0;
+          case 'under1000':
+            return fee > 0 && fee <= 1000;
+          case 'under2000':
+            return fee > 1000 && fee <= 2000;
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Default sorting by distance (closest first)
+    results.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+
+    return results;
+  }, [MenuItems, query, filters]);
+
+  const refresh = useCallback(async () => {
+    try {
+      await refetch();
+    } catch (error) {
+      console.error('Error refreshing search results:', error);
+    }
+  }, [refetch]);
+
+  return {
+    results: filteredResults,
+    isPending,
+    isRefetching,
+    error: error,
+    refetch: refresh,
+  };
+};
+
+const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
+  const { type, category = '' } = route.params || {};
+  const { colors } = useTheme();
+  const { t } = useTranslation('translation');
+
+  // Search state
+  const [query, setQuery] = useState('');
+  
+  // Filter modal visibility
+  const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
+
+  // Filter state - simplified to MVP only
+  const [filters, setFilters] = useState<GeneralFilterOptions>({
+    priceRange: null,
+    deliveryTime: 'any',
+    deliveryFee: 'any',
+    distanceRange: 'any',
+  });
+
+  const { results, isPending, isRefetching, error, refetch } = useSearchFood(query, filters);
+
+  const handleGoBack = useCallback(() => {
+    navigation.goBack();
+  }, [navigation]);
+
+  const renderFoodItem = useCallback(
+    ({ item }: { item: FoodProps }) => (
+      <View style={{ paddingVertical: 4 }}>
+        <FoodItemCard
+          key={item.id}
+          foodId={item.id}
+          restarantId={item.restaurant?.id!}
+          FoodName={item.name}
+          FoodPrice={item.price}
+          FoodImage={item.image || require('@/assets/images/NoOrdersDark.png')}
+          RestarantName={item.restaurant?.name || ''}
+          distanceFromUser={item.distance || 0}
+          DeliveryPrice={2000}
+          rating={4.5}
+          ratingCount={100}
+          hasPromo={false}
         />
-      </TouchableOpacity>
-    );
-  },
-);
-CheckboxItem.displayName = 'CheckboxItem';
-
-const SearchScreen: React.FC<RootStackScreenProps<'SearchScreen'>> = ({
-  navigation,
-  route,
-}) => {
-  const { type, category } = route.params;
-
-  // Modal visibility states
-  const [filterVisible, setFilterVisible] = useState(false);
-  const [promoVisible, setPromoVisible] = useState(false);
-  const [sortVisible, setSortVisible] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-
-  // Filter states
-  const [selectedCuisine, setSelectedCuisine] = useState('');
-  const [selectedPriceRange, setSelectedPriceRange] = useState('');
-  const [selectedDeliveryTime, setSelectedDeliveryTime] = useState('');
-  const [selectedRating, setSelectedRating] = useState('');
-  const [selectedDietaryRestrictions, setSelectedDietaryRestrictions] =
-    useState<string[]>([]);
-  const [selectedPromoFilters, setSelectedPromoFilters] = useState<string[]>(
+      </View>
+    ),
     [],
   );
-  const [sortBy, setSortBy] = useState('relevance');
 
-  // Optimized callbacks
-  const togglePromoFilter = useCallback((id: string) => {
-    setSelectedPromoFilters((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
-    );
-  }, []);
-
-  const handleCuisineSelect = useCallback((cuisine: string) => {
-    setSelectedCuisine(cuisine);
-  }, []);
-
-  const handlePriceRangeSelect = useCallback((range: string) => {
-    setSelectedPriceRange(range);
-  }, []);
-
-  const handleSortSelect = useCallback((sort: string) => {
-    setSortBy(sort);
-  }, []);
+  const keyExtractor = useCallback((item: FoodProps) => item.id, []);
 
   // Check if any filters are active
   const hasActiveFilters = useMemo(() => {
     return (
-      selectedCuisine ||
-      selectedPriceRange ||
-      selectedDeliveryTime ||
-      selectedRating ||
-      selectedDietaryRestrictions.length > 0
+      filters.priceRange !== null ||
+      filters.deliveryTime !== 'any' ||
+      filters.deliveryFee !== 'any' ||
+      filters.distanceRange !== 'any'
     );
-  }, [
-    selectedCuisine,
-    selectedPriceRange,
-    selectedDeliveryTime,
-    selectedRating,
-    selectedDietaryRestrictions,
-  ]);
+  }, [filters]);
 
-  const clearAllFilters = useCallback(() => {
-    setSelectedCuisine('');
-    setSelectedPriceRange('');
-    setSelectedDeliveryTime('');
-    setSelectedRating('');
-    setSelectedDietaryRestrictions([]);
-    setSelectedPromoFilters([]);
-    setSortBy('relevance');
-  }, []);
+  const getActiveFiltersCount = useMemo(() => {
+    let count = 0;
+    if (filters.priceRange) count++;
+    if (filters.deliveryTime !== 'any') count++;
+    if (filters.deliveryFee !== 'any') count++;
+    if (filters.distanceRange !== 'any') count++;
+    return count;
+  }, [filters]);
 
-  const clearPromoFilters = useCallback(() => {
-    setSelectedPromoFilters([]);
-  }, []);
-
-  const applyFilters = useCallback(() => {
-    Alert.alert(
-      'Filters Applied',
-      'Search results updated with your preferences!',
-    );
-    setFilterVisible(false);
-    setSortVisible(false);
-    setPromoVisible(false);
-  }, []);
-
-  const clearSearch = useCallback(() => {
-    setSearchQuery('');
-    Keyboard.dismiss();
-  }, []);
-
-  const closeFilterModal = useCallback(() => setFilterVisible(false), []);
-  const closeSortModal = useCallback(() => setSortVisible(false), []);
-  const closePromoModal = useCallback(() => setPromoVisible(false), []);
-
-  const openFilterModal = useCallback(() => setFilterVisible(true), []);
-  const openSortModal = useCallback(() => setSortVisible(true), []);
-  const openPromoModal = useCallback(() => setPromoVisible(true), []);
-
-  // Memoized render functions
-  const renderCuisineLabel = useCallback(
-    (cuisine: (typeof CUISINE_TYPES)[0]) => (
-      <View className="flex-row items-center space-x-2">
-        <Text className="mr-1">{cuisine.icon}</Text>
-        <Text className="text-sm">{cuisine.name}</Text>
-      </View>
-    ),
-    [],
-  );
-
-  const renderPriceLabel = useCallback(
-    (range: (typeof PRICE_RANGES)[0]) => <Text>{range.label}</Text>,
-    [],
-  );
-
-  const renderSortLabel = useCallback(
-    (option: (typeof SORT_OPTIONS)[0]) => (
-      <Text className="text-base">{option.label}</Text>
-    ),
-    [],
-  );
-
-  // Memoized components
-  const FilterModal = useMemo(
-    () => (
-      <Modal
-        visible={filterVisible}
-        animationType="slide"
-        presentationStyle="fullScreen"
-      >
-        <SafeAreaView className="flex-1 bg-gray-50">
-          <View className="flex-row justify-between items-center p-4 bg-white border-b border-gray-200">
-            <TouchableOpacity onPress={closeFilterModal} className="p-2">
-              <MaterialIcons name="close" size={24} color="#666" />
-            </TouchableOpacity>
-            <Text className="text-xl font-bold text-gray-800">Filters</Text>
-            <TouchableOpacity onPress={clearAllFilters}>
-              <Text className="text-primaryColor font-semibold">Clear All</Text>
-            </TouchableOpacity>
-          </View>
-
-          <ScrollView className="flex-1 p-4">
-            <FilterSection title="Cuisine Type">
-              <RadioButton.Group
-                onValueChange={handleCuisineSelect}
-                value={selectedCuisine}
-              >
-                {CUISINE_TYPES.map((cuisine) => (
-                  <RadioButtonItem
-                    key={cuisine.id}
-                    item={cuisine}
-                    selectedValue={selectedCuisine}
-                    onSelect={handleCuisineSelect}
-                    renderLabel={renderCuisineLabel}
-                  />
-                ))}
-              </RadioButton.Group>
-            </FilterSection>
-
-            <FilterSection title="Price Range">
-              <RadioButton.Group
-                onValueChange={handlePriceRangeSelect}
-                value={selectedPriceRange}
-              >
-                {PRICE_RANGES.map((range) => (
-                  <RadioButtonItem
-                    key={range.id}
-                    item={range}
-                    selectedValue={selectedPriceRange}
-                    onSelect={handlePriceRangeSelect}
-                    renderLabel={renderPriceLabel}
-                  />
-                ))}
-              </RadioButton.Group>
-            </FilterSection>
-          </ScrollView>
-
-          <View className="p-4 bg-white border-t border-gray-200">
-            <Button
-              mode="contained"
-              onPress={applyFilters}
-              buttonColor="#077aff"
-              className="py-1"
-            >
-              Apply Filters
-            </Button>
-          </View>
-        </SafeAreaView>
-      </Modal>
-    ),
-    [
-      filterVisible,
-      selectedCuisine,
-      selectedPriceRange,
-      closeFilterModal,
-      clearAllFilters,
-      applyFilters,
-      handleCuisineSelect,
-      handlePriceRangeSelect,
-      renderCuisineLabel,
-      renderPriceLabel,
-    ],
-  );
-
-  const SortModal = useMemo(
-    () => (
-      <Modal
-        visible={sortVisible}
-        animationType="slide"
-        presentationStyle="pageSheet"
-      >
-        <SafeAreaView className="flex-1 bg-white">
-          <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-            <TouchableOpacity onPress={closeSortModal}>
-              <MaterialIcons name="close" size={24} color="#666" />
-            </TouchableOpacity>
-            <Text className="text-lg font-bold text-gray-800">Sort By</Text>
-            <View style={{ width: 24 }} />
-          </View>
-
-          <ScrollView className="flex-1 p-4">
-            <RadioButton.Group onValueChange={handleSortSelect} value={sortBy}>
-              {SORT_OPTIONS.map((option) => (
-                <RadioButtonItem
-                  key={option.id}
-                  item={option}
-                  selectedValue={sortBy}
-                  onSelect={handleSortSelect}
-                  renderLabel={renderSortLabel}
-                />
-              ))}
-            </RadioButton.Group>
-          </ScrollView>
-
-          <View className="p-4 border-t border-gray-200">
-            <Button
-              mode="contained"
-              onPress={applyFilters}
-              buttonColor="#077aff"
-              className="py-1"
-            >
-              Apply Sort
-            </Button>
-          </View>
-        </SafeAreaView>
-      </Modal>
-    ),
-    [
-      sortVisible,
-      sortBy,
-      closeSortModal,
-      applyFilters,
-      handleSortSelect,
-      renderSortLabel,
-    ],
-  );
-
-  const PromoModal = useMemo(
-    () => (
-      <Modal
-        visible={promoVisible}
-        animationType="slide"
-        presentationStyle="pageSheet"
-      >
-        <SafeAreaView className="flex-1 bg-white">
-          <View className="flex-row justify-between items-center p-4 border-b border-gray-200">
-            <TouchableOpacity onPress={closePromoModal}>
-              <MaterialIcons name="close" size={24} color="#666" />
-            </TouchableOpacity>
-            <Text className="text-lg font-bold text-gray-800">Promotions</Text>
-            <TouchableOpacity onPress={clearPromoFilters}>
-              <Text className="text-primaryColor font-semibold">Clear</Text>
-            </TouchableOpacity>
-          </View>
-
-          <ScrollView className="flex-1 p-4">
-            <Text className="text-gray-600 mb-4">
-              Select the types of promotions you&apos;re interested in:
-            </Text>
-
-            {PROMO_OPTIONS.map((promo) => (
-              <CheckboxItem
-                key={promo.id}
-                item={promo}
-                isSelected={selectedPromoFilters.includes(promo.id)}
-                onToggle={togglePromoFilter}
-              />
-            ))}
-          </ScrollView>
-
-          <View className="p-4 border-t border-gray-200">
-            <Button
-              mode="contained"
-              onPress={applyFilters}
-              buttonColor="#077aff"
-              className="py-1"
-            >
-              Show Promotions
-            </Button>
-          </View>
-        </SafeAreaView>
-      </Modal>
-    ),
-    [
-      promoVisible,
-      selectedPromoFilters,
-      closePromoModal,
-      clearPromoFilters,
-      applyFilters,
-      togglePromoFilter,
-    ],
-  );
-
-  // Memoized SearchHeader
-  const SearchHeader = useMemo(
-    () => (
-      <View className="flex-row px-2 items-center py-3 " >
-        <TouchableOpacity
-          onPress={goBack}
-          className="bg-primary rounded-full p-2"
-        >
-          <MaterialIcons name="arrow-back" size={25} color="#fff" />
-        </TouchableOpacity>
-        <KeyboardAvoidingView
-          className="flex-1 ml-3"
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        >
-          <TextInput
-            placeholder="Search for your cravings.."
-            mode="outlined"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            outlineStyle={{
-              borderColor: '#c4def8',
-              borderWidth: 1,
-              borderRadius: 20,
-            }}
-            style={{
-              backgroundColor: 'rgb(202, 221, 247)',
-              paddingTop: 5,
-              paddingBottom: 5,
-              paddingRight: 10,
-              paddingLeft: 10,
-            }}
-            placeholderTextColor="#999"
-            left={
-              <TextInput.Icon
-                icon="magnify"
-                size={30}
-                color="black"
-                background="rgb(202, 221, 240)"
-                className="pt-3"
-              />
-            }
-            right={
-              searchQuery ? (
-                <TextInput.Icon
-                  icon="close"
-                  onPress={clearSearch}
-                  className="items-center pt-2"
-                />
-              ) : null
-            }
-            className="flex-1"
-            autoFocus={true}
-            contentStyle={{ marginRight: -10, marginLeft: 45 }}
-          />
-        </KeyboardAvoidingView>
-      </View>
-    ),
-    [searchQuery, clearSearch],
-  );
-
-  // Memoized CategoryHeader
-  const CategoryHeader = useMemo(() => {
-    if (type !== 'category') return null;
+  // Header component
+  const Header = () => {
+    if (type === 'category') {
+      return (
+        <View style={[styles.categoryHeader, { backgroundColor: colors.surface, borderBottomColor: colors.outline }]}>
+          <TouchableOpacity onPress={handleGoBack} style={[styles.backButton, { backgroundColor: colors.primary }]}>
+            <MaterialIcons name="arrow-back" size={20} color="white" />
+          </TouchableOpacity>
+          <Text style={[styles.categoryTitle, { color: colors.onSurface }]}>
+            {category}
+          </Text>
+        </View>
+      );
+    }
 
     return (
-      <View className="flex-row items-center px-4 py-2 bg-white mb-4">
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          activeOpacity={0.8}
-          className="active:bg-gray-100 p-2 rounded-full"
-        >
-          <MaterialIcons
-            name="arrow-back-ios"
-            size={21}
-            color={lightTheme.colors.primary}
-          />
-        </TouchableOpacity>
-        <Text className="text-[20px] font-semibold text-gray-800 flex-1 text-center">
-          {category}
-        </Text>
+      <View style={[styles.searchHeader, { backgroundColor: colors.background }]}>
+        <View style={styles.searchRow}>
+          <TouchableOpacity onPress={handleGoBack} style={[styles.backButton, { backgroundColor: colors.primary }]}>
+            <MaterialIcons name="arrow-back" size={20} color="white" />
+          </TouchableOpacity>
+          <SearchInput value={query} onChangeText={setQuery} />
+        </View>
       </View>
     );
-  }, [type, category, navigation]);
+  };
 
-  // Memoized filter buttons
-  const filterButtons = useMemo(
-    () => (
-      <View className="flex-row justify-around items-center my-3 space-x-1 px-2">
-        <TouchableOpacity
-          className={`flex-row items-center border-[2px] border-solid border-primary p-2 shadow-sm rounded-full ${
-            hasActiveFilters ? 'bg-primary' : 'bg-white'
-          }`}
-          onPress={openFilterModal}
+  // Filter bar component (below search bar)
+  const FilterBar = () => (
+    <View style={[styles.filterBar, { backgroundColor: colors.surface, borderBottomColor: colors.outline }]}>
+      <TouchableOpacity
+        style={[
+          styles.filterButton,
+          hasActiveFilters
+            ? { backgroundColor: colors.primaryContainer }
+            : { backgroundColor: colors.surfaceVariant }
+        ]}
+        onPress={() => setIsFilterModalVisible(true)}
+      >
+        <MaterialIcons
+          name="tune"
+          size={20}
+          color={hasActiveFilters ? colors.onPrimaryContainer : colors.onSurfaceVariant}
+        />
+        <Text
+          style={[
+            styles.filterButtonText,
+            {
+              color: hasActiveFilters ? colors.onPrimaryContainer : colors.onSurfaceVariant,
+            },
+          ]}
         >
-          <Feather
-            name="sliders"
-            size={18}
-            color={hasActiveFilters ? '#fff' : '#077aff'}
-          />
-          <Text
-            className={`ml-1 ${hasActiveFilters ? 'text-white' : 'text-primaryColor'}`}
-          >
-            Filter
+          {t('filters')}
+        </Text>
+        {getActiveFiltersCount > 0 && (
+          <View style={[styles.badge, { backgroundColor: colors.primary }]}>
+            <Text style={[styles.badgeText, { color: 'white' }]}>
+              {getActiveFiltersCount}
+            </Text>
+          </View>
+        )}
+      </TouchableOpacity>
+
+      {hasActiveFilters && (
+        <TouchableOpacity
+          style={[styles.clearButton, { backgroundColor: colors.errorContainer }]}
+          onPress={() => {
+            setFilters({
+              priceRange: null,
+              deliveryTime: 'any',
+              deliveryFee: 'any',
+              distanceRange: 'any',
+            });
+          }}
+        >
+          <MaterialIcons name="clear" size={16} color={colors.onErrorContainer} />
+          <Text style={[styles.clearButtonText, { color: colors.onErrorContainer }]}>
+            {t('clear')}
           </Text>
         </TouchableOpacity>
-
-        <TouchableOpacity
-          className={`border-[2px] border-solid border-primary p-2 shadow-sm rounded-full ${
-            sortBy !== 'relevance' ? 'bg-primary' : 'bg-white'
-          }`}
-          onPress={openSortModal}
-        >
-          <Text
-            className={`${sortBy !== 'relevance' ? 'text-white' : 'text-primary'}`}
-          >
-            Sort By
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          className={`border-[2px] border-solid border-primary p-2 shadow-sm rounded-full ${
-            selectedPromoFilters.length > 0 ? 'bg-primary' : 'bg-white'
-          }`}
-          onPress={openPromoModal}
-        >
-          <Text
-            className={`${selectedPromoFilters.length > 0 ? 'text-white' : 'text-primary'}`}
-          >
-            Promo
-          </Text>
-        </TouchableOpacity>
-      </View>
-    ),
-    [
-      hasActiveFilters,
-      sortBy,
-      selectedPromoFilters.length,
-      openFilterModal,
-      openSortModal,
-      openPromoModal,
-    ],
+      )}
+    </View>
   );
 
-  const { data: MenuItems, isLoading, error } = useGetAllMenu();
-  const { colors } = useTheme();
+  // Error state
   if (error) {
     return (
       <CommonView>
-        <View
-          className="flex-1 px-1 py-3 h-full justify-center items-center"
-          style={{ backgroundColor: colors.background }}
-        >
-          <Text className="text-3xl font-semibold text-red-400">
-            {error.message}
-            {/* image to be added */}
-          </Text>
-        </View>
+        <SafeAreaView style={{ flex: 1 }}>
+          <Header />
+          <ErrorDisplay 
+            onRetry={refetch} 
+            message={t('error_loading_food') || t('something_went_wrong')} 
+          />
+        </SafeAreaView>
+      </CommonView>
+    );
+  }
+
+  // Loading state
+  if (isPending) {
+    return (
+      <CommonView>
+        <SafeAreaView style={{ flex: 1 }}>
+          <Header />
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={colors.primary} />
+            <Text style={[styles.loadingText, { color: colors.onSurface }]}>
+              {t('searching')}
+            </Text>
+          </View>
+        </SafeAreaView>
       </CommonView>
     );
   }
 
   return (
     <CommonView>
-      {type === 'category' ? CategoryHeader : SearchHeader}
+      <SafeAreaView style={{ flex: 1 }}>
+        <Header />
+        <FilterBar />
 
-      {filterButtons}
-
-      {/* Search Results */}
-      {isLoading ? (
-        <LoadingScreen />
-      ) : MenuItems && MenuItems.length > 0 ? (
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <View className="flex-1 flex-row flex-wrap justify-between px-2">
-            <FlatList
-              data={MenuItems}
-              renderItem={({ item }) => (
-                <FoodItemCard
-                  key={item.id}
-                  foodId={item.id}
-                  restarantId={item.restaurantID}
-                  FoodName={item.name}
-                  FoodPrice={item.price!}
-                  FoodImage={item.image}
-                  RestarantName={''}
-                  distanceFromUser={item.distance!}
-                  DeliveryPrice={4000}
-                />
-              )}
-              keyExtractor={(item) => item.id}
-            />
+        {/* Results info */}
+        {hasActiveFilters && (
+          <View style={[styles.resultsInfo, { backgroundColor: colors.surfaceVariant }]}>
+            <Text style={[styles.resultsText, { color: colors.onSurfaceVariant }]}>
+              {results.length} {t('results_found')}
+            </Text>
           </View>
-        </ScrollView>
-      ) : (
-        <View className="flex-1 items-center justify-center">
-          <MaterialCommunityIcons name="food-off" size={80} color="#ccc" />
-          <Text className="text-gray-500 text-lg mt-4">No results found</Text>
-          <Text className="text-gray-400 text-sm mt-2">
-            Try a different search term or adjust your filters.
-          </Text>
-        </View>
-      )}
+        )}
 
-      {FilterModal}
-      {SortModal}
-      {PromoModal}
+        {/* Content */}
+        {isRefetching ? (
+          <SearchResultSkeleton count={4} />
+        ) : results.length > 0 ? (
+          <FlatList
+            data={results}
+            renderItem={renderFoodItem}
+            keyExtractor={keyExtractor}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={isRefetching}
+                onRefresh={refetch}
+                colors={[colors.primary]}
+              />
+            }
+          />
+        ) : (
+          <View style={styles.emptyState}>
+            <MaterialIcons
+              name="search-off"
+              size={64}
+              color={colors.onSurfaceVariant}
+            />
+            <Text style={[styles.emptyTitle, { color: colors.onSurface }]}>
+              {query
+                ? t('no_food_found')
+                : t('start_searching_for_food')}
+            </Text>
+            <Text style={[styles.emptySubtitle, { color: colors.onSurfaceVariant }]}>
+              {query
+                ? t('try_adjusting_search_or_filters')
+                : t('enter_search_term_to_find_delicious_food')}
+            </Text>
+          </View>
+        )}
+
+        {/* Filter Modal */}
+        <FilterModal
+          visible={isFilterModalVisible}
+          onClose={() => setIsFilterModalVisible(false)}
+          onApply={(filterOptions) => {
+            setFilters(filterOptions);
+          }}
+          currentFilters={filters}
+        />
+      </SafeAreaView>
     </CommonView>
   );
 };
+
+const styles = StyleSheet.create({
+  categoryHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+  },
+  searchHeader: {
+    paddingVertical: 8,
+  },
+  searchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingHorizontal: 16,
+  },
+  backButton: {
+    padding: 8,
+    borderRadius: 20,
+  },
+  categoryTitle: {
+    flex: 1,
+    textAlign: 'center',
+    fontSize: 18,
+    fontWeight: '600',
+    marginRight: 36,
+  },
+  filterBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    gap: 8,
+  },
+  filterButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    position: 'relative',
+  },
+  filterButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+    marginLeft: 6,
+  },
+  clearButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    marginLeft: 8,
+  },
+  clearButtonText: {
+    fontSize: 12,
+    fontWeight: '500',
+    marginLeft: 4,
+  },
+  badge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  badgeText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+  },
+  resultsInfo: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  resultsText: {
+    fontSize: 14,
+  },
+  listContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 20,
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 32,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginTop: 16,
+    textAlign: 'center',
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    marginTop: 8,
+    textAlign: 'center',
+  },
+});
 
 export default SearchScreen;

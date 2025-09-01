@@ -7,8 +7,7 @@ import {
 } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-type Language = 'English' | 'French';
-type Theme = 'light' | 'dark';
+type Theme = 'light' | 'dark' | 'system';
 type UserType = 'customer' | 'restaurant' | null;
 
 interface AppState {
@@ -16,7 +15,6 @@ interface AppState {
   isOnboardingComplete: boolean;
 
   // User preferences
-  language: Language;
   theme: Theme;
   userType: UserType;
 
@@ -35,7 +33,6 @@ interface AppActions {
   // User preferences
   setUserType: (type: Exclude<UserType, null>) => void;
   setTheme: (theme: Theme) => void;
-  setLanguage: (language: Language) => void;
 
   // App lifecycle
   setFirstLaunch: (isFirst: boolean) => void;
@@ -50,7 +47,6 @@ interface AppActions {
 
 const initialState: Omit<AppState, '_hasHydrated'> = {
   isOnboardingComplete: false,
-  language: 'English',
   theme: 'light',
   userType: null,
   isFirstLaunch: true,
@@ -81,13 +77,7 @@ export const useAppStore = create<AppState & AppActions>()(
             }
           },
 
-          setLanguage: (language) => {
-            const currentLanguage = get().language;
-            if (currentLanguage !== language) {
-              set({ language });
-            }
-          },
-
+          
           setTheme: (theme) => {
             const currentTheme = get().theme;
             if (currentTheme !== theme) {
@@ -122,13 +112,12 @@ export const useAppStore = create<AppState & AppActions>()(
           storage: createJSONStorage(() => AsyncStorage),
           partialize: (state) => ({
             isOnboardingComplete: state.isOnboardingComplete,
-            language: state.language,
             theme: state.theme,
             userType: state.userType,
             isFirstLaunch: state.isFirstLaunch,
             lastActiveTimestamp: state.lastActiveTimestamp,
           }),
-          version: 1,
+          version: 2,
           onRehydrateStorage: () => (state) => {
             state?.setHydrated(true);
           },
@@ -141,7 +130,6 @@ export const useAppStore = create<AppState & AppActions>()(
 
 // Performance-optimized selector hooks
 export const useTheme = () => useAppStore((state) => state.theme);
-export const useLanguage = () => useAppStore((state) => state.language);
 export const useAppUserType = () => useAppStore((state) => state.userType);
 export const useOnboardingComplete = () =>
   useAppStore((state) => state.isOnboardingComplete);

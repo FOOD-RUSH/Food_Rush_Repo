@@ -24,7 +24,8 @@ import { useAuthStore } from '@/src/stores/customerStores/AuthStore';
 import { useLogin } from '@/src/hooks/customer/useAuthhooks';
 import Toast from 'react-native-toast-message';
 import { useNetwork } from '@/src/contexts/NetworkContext';
-import { useLanguage } from '@/src/contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
+import ErrorDisplay from '@/src/components/auth/ErrorDisplay';
 
 interface LoginFormData {
   email: string;
@@ -36,7 +37,7 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
   route,
 }) => {
   const { colors } = useTheme();
-  const { t } = useLanguage();
+  const { t } = useTranslation('auth');
   const { isConnected, isInternetReachable } = useNetwork();
 
   const [showPassword, setShowPassword] = useState(false);
@@ -61,11 +62,7 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
   const { clearError } = useAuthStore();
 
   // Using the hook for login
-  const { 
-    mutate: loginMutation, 
-    isPending, 
-    error: loginError 
-  } = useLogin();
+  const { mutate: loginMutation, isPending, error: loginError } = useLogin();
 
   const onSubmit = useCallback(
     async (data: LoginFormData) => {
@@ -86,14 +83,14 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
       console.log('Attempting login with email:', data.email);
 
       loginMutation(
-        { 
-          email: data.email.trim().toLowerCase(), 
-          password: data.password 
+        {
+          email: data.email.trim().toLowerCase(),
+          password: data.password,
         },
         {
           onSuccess: () => {
             console.log('Login successful, showing success toast');
-            
+
             Toast.show({
               type: 'success',
               text1: t('success'),
@@ -109,18 +106,20 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
           },
           onError: (error: any) => {
             console.error('Login failed in component:', error);
-            
+
             // Determine error message
             let errorMessage = 'Login failed. Please try again.';
-            
+
             if (error?.message) {
               errorMessage = error.message;
             } else if (error?.status === 401) {
-              errorMessage = 'Invalid email or password. Please check your credentials.';
+              errorMessage =
+                'Invalid email or password. Please check your credentials.';
             } else if (error?.status === 429) {
               errorMessage = 'Too many login attempts. Please try again later.';
             } else if (error?.code === 'NETWORK_ERROR') {
-              errorMessage = 'Network error. Please check your internet connection.';
+              errorMessage =
+                'Network error. Please check your internet connection.';
             }
 
             Toast.show({
@@ -324,6 +323,12 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                 />
               </View>
 
+              {/* Error Display */}
+              <ErrorDisplay
+                error={loginError?.message || null}
+                visible={!!loginError}
+              />
+
               {/* Login Button */}
               <Button
                 mode="contained"
@@ -339,7 +344,7 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                   color: 'white',
                 }}
               >
-                {isPending ? t('logging_in') || 'Logging in...' : t('login')}
+                {isPending ? t('logging_in') : t('login')}
               </Button>
 
               {/* Divider */}
@@ -416,7 +421,7 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                 >
                   {t('dont_have_account')}{' '}
                 </Text>
-                <TextButton text={t('sign_up')} onPress={handleSignUp} />
+                <TextButton text={t('signup')} onPress={handleSignUp} />
               </View>
             </View>
           </View>

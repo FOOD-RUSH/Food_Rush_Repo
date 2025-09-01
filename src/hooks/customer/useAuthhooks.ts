@@ -1,6 +1,7 @@
 // useAuthHooks.ts
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { authApi } from "@/src/services/customer/authApi";
+import { useCallback } from "react";
+import { authApi, OTPCredentials } from "@/src/services/customer/authApi";
 import TokenManager from "@/src/services/customer/tokenManager";
 import { useAuthStore } from "@/src/stores/customerStores/AuthStore";
 
@@ -13,15 +14,98 @@ const CACHE_CONFIG = {
 
 // Auth hooks
 export const useCurrentUser = () => {
+    const { isAuthenticated } = useAuthStore();
+
     return useQuery({
         queryKey: ['auth', 'me'],
-        queryFn: () => authApi.getProfile().then(res => res.data),
+        queryFn: async () => {
+            try {
+                const response = await authApi.getProfile();
+                return response.data;
+            } catch (error: any) {
+                console.error('Failed to fetch user profile:', error);
+
+                // If unauthorized, clear auth state
+                if (error?.status === 401 || error?.response?.status === 401) {
+                    useAuthStore.getState().logoutUser();
+                }
+
+                throw error;
+            }
+        },
         staleTime: CACHE_CONFIG.STALE_TIME,
         gcTime: CACHE_CONFIG.CACHE_TIME,
-        retry: false,
-        enabled: !!useAuthStore.getState().isAuthenticated,
-    })
-}
+        retry: (failureCount, error: any) => {
+            // Don't retry on auth errors
+            if (error?.status === 401 || error?.response?.status === 401) {
+                return false;
+            }
+            // Retry up to 3 times for other errors
+            return failureCount < CACHE_CONFIG.MAX_RETRIES;
+        },
+        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+        enabled: isAuthenticated,
+        refetchOnWindowFocus: true,
+        refetchOnReconnect: true,
+    });
+};
+
+// Enhanced profile management hook
+export const useProfileManager = () => {
+    const queryClient = useQueryClient();
+    const { setUser } = useAuthStore();
+
+    const {
+        data: user,
+        isLoading,
+        error,
+        refetch,
+        isRefetching,
+    } = useCurrentUser();
+
+    const refreshProfile = useCallback(async () => {
+        try {
+            const { data } = await refetch();
+            if (data) {
+                setUser(data);
+                console.log(data)
+            }
+            return data;
+        } catch (error) {
+            console.error('Failed to refresh profile:', error);
+            throw error;
+        }
+    }, [refetch, setUser]);
+
+    const invalidateProfile = useCallback(() => {
+        queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
+    }, [queryClient]);
+
+    const updateLocalProfile = useCallback((updatedData: Partial<any>) => {
+        queryClient.setQueryData(['auth', 'me'], (oldData: any) => ({
+            ...oldData,
+            ...updatedData,
+        }));
+
+        // Also update the auth store
+        const currentUser = queryClient.getQueryData(['auth', 'me']);
+        if (currentUser) {
+            setUser(currentUser);
+        }
+    }, [queryClient, setUser]);
+
+    return {
+        user,
+        isLoading,
+        error,
+        isRefetching,
+        refreshProfile,
+        invalidateProfile,
+        updateLocalProfile,
+        hasProfile: !!user,
+        isProfileStale: error?.status === 401,
+    };
+};
 
 export const useLogin = () => {
     const queryClient = useQueryClient();
@@ -112,10 +196,11 @@ export const useVerifyOTP = () => {
     const { setUser, setIsAuthenticated, clearError } = useAuthStore();
 
     return useMutation({
-        mutationFn: (otpData: any) => authApi.verifyOTP(otpData),
+        mutationFn: (otpData: OTPCredentials) => authApi.verifyOTP(otpData),
         onSuccess: async (response) => {
             try {
-                const { user, accessToken, refreshToken } = response.data;
+                const { user, accessToken, refreshToken } = response.data.data;
+                console.log(`checking tokens ..... ${user}, ACCESS_T: ${accessToken}, Refresh_t: ${refreshToken}`)
 
                 if (!accessToken || !refreshToken || !user) {
                     throw new Error('Invalid verification response: missing required data');
@@ -160,6 +245,7 @@ export const useUpdateProfile = () => {
         mutationFn: (userData: any) => authApi.updateProfile(userData),
         onSuccess: (response) => {
             const updatedUser = response.data;
+            console.log(updatedUser)
             setUser(updatedUser);
             queryClient.setQueryData(['auth', 'me'], updatedUser);
         }
@@ -192,7 +278,7 @@ export const useResendOTP = () => {
 
 export const useResetPassword = () => {
     const queryClient = useQueryClient();
-    
+
     return useMutation({
         mutationFn: ({ otp, email, newPassword }: { otp: string, email: string, newPassword: string }) =>
             authApi.resetPassword({ email, otp, newPassword }),

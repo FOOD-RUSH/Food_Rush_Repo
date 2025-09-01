@@ -568,7 +568,3 @@ const DashboardScreen = ({ navigation }: any) => {
         {renderQuickActions()}
       </ScrollView>
     </CommonView>
-  );
-};
-
-export default DashboardScreen;

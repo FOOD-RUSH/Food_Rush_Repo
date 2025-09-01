@@ -5,17 +5,21 @@ import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { TouchableOpacity, View } from 'react-native';
 import { useTheme, Card, Text } from 'react-native-paper';
+import { useTranslation } from 'react-i18next';
 
 interface RestaurantCardProps {
-  deliveryFee: number;
+  deliveryFee?: number | string;
   restaurantName: string;
-  distanceFromUser: number;
-  estimatedTime: any;
-  rating: number;
-  image: any;
+  distanceFromUser?: number;
+  estimatedTime?: any;
+  rating?: number;
+  image?: any;
   restaurantID: string;
   discount?: string; // Optional discount text
   discountColor?: string; // Optional discount background color
+  // New optional props for future backend fields
+  deliveryPrice?: number;
+  distance?: number;
 }
 
 export const RestaurantCard = ({
@@ -24,18 +28,27 @@ export const RestaurantCard = ({
   restaurantName,
   distanceFromUser,
   estimatedTime,
-  rating,
+  rating = 4.5,
   image,
   discount,
   discountColor = '#ff4444',
+  deliveryPrice,
+  distance,
 }: RestaurantCardProps) => {
+  // Use deliveryPrice if available, otherwise fallback to deliveryFee
+  const finalDeliveryFee = deliveryPrice || (typeof deliveryFee === 'string' ? parseFloat(deliveryFee) : deliveryFee) || 0;
+  const finalDistance = distance || distanceFromUser || 0;
   const navigation =
     useNavigation<CustomerHomeStackScreenProps<'HomeScreen'>['navigation']>();
   const { colors } = useTheme();
+  const { t } = useTranslation('translation');
+
   return (
     <TouchableOpacity
       onPress={() => {
-        navigation.navigate('RestaurantDetails', { restaurantId: 'paulo' });
+        navigation.navigate('RestaurantDetails', {
+          restaurantId: restaurantID,
+        });
       }}
       activeOpacity={0.9}
     >
@@ -54,6 +67,10 @@ export const RestaurantCard = ({
           marginVertical: 12,
           borderColor: colors.surface,
           boxShadow: '1px 0px 10px rgba(0, 0, 0, 0.15)',
+          minWidth: 320,
+          maxWidth: 520,
+          minHeight: 220, // Added min card length
+          maxHeight: 340, // Added max card length
         }}
       >
         <View style={{ position: 'relative' }}>
@@ -147,7 +164,7 @@ export const RestaurantCard = ({
                   color: colors.onSurface,
                 }}
               >
-                {deliveryFee}F
+                {finalDeliveryFee}F
               </Text>
             </View>
             <View
@@ -200,11 +217,12 @@ export const RestaurantCard = ({
                 <Text
                   style={{ fontSize: 14, color: colors.primary, marginLeft: 4 }}
                 >
-                  {distanceFromUser}km
+                  {finalDistance}km
                 </Text>
               </View>
               <Text style={{ fontSize: 12, color: colors.onSurface }}>
-                {deliveryFee}FCFA Delivery Fee
+                {finalDeliveryFee}
+                {/* {t('delivery_fee_unit')} */} XAF
               </Text>
             </View>
 

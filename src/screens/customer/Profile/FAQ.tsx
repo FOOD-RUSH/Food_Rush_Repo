@@ -1,9 +1,11 @@
+import { useTranslation } from 'react-i18next';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import React, { useState } from 'react';
 import CommonView from '@/src/components/common/CommonView';
 import { Card, useTheme } from 'react-native-paper';
 import Seperator from '@/src/components/common/Seperator';
 import { MaterialIcons } from '@expo/vector-icons';
+import { t } from 'i18next';
 
 interface FAQItem {
   title: string;
@@ -14,31 +16,28 @@ interface FAQItem {
 const faqData: FAQItem[] = [
   {
     id: 1,
-    title: 'What is FoodRush?',
-    description:
-      'FoodRush is a comprehensive food delivery platform that connects you with your favorite restaurants and delivers fresh meals right to your doorstep. We partner with local restaurants to bring you a wide variety of cuisines at competitive prices.',
+    title: t('what_is_foodrush'),
+    description: t('foodrush_description'),
   },
   {
     id: 2,
-    title: 'How I can make a payment?',
-    description:
-      'We accept multiple payment methods including credit/debit cards, digital wallets like PayPal, Apple Pay, Google Pay, and cash on delivery. All online payments are secured with industry-standard encryption.',
+    title: t('how_can_i_make_a_payment'),
+    description: t('payment_methods_description'),
   },
   {
     id: 3,
-    title: 'How do I can cancel orders?',
-    description:
-      'You can cancel your order within 5 minutes of placing it through the app. Go to "My Orders", select the order you want to cancel, and tap "Cancel Order". If the restaurant has already started preparing your food, cancellation may not be possible.',
+    title: t('how_do_i_can_cancel_orders'),
+    description: t('cancel_order_description'),
   },
   {
     id: 4,
-    title: 'How do I can delete my account?',
-    description:
-      'To delete your account, go to Settings > Account Settings > Delete Account. Please note that this action is irreversible and will permanently remove all your order history, saved addresses, and preferences.',
+    title: t('how_do_i_can_delete_my_account'),
+    description: t('delete_account_description'),
   },
 ];
 
 const FAQ = () => {
+  const { t } = useTranslation('translation');
   const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
 
   const toggleExpanded = (id: number) => {

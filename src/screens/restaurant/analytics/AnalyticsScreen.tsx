@@ -518,7 +518,3 @@ const AnalyticsScreen = ({ navigation }: any) => {
         </Animated.View>
       </ScrollView>
     </CommonView>
-  );
-};
-
-export default AnalyticsScreen;

@@ -2,8 +2,11 @@ import React, { useCallback, useMemo } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
-import { Linking } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Linking, TouchableOpacity } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { MaterialIcons } from '@expo/vector-icons';
+import Toast from 'react-native-toast-message';
+import OrderReceiptScreen from '../screens/customer/Order/OrderReceiptScreen';
 
 // Navigation types and helpers
 import { RootStackParamList } from './types';
@@ -18,6 +21,7 @@ import {
   useAppUserType,
 } from '../stores/customerStores/AppStore';
 import { useIsAuthenticated } from '../stores/customerStores/AuthStore';
+import { useCartStore } from '../stores/customerStores/cartStore';
 
 // Navigators
 import AuthNavigator from './AuthNavigator';
@@ -37,23 +41,24 @@ import CartScreen from '../screens/customer/home/CartScreen';
 import NotificationsScreen from '../screens/restaurant/profile/NotificationsScreen';
 import FoodDetailsScreen from '../screens/customer/home/FoodDetailsScreen';
 import RestaurantDetailScreen from '../screens/customer/home/RestaurantDetailScreen';
+import NearbyRestaurantsScreen from '../screens/customer/home/NearbyRestaurantsScreen';
 
 // Profile screens
 import EditProfileScreen from '../screens/customer/Profile/EditProfileScreen';
 import FavoriteRestaurants from '../screens/customer/Profile/FavoriteRestaurants';
 import PaymentScreen from '../screens/customer/Profile/PaymentScreen';
 import LanguageScreen from '../screens/customer/Profile/LanguageScreen';
-import AddressScreen from '../screens/customer/Profile/AdressScreen';
+import AddressScreen from '../screens/customer/Profile/AddressScreen';
 
 // Data
 import { OnboardingSlides } from '@/src/utils/onboardingData';
-import { useAppTheme } from '../config/theme';
+import { useAppTheme, useAppNavigationTheme } from '../config/theme';
 
 // Stack navigator
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 // Screen option presets for better organization and reuse
-const createScreenOptions = (colors: any) => ({
+const createScreenOptions = (colors: any, t: any) => ({
   default: {
     headerShown: false,
     gestureEnabled: true,
@@ -64,11 +69,11 @@ const createScreenOptions = (colors: any) => ({
       backgroundColor: colors.background,
     },
     headerStyle: {
-      backgroundColor: colors.surface,
+      backgroundColor: colors.card,
       elevation: 0,
       shadowOpacity: 0,
     },
-    headerTintColor: colors.onSurface,
+    headerTintColor: colors.text,
   },
 
   modal: {
@@ -80,11 +85,11 @@ const createScreenOptions = (colors: any) => ({
       backgroundColor: colors.background,
     },
     headerStyle: {
-      backgroundColor: colors.surface,
+      backgroundColor: colors.card,
       elevation: 0,
       shadowOpacity: 0,
     },
-    headerTintColor: colors.onSurface,
+    headerTintColor: colors.text,
   },
 
   card: {
@@ -96,24 +101,24 @@ const createScreenOptions = (colors: any) => ({
     contentStyle: {
       backgroundColor: colors.background,
     },
-    headerTintColor: colors.onSurface,
+    headerTintColor: colors.text,
   },
 
   profileCard: {
     presentation: 'card' as const,
     headerShown: true,
     headerTitleAlign: 'center' as const,
-    animation: 'slide_from_left' as const,
+    animation: 'slide_from_right' as const,
     headerShadowVisible: false,
     contentStyle: {
       backgroundColor: colors.background,
     },
     headerStyle: {
-      backgroundColor: colors.surface,
+      backgroundColor: colors.card,
       elevation: 0,
       shadowOpacity: 0,
     },
-    headerTintColor: colors.onSurface,
+    headerTintColor: colors.text,
   },
 
   checkout: {
@@ -125,11 +130,11 @@ const createScreenOptions = (colors: any) => ({
       backgroundColor: colors.background,
     },
     headerStyle: {
-      backgroundColor: colors.surface,
+      backgroundColor: colors.card,
       elevation: 0,
       shadowOpacity: 0,
     },
-    headerTintColor: colors.onSurface,
+    headerTintColor: colors.text,
   },
 
   fullScreen: {
@@ -147,17 +152,64 @@ const RootNavigator: React.FC = () => {
   const isOnboardingComplete = useOnboardingComplete();
   const userType = useAppUserType();
   const themeMode = useAppStore((state) => state.theme);
+  const { t } = useTranslation('translation');
+
+  // Cart store actions
+  const clearCart = useCartStore((state) => state.clearCart);
+  const cartItems = useCartStore((state) => state.items);
 
   // App store actions
   const { completeOnboarding, setUserType } = useAppStore();
 
   // Theme
   const theme = useAppTheme(themeMode);
+  const navigationTheme = useAppNavigationTheme();
 
   // Memoized screen options for better performance
   const screenOptions = useMemo(
-    () => createScreenOptions(theme.colors),
-    [theme.colors],
+    () => createScreenOptions(theme.colors, t),
+    [theme.colors, t],
+  );
+  const handleClearCart = useCallback(() => {
+    if (cartItems.length === 0) {
+      Toast.show({
+        type: 'info',
+        text1: t('info'),
+        text2: t('cart_empty'),
+        position: 'bottom',
+      });
+      return;
+    }
+
+    clearCart();
+    Toast.show({
+      type: 'success',
+      text1: t('success'),
+      text2: t('cart_cleared_successfully'),
+      position: 'top',
+    });
+  }, [cartItems.length, clearCart, t]);
+
+
+  // Memoized cart screen options
+  const cartScreenOptions = useMemo(
+    () => ({
+      headerTitle: t('my_cart'),
+      headerBackTitleVisible: false,
+      headerRight: () => (
+        <TouchableOpacity
+          onPress={handleClearCart}
+          style={{ marginRight: 16 }}
+        >
+          <MaterialIcons
+            name="delete-forever"
+            size={24}
+            color={navigationTheme.colors.notification}
+          />
+        </TouchableOpacity>
+      ),
+    }),
+    [t, handleClearCart, navigationTheme.colors.notification],
   );
 
   // Event handlers
@@ -169,6 +221,7 @@ const RootNavigator: React.FC = () => {
     [completeOnboarding, setUserType],
   );
 
+  
   const handleLogin = useCallback(
     (selectedUserType: 'customer' | 'restaurant') => {
       setUserType(selectedUserType);
@@ -229,6 +282,7 @@ const RootNavigator: React.FC = () => {
       <NavigationContainer
         ref={navigationRef}
         linking={linking}
+        theme={navigationTheme}
         fallback={<LoadingScreen />}
         onReady={handleNavigationReady}
       >
@@ -260,27 +314,14 @@ const RootNavigator: React.FC = () => {
             <Stack.Screen
               name="Cart"
               component={CartScreen}
-              options={{
-                headerTitle: 'My Cart',
-                contentStyle: {
-                  backgroundColor: theme.colors.background,
-                },
-                headerRight: () => (
-                  <Ionicons
-                    name="options"
-                    size={24}
-                    color={theme.colors.onSurface}
-                    style={{ marginLeft: -10 }}
-                  />
-                ),
-              }}
+              options={cartScreenOptions}
             />
 
             <Stack.Screen
               name="Notifications"
               component={NotificationsScreen}
               options={{
-                headerTitle: 'Notifications',
+                headerTitle: t('notifications'),
               }}
             />
           </Stack.Group>
@@ -322,8 +363,15 @@ const RootNavigator: React.FC = () => {
               name="AddressScreen"
               component={AddressScreen}
               options={{
-                headerTitle: 'Address',
+                headerTitle: t('address'),
                 headerBackVisible: true,
+              }}
+            />
+            <Stack.Screen
+              name="NearbyRestaurants"
+              component={NearbyRestaurantsScreen}
+              options={{
+                headerTitle: t('restaurants_near_you'),
               }}
             />
           </Stack.Group>
@@ -334,7 +382,7 @@ const RootNavigator: React.FC = () => {
               name="EditProfile"
               component={EditProfileScreen}
               options={{
-                headerTitle: 'Edit Profile',
+                headerTitle: t('edit_profile'),
               }}
             />
 
@@ -342,7 +390,7 @@ const RootNavigator: React.FC = () => {
               name="Help"
               component={CustomerHelpCenterStackScreen}
               options={{
-                headerTitle: 'Help Center',
+                headerTitle: t('help_center'),
               }}
             />
 
@@ -350,7 +398,7 @@ const RootNavigator: React.FC = () => {
               name="FavoriteRestaurantScreen"
               component={FavoriteRestaurants}
               options={{
-                headerTitle: 'Favorite Restaurants',
+                headerTitle: t('favorite_restaurants'),
               }}
             />
 
@@ -358,7 +406,7 @@ const RootNavigator: React.FC = () => {
               name="PaymentMethods"
               component={PaymentScreen}
               options={{
-                headerTitle: 'Payment Methods',
+                headerTitle: t('payment_methods'),
               }}
             />
 
@@ -366,7 +414,7 @@ const RootNavigator: React.FC = () => {
               name="LanguageScreen"
               component={LanguageScreen}
               options={{
-                headerTitle: 'Language Settings',
+                headerTitle: t('language_settings'),
               }}
             />
           </Stack.Group>
@@ -377,11 +425,22 @@ const RootNavigator: React.FC = () => {
             component={CheckOutScreen}
             options={{
               ...screenOptions.checkout,
-              headerTitle: 'Checkout Order',
+              headerTitle: t('checkout_order'),
+              contentStyle: {
+                marginTop: -34,
+              },
             }}
           />
 
           {/* Future screens can be added here */}
+          <Stack.Screen 
+            name="OrderReceipt" 
+            component={OrderReceiptScreen}
+            options={{
+              ...screenOptions.fullScreen,
+              headerTitle: t('order_receipt'),
+            }}
+          />
           {/* 
           <Stack.Screen 
             name="OrderTracking" 

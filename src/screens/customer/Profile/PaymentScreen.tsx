@@ -1,16 +1,92 @@
-import { View, Text } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { View, Text, TouchableOpacity } from 'react-native';
 import React from 'react';
 import { RootStackScreenProps } from '@/src/navigation/types';
+import { usePaymentStore } from '@/src/stores/customerStores/paymentStore';
+import { PaymentMethod } from '@/src/types';
+import CommonView from '@/src/components/common/CommonView';
+import { Card, useTheme } from 'react-native-paper';
+import { MaterialIcons } from '@expo/vector-icons';
 
 const PaymentScreen = ({
   navigation,
 }: RootStackScreenProps<'PaymentMethods'>) => {
+  const { t } = useTranslation('translation');
+  const { colors } = useTheme();
+  const setSelectedPaymentMethod = usePaymentStore((state) => state.setSelectedPaymentMethod);
+
+  const handleSelectPaymentMethod = (method: PaymentMethod) => {
+    setSelectedPaymentMethod(method);
+    navigation.goBack(); // Navigate back to the checkout screen
+  };
+
+  const cardStyle = {
+    marginVertical: 8,
+    borderColor: colors.outline,
+    backgroundColor: colors.surface,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+  };
+
   return (
-    <View>
-      <Text className="text-center items-center justify-center">
-        PaymentScreen
-      </Text>
-    </View>
+    <CommonView>
+      <View className="flex-1 px-4 py-4">
+        <Text className="text-xl font-bold text-center mb-6" style={{ color: colors.onSurface }}>
+          {t('payment_method')}
+        </Text>
+
+        {/* MTN Mobile Money Card */}
+        <Card mode="outlined" style={cardStyle}>
+          <Card.Content className="py-4">
+            <TouchableOpacity 
+              className="flex-row items-center justify-between"
+              onPress={() => handleSelectPaymentMethod('mtn_mobile_money')}
+              activeOpacity={0.7}
+            >
+              <View className="flex-row items-center">
+                <MaterialIcons name="payment" size={28} color={colors.primary} />
+                <View className="ml-4">
+                  <Text className="text-lg font-semibold" style={{ color: colors.onSurface }}>
+                    MTN Mobile Money
+                  </Text>
+                  <Text className="text-sm" style={{ color: colors.onSurfaceVariant }}>
+                    Mobile Payment
+                  </Text>
+                </View>
+              </View>
+              <MaterialIcons name="arrow-forward-ios" size={20} color={colors.onSurfaceVariant} />
+            </TouchableOpacity>
+          </Card.Content>
+        </Card>
+
+        {/* Orange Mobile Money Card */}
+        <Card mode="outlined" style={cardStyle}>
+          <Card.Content className="py-4">
+            <TouchableOpacity 
+              className="flex-row items-center justify-between"
+              onPress={() => handleSelectPaymentMethod('orange_money')}
+              activeOpacity={0.7}
+            >
+              <View className="flex-row items-center">
+                <MaterialIcons name="payment" size={28} color={colors.primary} />
+                <View className="ml-4">
+                  <Text className="text-lg font-semibold" style={{ color: colors.onSurface }}>
+                    Orange Mobile Money
+                  </Text>
+                  <Text className="text-sm" style={{ color: colors.onSurfaceVariant }}>
+                    Mobile Payment
+                  </Text>
+                </View>
+              </View>
+              <MaterialIcons name="arrow-forward-ios" size={20} color={colors.onSurfaceVariant} />
+            </TouchableOpacity>
+          </Card.Content>
+        </Card>
+      </View>
+    </CommonView>
   );
 };
 

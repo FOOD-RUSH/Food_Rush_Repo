@@ -15,6 +15,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
+import { useTranslation } from 'react-i18next';
 
 // Constants
 const SWIPE_THRESHOLD = -60;
@@ -41,6 +42,7 @@ const CartFoodComponent: React.FC<CartFoodComponentProps> = React.memo(
     onDelete,
   }) => {
     const { colors } = useTheme();
+    const { t } = useTranslation('translation');
     const deleteCart = useCartStore((state) => state.deleteCart);
 
     // Shared values
@@ -74,25 +76,25 @@ const CartFoodComponent: React.FC<CartFoodComponentProps> = React.memo(
         onDelete?.(id);
       } catch (error) {
         console.error('Error deleting cart item:', error);
-        Alert.alert('Error', 'Failed to delete item. Please try again.');
+        Alert.alert(t('error'), t('failed_to_delete_item'));
       }
-    }, [id, deleteCart, onDelete]);
+    }, [id, deleteCart, onDelete, t]);
 
     // Confirm delete with alert
     const confirmDelete = useCallback(() => {
       Alert.alert(
-        'Remove Item',
-        `Remove ${menuItem.name} from your cart?`,
+        t('remove_item'),
+        `${t('remove')} ${menuItem.name} from your cart?`,
         [
           {
-            text: 'Cancel',
+            text: t('cancel'),
             style: 'cancel',
             onPress: () => {
               translateX.value = withSpring(0, SPRING_CONFIG);
             },
           },
           {
-            text: 'Remove',
+            text: t('remove'),
             style: 'destructive',
             onPress: () => {
               // Animate out smoothly
@@ -114,7 +116,7 @@ const CartFoodComponent: React.FC<CartFoodComponentProps> = React.memo(
         ],
         { cancelable: true },
       );
-    }, [menuItem.name, handleDelete, translateX, opacity, scale]);
+    }, [menuItem.name, handleDelete, translateX, opacity, scale, t]);
 
     // Simplified pan gesture
     const panGesture = Gesture.Pan()
@@ -197,7 +199,7 @@ const CartFoodComponent: React.FC<CartFoodComponentProps> = React.memo(
               <Animated.View style={deleteIconStyle}>
                 <MaterialIcons name="delete" size={24} color="#fff" />
               </Animated.View>
-              <Text style={styles.deleteText}>Remove</Text>
+              <Text style={styles.deleteText}>{t('remove')}</Text>
             </Pressable>
           </Animated.View>
 
@@ -240,7 +242,9 @@ const CartFoodComponent: React.FC<CartFoodComponentProps> = React.memo(
                             { color: colors.onSurfaceVariant },
                           ]}
                         >
-                          {quantity} item{quantity > 1 ? 's' : ''}
+                          {quantity}
+                          {t('item')}
+                          {quantity > 1 ? t('items_suffix') : ''}
                         </Text>
                         <Text
                           style={[
@@ -248,7 +252,7 @@ const CartFoodComponent: React.FC<CartFoodComponentProps> = React.memo(
                             { color: colors.onSurfaceVariant },
                           ]}
                         >
-                          •
+                          {t('separator')}
                         </Text>
                         <Text
                           style={[
@@ -256,7 +260,7 @@ const CartFoodComponent: React.FC<CartFoodComponentProps> = React.memo(
                             { color: colors.onSurfaceVariant },
                           ]}
                         >
-                          1.5 Km
+                          1.5{t('km_unit')}
                         </Text>
                       </View>
 
@@ -281,7 +285,7 @@ const CartFoodComponent: React.FC<CartFoodComponentProps> = React.memo(
                       )}
 
                       <Text style={[styles.price, { color: colors.primary }]}>
-                        {formattedPrice} FCFA
+                        {formattedPrice} {t('fcfa_unit')}
                       </Text>
                     </View>
                   </View>

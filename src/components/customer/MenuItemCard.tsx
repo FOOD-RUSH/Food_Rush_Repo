@@ -6,6 +6,7 @@ import { images } from '@/assets/images';
 import { useNavigation } from '@react-navigation/native';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import { useCartStore } from '@/src/stores/customerStores/cartStore';
+import { useTranslation } from 'react-i18next';
 
 const MenuItemCard = ({
   id,
@@ -18,6 +19,8 @@ const MenuItemCard = ({
   const addToCart = useCartStore((state) => state.addtoCart);
   const removeFromCart = useCartStore((state) => state.deleteCart);
   const [isSelect, setIsSelected] = useState(false);
+  const { t } = useTranslation('translation');
+
   const longPress = () => {
     setIsSelected(!isSelect);
     if (isSelect) {
@@ -81,7 +84,8 @@ const MenuItemCard = ({
               className="text-xl font-semibold"
               style={{ color: colors.primary }}
             >
-              {price} XAF
+              {price}
+              {t('xaf_currency')}
             </Text>
           </View>
         </View>

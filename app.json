@@ -11,28 +11,43 @@
     "splash": {
       "image": "./assets/images/SplashScreen.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#06102b"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "UIBackgroundModes": ["location", "fetch"]
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/Foodrushlogo.png",
         "backgroundColor": "#06102b"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+        "permissions": ["ACCESS_BACKGROUND_LOCATION"]
     },
     "web": {
       "bundler": "metro",
       "output": "single",
       "favicon": "./assets/images/favicon.png"
     },
+    
     "plugins": [
       "expo-font",
       "expo-asset",
       "expo-web-browser",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-localization",
+      [
+        "expo-location", 
+        {
+"locationAlwaysAndWhenInUsePermission": "This app needs access to your location to show nearby restaurants and provide delivery services.",
+          "locationAlwaysPermission": "This app needs access to your location to show nearby restaurants and provide delivery services.",
+          "locationWhenInUsePermission": "This app needs access to your location to show nearby restaurants and provide delivery services.",
+          "isIosBackgroundLocationEnabled": false,
+          "isAndroidBackgroundLocationEnabled": false        }
+    ]
     ],
     "experiments": {
       "typedRoutes": true

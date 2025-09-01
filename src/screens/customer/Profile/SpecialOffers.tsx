@@ -4,7 +4,7 @@ import React from 'react';
 const SpecialOffers = () => {
   return (
     <View>
-      <Text>SpecialOffers</Text>
+      <Text>{t('special_offers')}</Text>
     </View>
   );
 };

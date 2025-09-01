@@ -1,5 +1,5 @@
 import { View, StatusBar, Image, Pressable, Alert } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { ScrollView } from 'react-native-gesture-handler';
 import {
   Text,
@@ -15,24 +15,13 @@ import Seperator from '@/src/components/common/Seperator';
 import InputField from '@/src/components/customer/InputField';
 import { FoodProps } from '@/src/types';
 import { useCartStore } from '@/src/stores/customerStores/cartStore';
+import { useTranslation } from 'react-i18next';
+import { useGetMenuById } from '@/src/hooks/customer';
 
 interface ExtraProps {
   id: number;
   name: string;
   price: number;
-}
-
-interface FoodDetailProps {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  image: any;
-  reviewCount: number;
-  rating: number;
-  category: string;
-  extras: ExtraProps[];
-  preparationTime?: string;
 }
 
 const FoodDetailsScreen = ({
@@ -41,52 +30,18 @@ const FoodDetailsScreen = ({
 }: RootStackScreenProps<'FoodDetails'>) => {
   const { restaurantId, foodId } = route.params;
   const { colors } = useTheme();
-
-  const [foodDetails, setFoodDetails] = useState<FoodDetailProps>();
-  const [loading, setLoading] = useState(true);
+  const { t } = useTranslation('translation');
   const [quantity, setQuantity] = useState(0);
   const [instructions, setInstructions] = useState('');
-  useEffect(() => {
-    console.log('Restaurant ID: ' + restaurantId);
-    console.log('Food ID: ' + foodId);
-    const fetchFoodDetails = async () => {
-      try {
-        setLoading(true);
-        // Simulated API call - replace with your actual API endpoint
-        // const response = await fetch(`/api/restaurants/${restaurantId}/foods/${foodId}`);
-        // const data = await response.json();
 
-        // Mock data for demonstration
-
-        setTimeout(() => {
-          setFoodDetails({
-            id: foodId,
-            name: 'Mixed Vegetable Salad',
-            description:
-              'Fresh garden vegetables mixed with our signature dressing. A healthy and delicious choice packed with nutrients and vibrant flavors.',
-            price: 5500,
-            image: images.onboarding2,
-            rating: 4.5,
-            reviewCount: 128,
-            category: 'Salads',
-
-            extras: [
-              { id: 1, name: 'Extra Cheese', price: 500 },
-              { id: 2, name: 'Avocado', price: 800 },
-              { id: 3, name: 'Grilled Chicken', price: 1500 },
-            ],
-          });
-          setLoading(false);
-        }, 2000);
-      } catch (error) {
-        console.error('Error fetching food details:', error);
-        setLoading(false);
-        Alert.alert('Error', 'Failed to load food details. Please try again.');
-      }
-    };
-    fetchFoodDetails();
-  }, [restaurantId, foodId]);
   // store
+  const {
+    data: MenuDetails,
+    isLoading,
+    isRefetching,
+    refetch,
+    error,
+  } = useGetMenuById(restaurantId, foodId);
   const addItemtoCart = useCartStore().addtoCart;
 
   const handleQuantityChange = (change: number) => {
@@ -97,19 +52,19 @@ const FoodDetailsScreen = ({
   };
 
   const calculateTotalPrice = () => {
-    if (!foodDetails) return 0;
-    return foodDetails.price * quantity;
+    if (!MenuDetails) return 0;
+    return MenuDetails.price * quantity;
   };
 
   const handleAddToBasket = () => {
     const cartItem: FoodProps = {
-      id: foodDetails?.id!,
+      id: MenuDetails?.id!,
       restaurantID: restaurantId,
-      name: foodDetails?.name,
-      category: foodDetails?.category,
-      image: foodDetails?.image,
-      description: foodDetails?.description!,
-      price: foodDetails?.price,
+      name: MenuDetails?.name,
+      category: MenuDetails?.category,
+      image: MenuDetails?.image,
+      description: MenuDetails?.description!,
+      price: MenuDetails?.price!,
     };
 
     console.log('Adding to basket:', cartItem);
@@ -118,25 +73,29 @@ const FoodDetailsScreen = ({
     // Implement actual basket functionality here
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <View
         className={`flex-1 justify-center items-center ${colors.background}`}
       >
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text className={`mt-4 `}>Loading food details...</Text>
+        <Text className={`mt-4 `}>
+          {t('loading_food_details') || 'Loading food details...'}
+        </Text>
       </View>
     );
   }
 
-  if (!foodDetails) {
+  if (!MenuDetails) {
     return (
       <View
         className={`flex-1 justify-center items-center ${colors.background}`}
       >
-        <Text className={``}>Failed to load food details</Text>
-        <Button mode="contained" onPress={() => {}} className="mt-4">
-          Retry
+        <Text className={``}>
+          {t('failed_to_load_food_details') || 'Failed to load food details'}
+        </Text>
+        <Button mode="contained" onPress={() => refetch()} className="mt-4">
+          {t('retry') || 'Retry'}
         </Button>
       </View>
     );
@@ -150,16 +109,19 @@ const FoodDetailsScreen = ({
         <View className="relative">
           <Image
             className="relative object-center w-full h-[350px]"
-            source={foodDetails.image}
+            source={MenuDetails.image || images.onboarding1}
             resizeMode="cover"
+            onError={() => console.log('Image load error')}
           />
 
           {/* Rating Badge */}
           <View className="absolute bottom-4 right-4 bg-white rounded-full px-3 py-1 flex-row items-center">
             <Ionicons name="star" color="#FFD700" size={16} />
-            <Text className="ml-1 font-semibold">{foodDetails.rating}</Text>
+            <Text className="ml-1 font-semibold">
+              {MenuDetails.rating || 4.3}{' '}
+            </Text>
             <Text className={`ml-1 text-[${colors.onSurfaceVariant}]`}>
-              ({foodDetails.reviewCount})
+              ({MenuDetails.reviewCount || '100K'})
             </Text>
           </View>
         </View>
@@ -174,12 +136,12 @@ const FoodDetailsScreen = ({
                 fontWeight: 'bold',
               }}
             >
-              {foodDetails.name}
+              {MenuDetails.name}
             </Text>
 
             <Seperator />
 
-            <Text variant="bodyLarge">{foodDetails.description}</Text>
+            <Text variant="bodyLarge">{MenuDetails.description}</Text>
           </View>
         </View>
         {/* QUANTITY NEEDED */}
@@ -208,7 +170,8 @@ const FoodDetailsScreen = ({
 
         <View className="px-4 mb-4">
           <InputField
-            label="Add a note (optional)"
+            // label={t('add_a_note_optional')}
+            label={t('add_a_note')}
             multiline
             numberOfLines={3}
             style={{
@@ -218,7 +181,8 @@ const FoodDetailsScreen = ({
               alignSelf: 'center',
               height: 100,
             }}
-            placeholder="Special instructions or preferences"
+            // placeholder={t('special_instructions_or_preferences')}
+            placeholder={t('special_instruction')}
             onChangeText={(text) => setInstructions(text)}
           />
         </View>
@@ -235,13 +199,13 @@ const FoodDetailsScreen = ({
         >
           <View className="flex-row justify-center items-center px-4">
             <Text className="font-semibold text-lg" style={{ color: 'white' }}>
-              Add to Basket -
+              {/* {t('add_to_basket')} - */} {t('add_to_basket')}
             </Text>
             <Text
               className="text-white font-bold text-lg"
               style={{ color: 'white' }}
             >
-              {calculateTotalPrice()} FCFA
+              {calculateTotalPrice()} {t('fcfa_unit')}
             </Text>
           </View>
         </TouchableRipple>

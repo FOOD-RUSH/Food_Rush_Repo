@@ -1,8 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, devtools, persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { notificationApi } from '@/src/services/customer/notification.service';
-import { Notification, NotificationSettings } from '@/src/services/customer/notification.service';
+import { notificationApi , Notification, NotificationSettings } from '@/src/services/customer/notification.service';
 
 interface NotificationState {
   notifications: Notification[];

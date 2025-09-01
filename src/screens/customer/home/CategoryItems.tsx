@@ -1,11 +1,13 @@
 import { View } from 'react-native';
 import React from 'react';
-import { CategoryFilters } from '@/assets/images';
+import { CategoryFilters } from '@/src/constants/categories';
+import { useTranslation } from 'react-i18next';
 import CategoryItem from '@/src/components/customer/CategoryItem';
 import { useTheme } from 'react-native-paper';
 
 const CategoryItems = () => {
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   return (
     <View
@@ -14,7 +16,7 @@ const CategoryItems = () => {
       {CategoryFilters.map((category) => (
         <CategoryItem
           image={category.image}
-          title={category.title}
+          title={t(category.title)}
           key={category.id}
         />
       ))}

@@ -1,23 +1,28 @@
 import React, { useMemo, useCallback } from 'react';
-import { View, Text, Image, FlatList, ListRenderItem } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  FlatList,
+  ListRenderItem,
+} from 'react-native';
 import CommonView from '@/src/components/common/CommonView';
 import CartFoodComponent from '@/src/components/customer/CartFoodComponent';
 import { TouchableRipple, useTheme } from 'react-native-paper';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import { useCartStore, CartItem } from '@/src/stores/customerStores/cartStore';
 import { images } from '@/assets/images';
-import { useLanguage } from '@/src/contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-toast-message';
 
 const CartScreen = ({ navigation }: RootStackScreenProps<'Cart'>) => {
   const { colors } = useTheme();
-  const { t } = useLanguage();
+  const { t } = useTranslation('translation');
 
   // Subscribe to specific store slices to minimize re-renders
   const cartItems = useCartStore((state) => state.items);
   const totalPrice = useCartStore((state) => state.totalprice);
   const cartId = useCartStore((state) => state.CartID);
-  const clearCart = useCartStore((state) => state.clearCart);
 
   // Memoize formatted total price
   const formattedTotalPrice = useMemo(
@@ -40,45 +45,26 @@ const CartScreen = ({ navigation }: RootStackScreenProps<'Cart'>) => {
     if (cartItems.length === 0) {
       Toast.show({
         type: 'info',
-        text1: t('info'),
-        text2: t('cart_empty'),
+        text1: t('info') || 'Info',
+        text2: t('cart_empty') || 'Your cart is empty',
         position: 'top',
       });
       return;
     }
-    
+
     if (cartId) {
       navigation.navigate('Checkout', { cartId });
     } else {
       Toast.show({
         type: 'error',
-        text1: t('error'),
-        text2: 'Unable to proceed to checkout. Please try again.',
+        text1: t('error') || 'Error',
+        text2:
+          t('unable_to_proceed_to_checkout') || 'Unable to proceed to checkout',
         position: 'top',
       });
     }
   }, [cartItems.length, cartId, navigation, t]);
 
-  // Handle clear cart
-  const handleClearCart = useCallback(() => {
-    if (cartItems.length === 0) {
-      Toast.show({
-        type: 'info',
-        text1: t('info'),
-        text2: t('cart_empty'),
-        position: 'top',
-      });
-      return;
-    }
-    
-    clearCart();
-    Toast.show({
-      type: 'success',
-      text1: t('success'),
-      text2: 'Cart cleared successfully',
-      position: 'top',
-    });
-  }, [cartItems.length, clearCart, t]);
 
   // Optimized render item with useCallback to prevent unnecessary re-renders
   const renderCartItem: ListRenderItem<CartItem> = useCallback(
@@ -128,34 +114,16 @@ const CartScreen = ({ navigation }: RootStackScreenProps<'Cart'>) => {
 
   // Early return for empty cart
   if (cartItems.length === 0) {
-    return <CommonView>{EmptyCartComponent}</CommonView>;
+    return (
+      <CommonView>
+        {EmptyCartComponent}
+      </CommonView>
+    );
   }
 
   return (
     <CommonView>
       <View className="flex-1">
-        {/* Cart Header */}
-        <View className="flex-row justify-between items-center px-4 py-3">
-          <Text
-            className="text-xl font-bold"
-            style={{ color: colors.onSurface }}
-          >
-            {t('cart')}
-          </Text>
-          <TouchableRipple
-            onPress={handleClearCart}
-            className="px-3 py-1 rounded-full"
-            style={{ backgroundColor: colors.surfaceVariant }}
-          >
-            <Text
-              className="text-sm font-medium"
-              style={{ color: colors.primary }}
-            >
-              {t('clear_cart')}
-            </Text>
-          </TouchableRipple>
-        </View>
-
         {/* Cart Items List */}
         <FlatList
           data={cartItems}
@@ -207,7 +175,8 @@ const CartScreen = ({ navigation }: RootStackScreenProps<'Cart'>) => {
                 className="text-sm opacity-90"
                 style={{ color: colors.onPrimary }}
               >
-                {totalItems} item{totalItems !== 1 ? 's' : ''}
+                {totalItems} {t('item')}
+                {totalItems !== 1 ? t('items_suffix') : ''}
               </Text>
             </View>
 
@@ -215,7 +184,7 @@ const CartScreen = ({ navigation }: RootStackScreenProps<'Cart'>) => {
               className="font-bold text-lg"
               style={{ color: colors.onPrimary }}
             >
-              {formattedTotalPrice} FCFA
+              {formattedTotalPrice} {t('fcfa_unit')}
             </Text>
           </View>
         </TouchableRipple>

@@ -665,7 +665,3 @@ const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
         </CommonView>
       </LinearGradient>
     </>
-  );
-};
-
-export default EditFoodScreen;

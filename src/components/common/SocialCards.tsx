@@ -1,8 +1,8 @@
 import { View, Text, TouchableOpacity, Linking, Alert } from 'react-native';
 import React from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from 'react-native-paper';
-import { Card } from 'react-native-paper';
+import { useTheme , Card } from 'react-native-paper';
+import { useTranslation } from 'react-i18next';
 
 interface SocialCardsProps {
   id: number;
@@ -18,10 +18,11 @@ const SocialCards = ({
   link,
 }: SocialCardsProps) => {
   const { colors } = useTheme();
+  const { t } = useTranslation('translation');
 
   const handlePress = async () => {
     if (!link) {
-      Alert.alert('Info', 'Contact information not available');
+      Alert.alert(t('info'), t('contact_info_not_available'));
       return;
     }
 
@@ -30,10 +31,10 @@ const SocialCards = ({
       if (supported) {
         await Linking.openURL(link);
       } else {
-        Alert.alert('Error', `Cannot open ${social_platform}`);
+        Alert.alert(t('error'), `${t('cannot_open')}${social_platform}`);
       }
     } catch (error) {
-      Alert.alert('Error', `Failed to open ${social_platform}`);
+      Alert.alert(t('error'), `${t('failed_to_open')}${social_platform}`);
       console.error('Error opening link:', error);
     }
   };
@@ -73,7 +74,7 @@ const SocialCards = ({
                 className="text-sm mt-1"
                 style={{ color: colors.onSurfaceVariant }}
               >
-                Tap to call support
+                {t('tap_to_call_support')}
               </Text>
             )}
             {social_platform === 'WhatsApp' && (
@@ -81,7 +82,7 @@ const SocialCards = ({
                 className="text-sm mt-1"
                 style={{ color: colors.onSurfaceVariant }}
               >
-                Chat with us
+                {t('chat_with_us')}
               </Text>
             )}
             {['Website', 'Facebook', 'Twitter', 'Instagram'].includes(
@@ -91,7 +92,8 @@ const SocialCards = ({
                 className="text-sm mt-1"
                 style={{ color: colors.onSurfaceVariant }}
               >
-                Visit our {social_platform.toLowerCase()}
+                {t('visit_our')}
+                {social_platform.toLowerCase()}
               </Text>
             )}
           </View>

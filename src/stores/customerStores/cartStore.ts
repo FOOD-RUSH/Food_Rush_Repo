@@ -70,7 +70,7 @@ export const useCartStore = create<CartState & CartActions>()(
             const { restaurantID, items } = get();
 
             // Check if adding from different restaurant
-            if (restaurantID && item.restaurantID !== restaurantID) {
+            if (restaurantID && item.restaurant?.id !== restaurantID) {
               Alert.alert(
                 'Different Restaurant',
                 'You are trying to add food from a different restaurant. Do you want to clear your cart and add this item?',
@@ -84,8 +84,8 @@ export const useCartStore = create<CartState & CartActions>()(
                     onPress: () => {
                       set({
                         items: [],
-                        restaurantID: item.restaurantID,
-                        CartID: `${Date.now()}-${item.restaurantID}`,
+                        restaurantID: item.restaurant?.id,
+                        CartID: `${Date.now()}-${item.restaurant?.id}`,
                         totalprice: 0,
                       });
                       get().addtoCart(item, quantity, specialInstructions);
@@ -131,8 +131,8 @@ export const useCartStore = create<CartState & CartActions>()(
               // Set restaurant ID and cart ID if first item
               if (items.length === 0) {
                 set({
-                  restaurantID: item.restaurantID,
-                  CartID: `${Date.now()}-${item.restaurantID}`,
+                  restaurantID: item.restaurant?.id,
+                  CartID: `${Date.now()}-${item.restaurant?.id}`,
                 });
               }
             }

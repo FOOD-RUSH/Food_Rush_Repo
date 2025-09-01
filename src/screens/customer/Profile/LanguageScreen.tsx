@@ -1,47 +1,56 @@
 import React, { useCallback } from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import CommonView from '@/src/components/common/CommonView';
 import { RadioButton, useTheme } from 'react-native-paper';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import { useLanguage } from '@/src/contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
+import { SupportedLanguage } from '@/src/locales/i18n';
 
 const LanguageScreen = ({
   navigation,
 }: RootStackScreenProps<'LanguageScreen'>) => {
   const { colors } = useTheme();
-  const { language, setLanguage } = useLanguage();
+  const { t } = useTranslation();
+  const { currentLanguage, changeLanguage, availableLanguages } = useLanguage();
 
-  const handleLanguageChange = useCallback((newLanguage: 'en' | 'fr') => {
-    setLanguage(newLanguage);
-  }, [setLanguage]);
-
-  const languages = [
-    { code: 'en', name: 'English (US)' },
-    { code: 'fr', name: 'Français (FR)' },
-  ];
+  const handleLanguageChange = useCallback(
+    async (newLanguage: SupportedLanguage) => {
+      try {
+        await changeLanguage(newLanguage);
+      } catch (error) {
+        console.error('Failed to change language:', error);
+      }
+    },
+    [changeLanguage],
+  );
 
   return (
     <CommonView>
       <ScrollView className="py-5">
-        {languages.map((lang) => (
-          <View 
-            key={lang.code} 
+        {Object.entries(availableLanguages).map(([code, language]) => (
+          <TouchableOpacity
+            key={code}
+            onPress={() => handleLanguageChange(code as SupportedLanguage)}
             className="flex-row items-center justify-between py-4 px-4"
           >
-            <Text 
-              className="text-[18px] font-semibold"
-              style={{ color: colors.onSurface }}
-            >
-              {lang.name}
-            </Text>
+            <View className="flex-row items-center">
+              <Text className="text-2xl mr-3">{language.flag}</Text>
+              <Text
+                className="text-[18px] font-semibold"
+                style={{ color: colors.onSurface }}
+              >
+                {language.name}
+              </Text>
+            </View>
             <RadioButton
-              value={lang.code}
-              status={language === lang.code ? 'checked' : 'unchecked'}
-              onPress={() => handleLanguageChange(lang.code as 'en' | 'fr')}
+              value={code}
+              status={currentLanguage === code ? 'checked' : 'unchecked'}
+              onPress={() => handleLanguageChange(code as SupportedLanguage)}
               color={colors.primary}
               uncheckedColor={colors.outline}
             />
-          </View>
+          </TouchableOpacity>
         ))}
       </ScrollView>
     </CommonView>
