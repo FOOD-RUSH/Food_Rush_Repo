@@ -1,5 +1,7 @@
 import { MD3LightTheme, MD3DarkTheme, MD3Theme } from 'react-native-paper';
 import { useColorScheme } from 'react-native';
+import { DefaultTheme, DarkTheme, Theme as NavigationTheme } from '@react-navigation/native';
+import { useAppStore } from '../stores/customerStores/AppStore';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 
@@ -40,6 +42,33 @@ export const lightTheme: MD3Theme = {
   dark: false,
 };
 
+// React Navigation themes that perfectly match React Native Paper themes
+export const lightNavigationTheme: NavigationTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    primary: COLORS.PRIMARY,
+    background: '#ffffff',
+    card: '#ffffff',
+    text: '#1e293b',
+    border: '#cbd5e1',
+    notification: COLORS.ERROR,
+  },
+};
+
+export const darkNavigationTheme: NavigationTheme = {
+  ...DarkTheme,
+  colors: {
+    ...DarkTheme.colors,
+    primary: COLORS.PRIMARY,
+    background: '#0f172a',
+    card: '#1e293b',
+    text: '#f1f5f9',
+    border: '#64748b',
+    notification: COLORS.ERROR,
+  },
+};
+
 export const darkTheme: MD3Theme = {
   ...MD3DarkTheme,
   colors: {
@@ -74,6 +103,23 @@ export const useAppTheme = (themeMode: ThemeMode): MD3Theme => {
   return themeMode === 'dark' ? darkTheme : lightTheme;
 };
 
+// Hook to get the appropriate navigation theme
+export const useNavigationTheme = (themeMode: ThemeMode): NavigationTheme => {
+  const systemColorScheme = useColorScheme();
+
+  if (themeMode === 'system') {
+    return systemColorScheme === 'dark' ? darkNavigationTheme : lightNavigationTheme;
+  }
+
+  return themeMode === 'dark' ? darkNavigationTheme : lightNavigationTheme;
+};
+
+// Hook that integrates with Zustand store
+export const useAppNavigationTheme = (): NavigationTheme => {
+  const themeMode = useAppStore((state) => state.theme) as ThemeMode;
+  return useNavigationTheme(themeMode);
+};
+
 // Theme utilities
 export const getThemeColors = (isDark: boolean) => {
   return isDark ? darkTheme.colors : lightTheme.colors;
@@ -84,6 +130,8 @@ export const useIsSystemDarkMode = () => {
   const systemColorScheme = useColorScheme();
   return systemColorScheme === 'dark';
 };
+
+// Theme utilities
 
 // Utility function that doesn't use hooks (for non-component usage)
 export const getSystemColorScheme = () => {

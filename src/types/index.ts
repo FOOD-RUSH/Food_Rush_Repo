@@ -55,22 +55,6 @@ export interface User {
 // 
 // 
 // 
-//     
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
-// 
 // 
 
 
@@ -89,25 +73,33 @@ export interface FoodProps {
     latitude?: string,
     longitude?: string
   },
-  // ratings?: number;
-  distance?: number; 
-
+  rating?: number;
+  distance?: number;
+  deliveryPrice?: number;
 
 }
 
 
 export interface RestaurantCard {
-  restaurantId: string;
+  id: string;
   name: string;
   address: string;
+  latitude?: number | null;
+  longitude?: number | null;
   isOpen: boolean;
-  verificationStatus?: "Approved"
-  distanceFromUser: number,
-  imageUrl: string,
+  verificationStatus?: string;
+  menuMode?: string;
+  createdAt?: string;
+  // Future fields from backend
+  deliveryPrice?: number;
+  distance?: number;
+  imageUrl?: string;
   estimatedDeliveryTime?: string;
-  deliveryFee: string
-  rating?: number
-
+  deliveryFee?: string;
+  rating?: number;
+  // Mapped fields for component compatibility
+  restaurantId: string; // Will be mapped from id
+  distanceFromUser?: number; // Will be mapped from distance
 }
 
 

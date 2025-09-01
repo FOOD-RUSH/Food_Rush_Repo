@@ -13,6 +13,9 @@ interface LocationActions {
   setPermissionRequested: (requested: boolean) => void;
   setServicesEnabled: (enabled: boolean) => void;
   
+  // Batched update for performance
+  setBatch: (updates: Partial<LocationState>) => void;
+  
   // Computed actions
   setFallbackLocation: () => void;
   clearError: () => void;
@@ -32,53 +35,64 @@ const initialState: LocationState = {
 
 export const useLocationStore = create<LocationStore>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       // Initial state
       ...initialState,
 
-      // Actions
+      // Batched update for performance optimization
+      setBatch: (updates) => {
+        set((state) => ({
+          ...state,
+          ...updates,
+        }));
+      },
+
+      // Individual actions (use setBatch when possible)
       setLocation: (location) => {
-        set({
+        set((state) => ({
+          ...state,
           location,
-          error: null, // Clear error when location is set
+          error: null,
           isLoading: false,
-        });
+        }));
       },
 
       setLoading: (isLoading) => {
-        set({ isLoading });
+        set((state) => ({ ...state, isLoading }));
       },
 
       setError: (error) => {
-        set({
+        set((state) => ({
+          ...state,
           error,
           isLoading: false,
-        });
+        }));
       },
 
       setPermission: (hasPermission) => {
-        set({ hasPermission });
+        set((state) => ({ ...state, hasPermission }));
       },
 
       setPermissionRequested: (permissionRequested) => {
-        set({ permissionRequested });
+        set((state) => ({ ...state, permissionRequested }));
       },
 
       setServicesEnabled: (servicesEnabled) => {
-        set({ servicesEnabled });
+        set((state) => ({ ...state, servicesEnabled }));
       },
 
       setFallbackLocation: () => {
         const fallbackLocation = LocationService.getFallbackLocation();
-        set({
+        set((state) => ({
+          ...state,
           location: fallbackLocation,
           error: null,
           isLoading: false,
-        });
+        }));
       },
 
       clearError: () => {
-        set({ error: null });
+        set((state) => ({ ...state, error: null }));
       },
 
       reset: () => {
@@ -88,18 +102,34 @@ export const useLocationStore = create<LocationStore>()(
     {
       name: 'location-storage',
       storage: createJSONStorage(() => AsyncStorage),
-      // Only persist these values
+      // Only persist essential values
       partialize: (state) => ({
         location: state.location,
         hasPermission: state.hasPermission,
         permissionRequested: state.permissionRequested,
       }),
+      // Optimize storage writes
+      skipHydration: false,
     }
   )
 );
 
-// Selectors for common state combinations
+// Optimized selectors to prevent unnecessary re-renders
 export const useLocationData = () => useLocationStore((state) => state.location);
 export const useLocationLoading = () => useLocationStore((state) => state.isLoading);
 export const useLocationError = () => useLocationStore((state) => state.error);
 export const useLocationPermission = () => useLocationStore((state) => state.hasPermission);
+
+// Combined selectors for better performance
+export const useLocationStatus = () => useLocationStore((state) => ({
+  location: state.location,
+  isLoading: state.isLoading,
+  error: state.error,
+  hasPermission: state.hasPermission,
+}));
+
+export const useLocationInfo = () => useLocationStore((state) => ({
+  location: state.location,
+  hasPermission: state.hasPermission,
+  servicesEnabled: state.servicesEnabled,
+}));

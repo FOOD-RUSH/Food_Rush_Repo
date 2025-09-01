@@ -9,7 +9,7 @@ export interface OrderReceipt {
     image: any;
     phone?: string;
   };
-  items: Array<{
+  items: {
     id: string;
     name: string;
     price: number;
@@ -17,7 +17,7 @@ export interface OrderReceipt {
     image: any;
     category: string;
     description?: string;
-  }>;
+  }[];
   pricing: {
     subtotal: number;
     deliveryFee: number;
@@ -41,11 +41,11 @@ export interface OrderReceipt {
     lastFour?: string;
     provider?: string;
   };
-  timeline?: Array<{
+  timeline?: {
     status: string;
     timestamp: string;
     description: string;
-  }>;
+  }[];
 }
 
 // Mock data for development

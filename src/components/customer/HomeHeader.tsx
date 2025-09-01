@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Avatar, useTheme } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,7 +14,7 @@ interface HomeHeaderProps {
   onLocationPress: () => void;
 }
 
-const HomeHeader: React.FC<HomeHeaderProps> = ({
+const HomeHeader: React.FC<HomeHeaderProps> = React.memo(({
   navigation,
   location,
   onLocationPress,
@@ -23,18 +23,18 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({
   const { t } = useTranslation('translation');
   const cartItems = useCartItems();
 
-  // Calculate total cart items
-  const cartItemCount = cartItems.reduce(
-    (total, item) => total + item.quantity,
-    0,
-  );
+  // Memoize cart count calculation for performance
+  const cartItemCount = useMemo(() => {
+    return cartItems.reduce((total, item) => total + item.quantity, 0);
+  }, [cartItems]);
 
-  // Get display address
-  const getDisplayAddress = () => {
+  // Memoize display address calculation
+  const displayAddress = useMemo(() => {
     if (!location) {
       return t('select_location');
     }
 
+    // Show city and region for better UX in Cameroon
     if (location.city && location.region) {
       return `${location.city}, ${location.region}`;
     }
@@ -47,9 +47,24 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({
         : location.address;
     }
     return t('select_location');
-  };
+  }, [location, t]);
 
-  // Handle navigation actions
+  // Memoize fallback indicator
+  const fallbackIndicator = useMemo(() => {
+    if (!location?.isFallback) return null;
+    
+    return (
+      <View className="flex-row items-center mt-1">
+        <View className="px-2 py-0.5 bg-orange-100 rounded-full">
+          <Text className="text-xs text-orange-700 font-medium">
+            {t('default_location')}
+          </Text>
+        </View>
+      </View>
+    );
+  }, [location?.isFallback, t]);
+
+  // Stable navigation handlers
   const handleNotificationPress = useCallback(() => {
     navigation.navigate('Notifications');
   }, [navigation]);
@@ -58,13 +73,26 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({
     navigation.navigate('Cart');
   }, [navigation]);
 
+  // Memoize cart badge for performance
+  const cartBadge = useMemo(() => {
+    if (cartItemCount <= 0) return null;
+    
+    return (
+      <View className="absolute -top-1 -right-1 bg-red-500 rounded-full min-w-[18px] h-[18px] items-center justify-center">
+        <Text className="text-white text-xs font-bold">
+          {cartItemCount > 99 ? '99+' : cartItemCount}
+        </Text>
+      </View>
+    );
+  }, [cartItemCount]);
+
   return (
     <View
       className="flex-row items-center justify-between px-4 py-4"
       style={{
         backgroundColor: colors.background,
         borderBottomWidth: 1,
-        borderBottomColor: colors.outline,
+        borderBottomColor: colors.outlineVariant,
       }}
     >
       {/* Left Section - Avatar and Location */}
@@ -87,6 +115,7 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({
             className="flex-row items-center"
             onPress={onLocationPress}
             activeOpacity={0.7}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
             <View className="flex-1">
               <Text
@@ -95,18 +124,10 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({
                 numberOfLines={1}
                 ellipsizeMode="tail"
               >
-                {getDisplayAddress()}
+                {displayAddress}
               </Text>
 
-              {location?.isFallback && (
-                <View className="flex-row items-center mt-1">
-                  <View className="px-2 py-0.5 bg-orange-100 rounded-full">
-                    <Text className="text-xs text-orange-700 font-medium">
-                      {t('default_location')}
-                    </Text>
-                  </View>
-                </View>
-              )}
+              {fallbackIndicator}
             </View>
 
             <Ionicons
@@ -127,6 +148,7 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({
           style={{ backgroundColor: colors.surfaceVariant }}
           onPress={handleNotificationPress}
           activeOpacity={0.7}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
           <Ionicons
             name="notifications-outline"
@@ -141,20 +163,16 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({
           style={{ backgroundColor: colors.surfaceVariant }}
           onPress={handleCartPress}
           activeOpacity={0.7}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          {/* Cart Badge */}
-          {cartItemCount > 0 && (
-            <View className="absolute -top-1 -right-1 bg-red-500 rounded-full min-w-[18px] h-[18px] items-center justify-center">
-              <Text className="text-white text-xs font-bold">
-                {cartItemCount > 99 ? '99+' : cartItemCount}
-              </Text>
-            </View>
-          )}
+          {cartBadge}
           <Ionicons name="bag-outline" color={colors.onSurface} size={22} />
         </TouchableOpacity>
       </View>
     </View>
   );
-};
+});
 
-export default React.memo(HomeHeader);
+HomeHeader.displayName = 'HomeHeader';
+
+export default HomeHeader;

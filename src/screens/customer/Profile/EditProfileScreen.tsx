@@ -1,17 +1,15 @@
 import { useTranslation } from 'react-i18next';
-import { View, Text, Image } from 'react-native';
+import { View, Text, Image, Alert } from 'react-native';
 import React, { useState } from 'react';
 import { ScrollView } from 'react-native-gesture-handler';
 import { icons } from '@/assets/images';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import InputField from '@/src/components/customer/InputField';
-import { Dropdown } from 'react-native-element-dropdown';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import { Button, useTheme } from 'react-native-paper';
 import CommonView from '@/src/components/common/CommonView';
 import { useAuthUser } from '@/src/stores/customerStores/AuthStore';
 import { useUpdateProfile } from '@/src/hooks/customer/useAuthhooks';
-import { User } from '@/src/types';
 
 const EditProfileScreen = ({
   navigation,
@@ -20,34 +18,31 @@ const EditProfileScreen = ({
   const { t } = useTranslation('translation');
   const LoggedInUser = useAuthUser();
 
-  interface GenderProps {
-    id: number;
-    type: string;
-    label: string;
-  }
-
   const [fullName, setFullName] = useState(LoggedInUser?.fullName || '');
-
   const [email, setEmail] = useState(LoggedInUser?.email || '');
   const [phoneNumber, setPhoneNumber] = useState(
     LoggedInUser?.phoneNumber || '',
   );
-  const [genderValue, setGenderValue] = useState('Male');
+
+  const { colors } = useTheme();
+
+  const updateProfileMutation = useUpdateProfile();
 
   const handleUpdate = async () => {
-    // const data: User =  {
-    //   email: phoneNumber,
-    //   phoneNumber: email,
-    //   fullName: fullName,
-    //   role:'customer',
-    // }
-    // console.log({
-    //   data
-    // });
-    // // Here you would typically call an API to update the user profile
-    //  useUpdateProfile(fullName, email, phoneNumber)
+    try {
+      await updateProfileMutation.mutateAsync({
+        fullName,
+        email,
+        phoneNumber,
+      });
+      Alert.alert(t('success'), t('profile_updated_successfully' as any));
+      navigation.goBack();
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      Alert.alert(t('error'), t('failed_to_update_profile' as any));
+    }
   };
-  const { colors } = useTheme();
+
   return (
     <CommonView>
       <ScrollView
@@ -81,25 +76,6 @@ const EditProfileScreen = ({
           onChangeText={setEmail}
           rightIcon={<Ionicons size={23} name="mail-outline" />}
         />
-        {/* <Dropdown
-          data={gender}
-          valueField={'type'}
-          labelField={'label'}
-          value={genderValue}
-          style={{
-            height: 62,
-            borderColor: colors.surfaceVariant,
-            borderRadius: 8,
-            paddingHorizontal: 10,
-            backgroundColor: colors.surfaceVariant,
-            margin: 9,
-            
-          }}
-          itemTextStyle={{ color: colors.onBackground }}
-          containerStyle={{ backgroundColor: colors.surfaceVariant }}
-          selectedTextStyle={{ color: colors.primary }}
-          onChange={(item) => setGenderValue(item.type)}
-        /> */}
         <InputField
           leftIcon={
             <>
@@ -127,6 +103,8 @@ const EditProfileScreen = ({
           }}
           className="active:opacity-75 mb-2"
           onPress={handleUpdate}
+        loading={updateProfileMutation.status === 'pending'}
+        disabled={updateProfileMutation.status === 'pending'}
         >
           {t('update')}
         </Button>

@@ -56,7 +56,7 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
     } catch (error) {
       console.error('Error navigating to category:', error);
       Alert.alert(t('navigation_error'), t('unable_to_open_category'), [
-        { text: t('ok') },
+        { text: 'OK'},
       ]);
     }
   }, [navigation, title, categoryId, isLoading, disabled, onPress, t]);
@@ -90,8 +90,8 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
           shadowOpacity: 0.1,
           shadowRadius: 3.84,
           elevation: 5,
-          minHeight: 120,
-          minWidth: 100,
+          minHeight: 100,
+          minWidth: 90,
           position: 'relative',
         }}
       >
@@ -153,7 +153,7 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
           ) : (
             <Image
               source={image}
-              style={{ height: 56, width: 56 }}
+              style={{ height: 40, width: 40 }}
               resizeMode="contain"
               onError={handleImageError}
             />

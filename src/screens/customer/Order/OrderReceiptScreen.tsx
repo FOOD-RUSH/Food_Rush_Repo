@@ -95,7 +95,7 @@ const OrderReceiptScreen = ({
     <CommonView>
       <ScrollView
         className="flex-1"
-        style={{ backgroundColor: colors.background }}
+        style={{ backgroundColor: colors.surface }}
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
@@ -405,10 +405,10 @@ const OrderReceiptScreen = ({
 
         {/* Action Buttons */}
         <View className="p-6" style={{ backgroundColor: colors.surface }}>
-          <View className="flex-row space-x-3">
+          <View className="flex-row justify-between first:">
             <TouchableOpacity
               onPress={handleShareReceipt}
-              className="flex-1 border rounded-xl py-4 items-center"
+              className="flex-1 border rounded-xl py-4 items-center mr-2"
               style={{ borderColor: colors.primary }}
             >
               <Ionicons

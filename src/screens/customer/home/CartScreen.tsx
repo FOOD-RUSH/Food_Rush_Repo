@@ -5,8 +5,6 @@ import {
   Image,
   FlatList,
   ListRenderItem,
-  TouchableOpacity,
-  Platform,
 } from 'react-native';
 import CommonView from '@/src/components/common/CommonView';
 import CartFoodComponent from '@/src/components/customer/CartFoodComponent';
@@ -16,7 +14,6 @@ import { useCartStore, CartItem } from '@/src/stores/customerStores/cartStore';
 import { images } from '@/assets/images';
 import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-toast-message';
-import { MaterialIcons } from '@expo/vector-icons';
 
 const CartScreen = ({ navigation }: RootStackScreenProps<'Cart'>) => {
   const { colors } = useTheme();
@@ -26,7 +23,6 @@ const CartScreen = ({ navigation }: RootStackScreenProps<'Cart'>) => {
   const cartItems = useCartStore((state) => state.items);
   const totalPrice = useCartStore((state) => state.totalprice);
   const cartId = useCartStore((state) => state.CartID);
-  const clearCart = useCartStore((state) => state.clearCart);
 
   // Memoize formatted total price
   const formattedTotalPrice = useMemo(
@@ -69,26 +65,6 @@ const CartScreen = ({ navigation }: RootStackScreenProps<'Cart'>) => {
     }
   }, [cartItems.length, cartId, navigation, t]);
 
-  // Handle clear cart
-  const handleClearCart = useCallback(() => {
-    if (cartItems.length === 0) {
-      Toast.show({
-        type: 'info',
-        text1: t('info'),
-        text2: t('cart_empty'),
-        position: 'bottom',
-      });
-      return;
-    }
-
-    clearCart();
-    Toast.show({
-      type: 'success',
-      text1: t('success'),
-      text2: t('cart_cleared_successfully'),
-      position: 'top',
-    });
-  }, [cartItems.length, clearCart, t]);
 
   // Optimized render item with useCallback to prevent unnecessary re-renders
   const renderCartItem: ListRenderItem<CartItem> = useCallback(
@@ -140,35 +116,6 @@ const CartScreen = ({ navigation }: RootStackScreenProps<'Cart'>) => {
   if (cartItems.length === 0) {
     return (
       <CommonView>
-        <View
-          className=" flex-row  justify-between items-center px-2 py-4 mb-3 "
-          style={{
-            backgroundColor: colors.surface,
-            borderBottomColor: colors.outline,
-          }}
-        >
-          <TouchableOpacity
-            onPress={() => {
-              navigation.goBack();
-            }}
-          >
-            <MaterialIcons
-              name={Platform.OS === 'ios' ? 'arrow-back-ios-new' : 'arrow-back'}
-              size={25}
-              color={colors.onBackground}
-            />
-          </TouchableOpacity>
-          <Text className="text-xl" style={{ color: colors.onSurface }}>
-            {t('my_cart') || 'My Cart'}
-          </Text>
-          <TouchableOpacity onPress={handleClearCart}>
-            <MaterialIcons
-              name="delete-forever"
-              size={30}
-              color={colors.error}
-            />
-          </TouchableOpacity>
-        </View>
         {EmptyCartComponent}
       </CommonView>
     );
@@ -177,37 +124,6 @@ const CartScreen = ({ navigation }: RootStackScreenProps<'Cart'>) => {
   return (
     <CommonView>
       <View className="flex-1">
-        {/* Cart Header */}
-        <View
-          className=" flex-row  justify-between items-center px-2 py-4 mb-3 "
-          style={{
-            backgroundColor: colors.surface,
-            borderBottomColor: colors.outline,
-          }}
-        >
-          <TouchableOpacity
-            onPress={() => {
-              navigation.goBack();
-            }}
-          >
-            <MaterialIcons
-              name={Platform.OS === 'ios' ? 'arrow-back-ios-new' : 'arrow-back'}
-              size={25}
-              color={colors.onBackground}
-            />
-          </TouchableOpacity>
-          <Text className="text-xl" style={{ color: colors.onSurface }}>
-            {t('my_cart')}
-          </Text>
-          <TouchableOpacity onPress={handleClearCart}>
-            <MaterialIcons
-              name="delete-forever"
-              size={30}
-              color={colors.error}
-            />
-          </TouchableOpacity>
-        </View>
-
         {/* Cart Items List */}
         <FlatList
           data={cartItems}

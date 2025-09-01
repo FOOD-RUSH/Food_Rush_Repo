@@ -7,7 +7,7 @@ import {
 } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-type Theme = 'light' | 'dark';
+type Theme = 'light' | 'dark' | 'system';
 type UserType = 'customer' | 'restaurant' | null;
 
 interface AppState {

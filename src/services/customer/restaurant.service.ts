@@ -14,8 +14,12 @@ export interface RestaurantQuery {
   limit?: number;
 
 };
+
 interface foodItems {
   data: FoodProps[]
+}
+interface RestaurantItems {
+  data: RestaurantCard[]
 }
 export const restaurantApi = {
   // Get all Menus
@@ -32,11 +36,20 @@ export const restaurantApi = {
   },
   // Get all restaurants with filtering and pagination
   getAllRestaurants: async (query?: RestaurantQuery) => {
-    return apiClient.get<RestaurantCard[]>('/restaurants/browse', { params: query }).then((res) => res.data);
+    return apiClient.get<RestaurantItems>('/restaurants/browse', { params: query }).then((res) => {
+      // Map backend response to match component expectations
+      const mappedData = res.data.data.map((restaurant: any) => ({
+        ...restaurant,
+        restaurantId: restaurant.id, // Map id to restaurantId for component compatibility
+        distanceFromUser: restaurant.distance || 0, // Map distance to distanceFromUser
+        deliveryFee: restaurant.deliveryPrice?.toString() || restaurant.deliveryFee || '0', // Handle delivery price
+      }));
+      return mappedData;
+    });
   },
 
   // Get a specific restaurant by ID
-  getRestaurantById: (id: string) => {
+  getRestaurantById: async (id: string) => {
     return apiClient.get<RestaurantProfile>(`/restaurants/${id}`);
   },
 
@@ -55,7 +68,7 @@ export const restaurantApi = {
     radius: number = 5,
   ) => {
     return apiClient.get<RestaurantCard[]>(
-      `/restaurants/nearby?nearLat=${latitude}&nearLng=${longitude}&radiusKm=${radius}`,
+      `/restaurants/nearby`, { params: { latitude, longitude, radius } }
     );
   },
 
@@ -64,8 +77,6 @@ export const restaurantApi = {
     return apiClient.get<FoodProps>(`/restaurants/${restaurantId}/menu/${menuId}`);
 
   },
-
-
 
 
   // Get restaurant reviews

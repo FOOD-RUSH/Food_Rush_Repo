@@ -1,15 +1,13 @@
-import React, { ReactNode, useMemo } from 'react';
+import React, { ReactNode } from 'react';
 import { PaperProvider } from 'react-native-paper';
-import { lightTheme, darkTheme } from '@/src/config/theme';
+import { useAppTheme } from '@/src/config/theme';
 import { useAppStore } from '@/src/stores/customerStores/AppStore';
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  const theme = useAppStore((state) => state.theme);
+  const themeMode = useAppStore((state) => state.theme);
 
-  // Memoize theme selection to avoid unnecessary re-computations
-  const selectedTheme = useMemo(() => {
-    return theme === 'light' ? lightTheme : darkTheme;
-  }, [theme]);
+  // Use the unified theme hook that handles system mode
+  const selectedTheme = useAppTheme(themeMode);
 
   // Only re-render when theme actually changes
   return <PaperProvider theme={selectedTheme}>{children}</PaperProvider>;

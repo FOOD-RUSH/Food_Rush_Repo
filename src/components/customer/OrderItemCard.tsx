@@ -1,7 +1,9 @@
 import { View, Text, TouchableOpacity, Image } from 'react-native';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useTheme, Card } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
+import { useNavigation } from '@react-navigation/native';
+import { RootStackScreenProps } from '@/src/navigation/types';
 
 export interface OrderItemCardProps {
   foodId: string;
@@ -26,9 +28,11 @@ const OrderItemCard = ({
 }: OrderItemCardProps) => {
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
-
+  const navigation = useNavigation<RootStackScreenProps<'CustomerApp'>['navigation']>()
+  const handleNavigation = useCallback(()=> navigation.navigate('OrderReceipt', {orderId: '1w11'}),[navigation])
   return (
     <Card
+    onPress={handleNavigation}
       style={{
         margin: 10,
         borderRadius: 16,
@@ -41,7 +45,7 @@ const OrderItemCard = ({
         shadowOpacity: 0.15,
         shadowRadius: 3,
         boxShadow: '1px 0px 10px rgba(0, 0, 0, 0.15)',
-
+        
         elevation: 3,
       }}
     >
@@ -77,7 +81,7 @@ const OrderItemCard = ({
                 className={`text-base mr-2 font-medium `}
                 style={{ color: colors.onSurface }}
               >
-                {t('pipe_separator')}
+                  |
               </Text>
               <Text
                 className={`text-base font-medium `}

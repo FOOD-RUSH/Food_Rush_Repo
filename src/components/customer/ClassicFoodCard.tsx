@@ -168,7 +168,8 @@ const ClassicFoodCard = ({
                 className={`ml-1 text-xs `}
                 style={{ color: colors.onSurface }}
               >
-                {deliveryStatus}
+                500 XAF
+                {/* TO BE PRICE */}
               </Text>
             </View>
           </View>

@@ -1,8 +1,7 @@
 import { View, Text, TouchableOpacity, Linking, Alert } from 'react-native';
 import React from 'react';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from 'react-native-paper';
-import { Card } from 'react-native-paper';
+import { useTheme , Card } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 
 interface SocialCardsProps {

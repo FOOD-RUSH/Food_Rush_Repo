@@ -2,8 +2,10 @@ import React, { useCallback, useMemo } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
-import { Linking } from 'react-native';
+import { Linking, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { MaterialIcons } from '@expo/vector-icons';
+import Toast from 'react-native-toast-message';
 import OrderReceiptScreen from '../screens/customer/Order/OrderReceiptScreen';
 
 // Navigation types and helpers
@@ -19,6 +21,7 @@ import {
   useAppUserType,
 } from '../stores/customerStores/AppStore';
 import { useIsAuthenticated } from '../stores/customerStores/AuthStore';
+import { useCartStore } from '../stores/customerStores/cartStore';
 
 // Navigators
 import AuthNavigator from './AuthNavigator';
@@ -49,7 +52,7 @@ import AddressScreen from '../screens/customer/Profile/AddressScreen';
 
 // Data
 import { OnboardingSlides } from '@/src/utils/onboardingData';
-import { useAppTheme } from '../config/theme';
+import { useAppTheme, useAppNavigationTheme } from '../config/theme';
 
 // Stack navigator
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -66,11 +69,11 @@ const createScreenOptions = (colors: any, t: any) => ({
       backgroundColor: colors.background,
     },
     headerStyle: {
-      backgroundColor: colors.surface,
+      backgroundColor: colors.card,
       elevation: 0,
       shadowOpacity: 0,
     },
-    headerTintColor: colors.onSurface,
+    headerTintColor: colors.text,
   },
 
   modal: {
@@ -82,11 +85,11 @@ const createScreenOptions = (colors: any, t: any) => ({
       backgroundColor: colors.background,
     },
     headerStyle: {
-      backgroundColor: colors.surface,
+      backgroundColor: colors.card,
       elevation: 0,
       shadowOpacity: 0,
     },
-    headerTintColor: colors.onSurface,
+    headerTintColor: colors.text,
   },
 
   card: {
@@ -98,7 +101,7 @@ const createScreenOptions = (colors: any, t: any) => ({
     contentStyle: {
       backgroundColor: colors.background,
     },
-    headerTintColor: colors.onSurface,
+    headerTintColor: colors.text,
   },
 
   profileCard: {
@@ -111,11 +114,11 @@ const createScreenOptions = (colors: any, t: any) => ({
       backgroundColor: colors.background,
     },
     headerStyle: {
-      backgroundColor: colors.surface,
+      backgroundColor: colors.card,
       elevation: 0,
       shadowOpacity: 0,
     },
-    headerTintColor: colors.onSurface,
+    headerTintColor: colors.text,
   },
 
   checkout: {
@@ -127,11 +130,11 @@ const createScreenOptions = (colors: any, t: any) => ({
       backgroundColor: colors.background,
     },
     headerStyle: {
-      backgroundColor: colors.surface,
+      backgroundColor: colors.card,
       elevation: 0,
       shadowOpacity: 0,
     },
-    headerTintColor: colors.onSurface,
+    headerTintColor: colors.text,
   },
 
   fullScreen: {
@@ -151,16 +154,62 @@ const RootNavigator: React.FC = () => {
   const themeMode = useAppStore((state) => state.theme);
   const { t } = useTranslation('translation');
 
+  // Cart store actions
+  const clearCart = useCartStore((state) => state.clearCart);
+  const cartItems = useCartStore((state) => state.items);
+
   // App store actions
   const { completeOnboarding, setUserType } = useAppStore();
 
   // Theme
   const theme = useAppTheme(themeMode);
+  const navigationTheme = useAppNavigationTheme();
 
   // Memoized screen options for better performance
   const screenOptions = useMemo(
     () => createScreenOptions(theme.colors, t),
     [theme.colors, t],
+  );
+  const handleClearCart = useCallback(() => {
+    if (cartItems.length === 0) {
+      Toast.show({
+        type: 'info',
+        text1: t('info'),
+        text2: t('cart_empty'),
+        position: 'bottom',
+      });
+      return;
+    }
+
+    clearCart();
+    Toast.show({
+      type: 'success',
+      text1: t('success'),
+      text2: t('cart_cleared_successfully'),
+      position: 'top',
+    });
+  }, [cartItems.length, clearCart, t]);
+
+
+  // Memoized cart screen options
+  const cartScreenOptions = useMemo(
+    () => ({
+      headerTitle: t('my_cart'),
+      headerBackTitleVisible: false,
+      headerRight: () => (
+        <TouchableOpacity
+          onPress={handleClearCart}
+          style={{ marginRight: 16 }}
+        >
+          <MaterialIcons
+            name="delete-forever"
+            size={24}
+            color={navigationTheme.colors.notification}
+          />
+        </TouchableOpacity>
+      ),
+    }),
+    [t, handleClearCart, navigationTheme.colors.notification],
   );
 
   // Event handlers
@@ -172,6 +221,7 @@ const RootNavigator: React.FC = () => {
     [completeOnboarding, setUserType],
   );
 
+  
   const handleLogin = useCallback(
     (selectedUserType: 'customer' | 'restaurant') => {
       setUserType(selectedUserType);
@@ -232,6 +282,7 @@ const RootNavigator: React.FC = () => {
       <NavigationContainer
         ref={navigationRef}
         linking={linking}
+        theme={navigationTheme}
         fallback={<LoadingScreen />}
         onReady={handleNavigationReady}
       >
@@ -263,9 +314,7 @@ const RootNavigator: React.FC = () => {
             <Stack.Screen
               name="Cart"
               component={CartScreen}
-              options={{
-                headerShown: false,
-              }}
+              options={cartScreenOptions}
             />
 
             <Stack.Screen

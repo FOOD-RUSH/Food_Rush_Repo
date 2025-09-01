@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { View } from 'react-native';
 import { TextInput, useTheme } from 'react-native-paper';
-import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
 interface SearchInputProps {
@@ -11,8 +10,6 @@ interface SearchInputProps {
   disabled?: boolean;
   onFocus?: () => void;
   onClear?: () => void;
-  showFilterButton?: boolean;
-  onFilterPress?: () => void;
 }
 
 const SearchInput: React.FC<SearchInputProps> = ({
@@ -22,8 +19,6 @@ const SearchInput: React.FC<SearchInputProps> = ({
   disabled = false,
   onFocus,
   onClear,
-  showFilterButton = false,
-  onFilterPress,
 }) => {
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
@@ -44,57 +39,46 @@ const SearchInput: React.FC<SearchInputProps> = ({
   };
 
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-      <View style={{ flex: 1 }}>
-        <TextInput
-          placeholder={placeholder || t('search_for_food')}
-          mode="outlined"
-          value={value}
-          onChangeText={onChangeText}
-          onFocus={handleFocus}
-          // onBlur={handleBlur}
-          editable={!disabled}
-          outlineStyle={{
-            borderColor: isFocused ? colors.primary : colors.outline,
-            borderRadius: 12,
-          }}
-          style={{
-            backgroundColor: colors.surface,
-            opacity: disabled ? 0.6 : 1,
-          }}
-          left={
+    <View className='flex-1 flex-row items-center'>
+      <TextInput
+        placeholder={placeholder || t('search_for_food')}
+        mode="outlined"
+        value={value}
+        onChangeText={onChangeText}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        editable={!disabled}
+        outlineStyle={{
+          borderColor: isFocused ? colors.primary : colors.surfaceVariant,
+          borderRadius: 20,
+          borderWidth: 1,
+        }}
+        style={{
+          backgroundColor: isFocused ? '#e6f0ff' : colors.surfaceVariant,
+          opacity: disabled ? 0.6 : 1,
+          paddingTop: 5,
+          paddingBottom: 5,
+          paddingRight: 10,
+          paddingLeft: 10,
+          flex: 1,
+        }}
+        left={
+          <TextInput.Icon
+            icon="magnify"
+            size={20}
+            color={colors.onSurfaceVariant}
+          />
+        }
+        right={
+          value ? (
             <TextInput.Icon
-              icon="magnify"
-              size={20}
+              icon="close"
+              onPress={handleClear}
               color={colors.onSurfaceVariant}
             />
-          }
-          right={
-            value ? (
-              <TextInput.Icon
-                icon="close"
-                onPress={handleClear}
-                color={colors.onSurfaceVariant}
-              />
-            ) : null
-          }
-        />
-      </View>
-
-      {showFilterButton && (
-        <TouchableOpacity
-          onPress={onFilterPress}
-          disabled={disabled}
-          style={{
-            backgroundColor: colors.primary,
-            borderRadius: 12,
-            padding: 12,
-            opacity: disabled ? 0.6 : 1,
-          }}
-        >
-          <MaterialIcons name="tune" size={20} color="white" />
-        </TouchableOpacity>
-      )}
+          ) : null
+        }
+      />
     </View>
   );
 };

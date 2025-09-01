@@ -70,6 +70,10 @@ const FoodItemCard = ({
           shadowRadius: 3,
           elevation: 3,
           boxShadow: '1px 0px 10px rgba(0, 0, 0, 0.15)',
+          minWidth: 320, // Added min card width
+          maxWidth: 520, // Added max card width
+          minHeight: 120, // Added min card length
+          maxHeight: 180, // Added max card length
         }}
       >
         {/* Card content with horizontal layout */}
@@ -224,7 +228,7 @@ const FoodItemCard = ({
                     marginLeft: 5,
                   }}
                 >
-                  ${DeliveryPrice.toFixed(0)}
+                  {DeliveryPrice.toFixed(0)} F
                 </Text>
               </View>
 

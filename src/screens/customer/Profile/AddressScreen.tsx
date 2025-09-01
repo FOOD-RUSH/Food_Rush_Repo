@@ -50,7 +50,7 @@ const AddressScreen = ({
     if (error) {
       Alert.alert(t('error'), error, [{ text: 'OK', onPress: clearError }]);
     }
-  }, [clearError, error]);
+  }, [clearError, error, t]);
 
   const handleEditAddress = (address: AddressData) => {
     setSelectedAddress(address);
@@ -258,8 +258,8 @@ const AddressScreen = ({
             className="py-20 "
             contentContainerStyle={{ paddingBottom: 100 }}
           >
-            {addresses.map((address) => (
-              <AddressComponent key={address.id} address={address} />
+            {addresses.map((address, index) => (
+              <AddressComponent key={index} address={address} />
             ))}
           </ScrollView>
         )}

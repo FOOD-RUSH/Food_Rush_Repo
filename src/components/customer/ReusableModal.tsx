@@ -194,7 +194,7 @@ const ReusableModal: React.FC<ReusableModalProps> = ({
                 <ContentWrapper
                   style={[
                     {
-                      flex: isFullscreen ? 1 : undefined,
+                      flex: isFullscreen || scrollable ? 1 : undefined,
                       paddingHorizontal: 20,
                       paddingBottom: isFullscreen ? insets.bottom + 20 : 20,
                       paddingTop: title || showCloseButton ? 0 : 20,

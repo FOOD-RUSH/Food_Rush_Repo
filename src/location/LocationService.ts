@@ -2,28 +2,28 @@ import * as ExpoLocation from 'expo-location';
 import { Location, LocationResult, LocationOptions, PermissionStatus } from './types';
 
 /**
- * Simple, production-ready LocationService
+ * Optimized LocationService for Cameroon
  * Features:
- * - Fallback to Yaoundé when permission denied or location unavailable
- * - Simple caching (5 minutes)
- * - Proper error handling
- * - No distance calculations
- * - Clean API
+ * - No timeout (removed for network reliability)
+ * - Extended caching (15 minutes)
+ * - Proper error handling for poor network conditions
+ * - Thread-safe operations
+ * - YaoundÃ© fallback with precise coordinates
  */
 class LocationService {
   private static instance: LocationService;
   private cachedLocation: Location | null = null;
   private cacheTimestamp = 0;
-  private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-  private readonly DEFAULT_TIMEOUT = 15000; // 15 seconds
+  private readonly CACHE_DURATION = 15 * 60 * 1000; // 15 minutes for better performance
+  private currentRequest: Promise<LocationResult> | null = null;
 
-  // Yaoundé fallback location
+  // Precise YaoundÃ© coordinates (Centre-ville area)
   private readonly YAOUNDE_LOCATION: Omit<Location, 'timestamp'> = {
     latitude: 3.8480,
     longitude: 11.5021,
     city: 'Yaoundé',
     region: 'Centre',
-    address: 'Yaoundé, Centre Region, Cameroon',
+    address: 'Centre-ville, Yaoundé, Région du Centre, Cameroun',
     isFallback: true,
   };
 
@@ -34,9 +34,6 @@ class LocationService {
     return LocationService.instance;
   }
 
-  /**
-   * Get fallback location (Yaoundé)
-   */
   public getFallbackLocation(): Location {
     return {
       ...this.YAOUNDE_LOCATION,
@@ -44,9 +41,6 @@ class LocationService {
     };
   }
 
-  /**
-   * Check if location services are enabled on the device
-   */
   public async areLocationServicesEnabled(): Promise<boolean> {
     try {
       return await ExpoLocation.hasServicesEnabledAsync();
@@ -56,9 +50,6 @@ class LocationService {
     }
   }
 
-  /**
-   * Get current permission status
-   */
   public async getPermissionStatus(): Promise<PermissionStatus> {
     try {
       const { status } = await ExpoLocation.getForegroundPermissionsAsync();
@@ -77,9 +68,6 @@ class LocationService {
     }
   }
 
-  /**
-   * Request location permission from user
-   */
   public async requestPermission(): Promise<boolean> {
     try {
       const { status } = await ExpoLocation.requestForegroundPermissionsAsync();
@@ -90,9 +78,6 @@ class LocationService {
     }
   }
 
-  /**
-   * Check if cached location is still valid
-   */
   private isCacheValid(): boolean {
     return (
       this.cachedLocation !== null &&
@@ -100,24 +85,15 @@ class LocationService {
     );
   }
 
-  /**
-   * Get location from cache
-   */
   private getCachedLocation(): Location | null {
     return this.isCacheValid() ? this.cachedLocation : null;
   }
 
-  /**
-   * Cache location data
-   */
   private cacheLocation(location: Location): void {
     this.cachedLocation = location;
     this.cacheTimestamp = Date.now();
   }
 
-  /**
-   * Reverse geocode coordinates to address
-   */
   private async reverseGeocode(latitude: number, longitude: number): Promise<{
     city: string;
     region: string;
@@ -131,20 +107,20 @@ class LocationService {
 
       if (results && results.length > 0) {
         const result = results[0];
-        const city = result.city || result.district || result.subregion || 'Unknown City';
-        const region = result.region || result.country || 'Unknown Region';
+        const city = result.city || result.district || result.subregion || 'Yaoundé';
+        const region = result.region || 'Centre';
         
         const addressParts = [
           result.streetNumber,
           result.street,
           city,
           region,
-          result.country,
+          'Cameroun',
         ].filter(Boolean);
         
         const address = addressParts.length > 0 
           ? addressParts.join(', ')
-          : `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+          : `${city}, ${region}`;
 
         return { city, region, address };
       }
@@ -152,23 +128,21 @@ class LocationService {
       console.warn('LocationService: Geocoding failed:', error);
     }
 
-    // Fallback to coordinates if geocoding fails
+    // Fallback to Yaoundé if geocoding fails
     return {
-      city: 'Unknown City',
-      region: 'Unknown Region',
-      address: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
+      city: 'Yaoundé',
+      region: 'Centre',
+      address: 'Yaoundé, Centre, Cameroun',
     };
   }
 
   /**
-   * Get current user location
-   * Returns cached location if valid, otherwise fetches new location
-   * Falls back to Yaoundé if permission denied or location unavailable
+   * Get current user location with thread safety
+   * No timeout for better reliability in poor network conditions
    */
   public async getCurrentLocation(options: LocationOptions = {}): Promise<LocationResult> {
     const {
-      enableHighAccuracy = true,
-      timeout = this.DEFAULT_TIMEOUT,
+      enableHighAccuracy = false, // Default to false for better performance
       fallbackToYaounde = true,
     } = options;
 
@@ -181,6 +155,24 @@ class LocationService {
       };
     }
 
+    // Prevent concurrent requests
+    if (this.currentRequest) {
+      return this.currentRequest;
+    }
+
+    this.currentRequest = this._getCurrentLocationInternal(enableHighAccuracy, fallbackToYaounde);
+    
+    try {
+      return await this.currentRequest;
+    } finally {
+      this.currentRequest = null;
+    }
+  }
+
+  private async _getCurrentLocationInternal(
+    enableHighAccuracy: boolean,
+    fallbackToYaounde: boolean
+  ): Promise<LocationResult> {
     try {
       // Check if location services are enabled
       const servicesEnabled = await this.areLocationServicesEnabled();
@@ -210,21 +202,16 @@ class LocationService {
         };
       }
 
-      // Get current location
-      const locationResult = await Promise.race([
-        ExpoLocation.getCurrentPositionAsync({
-          accuracy: enableHighAccuracy
-            ? ExpoLocation.Accuracy.High
-            : ExpoLocation.Accuracy.Balanced,
-        }),
-        new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('Location request timeout')), timeout)
-        ),
-      ]);
+      // Get current location - NO TIMEOUT for reliability
+      const locationResult = await ExpoLocation.getCurrentPositionAsync({
+        accuracy: enableHighAccuracy
+          ? ExpoLocation.Accuracy.High
+          : ExpoLocation.Accuracy.Low, // Use Low for better performance in Cameroon
+      });
 
       const { latitude, longitude } = locationResult.coords;
 
-      // Reverse geocode to get address info
+      // Reverse geocode with fallback
       const { city, region, address } = await this.reverseGeocode(latitude, longitude);
 
       const location: Location = {
@@ -266,17 +253,12 @@ class LocationService {
     }
   }
 
-  /**
-   * Clear location cache (useful for testing or forced refresh)
-   */
   public clearCache(): void {
     this.cachedLocation = null;
     this.cacheTimestamp = 0;
+    this.currentRequest = null;
   }
 
-  /**
-   * Check if location can be obtained (services enabled + permission granted)
-   */
   public async canGetLocation(): Promise<boolean> {
     try {
       const [servicesEnabled, permissionStatus] = await Promise.all([

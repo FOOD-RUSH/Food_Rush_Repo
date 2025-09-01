@@ -2,7 +2,6 @@
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { restaurantApi, RestaurantQuery } from "@/src/services/customer/restaurant.service";
 import { OrderApi } from "@/src/services/customer/orders.service";
-// import { paymentApi } from "@/src/services/customer/payment.service";
 import { useAuthStore } from "@/src/stores/customerStores/AuthStore";
 
 export interface RestaurantFilters {
@@ -30,7 +29,8 @@ const CACHE_CONFIG = {
 // Restaurant hooks
 export const useAllRestaurants = (query: RestaurantQuery) => {
     return useQuery({
-        queryKey: ['restaurants', query],
+        queryKey: ['restaurants', query],// import { paymentApi } from "@/src/services/customer/payment.service";
+
         queryFn: () => restaurantApi.getAllRestaurants(query),
         staleTime: CACHE_CONFIG.STALE_TIME,
         gcTime: CACHE_CONFIG.CACHE_TIME,
@@ -41,17 +41,18 @@ export const useAllRestaurants = (query: RestaurantQuery) => {
 
 export const useRestaurantId = (id: string, category?: string) => {
     return useQuery({
-        queryKey: ['restaurant', id, category],
+        queryKey: ['restaurant', id,],
         queryFn: () => restaurantApi.getRestaurantById(id).then(res => res.data),
         staleTime: CACHE_CONFIG.STALE_TIME,
         gcTime: CACHE_CONFIG.CACHE_TIME,
         enabled: !!id,
     })
 }
-export const useGetAllMenu = () => {
+export const useGetAllMenu = (options?: { enabled?: boolean }) => {
     return useQuery({
         queryKey: ['All_menu'],
         queryFn: () => restaurantApi.getAllMenu(),
+        enabled: options?.enabled ?? true,
 
 
 
@@ -59,14 +60,14 @@ export const useGetAllMenu = () => {
     })
 }
 
-export const useGetAllMenuBrowse = (query: RestaurantQuery) => {
+export const useGetAllMenuBrowse = (query: RestaurantQuery | null, options?: { enabled?: boolean }) => {
     return useQuery({
         queryKey: ['All_menu', query],
-        queryFn: () => restaurantApi.getMenuBrowseAll({ ...query }),
+        queryFn: () => restaurantApi.getMenuBrowseAll({ ...query! }),
         staleTime: CACHE_CONFIG.STALE_TIME,
         gcTime: CACHE_CONFIG.CACHE_TIME,
         retry: CACHE_CONFIG.MAX_RETRIES,
-        enabled: !!query,
+        enabled: options?.enabled ?? !!query,
 
 
 
@@ -94,7 +95,7 @@ export const useGetRestaurantsNearBy = (
             if (!longitude || !latitude) {
                 throw new Error('No coordinates available');
             }
-            return restaurantApi.getNearbyRestaurants(longitude, latitude).then((res) => res.data);
+            return restaurantApi.getNearbyRestaurants(longitude, latitude);
         },
         enabled: !!longitude && !!latitude,
         staleTime: 5 * 60 * 1000, // 5 minutes
@@ -152,81 +153,3 @@ export const useCancelOrder = () => {
 
 
 
-
-
-// // Payment hooks
-// export const useInitiatePayment = () => {
-//     return useMutation({
-//         mutationFn: (paymentData: any) => paymentApi.initiatePayment(paymentData).then(res => res.data),
-//     })
-// }
-
-// export const useVerifyPayment = () => {
-//     return useMutation({
-//         mutationFn: (verificationData: any) => paymentApi.verifyPayment(verificationData).then(res => res.data),
-//     })
-// }
-
-// export const usePaymentHistory = (customerId: string) => {
-//     const isAuthenticated = useAuthStore(state => state.isAuthenticated);
-
-//     return useQuery({
-//         queryKey: ['payments', customerId],
-//         queryFn: () => paymentApi.getPaymentHistory({ customerId }).then(res => res.data),
-//         enabled: !!customerId && isAuthenticated,
-//     })
-// }
-
-// // Notification hooks
-// export const useNotifications = (userId: string) => {
-//     const isAuthenticated = useAuthStore(state => state.isAuthenticated);
-
-//     return useQuery({
-//         queryKey: ['notifications', userId],
-//         queryFn: () => notificationApi.getNotifications(userId).then(res => res.data),
-//         enabled: !!userId && isAuthenticated,
-//     })
-// }
-
-// export const useNotificationSettings = (userId: string) => {
-//     const isAuthenticated = useAuthStore(state => state.isAuthenticated);
-
-//     return useQuery({
-//         queryKey: ['notification-settings', userId],
-//         queryFn: () => notificationApi.getSettings(userId).then(res => res.data),
-//         enabled: !!userId && isAuthenticated,
-//     })
-// }
-
-// export const useUnreadCount = (userId: string) => {
-//     const isAuthenticated = useAuthStore(state => state.isAuthenticated);
-
-//     return useQuery({
-//         queryKey: ['unread-count', userId],
-//         queryFn: () => notificationApi.getUnreadCount(userId).then(res => res.data),
-//         enabled: !!userId && isAuthenticated,
-//         refetchInterval: 30000, // Refetch every 30 seconds for real-time updates
-//     })
-// }
-
-// export const useMarkAsRead = () => {
-//     const queryClient = useQueryClient();
-//     return useMutation({
-//         mutationFn: (notificationId: string) => notificationApi.markAsRead(notificationId).then(res => res.data),
-//         onSuccess: (_, variables) => {
-//             queryClient.invalidateQueries({ queryKey: ['notifications'] });
-//             queryClient.invalidateQueries({ queryKey: ['unread-count'] });
-//         }
-//     })
-// }
-
-// export const useMarkAllAsRead = () => {
-//     const queryClient = useQueryClient();
-//     return useMutation({
-//         mutationFn: (userId: string) => notificationApi.markAllAsRead(userId).then(res => res.data),
-//         onSuccess: () => {
-//             queryClient.invalidateQueries({ queryKey: ['notifications'] });
-//             queryClient.invalidateQueries({ queryKey: ['unread-count'] });
-//         }
-//     })
-// }

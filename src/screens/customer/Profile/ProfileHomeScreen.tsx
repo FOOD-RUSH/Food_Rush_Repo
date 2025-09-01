@@ -9,7 +9,7 @@ import { useAppStore } from '@/src/stores/customerStores/AppStore';
 import { useAuthStore } from '@/src/stores/customerStores/AuthStore';
 import { useProfileManager } from '@/src/hooks/customer/useAuthhooks';
 import { useBottomSheet } from '@/src/components/common/BottomSheet/BottomSheetContext';
-import ProfileLoadingState from '@/src/components/profile/ProfileLoadingState';
+import SkeletonLoader from '@/src/components/common/SkeletonLoader';
 import ProfileErrorState from '@/src/components/profile/ProfileErrorState';
 import LogoutContent from '@/src/components/common/BottomSheet/LogoutContent';
 import { icons } from '@/assets/images';
@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 const ProfileHomeScreen = ({
   navigation,
 }: CustomerProfileStackScreenProps<'ProfileHome'>) => {
-  const { user, isLoading, error, refreshProfile, isRefetching } =
+  const { user, isLoading, error, refreshProfile } =
     useProfileManager();
   const { colors } = useTheme();
   const theme = useAppStore((state) => state.theme);
@@ -35,7 +35,7 @@ const ProfileHomeScreen = ({
       console.error('Logout error:', error);
       Alert.alert(t('error'), t('failed_to_logout'));
     }
-  }, [logoutUser]);
+  }, [logoutUser, t]);
 
   const showLogoutModal = useCallback(() => {
     // Prevent multiple presentations
@@ -109,7 +109,7 @@ const ProfileHomeScreen = ({
   // Placeholder handlers for incomplete features
   const handleSpecialOffersPress = useCallback(() => {
     Alert.alert(t('info'), t('special_offers_feature_coming_soon'));
-  }, []);
+  }, [t]);
 
   const handleSecurityPress = useCallback(() => {
     Alert.alert(t('info'), t('security_settings_coming_soon'));
@@ -123,18 +123,6 @@ const ProfileHomeScreen = ({
       console.error('Failed to retry profile fetch:', error);
     }
   }, [refreshProfile]);
-
-  // Show loading state
-  if (isLoading) {
-    return (
-      <CommonView>
-        <ProfileLoadingState
-          message={t('loading_your_profile')}
-          showIcon={true}
-        />
-      </CommonView>
-    );
-  }
 
   // Show error state
   if (error && !user) {
@@ -163,18 +151,27 @@ const ProfileHomeScreen = ({
             className="bg-gray-500"
           />
           <View className="flex-col items-center justify-center flex-1 mx-2">
-            <Text
-              style={{ color: colors.onBackground }}
-              className="font-semibold text-[18px]"
-            >
-              {user?.fullName}
-            </Text>
-            <Text
-              style={{ color: colors.onSurfaceVariant }}
-              className="text-[15px]"
-            >
-              {user?.phoneNumber}
-            </Text>
+            {isLoading ? (
+              <>
+                <SkeletonLoader width={120} height={20} borderRadius={4} style={{ marginBottom: 6 }} />
+                <SkeletonLoader width={80} height={16} borderRadius={4} />
+              </>
+            ) : (
+              <>
+                <Text
+                  style={{ color: colors.onBackground }}
+                  className="font-semibold text-[18px]"
+                >
+                  {user?.fullName}
+                </Text>
+                <Text
+                  style={{ color: colors.onSurfaceVariant }}
+                  className="text-[15px]"
+                >
+                  {user?.phoneNumber}
+                </Text>
+              </>
+            )}
           </View>
           <TouchableOpacity activeOpacity={0.7} onPress={navigateToEditProfile}>
             <AntDesign name="edit" color={'#007aff'} size={25} />
