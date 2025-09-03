@@ -3,7 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Image, Platform, TouchableOpacity } from 'react-native';
+import { Image, Platform, TouchableOpacity, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
@@ -45,9 +45,18 @@ function CustomerHomeStackScreen() {
     <CustomerHomeStack.Navigator
       screenOptions={{
         headerShown: false,
+        // Prevent going back to auth screens
+        gestureEnabled: false,
       }}
     >
-      <CustomerHomeStack.Screen name="HomeScreen" component={HomeScreen} />
+      <CustomerHomeStack.Screen
+        name="HomeScreen"
+        component={HomeScreen}
+        options={{
+          // Prevent going back to auth screens
+          gestureEnabled: false,
+        }}
+      />
     </CustomerHomeStack.Navigator>
   );
 }
@@ -239,6 +248,38 @@ export default function CustomerNavigator() {
             size={size}
           />
         ),
+        tabBarLabel: ({ focused }) => {
+          // Only show label when tab is focused/selected
+          if (!focused) return null;
+
+          let label = '';
+          switch (route.name) {
+            case 'Home':
+              label = t('home');
+              break;
+            case 'Orders':
+              label = t('orders');
+              break;
+            case 'Profile':
+              label = t('profile');
+              break;
+            default:
+              label = '';
+          }
+
+          return focused ? (
+            <Text
+              style={{
+                fontSize: 12,
+                fontWeight: '600',
+                color: navigationTheme.colors.primary,
+                marginBottom: 4,
+              }}
+            >
+              {label}
+            </Text>
+          ) : null;
+        },
         tabBarActiveTintColor: navigationTheme.colors.primary,
         tabBarInactiveTintColor: navigationTheme.colors.border,
         tabBarStyle,
@@ -251,13 +292,14 @@ export default function CustomerNavigator() {
         lazy: true,
         unmountOnBlur: false,
         tabBarHideOnKeyboard: true,
+        // Prevent going back to auth screens
+        gestureEnabled: false,
       })}
     >
       <CustomerTab.Screen
         name="Home"
         component={CustomerHomeStackScreen}
         options={{
-          tabBarLabel: t('home'),
           headerShown: false,
         }}
       />
@@ -265,7 +307,6 @@ export default function CustomerNavigator() {
         name="Orders"
         component={CustomerOrderStackScreen}
         options={({ navigation }) => ({
-          tabBarLabel: t('orders'),
           headerRight: () => (
             <TouchableOpacity
               onPress={() => {
@@ -302,7 +343,6 @@ export default function CustomerNavigator() {
         name="Profile"
         component={CustomerProfileStackScreen}
         options={{
-          tabBarLabel: t('profile'),
           headerShown: false,
         }}
       />

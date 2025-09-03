@@ -1,42 +1,45 @@
-/**
- * Simplified Location Types for Food Rush App
- * Production-ready with essential functionality only
- */
-
-export interface Location {
+// src/location/types.ts - Simplified MVP types
+export interface Coordinates {
   latitude: number;
   longitude: number;
-  city: string;
-  region: string;
-  address: string;
-  isFallback: boolean;
-  timestamp: number;
 }
 
-export enum PermissionStatus {
-  GRANTED = 'granted',
-  DENIED = 'denied',
-  UNDETERMINED = 'undetermined',
+export interface Address {
+  id: string;
+  street: string;
+  landmark?: string;
+  fullAddress: string;
+  coordinates: Coordinates;
+  isDefault: boolean;
+  isGPSLocation: boolean;
+  isFallback: boolean;
+  createdAt: string;
+}
+
+export interface ManualAddressInput {
+  street: string;
+  landmark?: string;
+  label?: 'Home' | 'Work' | 'Other';
+}
+
+export interface GeocodeResponse {
+  success: boolean;
+  coordinates?: Coordinates;
+  formattedAddress?: string;
+  error?: string;
+}
+
+export interface LocationPermissionOptions {
+  autoInit?: boolean;
+  fallbackToYaounde?: boolean;
 }
 
 export interface LocationState {
-  location: Location | null;
+  currentLocation: Address | null;
+  savedAddresses: Address[];
   isLoading: boolean;
-  error: string | null;
   hasPermission: boolean;
-  permissionRequested: boolean;
-  servicesEnabled: boolean;
-}
-
-export interface LocationOptions {
-  enableHighAccuracy?: boolean;
-  timeout?: number;
-  fallbackToYaounde?: boolean;
-  requestPermissionOnDenied?: boolean;
-}
-
-export interface LocationResult {
-  success: boolean;
-  location?: Location;
-  error?: string;
+  permissionStatus: 'undetermined' | 'granted' | 'denied';
+  lastError: string | null;
+  isUsingFallback: boolean;
 }

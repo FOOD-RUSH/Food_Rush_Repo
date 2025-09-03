@@ -1,16 +1,11 @@
 import { useTranslation } from 'react-i18next';
 import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import CommonView from '@/src/components/common/CommonView';
-import { useLocation } from '@/src/location';
+import { useLocation, useSavedAddresses, useLocationActions, AddressInputModal } from '@/src/location';
 import { Card, useTheme, FAB } from 'react-native-paper';
 import { AntDesign, Ionicons, MaterialIcons } from '@expo/vector-icons';
-import AddressEditModal, {
-  AddressData,
-} from '@/src/components/customer/AddressEditModal';
-import { useAddressStore } from '@/src/stores/customerStores/addressStore';
-import { useAuthUser } from '@/src/stores/customerStores/AuthStore';
 
 const AddressScreen = ({
   navigation,
@@ -18,69 +13,36 @@ const AddressScreen = ({
   const { t } = useTranslation('translation');
   const { colors } = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedAddress, setSelectedAddress] = useState<AddressData | null>(
-    null,
-  );
-  const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
+  const [selectedAddress, setSelectedAddress] = useState<any | null>(null);
 
   // Store hooks
-  const addresses = useAddressStore((state) => state.addresses);
-  const addAddress = useAddressStore((state) => state.addAddress);
-  const updateAddress = useAddressStore((state) => state.updateAddress);
-  const deleteAddress = useAddressStore((state) => state.deleteAddress);
-  const setDefaultAddress = useAddressStore((state) => state.setDefaultAddress);
-  const error = useAddressStore((state) => state.error);
-  const clearError = useAddressStore((state) => state.clearError);
+  const addresses = useSavedAddresses();
+  const { setDefaultAddress, deleteSavedAddress } = useLocationActions();
 
   // Auth user
-  const user = useAuthUser();
 
   // Location data
   const { location } = useLocation({
-    showPermissionAlert: false,
+    autoInit: false,
     fallbackToYaounde: true,
   });
 
-  const currentFullAddress =
-    location?.city && location?.region
-      ? `${location.city}, ${location.region}`
-      : t('current_location') || 'Current Location';
+  
+  // Error handling removed since we're using the new location system
 
-  useEffect(() => {
-    if (error) {
-      Alert.alert(t('error'), error, [{ text: 'OK', onPress: clearError }]);
-    }
-  }, [clearError, error, t]);
-
-  const handleEditAddress = (address: AddressData) => {
+  const handleEditAddress = (address: any) => {
     setSelectedAddress(address);
-    setModalMode('edit');
     setModalVisible(true);
   };
 
   const handleAddAddress = () => {
     setSelectedAddress(null);
-    setModalMode('add');
     setModalVisible(true);
   };
 
-  const handleSaveAddress = async (addressData: AddressData) => {
-    // Navigate back to checkout screen after saving the address
-    navigation.goBack();
-    try {
-      if (modalMode === 'add') {
-        await addAddress({
-          ...addressData,
-          isDefault: addressData.isDefault || false,
-        });
-      } else if (selectedAddress?.id) {
-        await updateAddress(selectedAddress.id, addressData);
-      }
-
-      setModalVisible(false);
-    } catch (err) {
-      console.error('Error saving address:', err);
-    }
+  const handleSaveAddress = () => {
+    setModalVisible(false);
+    setSelectedAddress(null);
   };
 
   const handleDeleteAddress = (addressId: string) => {
@@ -96,7 +58,7 @@ const AddressScreen = ({
           text: t('delete'),
           style: 'destructive',
           onPress: () => {
-            deleteAddress(addressId);
+            deleteSavedAddress(addressId);
           },
         },
       ],
@@ -107,7 +69,7 @@ const AddressScreen = ({
     setDefaultAddress(addressId);
   };
 
-  const AddressComponent = ({ address }: { address: AddressData }) => {
+  const AddressComponent = ({ address }: { address: any }) => {
     return (
       <Card
         mode="outlined"
@@ -223,11 +185,10 @@ const AddressScreen = ({
           {t('add_your_first_address_to_make_ordering_easier')}
         </Text>
 
-        {location?.latitude && location?.longitude && (
+        {location?.coordinates?.latitude && location?.coordinates?.longitude && (
           <TouchableOpacity
             onPress={() => {
               setSelectedAddress(null);
-              setModalMode('add');
               setModalVisible(true);
             }}
             className="mt-6 px-6 py-3 rounded-xl flex-row items-center"
@@ -279,13 +240,12 @@ const AddressScreen = ({
           // loading={isLoading}
         />
 
-        {/* Address Edit Modal */}
-        <AddressEditModal
+        {/* Address Input Modal */}
+        <AddressInputModal
           visible={modalVisible}
-          onDismiss={() => setModalVisible(false)}
-          onSave={handleSaveAddress}
-          initialData={selectedAddress}
-          mode={modalMode}
+          onClose={() => setModalVisible(false)}
+          onAddressSaved={handleSaveAddress}
+          initialAddress={selectedAddress}
         />
       </View>
     </CommonView>

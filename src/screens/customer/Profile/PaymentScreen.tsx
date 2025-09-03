@@ -13,7 +13,9 @@ const PaymentScreen = ({
 }: RootStackScreenProps<'PaymentMethods'>) => {
   const { t } = useTranslation('translation');
   const { colors } = useTheme();
-  const setSelectedPaymentMethod = usePaymentStore((state) => state.setSelectedPaymentMethod);
+  const setSelectedPaymentMethod = usePaymentStore(
+    (state) => state.setSelectedPaymentMethod,
+  );
 
   const handleSelectPaymentMethod = (method: PaymentMethod) => {
     setSelectedPaymentMethod(method);
@@ -22,7 +24,7 @@ const PaymentScreen = ({
 
   const cardStyle = {
     marginVertical: 8,
-    borderColor: colors.outline,
+    borderColor: colors.surface,
     backgroundColor: colors.surface,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -34,30 +36,40 @@ const PaymentScreen = ({
   return (
     <CommonView>
       <View className="flex-1 px-4 py-4">
-        <Text className="text-xl font-bold text-center mb-6" style={{ color: colors.onSurface }}>
-          {t('payment_method')}
-        </Text>
-
         {/* MTN Mobile Money Card */}
         <Card mode="outlined" style={cardStyle}>
           <Card.Content className="py-4">
-            <TouchableOpacity 
+            <TouchableOpacity
               className="flex-row items-center justify-between"
               onPress={() => handleSelectPaymentMethod('mtn_mobile_money')}
               activeOpacity={0.7}
             >
               <View className="flex-row items-center">
-                <MaterialIcons name="payment" size={28} color={colors.primary} />
+                <MaterialIcons
+                  name="payment"
+                  size={28}
+                  color={colors.primary}
+                />
                 <View className="ml-4">
-                  <Text className="text-lg font-semibold" style={{ color: colors.onSurface }}>
+                  <Text
+                    className="text-lg font-semibold"
+                    style={{ color: colors.onSurface }}
+                  >
                     MTN Mobile Money
                   </Text>
-                  <Text className="text-sm" style={{ color: colors.onSurfaceVariant }}>
+                  <Text
+                    className="text-sm"
+                    style={{ color: colors.onSurfaceVariant }}
+                  >
                     Mobile Payment
                   </Text>
                 </View>
               </View>
-              <MaterialIcons name="arrow-forward-ios" size={20} color={colors.onSurfaceVariant} />
+              <MaterialIcons
+                name="arrow-forward-ios"
+                size={20}
+                color={colors.onSurfaceVariant}
+              />
             </TouchableOpacity>
           </Card.Content>
         </Card>
@@ -65,23 +77,37 @@ const PaymentScreen = ({
         {/* Orange Mobile Money Card */}
         <Card mode="outlined" style={cardStyle}>
           <Card.Content className="py-4">
-            <TouchableOpacity 
+            <TouchableOpacity
               className="flex-row items-center justify-between"
               onPress={() => handleSelectPaymentMethod('orange_money')}
               activeOpacity={0.7}
             >
               <View className="flex-row items-center">
-                <MaterialIcons name="payment" size={28} color={colors.primary} />
+                <MaterialIcons
+                  name="payment"
+                  size={28}
+                  color={colors.primary}
+                />
                 <View className="ml-4">
-                  <Text className="text-lg font-semibold" style={{ color: colors.onSurface }}>
+                  <Text
+                    className="text-lg font-semibold"
+                    style={{ color: colors.onSurface }}
+                  >
                     Orange Mobile Money
                   </Text>
-                  <Text className="text-sm" style={{ color: colors.onSurfaceVariant }}>
+                  <Text
+                    className="text-sm"
+                    style={{ color: colors.onSurfaceVariant }}
+                  >
                     Mobile Payment
                   </Text>
                 </View>
               </View>
-              <MaterialIcons name="arrow-forward-ios" size={20} color={colors.onSurfaceVariant} />
+              <MaterialIcons
+                name="arrow-forward-ios"
+                size={20}
+                color={colors.onSurfaceVariant}
+              />
             </TouchableOpacity>
           </Card.Content>
         </Card>

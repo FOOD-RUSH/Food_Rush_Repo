@@ -25,7 +25,7 @@
   "set_to_default": "Définir par défaut",
   "add_address_button": "Ajouter une adresse",
   "update_address_button": "Mettre à jour l'adresse",
-  "delivery_fee_unit": "Frais de livraison FCFA",
+  "delivery_fee_unit": "FCFA",
   "search_your_craving": "Recherchez votre envie",
   "promotion": "Promotion",
   "quick_filters": "Filtres rapides",
@@ -456,5 +456,16 @@
   "recently_joined": "Récemment rejoint",
   "active_filters_count": "{{count}} filtres actifs",
   "results_with_filters": "{{count}} résultats avec {{filters}} filtres",
-  "clear_all": "Tout Effacer"
+  "clear_all": "Tout Effacer",
+  "profile_updated_successfully": "Your Profile Updated cart_cleared_successfully!",
+  "how_was_delivery_order": "Comment s'est passée la livraison de commande du restaurant ?",
+  "enjoyed_food_rate_restaurant": "Vous avez apprécié la nourriture ? Évaluez le restaurant.",
+  "your_feedback_matters": "Votre avis compte.",
+  "star": "étoile",
+  "stars": "étoiles",
+  "add_optional_description": "Ajoutez une description optionnelle...",
+  "please_select_rating": "Veuillez sélectionner une note",
+  "review_submitted_successfully": "Avis soumis avec succès !"
+
+
 }

@@ -10,42 +10,42 @@ export const CategoryFilters = [
   {
     id: 1,
     image: FoodCategory.burger,
-    title: 'category_burger',
+    title: 'burger',
   },
   {
     id: 2,
     image: FoodCategory.vegetable,
-    title: 'category_vegetable',
+    title: 'vegetable',
   },
   {
     id: 3,
     image: FoodCategory.pizza,
-    title: 'category_pizza',
+    title: 'pizza',
   },
 
   {
     id: 4,
     image: FoodCategory.desert,
-    title: 'category_desert',
+    title: 'desert',
   },
   {
     id: 5,
     image: FoodCategory.meat,
-    title: 'category_meat',
+    title: 'meat',
   },
   {
     id: 6,
     image: FoodCategory.drink,
-    title: 'category_drinks',
+    title: 'drinks',
   },
   {
     id: 7,
     image: FoodCategory.noodles,
-    title: 'category_noodles',
+    title: 'noodles',
   },
   {
     id: 8,
     image: FoodCategory.others,
-    title: 'category_more',
+    title: 'more',
   },
 ];

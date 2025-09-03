@@ -210,7 +210,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
   const Header = () => {
     if (type === 'category') {
       return (
-        <View style={[styles.categoryHeader, { backgroundColor: colors.surface, borderBottomColor: colors.outline }]}>
+        <View style={[styles.categoryHeader, { backgroundColor: colors.surface }]}>
           <TouchableOpacity onPress={handleGoBack} style={[styles.backButton, { backgroundColor: colors.primary }]}>
             <MaterialIcons name="arrow-back" size={20} color="white" />
           </TouchableOpacity>
@@ -235,7 +235,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
 
   // Filter bar component (below search bar)
   const FilterBar = () => (
-    <View style={[styles.filterBar, { backgroundColor: colors.surface, borderBottomColor: colors.outline }]}>
+    <View style={[styles.filterBar, { backgroundColor: colors.surface }]}>
       <TouchableOpacity
         style={[
           styles.filterButton,
@@ -393,12 +393,12 @@ const styles = StyleSheet.create({
   categoryHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    
   },
   searchHeader: {
-    paddingVertical: 8,
+    paddingVertical: 4,
   },
   searchRow: {
     flexDirection: 'row',
@@ -413,7 +413,7 @@ const styles = StyleSheet.create({
   categoryTitle: {
     flex: 1,
     textAlign: 'center',
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '600',
     marginRight: 36,
   },
@@ -422,7 +422,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderBottomWidth: 1,
+    
     gap: 8,
   },
   filterButton: {
@@ -475,14 +475,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   resultsInfo: {
-    paddingHorizontal: 16,
     paddingVertical: 8,
   },
   resultsText: {
     fontSize: 14,
   },
   listContent: {
-    paddingHorizontal: 16,
     paddingBottom: 20,
   },
   emptyState: {

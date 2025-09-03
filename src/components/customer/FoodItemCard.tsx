@@ -6,6 +6,8 @@ import { View, TouchableOpacity } from 'react-native';
 import { Card, Text, useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { images } from '@/assets/images';
+import { useResponsive } from '@/src/hooks/useResponsive';
+import { ResponsiveImage, ResponsiveText } from '@/src/components/common';
 
 export interface FoodItemCardProps {
   foodId: string;
@@ -42,6 +44,7 @@ const FoodItemCard = ({
     useNavigation<CustomerHomeStackScreenProps<'HomeScreen'>['navigation']>();
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
+  const { isSmallDevice, getResponsiveSpacing, scale } = useResponsive();
 
   const primaryColor = colors.primary;
 
@@ -58,11 +61,11 @@ const FoodItemCard = ({
       <Card
         mode="outlined"
         style={{
-          margin: 10,
+          margin: getResponsiveSpacing(8),
           borderRadius: 16,
           overflow: 'hidden',
           backgroundColor: colors.surface,
-          marginVertical: 12,
+          marginVertical: getResponsiveSpacing(12),
           borderColor: colors.surface,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: 1 },
@@ -70,29 +73,28 @@ const FoodItemCard = ({
           shadowRadius: 3,
           elevation: 3,
           boxShadow: '1px 0px 10px rgba(0, 0, 0, 0.15)',
-          minWidth: 320, // Added min card width
-          maxWidth: 520, // Added max card width
-          minHeight: 120, // Added min card length
-          maxHeight: 180, // Added max card length
+          minWidth: isSmallDevice ? scale(280) : scale(320),
+          maxWidth: isSmallDevice ? scale(360) : scale(520),
+          minHeight: scale(120),
+          maxHeight: scale(180),
         }}
       >
         {/* Card content with horizontal layout */}
         <View
           style={{
             flexDirection: 'row',
-            padding: 16,
+            padding: getResponsiveSpacing(16),
             alignItems: 'center',
             position: 'relative',
           }}
         >
           {/* Left side - Food Image with PROMO badge */}
-          <View style={{ position: 'relative', marginRight: 16 }}>
-            <Card.Cover
+          <View style={{ position: 'relative', marginRight: getResponsiveSpacing(16) }}>
+            <ResponsiveImage
               source={FoodImage}
-              defaultSource={images.onboarding3}
+              size={isSmallDevice ? 'md' : 'lg'}
+              aspectRatio={1}
               style={{
-                height: 100,
-                width: 100,
                 borderRadius: 16,
               }}
             />
@@ -144,17 +146,17 @@ const FoodItemCard = ({
           {/* Right side - Food Details */}
           <View style={{ flex: 1 }}>
             {/* Food Name */}
-            <Text
+            <ResponsiveText
+              size={isSmallDevice ? 'base' : 'lg'}
+              weight="bold"
               style={{
-                fontSize: 16,
-                fontWeight: 'bold',
-                marginBottom: 10,
+                marginBottom: getResponsiveSpacing(8),
                 padding: 4,
                 color: colors.onSurface,
               }}
             >
               {FoodName}
-            </Text>
+            </ResponsiveText>
 
             {/* Distance and Rating */}
             <View
@@ -197,15 +199,15 @@ const FoodItemCard = ({
               }}
             >
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text
+                <ResponsiveText
+                  size={isSmallDevice ? 'base' : 'lg'}
+                  weight="bold"
                   style={{
                     color: colors.primary,
-                    fontSize: 16,
-                    fontWeight: 'bold',
                   }}
                 >
                   {FoodPrice} XAF
-                </Text>
+                </ResponsiveText>
                 <Text
                   style={{
                     color: colors.onSurface,

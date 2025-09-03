@@ -56,7 +56,6 @@ const SearchInput: React.FC<SearchInputProps> = ({
         style={{
           backgroundColor: isFocused ? '#e6f0ff' : colors.surfaceVariant,
           opacity: disabled ? 0.6 : 1,
-          paddingTop: 5,
           paddingBottom: 5,
           paddingRight: 10,
           paddingLeft: 10,
@@ -65,7 +64,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
         left={
           <TextInput.Icon
             icon="magnify"
-            size={20}
+            size={25}
             color={colors.onSurfaceVariant}
           />
         }

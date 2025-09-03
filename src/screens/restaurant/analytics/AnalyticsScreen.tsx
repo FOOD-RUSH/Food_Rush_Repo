@@ -14,7 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import CommonView from '@/src/components/common/CommonView';
 import { useFocusEffect } from '@react-navigation/native';
 
-const AnalyticsScreen = ({ navigation }: any) => {
+export const AnalyticsScreen = ({ navigation }: any) => {
   const [timeRange, setTimeRange] = useState('week');
   const [selectedMetric, setSelectedMetric] = useState('revenue');
   
@@ -25,9 +25,6 @@ const AnalyticsScreen = ({ navigation }: any) => {
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
   
-  const screenWidth = Dimensions.get('window').width;
-  const screenHeight = Dimensions.get('window').height;
-
   useEffect(() => {
     // Start entrance animations
     Animated.parallel([
@@ -518,3 +515,5 @@ const AnalyticsScreen = ({ navigation }: any) => {
         </Animated.View>
       </ScrollView>
     </CommonView>
+  )
+}

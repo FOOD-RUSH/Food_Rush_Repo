@@ -157,7 +157,7 @@ const CheckOutScreen = ({
   const cardStyle = useMemo(
     () => ({
       marginVertical: 8,
-      borderColor: colors.outline,
+      borderColor: colors.surface,
       backgroundColor: colors.surface,
       shadowColor: '#000',
       shadowOffset: { width: 0, height: 1 },

@@ -2,8 +2,8 @@ import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react'
 import CommonView from '@/src/components/common/CommonView';
 import { TextInput, useTheme } from 'react-native-paper';
 import { CategoryFilters } from '@/src/constants/categories';
-import { images } from '@/assets/images';
 import CategoryItem from '@/src/components/customer/CategoryItem';
+import { images } from '@/assets/images';
 import HomeHeader from '@/src/components/customer/HomeHeader';
 import FoodItemCard from '@/src/components/customer/FoodItemCard';
 import {
@@ -28,34 +28,33 @@ import { useTranslation } from 'react-i18next';
 import {
   useAllRestaurants,
   useGetAllMenu,
-  useGetAllMenuBrowse,
 } from '@/src/hooks/customer';
-import { useLocation, LocationPermissionModal } from '@/src/location';
 import { FoodProps, RestaurantCard as RestaurantCardType } from '@/src/types';
+import AddressInputModal from '@/src/location/AddressInputModalNew';
 import RestaurantCardSkeleton from '@/src/components/customer/RestaurantCardSkeleton';
 import FoodItemCardSkeleton from '@/src/components/customer/FoodItemCardSkeleton';
 import ClassicFoodCardSkeleton from '@/src/components/customer/ClassicFoodCardSkeleton';
 import ErrorDisplay from '@/src/components/common/ErrorDisplay';
 
 const { width } = Dimensions.get('window');
-RestaurantCard
-// Constants
+
+// Constants for better performance
 const CAROUSEL_CONFIG = {
   width: width * 0.65,
   height: 300,
-  autoPlayInterval: 5000, // Increased for better UX
-  animationDuration: 800, // Reduced for smoother animation
+  autoPlayInterval: 5000,
+  animationDuration: 800,
   parallaxScale: 0.92,
   parallaxOffset: 35,
 } as const;
 
 const SKELETON_COUNTS = {
-  restaurants: 3, // Reduced for faster loading
+  restaurants: 3,
   foods: 3,
   carousel: 2,
 } as const;
 
-// Optimized CarouselItem with stable props
+// Optimized CarouselItem component
 interface CarouselItemProps {
   food?: FoodProps;
   animationValue: SharedValue<number>;
@@ -115,20 +114,28 @@ interface LoadingSectionProps {
   horizontal?: boolean;
 }
 
-const LoadingSection = React.memo<LoadingSectionProps>(({ 
-  count, 
-  SkeletonComponent, 
-  horizontal = true 
+const LoadingSection = React.memo<LoadingSectionProps>(({
+  count,
+  SkeletonComponent,
+  horizontal = true
 }) => {
   const { colors } = useTheme();
-  
-  const skeletonItems = useMemo(() => 
+
+  const skeletonItems = useMemo(() =>
     Array.from({ length: count }, (_, index) => (
-      <SkeletonComponent key={`skeleton-${index}`} />
-    )), 
-    [count, SkeletonComponent]
+      <View
+        key={`skeleton-${index}`}
+        style={{
+          marginRight: horizontal ? 16 : 0,
+          marginBottom: horizontal ? 0 : 16
+        }}
+      >
+        <SkeletonComponent />
+      </View>
+    )),
+    [count, SkeletonComponent, horizontal]
   );
-  
+
   if (horizontal) {
     return (
       <ScrollView
@@ -136,6 +143,7 @@ const LoadingSection = React.memo<LoadingSectionProps>(({
         showsHorizontalScrollIndicator={false}
         className="px-4 py-2"
         style={{ backgroundColor: colors.background }}
+        contentContainerStyle={{ paddingHorizontal: 16 }}
       >
         {skeletonItems}
       </ScrollView>
@@ -156,63 +164,14 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
   const [refreshing, setRefreshing] = useState(false);
-  const [showPermissionModal, setShowPermissionModal] = useState(false);
+  const [showAddressModal, setShowAddressModal] = useState(false);
 
-  // Location hook with optimized options
-  const {
-    location,
-    isLoading: isLocationLoading,
-    hasPermission,
-    refreshLocation,
-    requestPermission,
-    setFallbackLocation,
-  } = useLocation({
-    autoInit: true,
-    showPermissionAlert: false, // Handle manually for better UX
-    showServicesAlert: false,
-    fallbackToYaounde: true,
-    enableHighAccuracy: false, // Better performance for Cameroon
+  // Simplified data fetching for MVP
+  const restaurantQuery = useAllRestaurants({
+    isOpen: true,
+    sortDir: 'ASC',
   });
-
-  // Stable query options with proper memoization
-  const queryOptions = useMemo(() => {
-    const hasValidLocation = location?.latitude && location?.longitude && !location.isFallback;
-
-    return {
-      restaurant: {
-        isOpen: true,
-        sortDir: 'ASC' as const,
-        ...(hasValidLocation && {
-          nearLat: location.latitude,
-          nearLng: location.longitude,
-          distance: 'distance' as const,
-        }),
-      },
-      food: hasValidLocation ? {
-        nearLat: location.latitude,
-        nearLng: location.longitude,
-        isOpen: true,
-        sortDir: 'ASC' as const,
-      } : null,
-    };
-  }, [location?.latitude, location?.longitude, location?.isFallback]);
-
-  // Use conditional hooks properly
-  const restaurantQuery = useAllRestaurants(queryOptions.restaurant);
-  
-  // Only use location-based food query if we have valid location
-  const locationBasedFoodQuery = useGetAllMenuBrowse(
-    queryOptions.food,
-    { enabled: !!queryOptions.food }
-  );
-  
-  // Always use general food query as fallback
-  const generalFoodQuery = useGetAllMenu({
-    enabled: !queryOptions.food, // Only when location-based is disabled
-  });
-
-  // Select the appropriate food data
-  const foodQuery = queryOptions.food ? locationBasedFoodQuery : generalFoodQuery;
+  const foodQuery = useGetAllMenu();
 
   // Destructure with stable names
   const {
@@ -233,7 +192,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
   const isDataLoading = isFoodLoading || isRestaurantLoading;
   const hasDataError = !!(foodError || restaurantError);
 
-  // Stable refs for cleanup
+  // Refs for cleanup
   const refreshTimeoutRef = useRef<number | null>(null);
 
   // Cleanup on unmount
@@ -245,11 +204,10 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
     };
   }, []);
 
-  // Optimized refresh with debouncing
+  // Simplified refresh with debouncing
   const onRefresh = useCallback(async () => {
     if (refreshing) return;
 
-    // Clear any pending refresh
     if (refreshTimeoutRef.current) {
       clearTimeout(refreshTimeoutRef.current);
     }
@@ -259,9 +217,9 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
     try {
       // Parallel execution for better performance
       await Promise.allSettled([
-        refreshLocation(),
         refetchRestaurants(),
         refetchFood(),
+        // Location system removed, no refreshLocation call
       ]);
     } catch (error) {
       console.error('Error refreshing data:', error);
@@ -271,41 +229,17 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
         setRefreshing(false);
       }, 500);
     }
-  }, [refreshing, refreshLocation, refetchRestaurants, refetchFood]);
+  }, [refreshing, refetchRestaurants, refetchFood]);
 
-  // Handle permission request with better UX
-  const handleRequestPermission = useCallback(async () => {
-    try {
-      const granted = await requestPermission();
-      if (granted) {
-        setShowPermissionModal(false);
-        // Auto-refresh location after permission granted
-        await refreshLocation();
-      }
-    } catch (error) {
-      console.error('Permission request failed:', error);
-    }
-  }, [requestPermission, refreshLocation]);
+  // Simple address press handler
+  const handleAddressPress = useCallback(() => {
+    // Show address input modal directly
+    setShowAddressModal(true);
+  }, []);
 
-  const handlePermissionDenied = useCallback(() => {
-    setFallbackLocation();
-    setShowPermissionModal(false);
-  }, [setFallbackLocation]);
+  // Location system removed, using null for HomeHeader
 
-  // Optimized address press handler
-  const handleAddressPress = useCallback(async () => {
-    if (!location || location.isFallback) {
-      // Show permission modal if no location or using fallback
-      setShowPermissionModal(true);
-    } else if (hasPermission) {
-      // Refresh current location
-      await refreshLocation();
-    } else {
-      setShowPermissionModal(true);
-    }
-  }, [location, hasPermission, refreshLocation]);
-
-  // Stable render functions with proper memoization
+  // Stable render functions
   const renderDiscountCarouselItem = useCallback(
     ({ index, animationValue }: { index: number; animationValue: SharedValue<number> }) => {
       const food = Array.isArray(foodData) ? foodData[index] : undefined;
@@ -369,7 +303,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
     []
   );
 
-  // Memoize carousel data for performance
+  // Memoize data for performance
   const carouselData = useMemo(() => 
     Array.isArray(foodData) ? foodData.slice(0, 6) : [], 
     [foodData]
@@ -401,7 +335,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
         {/* Header */}
         <HomeHeader
           navigation={navigation}
-          location={location}
+          location={null}
           onLocationPress={handleAddressPress}
         />
 
@@ -431,10 +365,10 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
             style={{
               backgroundColor: colors.surfaceVariant,
             }}
-            className="py-1 px-3 rounded-2xl"
+            className="py-2 px-3 rounded-2xl"
             placeholderTextColor={colors.onBackground}
-            onPressIn={handleSearchPress}
-            editable={false}
+            onPress={handleSearchPress}
+            editable={true}
             pointerEvents="box-only"
           />
         </View>
@@ -547,7 +481,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
               maxToRenderPerBatch={2}
               windowSize={6}
               getItemLayout={(_, index) => ({
-                length: 200, // Approximate width of FoodItemCard
+                length: 200,
                 offset: 200 * index,
                 index,
               })}
@@ -586,7 +520,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
               maxToRenderPerBatch={2}
               windowSize={6}
               getItemLayout={(_, index) => ({
-                length: 280, // Approximate width of RestaurantCard
+                length: 280,
                 offset: 280 * index,
                 index,
               })}
@@ -595,16 +529,19 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
         </View>
       </ScrollView>
 
-      {/* Location Permission Modal - Only render when needed */}
-      {showPermissionModal && (
-        <LocationPermissionModal
-          visible={showPermissionModal}
-          onRequestPermission={handleRequestPermission}
-          onDeny={handlePermissionDenied}
-          onClose={() => setShowPermissionModal(false)}
-          isLoading={isLocationLoading}
-        />
-      )}
+      {/* Location Permission Modal - Auto-show when needed */}
+      {/* LocationPermissionModal removed as location system is disabled */}
+
+      {/* Address Input Modal */}
+      {/* AddressInputModal kept but without location system */}
+      <AddressInputModal
+        visible={showAddressModal}
+        onClose={() => setShowAddressModal(false)}
+        onAddressSaved={async (addressInput) => {
+          // No location system, so just close modal
+          setShowAddressModal(false);
+        }}
+      />
     </CommonView>
   );
 };

@@ -3,7 +3,6 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Platform } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 
@@ -25,8 +24,8 @@ import ConfirmOrder from '../screens/restaurant/orders/ConfirmOrder';
 import RejectOrder from '../screens/restaurant/orders/RejectOrder';
 import { Platform } from 'react-native';
 
-import AnalyticsScreen from '../screens/restaurant/analytics/AnalyticsScreen';
-import DashboardScreen from '../screens/restaurant/analytics/DashboardScreen';
+import { AnalyticsScreen } from '../screens/restaurant/analytics/AnalyticsScreen';
+import {DashboardScreen} from '../screens/restaurant/analytics/DashboardScreen';
 import ProfileEditScreen from '../screens/restaurant/profile/ProfileEditScreen';
 import PaymentBillingScreen from '../screens/restaurant/profile/PaymentBillingScreen';
 import NotificationScreen from '../screens/restaurant/profile/NotificationScreen';
@@ -36,8 +35,8 @@ import AboutScreen from '../screens/restaurant/profile/AboutScreen';
 import RestaurantSettingsScreen from '../screens/restaurant/profile/RestaurantSettingsScreen';
 
 // Import the menu-related screens
-import AddFoodScreen from '../screens/restaurant/menu/AddFoodScreen';
-import EditFoodScreen from '../screens/restaurant/menu/EditFoodScreen';
+import {AddFoodScreen} from '../screens/restaurant/menu/AddFoodScreen';
+import {EditFoodScreen} from '../screens/restaurant/menu/EditFoodScreen';
 import FoodCategoriesScreen from '../screens/restaurant/menu/FoodCategoriesScreen';
 import MenuListScreen from '../screens/restaurant/menu/MenuListScreen';
 import MenuSettingsScreen from '../screens/restaurant/menu/MenuSettingsScreen';
@@ -229,7 +228,7 @@ function RestaurantAnalyticsStackScreen() {
         component={DashboardScreen}
         options={{ title: 'Dashboard' }}
       />
-      {/* <RestaurantAnalyticsStack.Screen name="SalesReport" component={SalesReportScreen} />
+       {/* <RestaurantAnalyticsStack.Screen name="SalesReport" component={SalesReportScreen} /> */}
      
     </RestaurantAnalyticsStack.Navigator>
   );
@@ -258,7 +257,6 @@ function RestaurantProfileStackScreen() {
           animation: 'slide_from_bottom', // Smooth animation
         }}
       />
-      {/* New Profile Option Screens */}
       <RestaurantProfileStack.Screen
         name="PaymentBilling"
         component={PaymentBillingScreen}

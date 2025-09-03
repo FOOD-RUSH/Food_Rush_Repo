@@ -41,6 +41,11 @@ export type RootStackParamList = {
   LanguageScreen: undefined;
   NearbyRestaurants: undefined;
   OrderReceipt: { orderId: string };
+  RestaurantReview: {
+    restaurantId?: string;
+    restaurantName?: string;
+    restaurantImage?: string;
+  };
 };
 
 // Auth Stack (unchanged)

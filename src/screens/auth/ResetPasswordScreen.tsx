@@ -15,6 +15,7 @@ import { useResetPassword } from '@/src/hooks/customer/useAuthhooks';
 import Toast from 'react-native-toast-message';
 import { useBottomSheet } from '@/src/components/common/BottomSheet/BottomSheetContext';
 import ResettingPassword from '@/src/components/auth/ResettingPassword';
+import OTPInput from '@/src/components/auth/OTPInput';
 import { AuthStackScreenProps } from '@/src/navigation/types';
 
 // Validation schema
@@ -162,39 +163,24 @@ const ResetPasswordScreen = ({
           <Controller
             control={control}
             name="otp"
-            render={({ field: { onChange, onBlur, value } }) => (
+            render={({ field: { onChange, value } }) => (
               <View className="mb-6">
-                <TextInput
-                  disabled={isPending}
-                  placeholder="Enter your OTP"
+                <Text
+                  className="text-base font-medium mb-3"
+                  style={{ color: colors.onSurface }}
+                >
+                  Enter OTP Code
+                </Text>
+                <OTPInput
                   value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  mode="outlined"
-                  autoCapitalize="none"
-                  style={{ backgroundColor: colors.surfaceVariant }}
-                  outlineStyle={{
-                    borderRadius: 12,
-                    borderWidth: 1,
-                    borderColor: errors.otp ? colors.error : colors.outline,
-                  }}
-                  contentStyle={{
-                    paddingHorizontal: 16,
-                    paddingVertical: 16,
-                  }}
+                  onChange={onChange}
                   error={!!errors.otp}
-                  left={
-                    <TextInput.Icon
-                      icon="key-variant"
-                      color={colors.onSurface}
-                    />
-                  }
-                  maxLength={4}
+                  disabled={isPending}
                 />
                 <HelperText
                   type="error"
                   visible={!!errors.otp}
-                  className="text-xs mt-1"
+                  className="text-xs mt-2 text-center"
                 >
                   {errors.otp?.message}
                 </HelperText>

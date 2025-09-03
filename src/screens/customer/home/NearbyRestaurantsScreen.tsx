@@ -5,7 +5,7 @@ import CommonView from '@/src/components/common/CommonView';
 import { RestaurantCard } from '@/src/components/customer/RestaurantCard';
 import { useGetRestaurantsNearBy } from '@/src/hooks/customer/useCustomerApi';
 import { RootStackScreenProps } from '@/src/navigation/types';
-import { useLocation } from '@/src/location';
+// Location system removed - using hardcoded coordinates
 import LoadingScreen from '@/src/components/common/LoadingScreen';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -15,26 +15,18 @@ const NearbyRestaurantsScreen = ({
 }: RootStackScreenProps<'NearbyRestaurants'>) => {
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
-  const { location: currentLocation } = useLocation();
 
-  // Get nearby restaurants using the existing API hook
+  // Get nearby restaurants using hardcoded coordinates
   const {
-    data: nearbyRestaurants,
+    data: nearbyRestaurantsResponse,
     isLoading,
     error,
     refetch,
     isRefetching,
-  } = useGetRestaurantsNearBy(
-    currentLocation?.longitude || 0,
-    currentLocation?.latitude || 0,
-  );
+  } = useGetRestaurantsNearBy();
 
-  // Auto-refetch when location changes
-  useEffect(() => {
-    if (currentLocation) {
-      refetch();
-    }
-  }, [currentLocation, refetch]);
+  // Extract data from response
+  const nearbyRestaurants = nearbyRestaurantsResponse?.data || [];
 
   const handleRefresh = () => {
     refetch();
@@ -71,9 +63,7 @@ const NearbyRestaurantsScreen = ({
         className="text-base text-center leading-6"
         style={{ color: colors.onSurfaceVariant }}
       >
-        {!currentLocation
-          ? t('enable_location_to_find_restaurants')
-          : t('no_restaurants_in_your_area')}
+        {t('no_restaurants_in_your_area')}
       </Text>
     </View>
   );
@@ -115,7 +105,7 @@ const NearbyRestaurantsScreen = ({
           <FlatList
             data={nearbyRestaurants}
             renderItem={renderRestaurant}
-            keyExtractor={(item) => item.restaurantId}
+            keyExtractor={(item) => item.id}
             contentContainerStyle={{ padding: 16 }}
             showsVerticalScrollIndicator={false}
             refreshControl={

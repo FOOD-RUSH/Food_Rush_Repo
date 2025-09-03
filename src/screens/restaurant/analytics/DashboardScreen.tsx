@@ -11,7 +11,7 @@ import {
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import CommonView from '@/src/components/common/CommonView';
 
-const DashboardScreen = ({ navigation }: any) => {
+export const DashboardScreen = ({ navigation }: any) => {
   const [timeRange, setTimeRange] = useState('week');
   
   // Animation values
@@ -568,3 +568,5 @@ const DashboardScreen = ({ navigation }: any) => {
         {renderQuickActions()}
       </ScrollView>
     </CommonView>
+  )
+}

@@ -5,12 +5,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { icons } from '@/assets/images';
 import type { CustomerHomeStackScreenProps } from '@/src/navigation/types';
 import { useTranslation } from 'react-i18next';
-import { Location } from '@/src/location';
+import { Address } from '@/src/location';
 import { useCartItems } from '@/src/stores/customerStores/cartStore';
+import { FUTURISTIC_FONTS } from '@/src/config/theme';
 
 interface HomeHeaderProps {
   navigation: CustomerHomeStackScreenProps<'HomeScreen'>['navigation'];
-  location: Location | null;
+  location: Address | null;
   onLocationPress: () => void;
 }
 
@@ -28,41 +29,12 @@ const HomeHeader: React.FC<HomeHeaderProps> = React.memo(({
     return cartItems.reduce((total, item) => total + item.quantity, 0);
   }, [cartItems]);
 
-  // Memoize display address calculation
+  // Hardcoded address for MVP - location system removed
   const displayAddress = useMemo(() => {
-    if (!location) {
-      return t('select_location');
-    }
+    return 'Yaoundé'; // Hardcoded city name
+  }, []);
 
-    // Show city and region for better UX in Cameroon
-    if (location.city && location.region) {
-      return `${location.city}, ${location.region}`;
-    }
-    if (location.city) {
-      return location.city;
-    }
-    if (location.address) {
-      return location.address.length > 30
-        ? `${location.address.substring(0, 30)}...`
-        : location.address;
-    }
-    return t('select_location');
-  }, [location, t]);
-
-  // Memoize fallback indicator
-  const fallbackIndicator = useMemo(() => {
-    if (!location?.isFallback) return null;
-    
-    return (
-      <View className="flex-row items-center mt-1">
-        <View className="px-2 py-0.5 bg-orange-100 rounded-full">
-          <Text className="text-xs text-orange-700 font-medium">
-            {t('default_location')}
-          </Text>
-        </View>
-      </View>
-    );
-  }, [location?.isFallback, t]);
+  // Location system removed, no fallback indicator needed
 
   // Stable navigation handlers
   const handleNotificationPress = useCallback(() => {
@@ -91,8 +63,7 @@ const HomeHeader: React.FC<HomeHeaderProps> = React.memo(({
       className="flex-row items-center justify-between px-4 py-4"
       style={{
         backgroundColor: colors.background,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.outlineVariant,
+      
       }}
     >
       {/* Left Section - Avatar and Location */}
@@ -119,15 +90,16 @@ const HomeHeader: React.FC<HomeHeaderProps> = React.memo(({
           >
             <View className="flex-1">
               <Text
-                className="font-medium text-sm"
-                style={{ color: colors.onSurface }}
+                className="font-medium text-lg"
+                style={{
+                  color: colors.onSurface,
+                  fontFamily: FUTURISTIC_FONTS.primary.fontFamily,
+                }}
                 numberOfLines={1}
                 ellipsizeMode="tail"
               >
                 {displayAddress}
               </Text>
-
-              {fallbackIndicator}
             </View>
 
             <Ionicons

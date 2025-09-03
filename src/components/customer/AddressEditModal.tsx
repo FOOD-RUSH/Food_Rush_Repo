@@ -45,16 +45,16 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
   const [fullAddress, setFullAddress] = useState('');
   const [isDefault, setIsDefault] = useState(false);
 
-  // Get current location data
-  const { location } = useLocation({
-    showPermissionAlert: false,
-    fallbackToYaounde: true,
-  });
+  // Location system removed - no location data available
+  // const { location } = useLocation({
+  //   showPermissionAlert: false,
+  //   fallbackToYaounde: true,
+  // });
 
-  const currentFullAddress =
-    location?.city && location.region
-      ? `${location.city}, ${location.region}`
-      : 'Current Location';
+  // const currentFullAddress =
+  //   location?.city && location.region
+  //     ? `${location.city}, ${location.region}`
+  //     : 'Current Location';
 
   useEffect(() => {
     if (initialData) {
@@ -63,13 +63,11 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
       setIsDefault(initialData.isDefault || false);
     } else {
       setLabel('');
-      // Auto-populate with current location if available
-      if (location?.latitude && location.longitude) {
-        setFullAddress(currentFullAddress);
-      }
+      // Location system removed - no auto-population
+      setFullAddress('');
       setIsDefault(false);
     }
-  }, [initialData, visible, currentFullAddress, location]);
+  }, [initialData, visible]);
 
   const handleSave = () => {
     if (label.trim() && fullAddress.trim()) {
@@ -77,10 +75,10 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
         id: initialData?.id,
         label: label.trim(),
         fullAddress: fullAddress.trim(),
-        latitude: location?.latitude || undefined,
-        longitude: location?.longitude || undefined,
-        city: location?.city || undefined,
-        region: location?.region || undefined,
+        latitude: undefined, // Location system removed
+        longitude: undefined, // Location system removed
+        city: undefined, // Location system removed
+        region: undefined, // Location system removed
         place: undefined,
         isDefault,
       };
@@ -127,19 +125,21 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
             >
               {t('full_address')}
             </Text>
-            {location?.latitude && location.longitude && (
-              <TouchableOpacity
-                onPress={() => setFullAddress(currentFullAddress)}
-                className="flex-row items-center px-3 py-1 rounded-full"
-                style={{ backgroundColor: '#007aff' }}
-                activeOpacity={0.7}
-              >
-                <Ionicons name="location" size={14} color="white" />
-                <Text className="text-white text-xs font-medium ml-1">
-                  {t('use_current')}
-                </Text>
-              </TouchableOpacity>
-            )}
+            {/* Use current location button - kept but disabled */}
+            <TouchableOpacity
+              onPress={() => {
+                // Location system removed - no functionality
+                console.log('Use current location button pressed but location system is disabled');
+              }}
+              className="flex-row items-center px-3 py-1 rounded-full"
+              style={{ backgroundColor: '#cccccc' }} // Gray color to indicate disabled
+              activeOpacity={0.7}
+            >
+              <Ionicons name="location" size={14} color="white" />
+              <Text className="text-white text-xs font-medium ml-1">
+                {t('use_current')}
+              </Text>
+            </TouchableOpacity>
           </View>
           <TextInput
             value={fullAddress}

@@ -1,6 +1,12 @@
 import { RestaurantCard, FoodProps, RestaurantProfile } from '../../types';
 import { apiClient } from './apiClient';
 
+// Hardcoded coordinates for Yaoundé (location system removed)
+const DEFAULT_COORDINATES = {
+  latitude: 3.8667,
+  longitude: 11.5167,
+};
+
 // Restaurant query parameters
 export interface RestaurantQuery {
   isOpen: boolean;
@@ -61,10 +67,10 @@ export const restaurantApi = {
     return apiClient.get<FoodProps[]>(url);
   },
 
-  // Get nearby restaurants based on location
+  // Get nearby restaurants based on location (uses hardcoded coordinates)
   getNearbyRestaurants: (
-    latitude: number,
-    longitude: number,
+    latitude: number = DEFAULT_COORDINATES.latitude,
+    longitude: number = DEFAULT_COORDINATES.longitude,
     radius: number = 5,
   ) => {
     return apiClient.get<RestaurantCard[]>(

@@ -24,7 +24,7 @@ export default function App() {
     const timer = setTimeout(() => {
       SplashScreen.hideAsync();
     }, 100);
-    
+
     return () => clearTimeout(timer);
   }, []);
 

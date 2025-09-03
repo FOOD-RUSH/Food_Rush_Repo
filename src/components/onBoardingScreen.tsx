@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
   Dimensions,
   StatusBar,
-  Animated,
   ImageSourcePropType,
+  Animated,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme, Button } from 'react-native-paper';
@@ -27,7 +27,6 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('screen');
 // Constants
 const WELCOME_TIMEOUT = 7000;
 const ANIMATION_DURATION = 800;
-const CARD_ANIMATION_DURATION = 100;
 
 // Types
 interface UserType {
@@ -280,7 +279,7 @@ const OnboardingSlide = memo(
                   <TouchableOpacity
                     onPress={onNext}
                     style={{
-                      backgroundColor: colors.surface,
+                      backgroundColor: colors.primary,
                       paddingVertical: 12,
                       paddingHorizontal: 24,
                       borderRadius: 25,
@@ -347,30 +346,12 @@ const UserTypeSelectionScreen = memo(
   }) => {
     const { colors } = useTheme();
     const { t } = useTranslation('translation');
-    const scaleAnims = useRef<Record<string, Animated.Value>>({
-      customer: new Animated.Value(1),
-      restaurant: new Animated.Value(1),
-    }).current;
 
     const handleUserTypePress = useCallback(
       (userType: 'customer' | 'restaurant') => {
-        // Animate card selection
-        Animated.sequence([
-          Animated.timing(scaleAnims[userType], {
-            toValue: 0.95,
-            duration: CARD_ANIMATION_DURATION,
-            useNativeDriver: true,
-          }),
-          Animated.timing(scaleAnims[userType], {
-            toValue: 1,
-            duration: CARD_ANIMATION_DURATION,
-            useNativeDriver: true,
-          }),
-        ]).start();
-
         onSelectUserType(userType);
       },
-      [scaleAnims, onSelectUserType],
+      [onSelectUserType],
     );
 
     const getButtonStyle = useCallback(
@@ -437,26 +418,11 @@ const UserTypeSelectionScreen = memo(
           {/* User Type Cards */}
           <View style={{ flex: 1, justifyContent: 'center' }}>
             {userTypes.map((type) => (
-              <Animated.View
-                key={type.id}
-                style={{
-                  transform: [
-                    {
-                      scale: selectedType === type.id ? scaleAnims[type.id] : 1,
-                    },
-                  ],
-                  marginBottom: 24,
-                }}
-              >
+              <View key={type.id} style={{ marginBottom: 24 }}>
                 <TouchableOpacity
                   activeOpacity={0.8}
                   style={{
                     borderRadius: 16,
-                    borderWidth: 2,
-                    borderColor:
-                      selectedType === type.id
-                        ? colors.primary
-                        : colors.outline,
                     backgroundColor: colors.surfaceVariant,
                     padding: 8,
                     height: SCREEN_HEIGHT / 3.5,
@@ -501,7 +467,7 @@ const UserTypeSelectionScreen = memo(
                     {/* {t(type.title)} */} {type.title}
                   </Text>
                 </TouchableOpacity>
-              </Animated.View>
+              </View>
             ))}
           </View>
 
@@ -612,3 +578,4 @@ OnboardingSlide.displayName = 'OnboardingSlide';
 UserTypeSelectionScreen.displayName = 'UserTypeSelectionScreen';
 
 export default memo(OnboardingScreen);
+

@@ -25,7 +25,7 @@ type EditFoodScreenProps = NativeStackScreenProps<
   'EditMenuItem'
 >;
 
-const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
+export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
   const navigation = useNavigation();
   
   // FIXED: Use itemId from route params and create a mock food item
@@ -665,3 +665,5 @@ const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
         </CommonView>
       </LinearGradient>
     </>
+  )
+  }

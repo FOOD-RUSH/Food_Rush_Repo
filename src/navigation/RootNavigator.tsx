@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { MaterialIcons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import OrderReceiptScreen from '../screens/customer/Order/OrderReceiptScreen';
+import RestaurantReviewScreen from '../screens/customer/RestaurantReviewScreen';
 
 // Navigation types and helpers
 import { RootStackParamList } from './types';
@@ -372,6 +373,16 @@ const RootNavigator: React.FC = () => {
               component={NearbyRestaurantsScreen}
               options={{
                 headerTitle: t('restaurants_near_you'),
+              }}
+            />
+
+            <Stack.Screen
+              name="RestaurantReview"
+              component={RestaurantReviewScreen}
+              options={{
+                headerTitle: '',
+                headerShown: false,
+                animation: 'slide_from_right' as const,
               }}
             />
           </Stack.Group>

@@ -1,308 +1,312 @@
-import { useCallback, useEffect, useRef, useMemo } from 'react';
-import { Alert, Linking } from 'react-native';
-import { useLocationStore } from './store';
-import { LocationOptions, PermissionStatus } from './types';
+// src/location/useLocation.ts - Simple MVP hook
+import { useEffect, useCallback, useRef, useMemo } from 'react';
 import LocationService from './LocationService';
+import {
+  useLocationStore,
+  useCurrentLocation,
+  useLocationLoading,
+  useLocationError,
+  useLocationPermission,
+  useLocationActions,
+} from './store';
+import { ManualAddressInput, Address } from './types';
 
-interface UseLocationOptions extends LocationOptions {
+interface UseLocationOptions {
   autoInit?: boolean;
-  showPermissionAlert?: boolean;
-  showServicesAlert?: boolean;
+  fallbackToYaounde?: boolean;
+  onLocationChange?: (location: Address | null) => void;
+  onError?: (error: string) => void;
 }
 
-/**
- * Fixed location hook with stable dependencies and batched updates
- * Optimized for Cameroon network conditions
- */
+// Simple debounce hook
+function useDebounce<T extends (...args: any[]) => any>(
+  callback: T,
+  delay: number
+): T {
+  const timeoutRef = useRef<number | null>(null);
+
+  return useCallback((...args: Parameters<T>) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = setTimeout(() => {
+      callback(...args);
+    }, delay);
+  }, [callback, delay]) as T;
+}
+
 export const useLocation = (options: UseLocationOptions = {}) => {
   const {
-    autoInit = true,
-    showPermissionAlert = true,
-    showServicesAlert = true,
+    autoInit = false,
     fallbackToYaounde = true,
-    enableHighAccuracy = false, // Default to false for better performance
+    onLocationChange,
+    onError,
   } = options;
 
-  // Store state and actions
+  const currentLocation = useCurrentLocation();
+  const isLoading = useLocationLoading();
+  const lastError = useLocationError();
+  const { hasPermission, status: permissionStatus } = useLocationPermission();
+
   const {
-    location,
-    isLoading,
-    error,
-    hasPermission,
-    permissionRequested,
-    servicesEnabled,
-    setLocation,
+    setCurrentLocation,
+    addSavedAddress,
     setLoading,
-    setError,
     setPermission,
-    setPermissionRequested,
-    setServicesEnabled,
-    setFallbackLocation,
+    setError,
     clearError,
-    setBatch,
-  } = useLocationStore();
+    createAddress,
+    createFallbackAddress,
+    setUsingFallback,
+  } = useLocationActions();
 
-  // Stable refs to prevent infinite loops
-  const isRequestingRef = useRef(false);
-  const initializationDoneRef = useRef(false);
-  const optionsRef = useRef(options);
+  const mountedRef = useRef(true);
 
-  // Update options ref when options change
   useEffect(() => {
-    optionsRef.current = options;
-  }, [options]);
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
-  // Memoize stable functions
-  const checkServices = useCallback(async (): Promise<boolean> => {
-    try {
-      const enabled = await LocationService.areLocationServicesEnabled();
-      setServicesEnabled(enabled);
-      
-      if (!enabled && optionsRef.current.showServicesAlert) {
-        Alert.alert(
-          'Services de localisation désactivés',
-          'Veuillez activer les services de localisation dans les paramètres de votre appareil pour une meilleure expérience.',
-          [
-            { text: 'Annuler', style: 'cancel' },
-            {
-              text: 'Ouvrir les paramètres',
-              onPress: () => Linking.openSettings(),
-            },
-          ]
-        );
+  const debouncedLocationChange = useDebounce(
+    useCallback((location: Address | null) => {
+      if (mountedRef.current) {
+        onLocationChange?.(location);
       }
-      
-      return enabled;
-    } catch (error) {
-      console.warn('useLocation: Error checking services:', error);
-      setServicesEnabled(false);
-      return false;
-    }
-  }, [setServicesEnabled]);
+    }, [onLocationChange]),
+    300
+  );
 
-  const checkPermission = useCallback(async (): Promise<boolean> => {
-    try {
-      const status = await LocationService.getPermissionStatus();
-      const granted = status === PermissionStatus.GRANTED;
-      setPermission(granted);
-      return granted;
-    } catch (error) {
-      console.warn('useLocation: Error checking permission:', error);
-      setPermission(false);
-      return false;
+  const debouncedErrorCallback = useDebounce(
+    useCallback((error: string) => {
+      if (mountedRef.current) {
+        onError?.(error);
+      }
+    }, [onError]),
+    300
+  );
+
+  useEffect(() => {
+    if (mountedRef.current) {
+      debouncedLocationChange(currentLocation);
     }
-  }, [setPermission]);
+  }, [currentLocation?.id, currentLocation?.coordinates?.latitude, currentLocation?.coordinates?.longitude, debouncedLocationChange]);
+
+  useEffect(() => {
+    if (mountedRef.current && lastError) {
+      debouncedErrorCallback(lastError);
+    }
+  }, [lastError, debouncedErrorCallback]);
+
+  const initializeLocation = useCallback(async () => {
+    if (!mountedRef.current) return;
+
+    try {
+      setLoading(true);
+      clearError();
+
+      const permissionGranted = await LocationService.checkPermission();
+      setPermission(permissionGranted, permissionGranted ? 'granted' : 'denied');
+
+      if (permissionGranted) {
+        const coords = await LocationService.getCurrentLocation();
+        if (coords) {
+          const addressText = await LocationService.reverseGeocode(coords);
+          const gpsAddress = createAddress(
+            'Position actuelle',
+            coords,
+            undefined,
+            true
+          );
+          setCurrentLocation(gpsAddress);
+          addSavedAddress(gpsAddress);
+          setUsingFallback(false);
+        } else if (fallbackToYaounde) {
+          setFallbackLocation();
+        }
+      } else if (fallbackToYaounde) {
+        setFallbackLocation();
+      }
+    } catch (error) {
+      if (mountedRef.current) {
+        setError('Impossible d\'initialiser la localisation');
+        if (fallbackToYaounde) {
+          setFallbackLocation();
+        }
+      }
+    } finally {
+      if (mountedRef.current) {
+        setLoading(false);
+      }
+    }
+  }, [fallbackToYaounde, setCurrentLocation, addSavedAddress, setError, setLoading, setPermission, setUsingFallback, clearError]);
 
   const requestPermission = useCallback(async (): Promise<boolean> => {
-    if (isRequestingRef.current) return false;
+    if (!mountedRef.current) return false;
 
     try {
-      isRequestingRef.current = true;
-      
-      // Batch updates for better performance
-      setBatch({
-        isLoading: true,
-        error: null,
-      });
-      
-      setPermissionRequested(true);
+      setLoading(true);
+      clearError();
 
       const granted = await LocationService.requestPermission();
-      setPermission(granted);
+      setPermission(granted, granted ? 'granted' : 'denied');
 
-      if (!granted && optionsRef.current.showPermissionAlert) {
-        Alert.alert(
-          'Autorisation de localisation refusée',
-          'L\'accès à la localisation a été refusé. Nous utiliserons Yaoundé comme localisation par défaut. Vous pouvez activer l\'accès à la localisation plus tard dans les paramètres.',
-          [
-            { text: 'OK', style: 'default' },
-            {
-              text: 'Ouvrir les paramètres',
-              onPress: () => Linking.openSettings(),
-            },
-          ]
-        );
+      if (granted) {
+        const coords = await LocationService.getCurrentLocation();
+        if (coords) {
+          const addressText = await LocationService.reverseGeocode(coords);
+          const gpsAddress = createAddress(
+            'Position actuelle',
+            coords,
+            undefined,
+            true
+          );
+          setCurrentLocation(gpsAddress);
+          addSavedAddress(gpsAddress);
+          setUsingFallback(false);
+          return true;
+        }
       }
-
-      return granted;
+      return false;
     } catch (error) {
-      console.warn('useLocation: Error requesting permission:', error);
-      setError(error instanceof Error ? error.message : 'Permission request failed');
+      if (mountedRef.current) {
+        setError('Impossible de demander la permission');
+      }
       return false;
     } finally {
-      setLoading(false);
-      isRequestingRef.current = false;
+      if (mountedRef.current) {
+        setLoading(false);
+      }
     }
-  }, [setBatch, setPermissionRequested, setPermission, setError, setLoading]);
+  }, [setCurrentLocation, addSavedAddress, setError, setLoading, setPermission, setUsingFallback, clearError]);
 
-  const getCurrentLocation = useCallback(async (forceRefresh = false): Promise<boolean> => {
-    if (isRequestingRef.current) return false;
+  const setFallbackLocation = useCallback(() => {
+    if (!mountedRef.current) return;
 
     try {
-      isRequestingRef.current = true;
-      
-      // Batch initial state update
-      setBatch({
-        isLoading: true,
-        error: null,
-      });
+      const fallbackAddress = createFallbackAddress();
+      setCurrentLocation(fallbackAddress);
+      addSavedAddress(fallbackAddress);
+      setUsingFallback(true);
+      clearError();
+    } catch {
+      if (mountedRef.current) {
+        setError('Impossible de définir la position par défaut');
+      }
+    }
+  }, [setCurrentLocation, addSavedAddress, setError, setUsingFallback, clearError]);
 
-      // Clear cache if force refresh
-      if (forceRefresh) {
-        LocationService.clearCache();
+  const refreshLocation = useCallback(async () => {
+    if (!mountedRef.current) return false;
+
+    if (hasPermission) {
+      const coords = await LocationService.getCurrentLocation();
+      if (coords) {
+        const addressText = await LocationService.reverseGeocode(coords);
+        const gpsAddress = createAddress(
+          'Position actuelle',
+          coords,
+          undefined,
+          true
+        );
+        setCurrentLocation(gpsAddress);
+        addSavedAddress(gpsAddress);
+        setUsingFallback(false);
+        return true;
+      }
+      return false;
+    } else {
+      return await requestPermission();
+    }
+  }, [hasPermission, setCurrentLocation, addSavedAddress, setUsingFallback, requestPermission]);
+
+  const addManualAddress = useCallback(async (
+    addressInput: ManualAddressInput,
+    setAsDefault = true
+  ): Promise<boolean> => {
+    if (!mountedRef.current) return false;
+
+    try {
+      setLoading(true);
+      clearError();
+
+      if (!LocationService.validateAddress(addressInput)) {
+        throw new Error('Adresse invalide');
       }
 
-      const result = await LocationService.getCurrentLocation({
-        enableHighAccuracy: optionsRef.current.enableHighAccuracy,
-        fallbackToYaounde: optionsRef.current.fallbackToYaounde,
-      });
+      const geocodeResult = await LocationService.geocodeAddress(addressInput);
+      if (!geocodeResult.success || !geocodeResult.coordinates) {
+        throw new Error(geocodeResult.error || 'Impossible de traiter l\'adresse');
+      }
 
-      // Batch final state update
-      setBatch({
-        location: result.location || null,
-        error: result.error || null,
-        isLoading: false,
-      });
+      const newAddress = createAddress(
+        addressInput.street,
+        geocodeResult.coordinates,
+        addressInput.landmark,
+        false,
+        addressInput.label
+      );
 
-      return result.success;
+      if (setAsDefault) {
+        newAddress.isDefault = true;
+        setCurrentLocation(newAddress);
+      }
+
+      addSavedAddress(newAddress);
+      setUsingFallback(false);
+      return true;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to get location';
-      console.warn('useLocation: Error getting location:', errorMessage);
-      
-      // Batch error state with fallback
-      if (optionsRef.current.fallbackToYaounde) {
-        const fallbackLocation = LocationService.getFallbackLocation();
-        setBatch({
-          location: fallbackLocation,
-          error: errorMessage,
-          isLoading: false,
-        });
-      } else {
-        setBatch({
-          error: errorMessage,
-          isLoading: false,
-        });
+      if (mountedRef.current) {
+        setError(error instanceof Error ? error.message : 'Impossible d\'ajouter l\'adresse');
       }
-      
       return false;
     } finally {
-      isRequestingRef.current = false;
-    }
-  }, [setBatch]);
-
-  // Initialize location only once with stable dependencies
-  useEffect(() => {
-    if (!autoInit || initializationDoneRef.current) return;
-
-    const initializeLocation = async () => {
-      if (isRequestingRef.current) return;
-      
-      try {
-        initializationDoneRef.current = true;
-
-        // Check services and permission
-        const [servicesOk, hasPermissionNow] = await Promise.all([
-          LocationService.areLocationServicesEnabled(),
-          LocationService.getPermissionStatus(),
-        ]);
-
-        setBatch({
-          servicesEnabled: servicesOk,
-          hasPermission: hasPermissionNow === PermissionStatus.GRANTED,
-        });
-
-        if (!servicesOk) {
-          // Services disabled, use fallback
-          if (fallbackToYaounde) {
-            const fallbackLocation = LocationService.getFallbackLocation();
-            setBatch({
-              location: fallbackLocation,
-              isLoading: false,
-            });
-          }
-          return;
-        }
-
-        if (hasPermissionNow === PermissionStatus.GRANTED) {
-          // Permission granted, get location
-          await getCurrentLocation();
-        } else if (!permissionRequested && hasPermissionNow === PermissionStatus.UNDETERMINED) {
-          // Permission not requested yet, try to request it
-          const granted = await LocationService.requestPermission();
-          setBatch({
-            hasPermission: granted,
-            permissionRequested: true,
-          });
-          
-          if (granted) {
-            await getCurrentLocation();
-          } else if (fallbackToYaounde) {
-            const fallbackLocation = LocationService.getFallbackLocation();
-            setBatch({
-              location: fallbackLocation,
-              isLoading: false,
-            });
-          }
-        } else if (fallbackToYaounde) {
-          // Permission was denied previously, use fallback
-          const fallbackLocation = LocationService.getFallbackLocation();
-          setBatch({
-            location: fallbackLocation,
-            isLoading: false,
-          });
-        }
-      } catch (error) {
-        console.warn('useLocation: Error initializing location:', error);
-        if (fallbackToYaounde) {
-          const fallbackLocation = LocationService.getFallbackLocation();
-          setBatch({
-            location: fallbackLocation,
-            error: error instanceof Error ? error.message : 'Initialization failed',
-            isLoading: false,
-          });
-        }
+      if (mountedRef.current) {
+        setLoading(false);
       }
-    };
+    }
+  }, [setCurrentLocation, addSavedAddress, setError, setLoading, setUsingFallback, clearError]);
 
-    initializeLocation();
+  const selectAddress = useCallback((address: Address) => {
+    if (mountedRef.current) {
+      setCurrentLocation(address);
+      setUsingFallback(address.isFallback);
+      clearError();
+    }
+  }, [setCurrentLocation, setUsingFallback, clearError]);
 
-    // Cleanup function
-    return () => {
-      isRequestingRef.current = false;
-    };
-  }, [autoInit, fallbackToYaounde]); // Minimal, stable dependencies
+  const hasValidLocation = useMemo(() => {
+    return !!(currentLocation?.coordinates?.latitude && currentLocation?.coordinates?.longitude);
+  }, [currentLocation?.coordinates]);
 
-  // Refresh location with proper cleanup
-  const refreshLocation = useCallback(async (): Promise<boolean> => {
-    return getCurrentLocation(true);
-  }, [getCurrentLocation]);
+  const isUsingFallback = useMemo(() => {
+    return currentLocation?.isFallback === true;
+  }, [currentLocation?.isFallback]);
 
-  // Memoized computed values to prevent unnecessary re-renders
-  const computedValues = useMemo(() => ({
-    hasValidLocation: location !== null,
-    isUsingFallback: location?.isFallback ?? false,
-    canRequestLocation: servicesEnabled && !hasPermission && !isLoading,
-  }), [location, servicesEnabled, hasPermission, isLoading]);
+  const shouldShowPermissionModal = useMemo(() => {
+    return !hasPermission &&
+      permissionStatus === 'undetermined' &&
+      !currentLocation &&
+      !isLoading;
+  }, [hasPermission, permissionStatus, currentLocation, isLoading]);
 
   return {
-    // State
-    location,
+    location: currentLocation,
     isLoading,
-    error,
     hasPermission,
-    permissionRequested,
-    servicesEnabled,
-    ...computedValues,
+    permissionStatus,
+    error: lastError,
+    hasValidLocation,
+    isUsingFallback,
+    shouldShowPermissionModal,
 
-    // Actions
-    getCurrentLocation,
-    refreshLocation,
+    initializeLocation,
     requestPermission,
-    checkServices,
-    checkPermission,
-    clearError,
-    
-    // Helpers
+    refreshLocation,
+    addManualAddress,
     setFallbackLocation,
+    selectAddress,
+    clearError,
   };
 };

@@ -19,6 +19,39 @@ const COLORS = {
   ERROR: '#ef4444',
 } as const;
 
+// Futuristic Font Configuration using system fonts (ZERO bundle size)
+export const FUTURISTIC_FONTS = {
+  primary: {
+    fontFamily: 'monospace', // System monospace font
+    fontWeight: '400' as const,
+  },
+  secondary: {
+    fontFamily: 'monospace',
+    fontWeight: '400' as const,
+  },
+  accent: {
+    fontFamily: 'monospace',
+    fontWeight: '400' as const,
+  },
+  display: {
+    fontFamily: 'monospace',
+    fontWeight: '700' as const,
+  },
+  mono: {
+    fontFamily: 'monospace',
+    fontWeight: '400' as const,
+  },
+} as const;
+
+// Font scale factors for different contexts
+export const FONT_SCALES = {
+  heading: 1.2,
+  subheading: 1.1,
+  body: 1.0,
+  caption: 0.9,
+  small: 0.8,
+} as const;
+
 export const lightTheme: MD3Theme = {
   ...MD3LightTheme,
   colors: {

@@ -17,6 +17,12 @@ export interface RestaurantFilters {
     };
 }
 
+// Hardcoded coordinates for Yaoundé (location system removed)
+const DEFAULT_COORDINATES = {
+    latitude: 3.8667,
+    longitude: 11.5167,
+};
+
 
 
 const CACHE_CONFIG = {
@@ -75,29 +81,25 @@ export const useGetAllMenuBrowse = (query: RestaurantQuery | null, options?: { e
 }
 
 export const useGetMenuById = (restaurantId: string, menuId: string) => {
-   return useQuery({
+    return useQuery({
         queryKey: ['menuItem', menuId],
         queryFn: () => restaurantApi.getMenuItemById(restaurantId, menuId).then(res => res.data),
-         staleTime: 5 * 60 * 1000, // 5 minutes
+        staleTime: 5 * 60 * 1000, // 5 minutes
         gcTime: 30 * 60 * 1000, // 30 minutes (previously cacheTime)
-        
+
     })
 }
 
-export const useGetRestaurantsNearBy = (
-    longitude: number,
-    latitude: number
-) => {
-
+export const useGetRestaurantsNearBy = () => {
     return useQuery({
         queryKey: ['nearby_restaurant'],
         queryFn: async () => {
-            if (!longitude || !latitude) {
-                throw new Error('No coordinates available');
-            }
-            return restaurantApi.getNearbyRestaurants(longitude, latitude);
+            // Use hardcoded coordinates for Yaoundé
+            const latitude = DEFAULT_COORDINATES.latitude;
+            const longitude = DEFAULT_COORDINATES.longitude;
+            return restaurantApi.getNearbyRestaurants(latitude, longitude);
         },
-        enabled: !!longitude && !!latitude,
+        enabled: true,
         staleTime: 5 * 60 * 1000, // 5 minutes
         gcTime: 30 * 60 * 1000, // 30 minutes (previously cacheTime)
         retry: 3,
