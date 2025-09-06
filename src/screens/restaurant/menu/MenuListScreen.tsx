@@ -1,12 +1,23 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { View, Text, FlatList, Animated, TouchableOpacity, Image, StatusBar, Dimensions, ViewStyle, Platform } from 'react-native';
-import { FAB, Searchbar } from 'react-native-paper';
+import { 
+  View, 
+  Text, 
+  FlatList, 
+  Animated, 
+  TouchableOpacity, 
+  Image, 
+  StatusBar, 
+  Platform,
+  Dimensions 
+} from 'react-native';
+import { FAB, Searchbar, Card, Badge, Switch } from 'react-native-paper';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import CommonView from '@/src/components/common/CommonView';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 interface MenuItem {
   id: string;
@@ -17,6 +28,7 @@ interface MenuItem {
   isAvailable: boolean;
   isPopular?: boolean;
   rating?: number;
+  description?: string;
 }
 
 interface FilterButton {
@@ -28,65 +40,61 @@ interface FilterButton {
 
 const MenuListScreen = () => {
   const navigation = useNavigation();
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
   const [menuItems, setMenuItems] = useState<MenuItem[]>([
     {
       id: '1',
-      name: 'Grilled Salmon',
-      price: 24.99,
-      category: 'Main Course',
-      image: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=300&h=200&fit=crop',
+      name: 'Margherita Pizza',
+      price: 18.99,
+      category: 'Pizza',
+      image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80',
       isAvailable: true,
       isPopular: true,
       rating: 4.8,
+      description: 'Classic Italian pizza with fresh mozzarella'
     },
     {
       id: '2',
       name: 'Caesar Salad',
       price: 12.50,
       category: 'Salads',
-      image: 'https://images.unsplash.com/photo-1546793665-c74683f339c1?w=300&h=200&fit=crop',
-      isAvailable: true,
+      image: 'https://images.unsplash.com/photo-1550304943-4f24f54ddde9?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80',
+      isAvailable: false,
+      isPopular: false,
       rating: 4.5,
+      description: 'Crisp romaine with parmesan and croutons'
     },
     {
       id: '3',
-      name: 'Chocolate Cake',
-      price: 8.99,
-      category: 'Desserts',
-      image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300&h=200&fit=crop',
-      isAvailable: false,
-      rating: 4.9,
-    },
-    {
-      id: '4',
       name: 'Beef Burger',
-      price: 16.75,
-      category: 'Main Course',
-      image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300&h=200&fit=crop',
+      price: 15.75,
+      category: 'Burgers',
+      image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80',
       isAvailable: true,
       isPopular: true,
       rating: 4.7,
+      description: 'Juicy beef patty with fresh vegetables'
     },
     {
-      id: '5',
-      name: 'Fresh Juice',
-      price: 5.99,
-      category: 'Beverages',
-      image: 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=300&h=200&fit=crop',
+      id: '4',
+      name: 'Chocolate Cake',
+      price: 8.99,
+      category: 'Desserts',
+      image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80',
       isAvailable: true,
-      rating: 4.3,
-    },
+      isPopular: false,
+      rating: 4.6,
+      description: 'Rich and decadent chocolate cake'
+    }
   ]);
 
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
   const headerSlideAnim = useRef(new Animated.Value(-100)).current;
-  const searchBarAnim = useRef(new Animated.Value(0)).current;
   const fabAnim = useRef(new Animated.Value(0)).current;
-  const floatingAnim = useRef(new Animated.Value(0)).current;
   const itemAnimations = useRef(menuItems.map(() => new Animated.Value(0))).current;
 
   useEffect(() => {
@@ -111,12 +119,6 @@ const MenuListScreen = () => {
           friction: 8,
           useNativeDriver: true,
         }),
-        Animated.spring(searchBarAnim, {
-          toValue: 1,
-          tension: 60,
-          friction: 8,
-          useNativeDriver: true,
-        }),
       ]),
       // Menu items stagger animation
       Animated.stagger(100, 
@@ -138,28 +140,8 @@ const MenuListScreen = () => {
       }),
     ]);
 
-    entranceSequence.start(() => {
-      startContinuousAnimations();
-    });
+    entranceSequence.start();
   }, []);
-
-  const startContinuousAnimations = () => {
-    // Floating animation for decorative elements
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(floatingAnim, {
-          toValue: 1,
-          duration: 4000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(floatingAnim, {
-          toValue: 0,
-          duration: 4000,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-  };
 
   const handleBack = () => {
     // Exit animation before navigating back
@@ -180,30 +162,13 @@ const MenuListScreen = () => {
   };
 
   const handleItemPress = (item: MenuItem) => {
-    // Add item press animation
-    console.log('Item pressed:', item.name);
-    // Navigate to food details or edit screen
+    console.log('Navigate to edit item:', item.name);
+    // Navigate to edit menu item screen
   };
 
   const handleAddFood = () => {
-    // FAB press animation
-    const fabScale = new Animated.Value(1);
-    
-    Animated.sequence([
-      Animated.timing(fabScale, {
-        toValue: 0.9,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-      Animated.timing(fabScale, {
-        toValue: 1,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-    ]).start();
-
-    // Navigate to add menu item screen - you'll need to define this route
     console.log('Navigate to AddFood screen');
+    // Navigate to add menu item screen
   };
 
   const handleFilterPress = (filter: string) => {
@@ -218,12 +183,7 @@ const MenuListScreen = () => {
     );
   };
 
-  const floatingInterpolate = floatingAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, -20],
-  });
-
-  const MenuItemRow: React.FC<{ item: MenuItem; index: number }> = ({ item, index }) => {
+  const MenuItemCard: React.FC<{ item: MenuItem; index: number }> = ({ item, index }) => {
     const scaleAnim = useRef(new Animated.Value(1)).current;
 
     const handlePressIn = () => {
@@ -250,166 +210,97 @@ const MenuListScreen = () => {
             {
               translateX: itemAnimations[index]?.interpolate({
                 inputRange: [0, 1],
-                outputRange: [150 * (index % 2 === 0 ? 1 : -1), 0],
+                outputRange: [100 * (index % 2 === 0 ? 1 : -1), 0],
               }) || 0
-            },
-            {
-              scale: itemAnimations[index]?.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0.8, 1],
-              }) || 1
             },
             { scale: scaleAnim }
           ],
           marginBottom: 16,
         }}
       >
-        <TouchableOpacity 
-          onPress={() => handleItemPress(item)}
-          onPressIn={handlePressIn}
-          onPressOut={handlePressOut}
-          activeOpacity={1}
-        >
-          <LinearGradient
-            colors={['rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.05)']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={{
-              borderRadius: 20,
-              padding: 16,
-              borderWidth: 1,
-              borderColor: 'rgba(255, 255, 255, 0.1)',
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 8 },
-              shadowOpacity: 0.2,
-              shadowRadius: 15,
-              elevation: 8,
-            }}
+        <Card className="mx-6" style={{ elevation: 4, backgroundColor: '#FFFFFF' }}>
+          <TouchableOpacity 
+            onPress={() => handleItemPress(item)}
+            onPressIn={handlePressIn}
+            onPressOut={handlePressOut}
+            activeOpacity={1}
           >
-            <View style={{ flexDirection: 'row' }}>
-              {/* Image Container */}
-              <View style={{ 
-                width: 100, 
-                height: 100, 
-                borderRadius: 15,
-                overflow: 'hidden',
-                marginRight: 16,
-              }}>
-                <Image 
-                  source={{ uri: item.image }}
-                  style={{ width: '100%', height: '100%' }}
-                  resizeMode="cover"
-                />
-                {item.isPopular && (
-                  <LinearGradient
-                    colors={['rgba(255, 193, 7, 0.9)', 'rgba(255, 152, 0, 0.9)']}
-                    style={{
-                      position: 'absolute',
-                      top: 8,
-                      left: 8,
-                      paddingHorizontal: 8,
-                      paddingVertical: 4,
-                      borderRadius: 12,
-                    }}
-                  >
-                    <Text style={{ 
-                      color: '#ffffff', 
-                      fontSize: 10, 
-                      fontWeight: '600' 
-                    }}>
-                      POPULAR
-                    </Text>
-                  </LinearGradient>
-                )}
-              </View>
-
-              {/* Content */}
-              <View style={{ flex: 1, justifyContent: 'space-between' }}>
-                <View>
-                  <Text style={{ 
-                    fontSize: 18, 
-                    fontWeight: '700', 
-                    color: '#ffffff',
-                    marginBottom: 4,
-                  }}>
-                    {item.name}
-                  </Text>
-                  <Text style={{ 
-                    fontSize: 14, 
-                    color: 'rgba(255, 255, 255, 0.7)',
-                    marginBottom: 8,
-                  }}>
-                    {item.category}
-                  </Text>
-                  
-                  {/* Rating */}
-                  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                    <MaterialCommunityIcons name="star" size={16} color="#ffd700" />
-                    <Text style={{ 
-                      color: 'rgba(255, 255, 255, 0.8)', 
-                      fontSize: 12, 
-                      marginLeft: 4 
-                    }}>
-                      {item.rating}
+            <Card.Content className="p-0">
+              <View className="flex-row">
+                {/* Image Container */}
+                <View className="relative">
+                  <Image 
+                    source={{ uri: item.image }}
+                    style={{ width: 120, height: 120, borderTopLeftRadius: 12, borderBottomLeftRadius: 12 }}
+                    resizeMode="cover"
+                  />
+                  {item.isPopular && (
+                    <View className="absolute top-2 left-2 bg-orange-500 px-2 py-1 rounded-full">
+                      <Text className="text-white text-xs font-semibold">Popular</Text>
+                    </View>
+                  )}
+                  <View className={`absolute bottom-2 right-2 px-2 py-1 rounded-full ${
+                    item.isAvailable ? 'bg-green-500' : 'bg-red-500'
+                  }`}>
+                    <Text className="text-white text-xs font-semibold">
+                      {item.isAvailable ? 'Available' : 'Sold Out'}
                     </Text>
                   </View>
                 </View>
 
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Text style={{ 
-                    fontSize: 20, 
-                    fontWeight: '700', 
-                    color: '#4facfe' 
-                  }}>
-                    ${item.price}
-                  </Text>
-                  
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <TouchableOpacity 
-                      onPress={() => toggleAvailability(item.id)}
-                      style={{
-                        paddingHorizontal: 12,
-                        paddingVertical: 6,
-                        borderRadius: 20,
-                        backgroundColor: item.isAvailable ? 'rgba(52, 199, 89, 0.2)' : 'rgba(255, 59, 48, 0.2)',
-                        borderWidth: 1,
-                        borderColor: item.isAvailable ? 'rgba(52, 199, 89, 0.4)' : 'rgba(255, 59, 48, 0.4)',
-                        marginRight: 8,
-                      }}
-                    >
-                      <Text style={{
-                        color: item.isAvailable ? '#34c759' : '#ff3b30',
-                        fontSize: 12,
-                        fontWeight: '600',
-                      }}>
-                        {item.isAvailable ? 'Available' : 'Sold Out'}
+                {/* Content */}
+                <View className="flex-1 p-4 justify-between">
+                  <View>
+                    <View className="flex-row items-start justify-between mb-2">
+                      <Text className="text-lg font-bold text-gray-800 flex-1 pr-2">
+                        {item.name}
                       </Text>
-                    </TouchableOpacity>
+                      <Text className="text-xl font-bold text-blue-600">${item.price}</Text>
+                    </View>
+                    
+                    <Text className="text-sm text-gray-500 mb-2">{item.category}</Text>
+                    
+                    {item.description && (
+                      <Text className="text-sm text-gray-600 mb-3" numberOfLines={2}>
+                        {item.description}
+                      </Text>
+                    )}
+                    
+                    <View className="flex-row items-center mb-3">
+                      <MaterialCommunityIcons name="star" size={16} color="#F59E0B" />
+                      <Text className="text-sm text-gray-600 ml-1">{item.rating}</Text>
+                    </View>
+                  </View>
 
+                  <View className="flex-row items-center justify-between">
+                    <View className="flex-row items-center">
+                      <Text className="text-sm text-gray-600 mr-3">Available:</Text>
+                      <Switch
+                        value={item.isAvailable}
+                        onValueChange={() => toggleAvailability(item.id)}
+                        thumbColor={item.isAvailable ? '#3B82F6' : '#E5E7EB'}
+                        trackColor={{ false: '#E5E7EB', true: '#DBEAFE' }}
+                      />
+                    </View>
+                    
                     <TouchableOpacity
-                      style={{
-                        width: 36,
-                        height: 36,
-                        borderRadius: 18,
-                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
+                      className="w-10 h-10 bg-blue-50 rounded-full items-center justify-center"
+                      onPress={() => handleItemPress(item)}
                     >
-                      <MaterialCommunityIcons name="pencil" size={16} color="rgba(255, 255, 255, 0.8)" />
+                      <MaterialCommunityIcons name="pencil" size={18} color="#3B82F6" />
                     </TouchableOpacity>
                   </View>
                 </View>
               </View>
-            </View>
-          </LinearGradient>
-        </TouchableOpacity>
+            </Card.Content>
+          </TouchableOpacity>
+        </Card>
       </Animated.View>
     );
   };
 
   const renderMenuItem = ({ item, index }: { item: MenuItem; index: number }) => (
-    <MenuItemRow item={item} index={index} />
+    <MenuItemCard item={item} index={index} />
   );
 
   // Filter items based on search query and active filter
@@ -437,394 +328,191 @@ const MenuListScreen = () => {
     {
       label: 'All',
       icon: 'food-fork-drink',
-      color: '#4facfe',
-      gradient: ['#4facfe', '#00f2fe']
+      color: '#3B82F6',
+      gradient: ['#3B82F6', '#1D4ED8']
     },
     {
       label: 'Available',
       icon: 'check-circle',
-      color: '#34c759',
-      gradient: ['#34c759', '#2ecc71']
+      color: '#10B981',
+      gradient: ['#10B981', '#047857']
     },
     {
       label: 'Popular',
       icon: 'star',
-      color: '#ffd700',
-      gradient: ['#ffd700', '#ffa000']
+      color: '#F59E0B',
+      gradient: ['#F59E0B', '#D97706']
     },
     {
       label: 'Sold Out',
       icon: 'close-circle',
-      color: '#ff3b30',
-      gradient: ['#ff3b30', '#dc3545']
+      color: '#EF4444',
+      gradient: ['#EF4444', '#DC2626']
     }
   ];
 
   return (
-    <>
-      <StatusBar barStyle="light-content" backgroundColor="#1a1a2e" />
-      <LinearGradient
-        colors={['#000002ff', '#090909ff', '#e1e7efff']}
-        style={{ flex: 1 }}
-      >
-        <CommonView style={{ flex: 1, backgroundColor: 'transparent' }}>
-          {/* Decorative floating elements */}
-          <Animated.View
-            style={{
-              position: 'absolute',
-              top: 120,
-              right: 20,
-              width: 100,
-              height: 100,
-              borderRadius: 50,
-              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-              transform: [{ translateY: floatingInterpolate }],
-            }}
-          />
-          <Animated.View
-            style={{
-              position: 'absolute',
-              bottom: 200,
-              left: 30,
-              width: 70,
-              height: 70,
-              borderRadius: 35,
-              backgroundColor: 'rgba(255, 255, 255, 0.03)',
-              transform: [{ translateY: floatingInterpolate }],
-            }}
-          />
-
-          {/* Custom Header */}
-          <Animated.View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              paddingTop: 20,
-              paddingBottom: 20,
-              transform: [{ translateY: headerSlideAnim }],
-            }}
-          >
+    <View style={{ flex: 1, backgroundColor: '#F8FAFC' }}>
+      <StatusBar barStyle="dark-content" backgroundColor="#F8FAFC" />
+      
+      <CommonView style={{ flex: 1, backgroundColor: 'transparent' }}>
+        {/* Custom Header */}
+        <Animated.View
+          className="px-6 pt-12 pb-4"
+          style={{
+            transform: [{ translateY: headerSlideAnim }],
+          }}
+        >
+          <View className="flex-row items-center mb-4">
             <TouchableOpacity
               onPress={handleBack}
-              style={{
-                width: 44,
-                height: 44,
-                borderRadius: 22,
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginRight: 16,
-              }}
+              className="w-12 h-12 bg-white rounded-full items-center justify-center shadow-sm mr-4"
             >
-              <Ionicons name="arrow-back" size={24} color="#ffffff" />
+              <Ionicons name="arrow-back" size={20} color="#374151" />
             </TouchableOpacity>
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#ffffff' }}>
-                Menu Items
-              </Text>
-              <Text style={{ fontSize: 14, color: 'rgba(255, 255, 255, 0.7)' }}>
-                Manage your restaurant menu
-              </Text>
+            <View className="flex-1">
+              <Text className="text-2xl font-bold text-gray-800">Menu Items</Text>
+              <Text className="text-gray-500">Manage your restaurant menu</Text>
             </View>
-            <View style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              paddingHorizontal: 12,
-              paddingVertical: 6,
-              borderRadius: 20,
-            }}>
-              <MaterialCommunityIcons name="food" size={16} color="#4facfe" />
-              <Text style={{ 
-                color: '#ffffff', 
-                fontSize: 12, 
-                fontWeight: '600',
-                marginLeft: 4,
-              }}>
-                {menuItems.length}
-              </Text>
+            <View className="bg-blue-50 px-3 py-2 rounded-full">
+              <Text className="text-blue-600 font-semibold text-sm">{menuItems.length} items</Text>
             </View>
-          </Animated.View>
+          </View>
+        </Animated.View>
 
-          <Animated.View 
-            style={{
-              flex: 1,
-              opacity: fadeAnim,
-              transform: [{ translateY: slideAnim }],
-            }}
-          >
-            {/* Search Bar */}
-            <Animated.View
+        <Animated.View 
+          style={{
+            flex: 1,
+            opacity: fadeAnim,
+            transform: [{ translateY: slideAnim }],
+          }}
+        >
+          {/* Search Bar */}
+          <View className="px-6 mb-4">
+            <Searchbar
+              placeholder="Search menu items..."
+              onChangeText={setSearchQuery}
+              value={searchQuery}
               style={{
-                marginBottom: 20,
-                opacity: searchBarAnim,
-                transform: [{
-                  scale: searchBarAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0.9, 1],
-                  })
-                }]
+                backgroundColor: '#FFFFFF',
+                elevation: 2,
+                borderRadius: 12,
               }}
-            >
-              <View style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                borderRadius: 20,
-                borderWidth: 1,
-                borderColor: 'rgba(255, 255, 255, 0.2)',
-              }}>
-                <Searchbar
-                  placeholder="Search menu items..."
-                  onChangeText={setSearchQuery}
-                  value={searchQuery}
-                  style={{
-                    backgroundColor: 'transparent',
-                    elevation: 0,
-                    shadowOpacity: 0,
-                  }}
-                  inputStyle={{ color: '#ffffff' }}
-                  placeholderTextColor="rgba(255, 255, 255, 0.6)"
-                  iconColor="rgba(255, 255, 255, 0.8)"
-                  theme={{
-                    colors: {
-                      primary: '#4facfe',
-                      onSurface: '#ffffff',
-                    }
-                  }}
-                />
-              </View>
-            </Animated.View>
-
-            {/* Stats Bar */}
-            <Animated.View
-              style={{
-                flexDirection: 'row',
-                marginBottom: 20,
-                opacity: fadeAnim,
-              }}
-            >
-              <LinearGradient
-                colors={['rgba(255, 255, 255, 0.1)', 'rgba(255, 255, 255, 0.05)']}
-                style={{
-                  flex: 1,
-                  flexDirection: 'row',
-                  borderRadius: 15,
-                  padding: 16,
-                  borderWidth: 1,
-                  borderColor: 'rgba(255, 255, 255, 0.1)',
-                }}
-              >
-                <View style={{ flex: 1, alignItems: 'center' }}>
-                  <Text style={{ 
-                    fontSize: 20, 
-                    fontWeight: 'bold', 
-                    color: '#4facfe' 
-                  }}>
-                    {menuItems.filter(item => item.isAvailable).length}
-                  </Text>
-                  <Text style={{ 
-                    fontSize: 12, 
-                    color: 'rgba(255, 255, 255, 0.7)' 
-                  }}>
-                    Available
-                  </Text>
-                </View>
-                
-                <View style={{ 
-                  width: 1, 
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)', 
-                  marginHorizontal: 16 
-                }} />
-                
-                <View style={{ flex: 1, alignItems: 'center' }}>
-                  <Text style={{ 
-                    fontSize: 20, 
-                    fontWeight: 'bold', 
-                    color: '#34c759' 
-                  }}>
-                    {menuItems.filter(item => item.isPopular).length}
-                  </Text>
-                  <Text style={{ 
-                    fontSize: 12, 
-                    color: 'rgba(255, 255, 255, 0.7)' 
-                  }}>
-                    Popular
-                  </Text>
-                </View>
-                
-                <View style={{ 
-                  width: 1, 
-                  backgroundColor: 'rgba(255, 255, 255, 0.2)', 
-                  marginHorizontal: 16 
-                }} />
-                
-                <View style={{ flex: 1, alignItems: 'center' }}>
-                  <Text style={{ 
-                    fontSize: 20, 
-                    fontWeight: 'bold', 
-                    color: '#ff9500' 
-                  }}>
-                    {menuItems.filter(item => !item.isAvailable).length}
-                  </Text>
-                  <Text style={{ 
-                    fontSize: 12, 
-                    color: 'rgba(255, 255, 255, 0.7)' 
-                  }}>
-                    Sold Out
-                  </Text>
-                </View>
-              </LinearGradient>
-            </Animated.View>
-
-            {/* Menu List */}
-            <FlatList
-              data={filteredItems}
-              renderItem={renderMenuItem}
-              keyExtractor={item => item.id}
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ paddingBottom: 100 }}
-              ListEmptyComponent={() => (
-                <Animated.View
-                  style={{
-                    flex: 1,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    paddingVertical: 60,
-                    opacity: fadeAnim,
-                  }}
-                >
-                  <View style={{
-                    width: 120,
-                    height: 120,
-                    borderRadius: 60,
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginBottom: 24,
-                  }}>
-                    <MaterialCommunityIcons name="food-off" size={60} color="rgba(255, 255, 255, 0.5)" />
-                  </View>
-                  <Text style={{
-                    color: 'rgba(255, 255, 255, 0.8)',
-                    fontSize: 18,
-                    fontWeight: '600',
-                    marginBottom: 8,
-                    textAlign: 'center',
-                  }}>
-                    {searchQuery ? 'No items found' : 'No menu items yet'}
-                  </Text>
-                  <Text style={{
-                    color: 'rgba(255, 255, 255, 0.6)',
-                    fontSize: 14,
-                    textAlign: 'center',
-                    paddingHorizontal: 40,
-                  }}>
-                    {searchQuery 
-                      ? `No items match "${searchQuery}"`
-                      : 'Start building your menu by adding your first item'
-                    }
-                  </Text>
-                </Animated.View>
-              )}
+              inputStyle={{ color: '#374151' }}
+              placeholderTextColor="#9CA3AF"
+              iconColor="#6B7280"
             />
-          </Animated.View>
+          </View>
 
-          {/* Bottom Filter Buttons */}
-          <Animated.View
-            style={{
-              position: 'absolute',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              backgroundColor: 'white',
-              paddingBottom: Platform.OS === 'ios' ? 34 : 16,
-              paddingTop: 16,
-              elevation: 8,
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: -2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 3,
-              opacity: fabAnim,
-              transform: [{
-                translateY: fabAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [100, 0],
-                })
-              }]
-            }}
-          >
-            <View style={{ 
-              flexDirection: 'row', 
-              justifyContent: 'space-evenly',
-              paddingHorizontal: 16
-            }}>
-              {filterButtons.map((button, index) => (
+          {/* Filter Chips */}
+          <View className="px-6 mb-4">
+            <View className="flex-row space-x-2">
+              {filterButtons.map((button) => (
                 <TouchableOpacity
                   key={button.label}
                   onPress={() => handleFilterPress(button.label.toLowerCase())}
+                  className={`px-4 py-2 rounded-full flex-row items-center ${
+                    activeFilter === button.label.toLowerCase() 
+                      ? 'bg-blue-500' 
+                      : 'bg-white border border-gray-200'
+                  }`}
+                  style={{ elevation: activeFilter === button.label.toLowerCase() ? 2 : 0 }}
                 >
-                  <LinearGradient
-                    colors={button.gradient as any}
-                    style={{
-                      width: 65,
-                      height: 65,
-                      borderRadius: 32.5,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      elevation: 4,
-                      shadowColor: '#000',
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: 0.2,
-                      shadowRadius: 3,
-                      opacity: activeFilter === button.label.toLowerCase() ? 1 : 0.7,
-                    }}
-                  >
-                    <MaterialCommunityIcons 
-                      name={button.icon as any} 
-                      size={22} 
-                      color="#fff" 
-                    />
-                    <Text 
-                      style={{ 
-                        color: '#fff', 
-                        fontSize: 11, 
-                        marginTop: 4,
-                        fontWeight: '600'
-                      }}
-                    >
-                      {button.label}
-                    </Text>
-                  </LinearGradient>
+                  <MaterialCommunityIcons 
+                    name={button.icon as any} 
+                    size={16} 
+                    color={activeFilter === button.label.toLowerCase() ? '#FFFFFF' : button.color}
+                  />
+                  <Text className={`ml-2 text-sm font-medium ${
+                    activeFilter === button.label.toLowerCase() ? 'text-white' : 'text-gray-700'
+                  }`}>
+                    {button.label}
+                  </Text>
                 </TouchableOpacity>
               ))}
             </View>
-          </Animated.View>
+          </View>
 
-          {/* Update FAB position to be above filter buttons */}
-          <Animated.View
+          {/* Stats Bar */}
+          <Card className="mx-6 mb-6" style={{ elevation: 2 }}>
+            <Card.Content className="py-4">
+              <View className="flex-row justify-around">
+                <View className="items-center">
+                  <Text className="text-xl font-bold text-green-600">
+                    {menuItems.filter(item => item.isAvailable).length}
+                  </Text>
+                  <Text className="text-sm text-gray-600">Available</Text>
+                </View>
+                
+                <View className="items-center">
+                  <Text className="text-xl font-bold text-orange-600">
+                    {menuItems.filter(item => item.isPopular).length}
+                  </Text>
+                  <Text className="text-sm text-gray-600">Popular</Text>
+                </View>
+                
+                <View className="items-center">
+                  <Text className="text-xl font-bold text-red-600">
+                    {menuItems.filter(item => !item.isAvailable).length}
+                  </Text>
+                  <Text className="text-sm text-gray-600">Sold Out</Text>
+                </View>
+              </View>
+            </Card.Content>
+          </Card>
+
+          {/* Menu List */}
+          <FlatList
+            data={filteredItems}
+            renderItem={renderMenuItem}
+            keyExtractor={item => item.id}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 100 }}
+            ListEmptyComponent={() => (
+              <Animated.View
+                className="items-center justify-center py-20"
+                style={{ opacity: fadeAnim }}
+              >
+                <View className="w-24 h-24 bg-gray-100 rounded-full items-center justify-center mb-6">
+                  <MaterialCommunityIcons name="food-off" size={48} color="#9CA3AF" />
+                </View>
+                <Text className="text-xl font-bold text-gray-800 mb-2 text-center">
+                  {searchQuery ? 'No items found' : 'No menu items yet'}
+                </Text>
+                <Text className="text-gray-500 text-center px-8">
+                  {searchQuery
+                    ? `No items match "${searchQuery}"`
+                    : 'Start building your menu by adding your first item'
+                  }
+                </Text>
+              </Animated.View>
+            )}
+          />
+        </Animated.View>
+
+        {/* FAB */}
+        <Animated.View
+          className="absolute bottom-6 right-6"
+          style={{
+            opacity: fabAnim,
+            transform: [{
+              scale: fabAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, 1],
+              })
+            }]
+          }}
+        >
+          <FAB
+            icon="plus"
             style={{
-              position: 'absolute',
-              bottom: Platform.OS === 'ios' ? 120 : 100,
-              right: 20,
-              opacity: fabAnim,
-              transform: [{
-                scale: fabAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0, 1],
-                })
-              }]
+              backgroundColor: '#3B82F6',
             }}
-          >
-            <FAB
-              icon="plus"
-              style={{
-                backgroundColor: '#007AFF',
-              }}
-              onPress={handleAddFood}
-            />
-          </Animated.View>
-        </CommonView>
-      </LinearGradient>
-    </>
+            onPress={handleAddFood}
+          />
+        </Animated.View>
+      </CommonView>
+    </View>
   );
 };
 

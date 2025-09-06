@@ -576,6 +576,9 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
 
   const handleLogin = useCallback(() => {
     if (selectedType) {
+      // Set the selected user type in the auth store
+      const { useAuthStore } = require('../stores/customerStores/AuthStore');
+      useAuthStore.getState().setSelectedUserType(selectedType);
       onLogin(selectedType);
     }
   }, [selectedType, onLogin]);

@@ -4,7 +4,7 @@ import { TextInput } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import CommonView from '@/src/components/common/CommonView';
 
-const AddFoodScreen = () => {
+export const AddFoodScreen = () => {
   const [foodName, setFoodName] = useState('');
   const [price, setPrice] = useState('');
   const [description, setDescription] = useState('');
@@ -112,3 +112,5 @@ const AddFoodScreen = () => {
         </Animated.View>
       </ScrollView>
     </CommonView>
+  )
+}

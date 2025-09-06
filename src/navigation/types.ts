@@ -56,6 +56,10 @@ export type AuthStackParamList = {
     userType: 'customer' | 'restaurant';
   };
   ResetPassword: { email: string };
+  AwaitingApproval: {
+    restaurantId?: string;
+    userId?: string;
+  };
 };
 
 // Customer Tab Navigator - Only core tab screens

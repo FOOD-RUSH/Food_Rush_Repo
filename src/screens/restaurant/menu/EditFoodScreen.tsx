@@ -25,24 +25,24 @@ type EditFoodScreenProps = NativeStackScreenProps<
   'EditMenuItem'
 >;
 
-const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
+export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
   const navigation = useNavigation();
   
   // FIXED: Use itemId from route params and create a mock food item
   // In a real app, you would fetch the item data using the itemId
   const { itemId } = route.params;
   
-  // Mock function to get food item by ID (replace with your actual data fetching logic)
+  // TODO: Replace with actual API call to fetch food item by ID
   const getFoodItemById = (id: string): FoodItem => {
     // This would typically be a database call or API request
-    // For now, return mock data
+    // For now, return empty data
     return {
       id: id,
-      name: 'Sample Food Item',
-      price: '12.99',
-      description: 'A delicious sample food item',
-      category: 'Main Course',
-      image: 'https://via.placeholder.com/300x200'
+      name: '',
+      price: '',
+      description: '',
+      category: '',
+      image: ''
     };
   };
 
@@ -665,3 +665,5 @@ const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
         </CommonView>
       </LinearGradient>
     </>
+  )
+}

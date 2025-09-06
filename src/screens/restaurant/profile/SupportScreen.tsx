@@ -14,25 +14,26 @@ import { RestaurantProfileStackScreenProps } from '../../../navigation/types';
 
 type Props = RestaurantProfileStackScreenProps<'Support'>;
 
-const faqs = [
-  {
-    question: 'How do I change my password?',
-    answer: 'Go to Account & Settings and tap on Change Password.',
-  },
-  {
-    question: 'How do I update my payment method?',
-    answer: 'Visit the Payment & Billing section to add or remove cards.',
-  },
-  {
-    question: 'How do I contact support?',
-    answer: 'You can email us at support@restaurant.com or use the chat below.',
-  },
-];
-
 const SupportScreen = ({ navigation }: Props) => {
   const headerAnim = useRef(new Animated.Value(-100)).current;
   const contentAnim = useRef(new Animated.Value(0)).current;
   const [expanded, setExpanded] = useState<number | null>(null);
+
+  const [faqs, setFaqs] = useState([
+    {
+      question: 'How do I change my password?',
+      answer: 'Go to Account & Settings and tap on Change Password.',
+    },
+    {
+      question: 'How do I update my payment method?',
+      answer: 'Visit the Payment & Billing section to add or remove cards.',
+    },
+    {
+      question: 'How do I contact support?',
+      answer: 'You can email us at support@restaurant.com or use the chat below.',
+    },
+  ]);
+
 
   useEffect(() => {
     Animated.sequence([

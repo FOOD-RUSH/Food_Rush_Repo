@@ -12,6 +12,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { RestaurantProfileStackScreenProps } from '../../../navigation/types';
+import { RESTAURANT_COLORS } from '@/src/config/restaurantTheme';
 
 // Type for props
 // This screen is registered as 'RestaurantSettings' in RestaurantProfileStackParamList
@@ -52,7 +53,7 @@ const RestaurantSettingsScreen = ({ navigation }: Props) => {
         }}
       >
         <LinearGradient
-          colors={["#764ba2", "#667eea"]}
+          colors={[RESTAURANT_COLORS.GRADIENT_START, RESTAURANT_COLORS.GRADIENT_END]}
           style={styles.header}
           start={[0, 0]}
           end={[1, 1]}
@@ -103,8 +104,8 @@ const RestaurantSettingsScreen = ({ navigation }: Props) => {
             <Switch
               value={acceptingOrders}
               onValueChange={setAcceptingOrders}
-              trackColor={{ false: '#ccc', true: '#764ba2' }}
-              thumbColor={acceptingOrders ? '#764ba2' : '#fff'}
+              trackColor={{ false: '#ccc', true: RESTAURANT_COLORS.PRIMARY }}
+              thumbColor={acceptingOrders ? RESTAURANT_COLORS.PRIMARY : '#fff'}
             />
           </View>
           <View style={styles.switchRow}>
@@ -112,8 +113,8 @@ const RestaurantSettingsScreen = ({ navigation }: Props) => {
             <Switch
               value={showOnMap}
               onValueChange={setShowOnMap}
-              trackColor={{ false: '#ccc', true: '#764ba2' }}
-              thumbColor={showOnMap ? '#764ba2' : '#fff'}
+              trackColor={{ false: '#ccc', true: RESTAURANT_COLORS.PRIMARY }}
+              thumbColor={showOnMap ? RESTAURANT_COLORS.PRIMARY : '#fff'}
             />
           </View>
           <TouchableOpacity style={styles.saveBtn}>
@@ -129,7 +130,7 @@ const RestaurantSettingsScreen = ({ navigation }: Props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f8fc',
+    backgroundColor: RESTAURANT_COLORS.BACKGROUND_LIGHT,
   },
   header: {
     flexDirection: 'row',
@@ -140,7 +141,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
     elevation: 8,
-    shadowColor: '#764ba2',
+    shadowColor: RESTAURANT_COLORS.PRIMARY,
     shadowOpacity: 0.25,
     shadowOffset: { width: 0, height: 6 },
     shadowRadius: 16,
@@ -158,7 +159,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#764ba2',
+    color: RESTAURANT_COLORS.PRIMARY,
     marginTop: 28,
     marginBottom: 12,
     marginLeft: 20,
@@ -169,46 +170,46 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     fontSize: 15,
-    color: '#764ba2',
+    color: RESTAURANT_COLORS.PRIMARY,
     marginBottom: 4,
   },
   input: {
-    backgroundColor: '#fff',
+    backgroundColor: RESTAURANT_COLORS.SURFACE_LIGHT,
     borderRadius: 10,
     padding: 12,
     fontSize: 16,
     borderWidth: 1.2,
-    borderColor: '#eee',
-    color: '#333',
+    borderColor: RESTAURANT_COLORS.BORDER_LIGHT,
+    color: RESTAURANT_COLORS.TEXT_LIGHT,
   },
   switchRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#fff',
+    backgroundColor: RESTAURANT_COLORS.SURFACE_LIGHT,
     borderRadius: 10,
     padding: 14,
     marginHorizontal: 20,
     marginBottom: 10,
     borderWidth: 1.2,
-    borderColor: '#eee',
+    borderColor: RESTAURANT_COLORS.BORDER_LIGHT,
   },
   switchLabel: {
     fontSize: 15,
-    color: '#333',
+    color: RESTAURANT_COLORS.TEXT_LIGHT,
     fontWeight: '500',
   },
   saveBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#764ba2',
+    backgroundColor: RESTAURANT_COLORS.PRIMARY,
     borderRadius: 14,
     padding: 16,
     marginTop: 24,
     marginHorizontal: 20,
     justifyContent: 'center',
     elevation: 2,
-    shadowColor: '#764ba2',
+    shadowColor: RESTAURANT_COLORS.PRIMARY,
     shadowOpacity: 0.18,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 8,

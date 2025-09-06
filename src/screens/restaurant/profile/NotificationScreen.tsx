@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -12,41 +12,41 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { RestaurantProfileStackScreenProps } from '../../../navigation/types';
 
-const notifications = [
-  {
-    id: '1',
-    title: 'Payment Received',
-    message: 'You have received a payment of $49.99.',
-    icon: 'cash-check',
-    color: '#4CAF50',
-    time: '2 hours ago',
-    read: false,
-  },
-  {
-    id: '2',
-    title: 'Order Completed',
-    message: 'Order #1234 has been completed.',
-    icon: 'check-circle-outline',
-    color: '#2196F3',
-    time: '5 hours ago',
-    read: true,
-  },
-  {
-    id: '3',
-    title: 'Inventory Low',
-    message: 'You are running low on Cheese.',
-    icon: 'alert-circle-outline',
-    color: '#FF9800',
-    time: '1 day ago',
-    read: false,
-  },
-];
-
 type Props = RestaurantProfileStackScreenProps<'Notification'>;
 
 const NotificationScreen = ({ navigation }: Props) => {
   const headerAnim = useRef(new Animated.Value(-100)).current;
   const listAnim = useRef(new Animated.Value(0)).current;
+
+  const [notifications, setNotifications] = useState([
+    {
+      id: '1',
+      title: 'Payment Received',
+      message: 'You have received a payment of $49.99.',
+      icon: 'cash-check',
+      color: '#4CAF50',
+      time: '2 hours ago',
+      read: false,
+    },
+    {
+      id: '2',
+      title: 'Order Completed',
+      message: 'Order #1234 has been completed.',
+      icon: 'check-circle-outline',
+      color: '#2196F3',
+      time: '5 hours ago',
+      read: true,
+    },
+    {
+      id: '3',
+      title: 'Inventory Low',
+      message: 'You are running low on Cheese.',
+      icon: 'alert-circle-outline',
+      color: '#FF9800',
+      time: '1 day ago',
+      read: false,
+    },
+  ]);
 
   useEffect(() => {
     Animated.sequence([

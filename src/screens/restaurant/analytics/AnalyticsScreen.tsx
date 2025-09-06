@@ -11,10 +11,12 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useTranslation } from 'react-i18next';
 import CommonView from '@/src/components/common/CommonView';
 import { useFocusEffect } from '@react-navigation/native';
 
-const AnalyticsScreen = ({ navigation }: any) => {
+export const AnalyticsScreen = ({ navigation }: any) => {
+  const { t } = useTranslation();
   const [timeRange, setTimeRange] = useState('week');
   const [selectedMetric, setSelectedMetric] = useState('revenue');
   
@@ -25,8 +27,6 @@ const AnalyticsScreen = ({ navigation }: any) => {
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
   
-  const screenWidth = Dimensions.get('window').width;
-  const screenHeight = Dimensions.get('window').height;
 
   useEffect(() => {
     // Start entrance animations
@@ -79,7 +79,7 @@ const AnalyticsScreen = ({ navigation }: any) => {
         easing: Easing.linear,
       })
     ).start();
-  }, []);
+  }, [fadeAnim, slideAnim, scaleAnim, pulseAnim, rotateAnim]);
 
   useFocusEffect(
     useCallback(() => {
@@ -111,35 +111,35 @@ const AnalyticsScreen = ({ navigation }: any) => {
           easing: Easing.out(Easing.back(1.1)),
         }),
       ]).start();
-    }, [])
+    }, [fadeAnim, slideAnim, scaleAnim])
   );
 
   const analyticsData = {
     revenue: {
-      current: '$12,450',
-      change: '+15.3%',
-      data: [2400, 2800, 3200, 2900, 3800, 4200, 3900],
+      current: '$0',
+      change: '0%',
+      data: [0, 0, 0, 0, 0, 0, 0],
       color: ['#667eea', '#764ba2'],
       icon: 'cash-multiple',
     },
     orders: {
-      current: '1,284',
-      change: '+8.7%',
-      data: [180, 220, 190, 280, 320, 350, 310],
+      current: '0',
+      change: '0%',
+      data: [0, 0, 0, 0, 0, 0, 0],
       color: ['#f093fb', '#f5576c'],
       icon: 'cart-outline',
     },
     customers: {
-      current: '856',
-      change: '+12.1%',
-      data: [120, 140, 160, 180, 200, 220, 210],
+      current: '0',
+      change: '0%',
+      data: [0, 0, 0, 0, 0, 0, 0],
       color: ['#4facfe', '#00f2fe'],
       icon: 'account-group',
     },
     satisfaction: {
-      current: '4.8',
-      change: '+0.3',
-      data: [4.2, 4.4, 4.6, 4.5, 4.7, 4.8, 4.8],
+      current: '0',
+      change: '0',
+      data: [0, 0, 0, 0, 0, 0, 0],
       color: ['#43e97b', '#38f9d7'],
       icon: 'star',
     },
@@ -292,7 +292,7 @@ const AnalyticsScreen = ({ navigation }: any) => {
       >
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#1D1D1F' }}>
-            {selectedMetric.charAt(0).toUpperCase() + selectedMetric.slice(1)} Trend
+            {selectedMetric.charAt(0).toUpperCase() + selectedMetric.slice(1)} {t('trend')}
           </Text>
           <LinearGradient
             colors={selectedData.color as [ColorValue, ColorValue, ...ColorValue[]]}
@@ -389,10 +389,10 @@ const AnalyticsScreen = ({ navigation }: any) => {
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <View>
               <Text style={{ fontSize: 32, fontWeight: 'bold', color: '#1D1D1F' }}>
-                Analytics
+                {t('analytics')}
               </Text>
               <Text style={{ color: '#8E8E93', marginTop: 4, fontSize: 16 }}>
-                Real-time business insights
+                {t('real_time_insights')}
               </Text>
             </View>
             
@@ -414,7 +414,7 @@ const AnalyticsScreen = ({ navigation }: any) => {
             >
               <MaterialCommunityIcons name="view-dashboard" size={20} color="white" />
               <Text style={{ color: 'white', marginLeft: 8, fontWeight: '600' }}>
-                Dashboard
+                {t('dashboard')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -464,13 +464,13 @@ const AnalyticsScreen = ({ navigation }: any) => {
 
         {/* Metrics Cards */}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 }}>
-          {renderAnimatedCard('revenue', 'Revenue', analyticsData.revenue, 0)}
-          {renderAnimatedCard('orders', 'Orders', analyticsData.orders, 1)}
+          {renderAnimatedCard('revenue', t('revenue'), analyticsData.revenue, 0)}
+          {renderAnimatedCard('orders', t('orders'), analyticsData.orders, 1)}
         </View>
-        
+
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 }}>
-          {renderAnimatedCard('customers', 'Customers', analyticsData.customers, 2)}
-          {renderAnimatedCard('satisfaction', 'Rating', analyticsData.satisfaction, 3)}
+          {renderAnimatedCard('customers', t('customers'), analyticsData.customers, 2)}
+          {renderAnimatedCard('satisfaction', t('rating'), analyticsData.satisfaction, 3)}
         </View>
 
         {/* Detailed Chart */}
@@ -493,28 +493,30 @@ const AnalyticsScreen = ({ navigation }: any) => {
           }}
         >
           <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#1D1D1F', marginBottom: 16 }}>
-            Performance Summary
+            {t('performance_summary')}
           </Text>
-          
+
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
-            <Text style={{ color: '#8E8E93', fontSize: 16 }}>Peak Hours</Text>
-            <Text style={{ color: '#1D1D1F', fontWeight: '600', fontSize: 16 }}>12:00 - 14:00</Text>
+            <Text style={{ color: '#8E8E93', fontSize: 16 }}>{t('peak_hours')}</Text>
+            <Text style={{ color: '#1D1D1F', fontWeight: '600', fontSize: 16 }}>N/A</Text>
           </View>
-          
+
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
-            <Text style={{ color: '#8E8E93', fontSize: 16 }}>Top Category</Text>
-            <Text style={{ color: '#1D1D1F', fontWeight: '600', fontSize: 16 }}>Main Dishes</Text>
+            <Text style={{ color: '#8E8E93', fontSize: 16 }}>{t('top_category')}</Text>
+            <Text style={{ color: '#1D1D1F', fontWeight: '600', fontSize: 16 }}>N/A</Text>
           </View>
-          
+
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
-            <Text style={{ color: '#8E8E93', fontSize: 16 }}>Avg. Order Value</Text>
-            <Text style={{ color: '#34C759', fontWeight: '600', fontSize: 16 }}>$24.80</Text>
+            <Text style={{ color: '#8E8E93', fontSize: 16 }}>{t('avg_order_value')}</Text>
+            <Text style={{ color: '#34C759', fontWeight: '600', fontSize: 16 }}>$0.00</Text>
           </View>
-          
+
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={{ color: '#8E8E93', fontSize: 16 }}>Growth Rate</Text>
-            <Text style={{ color: '#34C759', fontWeight: '600', fontSize: 16 }}>+18.5%</Text>
+            <Text style={{ color: '#8E8E93', fontSize: 16 }}>{t('growth_rate')}</Text>
+            <Text style={{ color: '#34C759', fontWeight: '600', fontSize: 16 }}>0%</Text>
           </View>
         </Animated.View>
       </ScrollView>
     </CommonView>
+  )
+}

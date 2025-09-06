@@ -1,21 +1,24 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  ScrollView, 
-  TouchableOpacity, 
-  Animated, 
-  Alert, 
-  StyleSheet, 
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Animated,
+  Alert,
+  StyleSheet,
   Modal,
   SafeAreaView,
   FlatList,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Button, Avatar, Divider, Badge } from 'react-native-paper';
+import { useTranslation } from 'react-i18next';
 import CommonView from '@/src/components/common/CommonView';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+// Ionicons import removed as unused
 import { RestaurantProfileStackScreenProps } from '../../../navigation/types';
+// Removed old language selector from profile; now lives in Account Settings
+// useAppStore import removed; theme is managed in Account Settings
 
 // Type definitions
 type NotificationType = 'order' | 'inventory' | 'payment' | 'schedule';
@@ -68,113 +71,82 @@ interface ProfileOption {
 type ProfileScreenProps = RestaurantProfileStackScreenProps<'ProfileScreen'>;
 
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
+  const { t } = useTranslation();
+  // Colors from theme not used here
+  // Theme controls removed from this screen; managed in Account Settings
   // State management
   const [user] = useState<UserProfile>({
-    name: 'Restaurant Owner',
-    email: 'owner@restaurant.com',
-    phone: '+1 234 567 8900',
-    restaurantName: 'The Great Eatery',
-    joinDate: 'January 2024',
-    address: '123 Food Street, City',
+    name: '',
+    email: '',
+    phone: '',
+    restaurantName: '',
+    joinDate: '',
+    address: '',
   });
 
   const [showNotifications, setShowNotifications] = useState<boolean>(false);
   const [showRestaurantProfile, setShowRestaurantProfile] = useState<boolean>(false);
   const [unreadNotifications] = useState<number>(2);
 
+  // Removed local dark mode toggle; use Account Settings
+
   // Animation refs
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
 
   // Notification data
-  const [notifications] = useState<NotificationItem[]>([
-    {
-      id: 1,
-      title: 'New Order Received',
-      message: 'Order #1234 has been placed by John Doe',
-      time: '5 minutes ago',
-      type: 'order',
-      read: false,
-    },
-    {
-      id: 2,
-      title: 'Low Stock Alert',
-      message: 'Tomatoes are running low in inventory',
-      time: '2 hours ago',
-      type: 'inventory',
-      read: false,
-    },
-    {
-      id: 3,
-      title: 'Payment Received',
-      message: 'Payment of $45.50 has been received',
-      time: '1 day ago',
-      type: 'payment',
-      read: true,
-    },
-    {
-      id: 4,
-      title: 'Staff Schedule',
-      message: 'Tomorrow\'s staff schedule has been updated',
-      time: '2 days ago',
-      type: 'schedule',
-      read: true,
-    },
-  ]);
+  const [notifications] = useState<NotificationItem[]>([]);
 
   // Restaurant data
   const [restaurant] = useState<RestaurantInfo>({
-    name: 'The Great Eatery',
-    description: 'A family-owned restaurant serving delicious comfort food since 2020',
-    cuisine: 'American, Italian',
-    rating: 4.5,
-    totalReviews: 128,
-    phone: '+1 234 567 8900',
-    email: 'info@thegreateatery.com',
-    address: '123 Food Street, City, State 12345',
-    hours: {
-      'Monday - Friday': '11:00 AM - 10:00 PM',
-      'Saturday - Sunday': '10:00 AM - 11:00 PM',
-    },
-    features: ['Takeout', 'Delivery', 'Dine-in', 'Outdoor Seating'],
-    established: '2020',
+    name: '',
+    description: '',
+    cuisine: '',
+    rating: 0,
+    totalReviews: 0,
+    phone: '',
+    email: '',
+    address: '',
+    hours: {},
+    features: [],
+    established: '',
   });
 
   // Profile options configuration
   const profileOptions: ProfileOption[] = [
     {
-      title: 'Payment & Billing',
-      subtitle: 'Manage your payment methods and billing info',
+      title: t('payment_billing'),
+      subtitle: t('manage_payment_methods'),
       icon: 'credit-card-outline',
-      onPress: () => navigation.navigate('PaymentBilling'), 
+      onPress: () => navigation.navigate('PaymentBilling'),
     },
     {
-      title: 'Notifications',
-      subtitle: 'View and manage your notifications',
+      title: t('notifications'),
+      subtitle: t('view_manage_notifications'),
       icon: 'bell-outline',
       onPress: () => navigation.navigate('Notification'),
     },
     {
-      title: 'Account & Settings',
-      subtitle: 'Update your account information and preferences',
+      title: t('account_settings'),
+      subtitle: t('update_account_info'),
       icon: 'account-cog-outline',
-      onPress: () => navigation.navigate('AccountSettings'), 
+      onPress: () => navigation.navigate('AccountSettings'),
     },
     {
-      title: 'Restaurant Settings',
-      subtitle: 'Edit your restaurant details and preferences',
+      title: t('restaurant_settings'),
+      subtitle: t('edit_restaurant_details'),
       icon: 'store-cog-outline',
       onPress: () => navigation.navigate('RestaurantSettings'),
     },
     {
-      title: 'Support',
-      subtitle: 'Get help or contact support',
+      title: t('support'),
+      subtitle: t('get_help_contact'),
       icon: 'lifebuoy',
       onPress: () => navigation.navigate('Support'),
     },
     {
-      title: 'About',
-      subtitle: 'Learn more about this app',
+      title: t('about'),
+      subtitle: t('learn_more_app'),
       icon: 'information-outline',
       onPress: () => navigation.navigate('About'),
     },
@@ -327,7 +299,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     >
       <SafeAreaView style={styles.modalContainer}>
         <View style={styles.modalHeader}>
-          <Text style={styles.modalTitle}>Notifications</Text>
+          <Text style={styles.modalTitle}>{t('notifications')}</Text>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <MaterialCommunityIcons name="close" size={24} color="#333" />
           </TouchableOpacity>
@@ -352,7 +324,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     >
       <SafeAreaView style={styles.modalContainer}>
         <View style={styles.modalHeader}>
-          <Text style={styles.modalTitle}>Restaurant Profile</Text>
+          <Text style={styles.modalTitle}>{t('restaurant_profile')}</Text>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <MaterialCommunityIcons name="close" size={24} color="#333" />
           </TouchableOpacity>
@@ -371,12 +343,12 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             <View style={styles.ratingContainer}>
               <MaterialCommunityIcons name="star" size={20} color="#FFD700" />
               <Text style={styles.ratingText}>{restaurant.rating}</Text>
-              <Text style={styles.reviewText}>({restaurant.totalReviews} reviews)</Text>
+              <Text style={styles.reviewText}>({restaurant.totalReviews} {t('reviews')})</Text>
             </View>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Contact Information</Text>
+            <Text style={styles.sectionTitle}>{t('contact_information')}</Text>
             <View style={styles.contactRow}>
               <MaterialCommunityIcons name="phone" size={20} color="#007AFF" />
               <Text style={styles.contactText}>{restaurant.phone}</Text>
@@ -392,12 +364,12 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Operating Hours</Text>
+            <Text style={styles.sectionTitle}>{t('operating_hours')}</Text>
             {renderHours()}
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Restaurant Features</Text>
+            <Text style={styles.sectionTitle}>{t('restaurant_features')}</Text>
             <View style={styles.featuresContainer}>
               {renderFeatures()}
             </View>
@@ -406,11 +378,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Details</Text>
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Cuisine Type:</Text>
+              <Text style={styles.detailLabel}>{t('cuisine_type')}</Text>
               <Text style={styles.detailValue}>{restaurant.cuisine}</Text>
             </View>
             <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Established:</Text>
+              <Text style={styles.detailLabel}>{t('established')}</Text>
               <Text style={styles.detailValue}>{restaurant.established}</Text>
             </View>
           </View>
@@ -443,6 +415,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           <MaterialCommunityIcons name="store" size={24} color="#007AFF" />
         </TouchableOpacity>
       </View>
+
+      {/* Theme and language controls moved to Account Settings */}
 
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         <Animated.View
@@ -492,7 +466,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           </View>
           <View style={styles.infoRow}>
             <MaterialCommunityIcons name="calendar" size={20} color="#666" />
-            <Text style={styles.infoText}>Member since {user.joinDate}</Text>
+            <Text style={styles.infoText}>{t('member_since')} {user.joinDate}</Text>
           </View>
         </Animated.View>
 
@@ -507,7 +481,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           }}
           onPress={openEditProfile}
         >
-          <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>Edit Profile</Text>
+          <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>{t('edit_profile')}</Text>
         </TouchableOpacity>
 
         <Divider style={styles.divider} />
@@ -582,6 +556,23 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  controlsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingBottom: 10,
+  },
+  controlItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  controlLabel: {
+    fontSize: 16,
+    color: '#333',
+    marginRight: 8,
   },
   topButtons: {
     flexDirection: 'row',

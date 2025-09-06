@@ -1,243 +1,79 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { View, Text, Animated, TouchableOpacity, Alert, Dimensions, StatusBar, ColorValue, ViewStyle, Modal, FlatList, TouchableHighlight, Image } from 'react-native';
+import React, { useRef, useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  Animated,
+  TouchableOpacity,
+  TextInput,
+  SafeAreaView,
+  StatusBar,
+  Dimensions,
+  Alert,
+  ScrollView,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
+import { Badge, Chip } from 'react-native-paper';
+import * as Haptics from 'expo-haptics';
+import { useTranslation } from 'react-i18next';
 import CommonView from '@/src/components/common/CommonView';
-import { MenuItem } from '@/src/types/MenuItem';
-import { StyleSheet } from 'react-native';
 import { RestaurantMenuStackParamList } from '@/src/navigation/types';
-
-const { width, height } = Dimensions.get('window');
 
 type MenuOption = {
   title: string;
   icon: string;
   screen?: keyof RestaurantMenuStackParamList;
   description: string;
-  gradient: [ColorValue, ColorValue];
-  iconColor: string;
   isImplemented: boolean;
-  category: 'main' | 'items' | 'categories' | 'settings';
+  category: 'items' | 'categories' | 'settings';
+  count?: number;
 };
-
-const menuOptions: MenuOption[] = [
-  {
-    title: 'Menu Items',
-    icon: 'food',
-    screen: 'MenuList',
-    description: 'View and manage menu items',
-    gradient: ['#4facfe', '#00f2fe'],
-    iconColor: '#ffffff',
-    isImplemented: true,
-    category: 'items'
-  },
-  {
-    title: 'Add New Item',
-    icon: 'plus-circle',
-    screen: 'AddMenuItem',
-    description: 'Add a new dish to your menu',
-    gradient: ['#43e97b', '#38f9d7'],
-    iconColor: '#ffffff',
-    isImplemented: true,
-    category: 'items'
-  },
-  {
-    title: 'Categories',
-    icon: 'tag-multiple',
-    screen: 'Categories',
-    description: 'Manage menu categories',
-    gradient: ['#fa709a', '#fee140'],
-    iconColor: '#ffffff',
-    isImplemented: true,
-    category: 'categories'
-  },
-  {
-    title: 'Add Category',
-    icon: 'playlist-plus',
-    screen: 'AddCategory',
-    description: 'Create new menu category',
-    gradient: ['#6a11cb', '#2575fc'],
-    iconColor: '#ffffff',
-    isImplemented: true,
-    category: 'categories'
-  },
-  {
-    title: 'Menu Settings',
-    icon: 'cog',
-    screen: 'MenuSettings',
-    description: 'Configure menu preferences',
-    gradient: ['#434343', '#000000'],
-    iconColor: '#ffffff',
-    isImplemented: true,
-    category: 'settings'
-  }
-];
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const MenuScreen = () => {
   const navigation = useNavigation<NativeStackNavigationProp<RestaurantMenuStackParamList>>();
-  const [isLoaded, setIsLoaded] = useState(false);
-  
-  // Animation values
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(50)).current;
-  const scaleAnim = useRef(new Animated.Value(0.8)).current;
-  const rotateAnim = useRef(new Animated.Value(0)).current;
-  const headerSlideAnim = useRef(new Animated.Value(-100)).current;
-  const cardAnimations = useRef([
-    new Animated.Value(0),
-    new Animated.Value(0),
-    new Animated.Value(0),
-    new Animated.Value(0),
-    new Animated.Value(0),
-    new Animated.Value(0),
-    new Animated.Value(0)
-  ]).current;
-  const statsAnimations = useRef([
-    new Animated.Value(0),
-    new Animated.Value(0),
-    new Animated.Value(0)
-  ]).current;
-  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const { t } = useTranslation();
 
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalType, setModalType] = useState<'EditMenuItem' | null>(null);
-  const [selectedFood, setSelectedFood] = useState<MenuItem | null>(null);
-
-  // Example menuItems array for modal selection
-  const menuItems: MenuItem[] = [
-    {
-      id: '1',
-      name: 'Grilled Salmon',
-      price: 24.99,
-      category: 'Main Course',
-      image: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=300&h=200&fit=crop',
-      isAvailable: true,
-    },
-    {
-      id: '2',
-      name: 'Caesar Salad',
-      price: 12.50,
-      category: 'Salads',
-      image: 'https://images.unsplash.com/photo-1546793665-c74683f339c1?w=300&h=200&fit=crop',
-      isAvailable: true,
-    },
-    {
-      id: '3',
-      name: 'Chocolate Cake',
-      price: 8.99,
-      category: 'Desserts',
-      image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300&h=200&fit=crop',
-      isAvailable: false,
-    },
+  const menuOptions: MenuOption[] = [
+    { title: t('menu_items'), icon: 'food', screen: 'MenuList', description: t('view_manage_menu_items'), isImplemented: true, category: 'items' },
+    { title: t('add_new_item'), icon: 'plus-circle', screen: 'AddMenuItem', description: t('add_new_dish'), isImplemented: true, category: 'items' },
+    { title: t('manage_categories'), icon: 'tag-multiple', screen: 'Categories', description: t('manage_menu_categories'), isImplemented: true, category: 'categories' },
+    { title: t('add_category'), icon: 'playlist-plus', screen: 'AddCategory', description: t('create_new_category'), isImplemented: true, category: 'categories' },
+    { title: t('menu_settings'), icon: 'cog', screen: 'MenuSettings', description: t('configure_menu_preferences'), isImplemented: true, category: 'settings' },
   ];
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedFilter, setSelectedFilter] = useState<'all' | 'items' | 'categories' | 'settings'>('all');
+  const [isFocused, setIsFocused] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [menuStats] = useState({ menuItems: 47, categories: 8, active: 42 });
+
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const filterAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Start entrance animations
-    const entranceAnimation = Animated.sequence([
-      Animated.timing(headerSlideAnim, {
-        toValue: 0,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 600,
-          useNativeDriver: true,
-        }),
-        Animated.spring(slideAnim, {
-          toValue: 0,
-          tension: 50,
-          friction: 8,
-          useNativeDriver: true,
-        }),
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          tension: 50,
-          friction: 8,
-          useNativeDriver: true,
-        }),
-      ]),
-    ]);
+    Animated.timing(fadeAnim, { toValue: 1, duration: 800, useNativeDriver: true }).start();
+    Animated.timing(filterAnim, { toValue: 1, duration: 600, delay: 400, useNativeDriver: true }).start();
+  }, [fadeAnim, filterAnim]);
 
-    const cardStaggerAnimation = Animated.stagger(150, 
-      cardAnimations.map(anim => 
-        Animated.spring(anim, {
-          toValue: 1,
-          tension: 60,
-          friction: 8,
-          useNativeDriver: true,
-        })
-      )
-    );
+  useEffect(() => {
+    Animated.spring(scaleAnim, {
+      toValue: isFocused ? 1.02 : 1,
+      friction: 5,
+      useNativeDriver: true
+    }).start();
+  }, [isFocused, scaleAnim]);
 
-    const statsStaggerAnimation = Animated.stagger(300,
-      statsAnimations.map(anim => 
-        Animated.spring(anim, {
-          toValue: 1,
-          tension: 40,
-          friction: 6,
-          useNativeDriver: true,
-        })
-      )
-    );
-
-    Animated.sequence([
-      entranceAnimation,
-      Animated.parallel([
-        cardStaggerAnimation,
-        statsStaggerAnimation,
-      ])
-    ]).start(() => {
-      setIsLoaded(true);
-      startPulseAnimation();
-    });
-
-    Animated.loop(
-      Animated.timing(rotateAnim, {
-        toValue: 1,
-        duration: 10000,
-        useNativeDriver: true,
-      })
-    ).start();
-  }, []);
-
-  const startPulseAnimation = () => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(pulseAnim, {
-          toValue: 1.05,
-          duration: 2000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(pulseAnim, {
-          toValue: 1,
-          duration: 2000,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
+  const onRefresh = () => {
+    setRefreshing(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setTimeout(() => setRefreshing(false), 1500);
   };
 
   const handleNavigation = (option: MenuOption) => {
-    const buttonScale = new Animated.Value(1);
-    Animated.sequence([
-      Animated.timing(buttonScale, {
-        toValue: 0.95,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-      Animated.timing(buttonScale, {
-        toValue: 1,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-    ]).start();
-
+    Haptics.selectionAsync();
+    
     if (!option.isImplemented) {
       Alert.alert(
         'Coming Soon',
@@ -247,16 +83,10 @@ const MenuScreen = () => {
       return;
     }
 
-    if (option.screen === 'EditMenuItem') {
-      setModalType('EditMenuItem');
-      setModalVisible(true);
-      return;
-    }
-
     try {
       if (option.screen && option.screen !== 'MenuScreen') {
-        // @ts-ignore - Navigation typing issue workaround
-        navigation.navigate(option.screen);
+        // Fix the navigation typing issue by using type assertion
+        (navigation as any).navigate(option.screen);
       }
     } catch (error) {
       Alert.alert(
@@ -268,486 +98,277 @@ const MenuScreen = () => {
     }
   };
 
-  const handleFoodSelect = (food: MenuItem) => {
-    setModalVisible(false);
-    setSelectedFood(food);
-    setTimeout(() => {
-      if (modalType === 'EditMenuItem') {
-        // @ts-ignore - Navigation typing issue workaround
-        navigation.navigate('EditMenuItem', { itemId: food.id });
-      }
-      setModalType(null);
-    }, 300);
-  };
-
-  const renderFoodModal = () => (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={modalVisible}
-      onRequestClose={() => setModalVisible(false)}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>Select Food Item to Edit</Text>
-          <FlatList
-            data={menuItems}
-            keyExtractor={item => item.id}
-            renderItem={({ item }) => (
-              <TouchableHighlight
-                underlayColor="#eee"
-                onPress={() => handleFoodSelect(item)}
-                style={styles.foodItem}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Image source={{ uri: item.image }} style={styles.foodImage} />
-                  <View style={{ marginLeft: 12 }}>
-                    <Text style={styles.foodName}>{item.name}</Text>
-                    <Text style={styles.foodCategory}>{item.category}</Text>
-                    <Text style={styles.foodPrice}>${item.price}</Text>
-                  </View>
-                </View>
-              </TouchableHighlight>
-            )}
-          />
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={() => setModalVisible(false)}
-          >
-            <Text style={styles.closeButtonText}>Cancel</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </Modal>
-  );
-
-  const handleQuickAction = (action: 'add' | 'categories') => {
-    if (action === 'add') {
-      Alert.alert('Coming Soon', 'Add menu item feature is coming soon!');
-    } else {
-      Alert.alert('Coming Soon', 'Categories management feature is coming soon!');
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'items': return '#3B82F6';
+      case 'categories': return '#6B7280';
+      case 'settings': return '#4B5563';
+      default: return '#3B82F6';
     }
   };
 
-  const rotateInterpolate = rotateAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-  });
+  const filteredOptions = menuOptions.filter(option =>
+    (option.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      option.description.toLowerCase().includes(searchQuery.toLowerCase())) &&
+    (selectedFilter === 'all' || option.category === selectedFilter)
+  );
 
-  const groupedOptions = {
-    main: menuOptions.filter(option => option.category === 'main'),
-    items: menuOptions.filter(option => option.category === 'items'),
-    categories: menuOptions.filter(option => option.category === 'categories'),
-    settings: menuOptions.filter(option => option.category === 'settings'),
+  const renderMenuCard = ({ item, index }: { item: MenuOption; index: number }) => {
+    const inputRange = [
+      -1,
+      0,
+      120 * index,
+      120 * (index + 2),
+    ];
+
+    const scale = scrollY.interpolate({
+      inputRange,
+      outputRange: [1, 1, 1, 0.95],
+      extrapolate: 'clamp',
+    });
+
+    const opacity = scrollY.interpolate({
+      inputRange,
+      outputRange: [1, 1, 1, 0],
+      extrapolate: 'clamp',
+    });
+
+    return (
+      <Animated.View 
+        style={{ 
+          transform: [{ scale }], 
+          opacity, 
+          marginBottom: 12 
+        }}
+      >
+        <TouchableOpacity
+          style={{
+            backgroundColor: 'white',
+            padding: 16,
+            borderRadius: 16,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderLeftWidth: 4,
+            borderLeftColor: getCategoryColor(item.category),
+            shadowColor: '#000',
+            shadowOpacity: 0.05,
+            shadowRadius: 5,
+            elevation: 2,
+          }}
+          onPress={() => handleNavigation(item)}
+          activeOpacity={0.8}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+            <View style={{
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              backgroundColor: `${getCategoryColor(item.category)}15`,
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginRight: 12,
+            }}>
+              <MaterialCommunityIcons name={item.icon as any} size={20} color={getCategoryColor(item.category)} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#111' }}>{item.title}</Text>
+                {!item.isImplemented && (
+                  <Badge style={{ backgroundColor: '#F59E0B', marginLeft: 8 }}>
+                    SOON
+                  </Badge>
+                )}
+              </View>
+              <Text style={{ color: '#6B7280', fontSize: 13 }} numberOfLines={1}>
+                {item.description}
+              </Text>
+            </View>
+          </View>
+          <MaterialCommunityIcons name="chevron-right" size={20} color="#9CA3AF" />
+        </TouchableOpacity>
+      </Animated.View>
+    );
   };
 
-  const renderSection = (title: string, options: MenuOption[], startIndex: number) => (
-    <View style={{ marginBottom: 24 }}>
-      <Text style={{ 
-        fontSize: 18, 
-        fontWeight: '700', 
-        color: '#1a1a2e', // Changed from white to dark
-        marginBottom: 16,
-        paddingLeft: 4,
-      }}>
-        {title}
-      </Text>
-      <View style={{ gap: 12 }}>
-        {options.map((option, index) => (
-          <Animated.View
-            key={option.title}
-            style={{
-              opacity: cardAnimations[startIndex + index] || fadeAnim,
-              transform: [{
-                translateX: (cardAnimations[startIndex + index] || fadeAnim).interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [100 * (index % 2 === 0 ? 1 : -1), 0],
-                })
-              }, {
-                scale: (cardAnimations[startIndex + index] || fadeAnim).interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0.9, 1],
-                })
-              }]
-            }}
-          >
-            <TouchableOpacity
-              onPress={() => handleNavigation(option)}
-              activeOpacity={0.8}
-            >
-              <LinearGradient
-                colors={option.gradient}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={{
-                  padding: 20,
-                  borderRadius: 16,
-                  shadowColor: '#000',
-                  shadowOffset: { width: 0, height: 6 },
-                  shadowOpacity: 0.2,
-                  shadowRadius: 12,
-                  elevation: 8,
-                  opacity: option.isImplemented ? 1 : 0.7,
-                }}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <View style={{
-                    width: 50,
-                    height: 50,
-                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                    borderRadius: 25,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginRight: 16,
-                  }}>
-                    <MaterialCommunityIcons 
-                      name={option.icon as any} 
-                      size={24} 
-                      color={option.iconColor} 
-                    />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                      <Text style={{ 
-                        fontSize: 16, 
-                        fontWeight: '600', 
-                        color: '#ffffff',
-                        marginBottom: 2,
-                      }}>
-                        {option.title}
-                      </Text>
-                      {!option.isImplemented && (
-                        <View style={{
-                          backgroundColor: 'rgba(255, 255, 255, 0.3)',
-                          borderRadius: 8,
-                          paddingHorizontal: 6,
-                          paddingVertical: 2,
-                          marginLeft: 8,
-                        }}>
-                          <Text style={{
-                            fontSize: 10,
-                            color: '#ffffff',
-                            fontWeight: '600',
-                          }}>
-                            SOON
-                          </Text>
-                        </View>
-                      )}
-                    </View>
-                    <Text style={{ 
-                      fontSize: 12, 
-                      color: 'rgba(255, 255, 255, 0.9)',
-                      lineHeight: 16,
-                    }}>
-                      {option.description}
-                    </Text>
-                  </View>
-                  <MaterialCommunityIcons 
-                    name="chevron-right" 
-                    size={20} 
-                    color="rgba(255, 255, 255, 0.8)" 
-                  />
-                </View>
-              </LinearGradient>
-            </TouchableOpacity>
-          </Animated.View>
-        ))}
-      </View>
-    </View>
-  );
-
+  const getStatusColor = (filter: string): string => {
+    switch (filter) {
+      case 'items':
+        return '#3B82F6'; // Blue color used for items
+      case 'categories':
+        return '#6B7280'; // Gray color used for categories
+      case 'settings':
+        return '#4B5563'; // Darker gray for settings
+      case 'all':
+        return '#3B82F6'; // Default blue color for 'all' filter
+      default:
+        return '#3B82F6'; // Fallback to blue
+    }
+  };
   return (
-    <>
-      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-      <View style={{ flex: 1, backgroundColor: '#ffffff' }}>
-        {/* @ts-ignore - CommonView with style prop workaround */}
-        <CommonView style={{ backgroundColor: '#ffffff' }}>
-          {/* Header Section */}
-          <Animated.View
-            style={{
-              opacity: fadeAnim,
-              transform: [{ translateY: headerSlideAnim }],
-              marginBottom: 32,
-              paddingTop: 20,
-            }}
-          >
-            <View style={{ alignItems: 'center', marginBottom: 16 }}>
-              <Animated.View
-                style={{
-                  transform: [{ scale: pulseAnim }],
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
+      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <CommonView>
+        <View style={{ flex: 1, paddingHorizontal: 20 }}>
+          {/* Header */}
+          <Animated.View style={{ opacity: fadeAnim, marginBottom: 16 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <View>
+                <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#111' }}>{t('menu_dashboard')}</Text>
+                <Text style={{ color: '#6B7280', marginTop: 2 }}>{t('manage_restaurant_menu')}</Text>
+              </View>
+              <TouchableOpacity 
+                style={{ backgroundColor: '#DBEAFE', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 12 }}
+                onPress={() => {
+                  Haptics.selectionAsync();
+                  // Add navigation to analytics if needed
                 }}
               >
-                <LinearGradient
-                  colors={['#ff6b6b', '#feca57'] as [ColorValue, ColorValue]}
-                  style={{
-                    width: 80,
-                    height: 80,
-                    borderRadius: 40,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginBottom: 16,
-                  }}
-                >
-                  <MaterialCommunityIcons name="chef-hat" size={40} color="#ffffff" />
-                </LinearGradient>
-              </Animated.View>
+                <Text style={{ color: '#3B82F6', fontWeight: '600' }}>Analytics</Text>
+              </TouchableOpacity>
             </View>
-            
-            <Text style={{ 
-              fontSize: 32, 
-              fontWeight: 'bold', 
-              color: '#1a1a2e',
-              textAlign: 'center',
-              marginBottom: 8,
-            }}>
-              Menu Management
-            </Text>
-            <Text style={{ 
-              color: '#666666', 
-              fontSize: 16,
-              textAlign: 'center',
-              paddingHorizontal: 20,
-            }}>
-              Manage your restaurant menu with style
-            </Text>
           </Animated.View>
 
-          {/* Update Statistics Section background */}
+          {/* Search */}
+          <Animated.View style={{ opacity: fadeAnim, marginBottom: 12 }}>
+            <Animated.View style={{
+              backgroundColor: 'white',
+              borderRadius: 12,
+              height: 45,
+              flexDirection: 'row',
+              alignItems: 'center',
+              paddingHorizontal: 12,
+              borderWidth: isFocused ? 2 : 0,
+              borderColor: '#3B82F6',
+              transform: [{ scale: scaleAnim }],
+              elevation: 2,
+            }}>
+              {(isFocused || searchQuery) && (
+                <MaterialCommunityIcons name="magnify" size={20} color="#3B82F6" />
+              )}
+              <TextInput
+                placeholder={t('search_menu_options')}
+                placeholderTextColor="#93C5FD"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                style={{
+                  flex: 1,
+                  height: 45,
+                  fontSize: 16,
+                  color: '#3B82F6',
+                  marginLeft: (isFocused || searchQuery) ? 8 : 0,
+                  textAlign: (isFocused || searchQuery) ? 'left' : 'center'
+                }}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => { if (!searchQuery) setIsFocused(false); }}
+              />
+            </Animated.View>
+          </Animated.View>
+
+          {/* Filters */}
+<Animated.View
+style={{opacity: fadeAnim, marginBottom: 8}}
+className="mb-4 mt-2"
+>
+<ScrollView 
+  horizontal
+  showsHorizontalScrollIndicator={false}
+  contentContainerStyle={{ paddingVertical: 8, paddingHorizontal: 4 }}
+>
+  {['all', 'items', 'categories', 'settings'].map((filter) => (
+     <Chip
+                     key={filter}
+                     selected={selectedFilter === filter}
+                     onPress={() => {
+                       Haptics.selectionAsync();
+                       setSelectedFilter(filter as 'all' | 'items' | 'categories' | 'settings');
+                     }}
+                     style={{ 
+                       backgroundColor: selectedFilter === filter ? getStatusColor(filter) : '#F3F4F6',
+                       marginRight: 8,
+                       borderColor: getStatusColor(filter),
+                       borderWidth: selectedFilter === filter ? 0 : 1
+                     }}
+                     textStyle={{ 
+                       color: selectedFilter === filter ? 'white' : '#4B5563',
+                       fontWeight: '600'
+                     }}
+                     compact
+                   >
+                     {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                   </Chip>
+                 ))}
+               </ScrollView>
+             </Animated.View>
+
+
+
+          {/* Stats */}
           <Animated.View style={{ 
             opacity: fadeAnim,
-            backgroundColor: '#f5f5f5',
-            borderRadius: 16, // Reduced from 20
-            padding: 16, // Reduced from 20
-            borderWidth: 1,
-            borderColor: '#e0e0e0',
-            marginBottom: 16, // Reduced from 20
+            flexDirection: 'row', 
+            justifyContent: 'space-around', 
+            backgroundColor: 'white', 
+            padding: 16, 
+            borderRadius: 16, 
+            marginBottom: 16, 
+            shadowColor: '#000', 
+            shadowOpacity: 0.05, 
+            shadowRadius: 5,
+            elevation: 2,
           }}>
-            <Text style={{ 
-              fontSize: 16, // Reduced from 18
-              fontWeight: '600',
-              color: '#1a1a2e',
-              marginBottom: 12, // Reduced from 16
-              textAlign: 'center',
-            }}>
-              Menu Statistics
-            </Text>
-            
-            <View style={{ flexDirection: 'row', paddingHorizontal: 8 }}>
-              {[
-                { label: 'Menu Items', value: '45', color: '#4facfe', icon: 'food' },
-                { label: 'Categories', value: '8', color: '#43e97b', icon: 'tag-multiple' },
-                { label: 'Popular', value: '12', color: '#fa709a', icon: 'star' },
-              ].map((stat, index) => (
-                <Animated.View 
-                  key={stat.label}
-                  style={{ 
-                    flex: 1, 
-                    alignItems: 'center',
-                    opacity: statsAnimations[index],
-                  }}
-                >
-                  <View style={{
-                    width: 40, // Reduced from 50
-                    height: 40, // Reduced from 50
-                    borderRadius: 20,
-                    backgroundColor: stat.color,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginBottom: 6, // Reduced from 8
-                  }}>
-                    <MaterialCommunityIcons name={stat.icon as any} size={20} color="#ffffff" />
-                  </View>
-                  <Text style={{ 
-                    fontSize: 20, // Reduced from 24
-                    fontWeight: 'bold',
-                    color: '#1a1a2e',
-                    marginBottom: 2,
-                  }}>
-                    {stat.value}
-                  </Text>
-                  <Text style={{ 
-                    fontSize: 11,
-                    color: '#666666',
-                    textAlign: 'center',
-                  }}>
-                    {stat.label}
-                  </Text>
-                </Animated.View>
-              ))}
-            </View>
+            {[
+              { label: t('menu_items'), value: menuStats.menuItems, color: '#3B82F6', icon: 'food' },
+              { label: t('manage_categories'), value: menuStats.categories, color: '#6B7280', icon: 'tag-multiple' },
+              { label: t('active'), value: menuStats.active, color: '#10B981', icon: 'check-circle' },
+            ].map(stat => (
+              <View key={stat.label} style={{ alignItems: 'center' }}>
+                <View style={{ 
+                  width: 40, 
+                  height: 40, 
+                  borderRadius: 20, 
+                  backgroundColor: `${stat.color}15`, 
+                  justifyContent: 'center', 
+                  alignItems: 'center', 
+                  marginBottom: 6 
+                }}>
+                  <MaterialCommunityIcons name={stat.icon as any} size={20} color={stat.color} />
+                </View>
+                <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#111', marginBottom: 2 }}>
+                  {stat.value}
+                </Text>
+                <Text style={{ fontSize: 12, color: '#6B7280', textAlign: 'center' }}>
+                  {stat.label}
+                </Text>
+              </View>
+            ))}
           </Animated.View>
 
-          {/* Scrollable Content */}
-          <Animated.ScrollView
+          {/* Menu List */}
+          <Animated.FlatList
+            data={filteredOptions}
+            keyExtractor={(item) => item.title}
+            renderItem={renderMenuCard}
             showsVerticalScrollIndicator={false}
-            style={{
-              flex: 1,
-              opacity: fadeAnim,
-              transform: [
-                { translateY: slideAnim },
-                { scale: scaleAnim }
-              ],
-            }}
-            contentContainerStyle={{ paddingBottom: 100 }}
-          >
-            {/* Menu Items Section */}
-            {renderSection('Menu Items', groupedOptions.items, 1)}
-            
-            {/* Categories Section */}
-            {renderSection('Categories', groupedOptions.categories, 3)}
-            
-            {/* Settings Section */}
-            {renderSection('Settings', groupedOptions.settings, 6)}
-
-            {/* Quick Actions Section */}
-            <Animated.View 
-              style={{ 
-                opacity: fadeAnim,
-                transform: [{
-                  translateY: fadeAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [80, 0],
-                  })
-                }],
-                marginBottom: 24,
-              }}
-            >
-              <Text style={{ 
-                fontSize: 18, 
-                fontWeight: '700', 
-                color: '#1a2a2e', 
-                marginBottom: 16,
-                paddingLeft: 4,
-              }}>
-                Quick Actions
-              </Text>
-              
-              <View style={{ flexDirection: 'row', gap: 12, marginBottom: 24 }}>
-                <TouchableOpacity
-                  style={{ flex: 1 }}
-                  onPress={() => handleQuickAction('add')}
-                  activeOpacity={0.8}
-                >
-                  <LinearGradient
-                    colors={['#11998e', '#38ef7d'] as [ColorValue, ColorValue]}
-                    style={{
-                      paddingVertical: 16,
-                      borderRadius: 15,
-                      alignItems: 'center',
-                      flexDirection: 'row',
-                      justifyContent: 'center',
-                      shadowColor: '#11998e',
-                      shadowOffset: { width: 0, height: 4 },
-                      shadowOpacity: 0.3,
-                      shadowRadius: 8,
-                      elevation: 6,
-                    }}
-                  >
-                    <MaterialCommunityIcons name="plus" size={20} color="#ffffff" style={{ marginRight: 8 }} />
-                    <Text style={{ color: '#ffffff', fontWeight: '600', fontSize: 16 }}>
-                      Add Item
-                    </Text>
-                  </LinearGradient>
-                </TouchableOpacity>
-                
-                <TouchableOpacity
-                  style={{ flex: 1 }}
-                  onPress={() => handleQuickAction('categories')}
-                  activeOpacity={0.8}
-                >
-                  <LinearGradient
-                    colors={['#667eea', '#764ba2'] as [ColorValue, ColorValue]}
-                    style={{
-                      paddingVertical: 16,
-                      borderRadius: 15,
-                      alignItems: 'center',
-                      flexDirection: 'row',
-                      justifyContent: 'center',
-                      shadowColor: '#667eea',
-                      shadowOffset: { width: 0, height: 4 },
-                      shadowOpacity: 0.3,
-                      shadowRadius: 8,
-                      elevation: 6,
-                    }}
-                  >
-                    <MaterialCommunityIcons name="format-list-bulleted" size={20} color="#ffffff" style={{ marginRight: 8 }} />
-                    <Text style={{ color: '#ffffff', fontWeight: '600', fontSize: 16 }}>
-                      Categories
-                    </Text>
-                  </LinearGradient>
-                </TouchableOpacity>
+            onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { y: scrollY } } }], 
+              { useNativeDriver: true }
+            )}
+            scrollEventThrottle={16}
+            contentContainerStyle={{ paddingBottom: 40 }}
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            ListEmptyComponent={
+              <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 40 }}>
+                <MaterialCommunityIcons name="food-off" size={40} color="#9CA3AF" />
+                <Text style={{ color: '#9CA3AF', marginTop: 8 }}>{t('no_menu_options_found')}</Text>
               </View>
-            </Animated.View>
-          </Animated.ScrollView>
-        </CommonView>
-      </View>
-      {renderFoodModal()}
-    </>
+            }
+          />
+        </View>
+      </CommonView>
+    </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 20,
-    padding: 20,
-    width: '85%',
-    maxHeight: '70%',
-    alignItems: 'center',
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    color: '#1a1a2e',
-  },
-  foodItem: {
-    width: '100%',
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  foodImage: {
-    width: 48,
-    height: 48,
-    borderRadius: 10,
-    backgroundColor: '#eee',
-  },
-  foodName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#222',
-  },
-  foodCategory: {
-    fontSize: 13,
-    color: '#888',
-    marginTop: 2,
-  },
-  foodPrice: {
-    fontSize: 14,
-    color: '#4facfe',
-    fontWeight: '600',
-    marginTop: 2,
-  },
-  closeButton: {
-    marginTop: 16,
-    backgroundColor: '#1a2a2e',
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 24,
-  },
-  closeButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-    fontSize: 16,
-  },
-});
 
 export default MenuScreen;

@@ -20,7 +20,7 @@ import {
   useOnboardingComplete,
   useAppUserType,
 } from '../stores/customerStores/AppStore';
-import { useIsAuthenticated } from '../stores/customerStores/AuthStore';
+import { useIsAuthenticated, useAuthUser } from '../stores/customerStores/AuthStore';
 import { useCartStore } from '../stores/customerStores/cartStore';
 
 // Navigators
@@ -148,6 +148,7 @@ const createScreenOptions = (colors: any, t: any) => ({
 const RootNavigator: React.FC = () => {
   // Store hooks with performance-optimized selectors
   const isAuthenticated = useIsAuthenticated();
+  const user = useAuthUser();
   const hasHydrated = useHasHydrated();
   const isOnboardingComplete = useOnboardingComplete();
   const userType = useAppUserType();
@@ -243,18 +244,24 @@ const RootNavigator: React.FC = () => {
   const getInitialRouteName = useCallback((): keyof RootStackParamList => {
     if (!isAuthenticated) {
       console.log('navigating to login');
-      return 'Auth';
+      return 'RestaurantApp';
     }
 
     switch (userType) {
       case 'customer':
         return 'CustomerApp';
       case 'restaurant':
+        // Check restaurant verification status
+        const verificationStatus = user?.verificationStatus || user?.restaurant?.verificationStatus;
+        if (verificationStatus === 'PENDING_VERIFICATION' || verificationStatus === 'PENDING') {
+          console.log('Restaurant not approved, navigating to awaiting approval');
+          return 'Auth'; // This will show AwaitingApproval screen
+        }
         return 'RestaurantApp';
       default:
         return 'Auth';
     }
-  }, [isAuthenticated, userType]);
+  }, [isAuthenticated, userType, user]);
 
   // Render loading screen while hydrating
   if (!hasHydrated) {
@@ -272,6 +279,7 @@ const RootNavigator: React.FC = () => {
           onLogin={handleLogin}
         />
       </>
+      
     );
   }
 

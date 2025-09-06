@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -11,46 +11,49 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { RestaurantProfileStackScreenProps } from '../../../navigation/types';
 
 const { width } = Dimensions.get('window');
 
-const paymentMethods = [
-  {
-    type: 'Visa',
-    last4: '1234',
-    icon: 'credit-card',
-    color1: '#4e54c8',
-    color2: '#8f94fb',
-  },
-  {
-    type: 'MasterCard',
-    last4: '5678',
-    icon: 'credit-card',
-    color1: '#fc5c7d',
-    color2: '#6a82fb',
-  },
-  {
-    type: 'Apple Pay',
-    last4: '',
-    icon: 'apple',
-    color1: '#232526',
-    color2: '#414345',
-  },
-];
-
-const billingHistory = [
-  { id: '1', date: '2025-07-01', amount: '$49.99', status: 'Paid' },
-  { id: '2', date: '2025-06-01', amount: '$49.99', status: 'Paid' },
-  { id: '3', date: '2025-05-01', amount: '$49.99', status: 'Paid' },
-];
 
 type Props = RestaurantProfileStackScreenProps<'PaymentBilling'>;
 
 const PaymentBillingScreen = ({ navigation }: Props) => {
+  const { t } = useTranslation();
   const headerAnim = useRef(new Animated.Value(-100)).current;
   const cardAnim = useRef(new Animated.Value(0)).current;
   const historyAnim = useRef(new Animated.Value(0)).current;
+
+  const [paymentMethods, setPaymentMethods] = useState([
+    {
+      type: 'Visa',
+      last4: '1234',
+      icon: 'credit-card',
+      color1: '#4e54c8',
+      color2: '#8f94fb',
+    },
+    {
+      type: 'MasterCard',
+      last4: '5678',
+      icon: 'credit-card',
+      color1: '#fc5c7d',
+      color2: '#6a82fb',
+    },
+    {
+      type: 'Apple Pay',
+      last4: '',
+      icon: 'apple',
+      color1: '#232526',
+      color2: '#414345',
+    },
+  ]);
+
+  const [billingHistory, setBillingHistory] = useState([
+    { id: '1', date: '2025-07-01', amount: '$49.99', status: 'Paid' },
+    { id: '2', date: '2025-06-01', amount: '$49.99', status: 'Paid' },
+    { id: '3', date: '2025-05-01', amount: '$49.99', status: 'Paid' },
+  ]);
 
   useEffect(() => {
     Animated.sequence([
@@ -93,7 +96,7 @@ const PaymentBillingScreen = ({ navigation }: Props) => {
           {item.last4 ? (
             <Text style={styles.cardDetails}>**** {item.last4}</Text>
           ) : (
-            <Text style={styles.cardDetails}>No card number</Text>
+            <Text style={styles.cardDetails}>{t('no_card_number')}</Text>
           )}
         </View>
       </LinearGradient>
@@ -117,25 +120,25 @@ const PaymentBillingScreen = ({ navigation }: Props) => {
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Payment & Billing</Text>
+          <Text style={styles.headerTitle}>{t('payment_billing')}</Text>
           <MaterialCommunityIcons name="credit-card-outline" size={32} color="#fff" style={{ marginLeft: 10 }} />
         </LinearGradient>
       </Animated.View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
         {/* Payment Methods Section */}
-        <Text style={styles.sectionTitle}>Payment Methods</Text>
+        <Text style={styles.sectionTitle}>{t('payment_methods')}</Text>
         <View style={styles.cardsContainer}>
           {paymentMethods.map(renderPaymentCard)}
           <TouchableOpacity style={styles.addCardBtn}>
             <Ionicons name="add-circle-outline" size={28} color="#764ba2" />
-            <Text style={styles.addCardText}>Add New Card</Text>
+            <Text style={styles.addCardText}>{t('add_new_card')}</Text>
           </TouchableOpacity>
         </View>
 
         {/* Billing History Section */}
         <Animated.View style={{ opacity: historyAnim, marginTop: 24 }}>
-          <Text style={styles.sectionTitle}>Billing History</Text>
+          <Text style={styles.sectionTitle}>{t('billing_history')}</Text>
           {billingHistory.map((item) => (
             <View key={item.id} style={styles.historyRow}>
               <MaterialCommunityIcons name="receipt" size={22} color="#764ba2" style={{ marginRight: 10 }} />

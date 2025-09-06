@@ -10,9 +10,18 @@ export interface User {
   email: string;
   fullName: string;
   phoneNumber: string;
-  role: 'customer';
+  role: 'customer' | 'restaurant';
   isEmailVerified: boolean;
-  profilePicture?: null | any
+  profilePicture?: null | any;
+  // Restaurant-specific fields
+  restaurantId?: string;
+  restaurantName?: string;
+  verificationStatus?: string;
+  restaurant?: {
+    id: string;
+    name: string;
+    verificationStatus: string;
+  };
 }
 // {
 //   "status_code": 200,

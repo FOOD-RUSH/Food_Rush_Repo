@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, FlatList, Animated, TouchableOpacity, ScrollView } from 'react-native';
 import { Searchbar, Chip } from 'react-native-paper';
+import { useTranslation } from 'react-i18next';
 import CommonView from '@/src/components/common/CommonView';
 
 interface HistoryOrder {
@@ -16,6 +17,7 @@ interface HistoryOrder {
 }
 
 const OrderHistoryScreen = () => {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -28,62 +30,7 @@ const OrderHistoryScreen = () => {
     }).start();
   }, [fadeAnim]);
 
-  const historyOrders: HistoryOrder[] = [
-    {
-      id: '101',
-      customerName: 'John Doe',
-      items: ['Burger', 'Fries', 'Coke'],
-      total: 18.99,
-      status: 'completed',
-      orderDate: '2024-01-15',
-      completedTime: '2:30 PM',
-      restaurant: 'Burger Palace',
-      rating: 5,
-    },
-    {
-      id: '102',
-      customerName: 'Jane Smith',
-      items: ['Pizza Margherita', 'Caesar Salad'],
-      total: 24.49,
-      status: 'completed',
-      orderDate: '2024-01-14',
-      completedTime: '1:45 PM',
-      restaurant: 'Pizza Corner',
-      rating: 4,
-    },
-    {
-      id: '103',
-      customerName: 'Mike Johnson',
-      items: ['Chicken Alfredo', 'Garlic Bread'],
-      total: 22.75,
-      status: 'cancelled',
-      orderDate: '2024-01-13',
-      completedTime: '12:00 PM',
-      restaurant: 'Italian Bistro',
-    },
-    {
-      id: '104',
-      customerName: 'Sarah Wilson',
-      items: ['Buffalo Wings', 'Onion Rings', 'Beer'],
-      total: 19.50,
-      status: 'completed',
-      orderDate: '2024-01-12',
-      completedTime: '7:15 PM',
-      restaurant: 'Wings & More',
-      rating: 5,
-    },
-    {
-      id: '105',
-      customerName: 'David Brown',
-      items: ['Salmon Teriyaki', 'Miso Soup', 'Green Tea'],
-      total: 28.99,
-      status: 'completed',
-      orderDate: '2024-01-11',
-      completedTime: '6:30 PM',
-      restaurant: 'Sushi Master',
-      rating: 4,
-    },
-  ];
+  const [historyOrders, setHistoryOrders] = useState<HistoryOrder[]>([]);
 
   // Filter orders based on selected filter and search query
   const filteredOrders = historyOrders.filter(order => {
@@ -244,7 +191,7 @@ const OrderHistoryScreen = () => {
                   onPress={() => {/* Reorder functionality */}}
                 >
                   <Text style={{ color: 'white', fontSize: 12, fontWeight: '600' }}>
-                    Reorder
+                    {t('reorder')}
                   </Text>
                 </TouchableOpacity>
               )}
@@ -269,8 +216,8 @@ const OrderHistoryScreen = () => {
     <CommonView>
       <View style={{ flex: 1 }}>
         <View style={{ marginBottom: 24 }}>
-          <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#333' }}>Order History</Text>
-          <Text style={{ color: '#666', marginTop: 8 }}>View all your past orders</Text>
+          <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#333' }}>{t('order_history')}</Text>
+          <Text style={{ color: '#666', marginTop: 8 }}>{t('view_past_orders')}</Text>
         </View>
 
         {/* Stats Summary */}
@@ -291,24 +238,24 @@ const OrderHistoryScreen = () => {
             <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#007AFF' }}>
               {getTotalOrders()}
             </Text>
-            <Text style={{ color: '#666', fontSize: 12 }}>Total Orders</Text>
+            <Text style={{ color: '#666', fontSize: 12 }}>{t('total_orders')}</Text>
           </View>
           <View style={{ alignItems: 'center' }}>
             <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#34C759' }}>
               {getCompletedOrders()}
             </Text>
-            <Text style={{ color: '#666', fontSize: 12 }}>Completed</Text>
+            <Text style={{ color: '#666', fontSize: 12 }}>{t('completed')}</Text>
           </View>
           <View style={{ alignItems: 'center' }}>
             <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#FF9500' }}>
               ${getTotalRevenue().toFixed(2)}
             </Text>
-            <Text style={{ color: '#666', fontSize: 12 }}>Revenue</Text>
+            <Text style={{ color: '#666', fontSize: 12 }}>{t('revenue')}</Text>
           </View>
         </View>
 
         <Searchbar
-          placeholder="Search order history"
+          placeholder={t('search_order_history')}
           onChangeText={setSearchQuery}
           value={searchQuery}
           style={{ marginBottom: 16, borderRadius: 12 }}
@@ -339,9 +286,9 @@ const OrderHistoryScreen = () => {
           contentContainerStyle={{ paddingBottom: 20 }}
           ListEmptyComponent={() => (
             <View style={{ alignItems: 'center', marginTop: 40 }}>
-              <Text style={{ color: '#666', fontSize: 16 }}>No order history found</Text>
+              <Text style={{ color: '#666', fontSize: 16 }}>{t('no_order_history_found')}</Text>
               <Text style={{ color: '#999', fontSize: 14, marginTop: 4 }}>
-                Your completed and cancelled orders will appear here
+                {t('past_orders_description')}
               </Text>
             </View>
           )}

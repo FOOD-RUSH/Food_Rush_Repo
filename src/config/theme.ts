@@ -2,6 +2,12 @@ import { MD3LightTheme, MD3DarkTheme, MD3Theme } from 'react-native-paper';
 import { useColorScheme } from 'react-native';
 import { DefaultTheme, DarkTheme, Theme as NavigationTheme } from '@react-navigation/native';
 import { useAppStore } from '../stores/customerStores/AppStore';
+import {
+  restaurantDarkNavigationTheme,
+  restaurantLightNavigationTheme,
+  restaurantDarkTheme,
+  restaurantLightTheme,
+} from './restaurantTheme';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 
@@ -95,23 +101,33 @@ export const darkTheme: MD3Theme = {
 // Hook to get the appropriate theme based on user preference and system settings
 export const useAppTheme = (themeMode: ThemeMode): MD3Theme => {
   const systemColorScheme = useColorScheme();
+  const userType = useAppStore((state) => state.userType);
+
+  const themedSet = userType === 'restaurant'
+    ? { light: restaurantLightTheme, dark: restaurantDarkTheme }
+    : { light: lightTheme, dark: darkTheme };
 
   if (themeMode === 'system') {
-    return systemColorScheme === 'dark' ? darkTheme : lightTheme;
+    return systemColorScheme === 'dark' ? themedSet.dark : themedSet.light;
   }
 
-  return themeMode === 'dark' ? darkTheme : lightTheme;
+  return themeMode === 'dark' ? themedSet.dark : themedSet.light;
 };
 
 // Hook to get the appropriate navigation theme
 export const useNavigationTheme = (themeMode: ThemeMode): NavigationTheme => {
   const systemColorScheme = useColorScheme();
+  const userType = useAppStore((state) => state.userType);
+
+  const themedSet = userType === 'restaurant'
+    ? { light: restaurantLightNavigationTheme, dark: restaurantDarkNavigationTheme }
+    : { light: lightNavigationTheme, dark: darkNavigationTheme };
 
   if (themeMode === 'system') {
-    return systemColorScheme === 'dark' ? darkNavigationTheme : lightNavigationTheme;
+    return systemColorScheme === 'dark' ? themedSet.dark : themedSet.light;
   }
 
-  return themeMode === 'dark' ? darkNavigationTheme : lightNavigationTheme;
+  return themeMode === 'dark' ? themedSet.dark : themedSet.light;
 };
 
 // Hook that integrates with Zustand store
