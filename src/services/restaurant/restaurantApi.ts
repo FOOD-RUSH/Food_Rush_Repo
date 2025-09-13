@@ -1,3 +1,196 @@
 import { restaurantApiClient } from './apiClient';
 
-export interface RestaurantProfile {\n  id: string;\n  name: string;\n  description?: string;\n  address: string;\n  city: string;\n  region: string;\n  postalCode?: string;\n  country: string;\n  latitude?: number;\n  longitude?: number;\n  phone: string;\n  email: string;\n  website?: string;\n  cuisineType: string[];\n  deliveryRadius: number;\n  isActive: boolean;\n  isVerified: boolean;\n  rating: number;\n  totalReviews: number;\n  openingHours: {\n    [key: string]: {\n      open: string;\n      close: string;\n      isOpen: boolean;\n    };\n  };\n  imageUrl?: string;\n  bannerUrl?: string;\n  createdAt: string;\n  updatedAt: string;\n}\n\nexport interface RestaurantStats {\n  totalOrders: number;\n  totalRevenue: number;\n  averageOrderValue: number;\n  averagePreparationTime: number;\n  cancellationRate: number;\n  customerSatisfaction: number;\n  orderAccuracy: number;\n  repeatCustomers: number;\n  todayOrders: number;\n  todayRevenue: number;\n  weeklyOrders: number[];\n  monthlyRevenue: number[];\n  topCategories: {\n    name: string;\n    orders: number;\n    percentage: number;\n    color: string;\n  }[];\n  paymentMethods: {\n    method: string;\n    percentage: number;\n    color: string;\n  }[];\n}\n\nexport interface UpdateRestaurantRequest {\n  name?: string;\n  description?: string;\n  address?: string;\n  city?: string;\n  region?: string;\n  postalCode?: string;\n  country?: string;\n  latitude?: number;\n  longitude?: number;\n  phone?: string;\n  website?: string;\n  cuisineType?: string[];\n  deliveryRadius?: number;\n  openingHours?: RestaurantProfile['openingHours'];\n}\n\nexport interface NotificationItem {\n  id: string;\n  type: 'order' | 'system' | 'promotion' | 'alert';\n  title: string;\n  message: string;\n  isRead: boolean;\n  priority: 'low' | 'medium' | 'high';\n  orderId?: string;\n  createdAt: string;\n  data?: any;\n}\n\nexport const restaurantApi = {\n  // Restaurant Profile\n  getProfile: () => {\n    return restaurantApiClient.get<{ status_code: number; message: string; data: RestaurantProfile }>('/restaurants/profile');\n  },\n\n  updateProfile: (data: UpdateRestaurantRequest) => {\n    return restaurantApiClient.put<{ status_code: number; message: string; data: RestaurantProfile }>('/restaurants/profile', data);\n  },\n\n  updateLocation: (data: {\n    address: string;\n    city: string;\n    region?: string;\n    postalCode?: string;\n    country: string;\n    latitude?: number;\n    longitude?: number;\n    deliveryRadius: number;\n  }) => {\n    return restaurantApiClient.put('/restaurants/location', data);\n  },\n\n  toggleStatus: (isActive: boolean) => {\n    return restaurantApiClient.put('/restaurants/status', { isActive });\n  },\n\n  // Analytics\n  getStats: (period?: 'today' | 'yesterday' | '7days' | '30days') => {\n    return restaurantApiClient.get<{ status_code: number; message: string; data: RestaurantStats }>('/restaurants/analytics/stats', {\n      params: { period }\n    });\n  },\n\n  getBestSellers: (period?: string) => {\n    return restaurantApiClient.get('/restaurants/analytics/bestsellers', {\n      params: { period }\n    });\n  },\n\n  getTimeHeatmap: (period?: string) => {\n    return restaurantApiClient.get('/restaurants/analytics/heatmap', {\n      params: { period }\n    });\n  },\n\n  // Notifications\n  getNotifications: (params?: { type?: string; isRead?: boolean; limit?: number; offset?: number }) => {\n    return restaurantApiClient.get<{ status_code: number; message: string; data: { notifications: NotificationItem[]; total: number } }>('/restaurants/notifications', { params });\n  },\n\n  markNotificationAsRead: (notificationId: string) => {\n    return restaurantApiClient.put(`/restaurants/notifications/${notificationId}/read`);\n  },\n\n  markAllNotificationsAsRead: () => {\n    return restaurantApiClient.put('/restaurants/notifications/mark-all-read');\n  },\n\n  // Settings\n  getSettings: () => {\n    return restaurantApiClient.get('/restaurants/settings');\n  },\n\n  updateSettings: (settings: {\n    language?: string;\n    currency?: string;\n    timezone?: string;\n    notifications?: {\n      orders?: boolean;\n      promotions?: boolean;\n      system?: boolean;\n    };\n  }) => {\n    return restaurantApiClient.put('/restaurants/settings', settings);\n  },\n\n  // Image Upload\n  uploadImage: (formData: FormData, type: 'profile' | 'banner' | 'menu') => {\n    return restaurantApiClient.post(`/restaurants/upload/${type}`, formData, {\n      headers: {\n        'Content-Type': 'multipart/form-data',\n      },\n    });\n  },\n\n  // Location Services\n  getCurrentLocation: () => {\n    // This would integrate with your location service\n    return restaurantApiClient.get('/restaurants/location/current');\n  },\n\n  searchNearbyPlaces: (query: string, latitude: number, longitude: number) => {\n    return restaurantApiClient.get('/restaurants/location/nearby', {\n      params: { query, latitude, longitude }\n    });\n  },\n\n  validateAddress: (address: string) => {\n    return restaurantApiClient.post('/restaurants/location/validate', { address });\n  },\n};
+export interface RestaurantProfile {
+  id: string;
+  name: string;
+  description?: string;
+  address: string;
+  city: string;
+  region: string;
+  postalCode?: string;
+  country: string;
+  latitude?: number;
+  longitude?: number;
+  phone: string;
+  email: string;
+  website?: string;
+  cuisineType: string[];
+  deliveryRadius: number;
+  isActive: boolean;
+  isVerified: boolean;
+  rating: number;
+  totalReviews: number;
+  openingHours: {
+    [key: string]: {
+      open: string;
+      close: string;
+      isOpen: boolean;
+    };
+  };
+  imageUrl?: string;
+  bannerUrl?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RestaurantStats {
+  totalOrders: number;
+  totalRevenue: number;
+  averageOrderValue: number;
+  averagePreparationTime: number;
+  cancellationRate: number;
+  customerSatisfaction: number;
+  orderAccuracy: number;
+  repeatCustomers: number;
+  todayOrders: number;
+  todayRevenue: number;
+  weeklyOrders: number[];
+  monthlyRevenue: number[];
+  topCategories: {
+    name: string;
+    orders: number;
+    percentage: number;
+    color: string;
+  }[];
+  paymentMethods: {
+    method: string;
+    percentage: number;
+    color: string;
+  }[];
+}
+
+export interface UpdateRestaurantRequest {
+  name?: string;
+  description?: string;
+  address?: string;
+  city?: string;
+  region?: string;
+  postalCode?: string;
+  country?: string;
+  latitude?: number;
+  longitude?: number;
+  phone?: string;
+  website?: string;
+  cuisineType?: string[];
+  deliveryRadius?: number;
+  openingHours?: RestaurantProfile['openingHours'];
+}
+
+export interface NotificationItem {
+  id: string;
+  type: 'order' | 'system' | 'promotion' | 'alert';
+  title: string;
+  message: string;
+  isRead: boolean;
+  priority: 'low' | 'medium' | 'high';
+  orderId?: string;
+  createdAt: string;
+  data?: any;
+}
+
+export const restaurantApi = {
+  // Restaurant Profile
+  getProfile: () => {
+    return restaurantApiClient.get<{ status_code: number; message: string; data: RestaurantProfile }>('/restaurants/profile');
+  },
+
+  updateProfile: (data: UpdateRestaurantRequest) => {
+    return restaurantApiClient.put<{ status_code: number; message: string; data: RestaurantProfile }>('/restaurants/profile', data);
+  },
+
+  updateLocation: (data: {
+    address: string;
+    city: string;
+    region?: string;
+    postalCode?: string;
+    country: string;
+    latitude?: number;
+    longitude?: number;
+    deliveryRadius: number;
+  }) => {
+    return restaurantApiClient.put('/restaurants/location', data);
+  },
+
+  updateStatus: (restaurantId: string, status: 'online' | 'offline' | 'busy') => {
+    return restaurantApiClient.patch(`/restaurants/${restaurantId}/status`, { status });
+  },
+
+  toggleStatus: (isActive: boolean) => {
+    return restaurantApiClient.put('/restaurants/status', { isActive });
+  },
+
+  // Analytics
+  getStats: (period?: 'today' | 'yesterday' | '7days' | '30days') => {
+    return restaurantApiClient.get<{ status_code: number; message: string; data: RestaurantStats }>('/restaurants/analytics/stats', {
+      params: { period }
+    });
+  },
+
+  getBestSellers: (period?: string) => {
+    return restaurantApiClient.get('/restaurants/analytics/bestsellers', {
+      params: { period }
+    });
+  },
+
+  getTimeHeatmap: (period?: string) => {
+    return restaurantApiClient.get('/restaurants/analytics/heatmap', {
+      params: { period }
+    });
+  },
+
+  // Notifications
+  getNotifications: (params?: { type?: string; isRead?: boolean; limit?: number; offset?: number }) => {
+    return restaurantApiClient.get<{ status_code: number; message: string; data: { notifications: NotificationItem[]; total: number } }>('/restaurants/notifications', { params });
+  },
+
+  markNotificationAsRead: (notificationId: string) => {
+    return restaurantApiClient.put(`/restaurants/notifications/${notificationId}/read`);
+  },
+
+  markAllNotificationsAsRead: () => {
+    return restaurantApiClient.put('/restaurants/notifications/mark-all-read');
+  },
+
+  // Settings
+  getSettings: () => {
+    return restaurantApiClient.get('/restaurants/settings');
+  },
+
+  updateSettings: (settings: {
+    language?: string;
+    currency?: string;
+    timezone?: string;
+    notifications?: {
+      orders?: boolean;
+      promotions?: boolean;
+      system?: boolean;
+    };
+  }) => {
+    return restaurantApiClient.put('/restaurants/settings', settings);
+  },
+
+  // Image Upload
+  uploadImage: (formData: FormData, type: 'profile' | 'banner' | 'menu') => {
+    return restaurantApiClient.post(`/restaurants/upload/${type}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+
+  // Location Services
+  getCurrentLocation: () => {
+    // This would integrate with your location service
+    return restaurantApiClient.get('/restaurants/location/current');
+  },
+
+  searchNearbyPlaces: (query: string, latitude: number, longitude: number) => {
+    return restaurantApiClient.get('/restaurants/location/nearby', {
+      params: { query, latitude, longitude }
+    });
+  },
+
+  validateAddress: (address: string) => {
+    return restaurantApiClient.post('/restaurants/location/validate', { address });
+  },
+};

@@ -319,6 +319,8 @@ const RootNavigator: React.FC = () => {
             <Stack.Screen name="RestaurantSettings" component={AccountSettingsScreen} options={{ headerTitle: t('settings') }} />
             <Stack.Screen name="RestaurantSupport" component={SupportScreen} options={{ headerTitle: t('support') }} />
             <Stack.Screen name="RestaurantAbout" component={AboutScreen} options={{ headerTitle: t('about') }} />
+            <Stack.Screen name="RestaurantPaymentBilling" component={PaymentBillingScreen} options={{ headerTitle: t('payment_billing') }} />
+            <Stack.Screen name="RestaurantNotifications" component={NotificationsScreen} options={{ headerTitle: t('notifications') }} />
           </Stack.Group>
 
 

@@ -17,4 +17,291 @@ const TimeHeatmap: React.FC<RestaurantAnalyticsStackScreenProps<'TimeHeatmap'>> 
   const { colors } = useTheme();
   const { t } = useTranslation();
   
-  const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month'>('week');\n\n  const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];\n  const hours = Array.from({ length: 24 }, (_, i) => i);\n\n  // Mock data - replace with actual API call\n  const generateHeatmapData = (): HeatmapData[] => {\n    const data: HeatmapData[] = [];\n    \n    daysOfWeek.forEach(day => {\n      hours.forEach(hour => {\n        let orders = 0;\n        \n        // Simulate realistic order patterns\n        if (hour >= 6 && hour <= 10) { // Breakfast\n          orders = Math.floor(Math.random() * 15) + 5;\n        } else if (hour >= 11 && hour <= 15) { // Lunch\n          orders = Math.floor(Math.random() * 25) + 15;\n        } else if (hour >= 17 && hour <= 21) { // Dinner\n          orders = Math.floor(Math.random() * 30) + 20;\n        } else {\n          orders = Math.floor(Math.random() * 5);\n        }\n        \n        // Weekend boost\n        if (day === 'Sat' || day === 'Sun') {\n          orders = Math.floor(orders * 1.3);\n        }\n        \n        data.push({\n          hour,\n          day,\n          orders,\n          intensity: Math.min(orders / 50, 1), // Normalize to 0-1\n        });\n      });\n    });\n    \n    return data;\n  };\n\n  const heatmapData = generateHeatmapData();\n\n  const getIntensityColor = (intensity: number) => {\n    if (intensity === 0) return colors.surfaceVariant;\n    if (intensity <= 0.2) return '#007aff20';\n    if (intensity <= 0.4) return '#007aff40';\n    if (intensity <= 0.6) return '#007aff60';\n    if (intensity <= 0.8) return '#007aff80';\n    return '#007aff';\n  };\n\n  const getDataForCell = (day: string, hour: number) => {\n    return heatmapData.find(d => d.day === day && d.hour === hour);\n  };\n\n  const getPeakHours = () => {\n    const hourTotals = hours.map(hour => {\n      const total = heatmapData\n        .filter(d => d.hour === hour)\n        .reduce((sum, d) => sum + d.orders, 0);\n      return { hour, total };\n    });\n    \n    return hourTotals\n      .sort((a, b) => b.total - a.total)\n      .slice(0, 3);\n  };\n\n  const getBusiestDays = () => {\n    const dayTotals = daysOfWeek.map(day => {\n      const total = heatmapData\n        .filter(d => d.day === day)\n        .reduce((sum, d) => sum + d.orders, 0);\n      return { day, total };\n    });\n    \n    return dayTotals\n      .sort((a, b) => b.total - a.total)\n      .slice(0, 3);\n  };\n\n  const peakHours = getPeakHours();\n  const busiestDays = getBusiestDays();\n\n  return (\n    <CommonView>\n      <ScrollView showsVerticalScrollIndicator={false}>\n        {/* Header */}\n        <View style={{ padding: 16, paddingBottom: 0 }}>\n          <Text style={{ fontSize: 28, fontWeight: 'bold', color: colors.onBackground }}>\n            {t('time_heatmap')}\n          </Text>\n          <Text style={{ fontSize: 14, color: colors.onSurfaceVariant, marginTop: 4 }}>\n            {t('hourly_order_patterns')}\n          </Text>\n        </View>\n\n        {/* Period Selector */}\n        <View style={{ padding: 16, paddingTop: 12 }}>\n          <View style={{ flexDirection: 'row' }}>\n            <TouchableOpacity\n              onPress={() => setSelectedPeriod('week')}\n              style={{\n                flex: 1,\n                paddingVertical: 8,\n                paddingHorizontal: 16,\n                backgroundColor: selectedPeriod === 'week' ? '#007aff' : colors.surfaceVariant,\n                borderRadius: 8,\n                marginRight: 8,\n              }}\n            >\n              <Text\n                style={{\n                  textAlign: 'center',\n                  fontWeight: '600',\n                  color: selectedPeriod === 'week' ? 'white' : colors.onSurfaceVariant,\n                }}\n              >\n                {t('this_week')}\n              </Text>\n            </TouchableOpacity>\n            <TouchableOpacity\n              onPress={() => setSelectedPeriod('month')}\n              style={{\n                flex: 1,\n                paddingVertical: 8,\n                paddingHorizontal: 16,\n                backgroundColor: selectedPeriod === 'month' ? '#007aff' : colors.surfaceVariant,\n                borderRadius: 8,\n                marginLeft: 8,\n              }}\n            >\n              <Text\n                style={{\n                  textAlign: 'center',\n                  fontWeight: '600',\n                  color: selectedPeriod === 'month' ? 'white' : colors.onSurfaceVariant,\n                }}\n              >\n                {t('this_month')}\n              </Text>\n            </TouchableOpacity>\n          </View>\n        </View>\n\n        {/* Insights */}\n        <View style={{ padding: 16, paddingTop: 0 }}>\n          <Card style={{ backgroundColor: colors.surface, marginBottom: 16 }}>\n            <View style={{ padding: 16 }}>\n              <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.onSurface, marginBottom: 12 }}>\n                {t('key_insights')}\n              </Text>\n              \n              <View style={{ marginBottom: 12 }}>\n                <Text style={{ fontSize: 14, fontWeight: '600', color: colors.onSurface, marginBottom: 4 }}>\n                  {t('peak_hours')}\n                </Text>\n                <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>\n                  {peakHours.map((item, index) => (\n                    <Chip\n                      key={index}\n                      style={{ backgroundColor: '#007aff20', marginRight: 8, marginBottom: 4 }}\n                      textStyle={{ color: '#007aff', fontSize: 12 }}\n                      compact\n                    >\n                      {item.hour}:00 ({item.total} orders)\n                    </Chip>\n                  ))}\n                </View>\n              </View>\n              \n              <View>\n                <Text style={{ fontSize: 14, fontWeight: '600', color: colors.onSurface, marginBottom: 4 }}>\n                  {t('busiest_days')}\n                </Text>\n                <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>\n                  {busiestDays.map((item, index) => (\n                    <Chip\n                      key={index}\n                      style={{ backgroundColor: '#00C85120', marginRight: 8, marginBottom: 4 }}\n                      textStyle={{ color: '#00C851', fontSize: 12 }}\n                      compact\n                    >\n                      {item.day} ({item.total} orders)\n                    </Chip>\n                  ))}\n                </View>\n              </View>\n            </View>\n          </Card>\n        </View>\n\n        {/* Heatmap */}\n        <View style={{ padding: 16, paddingTop: 0 }}>\n          <Card style={{ backgroundColor: colors.surface }}>\n            <View style={{ padding: 16 }}>\n              <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.onSurface, marginBottom: 16 }}>\n                {t('order_heatmap')}\n              </Text>\n              \n              {/* Hour labels */}\n              <View style={{ flexDirection: 'row', marginBottom: 8 }}>\n                <View style={{ width: 40 }} />\n                {[6, 9, 12, 15, 18, 21].map(hour => (\n                  <View key={hour} style={{ flex: 1, alignItems: 'center' }}>\n                    <Text style={{ fontSize: 10, color: colors.onSurfaceVariant }}>\n                      {hour}:00\n                    </Text>\n                  </View>\n                ))}\n              </View>\n              \n              {/* Heatmap grid */}\n              {daysOfWeek.map(day => (\n                <View key={day} style={{ flexDirection: 'row', marginBottom: 4 }}>\n                  <View style={{ width: 40, justifyContent: 'center' }}>\n                    <Text style={{ fontSize: 12, color: colors.onSurfaceVariant, fontWeight: '600' }}>\n                      {day}\n                    </Text>\n                  </View>\n                  {hours.map(hour => {\n                    const cellData = getDataForCell(day, hour);\n                    return (\n                      <View\n                        key={hour}\n                        style={{\n                          flex: 1,\n                          aspectRatio: 1,\n                          backgroundColor: getIntensityColor(cellData?.intensity || 0),\n                          marginHorizontal: 1,\n                          borderRadius: 2,\n                          justifyContent: 'center',\n                          alignItems: 'center',\n                        }}\n                      >\n                        {cellData && cellData.orders > 0 && (\n                          <Text\n                            style={{\n                              fontSize: 8,\n                              color: cellData.intensity > 0.5 ? 'white' : colors.onSurface,\n                              fontWeight: 'bold',\n                            }}\n                          >\n                            {cellData.orders}\n                          </Text>\n                        )}\n                      </View>\n                    );\n                  })}\n                </View>\n              ))}\n              \n              {/* Legend */}\n              <View style={{ marginTop: 16, alignItems: 'center' }}>\n                <Text style={{ fontSize: 12, color: colors.onSurfaceVariant, marginBottom: 8 }}>\n                  {t('order_volume')}\n                </Text>\n                <View style={{ flexDirection: 'row', alignItems: 'center' }}>\n                  <Text style={{ fontSize: 10, color: colors.onSurfaceVariant, marginRight: 8 }}>\n                    {t('low')}\n                  </Text>\n                  {[0, 0.2, 0.4, 0.6, 0.8, 1].map((intensity, index) => (\n                    <View\n                      key={index}\n                      style={{\n                        width: 16,\n                        height: 16,\n                        backgroundColor: getIntensityColor(intensity),\n                        marginHorizontal: 1,\n                        borderRadius: 2,\n                      }}\n                    />\n                  ))}\n                  <Text style={{ fontSize: 10, color: colors.onSurfaceVariant, marginLeft: 8 }}>\n                    {t('high')}\n                  </Text>\n                </View>\n              </View>\n            </View>\n          </Card>\n        </View>\n      </ScrollView>\n    </CommonView>\n  );\n};\n\nexport default TimeHeatmap;
+  const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month'>('week');
+
+  const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const hours = Array.from({ length: 24 }, (_, i) => i);
+
+  // Mock data - replace with actual API call
+  const generateHeatmapData = (): HeatmapData[] => {
+    const data: HeatmapData[] = [];
+    
+    daysOfWeek.forEach(day => {
+      hours.forEach(hour => {
+        let orders = 0;
+        
+        // Simulate realistic order patterns
+        if (hour >= 6 && hour <= 10) { // Breakfast
+          orders = Math.floor(Math.random() * 15) + 5;
+        } else if (hour >= 11 && hour <= 15) { // Lunch
+          orders = Math.floor(Math.random() * 25) + 15;
+        } else if (hour >= 17 && hour <= 21) { // Dinner
+          orders = Math.floor(Math.random() * 30) + 20;
+        } else {
+          orders = Math.floor(Math.random() * 5);
+        }
+        
+        // Weekend boost
+        if (day === 'Sat' || day === 'Sun') {
+          orders = Math.floor(orders * 1.3);
+        }
+        
+        data.push({
+          hour,
+          day,
+          orders,
+          intensity: Math.min(orders / 50, 1), // Normalize to 0-1
+        });
+      });
+    });
+    
+    return data;
+  };
+
+  const heatmapData = generateHeatmapData();
+
+  const getIntensityColor = (intensity: number) => {
+    if (intensity === 0) return colors.surfaceVariant;
+    if (intensity <= 0.2) return '#007aff20';
+    if (intensity <= 0.4) return '#007aff40';
+    if (intensity <= 0.6) return '#007aff60';
+    if (intensity <= 0.8) return '#007aff80';
+    return '#007aff';
+  };
+
+  const getDataForCell = (day: string, hour: number) => {
+    return heatmapData.find(d => d.day === day && d.hour === hour);
+  };
+
+  const getPeakHours = () => {
+    const hourTotals = hours.map(hour => {
+      const total = heatmapData
+        .filter(d => d.hour === hour)
+        .reduce((sum, d) => sum + d.orders, 0);
+      return { hour, total };
+    });
+    
+    return hourTotals
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 3);
+  };
+
+  const getBusiestDays = () => {
+    const dayTotals = daysOfWeek.map(day => {
+      const total = heatmapData
+        .filter(d => d.day === day)
+        .reduce((sum, d) => sum + d.orders, 0);
+      return { day, total };
+    });
+    
+    return dayTotals
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 3);
+  };
+
+  const peakHours = getPeakHours();
+  const busiestDays = getBusiestDays();
+
+  return (
+    <CommonView>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <View style={{ padding: 16, paddingBottom: 0 }}>
+          <Text style={{ fontSize: 28, fontWeight: 'bold', color: colors.onBackground }}>
+            {t('time_heatmap')}
+          </Text>
+          <Text style={{ fontSize: 14, color: colors.onSurfaceVariant, marginTop: 4 }}>
+            {t('hourly_order_patterns')}
+          </Text>
+        </View>
+
+        {/* Period Selector */}
+        <View style={{ padding: 16, paddingTop: 12 }}>
+          <View style={{ flexDirection: 'row' }}>
+            <TouchableOpacity
+              onPress={() => setSelectedPeriod('week')}
+              style={{
+                flex: 1,
+                paddingVertical: 8,
+                paddingHorizontal: 16,
+                backgroundColor: selectedPeriod === 'week' ? '#007aff' : colors.surfaceVariant,
+                borderRadius: 8,
+                marginRight: 8,
+              }}
+            >
+              <Text
+                style={{
+                  textAlign: 'center',
+                  fontWeight: '600',
+                  color: selectedPeriod === 'week' ? 'white' : colors.onSurfaceVariant,
+                }}
+              >
+                {t('this_week')}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setSelectedPeriod('month')}
+              style={{
+                flex: 1,
+                paddingVertical: 8,
+                paddingHorizontal: 16,
+                backgroundColor: selectedPeriod === 'month' ? '#007aff' : colors.surfaceVariant,
+                borderRadius: 8,
+                marginLeft: 8,
+              }}
+            >
+              <Text
+                style={{
+                  textAlign: 'center',
+                  fontWeight: '600',
+                  color: selectedPeriod === 'month' ? 'white' : colors.onSurfaceVariant,
+                }}
+              >
+                {t('this_month')}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Insights */}
+        <View style={{ padding: 16, paddingTop: 0 }}>
+          <Card style={{ backgroundColor: colors.surface, marginBottom: 16 }}>
+            <View style={{ padding: 16 }}>
+              <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.onSurface, marginBottom: 12 }}>
+                {t('key_insights')}
+              </Text>
+              
+              <View style={{ marginBottom: 12 }}>
+                <Text style={{ fontSize: 14, fontWeight: '600', color: colors.onSurface, marginBottom: 4 }}>
+                  {t('peak_hours')}
+                </Text>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                  {peakHours.map((item, index) => (
+                    <Chip
+                      key={index}
+                      style={{ backgroundColor: '#007aff20', marginRight: 8, marginBottom: 4 }}
+                      textStyle={{ color: '#007aff', fontSize: 12 }}
+                      compact
+                    >
+                      {item.hour}:00 ({item.total} orders)
+                    </Chip>
+                  ))}
+                </View>
+              </View>
+              
+              <View>
+                <Text style={{ fontSize: 14, fontWeight: '600', color: colors.onSurface, marginBottom: 4 }}>
+                  {t('busiest_days')}
+                </Text>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                  {busiestDays.map((item, index) => (
+                    <Chip
+                      key={index}
+                      style={{ backgroundColor: '#00C85120', marginRight: 8, marginBottom: 4 }}
+                      textStyle={{ color: '#00C851', fontSize: 12 }}
+                      compact
+                    >
+                      {item.day} ({item.total} orders)
+                    </Chip>
+                  ))}
+                </View>
+              </View>
+            </View>
+          </Card>
+        </View>
+
+        {/* Heatmap */}
+        <View style={{ padding: 16, paddingTop: 0 }}>
+          <Card style={{ backgroundColor: colors.surface }}>
+            <View style={{ padding: 16 }}>
+              <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.onSurface, marginBottom: 16 }}>
+                {t('order_heatmap')}
+              </Text>
+              
+              {/* Hour labels */}
+              <View style={{ flexDirection: 'row', marginBottom: 8 }}>
+                <View style={{ width: 40 }} />
+                {[6, 9, 12, 15, 18, 21].map(hour => (
+                  <View key={hour} style={{ flex: 1, alignItems: 'center' }}>
+                    <Text style={{ fontSize: 10, color: colors.onSurfaceVariant }}>
+                      {hour}:00
+                    </Text>
+                  </View>
+                ))}
+              </View>
+              
+              {/* Heatmap grid */}
+              {daysOfWeek.map(day => (
+                <View key={day} style={{ flexDirection: 'row', marginBottom: 4 }}>
+                  <View style={{ width: 40, justifyContent: 'center' }}>
+                    <Text style={{ fontSize: 12, color: colors.onSurfaceVariant, fontWeight: '600' }}>
+                      {day}
+                    </Text>
+                  </View>
+                  {hours.map(hour => {
+                    const cellData = getDataForCell(day, hour);
+                    return (
+                      <View
+                        key={hour}
+                        style={{
+                          flex: 1,
+                          aspectRatio: 1,
+                          backgroundColor: getIntensityColor(cellData?.intensity || 0),
+                          marginHorizontal: 1,
+                          borderRadius: 2,
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                        }}
+                      >
+                        {cellData && cellData.orders > 0 && (
+                          <Text
+                            style={{
+                              fontSize: 8,
+                              color: cellData.intensity > 0.5 ? 'white' : colors.onSurface,
+                              fontWeight: 'bold',
+                            }}
+                          >
+                            {cellData.orders}
+                          </Text>
+                        )}
+                      </View>
+                    );
+                  })}
+                </View>
+              ))}
+              
+              {/* Legend */}
+              <View style={{ marginTop: 16, alignItems: 'center' }}>
+                <Text style={{ fontSize: 12, color: colors.onSurfaceVariant, marginBottom: 8 }}>
+                  {t('order_volume')}
+                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={{ fontSize: 10, color: colors.onSurfaceVariant, marginRight: 8 }}>
+                    {t('low')}
+                  </Text>
+                  {[0, 0.2, 0.4, 0.6, 0.8, 1].map((intensity, index) => (
+                    <View
+                      key={index}
+                      style={{
+                        width: 16,
+                        height: 16,
+                        backgroundColor: getIntensityColor(intensity),
+                        marginHorizontal: 1,
+                        borderRadius: 2,
+                      }}
+                    />
+                  ))}
+                  <Text style={{ fontSize: 10, color: colors.onSurfaceVariant, marginLeft: 8 }}>
+                    {t('high')}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </Card>
+        </View>
+      </ScrollView>
+    </CommonView>
+  );
+};
+
+export default TimeHeatmap;

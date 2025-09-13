@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Switch } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Switch, Alert, Dimensions } from 'react-native';
 import { useTheme, Card, Avatar, Button, Divider } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -8,6 +8,12 @@ import * as Haptics from 'expo-haptics';
 
 import CommonView from '@/src/components/common/CommonView';
 import { RestaurantAccountStackScreenProps } from '@/src/navigation/types';
+import { useAuthUser } from '@/src/stores/customerStores/AuthStore';
+import RestaurantStatusControl from '@/src/components/restaurant/RestaurantStatusControl';
+
+const { width: screenWidth } = Dimensions.get('window');
+const isSmallScreen = screenWidth < 375;
+const isMediumScreen = screenWidth >= 375 && screenWidth < 414;
 
 interface MenuItemProps {
   icon: string;
@@ -17,6 +23,7 @@ interface MenuItemProps {
   showChevron?: boolean;
   rightComponent?: React.ReactNode;
   color?: string;
+  showDivider?: boolean;
 }
 
 const MenuItem: React.FC<MenuItemProps> = ({
@@ -26,45 +33,71 @@ const MenuItem: React.FC<MenuItemProps> = ({
   onPress,
   showChevron = true,
   rightComponent,
-  color = '#007aff'
+  color = '#007aff',
+  showDivider = false
 }) => {
   const { colors } = useTheme();
 
   return (
-    <TouchableOpacity onPress={onPress} style={{ paddingVertical: 12 }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <View
-          style={{
-            width: 40,
-            height: 40,
-            borderRadius: 20,
-            backgroundColor: color + '15',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginRight: 12,
-          }}
-        >
-          <MaterialCommunityIcons name={icon as any} size={20} color={color} />
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text style={{ fontSize: 16, fontWeight: '500', color: colors.onSurface }}>
-            {title}
-          </Text>
-          {subtitle && (
-            <Text style={{ fontSize: 12, color: colors.onSurfaceVariant, marginTop: 2 }}>
-              {subtitle}
+    <>
+      <TouchableOpacity 
+        onPress={onPress} 
+        style={{ 
+          paddingVertical: isSmallScreen ? 14 : 16,
+          paddingHorizontal: 4,
+        }}
+        activeOpacity={0.7}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <View
+            style={{
+              width: isSmallScreen ? 44 : 48,
+              height: isSmallScreen ? 44 : 48,
+              borderRadius: isSmallScreen ? 22 : 24,
+              backgroundColor: color + '15',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginRight: 16,
+            }}
+          >
+            <MaterialCommunityIcons 
+              name={icon as any} 
+              size={isSmallScreen ? 22 : 24} 
+              color={color} 
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text style={{ 
+              fontSize: isSmallScreen ? 16 : 17, 
+              fontWeight: '600', 
+              color: colors.onSurface,
+              marginBottom: subtitle ? 2 : 0,
+            }}>
+              {title}
             </Text>
-          )}
+            {subtitle && (
+              <Text style={{ 
+                fontSize: isSmallScreen ? 13 : 14, 
+                color: colors.onSurfaceVariant,
+                lineHeight: 18,
+              }}>
+                {subtitle}
+              </Text>
+            )}
+          </View>
+          {rightComponent || (showChevron && (
+            <MaterialCommunityIcons
+              name="chevron-right"
+              size={20}
+              color={colors.onSurfaceVariant}
+            />
+          ))}
         </View>
-        {rightComponent || (showChevron && (
-          <MaterialCommunityIcons
-            name="chevron-right"
-            size={20}
-            color={colors.onSurfaceVariant}
-          />
-        ))}
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+      {showDivider && (
+        <Divider style={{ marginLeft: isSmallScreen ? 60 : 64, marginVertical: 4 }} />
+      )}
+    </>
   );
 };
 
@@ -72,211 +105,297 @@ const AccountHome: React.FC<RestaurantAccountStackScreenProps<'AccountHome'>> = 
   const { colors } = useTheme();
   const { t } = useTranslation();
   const navigation = useNavigation();
+  const user = useAuthUser();
   
-  const [isOnline, setIsOnline] = useState(true);
+  const [restaurantStatus, setRestaurantStatus] = useState<'online' | 'offline' | 'busy'>('offline');
 
   // Mock restaurant data - replace with actual data from store/API
   const restaurantData = {
-    name: 'Chez Marie Restaurant',
-    email: 'marie@chezmarierestaurant.cm',
-    phone: '+237 6XX XXX XXX',
-    address: 'Douala, Cameroon',
+    name: user?.restaurantName || 'Chez Marie Restaurant',
+    email: user?.email || 'marie@chezmarierestaurant.cm',
+    phone: user?.phoneNumber || '+237 6XX XXX XXX',
+    address: user?.address || 'Douala, Cameroon',
     cuisine: 'African, Continental',
     rating: 4.5,
     totalOrders: 1247,
-    joinDate: 'January 2024',
+    joinDate: user?.joinDate || 'January 2024',
     profileImage: null,
   };
 
-  const handleProfilePress = () => {
-    Haptics.selectionAsync();
-    navigation.navigate('RestaurantProfile');
+  const handleLogout = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    Alert.alert(
+      t('logout'),
+      t('are_you_sure_logout'),
+      [
+        { text: t('cancel'), style: 'cancel' },
+        { 
+          text: t('logout'), 
+          style: 'destructive', 
+          onPress: () => {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            console.log('User logged out');
+          }
+        },
+      ]
+    );
   };
 
-  const handleLocationPress = () => {
-    Haptics.selectionAsync();
-    navigation.navigate('RestaurantLocation');
-  };
-
-  const handleThemeSettingsPress = () => {
-    Haptics.selectionAsync();
-    navigation.navigate('RestaurantThemeSettings');
-  };
-
-  const handleSettingsPress = () => {
-    Haptics.selectionAsync();
-    navigation.navigate('RestaurantSettings');
-  };
-
-  const handleSupportPress = () => {
-    Haptics.selectionAsync();
-    navigation.navigate('RestaurantSupport');
-  };
-
-  const handleAboutPress = () => {
-    Haptics.selectionAsync();
-    navigation.navigate('RestaurantAbout');
-  };
-
-  const toggleOnlineStatus = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setIsOnline(!isOnline);
+  const handleStatusChange = (status: 'online' | 'offline' | 'busy') => {
+    setRestaurantStatus(status);
   };
 
   return (
-    <CommonView>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={{ padding: 16, paddingBottom: 0 }}>
-          <Text style={{ fontSize: 28, fontWeight: 'bold', color: colors.onBackground }}>
-            {t('account')}
+    <CommonView style={{ backgroundColor: colors.background }}>
+      <ScrollView 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 40 }}
+      >
+        {/* Profile Header - Clean and modern */}
+        <View className={`${isSmallScreen ? 'px-4 pt-4 pb-6' : 'px-6 pt-6 pb-8'} items-center`}>
+          <Avatar.Text
+            size={isSmallScreen ? 80 : 90}
+            label={user?.fullName ? user.fullName.split(' ').map(n => n[0]).join('') : restaurantData.name.charAt(0)}
+            style={{ backgroundColor: '#007aff', marginBottom: 16 }}
+            labelStyle={{ fontSize: isSmallScreen ? 28 : 32, fontWeight: 'bold' }}
+          />
+          
+          <Text 
+            className={`${isSmallScreen ? 'text-xl' : 'text-2xl'} font-bold text-center mb-2`}
+            style={{ color: colors.onSurface }}
+          >
+            {user?.fullName || restaurantData.name}
           </Text>
-          <Text style={{ fontSize: 14, color: colors.onSurfaceVariant, marginTop: 4 }}>
-            {t('manage_your_restaurant')}
+          
+          <Text 
+            className={`${isSmallScreen ? 'text-base' : 'text-lg'} text-center mb-1`}
+            style={{ color: colors.onSurfaceVariant }}
+          >
+            {restaurantData.name}
           </Text>
+          
+          <Text 
+            className={`${isSmallScreen ? 'text-sm' : 'text-base'} text-center mb-4`}
+            style={{ color: colors.onSurfaceVariant }}
+          >
+            {restaurantData.email}
+          </Text>
+
+          {/* Quick Stats */}
+          <View className="flex-row items-center space-x-6">
+            <View className="items-center">
+              <View className="flex-row items-center mb-1">
+                <MaterialCommunityIcons name="star" size={16} color="#FFD700" />
+                <Text 
+                  className={`${isSmallScreen ? 'text-base' : 'text-lg'} font-bold ml-1`}
+                  style={{ color: colors.onSurface }}
+                >
+                  {restaurantData.rating}
+                </Text>
+              </View>
+              <Text 
+                className={`${isSmallScreen ? 'text-xs' : 'text-sm'}`}
+                style={{ color: colors.onSurfaceVariant }}
+              >
+                {t('rating')}
+              </Text>
+            </View>
+            
+            <View className="items-center">
+              <Text 
+                className={`${isSmallScreen ? 'text-base' : 'text-lg'} font-bold mb-1`}
+                style={{ color: colors.onSurface }}
+              >
+                {restaurantData.totalOrders}
+              </Text>
+              <Text 
+                className={`${isSmallScreen ? 'text-xs' : 'text-sm'}`}
+                style={{ color: colors.onSurfaceVariant }}
+              >
+                {t('orders')}
+              </Text>
+            </View>
+          </View>
         </View>
 
-        {/* Restaurant Profile Card */}
-        <Card style={{ margin: 16, backgroundColor: colors.surface }}>
-          <TouchableOpacity onPress={handleProfilePress} style={{ padding: 16 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Avatar.Text
-                size={60}
-                label={restaurantData.name.charAt(0)}
-                style={{ backgroundColor: '#007aff' }}
-              />
-              <View style={{ flex: 1, marginLeft: 12 }}>
-                <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.onSurface }}>
-                  {restaurantData.name}
-                </Text>
-                <Text style={{ fontSize: 14, color: colors.onSurfaceVariant, marginTop: 2 }}>
-                  {restaurantData.cuisine}
-                </Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
-                  <MaterialCommunityIcons name="star" size={16} color="#FFD700" />
-                  <Text style={{ fontSize: 12, color: colors.onSurfaceVariant, marginLeft: 4 }}>
-                    {restaurantData.rating} • {restaurantData.totalOrders} {t('orders')}
-                  </Text>
-                </View>
-              </View>
-              <MaterialCommunityIcons
-                name="chevron-right"
-                size={24}
-                color={colors.onSurfaceVariant}
-              />
-            </View>
-          </TouchableOpacity>
-        </Card>
+        {/* Restaurant Status Control */}
+        <View className={`${isSmallScreen ? 'mx-4 mb-4' : 'mx-6 mb-6'}`}>
+          <RestaurantStatusControl
+            currentStatus={restaurantStatus}
+            onStatusChange={handleStatusChange}
+            showAsCard={true}
+            compact={false}
+          />
+        </View>
 
-        {/* Online Status */}
-        <Card style={{ margin: 16, marginTop: 0, backgroundColor: colors.surface }}>
-          <View style={{ padding: 16 }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <View
-                  style={{
-                    width: 12,
-                    height: 12,
-                    borderRadius: 6,
-                    backgroundColor: isOnline ? '#00C851' : '#FF4444',
-                    marginRight: 8,
-                  }}
-                />
-                <Text style={{ fontSize: 16, fontWeight: '600', color: colors.onSurface }}>
-                  {isOnline ? t('restaurant_online') : t('restaurant_offline')}
-                </Text>
-              </View>
-              <Switch
-                value={isOnline}
-                onValueChange={toggleOnlineStatus}
-                trackColor={{ false: '#767577', true: '#007aff' }}
-                thumbColor={isOnline ? '#ffffff' : '#f4f3f4'}
-              />
-            </View>
-            <Text style={{ fontSize: 12, color: colors.onSurfaceVariant, marginTop: 4 }}>
-              {isOnline ? t('accepting_orders') : t('not_accepting_orders')}
-            </Text>
-          </View>
-        </Card>
-
-        {/* Restaurant Management */}
-        <Card style={{ margin: 16, marginTop: 0, backgroundColor: colors.surface }}>
-          <View style={{ padding: 16 }}>
-            <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.onSurface, marginBottom: 12 }}>
+        {/* Restaurant Management Section */}
+        <Card 
+          className={`${isSmallScreen ? 'mx-4 mb-4' : 'mx-6 mb-6'}`}
+          style={{ backgroundColor: colors.surface, borderRadius: 16 }}
+        >
+          <View className={`${isSmallScreen ? 'p-4' : 'p-5'}`}>
+            <Text 
+              className={`${isSmallScreen ? 'text-lg' : 'text-xl'} font-bold mb-4`}
+              style={{ color: colors.onSurface }}
+            >
               {t('restaurant_management')}
             </Text>
             
             <MenuItem
-              icon="store"
-              title={t('restaurant_profile')}
-              subtitle={t('business_info_settings')}
-              onPress={handleProfilePress}
+              icon="store-edit"
+              title={t('edit_profile')}
+              subtitle={t('update_restaurant_information')}
+              onPress={() => {
+                Haptics.selectionAsync();
+                navigation.navigate('RestaurantEditProfile');
+              }}
               color="#007aff"
+              showDivider
             />
             
-            <Divider style={{ marginVertical: 8 }} />
+            <MenuItem
+              icon="map-marker-outline"
+              title={t('restaurant_location')}
+              subtitle={t('manage_address_delivery_zones')}
+              onPress={() => {
+                Haptics.selectionAsync();
+                navigation.navigate('RestaurantLocation');
+              }}
+              color="#00D084"
+              showDivider
+            />
             
             <MenuItem
-              icon="map-marker"
-              title={t('restaurant_location')}
-              subtitle={t('address_delivery_settings')}
-              onPress={handleLocationPress}
-              color="#00C851"
+              icon="credit-card-outline"
+              title={t('payment_billing')}
+              subtitle={t('manage_payment_methods_billing')}
+              onPress={() => {
+                Haptics.selectionAsync();
+                navigation.navigate('RestaurantPaymentBilling');
+              }}
+              color="#FF6B35"
             />
           </View>
         </Card>
 
-        {/* App Settings */}
-        <Card style={{ margin: 16, marginTop: 0, backgroundColor: colors.surface }}>
-          <View style={{ padding: 16 }}>
-            <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.onSurface, marginBottom: 12 }}>
+        {/* App Settings Section */}
+        <Card 
+          className={`${isSmallScreen ? 'mx-4 mb-4' : 'mx-6 mb-6'}`}
+          style={{ backgroundColor: colors.surface, borderRadius: 16 }}
+        >
+          <View className={`${isSmallScreen ? 'p-4' : 'p-5'}`}>
+            <Text 
+              className={`${isSmallScreen ? 'text-lg' : 'text-xl'} font-bold mb-4`}
+              style={{ color: colors.onSurface }}
+            >
               {t('app_settings')}
             </Text>
             
             <MenuItem
-              icon="palette"
-              title={t('theme_language_settings')}
-              subtitle={t('appearance_language_preferences')}
-              onPress={handleThemeSettingsPress}
+              icon="bell-outline"
+              title={t('notifications')}
+              subtitle={t('manage_notification_preferences')}
+              onPress={() => {
+                Haptics.selectionAsync();
+                navigation.navigate('RestaurantNotifications');
+              }}
               color="#8B5CF6"
+              showDivider
             />
             
-            <Divider style={{ marginVertical: 8 }} />
-            
             <MenuItem
-              icon="cog"
-              title={t('app_settings')}
-              subtitle={t('notifications_other_preferences')}
-              onPress={handleSettingsPress}
-              color="#FF8800"
+              icon="palette-outline"
+              title={t('appearance_language')}
+              subtitle={t('theme_language_preferences')}
+              onPress={() => {
+                Haptics.selectionAsync();
+                navigation.navigate('RestaurantThemeSettings');
+              }}
+              color="#FF9500"
+              showDivider
             />
             
-            <Divider style={{ marginVertical: 8 }} />
-            
             <MenuItem
-              icon="help-circle"
-              title={t('help_support')}
-              subtitle={t('faq_contact_support')}
-              onPress={handleSupportPress}
-              color="#007aff"
-            />
-            
-            <Divider style={{ marginVertical: 8 }} />
-            
-            <MenuItem
-              icon="information"
-              title={t('about')}
-              subtitle={t('app_version_terms')}
-              onPress={handleAboutPress}
+              icon="cog-outline"
+              title={t('account_settings')}
+              subtitle={t('privacy_security_settings')}
+              onPress={() => {
+                Haptics.selectionAsync();
+                navigation.navigate('RestaurantSettings');
+              }}
               color="#6B7280"
             />
           </View>
         </Card>
 
+        {/* Support & Information Section */}
+        <Card 
+          className={`${isSmallScreen ? 'mx-4 mb-6' : 'mx-6 mb-8'}`}
+          style={{ backgroundColor: colors.surface, borderRadius: 16 }}
+        >
+          <View className={`${isSmallScreen ? 'p-4' : 'p-5'}`}>
+            <Text 
+              className={`${isSmallScreen ? 'text-lg' : 'text-xl'} font-bold mb-4`}
+              style={{ color: colors.onSurface }}
+            >
+              {t('support_information')}
+            </Text>
+            
+            <MenuItem
+              icon="help-circle-outline"
+              title={t('help_support')}
+              subtitle={t('faq_contact_support_team')}
+              onPress={() => {
+                Haptics.selectionAsync();
+                navigation.navigate('RestaurantSupport');
+              }}
+              color="#007aff"
+              showDivider
+            />
+            
+            <MenuItem
+              icon="information-outline"
+              title={t('about')}
+              subtitle={t('app_version_terms_privacy')}
+              onPress={() => {
+                Haptics.selectionAsync();
+                navigation.navigate('RestaurantAbout');
+              }}
+              color="#6B7280"
+            />
+          </View>
+        </Card>
 
-
-        {/* Bottom Spacing */}
-        <View style={{ height: 20 }} />
+        {/* Logout Button */}
+        <View className={`${isSmallScreen ? 'px-4' : 'px-6'}`}>
+          <Button
+            mode="contained"
+            onPress={handleLogout}
+            style={{
+              backgroundColor: '#FF3B30',
+              borderRadius: 12,
+              paddingVertical: isSmallScreen ? 4 : 6,
+            }}
+            contentStyle={{
+              paddingVertical: isSmallScreen ? 8 : 10,
+            }}
+            labelStyle={{
+              fontSize: isSmallScreen ? 16 : 17,
+              fontWeight: '600',
+              color: 'white',
+            }}
+            icon="logout"
+          >
+            {t('logout')}
+          </Button>
+          
+          <Text 
+            className={`text-center ${isSmallScreen ? 'text-xs' : 'text-sm'} mt-4`}
+            style={{ color: colors.onSurfaceVariant }}
+          >
+            {t('version')} 1.0.0
+          </Text>
+        </View>
       </ScrollView>
     </CommonView>
   );

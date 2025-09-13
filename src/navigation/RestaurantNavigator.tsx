@@ -151,16 +151,17 @@ export default function RestaurantNavigator() {
           return <Ionicons name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.secondaryContainer,
+        tabBarInactiveTintColor: colors.onSurfaceVariant,
         headerShown: false,
         tabBarStyle: {
           backgroundColor: colors.surface,
           height: (Platform.OS === 'ios' ? 80 : 60) + insets.bottom,
           paddingBottom: (Platform.OS === 'ios' ? 25 : 10) + insets.bottom,
- borderTopRightRadius: 40,
-      borderTopLeftRadius: 40,
-      marginTop: -50,
-      paddingTop: 10,          shadowColor: '#000000ff',
+          borderTopRightRadius: 40,
+          borderTopLeftRadius: 40,
+          marginTop: -50,
+          paddingTop: 10,
+          shadowColor: '#000000ff',
           shadowOffset: {
             width: 0,
             height: -2,

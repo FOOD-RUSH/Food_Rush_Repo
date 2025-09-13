@@ -54,13 +54,14 @@ function CustomerHomeStackScreen() {
 
 function CustomerOrderStackScreen() {
   const navigationTheme = useAppNavigationTheme();
+  const { colors } = useTheme();
   const { t } = useTranslation('translation');
   return (
     <CustomerOrderStack.Navigator
       initialRouteName="CompletedOrdersScreen"
       screenOptions={{
         tabBarActiveTintColor: navigationTheme.colors.primary,
-        tabBarInactiveTintColor: navigationTheme.colors.border,
+        tabBarInactiveTintColor: colors.onSurfaceVariant,
         tabBarStyle: {
           backgroundColor: navigationTheme.colors.card,
           borderTopColor: navigationTheme.colors.card,
@@ -89,6 +90,7 @@ function CustomerOrderStackScreen() {
 export function CustomerHelpCenterStackScreen() {
   
   const navigationTheme = useAppNavigationTheme();
+  const { colors } = useTheme();
   const { t } = useTranslation('translation');
 
   return (
@@ -96,7 +98,7 @@ export function CustomerHelpCenterStackScreen() {
       initialRouteName="FAQ"
       screenOptions={{
         tabBarActiveTintColor: navigationTheme.colors.primary,
-        tabBarInactiveTintColor: navigationTheme.colors.border,
+        tabBarInactiveTintColor: colors.onSurfaceVariant,
         tabBarStyle: {
           backgroundColor: navigationTheme.colors.card,
           borderTopColor: navigationTheme.colors.card,
@@ -201,6 +203,7 @@ export default function CustomerNavigator() {
   const insets = useSafeAreaInsets();
   
   const navigationTheme = useAppNavigationTheme();
+  const { colors } = useTheme();
   const { t } = useTranslation('translation');
 
   const tabBarStyle = useMemo(
@@ -240,7 +243,7 @@ export default function CustomerNavigator() {
           />
         ),
         tabBarActiveTintColor: navigationTheme.colors.primary,
-        tabBarInactiveTintColor: navigationTheme.colors.border,
+        tabBarInactiveTintColor: colors.onSurfaceVariant,
         tabBarStyle,
         headerStyle,
         headerTitleStyle: {

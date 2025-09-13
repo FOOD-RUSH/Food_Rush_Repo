@@ -138,13 +138,12 @@ const NotificationsList: React.FC<RestaurantNotificationsStackScreenProps<'Notif
     // Navigate based on notification type
     if (notification.type === 'order' && notification.orderId) {
       // Navigate to order details
-      navigation.navigate('Orders', {
-        screen: 'OrderDetails',
-        params: { orderId: notification.orderId }
-      });
+        navigation.navigate('RestaurantOrderDetails', { orderId: notification.orderId! });
     } else {
       // Navigate to notification details
-      navigation.navigate('NotificationDetails', { notificationId: notification.id });
+        navigation.navigate('RestaurantNotificationDetails', {
+          notificationId: notification.id,
+        });
     }
   };
 

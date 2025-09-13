@@ -1,17 +1,25 @@
-import { View, Text, Image, ScrollView, TouchableOpacity, Animated, Alert } from 'react-native';
+import { View, Text, Image, ScrollView, TouchableOpacity, Animated, Alert, Dimensions } from 'react-native';
 import React, { useRef, useState } from 'react';
-import { TextInput } from 'react-native-paper';
-import { Ionicons } from '@expo/vector-icons';
+import { TextInput, useTheme } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import * as Haptics from 'expo-haptics';
 import CommonView from '@/src/components/common/CommonView';
 import { saveImageLocally, generateImageId } from '@/src/utils/imageStorage';
 import { useAuthUser } from '@/src/stores/customerStores/AuthStore';
 import { useCreateMenuItem, useUploadImage } from '@/src/hooks/restaurant/useMenuApi';
 import { useNavigation } from '@react-navigation/native';
 import { RestaurantMenuStackScreenProps } from '@/src/navigation/types';
+import { useTranslation } from 'react-i18next';
+
+const { width: screenWidth } = Dimensions.get('window');
+const isSmallScreen = screenWidth < 375;
+const isMediumScreen = screenWidth >= 375 && screenWidth < 414;
 
 export const AddFoodScreen = () => {
   const navigation = useNavigation<RestaurantMenuStackScreenProps<'AddMenuItem'>['navigation']>();
+  const { colors } = useTheme();
+  const { t } = useTranslation();
   const user = useAuthUser();
   const restaurantId = user?.restaurantId;
 
@@ -28,18 +36,19 @@ export const AddFoodScreen = () => {
 
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(50)).current;
+  const slideAnim = useRef(new Animated.Value(30)).current;
 
   React.useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
-        duration: 500,
+        duration: 600,
         useNativeDriver: true,
       }),
-      Animated.timing(slideAnim, {
+      Animated.spring(slideAnim, {
         toValue: 0,
-        duration: 500,
+        tension: 50,
+        friction: 8,
         useNativeDriver: true,
       }),
     ]).start();
@@ -47,10 +56,12 @@ export const AddFoodScreen = () => {
 
   const handleImagePick = async () => {
     try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      
       // Request permissions
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('Permission needed', 'Please grant permission to access your photos');
+        Alert.alert(t('permission_needed'), t('please_grant_photo_permission'));
         return;
       }
 
@@ -76,13 +87,13 @@ export const AddFoodScreen = () => {
 
         try {
           const uploadResponse = await uploadImageMutation.mutateAsync(formData);
-          // Assuming the response contains the image URL
           const responseData = uploadResponse.data as any;
           const imageUrl = responseData?.url || responseData?.imageUrl || responseData?.image;
           setImageUri(imageUrl);
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         } catch (uploadError) {
           console.error('Error uploading image:', uploadError);
-          Alert.alert('Upload Error', 'Failed to upload image. Please try again.');
+          Alert.alert(t('upload_error'), t('failed_to_upload_image'));
           // Fallback to local storage
           const imageId = generateImageId();
           const localUri = await saveImageLocally(asset.uri, imageId);
@@ -91,149 +102,365 @@ export const AddFoodScreen = () => {
       }
     } catch (error) {
       console.error('Error picking image:', error);
-      Alert.alert('Error', 'Failed to pick image');
+      Alert.alert(t('error'), t('failed_to_pick_image'));
     } finally {
       setIsUploading(false);
     }
   };
 
+  const handleSave = async () => {
+    if (!restaurantId) {
+      Alert.alert(t('error'), t('restaurant_id_not_found'));
+      return;
+    }
+
+    if (!foodName.trim() || !price.trim()) {
+      Alert.alert(t('error'), t('please_fill_required_fields'));
+      return;
+    }
+
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      
+      const menuItemData = {
+        name: foodName.trim(),
+        description: description.trim(),
+        price: parseFloat(price),
+        categoryId: category.trim() || 'default',
+        imageUrl: imageUri || undefined,
+        isAvailable: true,
+      };
+
+      await createMenuItemMutation.mutateAsync({
+        restaurantId,
+        data: menuItemData,
+      });
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Alert.alert(t('success'), t('menu_item_created_successfully'), [
+        { text: t('ok'), onPress: () => navigation.goBack() }
+      ]);
+    } catch (error) {
+      console.error('Error creating menu item:', error);
+      Alert.alert(t('error'), t('failed_to_create_menu_item'));
+    }
+  };
+
   return (
-    <CommonView>
-      <ScrollView showsVerticalScrollIndicator={false}>
+    <CommonView style={{ backgroundColor: colors.background }}>
+      <ScrollView 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 40 }}
+      >
         <Animated.View
           style={{
             opacity: fadeAnim,
             transform: [{ translateY: slideAnim }],
           }}
+          className={`${isSmallScreen ? 'px-4 pt-4' : 'px-6 pt-6'}`}
         >
-          {/* Header Section */}
-          <View className="mb-6">
-            <Text className="text-2xl font-bold text-gray-800">Add New Item</Text>
-            <Text className="text-gray-500 mt-2">
-              Fill in the details to add a new menu item
+          {/* Header Section - Enhanced typography */}
+          <View className="mb-8">
+            <Text 
+              className={`${isSmallScreen ? 'text-2xl' : 'text-3xl'} font-bold`}
+              style={{ color: colors.onBackground, letterSpacing: -0.5 }}
+            >
+              {t('add_new_item')}
+            </Text>
+            <Text 
+              className={`${isSmallScreen ? 'text-sm' : 'text-base'} mt-2 font-medium`}
+              style={{ color: colors.onSurfaceVariant }}
+            >
+              {t('fill_details_to_add_menu_item')}
             </Text>
           </View>
 
-          {/* Image Upload Section */}
+          {/* Enhanced Image Upload Section */}
           <TouchableOpacity
-            className="h-48 bg-gray-100 rounded-2xl mb-6 items-center justify-center relative overflow-hidden"
+            className={`${isSmallScreen ? 'h-44' : 'h-52'} rounded-3xl mb-8 items-center justify-center relative overflow-hidden`}
+            style={{ 
+              backgroundColor: colors.surfaceVariant,
+              borderWidth: 2,
+              borderColor: imageUri ? '#007aff' : colors.outline,
+              borderStyle: 'dashed',
+            }}
             onPress={handleImagePick}
             disabled={isUploading}
+            activeOpacity={0.8}
           >
             {imageUri ? (
               <>
                 <Image
                   source={{ uri: imageUri }}
-                  className="w-full h-full rounded-2xl"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    borderRadius: 20,
+                  }}
                   resizeMode="cover"
                 />
-                <View className="absolute inset-0 bg-black/20 items-center justify-center">
-                  <Ionicons name="camera" size={32} color="#FFFFFF" />
-                  <Text className="text-white mt-2 font-semibold">Change Image</Text>
+                <View 
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    backgroundColor: 'rgba(0,0,0,0.3)',
+                    borderRadius: 20,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
+                >
+                  <MaterialCommunityIcons name="camera" size={36} color="#FFFFFF" />
+                  <Text 
+                    className={`text-white mt-2 ${isSmallScreen ? 'text-sm' : 'text-base'} font-semibold`}
+                  >
+                    {t('change_image')}
+                  </Text>
                 </View>
               </>
             ) : (
               <>
-                <Ionicons name="camera-outline" size={40} color="#007AFF" />
-                <Text className="text-blue-500 mt-2 font-semibold">
-                  {isUploading ? 'Uploading...' : 'Add Food Image'}
+                <MaterialCommunityIcons 
+                  name="camera-plus" 
+                  size={isSmallScreen ? 48 : 56} 
+                  color="#007aff" 
+                />
+                <Text 
+                  className={`text-blue-500 mt-3 ${isSmallScreen ? 'text-base' : 'text-lg'} font-semibold`}
+                >
+                  {isUploading ? t('uploading') : t('add_food_image')}
+                </Text>
+                <Text 
+                  className={`${isSmallScreen ? 'text-xs' : 'text-sm'} mt-1 text-center px-4`}
+                  style={{ color: colors.onSurfaceVariant }}
+                >
+                  {t('tap_to_upload_image')}
                 </Text>
               </>
             )}
           </TouchableOpacity>
 
-          {/* Form Fields */}
-          <View className="space-y-4">
-            <TextInput
-              mode="outlined"
-              label="Food Name"
-              value={foodName}
-              onChangeText={setFoodName}
-              className="bg-white"
-            />
+          {/* Enhanced Form Fields with borderless design */}
+          <View className="space-y-6">
+            {/* Food Name */}
+            <View>
+              <Text 
+                className={`${isSmallScreen ? 'text-sm' : 'text-base'} font-semibold mb-2`}
+                style={{ color: colors.onSurface }}
+              >
+                {t('food_name')} *
+              </Text>
+              <View 
+                className="rounded-2xl"
+                style={{ 
+                  backgroundColor: colors.surface,
+                  elevation: 2,
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 3,
+                }}
+              >
+                <TextInput
+                  mode="flat"
+                  value={foodName}
+                  onChangeText={setFoodName}
+                  placeholder={t('enter_food_name')}
+                  style={{ 
+                    backgroundColor: 'transparent',
+                    fontSize: isSmallScreen ? 16 : 17,
+                  }}
+                  contentStyle={{
+                    paddingHorizontal: 16,
+                    paddingVertical: isSmallScreen ? 12 : 14,
+                  }}
+                  underlineStyle={{ display: 'none' }}
+                  activeUnderlineColor="transparent"
+                  textColor={colors.onSurface}
+                  placeholderTextColor={colors.onSurfaceVariant}
+                />
+              </View>
+            </View>
 
-            <TextInput
-              mode="outlined"
-              label="Price"
-              value={price}
-              onChangeText={setPrice}
-              keyboardType="numeric"
-              className="bg-white"
-            />
+            {/* Price */}
+            <View>
+              <Text 
+                className={`${isSmallScreen ? 'text-sm' : 'text-base'} font-semibold mb-2`}
+                style={{ color: colors.onSurface }}
+              >
+                {t('price')} (XAF) *
+              </Text>
+              <View 
+                className="rounded-2xl"
+                style={{ 
+                  backgroundColor: colors.surface,
+                  elevation: 2,
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 3,
+                }}
+              >
+                <TextInput
+                  mode="flat"
+                  value={price}
+                  onChangeText={setPrice}
+                  placeholder={t('enter_price')}
+                  keyboardType="numeric"
+                  style={{ 
+                    backgroundColor: 'transparent',
+                    fontSize: isSmallScreen ? 16 : 17,
+                  }}
+                  contentStyle={{
+                    paddingHorizontal: 16,
+                    paddingVertical: isSmallScreen ? 12 : 14,
+                  }}
+                  underlineStyle={{ display: 'none' }}
+                  activeUnderlineColor="transparent"
+                  textColor={colors.onSurface}
+                  placeholderTextColor={colors.onSurfaceVariant}
+                  left={<TextInput.Icon icon="currency-usd" color={colors.onSurfaceVariant} />}
+                />
+              </View>
+            </View>
 
-            <TextInput
-              mode="outlined"
-              label="Category"
-              value={category}
-              onChangeText={setCategory}
-              className="bg-white"
-            />
+            {/* Category */}
+            <View>
+              <Text 
+                className={`${isSmallScreen ? 'text-sm' : 'text-base'} font-semibold mb-2`}
+                style={{ color: colors.onSurface }}
+              >
+                {t('category')}
+              </Text>
+              <View 
+                className="rounded-2xl"
+                style={{ 
+                  backgroundColor: colors.surface,
+                  elevation: 2,
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 3,
+                }}
+              >
+                <TextInput
+                  mode="flat"
+                  value={category}
+                  onChangeText={setCategory}
+                  placeholder={t('enter_category')}
+                  style={{ 
+                    backgroundColor: 'transparent',
+                    fontSize: isSmallScreen ? 16 : 17,
+                  }}
+                  contentStyle={{
+                    paddingHorizontal: 16,
+                    paddingVertical: isSmallScreen ? 12 : 14,
+                  }}
+                  underlineStyle={{ display: 'none' }}
+                  activeUnderlineColor="transparent"
+                  textColor={colors.onSurface}
+                  placeholderTextColor={colors.onSurfaceVariant}
+                  left={<TextInput.Icon icon="tag" color={colors.onSurfaceVariant} />}
+                />
+              </View>
+            </View>
 
-            <TextInput
-              mode="outlined"
-              label="Description"
-              value={description}
-              onChangeText={setDescription}
-              multiline
-              numberOfLines={4}
-              className="bg-white"
-            />
+            {/* Description */}
+            <View>
+              <Text 
+                className={`${isSmallScreen ? 'text-sm' : 'text-base'} font-semibold mb-2`}
+                style={{ color: colors.onSurface }}
+              >
+                {t('description')}
+              </Text>
+              <View 
+                className="rounded-2xl"
+                style={{ 
+                  backgroundColor: colors.surface,
+                  elevation: 2,
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 3,
+                }}
+              >
+                <TextInput
+                  mode="flat"
+                  value={description}
+                  onChangeText={setDescription}
+                  placeholder={t('enter_description')}
+                  multiline
+                  numberOfLines={4}
+                  style={{ 
+                    backgroundColor: 'transparent',
+                    fontSize: isSmallScreen ? 16 : 17,
+                    minHeight: isSmallScreen ? 100 : 120,
+                  }}
+                  contentStyle={{
+                    paddingHorizontal: 16,
+                    paddingVertical: isSmallScreen ? 12 : 14,
+                  }}
+                  underlineStyle={{ display: 'none' }}
+                  activeUnderlineColor="transparent"
+                  textColor={colors.onSurface}
+                  placeholderTextColor={colors.onSurfaceVariant}
+                />
+              </View>
+            </View>
           </View>
 
-          {/* Action Buttons */}
-          <View className="flex-row space-x-4 mt-8 mb-6">
+          {/* Enhanced Action Buttons */}
+          <View className="flex-row space-x-4 mt-10">
             <TouchableOpacity
-              className="flex-1 bg-gray-100 py-4 rounded-full"
-              onPress={() => navigation.goBack()}
+              className={`flex-1 ${isSmallScreen ? 'py-4' : 'py-5'} rounded-2xl`}
+              style={{ 
+                backgroundColor: colors.surfaceVariant,
+                elevation: 1,
+              }}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                navigation.goBack();
+              }}
+              activeOpacity={0.8}
             >
-              <Text className="text-center text-gray-700 font-semibold">Cancel</Text>
+              <Text 
+                className={`text-center ${isSmallScreen ? 'text-base' : 'text-lg'} font-semibold`}
+                style={{ color: colors.onSurfaceVariant }}
+              >
+                {t('cancel')}
+              </Text>
             </TouchableOpacity>
             
             <TouchableOpacity
-              className="flex-1 bg-blue-500 py-4 rounded-full"
-              onPress={async () => {
-                if (!restaurantId) {
-                  Alert.alert('Error', 'Restaurant ID not found. Please log in again.');
-                  return;
-                }
-
-                if (!foodName.trim() || !price.trim()) {
-                  Alert.alert('Error', 'Please fill in all required fields');
-                  return;
-                }
-
-                try {
-                  const menuItemData = {
-                    name: foodName.trim(),
-                    description: description.trim(),
-                    price: parseFloat(price),
-                    categoryId: category.trim() || 'default', // You might want to get actual category ID
-                    imageUrl: imageUri || undefined,
-                    isAvailable: true,
-                  };
-
-                  await createMenuItemMutation.mutateAsync({
-                    restaurantId,
-                    data: menuItemData,
-                  });
-
-                  Alert.alert('Success', 'Menu item created successfully!', [
-                    { text: 'OK', onPress: () => navigation.goBack() }
-                  ]);
-                } catch (error) {
-                  console.error('Error creating menu item:', error);
-                  Alert.alert('Error', 'Failed to create menu item. Please try again.');
-                }
+              className={`flex-1 ${isSmallScreen ? 'py-4' : 'py-5'} rounded-2xl`}
+              style={{ 
+                backgroundColor: '#007aff',
+                elevation: 3,
+                shadowColor: '#007aff',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.3,
+                shadowRadius: 4,
               }}
+              onPress={handleSave}
               disabled={createMenuItemMutation.isPending}
+              activeOpacity={0.9}
             >
-              <Text className="text-center text-white font-semibold">
-                {createMenuItemMutation.isPending ? 'Saving...' : 'Save Item'}
+              <Text 
+                className={`text-center text-white ${isSmallScreen ? 'text-base' : 'text-lg'} font-bold`}
+              >
+                {createMenuItemMutation.isPending ? t('saving') : t('save_item')}
               </Text>
             </TouchableOpacity>
           </View>
+
+          {/* Helper Text */}
+          <Text 
+            className={`text-center ${isSmallScreen ? 'text-xs' : 'text-sm'} mt-4`}
+            style={{ color: colors.onSurfaceVariant }}
+          >
+            * {t('required_fields')}
+          </Text>
         </Animated.View>
       </ScrollView>
     </CommonView>
-  )
-}
+  );
+};
