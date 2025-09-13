@@ -1,11 +1,12 @@
 import { useTranslation } from 'react-i18next';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import React from 'react';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import { usePaymentStore } from '@/src/stores/customerStores/paymentStore';
 import { PaymentMethod } from '@/src/types';
 import CommonView from '@/src/components/common/CommonView';
 import { Card, useTheme } from 'react-native-paper';
+import { images } from '@/assets/images';
 import { MaterialIcons } from '@expo/vector-icons';
 
 const PaymentScreen = ({
@@ -45,10 +46,10 @@ const PaymentScreen = ({
               activeOpacity={0.7}
             >
               <View className="flex-row items-center">
-                <MaterialIcons
-                  name="payment"
-                  size={28}
-                  color={colors.primary}
+                <Image
+                  source={images.Mobile_Money}
+                  style={{ width: 32, height: 32 }}
+                  resizeMode="contain"
                 />
                 <View className="ml-4">
                   <Text
@@ -83,10 +84,10 @@ const PaymentScreen = ({
               activeOpacity={0.7}
             >
               <View className="flex-row items-center">
-                <MaterialIcons
-                  name="payment"
-                  size={28}
-                  color={colors.primary}
+                <Image
+                  source={images.Orange_Money}
+                  style={{ width: 32, height: 32 }}
+                  resizeMode="contain"
                 />
                 <View className="ml-4">
                   <Text

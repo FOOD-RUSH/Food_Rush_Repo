@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  ScrollView, 
-  TouchableOpacity, 
-  Animated, 
-  Alert, 
-  StyleSheet, 
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Animated,
+  Alert,
+  StyleSheet,
   Modal,
   SafeAreaView,
   FlatList,
@@ -14,7 +14,7 @@ import {
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Button, Avatar, Divider, Badge } from 'react-native-paper';
 import CommonView from '@/src/components/common/CommonView';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import { Ionicons } from '@expo/vector-icons';
 import { RestaurantProfileStackScreenProps } from '../../../navigation/types';
 
 // Type definitions
@@ -79,7 +79,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   });
 
   const [showNotifications, setShowNotifications] = useState<boolean>(false);
-  const [showRestaurantProfile, setShowRestaurantProfile] = useState<boolean>(false);
+  const [showRestaurantProfile, setShowRestaurantProfile] =
+    useState<boolean>(false);
   const [unreadNotifications] = useState<number>(2);
 
   // Animation refs
@@ -115,7 +116,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     {
       id: 4,
       title: 'Staff Schedule',
-      message: 'Tomorrow\'s staff schedule has been updated',
+      message: "Tomorrow's staff schedule has been updated",
       time: '2 days ago',
       type: 'schedule',
       read: true,
@@ -125,7 +126,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   // Restaurant data
   const [restaurant] = useState<RestaurantInfo>({
     name: 'The Great Eatery',
-    description: 'A family-owned restaurant serving delicious comfort food since 2020',
+    description:
+      'A family-owned restaurant serving delicious comfort food since 2020',
     cuisine: 'American, Italian',
     rating: 4.5,
     totalReviews: 128,
@@ -146,7 +148,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       title: 'Payment & Billing',
       subtitle: 'Manage your payment methods and billing info',
       icon: 'credit-card-outline',
-      onPress: () => navigation.navigate('PaymentBilling'), 
+      onPress: () => navigation.navigate('PaymentBilling'),
     },
     {
       title: 'Notifications',
@@ -158,7 +160,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       title: 'Account & Settings',
       subtitle: 'Update your account information and preferences',
       icon: 'account-cog-outline',
-      onPress: () => navigation.navigate('AccountSettings'), 
+      onPress: () => navigation.navigate('AccountSettings'),
     },
     {
       title: 'Restaurant Settings',
@@ -196,8 +198,13 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   }, [fadeAnim, slideAnim]);
 
   // Utility functions
-  const getNotificationIcon = (type: NotificationType): keyof typeof MaterialCommunityIcons.glyphMap => {
-    const iconMap: Record<NotificationType, keyof typeof MaterialCommunityIcons.glyphMap> = {
+  const getNotificationIcon = (
+    type: NotificationType,
+  ): keyof typeof MaterialCommunityIcons.glyphMap => {
+    const iconMap: Record<
+      NotificationType,
+      keyof typeof MaterialCommunityIcons.glyphMap
+    > = {
       order: 'shopping',
       inventory: 'package-variant',
       payment: 'credit-card',
@@ -218,28 +225,22 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   // Event handlers
   const handleEditProfile = () => {
-    Alert.alert(
-      'Edit Profile',
-      'Profile editing feature is coming soon!',
-      [{ text: 'OK', style: 'default' }]
-    );
+    Alert.alert('Edit Profile', 'Profile editing feature is coming soon!', [
+      { text: 'OK', style: 'default' },
+    ]);
   };
 
   const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Logout', 
-          style: 'destructive',
-          onPress: () => {
-            console.log('User logged out');
-          }
-        }
-      ]
-    );
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: () => {
+          console.log('User logged out');
+        },
+      },
+    ]);
   };
 
   const handleNotificationPress = (item: NotificationItem) => {
@@ -265,18 +266,17 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   // Render functions
   const renderNotification = ({ item }: { item: NotificationItem }) => (
-    <TouchableOpacity 
-      style={[
-        styles.notificationItem,
-        !item.read && styles.unreadNotification
-      ]}
+    <TouchableOpacity
+      style={[styles.notificationItem, !item.read && styles.unreadNotification]}
       onPress={() => handleNotificationPress(item)}
     >
       <View style={styles.notificationLeft}>
-        <View style={[
-          styles.notificationIconContainer,
-          { backgroundColor: getNotificationColor(item.type) + '20' }
-        ]}>
+        <View
+          style={[
+            styles.notificationIconContainer,
+            { backgroundColor: getNotificationColor(item.type) + '20' },
+          ]}
+        >
           <MaterialCommunityIcons
             name={getNotificationIcon(item.type)}
             size={20}
@@ -284,10 +284,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           />
         </View>
         <View style={styles.notificationContent}>
-          <Text style={[
-            styles.notificationTitle,
-            !item.read && styles.unreadText
-          ]}>
+          <Text
+            style={[styles.notificationTitle, !item.read && styles.unreadText]}
+          >
             {item.title}
           </Text>
           <Text style={styles.notificationMessage} numberOfLines={2}>
@@ -318,7 +317,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   };
 
   // Modal Components
-  const NotificationModal: React.FC<ModalComponentProps> = ({ visible, onClose }) => (
+  const NotificationModal: React.FC<ModalComponentProps> = ({
+    visible,
+    onClose,
+  }) => (
     <Modal
       visible={visible}
       animationType="slide"
@@ -343,7 +345,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     </Modal>
   );
 
-  const RestaurantModal: React.FC<ModalComponentProps> = ({ visible, onClose }) => (
+  const RestaurantModal: React.FC<ModalComponentProps> = ({
+    visible,
+    onClose,
+  }) => (
     <Modal
       visible={visible}
       animationType="slide"
@@ -357,21 +362,31 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             <MaterialCommunityIcons name="close" size={24} color="#333" />
           </TouchableOpacity>
         </View>
-        
-        <ScrollView style={styles.restaurantProfileContent} showsVerticalScrollIndicator={false}>
+
+        <ScrollView
+          style={styles.restaurantProfileContent}
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.restaurantHeader}>
             <Avatar.Text
               size={60}
-              label={restaurant.name.split(' ').map(n => n[0]).join('')}
+              label={restaurant.name
+                .split(' ')
+                .map((n) => n[0])
+                .join('')}
               style={styles.restaurantAvatar}
             />
             <Text style={styles.restaurantNameModal}>{restaurant.name}</Text>
-            <Text style={styles.restaurantDescription}>{restaurant.description}</Text>
-            
+            <Text style={styles.restaurantDescription}>
+              {restaurant.description}
+            </Text>
+
             <View style={styles.ratingContainer}>
               <MaterialCommunityIcons name="star" size={20} color="#FFD700" />
               <Text style={styles.ratingText}>{restaurant.rating}</Text>
-              <Text style={styles.reviewText}>({restaurant.totalReviews} reviews)</Text>
+              <Text style={styles.reviewText}>
+                ({restaurant.totalReviews} reviews)
+              </Text>
             </View>
           </View>
 
@@ -386,7 +401,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
               <Text style={styles.contactText}>{restaurant.email}</Text>
             </View>
             <View style={styles.contactRow}>
-              <MaterialCommunityIcons name="map-marker" size={20} color="#007AFF" />
+              <MaterialCommunityIcons
+                name="map-marker"
+                size={20}
+                color="#007AFF"
+              />
               <Text style={styles.contactText}>{restaurant.address}</Text>
             </View>
           </View>
@@ -398,9 +417,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Restaurant Features</Text>
-            <View style={styles.featuresContainer}>
-              {renderFeatures()}
-            </View>
+            <View style={styles.featuresContainer}>{renderFeatures()}</View>
           </View>
 
           <View style={styles.section}>
@@ -419,8 +436,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     </Modal>
   );
 
-
- return (
+  return (
     <CommonView>
       {/* Top Action Buttons */}
       <View style={styles.topButtons}>
@@ -435,7 +451,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             </Badge>
           )}
         </TouchableOpacity>
-        
+
         <TouchableOpacity
           style={styles.topButton}
           onPress={() => setShowRestaurantProfile(true)}
@@ -456,13 +472,16 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         >
           <Avatar.Text
             size={80}
-            label={user.name.split(' ').map(n => n[0]).join('')}
+            label={user.name
+              .split(' ')
+              .map((n) => n[0])
+              .join('')}
             style={styles.avatar}
           />
           <Text style={styles.userName}>{user.name}</Text>
           <Text style={styles.restaurantName}>{user.restaurantName}</Text>
           <Text style={styles.userEmail}>{user.email}</Text>
-          
+
           <Button
             mode="outlined"
             onPress={handleEditProfile}
@@ -507,7 +526,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           }}
           onPress={openEditProfile}
         >
-          <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>Edit Profile</Text>
+          <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>
+            Edit Profile
+          </Text>
         </TouchableOpacity>
 
         <Divider style={styles.divider} />
@@ -539,7 +560,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                   <Text style={styles.optionSubtitle}>{option.subtitle}</Text>
                 </View>
               </View>
-              <MaterialCommunityIcons name="chevron-right" size={20} color="#ccc" />
+              <MaterialCommunityIcons
+                name="chevron-right"
+                size={20}
+                color="#ccc"
+              />
             </TouchableOpacity>
           ))}
         </Animated.View>
@@ -570,7 +595,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         visible={showNotifications}
         onClose={() => setShowNotifications(false)}
       />
-      
+
       <RestaurantModal
         visible={showRestaurantProfile}
         onClose={() => setShowRestaurantProfile(false)}

@@ -1,10 +1,3 @@
-<<<<<<< HEAD
-import React, { useState, useRef, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  ScrollView, 
-  TouchableOpacity, 
   Animated, 
   Alert, 
   StyleSheet, 

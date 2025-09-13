@@ -58,25 +58,43 @@ const SupportScreen = ({ navigation }: Props) => {
         }}
       >
         <LinearGradient
-          colors={["#764ba2", "#667eea"]}
+          colors={['#764ba2', '#667eea']}
           style={styles.header}
           start={[0, 0]}
           end={[1, 1]}
         >
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backBtn}
+          >
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Support</Text>
-          <MaterialCommunityIcons name="lifebuoy" size={32} color="#fff" style={{ marginLeft: 10 }} />
+          <MaterialCommunityIcons
+            name="lifebuoy"
+            size={32}
+            color="#fff"
+            style={{ marginLeft: 10 }}
+          />
         </LinearGradient>
       </Animated.View>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 32 }}
+      >
         <Animated.View style={{ opacity: contentAnim, marginTop: 24 }}>
           <Text style={styles.sectionTitle}>FAQs</Text>
           {faqs.map((faq, idx) => (
             <View key={idx} style={styles.faqContainer}>
-              <TouchableOpacity onPress={() => setExpanded(expanded === idx ? null : idx)} style={styles.faqQuestionRow}>
-                <MaterialCommunityIcons name={expanded === idx ? 'chevron-up' : 'chevron-down'} size={22} color="#764ba2" />
+              <TouchableOpacity
+                onPress={() => setExpanded(expanded === idx ? null : idx)}
+                style={styles.faqQuestionRow}
+              >
+                <MaterialCommunityIcons
+                  name={expanded === idx ? 'chevron-up' : 'chevron-down'}
+                  size={22}
+                  color="#764ba2"
+                />
                 <Text style={styles.faqQuestion}>{faq.question}</Text>
               </TouchableOpacity>
               {expanded === idx && (
@@ -87,12 +105,26 @@ const SupportScreen = ({ navigation }: Props) => {
             </View>
           ))}
           <Text style={styles.sectionTitle}>Contact Us</Text>
-          <TouchableOpacity style={styles.contactBtn} onPress={() => Linking.openURL('mailto:support@restaurant.com')}>
-            <MaterialCommunityIcons name="email-outline" size={22} color="#fff" />
+          <TouchableOpacity
+            style={styles.contactBtn}
+            onPress={() => Linking.openURL('mailto:support@restaurant.com')}
+          >
+            <MaterialCommunityIcons
+              name="email-outline"
+              size={22}
+              color="#fff"
+            />
             <Text style={styles.contactBtnText}>Email Support</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.contactBtn} onPress={() => Linking.openURL('https://wa.me/1234567890')}>
-            <MaterialCommunityIcons name="chat-outline" size={22} color="#fff" />
+          <TouchableOpacity
+            style={styles.contactBtn}
+            onPress={() => Linking.openURL('https://wa.me/1234567890')}
+          >
+            <MaterialCommunityIcons
+              name="chat-outline"
+              size={22}
+              color="#fff"
+            />
             <Text style={styles.contactBtnText}>Chat on WhatsApp</Text>
           </TouchableOpacity>
         </Animated.View>

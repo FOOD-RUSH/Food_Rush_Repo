@@ -1,10 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, FlatList, Animated, TouchableOpacity, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  Animated,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
 import { Searchbar, Chip, Badge, Button, Divider } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { RouteProp } from '@react-navigation/native';
 import CommonView from '@/src/components/common/CommonView';
-
 type OrderDetailsParams = {
   OrderDetails: {
     orderId: string;
@@ -53,48 +59,52 @@ const OrderScreen = () => {
     // Add more sample orders as needed
   ];
 
-  const OrderCard = React.memo(({ item, index }: { item: Order; index: number }) => {
-    const scaleAnim = useRef(new Animated.Value(0.9)).current;
+  const OrderCard = React.memo(
+    ({ item, index }: { item: Order; index: number }) => {
+      const scaleAnim = useRef(new Animated.Value(0.9)).current;
 
-    useEffect(() => {
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        delay: index * 100,
-        useNativeDriver: true,
-      }).start();
-    }, [index, scaleAnim]);
+      useEffect(() => {
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          delay: index * 100,
+          useNativeDriver: true,
+        }).start();
+      }, [index, scaleAnim]);
 
-    return (
-      <Animated.View
-        style={{
-          transform: [{ scale: scaleAnim }],
-          opacity: fadeAnim,
-        }}
-      >
-        <TouchableOpacity 
-          className="bg-white p-4 rounded-xl mb-3 shadow-sm"
-          onPress={() => {/* Navigate to order details */}}
+      return (
+        <Animated.View
+          style={{
+            transform: [{ scale: scaleAnim }],
+            opacity: fadeAnim,
+          }}
         >
-          <View className="flex-row justify-between items-center mb-2">
-            <Text className="text-lg font-semibold">Order #{item.id}</Text>
-            <Badge>{item.status}</Badge>
-          </View>
-          
-          <View className="flex-row justify-between items-center mb-2">
-            <Text className="text-gray-600">{item.customerName}</Text>
-            <Text className="text-gray-600">{item.time}</Text>
-          </View>
+          <TouchableOpacity
+            className="bg-white p-4 rounded-xl mb-3 shadow-sm"
+            onPress={() => {
+              /* Navigate to order details */
+            }}
+          >
+            <View className="flex-row justify-between items-center mb-2">
+              <Text className="text-lg font-semibold">Order #{item.id}</Text>
+              <Badge>{item.status}</Badge>
+            </View>
 
-          <View className="border-t border-gray-100 pt-2">
-            <Text className="text-gray-500">{item.items.join(', ')}</Text>
-            <Text className="text-lg font-bold text-blue-500 mt-2">
-              ${item.total.toFixed(2)}
-            </Text>
-          </View>
-        </TouchableOpacity>
-      </Animated.View>
-    );
-  });
+            <View className="flex-row justify-between items-center mb-2">
+              <Text className="text-gray-600">{item.customerName}</Text>
+              <Text className="text-gray-600">{item.time}</Text>
+            </View>
+
+            <View className="border-t border-gray-100 pt-2">
+              <Text className="text-gray-500">{item.items.join(', ')}</Text>
+              <Text className="text-lg font-bold text-blue-500 mt-2">
+                ${item.total.toFixed(2)}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        </Animated.View>
+      );
+    },
+  );
 
   OrderCard.displayName = 'OrderCard';
 
@@ -103,7 +113,9 @@ const OrderScreen = () => {
       <View className="flex-1">
         <View className="mb-6">
           <Text className="text-3xl font-bold text-gray-800">Orders</Text>
-          <Text className="text-gray-500 mt-2">Manage your restaurant orders</Text>
+          <Text className="text-gray-500 mt-2">
+            Manage your restaurant orders
+          </Text>
         </View>
 
         <Searchbar
@@ -113,27 +125,31 @@ const OrderScreen = () => {
           className="mb-4 rounded-xl"
         />
 
-        <ScrollView 
-          horizontal 
+        <ScrollView
+          horizontal
           showsHorizontalScrollIndicator={false}
           className="mb-4"
         >
-          {['all', 'pending', 'preparing', 'ready', 'delivered'].map((filter) => (
-            <Chip
-              key={filter}
-              selected={selectedFilter === filter}
-              onPress={() => setSelectedFilter(filter)}
-              className="mr-2"
-            >
-              {filter.charAt(0).toUpperCase() + filter.slice(1)}
-            </Chip>
-          ))}
+          {['all', 'pending', 'preparing', 'ready', 'delivered'].map(
+            (filter) => (
+              <Chip
+                key={filter}
+                selected={selectedFilter === filter}
+                onPress={() => setSelectedFilter(filter)}
+                className="mr-2"
+              >
+                {filter.charAt(0).toUpperCase() + filter.slice(1)}
+              </Chip>
+            ),
+          )}
         </ScrollView>
 
         <FlatList
           data={orders}
-          renderItem={({ item, index }) => <OrderCard item={item} index={index} />}
-          keyExtractor={item => item.id}
+          renderItem={({ item, index }) => (
+            <OrderCard item={item} index={index} />
+          )}
+          keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 20 }}
         />
@@ -148,18 +164,18 @@ interface OrderItem {
   price: number;
 }
 
-const OrderDetailsScreen = ({ 
-  route 
-}: { 
-  route: RouteProp<OrderDetailsParams, 'OrderDetails'> 
+const OrderDetailsScreen = ({
+  route,
+}: {
+  route: RouteProp<OrderDetailsParams, 'OrderDetails'>;
 }) => {
   const { orderId } = route.params;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
-  
+
   const orderItems: OrderItem[] = [
-    { quantity: 2, name: "Burger", price: 25.99 },
-    { quantity: 1, name: "Fries", price: 19.99 },
+    { quantity: 2, name: 'Burger', price: 25.99 },
+    { quantity: 1, name: 'Fries', price: 19.99 },
   ];
 
   useEffect(() => {
@@ -187,9 +203,15 @@ const OrderDetailsScreen = ({
         >
           {/* Order Status */}
           <View className="bg-white p-4 rounded-xl mb-4">
-            <Text className="text-2xl font-bold text-gray-800">Order #{orderId}</Text>
+            <Text className="text-2xl font-bold text-gray-800">
+              Order #{orderId}
+            </Text>
             <View className="flex-row items-center mt-2">
-              <MaterialCommunityIcons name="clock-outline" size={20} color="#9CA3AF" />
+              <MaterialCommunityIcons
+                name="clock-outline"
+                size={20}
+                color="#9CA3AF"
+              />
               <Text className="text-gray-500 ml-2">Received at 10:30 AM</Text>
             </View>
           </View>
@@ -227,14 +249,18 @@ const OrderDetailsScreen = ({
           <View className="space-y-3">
             <Button
               mode="contained"
-              onPress={() => {/* Handle accept order */}}
+              onPress={() => {
+                /* Handle accept order */
+              }}
               className="rounded-xl"
             >
               Accept Order
             </Button>
             <Button
               mode="outlined"
-              onPress={() => {/* Handle reject order */}}
+              onPress={() => {
+                /* Handle reject order */
+              }}
               className="rounded-xl"
               textColor="red"
             >

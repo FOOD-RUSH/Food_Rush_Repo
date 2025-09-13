@@ -6,16 +6,24 @@ import {
   TouchableOpacity,
   RefreshControl,
   Alert,
+  Image,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useTheme, IconButton } from 'react-native-paper';
+import { useTheme, Card } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import CommonView from '@/src/components/common/CommonView';
-import { useFavoriteRestaurants, useToggleFavorite } from '@/src/hooks/customer/useFavoriteRestaurants';
-import { useAuthUser } from '@/src/stores/customerStores/AuthStore';
+import {
+  useFavoriteRestaurants,
+  useToggleFavorite,
+} from '@/src/hooks/customer/useFavoriteRestaurants';
 import { RestaurantCard as RestaurantCardType } from '@/src/types';
 import ErrorDisplay from '@/src/components/common/ErrorDisplay';
+import {
+  getResponsiveSpacing,
+  isSmallDevice,
+  scale,
+} from '@/src/utils/responsive';
 
 // Loading skeleton component
 const RestaurantSkeleton = () => {
@@ -28,20 +36,20 @@ const RestaurantSkeleton = () => {
     >
       <View className="flex-row">
         <View
-          className="w-20 h-20 rounded-lg mr-4"
+          className="w-24 h-24 rounded-lg mr-4"
           style={{ backgroundColor: colors.surface }}
         />
-        <View className="flex-1">
+        <View className="flex-1 justify-center">
           <View
-            className="h-5 rounded mb-2"
+            className="h-6 rounded mb-2"
             style={{ backgroundColor: colors.surface }}
           />
           <View
-            className="h-4 rounded mb-1 w-3/4"
+            className="h-5 rounded mb-2 w-4/5"
             style={{ backgroundColor: colors.surface }}
           />
           <View
-            className="h-4 rounded w-1/2"
+            className="h-5 rounded w-3/5"
             style={{ backgroundColor: colors.surface }}
           />
         </View>
@@ -79,7 +87,10 @@ const EmptyState = ({ onRefresh }: { onRefresh: () => void }) => {
         className="text-base text-center mb-8 leading-6"
         style={{ color: colors.onSurfaceVariant }}
       >
-        {t('no_favorites_description', 'You haven\'t added any restaurants to your favorites yet. Start exploring and save your favorite spots!')}
+        {t(
+          'no_favorites_description',
+          "You haven't added any restaurants to your favorites yet. Start exploring and save your favorite spots!",
+        )}
       </Text>
 
       <TouchableOpacity
@@ -111,31 +122,48 @@ const FavoriteRestaurantItem = ({
 }) => {
   const { colors } = useTheme();
 
-  const handleToggleFavorite = useCallback((e: any) => {
-    e.stopPropagation();
-    Alert.alert(
-      'Remove from Favorites',
-      `Remove ${item.name} from your favorites?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove',
-          style: 'destructive',
-          onPress: () => onToggleFavorite(item.restaurantId),
-        },
-      ]
-    );
-  }, [item, onToggleFavorite]);
+  const handleToggleFavorite = useCallback(
+    (e: any) => {
+      e.stopPropagation();
+      Alert.alert(
+        'Remove from Favorites',
+        `Remove ${item.name} from your favorites?`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Remove',
+            style: 'destructive',
+            onPress: () => onToggleFavorite(item.id),
+          },
+        ],
+      );
+    },
+    [item, onToggleFavorite],
+  );
 
   return (
-    <TouchableOpacity
-      className="mx-4 mb-4"
-      onPress={() => onPress(item)}
-      activeOpacity={0.7}
-    >
-      <View
-        className="p-4 rounded-xl relative"
-        style={{ backgroundColor: colors.surface }}
+    <TouchableOpacity onPress={() => onPress(item)} activeOpacity={0.7}>
+      <Card
+        style={{
+          margin: getResponsiveSpacing(8),
+          borderRadius: 16,
+          overflow: 'hidden',
+          backgroundColor: colors.surface,
+          marginVertical: getResponsiveSpacing(12),
+          borderColor: colors.surface,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.2,
+          shadowRadius: 4,
+          elevation: 4,
+          boxShadow: '0px 2px 12px rgba(0, 0, 0, 0.2)',
+          minWidth: isSmallDevice ? scale(280) : scale(320),
+          maxWidth: isSmallDevice ? scale(360) : scale(520),
+          minHeight: scale(140),
+          maxHeight: scale(200),
+          padding: 12,
+        }}
+        className="rounded-xl relative"
       >
         {/* Favorite button */}
         <TouchableOpacity
@@ -144,35 +172,35 @@ const FavoriteRestaurantItem = ({
           onPress={handleToggleFavorite}
           activeOpacity={0.7}
         >
-          <Ionicons
-            name="heart"
-            size={20}
-            color={colors.error}
-          />
+          <Ionicons name="heart" size={20} color={colors.error} />
         </TouchableOpacity>
 
         <View className="flex-row">
           {/* Restaurant Image */}
           <View
-            className="w-20 h-20 rounded-lg mr-4 items-center justify-center"
+            className="w-24 h-24 rounded-lg mr-4 items-center justify-center overflow-hidden"
             style={{ backgroundColor: colors.surfaceVariant }}
           >
             {item.imageUrl ? (
-              <View className="w-full h-full rounded-lg bg-gray-200" />
+              <Image
+                source={{ uri: item.imageUrl }}
+                style={{ width: '100%', height: '100%', borderRadius: 8 }}
+                resizeMode="cover"
+              />
             ) : (
               <Ionicons
                 name="restaurant-outline"
-                size={30}
+                size={40}
                 color={colors.onSurfaceVariant}
               />
             )}
           </View>
 
           {/* Restaurant Info */}
-          <View className="flex-1">
-            <View className="flex-row items-center mb-1">
+          <View className="flex-1 justify-center">
+            <View className="flex-row items-center mb-2">
               <Text
-                className="text-lg font-semibold flex-1 mr-2"
+                className="text-xl font-bold flex-1 mr-2"
                 style={{ color: colors.onSurface }}
                 numberOfLines={1}
               >
@@ -180,7 +208,7 @@ const FavoriteRestaurantItem = ({
               </Text>
               {!item.isOpen && (
                 <View
-                  className="px-2 py-1 rounded-full"
+                  className="px-3 py-1 rounded-full"
                   style={{ backgroundColor: colors.errorContainer }}
                 >
                   <Text
@@ -194,22 +222,18 @@ const FavoriteRestaurantItem = ({
             </View>
 
             <Text
-              className="text-sm mb-2"
+              className="text-base mb-3"
               style={{ color: colors.onSurfaceVariant }}
-              numberOfLines={1}
+              numberOfLines={2}
             >
               {item.address}
             </Text>
 
             <View className="flex-row items-center justify-between">
               <View className="flex-row items-center">
-                <Ionicons
-                  name="star"
-                  size={14}
-                  color="#fbbf24"
-                />
+                <Ionicons name="star" size={16} color="#fbbf24" />
                 <Text
-                  className="text-sm ml-1 mr-3"
+                  className="text-base ml-1 mr-4"
                   style={{ color: colors.onSurfaceVariant }}
                 >
                   {item.rating?.toFixed(1) || 'N/A'}
@@ -217,11 +241,11 @@ const FavoriteRestaurantItem = ({
 
                 <Ionicons
                   name="time-outline"
-                  size={14}
+                  size={16}
                   color={colors.onSurfaceVariant}
                 />
                 <Text
-                  className="text-sm ml-1"
+                  className="text-base ml-1"
                   style={{ color: colors.onSurfaceVariant }}
                 >
                   {item.estimatedDeliveryTime || 'N/A'}
@@ -230,7 +254,7 @@ const FavoriteRestaurantItem = ({
 
               {item.deliveryFee && (
                 <Text
-                  className="text-sm font-medium"
+                  className="text-base font-semibold"
                   style={{ color: colors.primary }}
                 >
                   {item.deliveryFee} FCFA
@@ -239,7 +263,7 @@ const FavoriteRestaurantItem = ({
             </View>
           </View>
         </View>
-      </View>
+      </Card>
     </TouchableOpacity>
   );
 };
@@ -249,7 +273,6 @@ const FavoriteRestaurants = ({
 }: RootStackScreenProps<'FavoriteRestaurantScreen'>) => {
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
-  const user = useAuthUser();
 
   const {
     data: favoriteRestaurants,
@@ -276,26 +299,29 @@ const FavoriteRestaurants = ({
   }, [refetch]);
 
   // Handle restaurant press
-  const handleRestaurantPress = useCallback((restaurant: RestaurantCardType) => {
-    navigation.navigate('RestaurantDetail', {
-      restaurantId: restaurant.restaurantId,
-      restaurantName: restaurant.name,
-    });
-  }, [navigation]);
+  const handleRestaurantPress = useCallback(
+    (restaurant: RestaurantCardType) => {
+      navigation.navigate('RestaurantDetails', { restaurantId: restaurant.id });
+    },
+    [navigation],
+  );
 
   // Handle toggle favorite
-  const handleToggleFavorite = useCallback(async (restaurantId: string) => {
-    try {
-      await toggleFavorite(restaurantId);
-      // Refetch to update the list
-      refetch();
-    } catch (error) {
-      Alert.alert(
-        t('error', 'Error'),
-        t('failed_to_remove_favorite', 'Failed to remove from favorites')
-      );
-    }
-  }, [toggleFavorite, refetch, t]);
+  const handleToggleFavorite = useCallback(
+    async (restaurantId: string) => {
+      try {
+        await toggleFavorite(restaurantId);
+        // Refetch to update the list
+        refetch();
+      } catch (error) {
+        Alert.alert(
+          t('error', 'Error'),
+          t('failed_to_remove_favorite', 'Failed to remove from favorites'),
+        );
+      }
+    },
+    [toggleFavorite, refetch, t],
+  );
 
   // Handle explore restaurants
   const handleExploreRestaurants = useCallback(() => {
@@ -349,33 +375,6 @@ const FavoriteRestaurants = ({
   return (
     <CommonView>
       <View className="flex-1 pt-4">
-        {/* Header */}
-        <View className="flex-row items-center justify-between px-4 py-4 mb-4">
-          <View className="flex-row items-center">
-            <IconButton
-              icon="arrow-left"
-              size={24}
-              iconColor={colors.onSurface}
-              onPress={() => navigation.goBack()}
-            />
-            <Text
-              className="text-xl font-bold ml-2"
-              style={{ color: colors.onSurface }}
-            >
-              {t('favorite_restaurants', 'Favorite Restaurants')}
-            </Text>
-          </View>
-
-          {favoriteRestaurants && favoriteRestaurants.length > 0 && (
-            <Text
-              className="text-sm"
-              style={{ color: colors.onSurfaceVariant }}
-            >
-              {favoriteRestaurants.length} {t('restaurants', 'restaurants')}
-            </Text>
-          )}
-        </View>
-
         {/* Content */}
         {favoriteRestaurants && favoriteRestaurants.length > 0 ? (
           <FlatList

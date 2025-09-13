@@ -1,45 +1,61 @@
-// src/location/types.ts - Simplified MVP types
 export interface Coordinates {
   latitude: number;
   longitude: number;
 }
 
-export interface Address {
+export interface Location extends Coordinates {
+  city: string;
+  neighborhood?: string;
+  landmark?: string;
+  formattedAddress: string;
+  exactLocation?: string;
+  isFallback: boolean;
+  timestamp: number;
+}
+
+export interface SavedAddress {
   id: string;
+  label: string; // 'Home', 'Work', 'Other'
   street: string;
+  neighborhood?: string;
   landmark?: string;
   fullAddress: string;
   coordinates: Coordinates;
+  deliveryInstructions?: string;
   isDefault: boolean;
-  isGPSLocation: boolean;
-  isFallback: boolean;
-  createdAt: string;
+  createdAt: number;
+  updatedAt: number;
 }
 
-export interface ManualAddressInput {
-  street: string;
-  landmark?: string;
-  label?: 'Home' | 'Work' | 'Other';
-}
-
-export interface GeocodeResponse {
+export interface LocationResult {
   success: boolean;
-  coordinates?: Coordinates;
-  formattedAddress?: string;
+  location?: Location;
   error?: string;
+  fromCache?: boolean;
 }
 
-export interface LocationPermissionOptions {
-  autoInit?: boolean;
+export interface LocationOptions {
+  timeout?: number;
+  enableHighAccuracy?: boolean;
   fallbackToYaounde?: boolean;
+  maxAge?: number;
+}
+
+export enum PermissionStatus {
+  GRANTED = 'granted',
+  DENIED = 'denied',
+  NOT_REQUESTED = 'not_requested',
+  RESTRICTED = 'restricted',
 }
 
 export interface LocationState {
-  currentLocation: Address | null;
-  savedAddresses: Address[];
+  location: Location | null;
+  savedAddresses: SavedAddress[];
+  defaultAddressId: string | null;
   isLoading: boolean;
+  error: string | null;
   hasPermission: boolean;
-  permissionStatus: 'undetermined' | 'granted' | 'denied';
-  lastError: string | null;
-  isUsingFallback: boolean;
+  permissionRequested: boolean;
+  servicesEnabled: boolean;
+  lastPermissionRequest: number;
 }

@@ -29,6 +29,9 @@ import ApplogoDark from '@/assets/images/foodrush.svg';
 import NoOrdersLight from '@/assets/images/Food Illustrations/Clipboard light-1.png';
 import NoOrdersDark from '@/assets/images/Food Illustrations/Clipboard light.png';
 import ProfilePlogo from '@/assets/images/Food Illustrations/Type=Edit Avatar, Component=Avatar lIGHT.png';
+import Orange_Money from '@/assets/images/Orange_money.png';
+import Mobile_Money from '@/assets/images/MTN_mobileMoney.png';
+import Loading_reset from '@/assets/images/Food Illustrations/LoadingFood.png';
 // Icons
 import not_found from '@/assets/images/Food Illustrations/Not found darck.png';
 
@@ -44,6 +47,9 @@ export const images = {
   customerImg,
   restaurantImg,
   not_found,
+  Orange_Money,
+  Mobile_Money,
+  Loading_reset,
 };
 
 export const icons = {
@@ -51,7 +57,6 @@ export const icons = {
   R_logo,
   ProfilePlogo,
 };
-
 
 export const FoodCategory = {
   appleIcon,

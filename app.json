@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "food-rush",
+    "name": "Food rush",
     "slug": "food-rush",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -16,7 +16,15 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "UIBackgroundModes": ["location", "fetch"]
+        "UIBackgroundModes": [
+          "location",
+          "fetch",
+          "background-processing",
+          "remote-notification"
+        ],
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to your location to show nearby restaurants and provide accurate delivery services.",
+        "NSLocationWhenInUseUsageDescription": "This app needs access to your location to show nearby restaurants and calculate delivery times.",
+        "NSUserNotificationUsageDescription": "This app uses notifications to update you about your orders and special offers."
       }
     },
     "android": {
@@ -25,14 +33,23 @@
         "backgroundColor": "#06102b"
       },
       "edgeToEdgeEnabled": true,
-        "permissions": ["ACCESS_BACKGROUND_LOCATION"]
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "INTERNET",
+        "ACCESS_NETWORK_STATE",
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE",
+        "WAKE_LOCK"
+      ]
     },
     "web": {
       "bundler": "metro",
       "output": "single",
       "favicon": "./assets/images/favicon.png"
     },
-    
+
     "plugins": [
       "expo-font",
       "expo-asset",
@@ -40,14 +57,24 @@
       "expo-secure-store",
       "expo-localization",
       [
-        "expo-location", 
+        "expo-location",
         {
-"locationAlwaysAndWhenInUsePermission": "This app needs access to your location to show nearby restaurants and provide delivery services.",
-          "locationAlwaysPermission": "This app needs access to your location to show nearby restaurants and provide delivery services.",
-          "locationWhenInUsePermission": "This app needs access to your location to show nearby restaurants and provide delivery services.",
+          "locationAlwaysAndWhenInUsePermission": "This app needs access to your location to show nearby restaurants and provide accurate delivery services.",
+          "locationAlwaysPermission": "This app needs access to your location to show nearby restaurants and provide delivery services even when the app is in the background.",
+          "locationWhenInUsePermission": "This app needs access to your location to show nearby restaurants and calculate delivery times.",
           "isIosBackgroundLocationEnabled": false,
-          "isAndroidBackgroundLocationEnabled": false        }
-    ]
+          "isAndroidBackgroundLocationEnabled": false
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/notification-icon.png",
+          "color": "#007aff",
+          "defaultChannel": "default",
+          "sounds": ["./assets/sounds/notification.wav"]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

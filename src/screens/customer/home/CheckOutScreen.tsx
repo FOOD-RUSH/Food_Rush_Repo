@@ -14,11 +14,12 @@ import { RootStackScreenProps } from '@/src/navigation/types';
 import { Card, useTheme } from 'react-native-paper';
 import Seperator from '@/src/components/common/Seperator';
 import CheckOutItem from '@/src/components/customer/CheckOutItem';
-import { useCartStore, CartItem } from '@/src/stores/customerStores/cartStore';
+import { useCartStore, useCartTotal, CartItem } from '@/src/stores/customerStores/cartStore';
+import { useAuthUser } from '@/src/stores/customerStores';
 import CheckoutContent from '@/src/components/common/BottomSheet/CheckoutContent';
 import { useBottomSheet } from '@/src/components/common/BottomSheet/BottomSheetContext';
+import { useDefaultAddress } from '@/src/location/store';
 import { useSelectedPaymentMethod } from '@/src/stores/customerStores/paymentStore';
-import { useDefaultAddress } from '@/src/stores/customerStores/addressStore';
 
 import { useTranslation } from 'react-i18next';
 
@@ -30,10 +31,11 @@ const CheckOutScreen = ({
   const { t } = useTranslation('translation');
   // Subscribe to specific store slices
   const cartItems = useCartStore((state) => state.items);
-  const totalPrice = useCartStore((state) => state.totalprice);
+  const totalPrice = useCartTotal();
   const clearCart = useCartStore((state) => state.clearCart);
-  const selectedPaymentMethod = useSelectedPaymentMethod();
   const defaultAddress = useDefaultAddress();
+  const selectedPaymentMethod = useSelectedPaymentMethod();
+  const user = useAuthUser();
 
   // Constants for fees
   const DELIVERY_FEE = 2300;
@@ -89,6 +91,7 @@ const CheckOutScreen = ({
 
   // Handle payment method selection
   const handlePaymentPress = useCallback(() => {
+    // Navigate to payment methods screen
     navigation.navigate('PaymentMethods');
   }, [navigation]);
 
@@ -128,7 +131,7 @@ const CheckOutScreen = ({
 
     // Present the enhanced checkout content with cart management
     present(<CheckoutContent onConfirm={confirmOrder} onDismiss={dismiss} />, {
-      snapPoints: ['50%', '95%'], // Allow for more content
+      snapPoints: ['40%'], // Allow for more content
       enablePanDownToClose: true,
       title: t('confirm_your_order'),
       showHandle: true,
@@ -142,9 +145,9 @@ const CheckOutScreen = ({
       <CheckOutItem
         id={item.id}
         menuItem={item.menuItem}
-        ItemtotalPrice={item.ItemtotalPrice}
         quantity={item.quantity}
         specialInstructions={item.specialInstructions}
+        addedAt={item.addedAt}
       />
     ),
     [],
@@ -353,9 +356,11 @@ const CheckOutScreen = ({
                   className="text-sm mr-2"
                   style={{ color: colors.onSurfaceVariant }}
                 >
-                  {selectedPaymentMethod === 'mtn_mobile_money' ? 'MTN Mobile Money' : 
-                   selectedPaymentMethod === 'orange_money' ? 'Orange Mobile Money' : 
-                   t('e_wallet')}
+                  {selectedPaymentMethod === 'mtn_mobile_money'
+                    ? 'MTN Mobile Money'
+                    : selectedPaymentMethod === 'orange_money'
+                      ? 'Orange Mobile Money'
+                      : t('e_wallet')}
                 </Text>
                 <MaterialIcons
                   name="arrow-forward-ios"
@@ -494,13 +499,10 @@ const CheckOutScreen = ({
       </ScrollView>
 
       {/* Place Order Button */}
-      <View
-        className="absolute bottom-0 left-0 right-0 px-4 py-4"
-        style={{ backgroundColor: colors.surface }}
-      >
+      <View className=" px-4 pb-4 " style={{ backgroundColor: colors.surface }}>
         <View
           className="h-px mb-4"
-          style={{ backgroundColor: colors.outline }}
+          style={{ backgroundColor: colors.surface }}
         />
 
         <TouchableOpacity

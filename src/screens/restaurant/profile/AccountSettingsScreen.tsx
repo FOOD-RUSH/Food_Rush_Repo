@@ -49,19 +49,30 @@ const AccountSettingsScreen = ({ navigation }: Props) => {
         }}
       >
         <LinearGradient
-          colors={["#667eea", "#764ba2"]}
+          colors={['#667eea', '#764ba2']}
           style={styles.header}
           start={[0, 0]}
           end={[1, 1]}
         >
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backBtn}
+          >
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Account & Settings</Text>
-          <MaterialCommunityIcons name="account-cog-outline" size={32} color="#fff" style={{ marginLeft: 10 }} />
+          <MaterialCommunityIcons
+            name="account-cog-outline"
+            size={32}
+            color="#fff"
+            style={{ marginLeft: 10 }}
+          />
         </LinearGradient>
       </Animated.View>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 32 }}
+      >
         <Animated.View style={{ opacity: contentAnim, marginTop: 24 }}>
           <Text style={styles.sectionTitle}>Profile Info</Text>
           <View style={styles.inputGroup}>

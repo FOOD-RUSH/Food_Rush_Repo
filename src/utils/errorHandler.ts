@@ -25,19 +25,19 @@ export const ERROR_CODES = {
   INVALID_CREDENTIALS: 'INVALID_CREDENTIALS',
   ACCOUNT_LOCKED: 'ACCOUNT_LOCKED',
   EMAIL_NOT_VERIFIED: 'EMAIL_NOT_VERIFIED',
-  
+
   // Validation errors
   VALIDATION_FAILED: 'VALIDATION_FAILED',
   INVALID_INPUT: 'INVALID_INPUT',
-  
+
   // Resource errors
   RESOURCE_NOT_FOUND: 'RESOURCE_NOT_FOUND',
   RESOURCE_CONFLICT: 'RESOURCE_CONFLICT',
-  
+
   // Payment errors
   PAYMENT_FAILED: 'PAYMENT_FAILED',
   INSUFFICIENT_FUNDS: 'INSUFFICIENT_FUNDS',
-  
+
   // Location errors
   LOCATION_PERMISSION_DENIED: 'LOCATION_PERMISSION_DENIED',
   LOCATION_UNAVAILABLE: 'LOCATION_UNAVAILABLE',
@@ -49,7 +49,7 @@ export const handleApiError = (error: any): ApiError => {
   if (error && typeof error === 'object' && 'message' in error) {
     return error as ApiError;
   }
-  
+
   // Handle network errors
   if (!error.response) {
     return {
@@ -57,10 +57,10 @@ export const handleApiError = (error: any): ApiError => {
       code: 'NETWORK_ERROR',
     };
   }
-  
+
   // Handle different status codes
   const { status, data } = error.response;
-  
+
   switch (status) {
     case 400:
       return {
@@ -69,42 +69,42 @@ export const handleApiError = (error: any): ApiError => {
         code: data?.code || ERROR_CODES.VALIDATION_FAILED,
         details: data?.details,
       };
-      
+
     case 401:
       return {
         message: data?.message || ERROR_MESSAGES.UNAUTHORIZED,
         status,
         code: data?.code || ERROR_CODES.INVALID_CREDENTIALS,
       };
-      
+
     case 403:
       return {
         message: data?.message || ERROR_MESSAGES.FORBIDDEN,
         status,
         code: data?.code || 'FORBIDDEN',
       };
-      
+
     case 404:
       return {
         message: data?.message || ERROR_MESSAGES.NOT_FOUND,
         status,
         code: data?.code || ERROR_CODES.RESOURCE_NOT_FOUND,
       };
-      
+
     case 409:
       return {
         message: data?.message || 'Conflict occurred',
         status,
         code: data?.code || ERROR_CODES.RESOURCE_CONFLICT,
       };
-      
+
     case 500:
       return {
         message: data?.message || ERROR_MESSAGES.SERVER_ERROR,
         status,
         code: data?.code || 'SERVER_ERROR',
       };
-      
+
     default:
       return {
         message: data?.message || ERROR_MESSAGES.UNKNOWN_ERROR,
@@ -128,36 +128,40 @@ export const isNetworkError = (error: any): boolean => {
 // Function to check if error is related to authentication
 export const isAuthError = (error: any): boolean => {
   const apiError = handleApiError(error);
-  return apiError.status === 401 || apiError.code === ERROR_CODES.INVALID_CREDENTIALS;
+  return (
+    apiError.status === 401 || apiError.code === ERROR_CODES.INVALID_CREDENTIALS
+  );
 };
 
 // Function to check if error is related to validation
 export const isValidationError = (error: any): boolean => {
   const apiError = handleApiError(error);
-  return apiError.status === 400 || apiError.code === ERROR_CODES.VALIDATION_FAILED;
+  return (
+    apiError.status === 400 || apiError.code === ERROR_CODES.VALIDATION_FAILED
+  );
 };
 
 // Function to create a user-friendly error message
 export const createUserFriendlyError = (error: any): string => {
   const apiError = handleApiError(error);
-  
+
   // Map specific error codes to user-friendly messages
   switch (apiError.code) {
     case ERROR_CODES.INVALID_CREDENTIALS:
       return 'Invalid email or password. Please try again.';
-      
+
     case ERROR_CODES.EMAIL_NOT_VERIFIED:
       return 'Please verify your email address before logging in.';
-      
+
     case ERROR_CODES.PAYMENT_FAILED:
       return 'Payment failed. Please check your payment details and try again.';
-      
+
     case ERROR_CODES.INSUFFICIENT_FUNDS:
       return 'Insufficient funds. Please check your account balance.';
-      
+
     case ERROR_CODES.LOCATION_PERMISSION_DENIED:
       return 'Location permission denied. Please enable location access in settings.';
-      
+
     default:
       return apiError.message;
   }

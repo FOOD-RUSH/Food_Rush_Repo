@@ -5,7 +5,15 @@ import { useTheme } from 'react-native-paper';
 const SearchResultSkeleton: React.FC = () => {
   const { colors } = useTheme();
 
-  const SkeletonBox = ({ width, height, style }: { width: number | string; height: number; style?: any }) => (
+  const SkeletonBox = ({
+    width,
+    height,
+    style,
+  }: {
+    width: number | string;
+    height: number;
+    style?: any;
+  }) => (
     <View
       style={[
         {
@@ -23,20 +31,20 @@ const SearchResultSkeleton: React.FC = () => {
     <View style={[styles.container, { backgroundColor: colors.surface }]}>
       {/* Image skeleton */}
       <SkeletonBox width={80} height={80} style={styles.image} />
-      
+
       <View style={styles.content}>
         {/* Title skeleton */}
         <SkeletonBox width="70%" height={16} style={styles.title} />
-        
+
         {/* Restaurant name skeleton */}
         <SkeletonBox width="50%" height={12} style={styles.restaurant} />
-        
+
         {/* Rating and distance skeleton */}
         <View style={styles.metadata}>
           <SkeletonBox width={60} height={12} />
           <SkeletonBox width={40} height={12} />
         </View>
-        
+
         {/* Price skeleton */}
         <SkeletonBox width="30%" height={14} style={styles.price} />
       </View>

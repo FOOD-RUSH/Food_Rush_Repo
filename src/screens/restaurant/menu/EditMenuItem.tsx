@@ -46,7 +46,9 @@ const EditMenuItemScreen = ({
     <CommonView>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View className="mb-6">
-          <Text className="text-2xl font-bold text-gray-800">Edit Menu Item</Text>
+          <Text className="text-2xl font-bold text-gray-800">
+            Edit Menu Item
+          </Text>
           <Text className="text-gray-500 mt-2">Update item details</Text>
         </View>
 
@@ -62,7 +64,11 @@ const EditMenuItemScreen = ({
             />
           ) : (
             <View className="items-center justify-center h-full">
-              <MaterialCommunityIcons name="camera-plus" size={40} color="#007AFF" />
+              <MaterialCommunityIcons
+                name="camera-plus"
+                size={40}
+                color="#007AFF"
+              />
               <Text className="text-blue-500 mt-2">Change Image</Text>
             </View>
           )}

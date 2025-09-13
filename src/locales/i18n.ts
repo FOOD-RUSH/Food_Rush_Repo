@@ -16,7 +16,7 @@ const STORAGE_KEY = 'user-language';
 const DEFAULT_LANGUAGE = 'en';
 const SUPPORTED_LANGUAGES = ['en', 'fr'] as const;
 
-export type SupportedLanguage = typeof SUPPORTED_LANGUAGES[number];
+export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 
 // Language metadata
 export const LANGUAGES = {
@@ -32,7 +32,10 @@ const languageDetector = {
     try {
       // Check saved preference first
       const savedLanguage = await AsyncStorage.getItem(STORAGE_KEY);
-      if (savedLanguage && SUPPORTED_LANGUAGES.includes(savedLanguage as SupportedLanguage)) {
+      if (
+        savedLanguage &&
+        SUPPORTED_LANGUAGES.includes(savedLanguage as SupportedLanguage)
+      ) {
         callback(savedLanguage);
         return;
       }
@@ -40,10 +43,12 @@ const languageDetector = {
       // Fallback to device language
       const deviceLocales = Localization.getLocales();
       const deviceLanguage = deviceLocales[0]?.languageCode;
-      const supportedLanguage = SUPPORTED_LANGUAGES.includes(deviceLanguage as SupportedLanguage) 
+      const supportedLanguage = SUPPORTED_LANGUAGES.includes(
+        deviceLanguage as SupportedLanguage,
+      )
         ? (deviceLanguage as SupportedLanguage)
         : DEFAULT_LANGUAGE;
-      
+
       callback(supportedLanguage);
     } catch {
       callback(DEFAULT_LANGUAGE);
@@ -65,12 +70,12 @@ i18n
   .use(initReactI18next)
   .init({
     resources: {
-      en: { 
+      en: {
         translation: en,
         auth: enAuth,
         generated: enGenerated,
       },
-      fr: { 
+      fr: {
         translation: fr,
         auth: frAuth,
         generated: frGenerated,

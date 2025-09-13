@@ -1,6 +1,10 @@
 import { MD3LightTheme, MD3DarkTheme, MD3Theme } from 'react-native-paper';
 import { useColorScheme } from 'react-native';
-import { DefaultTheme, DarkTheme, Theme as NavigationTheme } from '@react-navigation/native';
+import {
+  DefaultTheme,
+  DarkTheme,
+  Theme as NavigationTheme,
+} from '@react-navigation/native';
 import { useAppStore } from '../stores/customerStores/AppStore';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
@@ -141,7 +145,9 @@ export const useNavigationTheme = (themeMode: ThemeMode): NavigationTheme => {
   const systemColorScheme = useColorScheme();
 
   if (themeMode === 'system') {
-    return systemColorScheme === 'dark' ? darkNavigationTheme : lightNavigationTheme;
+    return systemColorScheme === 'dark'
+      ? darkNavigationTheme
+      : lightNavigationTheme;
   }
 
   return themeMode === 'dark' ? darkNavigationTheme : lightNavigationTheme;

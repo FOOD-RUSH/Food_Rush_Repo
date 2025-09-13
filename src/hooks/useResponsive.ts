@@ -25,7 +25,8 @@ export const useResponsive = () => {
   return useMemo(() => {
     // Device detection based on current dimensions
     const currentIsSmallDevice = width < breakpoints.sm;
-    const currentIsMediumDevice = width >= breakpoints.sm && width < breakpoints.md;
+    const currentIsMediumDevice =
+      width >= breakpoints.sm && width < breakpoints.md;
     const currentIsLargeDevice = width >= breakpoints.md;
     const currentIsTablet = width >= breakpoints.lg;
     const currentIsLandscape = width > height;
@@ -45,14 +46,19 @@ export const useResponsive = () => {
       // Scaling functions
       scale: (size: number) => scale(size),
       verticalScale: (size: number) => verticalScale(size),
-      moderateScale: (size: number, factor = 0.5) => moderateScale(size, factor),
+      moderateScale: (size: number, factor = 0.5) =>
+        moderateScale(size, factor),
 
       // Responsive utilities
-      getResponsiveSpacing: (baseSize: number) => getResponsiveSpacing(baseSize),
-      getResponsiveFontSize: (baseSize: number) => getResponsiveFontSize(baseSize),
+      getResponsiveSpacing: (baseSize: number) =>
+        getResponsiveSpacing(baseSize),
+      getResponsiveFontSize: (baseSize: number) =>
+        getResponsiveFontSize(baseSize),
       getContainerWidth: (maxWidth?: number) => getContainerWidth(maxWidth),
-      getGridColumns: (preferredColumns: number) => getGridColumns(preferredColumns),
-      getResponsiveImageSize: (baseSize: number) => getResponsiveImageSize(baseSize),
+      getGridColumns: (preferredColumns: number) =>
+        getGridColumns(preferredColumns),
+      getResponsiveImageSize: (baseSize: number) =>
+        getResponsiveImageSize(baseSize),
       getSafeAreaInsets: () => getSafeAreaInsets(),
 
       // Touch targets
@@ -62,11 +68,12 @@ export const useResponsive = () => {
       breakpoints,
 
       // Convenience methods
-      isBreakpoint: (breakpoint: keyof typeof breakpoints) => width >= breakpoints[breakpoint],
+      isBreakpoint: (breakpoint: keyof typeof breakpoints) =>
+        width >= breakpoints[breakpoint],
       getBreakpoint: () => {
         const entries = Object.entries(breakpoints).reverse();
         const current = entries.find(([, bpWidth]) => width >= bpWidth);
-        return current ? current[0] as keyof typeof breakpoints : 'xs';
+        return current ? (current[0] as keyof typeof breakpoints) : 'xs';
       },
 
       // Layout helpers

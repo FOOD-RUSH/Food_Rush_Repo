@@ -30,12 +30,12 @@ class PaymentService {
   async processPayment(
     amount: number,
     method: PaymentMethod,
-    orderId: string
+    orderId: string,
   ): Promise<PaymentResult> {
     try {
       // Implementation for payment processing
       console.log('Processing payment:', { amount, method, orderId });
-      
+
       // This would integrate with actual payment providers
       return {
         success: true,
@@ -63,4 +63,3 @@ class PaymentService {
 }
 
 export default PaymentService.getInstance();
-

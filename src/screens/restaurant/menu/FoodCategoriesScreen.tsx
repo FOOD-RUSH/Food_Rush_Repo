@@ -42,22 +42,34 @@ const FoodCategoriesScreen = () => {
       >
         <View className="flex-row items-center bg-white p-4 rounded-xl mb-3 shadow-sm">
           <View className="w-12 h-12 bg-blue-100 rounded-full items-center justify-center">
-            <MaterialCommunityIcons name="food-fork-drink" size={24} color="#007AFF" />
+            <MaterialCommunityIcons
+              name="food-fork-drink"
+              size={24}
+              color="#007AFF"
+            />
           </View>
           <View className="flex-1 ml-4">
-            <Text className="text-lg font-semibold text-gray-800">{category.name}</Text>
-            <Text className="text-sm text-gray-500">{category.itemCount} items</Text>
+            <Text className="text-lg font-semibold text-gray-800">
+              {category.name}
+            </Text>
+            <Text className="text-sm text-gray-500">
+              {category.itemCount} items
+            </Text>
           </View>
           <IconButton
             icon="pencil"
             size={20}
-            onPress={() => {/* Handle edit */}}
+            onPress={() => {
+              /* Handle edit */
+            }}
           />
           <IconButton
             icon="delete"
             size={20}
             iconColor="#EF4444"
-            onPress={() => {/* Handle delete */}}
+            onPress={() => {
+              /* Handle delete */
+            }}
           />
         </View>
       </Animated.View>
@@ -66,7 +78,7 @@ const FoodCategoriesScreen = () => {
 
   return (
     <CommonView>
-      <Animated.View 
+      <Animated.View
         className="flex-1"
         style={{
           transform: [{ translateY: slideAnim }],
@@ -90,7 +102,9 @@ const FoodCategoriesScreen = () => {
           />
           <Button
             mode="contained"
-            onPress={() => {/* Handle add category */}}
+            onPress={() => {
+              /* Handle add category */
+            }}
             className="ml-2"
             style={{ borderRadius: 12 }}
           >

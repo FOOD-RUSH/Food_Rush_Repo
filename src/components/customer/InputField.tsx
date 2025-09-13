@@ -32,7 +32,9 @@ const InputField = ({
         placeholder={placeholder}
         mode="outlined"
         left={leftIcon ? <TextInput.Icon icon={() => leftIcon} /> : undefined}
-        right={rightIcon ? <TextInput.Icon icon={() => rightIcon} /> : undefined}
+        right={
+          rightIcon ? <TextInput.Icon icon={() => rightIcon} /> : undefined
+        }
         outlineStyle={{
           borderRadius: 16,
           borderColor: error ? colors.error : colors.surfaceVariant,

@@ -7,12 +7,14 @@ This directory contains an optimized context system designed for minimal re-rend
 The context system is organized into three layers for optimal performance:
 
 ### 1. Core Infrastructure Providers
+
 - **GestureHandlerRootView**: Gesture handling
 - **SafeAreaProvider**: Safe area management
 - **QueryClientProvider**: React Query for data fetching
 - **I18nextProvider**: Internationalization
 
 ### 2. App State Providers
+
 - **AppStateProvider**: App lifecycle and state management
 - **PerformanceProvider**: Performance monitoring and optimization
 - **LanguageProvider**: Language and localization
@@ -20,6 +22,7 @@ The context system is organized into three layers for optimal performance:
 - **NetworkProvider**: Network connectivity
 
 ### 3. UI Providers
+
 - **BottomSheetModalProvider**: Bottom sheet modals
 - **BottomSheetProvider**: Bottom sheet context
 
@@ -36,6 +39,7 @@ The context system is organized into three layers for optimal performance:
 ### 📊 Performance Monitoring
 
 The `PerformanceProvider` includes:
+
 - Render tracking for components
 - Interaction monitoring
 - Memory usage tracking
@@ -80,7 +84,7 @@ function MyComponent() {
   // These hooks will only re-render when their specific values change
   const isConnected = useIsConnected();
   const currentLanguage = useCurrentLanguage();
-  
+
   return (
     <View>
       <Text>Connected: {isConnected ? 'Yes' : 'No'}</Text>
@@ -182,7 +186,7 @@ const isConnected = useIsConnected();
 
 ```tsx
 const { createOptimizedValue } = useOptimizedComponent({
-  componentName: 'ExpensiveComponent'
+  componentName: 'ExpensiveComponent',
 });
 
 const expensiveValue = createOptimizedValue(() => {
@@ -295,11 +299,7 @@ import { render } from '@testing-library/react-native';
 import { AppContextProvider } from '@/src/contexts/AppContextProvider';
 
 const renderWithContext = (component) => {
-  return render(
-    <AppContextProvider>
-      {component}
-    </AppContextProvider>
-  );
+  return render(<AppContextProvider>{component}</AppContextProvider>);
 };
 ```
 

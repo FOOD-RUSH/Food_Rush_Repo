@@ -5,7 +5,6 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image, Platform, TouchableOpacity, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { useAppNavigationTheme } from '../config/theme';
 
@@ -96,7 +95,6 @@ function CustomerOrderStackScreen() {
 }
 
 export function CustomerHelpCenterStackScreen() {
-  
   const navigationTheme = useAppNavigationTheme();
   const { t } = useTranslation('translation');
 
@@ -127,7 +125,6 @@ export function CustomerHelpCenterStackScreen() {
 }
 
 function CustomerProfileStackScreen() {
-  
   const navigationTheme = useAppNavigationTheme();
   const { t } = useTranslation('translation');
 
@@ -138,6 +135,7 @@ function CustomerProfileStackScreen() {
         headerStyle: {
           backgroundColor: navigationTheme.colors.card,
         },
+
         headerTitleStyle: {
           color: navigationTheme.colors.text,
         },
@@ -155,6 +153,8 @@ function CustomerProfileStackScreen() {
           headerTitleStyle: {
             color: navigationTheme.colors.text,
           },
+          headerShadowVisible: true,
+
           headerLeft: () => (
             <Image
               source={icons.R_logo}
@@ -208,7 +208,7 @@ TabBarIcon.displayName = 'TabBarIcon';
 
 export default function CustomerNavigator() {
   const insets = useSafeAreaInsets();
-  
+
   const navigationTheme = useAppNavigationTheme();
   const { t } = useTranslation('translation');
 

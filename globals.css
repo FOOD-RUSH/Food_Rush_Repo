@@ -65,18 +65,38 @@
 
 @layer utilities {
   /* Responsive text scaling */
-  .text-responsive-xs { font-size: clamp(0.75rem, 2vw, 0.875rem); }
-  .text-responsive-sm { font-size: clamp(0.875rem, 2.5vw, 1rem); }
-  .text-responsive-base { font-size: clamp(1rem, 3vw, 1.125rem); }
-  .text-responsive-lg { font-size: clamp(1.125rem, 3.5vw, 1.25rem); }
-  .text-responsive-xl { font-size: clamp(1.25rem, 4vw, 1.5rem); }
-  .text-responsive-2xl { font-size: clamp(1.5rem, 5vw, 2rem); }
+  .text-responsive-xs {
+    font-size: clamp(0.75rem, 2vw, 0.875rem);
+  }
+  .text-responsive-sm {
+    font-size: clamp(0.875rem, 2.5vw, 1rem);
+  }
+  .text-responsive-base {
+    font-size: clamp(1rem, 3vw, 1.125rem);
+  }
+  .text-responsive-lg {
+    font-size: clamp(1.125rem, 3.5vw, 1.25rem);
+  }
+  .text-responsive-xl {
+    font-size: clamp(1.25rem, 4vw, 1.5rem);
+  }
+  .text-responsive-2xl {
+    font-size: clamp(1.5rem, 5vw, 2rem);
+  }
 
   /* Responsive spacing */
-  .space-responsive-xs > * + * { margin-left: clamp(0.5rem, 2vw, 0.75rem); }
-  .space-responsive-sm > * + * { margin-left: clamp(0.75rem, 3vw, 1rem); }
-  .space-responsive-md > * + * { margin-left: clamp(1rem, 4vw, 1.5rem); }
-  .space-responsive-lg > * + * { margin-left: clamp(1.5rem, 5vw, 2rem); }
+  .space-responsive-xs > * + * {
+    margin-left: clamp(0.5rem, 2vw, 0.75rem);
+  }
+  .space-responsive-sm > * + * {
+    margin-left: clamp(0.75rem, 3vw, 1rem);
+  }
+  .space-responsive-md > * + * {
+    margin-left: clamp(1rem, 4vw, 1.5rem);
+  }
+  .space-responsive-lg > * + * {
+    margin-left: clamp(1.5rem, 5vw, 2rem);
+  }
 
   /* Responsive containers */
   .container-responsive {
@@ -103,22 +123,44 @@
   }
 
   /* Responsive grid */
-  .grid-responsive-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
-  .grid-responsive-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .grid-responsive-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .grid-responsive-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .grid-responsive-1 {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+  .grid-responsive-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .grid-responsive-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .grid-responsive-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 
   @media (min-width: 640px) {
-    .grid-responsive-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
-    .grid-responsive-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .grid-responsive-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-responsive-1 {
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+    .grid-responsive-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .grid-responsive-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
   }
 
   @media (min-width: 768px) {
-    .grid-responsive-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
-    .grid-responsive-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .grid-responsive-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .grid-responsive-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .grid-responsive-1 {
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+    .grid-responsive-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .grid-responsive-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .grid-responsive-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
   }
 
   /* Responsive flex utilities */
@@ -172,4 +214,3 @@
     }
   }
 }
-

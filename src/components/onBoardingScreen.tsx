@@ -5,10 +5,10 @@ import {
   Image,
   ImageBackground,
   TouchableOpacity,
-  Dimensions,
   StatusBar,
   ImageSourcePropType,
   Animated,
+  useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme, Button } from 'react-native-paper';
@@ -16,13 +16,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { images } from '@/assets/images';
 import { useTranslation } from 'react-i18next';
 import { LanguageSelector } from './common/LanguageSelector';
+
 interface OnboardingInfo {
   image: ImageSourcePropType;
   title: string;
   description: string;
 }
-
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('screen');
 
 // Constants
 const WELCOME_TIMEOUT = 7000;
@@ -57,6 +56,8 @@ const userTypes: UserType[] = [
 
 // Welcome Screen Component
 const OnboardingWelcome = memo(({ onComplete }: { onComplete: () => void }) => {
+  const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = useWindowDimensions();
+
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -353,6 +354,8 @@ const UserTypeSelectionScreen = memo(
       },
       [onSelectUserType],
     );
+    const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } =
+      useWindowDimensions();
 
     const getButtonStyle = useCallback(
       (isSelected: boolean) => ({
@@ -390,7 +393,7 @@ const UserTypeSelectionScreen = memo(
             flex: 1,
             paddingHorizontal: 24,
             paddingTop: 32,
-            paddingBottom: 40,
+            paddingBottom: 50,
           }}
         >
           {/* Header */}
@@ -418,7 +421,7 @@ const UserTypeSelectionScreen = memo(
           {/* User Type Cards */}
           <View style={{ flex: 1, justifyContent: 'center' }}>
             {userTypes.map((type) => (
-              <View key={type.id} style={{ marginBottom: 24 }}>
+              <View key={type.id} style={{ marginBottom: 14 }}>
                 <TouchableOpacity
                   activeOpacity={0.8}
                   style={{
@@ -464,7 +467,8 @@ const UserTypeSelectionScreen = memo(
                       color: colors.onSurface,
                     }}
                   >
-                    {/* {t(type.title)} */} {type.title}
+                    {t(type.title)}
+                    {/* {type.title} */}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -578,4 +582,3 @@ OnboardingSlide.displayName = 'OnboardingSlide';
 UserTypeSelectionScreen.displayName = 'UserTypeSelectionScreen';
 
 export default memo(OnboardingScreen);
-

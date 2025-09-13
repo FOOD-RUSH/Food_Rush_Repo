@@ -27,7 +27,9 @@ const EditCategoryScreen = ({
     <CommonView>
       <View className="flex-1">
         <View className="mb-6">
-          <Text className="text-2xl font-bold text-gray-800">Edit Category</Text>
+          <Text className="text-2xl font-bold text-gray-800">
+            Edit Category
+          </Text>
           <Text className="text-gray-500 mt-2">Update category details</Text>
         </View>
 
@@ -90,13 +92,20 @@ const EditCategoryScreen = ({
             <Dialog.Title>Delete Category</Dialog.Title>
             <Dialog.Content>
               <Text>
-                Are you sure you want to delete this category? This action cannot
-                be undone.
+                Are you sure you want to delete this category? This action
+                cannot be undone.
               </Text>
             </Dialog.Content>
             <Dialog.Actions>
-              <Button onPress={() => setDeleteDialogVisible(false)}>Cancel</Button>
-              <Button textColor="red" onPress={() => {/* Handle delete */}}>
+              <Button onPress={() => setDeleteDialogVisible(false)}>
+                Cancel
+              </Button>
+              <Button
+                textColor="red"
+                onPress={() => {
+                  /* Handle delete */
+                }}
+              >
                 Delete
               </Button>
             </Dialog.Actions>

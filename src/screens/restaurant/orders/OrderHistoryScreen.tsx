@@ -1,5 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, FlatList, Animated, TouchableOpacity, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  Animated,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
 import { Searchbar, Chip } from 'react-native-paper';
 import CommonView from '@/src/components/common/CommonView';
 
@@ -65,7 +72,7 @@ const OrderHistoryScreen = () => {
       id: '104',
       customerName: 'Sarah Wilson',
       items: ['Buffalo Wings', 'Onion Rings', 'Beer'],
-      total: 19.50,
+      total: 19.5,
       status: 'completed',
       orderDate: '2024-01-12',
       completedTime: '7:15 PM',
@@ -86,19 +93,24 @@ const OrderHistoryScreen = () => {
   ];
 
   // Filter orders based on selected filter and search query
-  const filteredOrders = historyOrders.filter(order => {
-    const matchesFilter = selectedFilter === 'all' || order.status === selectedFilter;
-    const matchesSearch = order.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         order.id.includes(searchQuery) ||
-                         order.restaurant.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredOrders = historyOrders.filter((order) => {
+    const matchesFilter =
+      selectedFilter === 'all' || order.status === selectedFilter;
+    const matchesSearch =
+      order.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      order.id.includes(searchQuery) ||
+      order.restaurant.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
   const getStatusColor = (status: HistoryOrder['status']) => {
     switch (status) {
-      case 'completed': return '#34C759';
-      case 'cancelled': return '#FF3B30';
-      default: return '#8E8E93';
+      case 'completed':
+        return '#34C759';
+      case 'cancelled':
+        return '#FF3B30';
+      default:
+        return '#8E8E93';
     }
   };
 
@@ -125,7 +137,13 @@ const OrderHistoryScreen = () => {
     );
   };
 
-  const HistoryCard = ({ item, index }: { item: HistoryOrder; index: number }) => {
+  const HistoryCard = ({
+    item,
+    index,
+  }: {
+    item: HistoryOrder;
+    index: number;
+  }) => {
     const scaleAnim = useRef(new Animated.Value(0.9)).current;
 
     useEffect(() => {
@@ -143,7 +161,7 @@ const OrderHistoryScreen = () => {
           opacity: fadeAnim,
         }}
       >
-        <TouchableOpacity 
+        <TouchableOpacity
           style={{
             backgroundColor: 'white',
             padding: 16,
@@ -155,42 +173,56 @@ const OrderHistoryScreen = () => {
             shadowRadius: 4,
             elevation: 3,
           }}
-          onPress={() => {/* Navigate to order details */}}
+          onPress={() => {
+            /* Navigate to order details */
+          }}
         >
-          <View style={{ 
-            flexDirection: 'row', 
-            justifyContent: 'space-between', 
-            alignItems: 'center', 
-            marginBottom: 8 
-          }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: 8,
+            }}
+          >
             <Text style={{ fontSize: 18, fontWeight: '600', color: '#333' }}>
               Order #{item.id}
             </Text>
-            <View style={{ 
-              backgroundColor: getStatusColor(item.status), 
-              paddingHorizontal: 12, 
-              paddingVertical: 4, 
-              borderRadius: 16 
-            }}>
-              <Text style={{ 
-                color: 'white', 
-                fontSize: 12, 
-                fontWeight: '600',
-                textTransform: 'uppercase'
-              }}>
+            <View
+              style={{
+                backgroundColor: getStatusColor(item.status),
+                paddingHorizontal: 12,
+                paddingVertical: 4,
+                borderRadius: 16,
+              }}
+            >
+              <Text
+                style={{
+                  color: 'white',
+                  fontSize: 12,
+                  fontWeight: '600',
+                  textTransform: 'uppercase',
+                }}
+              >
                 {item.status}
               </Text>
             </View>
           </View>
-          
-          <View style={{ 
-            flexDirection: 'row', 
-            justifyContent: 'space-between', 
-            alignItems: 'center', 
-            marginBottom: 8 
-          }}>
-            <Text style={{ color: '#666', fontSize: 16 }}>{item.customerName}</Text>
-            <Text style={{ color: '#666', fontSize: 14 }}>{item.completedTime}</Text>
+
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: 8,
+            }}
+          >
+            <Text style={{ color: '#666', fontSize: 16 }}>
+              {item.customerName}
+            </Text>
+            <Text style={{ color: '#666', fontSize: 14 }}>
+              {item.completedTime}
+            </Text>
           </View>
 
           <View style={{ marginBottom: 8 }}>
@@ -198,39 +230,44 @@ const OrderHistoryScreen = () => {
               📍 {item.restaurant}
             </Text>
             <Text style={{ color: '#999', fontSize: 12 }}>
-              📅 {new Date(item.orderDate).toLocaleDateString('en-US', {
+              📅{' '}
+              {new Date(item.orderDate).toLocaleDateString('en-US', {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
-                day: 'numeric'
+                day: 'numeric',
               })}
             </Text>
           </View>
 
           {item.rating && (
-            <View style={{ marginBottom: 8 }}>
-              {renderStars(item.rating)}
-            </View>
+            <View style={{ marginBottom: 8 }}>{renderStars(item.rating)}</View>
           )}
 
-          <View style={{ 
-            borderTopWidth: 1, 
-            borderTopColor: '#f0f0f0', 
-            paddingTop: 8 
-          }}>
+          <View
+            style={{
+              borderTopWidth: 1,
+              borderTopColor: '#f0f0f0',
+              paddingTop: 8,
+            }}
+          >
             <Text style={{ color: '#888', fontSize: 14, marginBottom: 8 }}>
               {item.items.join(', ')}
             </Text>
-            <View style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}>
-              <Text style={{ 
-                fontSize: 18, 
-                fontWeight: 'bold', 
-                color: '#007AFF',
-              }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 18,
+                  fontWeight: 'bold',
+                  color: '#007AFF',
+                }}
+              >
                 ${item.total.toFixed(2)}
               </Text>
               {item.status === 'completed' && (
@@ -241,9 +278,13 @@ const OrderHistoryScreen = () => {
                     paddingVertical: 6,
                     borderRadius: 8,
                   }}
-                  onPress={() => {/* Reorder functionality */}}
+                  onPress={() => {
+                    /* Reorder functionality */
+                  }}
                 >
-                  <Text style={{ color: 'white', fontSize: 12, fontWeight: '600' }}>
+                  <Text
+                    style={{ color: 'white', fontSize: 12, fontWeight: '600' }}
+                  >
                     Reorder
                   </Text>
                 </TouchableOpacity>
@@ -255,52 +296,70 @@ const OrderHistoryScreen = () => {
     );
   };
 
-  const renderHistoryCard = ({ item, index }: { item: HistoryOrder; index: number }) => (
-    <HistoryCard item={item} index={index} />
-  );
+  const renderHistoryCard = ({
+    item,
+    index,
+  }: {
+    item: HistoryOrder;
+    index: number;
+  }) => <HistoryCard item={item} index={index} />;
 
   const getTotalOrders = () => filteredOrders.length;
-  const getCompletedOrders = () => filteredOrders.filter(order => order.status === 'completed').length;
-  const getTotalRevenue = () => filteredOrders
-    .filter(order => order.status === 'completed')
-    .reduce((sum, order) => sum + order.total, 0);
+  const getCompletedOrders = () =>
+    filteredOrders.filter((order) => order.status === 'completed').length;
+  const getTotalRevenue = () =>
+    filteredOrders
+      .filter((order) => order.status === 'completed')
+      .reduce((sum, order) => sum + order.total, 0);
 
   return (
     <CommonView>
       <View style={{ flex: 1 }}>
         <View style={{ marginBottom: 24 }}>
-          <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#333' }}>Order History</Text>
-          <Text style={{ color: '#666', marginTop: 8 }}>View all your past orders</Text>
+          <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#333' }}>
+            Order History
+          </Text>
+          <Text style={{ color: '#666', marginTop: 8 }}>
+            View all your past orders
+          </Text>
         </View>
 
         {/* Stats Summary */}
-        <View style={{
-          flexDirection: 'row',
-          justifyContent: 'space-around',
-          backgroundColor: 'white',
-          padding: 16,
-          borderRadius: 12,
-          marginBottom: 16,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 4,
-          elevation: 3,
-        }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-around',
+            backgroundColor: 'white',
+            padding: 16,
+            borderRadius: 12,
+            marginBottom: 16,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+            elevation: 3,
+          }}
+        >
           <View style={{ alignItems: 'center' }}>
-            <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#007AFF' }}>
+            <Text
+              style={{ fontSize: 20, fontWeight: 'bold', color: '#007AFF' }}
+            >
               {getTotalOrders()}
             </Text>
             <Text style={{ color: '#666', fontSize: 12 }}>Total Orders</Text>
           </View>
           <View style={{ alignItems: 'center' }}>
-            <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#34C759' }}>
+            <Text
+              style={{ fontSize: 20, fontWeight: 'bold', color: '#34C759' }}
+            >
               {getCompletedOrders()}
             </Text>
             <Text style={{ color: '#666', fontSize: 12 }}>Completed</Text>
           </View>
           <View style={{ alignItems: 'center' }}>
-            <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#FF9500' }}>
+            <Text
+              style={{ fontSize: 20, fontWeight: 'bold', color: '#FF9500' }}
+            >
               ${getTotalRevenue().toFixed(2)}
             </Text>
             <Text style={{ color: '#666', fontSize: 12 }}>Revenue</Text>
@@ -314,8 +373,8 @@ const OrderHistoryScreen = () => {
           style={{ marginBottom: 16, borderRadius: 12 }}
         />
 
-        <ScrollView 
-          horizontal 
+        <ScrollView
+          horizontal
           showsHorizontalScrollIndicator={false}
           style={{ marginBottom: 16 }}
         >
@@ -339,7 +398,9 @@ const OrderHistoryScreen = () => {
           contentContainerStyle={{ paddingBottom: 20 }}
           ListEmptyComponent={() => (
             <View style={{ alignItems: 'center', marginTop: 40 }}>
-              <Text style={{ color: '#666', fontSize: 16 }}>No order history found</Text>
+              <Text style={{ color: '#666', fontSize: 16 }}>
+                No order history found
+              </Text>
               <Text style={{ color: '#999', fontSize: 14, marginTop: 4 }}>
                 Your completed and cancelled orders will appear here
               </Text>

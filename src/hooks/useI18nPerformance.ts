@@ -50,7 +50,9 @@ export const useI18nPerformance = () => {
       // Track slow translations (>1ms)
       if (duration > 1) {
         metrics.slowTranslations++;
-        console.warn(`Slow translation detected: "${String(key)}" took ${duration.toFixed(2)}ms`);
+        console.warn(
+          `Slow translation detected: "${String(key)}" took ${duration.toFixed(2)}ms`,
+        );
       }
 
       // Track missing keys
@@ -65,7 +67,10 @@ export const useI18nPerformance = () => {
     // Log performance summary every 100 translations
     const logInterval = setInterval(() => {
       const metrics = metricsRef.current;
-      if (metrics.translationCount > 0 && metrics.translationCount % 100 === 0) {
+      if (
+        metrics.translationCount > 0 &&
+        metrics.translationCount % 100 === 0
+      ) {
         console.log('📊 i18n Performance Summary:', {
           totalTranslations: metrics.translationCount,
           averageTime: `${metrics.averageTime.toFixed(3)}ms`,

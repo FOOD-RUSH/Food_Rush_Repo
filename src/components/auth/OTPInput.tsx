@@ -39,7 +39,9 @@ const OTPInput: React.FC<OTPInputProps> = ({
 
     if (digit) {
       // Update the OTP value
-      const newOtp = otpArray.map((val, i) => i === index ? digit : val).join('');
+      const newOtp = otpArray
+        .map((val, i) => (i === index ? digit : val))
+        .join('');
       onChange(newOtp);
 
       // Auto-focus next input
@@ -51,7 +53,9 @@ const OTPInput: React.FC<OTPInputProps> = ({
       }
     } else {
       // Handle backspace
-      const newOtp = otpArray.map((val, i) => i === index ? '' : val).join('');
+      const newOtp = otpArray
+        .map((val, i) => (i === index ? '' : val))
+        .join('');
       onChange(newOtp);
     }
   };
@@ -81,10 +85,10 @@ const OTPInput: React.FC<OTPInputProps> = ({
         borderColor: error
           ? colors.error
           : isFocused
-          ? colors.primary
-          : hasValue
-          ? colors.primary
-          : colors.outline,
+            ? colors.primary
+            : hasValue
+              ? colors.primary
+              : colors.outline,
         backgroundColor: colors.surfaceVariant,
         color: colors.onSurface,
       },

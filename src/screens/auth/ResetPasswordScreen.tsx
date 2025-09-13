@@ -66,11 +66,7 @@ const ResetPasswordScreen = ({
 
   const passwordValue = watch('password');
   const confirmPasswordValue = watch('confirmPassword');
-  const {
-    mutate: ResetPasswordMutation,
-    error,
-    isPending,
-  } = useResetPassword();
+  const { mutate: ResetPasswordMutation, isPending } = useResetPassword();
 
   const onSubmit = useCallback(
     async (data: ResetPasswordForm) => {

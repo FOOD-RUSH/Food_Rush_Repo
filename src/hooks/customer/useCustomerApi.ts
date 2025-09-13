@@ -1,157 +1,130 @@
-// useCustomerApi.ts
-import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { restaurantApi, RestaurantQuery } from "@/src/services/customer/restaurant.service";
-import { OrderApi } from "@/src/services/customer/orders.service";
-import { useAuthStore } from "@/src/stores/customerStores/AuthStore";
-
-export interface RestaurantFilters {
-    cuisine?: string[];
-    minRating?: number;
-    maxDeliveryTime?: number;
-    maxDeliveryFee?: number;
-    isOpen?: boolean;
-    coordinates?: {
-        latitude: number;
-        longitude: number;
-        radius?: number;
-    };
-}
-
-// Hardcoded coordinates for Yaoundé (location system removed)
-const DEFAULT_COORDINATES = {
-    latitude: 3.8667,
-    longitude: 11.5167,
-};
-
-
+// hooks/customer/index.ts - Updated to match your existing pattern
+import { useQuery } from '@tanstack/react-query';
+import {
+  restaurantApi,
+  RestaurantQuery,
+} from '@/src/services/customer/restaurant.service';
+import { useLocationForQueries } from './useLocationService';
 
 const CACHE_CONFIG = {
-    STALE_TIME: 5 * 60 * 1000, // 5 minutes
-    CACHE_TIME: 10 * 60 * 1000, // 10 minutes
-    RETRY_DELAY: 1000,
-    MAX_RETRIES: 3,
+  STALE_TIME: 5 * 60 * 1000, // 5 minutes
+  CACHE_TIME: 10 * 60 * 1000, // 10 minutes
+  MAX_RETRIES: 3,
 };
 
-// Restaurant hooks
+// Updated to match your existing naming convention
+export const useGetAllMenu = (options: { enabled?: boolean } = {}) => {
+  const { nearLat, nearLng, locationQueryKey } = useLocationForQueries();
+
+  return useQuery({
+    queryKey: ['menu', 'all', ...locationQueryKey],
+    queryFn: async () => {
+      try {
+        const result = await restaurantApi.getAllMenuItems({
+          nearLat,
+          nearLng,
+        });
+        return result;
+      } catch (error) {
+        console.error('Error fetching all menu:', error);
+        throw error;
+      }
+    },
+    enabled: (options.enabled ?? true) && !!(nearLat && nearLng),
+    staleTime: CACHE_CONFIG.STALE_TIME,
+    gcTime: CACHE_CONFIG.CACHE_TIME,
+    retry: CACHE_CONFIG.MAX_RETRIES,
+  });
+};
+
+export const useGetAllMenuItem = () => {
+  return useQuery({
+    queryKey: ['menu', 'all'],
+    queryFn: async () => {
+      try {
+        const result = await restaurantApi.getAllMenu2();
+        return result;
+      } catch (error) {
+        console.error('Error fetching all menu:', error);
+        throw error;
+      }
+    },
+    staleTime: CACHE_CONFIG.STALE_TIME,
+    gcTime: CACHE_CONFIG.CACHE_TIME,
+    retry: CACHE_CONFIG.MAX_RETRIES,
+  });
+};
+
+// Hook for restaurant details with automatic location
+export const useRestaurantDetails = (id: string) => {
+  const { nearLat, nearLng, locationQueryKey } = useLocationForQueries();
+
+  return useQuery({
+    queryKey: ['restaurant-details', id, ...locationQueryKey],
+    queryFn: () => restaurantApi.getRestaurantDetails(id, nearLat, nearLng),
+    enabled: !!id,
+    staleTime: CACHE_CONFIG.STALE_TIME,
+    gcTime: CACHE_CONFIG.CACHE_TIME,
+    retry: CACHE_CONFIG.MAX_RETRIES,
+  });
+};
+// Hook for nearby restaurants with automatic location
+export const useNearbyRestaurants = () => {
+  const { nearLat, nearLng, locationQueryKey } = useLocationForQueries();
+
+  return useQuery({
+    queryKey: ['nearby-restaurants', ...locationQueryKey, { nearLat, nearLng }],
+    queryFn: () =>
+      restaurantApi.getNearbyRestaurants({
+        nearLat,
+        nearLng,
+        verificationStatus: 'APPROVED',
+        isOpen: true,
+      }),
+    enabled: !!(nearLat && nearLng),
+    staleTime: CACHE_CONFIG.STALE_TIME,
+    gcTime: CACHE_CONFIG.CACHE_TIME,
+    retry: CACHE_CONFIG.MAX_RETRIES,
+  });
+};
+// Additional hooks for the simplified version
 export const useAllRestaurants = (query: RestaurantQuery) => {
-    return useQuery({
-        queryKey: ['restaurants', query],// import { paymentApi } from "@/src/services/customer/payment.service";
+  const { nearLat, nearLng, locationQueryKey } = useLocationForQueries();
 
-        queryFn: () => restaurantApi.getAllRestaurants(query),
-        staleTime: CACHE_CONFIG.STALE_TIME,
-        gcTime: CACHE_CONFIG.CACHE_TIME,
-        retry: CACHE_CONFIG.MAX_RETRIES,
-
-    })
+  return useQuery({
+    queryKey: ['restaurants', 'all', ...locationQueryKey, query],
+    queryFn: async () => {
+      try {
+        const result = await restaurantApi.getAllRestaurants({
+          ...query,
+          nearLat: nearLat,
+          nearLng: nearLng,
+          isOpen: true,
+          verificationStatus: 'APPROVED',
+        });
+        return result;
+      } catch (error) {
+        console.error('Error fetching all restaurants:', error);
+        throw error;
+      }
+    },
+    staleTime: CACHE_CONFIG.STALE_TIME,
+    gcTime: CACHE_CONFIG.CACHE_TIME,
+    retry: CACHE_CONFIG.MAX_RETRIES,
+    enabled: !!(nearLat && nearLng),
+  });
 };
 
-export const useRestaurantId = (id: string, category?: string) => {
-    return useQuery({
-        queryKey: ['restaurant', id,],
-        queryFn: () => restaurantApi.getRestaurantById(id).then(res => res.data),
-        staleTime: CACHE_CONFIG.STALE_TIME,
-        gcTime: CACHE_CONFIG.CACHE_TIME,
-        enabled: !!id,
-    })
-}
-export const useGetAllMenu = (options?: { enabled?: boolean }) => {
-    return useQuery({
-        queryKey: ['All_menu'],
-        queryFn: () => restaurantApi.getAllMenu(),
-        enabled: options?.enabled ?? true,
+// Hook for menu item by ID with automatic location
+export const useMenuItemById = (id: string) => {
+  const { nearLat, nearLng, locationQueryKey } = useLocationForQueries();
 
-
-
-
-    })
-}
-
-export const useGetAllMenuBrowse = (query: RestaurantQuery | null, options?: { enabled?: boolean }) => {
-    return useQuery({
-        queryKey: ['All_menu', query],
-        queryFn: () => restaurantApi.getMenuBrowseAll({ ...query! }),
-        staleTime: CACHE_CONFIG.STALE_TIME,
-        gcTime: CACHE_CONFIG.CACHE_TIME,
-        retry: CACHE_CONFIG.MAX_RETRIES,
-        enabled: options?.enabled ?? !!query,
-
-
-
-    })
-}
-
-export const useGetMenuById = (restaurantId: string, menuId: string) => {
-    return useQuery({
-        queryKey: ['menuItem', menuId],
-        queryFn: () => restaurantApi.getMenuItemById(restaurantId, menuId).then(res => res.data),
-        staleTime: 5 * 60 * 1000, // 5 minutes
-        gcTime: 30 * 60 * 1000, // 30 minutes (previously cacheTime)
-
-    })
-}
-
-export const useGetRestaurantsNearBy = () => {
-    return useQuery({
-        queryKey: ['nearby_restaurant'],
-        queryFn: async () => {
-            // Use hardcoded coordinates for Yaoundé
-            const latitude = DEFAULT_COORDINATES.latitude;
-            const longitude = DEFAULT_COORDINATES.longitude;
-            return restaurantApi.getNearbyRestaurants(latitude, longitude);
-        },
-        enabled: true,
-        staleTime: 5 * 60 * 1000, // 5 minutes
-        gcTime: 30 * 60 * 1000, // 30 minutes (previously cacheTime)
-        retry: 3,
-        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-    })
-}
-
-
-
-
-// Order hooks
-export const useCreateOrder = () => {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (orderData: any) => OrderApi.createOrder(orderData).then(res => res.data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['orders'] });
-        }
-    })
-}
-
-export const useOrderById = (orderId: string) => {
-    const isAuthenticated = useAuthStore(state => state.isAuthenticated);
-
-    return useQuery({
-        queryKey: ['orders', orderId],
-        queryFn: () => OrderApi.getOrderById(orderId).then(res => res.data),
-        enabled: !!orderId && isAuthenticated,
-    })
-}
-
-export const useAllOrders = (customerId: string) => {
-    const isAuthenticated = useAuthStore(state => state.isAuthenticated);
-
-    return useQuery({
-        queryKey: ['orders', customerId],
-        queryFn: () => OrderApi.getAllOrders(customerId).then(res => res.data),
-        enabled: !!customerId && isAuthenticated,
-    })
-}
-
-export const useCancelOrder = () => {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (orderId: string) => OrderApi.cancelOrder(orderId).then(res => res.data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['orders'] });
-        }
-    })
-}
-
-// Menu Hooks 
-
-
-
+  return useQuery({
+    queryKey: ['menu-item', id, ...locationQueryKey],
+    queryFn: () => restaurantApi.getMenuItemById(id, nearLat, nearLng),
+    // enabled: enabled && !!id,
+    staleTime: CACHE_CONFIG.STALE_TIME,
+    gcTime: CACHE_CONFIG.CACHE_TIME,
+    retry: CACHE_CONFIG.MAX_RETRIES,
+  });
+};

@@ -23,11 +23,7 @@ const RestaurantCardSkeleton: React.FC = () => {
       }}
     >
       {/* Image skeleton */}
-      <SkeletonLoader
-        width="100%"
-        height={150}
-        borderRadius={0}
-      />
+      <SkeletonLoader width="100%" height={150} borderRadius={0} />
 
       {/* Heart icon skeleton */}
       <View
@@ -74,7 +70,12 @@ const RestaurantCardSkeleton: React.FC = () => {
           }}
         >
           <SkeletonLoader width={12} height={12} borderRadius={6} />
-          <SkeletonLoader width={20} height={12} borderRadius={6} style={{ marginLeft: 4 }} />
+          <SkeletonLoader
+            width={20}
+            height={12}
+            borderRadius={6}
+            style={{ marginLeft: 4 }}
+          />
         </View>
       </View>
 
@@ -102,7 +103,12 @@ const RestaurantCardSkeleton: React.FC = () => {
               }}
             >
               <SkeletonLoader width={14} height={14} borderRadius={7} />
-              <SkeletonLoader width={40} height={14} borderRadius={7} style={{ marginLeft: 4 }} />
+              <SkeletonLoader
+                width={40}
+                height={14}
+                borderRadius={7}
+                style={{ marginLeft: 4 }}
+              />
             </View>
             <SkeletonLoader width={60} height={12} borderRadius={6} />
           </View>

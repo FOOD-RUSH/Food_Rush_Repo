@@ -31,7 +31,10 @@ export default function OrderConfirmationScreen({ route, navigation }: Props) {
       ) : null}
 
       <View style={styles.row}>
-        <Button title="Go to Orders" onPress={() => navigation.navigate('OrderHistory')} />
+        <Button
+          title="Go to Orders"
+          onPress={() => navigation.navigate('OrderHistory')}
+        />
       </View>
 
       {/* TODO: If you need to re-fetch order details, call GET /api/v1/orders/{id} here */}
@@ -44,7 +47,12 @@ const styles = StyleSheet.create({
   container: { flex: 1, padding: 16 },
   title: { fontSize: 22, fontWeight: '700', marginBottom: 8 },
   status: { fontSize: 16, marginBottom: 6 },
-  reasonBox: { marginTop: 12, padding: 12, backgroundColor: '#fff3f3', borderRadius: 6 },
+  reasonBox: {
+    marginTop: 12,
+    padding: 12,
+    backgroundColor: '#fff3f3',
+    borderRadius: 6,
+  },
   reasonLabel: { fontWeight: '600' },
   reasonText: { marginTop: 6, color: '#333' },
   row: { marginTop: 20 },

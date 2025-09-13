@@ -1,15 +1,12 @@
-// src/location/LocationService.ts - Simple MVP implementation
-import * as Location from 'expo-location';
-import { Coordinates, ManualAddressInput, GeocodeResponse } from './types';
-
-// Yaoundé center for MVP
-const YAOUNDE_CENTER: Coordinates = {
-  latitude: 3.8667,
-  longitude: 11.5167
-};
+import * as ExpoLocation from 'expo-location';
+import { LOCATION_CONFIG, YAOUNDE_CENTER, isValidCameroonCoordinate } from './constants';
+import { Coordinates, Location, LocationResult, PermissionStatus } from './types';
 
 class LocationService {
   private static instance: LocationService;
+  private currentLocation: Location | null = null;
+  private cacheTimestamp = 0;
+  private lastPermissionRequest = 0;
 
   static getInstance(): LocationService {
     if (!LocationService.instance) {
@@ -18,89 +15,227 @@ class LocationService {
     return LocationService.instance;
   }
 
-  // Simple permission check
-  async checkPermission(): Promise<boolean> {
+  async isLocationEnabled(): Promise<boolean> {
     try {
-      const { status } = await Location.getForegroundPermissionsAsync();
-      return status === 'granted';
-    } catch {
+      return await ExpoLocation.hasServicesEnabledAsync();
+    } catch (error) {
+      console.warn('Error checking location services:', error);
       return false;
     }
   }
 
-  // Simple permission request
-  async requestPermission(): Promise<boolean> {
+  async getPermissionStatus(): Promise<PermissionStatus> {
     try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      return status === 'granted';
-    } catch {
-      return false;
+      const { status } = await ExpoLocation.getForegroundPermissionsAsync();
+      switch (status) {
+        case 'granted':
+          return PermissionStatus.GRANTED;
+        case 'denied':
+          return PermissionStatus.DENIED;
+        default:
+          return PermissionStatus.NOT_REQUESTED;
+      }
+    } catch (error) {
+      console.warn('Error getting permission status:', error);
+      return PermissionStatus.NOT_REQUESTED;
     }
   }
 
-  // Get GPS location with simple timeout
-  async getCurrentLocation(): Promise<Coordinates | null> {
-    try {
-      const location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
-        timeInterval: 5000,
-      });
-
-      const coords = {
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
+  async requestPermission(): Promise<{
+    granted: boolean;
+    status: PermissionStatus;
+    shouldShowRationale?: boolean;
+  }> {
+    const now = Date.now();
+    
+    // Prevent spam permission requests
+    if (now - this.lastPermissionRequest < LOCATION_CONFIG.PERMISSION_COOLDOWN) {
+      const currentStatus = await this.getPermissionStatus();
+      return {
+        granted: currentStatus === PermissionStatus.GRANTED,
+        status: currentStatus,
       };
+    }
 
-      // Basic validation for Cameroon
-      if (this.isValidLocation(coords)) {
-        return coords;
+    try {
+      this.lastPermissionRequest = now;
+      const result = await ExpoLocation.requestForegroundPermissionsAsync();
+      
+      const status = result.status === 'granted' 
+        ? PermissionStatus.GRANTED 
+        : PermissionStatus.DENIED;
+
+      return {
+        granted: result.status === 'granted',
+        status,
+        shouldShowRationale: result.canAskAgain === false,
+      };
+    } catch (error) {
+      console.warn('Error requesting permission:', error);
+      return {
+        granted: false,
+        status: PermissionStatus.DENIED,
+      };
+    }
+  }
+
+  async getCurrentLocation(forceRefresh = false): Promise<LocationResult> {
+    try {
+      // Return cached location if valid and not forcing refresh
+      if (
+        !forceRefresh &&
+        this.currentLocation &&
+        Date.now() - this.cacheTimestamp < LOCATION_CONFIG.CACHE_DURATION
+      ) {
+        return {
+          success: true,
+          location: this.currentLocation,
+          fromCache: true,
+        };
       }
 
-      return YAOUNDE_CENTER;
-    } catch {
-      return null;
-    }
-  }
+      // Check if location services are enabled
+      const servicesEnabled = await this.isLocationEnabled();
+      if (!servicesEnabled) {
+        return this.getFallbackLocation('Location services are disabled');
+      }
 
-  // Simple location validation
-  private isValidLocation(coords: Coordinates): boolean {
-    return (
-      coords.latitude >= 1.0 && coords.latitude <= 13.0 &&
-      coords.longitude >= 8.0 && coords.longitude <= 16.0
-    );
-  }
+      // Check permission
+      const permission = await this.getPermissionStatus();
+      if (permission !== PermissionStatus.GRANTED) {
+        return this.getFallbackLocation('Location permission not granted');
+      }
 
-  // Simple address processing for MVP
-  async geocodeAddress(addressInput: ManualAddressInput): Promise<GeocodeResponse> {
-    try {
-      const formattedAddress = `${addressInput.street}${addressInput.landmark ? `, ${addressInput.landmark}` : ''}, Yaoundé`;
+      // Get GPS location with timeout
+      const position = await Promise.race([
+        ExpoLocation.getCurrentPositionAsync({
+          accuracy: ExpoLocation.Accuracy.Balanced,
+        }),
+        new Promise<never>((_, reject) => 
+          setTimeout(() => reject(new Error('GPS timeout')), LOCATION_CONFIG.GPS_TIMEOUT)
+        ),
+      ]);
+
+      const coordinates: Coordinates = {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      };
+
+      // Validate coordinates
+      if (!isValidCameroonCoordinate(coordinates)) {
+        return this.getFallbackLocation('Location outside service area');
+      }
+
+      // Reverse geocode
+      const address = await this.reverseGeocode(coordinates);
+
+      const location: Location = {
+        ...coordinates,
+        city: 'Yaoundé',
+        exactLocation: address.exactLocation,
+        formattedAddress: address.formattedAddress,
+        isFallback: false,
+        timestamp: Date.now(),
+      };
+
+      // Cache the location
+      this.currentLocation = location;
+      this.cacheTimestamp = Date.now();
 
       return {
         success: true,
-        coordinates: YAOUNDE_CENTER,
-        formattedAddress,
+        location,
+        fromCache: false,
       };
-    } catch {
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to get location';
+      console.warn('Error getting current location:', errorMessage);
+      return this.getFallbackLocation(errorMessage);
+    }
+  }
+
+  private async reverseGeocode(coordinates: Coordinates): Promise<{
+    exactLocation: string;
+    formattedAddress: string;
+  }> {
+    try {
+      const geocodeResult = await ExpoLocation.reverseGeocodeAsync(coordinates);
+
+      if (!geocodeResult || geocodeResult.length === 0) {
+        return {
+          exactLocation: 'Yaoundé',
+          formattedAddress: 'Yaoundé, Cameroun',
+        };
+      }
+
+      const result = geocodeResult[0];
+      let exactLocation = 'Yaoundé';
+      
+      if (result.street) {
+        exactLocation = result.street;
+      } else if (result.district) {
+        exactLocation = result.district;
+      } else if (result.subregion) {
+        exactLocation = result.subregion;
+      }
+
+      const addressParts = [
+        result.street,
+        result.district || result.subregion,
+        result.city || 'Yaoundé',
+        'Cameroun',
+      ].filter(Boolean);
+
       return {
-        success: false,
-        error: 'Failed to process address',
+        exactLocation,
+        formattedAddress: addressParts.join(', '),
+      };
+    } catch (error) {
+      console.warn('Reverse geocoding failed:', error);
+      return {
+        exactLocation: 'Yaoundé',
+        formattedAddress: 'Yaoundé, Cameroun',
       };
     }
   }
 
-  // Simple reverse geocoding
-  async reverseGeocode(coords: Coordinates): Promise<string> {
-    return this.isValidLocation(coords) ? 'Yaoundé, Cameroun' : 'Location inconnue';
+  private getFallbackLocation(reason?: string): LocationResult {
+    const location: Location = {
+      ...YAOUNDE_CENTER,
+      city: 'Yaoundé',
+      exactLocation: 'Centre-ville, Yaoundé',
+      formattedAddress: 'Centre-ville, Yaoundé, Cameroun',
+      isFallback: true,
+      timestamp: Date.now(),
+    };
+
+    this.currentLocation = location;
+    this.cacheTimestamp = Date.now();
+
+    return {
+      success: true,
+      location,
+      error: reason,
+    };
   }
 
-  // Get default location
-  getDefaultLocation(): Coordinates {
+  getDefaultCoordinates(): Coordinates {
     return YAOUNDE_CENTER;
   }
 
-  // Validate address input
-  validateAddress(addressInput: ManualAddressInput): boolean {
-    return !!(addressInput.street?.trim());
+  clearCache(): void {
+    this.currentLocation = null;
+    this.cacheTimestamp = 0;
+  }
+
+  getCachedLocation(): Location | null {
+    if (
+      this.currentLocation &&
+      Date.now() - this.cacheTimestamp < LOCATION_CONFIG.CACHE_DURATION
+    ) {
+      return this.currentLocation;
+    }
+    return null;
   }
 }
 

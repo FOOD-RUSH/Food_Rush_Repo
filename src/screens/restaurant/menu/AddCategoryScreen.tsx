@@ -46,7 +46,7 @@ const AddCategoryScreen = () => {
             >
               Cancel
             </Button>
-            
+
             <Button
               mode="contained"
               onPress={() => {}}

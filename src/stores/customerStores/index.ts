@@ -4,6 +4,4 @@
 export * from './AppStore';
 export * from './AuthStore';
 export * from './cartStore';
-export * from './addressStore';
-export * from './paymentStore';
 export * from './notificationStore';

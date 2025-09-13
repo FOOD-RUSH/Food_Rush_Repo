@@ -1,80 +1,101 @@
 import { useTranslation } from 'react-i18next';
-import { View, Text, Image, FlatList } from 'react-native';
-import React from 'react';
-import OrderItemCard, {
-  OrderItemCardProps,
-} from '@/src/components/customer/OrderItemCard';
+import { View, Text, Image, FlatList, RefreshControl } from 'react-native';
+import React, { useCallback } from 'react';
+import OrderItemCard from '@/src/components/customer/OrderItemCard';
 import CommonView from '@/src/components/common/CommonView';
-import { images } from '@/assets/images';
-
-const orderItems: OrderItemCardProps[] = [
-  {
-    foodId: '1',
-    restaurantId: '101',
-    foodName: 'Pizza Margherita',
-    image: require('@/assets/images/apple.png'),
-    foodPrice: '12.99',
-    quantity: 2,
-    orderStatus: 'active',
-    distance: '2.4 km',
-  },
-  {
-    foodId: '2',
-    restaurantId: '102',
-    foodName: 'Spaghetti Carbonara',
-    image: images.restaurantImg,
-    foodPrice: '10.99',
-    quantity: 1,
-    orderStatus: 'active',
-    distance: '1.8 km',
-  },
-  {
-    foodId: '3',
-    restaurantId: '103',
-    foodName: 'Caesar Salad',
-    image: images.onboarding1,
-    foodPrice: '8.99',
-    quantity: 3,
-    orderStatus: 'active',
-    distance: '3.2 km',
-  },
-];
+import {
+  useActiveOrders,
+  useActiveOrdersCount,
+} from '@/src/hooks/customer/useOrdersApi';
+import LoadingScreen from '@/src/components/common/LoadingScreen';
+import { useTheme } from 'react-native-paper';
+import { Order } from '@/src/types';
 
 const ActiveOrderScreen = () => {
   const { t } = useTranslation('translation');
+  const { colors } = useTheme();
+
+  // Fetch active orders using React Query
+  const {
+    data: activeOrders,
+    isLoading,
+    error,
+    refetch,
+    isRefetching,
+  } = useActiveOrders();
+
+  const handleRefresh = useCallback(() => {
+    refetch();
+  }, [refetch]);
+
+  const handleTrackOrder = useCallback((orderId: string) => {
+    // Handle order tracking navigation
+    console.log('Track order:', orderId);
+  }, []);
+
+  const handleReorder = useCallback((order: Order) => {
+    // Handle reorder logic
+    console.log('Reorder:', order);
+  }, []);
+
+  const renderOrderItem = useCallback(
+    ({ item }: { item: Order }) => (
+      <OrderItemCard
+        key={item.id}
+        order={item}
+        onTrackOrder={handleTrackOrder}
+        onReorder={handleReorder}
+      />
+    ),
+    [handleTrackOrder, handleReorder],
+  );
+
+  const keyExtractor = useCallback((item: Order) => item.id, []);
+
   const renderEmptyComponent = () => (
     <View className="flex-1 items-center justify-center px-8 py-12">
       <Image
         source={require('@/assets/images/NoOrdersLight.png')}
+        style={{ width: 200, height: 200, marginBottom: 16 }}
         resizeMode="contain"
       />
-      <Text className="text-gray-500 text-lg text-center">
+      <Text
+        style={{
+          color: colors.onSurfaceVariant,
+          fontSize: 18,
+          textAlign: 'center',
+          marginBottom: 8,
+        }}
+      >
         {t('no_active_orders_found')}
       </Text>
-      <Text className="text-gray-400 text-sm text-center mt-2">
+      <Text
+        style={{
+          color: colors.onSurfaceVariant,
+          fontSize: 14,
+          textAlign: 'center',
+          opacity: 0.8,
+        }}
+      >
         {t('your_active_orders_will_appear_here')}
       </Text>
     </View>
   );
 
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
+
   return (
     <CommonView>
-      <View className="flex-1 h-full">
+      <View
+        className="flex-1 h-full"
+        style={{ backgroundColor: colors.background }}
+      >
         <FlatList
-          data={orderItems}
-          renderItem={({ item }) => (
-            <OrderItemCard
-              foodId={item.foodId}
-              restaurantId={item.restaurantId}
-              foodName={item.foodName}
-              image={item.image}
-              foodPrice={item.foodPrice}
-              quantity={item.quantity}
-              orderStatus={item.orderStatus}
-              distance={item.distance}
-            />
-          )}
-          keyExtractor={(item) => item.foodId}
+          data={activeOrders || []}
+          renderItem={renderOrderItem}
+          keyExtractor={keyExtractor}
           contentContainerStyle={{
             paddingTop: 8,
             paddingBottom: 20,
@@ -82,6 +103,14 @@ const ActiveOrderScreen = () => {
           }}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={renderEmptyComponent}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={handleRefresh}
+              colors={[colors.primary]}
+              tintColor={colors.primary}
+            />
+          }
         />
       </View>
     </CommonView>

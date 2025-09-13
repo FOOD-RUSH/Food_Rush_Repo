@@ -77,7 +77,6 @@ export const useAppStore = create<AppState & AppActions>()(
             }
           },
 
-          
           setTheme: (theme) => {
             const currentTheme = get().theme;
             if (currentTheme !== theme) {

@@ -43,6 +43,7 @@ import NotificationsScreen from '../screens/restaurant/profile/NotificationsScre
 import FoodDetailsScreen from '../screens/customer/home/FoodDetailsScreen';
 import RestaurantDetailScreen from '../screens/customer/home/RestaurantDetailScreen';
 import NearbyRestaurantsScreen from '../screens/customer/home/NearbyRestaurantsScreen';
+import OrderTrackingScreen from '../screens/customer/Order/OrderTrackingScreen';
 
 // Profile screens
 import EditProfileScreen from '../screens/customer/Profile/EditProfileScreen';
@@ -54,6 +55,7 @@ import AddressScreen from '../screens/customer/Profile/AddressScreen';
 // Data
 import { OnboardingSlides } from '@/src/utils/onboardingData';
 import { useAppTheme, useAppNavigationTheme } from '../config/theme';
+import ProfileDetailsScreen from '../screens/customer/Profile/ProfileDetailsScreen';
 
 // Stack navigator
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -191,17 +193,13 @@ const RootNavigator: React.FC = () => {
     });
   }, [cartItems.length, clearCart, t]);
 
-
   // Memoized cart screen options
   const cartScreenOptions = useMemo(
     () => ({
       headerTitle: t('my_cart'),
       headerBackTitleVisible: false,
       headerRight: () => (
-        <TouchableOpacity
-          onPress={handleClearCart}
-          style={{ marginRight: 16 }}
-        >
+        <TouchableOpacity onPress={handleClearCart} style={{ marginRight: 16 }}>
           <MaterialIcons
             name="delete-forever"
             size={24}
@@ -222,7 +220,6 @@ const RootNavigator: React.FC = () => {
     [completeOnboarding, setUserType],
   );
 
-  
   const handleLogin = useCallback(
     (selectedUserType: 'customer' | 'restaurant') => {
       setUserType(selectedUserType);
@@ -381,8 +378,7 @@ const RootNavigator: React.FC = () => {
               component={RestaurantReviewScreen}
               options={{
                 headerTitle: '',
-                headerShown: false,
-                animation: 'slide_from_right' as const,
+                ...screenOptions.fullScreen,
               }}
             />
           </Stack.Group>
@@ -428,6 +424,21 @@ const RootNavigator: React.FC = () => {
                 headerTitle: t('language_settings'),
               }}
             />
+            <Stack.Screen
+              name="ProfileDetails"
+              component={ProfileDetailsScreen}
+              options={{
+                headerTitle: t('profile_details'),
+              }}
+            />
+            <Stack.Screen
+              name="OrderTracking"
+              component={OrderTrackingScreen}
+              options={{
+                headerTitle: 'Track Order',
+                gestureEnabled: false, // Prevent swipe back during tracking
+              }}
+            />
           </Stack.Group>
 
           {/* Checkout Screen */}
@@ -444,25 +455,14 @@ const RootNavigator: React.FC = () => {
           />
 
           {/* Future screens can be added here */}
-          <Stack.Screen 
-            name="OrderReceipt" 
+          <Stack.Screen
+            name="OrderReceipt"
             component={OrderReceiptScreen}
             options={{
               ...screenOptions.fullScreen,
               headerTitle: t('order_receipt'),
             }}
           />
-          {/* 
-          <Stack.Screen 
-            name="OrderTracking" 
-            component={OrderTrackingScreen}
-            options={{
-              ...screenOptions.checkout,
-              headerTitle: 'Track Order',
-              gestureEnabled: false, // Prevent swipe back during tracking
-            }}
-          />
-          */}
         </Stack.Navigator>
       </NavigationContainer>
     </>

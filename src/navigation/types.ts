@@ -1,4 +1,3 @@
-
 // Updated types.ts - Moving full-screen screens to RootStack
 import {
   NavigatorScreenParams,
@@ -19,7 +18,7 @@ export type RootStackParamList = {
 
   Checkout: { cartId?: string };
   OrderTracking: { orderId: string };
-  FoodDetails: { foodId: string; restaurantId: string };
+  FoodDetails: { foodId: string };
   RestaurantDetails: { restaurantId: string };
   Notifications: undefined;
   Category: { categoryId: string };
@@ -30,8 +29,8 @@ export type RootStackParamList = {
   };
   // profile screens
   EditProfile: undefined;
+  ProfileDetails: undefined;
   AddressScreen: undefined;
-  AddAddress: { addressId?: string };
   PaymentMethods: undefined;
   AddPayment: { paymentId?: string };
   Settings: undefined;
@@ -73,7 +72,7 @@ export type CustomerTabParamList = {
 // Customer Home Stack - Only screens that should show tabs
 export type CustomerHomeStackParamList = {
   HomeScreen: undefined;
- 
+
   // Removed: Cart, FoodDetails, RestaurantDetails, SearchScreen, etc.
   // These are now in RootStack
 };
@@ -89,8 +88,8 @@ export type CustomerOrderStackParamList = {
 
 export type CustomerProfileStackParamList = {
   ProfileHome: undefined;
+  ProfileDetails: undefined;
 };
-
 
 export type CustomerHelpCenterStackParamList = {
   FAQ: undefined;
@@ -174,7 +173,6 @@ export type CustomerTabScreenProps<T extends keyof CustomerTabParamList> =
   >;
 
 export type RestaurantTabScreenProps<T extends keyof RestaurantTabParamList> =
-
   CompositeScreenProps<
     BottomTabScreenProps<RestaurantTabParamList, T>,
     RootStackScreenProps<keyof RootStackParamList>

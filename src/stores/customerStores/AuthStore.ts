@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { createJSONStorage, devtools, persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from '../../types';
-import { navigate } from '../../navigation/navigationHelpers';
+import { navigate, reset } from '../../navigation/navigationHelpers';
 import TokenManager from '@/src/services/customer/tokenManager';
 
 interface AuthState {
@@ -93,7 +93,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             });
 
             // Navigate to auth screen
-            navigate('Auth');
+            reset('Auth');
           } catch (error) {
             console.error('Error during logout:', error);
             // Still reset state even if token clearing fails
@@ -101,7 +101,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
               ...initialState,
               selectedUserType: get().selectedUserType,
             });
-            navigate('Auth');
+            reset('Auth');
           }
         },
 
@@ -185,27 +185,32 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
 // Selector hooks for better performance and type safety
 export const useAuthUser = () => useAuthStore((state) => state.user);
-export const useIsAuthenticated = () => useAuthStore((state) => state.isAuthenticated);
+export const useIsAuthenticated = () =>
+  useAuthStore((state) => state.isAuthenticated);
 export const useAuthLoading = () => useAuthStore((state) => state.isLoading);
 export const useAuthError = () => useAuthStore((state) => state.error);
 export const useUserType = () => useAuthStore((state) => state.userType);
-export const useSelectedUserType = () => useAuthStore((state) => state.selectedUserType);
-export const useRegistrationData = () => useAuthStore((state) => state.registrationData);
+export const useSelectedUserType = () =>
+  useAuthStore((state) => state.selectedUserType);
+export const useRegistrationData = () =>
+  useAuthStore((state) => state.registrationData);
 
 // Compound selectors for complex state combinations
-export const useAuthStatus = () => useAuthStore((state) => ({
-  isAuthenticated: state.isAuthenticated,
-  isLoading: state.isLoading,
-  user: state.user,
-  error: state.error,
-}));
+export const useAuthStatus = () =>
+  useAuthStore((state) => ({
+    isAuthenticated: state.isAuthenticated,
+    isLoading: state.isLoading,
+    user: state.user,
+    error: state.error,
+  }));
 
-export const useAuthActions = () => useAuthStore((state) => ({
-  setUser: state.setUser,
-  setIsAuthenticated: state.setIsAuthenticated,
-  setError: state.setError,
-  clearError: state.clearError,
-  logoutUser: state.logoutUser,
-  resetAuth: state.resetAuth,
-  setRegistrationData: state.setRegistrationData,
-}));
+export const useAuthActions = () =>
+  useAuthStore((state) => ({
+    setUser: state.setUser,
+    setIsAuthenticated: state.setIsAuthenticated,
+    setError: state.setError,
+    clearError: state.clearError,
+    logoutUser: state.logoutUser,
+    resetAuth: state.resetAuth,
+    setRegistrationData: state.setRegistrationData,
+  }));

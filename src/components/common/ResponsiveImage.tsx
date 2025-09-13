@@ -1,5 +1,10 @@
 import React from 'react';
-import { Image, ImageSourcePropType, ImageStyle, StyleProp } from 'react-native';
+import {
+  Image,
+  ImageSourcePropType,
+  ImageStyle,
+  StyleProp,
+} from 'react-native';
 import { useResponsive } from '@/src/hooks/useResponsive';
 
 interface ResponsiveImageProps {
@@ -54,16 +59,22 @@ export const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
 };
 
 // Specialized image variants
-export const ResponsiveAvatar: React.FC<Omit<ResponsiveImageProps, 'aspectRatio'>> = (props) => (
+export const ResponsiveAvatar: React.FC<
+  Omit<ResponsiveImageProps, 'aspectRatio'>
+> = (props) => (
   <ResponsiveImage {...props} aspectRatio={1} resizeMode="cover" />
 );
 
-export const ResponsiveIcon: React.FC<Omit<ResponsiveImageProps, 'aspectRatio' | 'resizeMode'>> = (props) => (
+export const ResponsiveIcon: React.FC<
+  Omit<ResponsiveImageProps, 'aspectRatio' | 'resizeMode'>
+> = (props) => (
   <ResponsiveImage {...props} aspectRatio={1} resizeMode="contain" />
 );
 
-export const ResponsiveBanner: React.FC<Omit<ResponsiveImageProps, 'aspectRatio'>> = (props) => (
-  <ResponsiveImage {...props} aspectRatio={16/9} resizeMode="cover" />
+export const ResponsiveBanner: React.FC<
+  Omit<ResponsiveImageProps, 'aspectRatio'>
+> = (props) => (
+  <ResponsiveImage {...props} aspectRatio={16 / 9} resizeMode="cover" />
 );
 
 // Hook for responsive image dimensions

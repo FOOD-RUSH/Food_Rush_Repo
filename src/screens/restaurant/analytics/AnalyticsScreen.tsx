@@ -17,14 +17,14 @@ import { useFocusEffect } from '@react-navigation/native';
 export const AnalyticsScreen = ({ navigation }: any) => {
   const [timeRange, setTimeRange] = useState('week');
   const [selectedMetric, setSelectedMetric] = useState('revenue');
-  
+
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
   const scaleAnim = useRef(new Animated.Value(0.9)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
-  
+
   useEffect(() => {
     // Start entrance animations
     Animated.parallel([
@@ -74,7 +74,7 @@ export const AnalyticsScreen = ({ navigation }: any) => {
         duration: 20000,
         useNativeDriver: true,
         easing: Easing.linear,
-      })
+      }),
     ).start();
   }, []);
 
@@ -108,7 +108,7 @@ export const AnalyticsScreen = ({ navigation }: any) => {
           easing: Easing.out(Easing.back(1.1)),
         }),
       ]).start();
-    }, [])
+    }, []),
   );
 
   const analyticsData = {
@@ -147,7 +147,7 @@ export const AnalyticsScreen = ({ navigation }: any) => {
     title: string,
     data: any,
     index: number,
-    isLarge: boolean = false
+    isLarge: boolean = false,
   ) => {
     const animatedStyle = {
       opacity: fadeAnim,
@@ -184,31 +184,54 @@ export const AnalyticsScreen = ({ navigation }: any) => {
           onPress={() => setSelectedMetric(key)}
           activeOpacity={0.9}
         >
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
             <View>
-              <Text style={{ color: '#8E8E93', fontSize: 14, fontWeight: '500' }}>
+              <Text
+                style={{ color: '#8E8E93', fontSize: 14, fontWeight: '500' }}
+              >
                 {title}
               </Text>
-              <Text style={{ 
-                fontSize: isLarge ? 32 : 24, 
-                fontWeight: 'bold', 
-                color: '#1D1D1F',
-                marginTop: 4 
-              }}>
+              <Text
+                style={{
+                  fontSize: isLarge ? 32 : 24,
+                  fontWeight: 'bold',
+                  color: '#1D1D1F',
+                  marginTop: 4,
+                }}
+              >
                 {data.current}
               </Text>
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginTop: 4,
+                }}
+              >
                 <MaterialCommunityIcons
                   name="trending-up"
                   size={16}
                   color="#34C759"
                 />
-                <Text style={{ color: '#34C759', fontSize: 14, fontWeight: '600', marginLeft: 4 }}>
+                <Text
+                  style={{
+                    color: '#34C759',
+                    fontSize: 14,
+                    fontWeight: '600',
+                    marginLeft: 4,
+                  }}
+                >
                   {data.change}
                 </Text>
               </View>
             </View>
-            
+
             <Animated.View
               style={{
                 transform: [{ scale: selectedMetric === key ? pulseAnim : 1 }],
@@ -232,10 +255,16 @@ export const AnalyticsScreen = ({ navigation }: any) => {
               </LinearGradient>
             </Animated.View>
           </View>
-          
+
           {/* Mini Chart */}
           <View style={{ marginTop: 16, height: 40 }}>
-            <View style={{ flexDirection: 'row', alignItems: "flex-end", height: 40 }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'flex-end',
+                height: 40,
+              }}
+            >
               {data.data.map((value: number, i: number) => {
                 const maxValue = Math.max(...data.data);
                 const height = (value / maxValue) * 40;
@@ -269,8 +298,9 @@ export const AnalyticsScreen = ({ navigation }: any) => {
   };
 
   const renderDetailedChart = () => {
-    const selectedData = analyticsData[selectedMetric as keyof typeof analyticsData];
-    
+    const selectedData =
+      analyticsData[selectedMetric as keyof typeof analyticsData];
+
     return (
       <Animated.View
         style={{
@@ -287,25 +317,51 @@ export const AnalyticsScreen = ({ navigation }: any) => {
           elevation: 8,
         }}
       >
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 20,
+          }}
+        >
           <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#1D1D1F' }}>
-            {selectedMetric.charAt(0).toUpperCase() + selectedMetric.slice(1)} Trend
+            {selectedMetric.charAt(0).toUpperCase() + selectedMetric.slice(1)}{' '}
+            Trend
           </Text>
           <LinearGradient
-            colors={selectedData.color as [ColorValue, ColorValue, ...ColorValue[]]}
-            style={{ width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' }}
+            colors={
+              selectedData.color as [ColorValue, ColorValue, ...ColorValue[]]
+            }
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
           >
-            <MaterialCommunityIcons name={selectedData.icon as any} size={20} color="white" />
+            <MaterialCommunityIcons
+              name={selectedData.icon as any}
+              size={20}
+              color="white"
+            />
           </LinearGradient>
         </View>
-        
+
         {/* Advanced Chart Visualization */}
         <View style={{ height: 200, justifyContent: 'flex-end' }}>
-          <View style={{ flexDirection: 'row', alignItems: "flex-end", height: 150 }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'flex-end',
+              height: 150,
+            }}
+          >
             {selectedData.data.map((value: number, index: number) => {
               const maxValue = Math.max(...selectedData.data);
               const height = (value / maxValue) * 150;
-              
+
               return (
                 <View key={index} style={{ flex: 1, alignItems: 'center' }}>
                   <Animated.View
@@ -321,7 +377,10 @@ export const AnalyticsScreen = ({ navigation }: any) => {
                     }}
                   >
                     <LinearGradient
-                      colors={[selectedData.color[0], selectedData.color[1] + '60']}
+                      colors={[
+                        selectedData.color[0],
+                        selectedData.color[1] + '60',
+                      ]}
                       style={{
                         width: 24,
                         height,
@@ -330,12 +389,14 @@ export const AnalyticsScreen = ({ navigation }: any) => {
                       }}
                     />
                   </Animated.View>
-                  <Text style={{ 
-                    color: '#8E8E93', 
-                    fontSize: 12, 
-                    marginTop: 8,
-                    fontWeight: '500'
-                  }}>
+                  <Text
+                    style={{
+                      color: '#8E8E93',
+                      fontSize: 12,
+                      marginTop: 8,
+                      fontWeight: '500',
+                    }}
+                  >
                     {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index]}
                   </Text>
                 </View>
@@ -369,7 +430,7 @@ export const AnalyticsScreen = ({ navigation }: any) => {
 
   return (
     <CommonView>
-      <ScrollView 
+      <ScrollView
         showsVerticalScrollIndicator={false}
         bounces={true}
         style={{ flex: 1 }}
@@ -383,16 +444,24 @@ export const AnalyticsScreen = ({ navigation }: any) => {
             paddingBottom: 30,
           }}
         >
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
             <View>
-              <Text style={{ fontSize: 32, fontWeight: 'bold', color: '#1D1D1F' }}>
+              <Text
+                style={{ fontSize: 32, fontWeight: 'bold', color: '#1D1D1F' }}
+              >
                 Analytics
               </Text>
               <Text style={{ color: '#8E8E93', marginTop: 4, fontSize: 16 }}>
                 Real-time business insights
               </Text>
             </View>
-            
+
             <TouchableOpacity
               onPress={navigateToDashboard}
               style={{
@@ -409,8 +478,14 @@ export const AnalyticsScreen = ({ navigation }: any) => {
                 elevation: 5,
               }}
             >
-              <MaterialCommunityIcons name="view-dashboard" size={20} color="white" />
-              <Text style={{ color: 'white', marginLeft: 8, fontWeight: '600' }}>
+              <MaterialCommunityIcons
+                name="view-dashboard"
+                size={20}
+                color="white"
+              />
+              <Text
+                style={{ color: 'white', marginLeft: 8, fontWeight: '600' }}
+              >
                 Dashboard
               </Text>
             </TouchableOpacity>
@@ -460,14 +535,36 @@ export const AnalyticsScreen = ({ navigation }: any) => {
         </Animated.View>
 
         {/* Metrics Cards */}
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            marginBottom: 20,
+          }}
+        >
           {renderAnimatedCard('revenue', 'Revenue', analyticsData.revenue, 0)}
           {renderAnimatedCard('orders', 'Orders', analyticsData.orders, 1)}
         </View>
-        
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 }}>
-          {renderAnimatedCard('customers', 'Customers', analyticsData.customers, 2)}
-          {renderAnimatedCard('satisfaction', 'Rating', analyticsData.satisfaction, 3)}
+
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            marginBottom: 20,
+          }}
+        >
+          {renderAnimatedCard(
+            'customers',
+            'Customers',
+            analyticsData.customers,
+            2,
+          )}
+          {renderAnimatedCard(
+            'satisfaction',
+            'Rating',
+            analyticsData.satisfaction,
+            3,
+          )}
         </View>
 
         {/* Detailed Chart */}
@@ -489,31 +586,68 @@ export const AnalyticsScreen = ({ navigation }: any) => {
             elevation: 8,
           }}
         >
-          <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#1D1D1F', marginBottom: 16 }}>
+          <Text
+            style={{
+              fontSize: 20,
+              fontWeight: 'bold',
+              color: '#1D1D1F',
+              marginBottom: 16,
+            }}
+          >
             Performance Summary
           </Text>
-          
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
+
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              marginBottom: 12,
+            }}
+          >
             <Text style={{ color: '#8E8E93', fontSize: 16 }}>Peak Hours</Text>
-            <Text style={{ color: '#1D1D1F', fontWeight: '600', fontSize: 16 }}>12:00 - 14:00</Text>
+            <Text style={{ color: '#1D1D1F', fontWeight: '600', fontSize: 16 }}>
+              12:00 - 14:00
+            </Text>
           </View>
-          
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
+
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              marginBottom: 12,
+            }}
+          >
             <Text style={{ color: '#8E8E93', fontSize: 16 }}>Top Category</Text>
-            <Text style={{ color: '#1D1D1F', fontWeight: '600', fontSize: 16 }}>Main Dishes</Text>
+            <Text style={{ color: '#1D1D1F', fontWeight: '600', fontSize: 16 }}>
+              Main Dishes
+            </Text>
           </View>
-          
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
-            <Text style={{ color: '#8E8E93', fontSize: 16 }}>Avg. Order Value</Text>
-            <Text style={{ color: '#34C759', fontWeight: '600', fontSize: 16 }}>$24.80</Text>
+
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              marginBottom: 12,
+            }}
+          >
+            <Text style={{ color: '#8E8E93', fontSize: 16 }}>
+              Avg. Order Value
+            </Text>
+            <Text style={{ color: '#34C759', fontWeight: '600', fontSize: 16 }}>
+              $24.80
+            </Text>
           </View>
-          
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+
+          <View
+            style={{ flexDirection: 'row', justifyContent: 'space-between' }}
+          >
             <Text style={{ color: '#8E8E93', fontSize: 16 }}>Growth Rate</Text>
-            <Text style={{ color: '#34C759', fontWeight: '600', fontSize: 16 }}>+18.5%</Text>
+            <Text style={{ color: '#34C759', fontWeight: '600', fontSize: 16 }}>
+              +18.5%
+            </Text>
           </View>
         </Animated.View>
       </ScrollView>
     </CommonView>
-  )
-}
+  );
+};

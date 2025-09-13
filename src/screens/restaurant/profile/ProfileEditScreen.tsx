@@ -12,7 +12,7 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
-  Modal
+  Modal,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -31,14 +31,14 @@ interface AnimatedBgShapeProps {
   left: number;
 }
 
-const AnimatedBgShape: React.FC<AnimatedBgShapeProps> = ({ 
-  style, 
-  delay, 
-  color1, 
-  color2, 
-  size, 
-  top, 
-  left 
+const AnimatedBgShape: React.FC<AnimatedBgShapeProps> = ({
+  style,
+  delay,
+  color1,
+  color2,
+  size,
+  top,
+  left,
 }) => {
   const anim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -47,18 +47,18 @@ const AnimatedBgShape: React.FC<AnimatedBgShapeProps> = ({
     // Floating animation
     Animated.loop(
       Animated.sequence([
-        Animated.timing(anim, { 
-          toValue: 1, 
-          duration: 4000 + delay, 
-          delay, 
-          useNativeDriver: true 
+        Animated.timing(anim, {
+          toValue: 1,
+          duration: 4000 + delay,
+          delay,
+          useNativeDriver: true,
         }),
-        Animated.timing(anim, { 
-          toValue: 0, 
-          duration: 4000 + delay, 
-          useNativeDriver: true 
+        Animated.timing(anim, {
+          toValue: 0,
+          duration: 4000 + delay,
+          useNativeDriver: true,
         }),
-      ])
+      ]),
     ).start();
 
     // Pulsing animation
@@ -74,13 +74,13 @@ const AnimatedBgShape: React.FC<AnimatedBgShapeProps> = ({
           duration: 2000,
           useNativeDriver: true,
         }),
-      ])
+      ]),
     ).start();
   }, []);
 
-  const translateY = anim.interpolate({ 
-    inputRange: [0, 1], 
-    outputRange: [0, 30] 
+  const translateY = anim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 30],
   });
 
   return (
@@ -102,10 +102,10 @@ const AnimatedBgShape: React.FC<AnimatedBgShapeProps> = ({
     >
       <LinearGradient
         colors={[color1, color2]}
-        style={{ 
-          width: '100%', 
-          height: '100%', 
-          borderRadius: size / 2 
+        style={{
+          width: '100%',
+          height: '100%',
+          borderRadius: size / 2,
         }}
         start={[0, 0]}
         end={[1, 1]}
@@ -184,26 +184,26 @@ const FloatingInput: React.FC<FloatingInputProps> = ({
   };
 
   return (
-    <Animated.View 
+    <Animated.View
       style={[
-        styles.floatingInputContainer, 
+        styles.floatingInputContainer,
         isFocused && styles.focusedInput,
-        { transform: [{ scale: scaleAnim }] }
+        { transform: [{ scale: scaleAnim }] },
       ]}
     >
       <Animated.Text style={labelStyle}>{label}</Animated.Text>
       <View style={styles.inputRow}>
-        <Ionicons 
-          name={icon} 
-          size={20} 
-          color={isFocused ? '#764ba2' : '#aaa'} 
-          style={styles.inputIcon} 
+        <Ionicons
+          name={icon}
+          size={20}
+          color={isFocused ? '#764ba2' : '#aaa'}
+          style={styles.inputIcon}
         />
         <TextInput
           style={[
             styles.floatingInput,
             multiline && styles.multilineInput,
-            { height: multiline ? numberOfLines * 20 + 28 : 48 }
+            { height: multiline ? numberOfLines * 20 + 28 : 48 },
           ]}
           value={value}
           onChangeText={onChangeText}
@@ -221,9 +221,13 @@ const FloatingInput: React.FC<FloatingInputProps> = ({
   );
 };
 
-type ProfileEditScreenProps = RestaurantProfileStackScreenProps<'ProfileEditProfile'>;
+type ProfileEditScreenProps =
+  RestaurantProfileStackScreenProps<'ProfileEditProfile'>;
 
-const ProfileEditScreen: React.FC<ProfileEditScreenProps> = ({ navigation, route }) => {
+const ProfileEditScreen: React.FC<ProfileEditScreenProps> = ({
+  navigation,
+  route,
+}) => {
   // Get initial values from route params or use defaults
   const initialProfile = route.params?.userProfile || {
     name: 'Restaurant Owner',
@@ -239,7 +243,7 @@ const ProfileEditScreen: React.FC<ProfileEditScreenProps> = ({ navigation, route
   const [profile, setProfile] = useState(initialProfile);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  
+
   // Animation refs
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
@@ -263,7 +267,7 @@ const ProfileEditScreen: React.FC<ProfileEditScreenProps> = ({ navigation, route
   }, []);
 
   const updateField = (field: keyof typeof profile, value: string) => {
-    setProfile(prev => ({ ...prev, [field]: value }));
+    setProfile((prev) => ({ ...prev, [field]: value }));
   };
 
   const validateForm = (): boolean => {
@@ -290,7 +294,7 @@ const ProfileEditScreen: React.FC<ProfileEditScreenProps> = ({ navigation, route
     if (!validateForm()) return;
 
     setIsLoading(true);
-    
+
     // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
@@ -325,56 +329,56 @@ const ProfileEditScreen: React.FC<ProfileEditScreenProps> = ({ navigation, route
       'Are you sure you want to discard your changes?',
       [
         { text: 'Keep Editing', style: 'cancel' },
-        { 
-          text: 'Discard', 
+        {
+          text: 'Discard',
           style: 'destructive',
-          onPress: () => navigation.goBack()
-        }
-      ]
+          onPress: () => navigation.goBack(),
+        },
+      ],
     );
   };
 
   return (
     <View style={styles.container}>
       {/* Animated background shapes */}
-      <AnimatedBgShape 
-        color1="#43e97b" 
-        color2="#38f9d7" 
-        size={200} 
-        top={-80} 
-        left={-60} 
-        delay={0} 
+      <AnimatedBgShape
+        color1="#43e97b"
+        color2="#38f9d7"
+        size={200}
+        top={-80}
+        left={-60}
+        delay={0}
       />
-      <AnimatedBgShape 
-        color1="#667eea" 
-        color2="#764ba2" 
-        size={150} 
-        top={100} 
-        left={width - 120} 
-        delay={1000} 
+      <AnimatedBgShape
+        color1="#667eea"
+        color2="#764ba2"
+        size={150}
+        top={100}
+        left={width - 120}
+        delay={1000}
       />
-      <AnimatedBgShape 
-        color1="#fa709a" 
-        color2="#fee140" 
-        size={120} 
-        top={height - 250} 
-        left={-40} 
-        delay={2000} 
+      <AnimatedBgShape
+        color1="#fa709a"
+        color2="#fee140"
+        size={120}
+        top={height - 250}
+        left={-40}
+        delay={2000}
       />
-      <AnimatedBgShape 
-        color1="#43cea2" 
-        color2="#185a9d" 
-        size={100} 
-        top={height - 180} 
-        left={width - 80} 
-        delay={3000} 
+      <AnimatedBgShape
+        color1="#43cea2"
+        color2="#185a9d"
+        size={100}
+        top={height - 180}
+        left={width - 80}
+        delay={3000}
       />
 
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined} 
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.keyboardView}
       >
-        <ScrollView 
+        <ScrollView
           style={styles.scrollView}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
@@ -390,8 +394,8 @@ const ProfileEditScreen: React.FC<ProfileEditScreenProps> = ({ navigation, route
           >
             {/* Header */}
             <View style={styles.header}>
-              <TouchableOpacity 
-                style={styles.backButton} 
+              <TouchableOpacity
+                style={styles.backButton}
                 onPress={handleCancel}
               >
                 <Ionicons name="arrow-back" size={24} color="#764ba2" />
@@ -408,14 +412,20 @@ const ProfileEditScreen: React.FC<ProfileEditScreenProps> = ({ navigation, route
                   style={styles.profilePicture}
                 >
                   <Text style={styles.profileInitials}>
-                    {profile.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                    {profile.name
+                      .split(' ')
+                      .map((n) => n[0])
+                      .join('')
+                      .toUpperCase()}
                   </Text>
                 </LinearGradient>
                 <TouchableOpacity style={styles.editPictureButton}>
                   <Ionicons name="camera" size={16} color="white" />
                 </TouchableOpacity>
               </View>
-              <Text style={styles.changePictureText}>Tap to change picture</Text>
+              <Text style={styles.changePictureText}>
+                Tap to change picture
+              </Text>
             </View>
 
             {/* Form Fields */}
@@ -494,20 +504,20 @@ const ProfileEditScreen: React.FC<ProfileEditScreenProps> = ({ navigation, route
 
             {/* Action Buttons */}
             <View style={styles.buttonContainer}>
-              <TouchableOpacity 
-                style={styles.cancelButton} 
+              <TouchableOpacity
+                style={styles.cancelButton}
                 onPress={handleCancel}
               >
                 <Text style={styles.cancelButtonText}>Cancel</Text>
               </TouchableOpacity>
 
-              <TouchableOpacity 
-                style={styles.saveButton} 
+              <TouchableOpacity
+                style={styles.saveButton}
                 onPress={handleSave}
                 disabled={isLoading}
               >
                 <LinearGradient
-                  colors={["#667eea", "#764ba2"]}
+                  colors={['#667eea', '#764ba2']}
                   style={styles.saveButtonGradient}
                   start={[0, 0]}
                   end={[1, 1]}
@@ -528,11 +538,7 @@ const ProfileEditScreen: React.FC<ProfileEditScreenProps> = ({ navigation, route
       </KeyboardAvoidingView>
 
       {/* Success Modal */}
-      <Modal
-        visible={showSuccessModal}
-        transparent
-        animationType="none"
-      >
+      <Modal visible={showSuccessModal} transparent animationType="none">
         <BlurView intensity={20} style={styles.modalOverlay}>
           <Animated.View
             style={[

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useTheme } from 'react-native-paper';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
 interface CheckoutContentProps {
@@ -15,43 +16,70 @@ const CheckoutContent: React.FC<CheckoutContentProps> = ({
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
 
+  const handleConfirmAndDismiss = () => {
+    onConfirm();
+    onDismiss();
+  };
+
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingVertical: 20,
-      }}
-    >
-      <Text
+    <View style={{ flex: 1 }}>
+      {/* Content */}
+      <View
         style={{
-          color: colors.onSurface,
-          fontSize: 18,
-          fontWeight: '600',
-          marginBottom: 12,
-          textAlign: 'center',
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: 16,
+          paddingVertical: 10,
         }}
       >
-        {t('checkout_confirmation')}
-      </Text>
+        <View
+          style={{
+            width: 48,
+            height: 48,
+            borderRadius: 24,
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: 8,
+            backgroundColor: colors.primaryContainer,
+          }}
+        >
+          <MaterialIcons
+            name="shopping-cart-checkout"
+            size={24}
+            color={colors.onPrimaryContainer}
+          />
+        </View>
 
-      {/* Google-style Action Buttons */}
+        <Text
+          style={{
+            color: colors.onSurface,
+            fontSize: 14,
+            lineHeight: 20,
+            textAlign: 'center',
+            paddingHorizontal: 8,
+          }}
+        >
+          {t('checkout_confirmation')}
+        </Text>
+      </View>
+
+      {/* Action Buttons */}
       <View
         style={{
           flexDirection: 'row',
-          justifyContent: 'flex-end',
           gap: 8,
           paddingTop: 8,
+          borderTopWidth: 1,
+          borderTopColor: colors.outline + '30',
         }}
       >
         <TouchableOpacity
           onPress={onDismiss}
           style={{
             flex: 1,
-            paddingVertical: 14,
-            paddingHorizontal: 24,
-            borderRadius: 12,
+            paddingVertical: 12,
+            paddingHorizontal: 16,
+            borderRadius: 8,
             backgroundColor: colors.surfaceVariant,
             alignItems: 'center',
             justifyContent: 'center',
@@ -62,10 +90,9 @@ const CheckoutContent: React.FC<CheckoutContentProps> = ({
         >
           <Text
             style={{
-              color: colors.primary,
-              fontSize: 16,
+              color: colors.onSurfaceVariant,
+              fontSize: 14,
               fontWeight: '600',
-              letterSpacing: 0.1,
             }}
           >
             {t('cancel')}
@@ -73,23 +100,15 @@ const CheckoutContent: React.FC<CheckoutContentProps> = ({
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => {
-            onConfirm();
-            onDismiss();
-          }}
+          onPress={handleConfirmAndDismiss}
           style={{
-            paddingHorizontal: 24,
+            flex: 1,
             paddingVertical: 12,
-            borderRadius: 12,
+            paddingHorizontal: 16,
+            borderRadius: 8,
             backgroundColor: colors.primary,
-            minWidth: 100,
             alignItems: 'center',
             justifyContent: 'center',
-            elevation: 2,
-            shadowColor: colors.shadow,
-            shadowOffset: { width: 0, height: 1 },
-            shadowOpacity: 0.2,
-            shadowRadius: 2,
           }}
           activeOpacity={0.8}
         >
@@ -97,8 +116,7 @@ const CheckoutContent: React.FC<CheckoutContentProps> = ({
             style={{
               color: colors.onPrimary,
               fontSize: 14,
-              fontWeight: '500',
-              letterSpacing: 0.1,
+              fontWeight: '600',
             }}
           >
             {t('place_order')}

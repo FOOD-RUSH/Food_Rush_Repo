@@ -2,7 +2,7 @@
 
 /**
  * Translation Validation Script
- * 
+ *
  * This script validates that all translation files have consistent keys
  * and helps identify missing translations.
  */
@@ -41,99 +41,105 @@ function getAllKeys(obj, prefix = '') {
 
 function validateTranslations() {
   console.log('🔍 Validating translation files...\n');
-  
+
   let hasErrors = false;
-  
+
   for (const namespace of NAMESPACES) {
     console.log(`📁 Namespace: ${namespace}`);
-    
+
     // Load all translations for this namespace
     const translations = {};
     const allKeys = new Set();
-    
+
     for (const language of SUPPORTED_LANGUAGES) {
       const translation = loadTranslationFile(language, namespace);
       if (translation) {
         translations[language] = translation;
         const keys = getAllKeys(translation);
-        keys.forEach(key => allKeys.add(key));
+        keys.forEach((key) => allKeys.add(key));
       } else {
         hasErrors = true;
       }
     }
-    
+
     // Check for missing keys
     for (const language of SUPPORTED_LANGUAGES) {
       const translation = translations[language];
       if (!translation) continue;
-      
+
       const languageKeys = new Set(getAllKeys(translation));
-      const missingKeys = [...allKeys].filter(key => !languageKeys.has(key));
-      
+      const missingKeys = [...allKeys].filter((key) => !languageKeys.has(key));
+
       if (missingKeys.length > 0) {
         console.log(`❌ Missing keys in ${language}:`);
-        missingKeys.forEach(key => console.log(`   - ${key}`));
+        missingKeys.forEach((key) => console.log(`   - ${key}`));
         hasErrors = true;
       } else {
         console.log(`✅ ${language}: All keys present`);
       }
     }
-    
+
     // Check for extra keys
     const baseLanguage = 'en';
     const baseKeys = new Set(getAllKeys(translations[baseLanguage] || {}));
-    
+
     for (const language of SUPPORTED_LANGUAGES) {
       if (language === baseLanguage) continue;
-      
+
       const translation = translations[language];
       if (!translation) continue;
-      
+
       const languageKeys = new Set(getAllKeys(translation));
-      const extraKeys = [...languageKeys].filter(key => !baseKeys.has(key));
-      
+      const extraKeys = [...languageKeys].filter((key) => !baseKeys.has(key));
+
       if (extraKeys.length > 0) {
         console.log(`⚠️  Extra keys in ${language} (not in ${baseLanguage}):`);
-        extraKeys.forEach(key => console.log(`   + ${key}`));
+        extraKeys.forEach((key) => console.log(`   + ${key}`));
       }
     }
-    
+
     console.log('');
   }
-  
+
   if (!hasErrors) {
     console.log('🎉 All translation files are valid!');
   } else {
-    console.log('❌ Translation validation failed. Please fix the issues above.');
+    console.log(
+      '❌ Translation validation failed. Please fix the issues above.',
+    );
     process.exit(1);
   }
 }
 
 function generateMissingKeys() {
   console.log('🔧 Generating missing translation keys...\n');
-  
+
   for (const namespace of NAMESPACES) {
     const baseTranslation = loadTranslationFile('en', namespace);
     if (!baseTranslation) continue;
-    
+
     const baseKeys = getAllKeys(baseTranslation);
-    
+
     for (const language of SUPPORTED_LANGUAGES) {
       if (language === 'en') continue;
-      
+
       const translation = loadTranslationFile(language, namespace);
       if (!translation) continue;
-      
+
       const languageKeys = new Set(getAllKeys(translation));
-      const missingKeys = baseKeys.filter(key => !languageKeys.has(key));
-      
+      const missingKeys = baseKeys.filter((key) => !languageKeys.has(key));
+
       if (missingKeys.length > 0) {
         console.log(`Missing keys for ${language}/${namespace}.json:`);
         console.log('```json');
         const missingTranslations = {};
-        missingKeys.forEach(key => {
+        missingKeys.forEach((key) => {
           const value = getNestedValue(baseTranslation, key);
-          setNestedValue(missingTranslations, key, `[TODO: Translate] ${value}`);
+          setNestedValue(
+            missingTranslations,
+            key,
+            `[TODO: Translate] ${value}`,
+          );
         });
         console.log(JSON.stringify(missingTranslations, null, 2));
         console.log('```\n');
@@ -168,7 +174,11 @@ switch (command) {
     break;
   default:
     console.log('Usage:');
-    console.log('  node validate-translations.js validate  - Validate translation files');
-    console.log('  node validate-translations.js generate  - Generate missing translation keys');
+    console.log(
+      '  node validate-translations.js validate  - Validate translation files',
+    );
+    console.log(
+      '  node validate-translations.js generate  - Generate missing translation keys',
+    );
     break;
 }

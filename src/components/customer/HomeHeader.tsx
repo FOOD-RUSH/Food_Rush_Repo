@@ -1,150 +1,149 @@
-import React, { useCallback, useMemo } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+// HomeHeader.tsx - Updated with production UX
+import React, { useCallback } from 'react';
+import { TouchableOpacity, View, Text } from 'react-native';
 import { Avatar, useTheme } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { icons } from '@/assets/images';
-import type { CustomerHomeStackScreenProps } from '@/src/navigation/types';
 import { useTranslation } from 'react-i18next';
-import { Address } from '@/src/location';
+import { useLocation } from '@/src/location/useLocation';
 import { useCartItems } from '@/src/stores/customerStores/cartStore';
-import { FUTURISTIC_FONTS } from '@/src/config/theme';
 
 interface HomeHeaderProps {
-  navigation: CustomerHomeStackScreenProps<'HomeScreen'>['navigation'];
-  location: Address | null;
-  onLocationPress: () => void;
+  navigation: any;
 }
 
-const HomeHeader: React.FC<HomeHeaderProps> = React.memo(({
-  navigation,
-  location,
-  onLocationPress,
-}) => {
+const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
   const cartItems = useCartItems();
 
-  // Memoize cart count calculation for performance
-  const cartItemCount = useMemo(() => {
-    return cartItems.reduce((total, item) => total + item.quantity, 0);
-  }, [cartItems]);
+  const {
+    location,
+    isLoading: locationLoading,
+    error: locationError,
+    hasPermission,
+    isUsingFallback,
+    requestPermissionWithLocation,
+    refreshLocation,
+    showLocationPermissionDialog,
+  } = useLocation({
+    autoRequest: true, // Get cached/fallback location on mount
+    requestOnMount: false, // Don't auto-request permission (better UX)
+  });
 
-  // Hardcoded address for MVP - location system removed
-  const displayAddress = useMemo(() => {
-    return 'Yaoundé'; // Hardcoded city name
-  }, []);
+  const cartItemCount = cartItems.reduce((total, item) => total + item.quantity, 0);
 
-  // Location system removed, no fallback indicator needed
+  const getDisplayAddress = () => {
+    if (locationLoading) {
+      return t('getting_location', 'Getting your location...');
+    }
 
-  // Stable navigation handlers
-  const handleNotificationPress = useCallback(() => {
-    navigation.navigate('Notifications');
-  }, [navigation]);
+    if (!location) {
+      return t('select_location', 'Tap to set location');
+    }
 
-  const handleCartPress = useCallback(() => {
-    navigation.navigate('Cart');
-  }, [navigation]);
-
-  // Memoize cart badge for performance
-  const cartBadge = useMemo(() => {
-    if (cartItemCount <= 0) return null;
-    
     return (
-      <View className="absolute -top-1 -right-1 bg-red-500 rounded-full min-w-[18px] h-[18px] items-center justify-center">
-        <Text className="text-white text-xs font-bold">
-          {cartItemCount > 99 ? '99+' : cartItemCount}
-        </Text>
-      </View>
+      location.exactLocation ||
+      location.city ||
+      t('select_location', 'Tap to set location')
     );
-  }, [cartItemCount]);
+  };
+
+  const handleLocationPress = useCallback(async () => {
+    if (!hasPermission) {
+      // Show contextual permission dialog
+      showLocationPermissionDialog(
+        async () => {
+          await requestPermissionWithLocation();
+        },
+        () => {
+          // User cancelled - they can still use the app with fallback location
+          console.log('User cancelled location permission');
+        }
+      );
+    } else if (locationError || isUsingFallback) {
+      // Try to refresh location
+      await refreshLocation();
+    } else {
+      // Navigate to location picker/search
+      navigation.navigate('LocationPicker');
+    }
+  }, [
+    hasPermission,
+    locationError,
+    isUsingFallback,
+    showLocationPermissionDialog,
+    requestPermissionWithLocation,
+    refreshLocation,
+    navigation,
+  ]);
+
+  const getLocationIcon = () => {
+    if (locationLoading) return 'time-outline';
+    if (locationError && !hasPermission) return 'location-outline';
+    if (isUsingFallback) return 'location-outline';
+    return 'chevron-down';
+  };
+
+  const getLocationIconColor = () => {
+    if (locationError && !hasPermission) return colors.error;
+    if (isUsingFallback) return colors.onSurfaceVariant;
+    return colors.onSurfaceVariant;
+  };
 
   return (
     <View
       className="flex-row items-center justify-between px-4 py-4"
-      style={{
-        backgroundColor: colors.background,
-      
-      }}
+      style={{ backgroundColor: colors.background }}
     >
       {/* Left Section - Avatar and Location */}
       <View className="flex-row items-center flex-1">
         <Avatar.Image
           source={icons.appleIcon}
-          size={50}
+          size={70}
           style={{ backgroundColor: colors.surfaceVariant }}
         />
 
         <View className="ml-3 flex-1">
-          <Text
-            className="text-xs mb-1"
-            style={{ color: colors.onSurfaceVariant }}
-          >
-            {t('deliver_to')}
+          <Text className="text-xs mb-1" style={{ color: colors.onSurfaceVariant }}>
+            {t('deliver_to', 'Deliver to')}
           </Text>
 
           <TouchableOpacity
             className="flex-row items-center"
-            onPress={onLocationPress}
+            onPress={handleLocationPress}
             activeOpacity={0.7}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            disabled={locationLoading}
           >
             <View className="flex-1">
               <Text
-                className="font-medium text-lg"
+                className="font-medium text-base"
                 style={{
-                  color: colors.onSurface,
-                  fontFamily: FUTURISTIC_FONTS.primary.fontFamily,
+                  color: locationLoading
+                    ? colors.onSurfaceVariant
+                    : colors.onSurface,
                 }}
                 numberOfLines={1}
                 ellipsizeMode="tail"
               >
-                {displayAddress}
+                {getDisplayAddress()}
+              </Text>
+
+              {/* Status indicators */}
+              {isUsingFallback && !locationLoading && (
+                <View className="flex-row items-center mt-1">
+                  <View className="px-2 py-0.5 bg-orange-100 rounded-full">
+                    <Text className="text-white text-xs font-bold">
+                {cartItemCount > 99 ? '99+' : cartItemCount}
               </Text>
             </View>
-
-            <Ionicons
-              name="chevron-down"
-              size={16}
-              color={colors.onSurfaceVariant}
-              style={{ marginLeft: 8 }}
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Right Section - Notification and Cart */}
-      <View className="flex-row items-center gap-3">
-        {/* Notifications Button */}
-        <TouchableOpacity
-          className="p-2 rounded-full"
-          style={{ backgroundColor: colors.surfaceVariant }}
-          onPress={handleNotificationPress}
-          activeOpacity={0.7}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        >
-          <Ionicons
-            name="notifications-outline"
-            color={colors.onSurface}
-            size={22}
-          />
-        </TouchableOpacity>
-
-        {/* Cart Button with Badge */}
-        <TouchableOpacity
-          className="p-2 rounded-full relative"
-          style={{ backgroundColor: colors.surfaceVariant }}
-          onPress={handleCartPress}
-          activeOpacity={0.7}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        >
-          {cartBadge}
+          )}
           <Ionicons name="bag-outline" color={colors.onSurface} size={22} />
         </TouchableOpacity>
       </View>
     </View>
   );
-});
+};
 
-HomeHeader.displayName = 'HomeHeader';
+export default React.memo(HomeHeader);
 
-export default HomeHeader;

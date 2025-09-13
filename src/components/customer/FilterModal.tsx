@@ -34,7 +34,8 @@ const FilterModal: React.FC<FilterModalProps> = ({
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
 
-  const [selectedFilters, setSelectedFilters] = useState<GeneralFilterOptions>(currentFilters);
+  const [selectedFilters, setSelectedFilters] =
+    useState<GeneralFilterOptions>(currentFilters);
 
   const handleApply = () => {
     onApply(selectedFilters);
@@ -187,6 +188,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
       animationType="slide"
       transparent
       onRequestClose={onClose}
+      
     >
       <View style={[styles.overlay, { backgroundColor: colors.backdrop }]}>
         <View style={[styles.modal, { backgroundColor: colors.surface }]}>
@@ -197,7 +199,9 @@ const FilterModal: React.FC<FilterModalProps> = ({
                 {t('filters')}
               </Text>
               {getActiveFiltersCount() > 0 && (
-                <Text style={[styles.subtitle, { color: colors.onSurfaceVariant }]}>
+                <Text
+                  style={[styles.subtitle, { color: colors.onSurfaceVariant }]}
+                >
                   {getActiveFiltersCount()} {t('active')}
                 </Text>
               )}
@@ -207,7 +211,10 @@ const FilterModal: React.FC<FilterModalProps> = ({
             </TouchableOpacity>
           </View>
 
-          <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+          <ScrollView
+            style={styles.content}
+            showsVerticalScrollIndicator={false}
+          >
             {filterSections.map((section) => (
               <View key={section.key} style={styles.section}>
                 <View style={styles.sectionHeader}>
@@ -216,14 +223,17 @@ const FilterModal: React.FC<FilterModalProps> = ({
                     size={20}
                     color={colors.primary}
                   />
-                  <Text style={[styles.sectionTitle, { color: colors.onSurface }]}>
+                  <Text
+                    style={[styles.sectionTitle, { color: colors.onSurface }]}
+                  >
                     {section.title}
                   </Text>
                 </View>
 
                 <View style={styles.optionsContainer}>
                   {section.options.map((option) => {
-                    const isSelected = selectedFilters[section.key] === option.value;
+                    const isSelected =
+                      selectedFilters[section.key] === option.value;
                     return (
                       <TouchableOpacity
                         key={option.value}
@@ -238,7 +248,9 @@ const FilterModal: React.FC<FilterModalProps> = ({
                               : colors.outline,
                           },
                         ]}
-                        onPress={() => updateFilter(section.key, option.value as any)}
+                        onPress={() =>
+                          updateFilter(section.key, option.value as any)
+                        }
                       >
                         <View style={styles.optionContent}>
                           <MaterialIcons
@@ -306,7 +318,8 @@ const FilterModal: React.FC<FilterModalProps> = ({
               onPress={handleApply}
               style={styles.applyButton}
             >
-              {t('apply')} {getActiveFiltersCount() > 0 && `(${getActiveFiltersCount()})`}
+              {t('apply')}{' '}
+              {getActiveFiltersCount() > 0 && `(${getActiveFiltersCount()})`}
             </Button>
           </View>
         </View>

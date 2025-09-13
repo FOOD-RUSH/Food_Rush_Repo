@@ -56,7 +56,7 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
     } catch (error) {
       console.error('Error navigating to category:', error);
       Alert.alert(t('navigation_error'), t('unable_to_open_category'), [
-        { text: 'OK'},
+        { text: 'OK' },
       ]);
     }
   }, [navigation, title, categoryId, isLoading, disabled, onPress, t]);
@@ -78,8 +78,6 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
         style={{
           borderRadius: 16,
           margin: 8,
-          justifyContent: 'center',
-          alignItems: 'center',
           padding: 16,
           backgroundColor: colors.surface,
           shadowColor: colors.shadow,
@@ -90,9 +88,11 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
           shadowOpacity: 0.1,
           shadowRadius: 3.84,
           elevation: 5,
-          minHeight: 100,
-          minWidth: 90,
+          minWidth: 140,
+          height: 80,
           position: 'relative',
+          flexDirection: 'row',
+          alignItems: 'center',
         }}
       >
         {/* Badge */}
@@ -128,7 +128,7 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
             width: 56,
             justifyContent: 'center',
             alignItems: 'center',
-            marginBottom: 12,
+            marginRight: 12,
           }}
         >
           {isLoading ? (
@@ -165,15 +165,13 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
           style={{
             fontSize: 14,
             fontWeight: '600',
-            textAlign: 'center',
             color: colors.onSurface,
-            maxWidth: 90,
-            lineHeight: 18,
+            flex: 1,
           }}
           numberOfLines={2}
           ellipsizeMode="tail"
         >
-          {title}
+          {t(`category_${title.toLowerCase().replace(/\s+/g, '_')}`, title)}
         </Text>
 
         {/* Item Count */}
@@ -182,8 +180,7 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
             style={{
               fontSize: 12,
               color: colors.onSurfaceVariant,
-              marginTop: 4,
-              textAlign: 'center',
+              marginLeft: 8,
             }}
           >
             {itemCount}

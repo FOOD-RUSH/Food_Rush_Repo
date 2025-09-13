@@ -1,5 +1,19 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { View, Text, Animated, TouchableOpacity, Alert, Dimensions, StatusBar, ColorValue, ViewStyle, Modal, FlatList, TouchableHighlight, Image } from 'react-native';
+import {
+  View,
+  Text,
+  Animated,
+  TouchableOpacity,
+  Alert,
+  Dimensions,
+  StatusBar,
+  ColorValue,
+  ViewStyle,
+  Modal,
+  FlatList,
+  TouchableHighlight,
+  Image,
+} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -31,7 +45,7 @@ const menuOptions: MenuOption[] = [
     gradient: ['#4facfe', '#00f2fe'],
     iconColor: '#ffffff',
     isImplemented: true,
-    category: 'items'
+    category: 'items',
   },
   {
     title: 'Add New Item',
@@ -41,7 +55,7 @@ const menuOptions: MenuOption[] = [
     gradient: ['#43e97b', '#38f9d7'],
     iconColor: '#ffffff',
     isImplemented: true,
-    category: 'items'
+    category: 'items',
   },
   {
     title: 'Categories',
@@ -51,7 +65,7 @@ const menuOptions: MenuOption[] = [
     gradient: ['#fa709a', '#fee140'],
     iconColor: '#ffffff',
     isImplemented: true,
-    category: 'categories'
+    category: 'categories',
   },
   {
     title: 'Add Category',
@@ -61,7 +75,7 @@ const menuOptions: MenuOption[] = [
     gradient: ['#6a11cb', '#2575fc'],
     iconColor: '#ffffff',
     isImplemented: true,
-    category: 'categories'
+    category: 'categories',
   },
   {
     title: 'Menu Settings',
@@ -71,16 +85,17 @@ const menuOptions: MenuOption[] = [
     gradient: ['#434343', '#000000'],
     iconColor: '#ffffff',
     isImplemented: true,
-    category: 'settings'
-  }
+    category: 'settings',
+  },
 ];
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const MenuScreen = () => {
-  const navigation = useNavigation<NativeStackNavigationProp<RestaurantMenuStackParamList>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RestaurantMenuStackParamList>>();
   const [isLoaded, setIsLoaded] = useState(false);
-  
+
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
@@ -94,12 +109,12 @@ const MenuScreen = () => {
     new Animated.Value(0),
     new Animated.Value(0),
     new Animated.Value(0),
-    new Animated.Value(0)
+    new Animated.Value(0),
   ]).current;
   const statsAnimations = useRef([
     new Animated.Value(0),
     new Animated.Value(0),
-    new Animated.Value(0)
+    new Animated.Value(0),
   ]).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
@@ -114,15 +129,17 @@ const MenuScreen = () => {
       name: 'Grilled Salmon',
       price: 24.99,
       category: 'Main Course',
-      image: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=300&h=200&fit=crop',
+      image:
+        'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=300&h=200&fit=crop',
       isAvailable: true,
     },
     {
       id: '2',
       name: 'Caesar Salad',
-      price: 12.50,
+      price: 12.5,
       category: 'Salads',
-      image: 'https://images.unsplash.com/photo-1546793665-c74683f339c1?w=300&h=200&fit=crop',
+      image:
+        'https://images.unsplash.com/photo-1546793665-c74683f339c1?w=300&h=200&fit=crop',
       isAvailable: true,
     },
     {
@@ -130,7 +147,8 @@ const MenuScreen = () => {
       name: 'Chocolate Cake',
       price: 8.99,
       category: 'Desserts',
-      image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300&h=200&fit=crop',
+      image:
+        'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300&h=200&fit=crop',
       isAvailable: false,
     },
   ];
@@ -164,34 +182,33 @@ const MenuScreen = () => {
       ]),
     ]);
 
-    const cardStaggerAnimation = Animated.stagger(150, 
-      cardAnimations.map(anim => 
+    const cardStaggerAnimation = Animated.stagger(
+      150,
+      cardAnimations.map((anim) =>
         Animated.spring(anim, {
           toValue: 1,
           tension: 60,
           friction: 8,
           useNativeDriver: true,
-        })
-      )
+        }),
+      ),
     );
 
-    const statsStaggerAnimation = Animated.stagger(300,
-      statsAnimations.map(anim => 
+    const statsStaggerAnimation = Animated.stagger(
+      300,
+      statsAnimations.map((anim) =>
         Animated.spring(anim, {
           toValue: 1,
           tension: 40,
           friction: 6,
           useNativeDriver: true,
-        })
-      )
+        }),
+      ),
     );
 
     Animated.sequence([
       entranceAnimation,
-      Animated.parallel([
-        cardStaggerAnimation,
-        statsStaggerAnimation,
-      ])
+      Animated.parallel([cardStaggerAnimation, statsStaggerAnimation]),
     ]).start(() => {
       setIsLoaded(true);
       startPulseAnimation();
@@ -202,7 +219,7 @@ const MenuScreen = () => {
         toValue: 1,
         duration: 10000,
         useNativeDriver: true,
-      })
+      }),
     ).start();
   }, []);
 
@@ -219,7 +236,7 @@ const MenuScreen = () => {
           duration: 2000,
           useNativeDriver: true,
         }),
-      ])
+      ]),
     ).start();
   };
 
@@ -242,7 +259,7 @@ const MenuScreen = () => {
       Alert.alert(
         'Coming Soon',
         `${option.title} feature is not implemented yet. This feature is coming soon!`,
-        [{ text: 'OK', style: 'default' }]
+        [{ text: 'OK', style: 'default' }],
       );
       return;
     }
@@ -262,7 +279,7 @@ const MenuScreen = () => {
       Alert.alert(
         'Navigation Error',
         `Screen "${option.screen}" is not available yet. This feature is coming soon!`,
-        [{ text: 'OK', style: 'default' }]
+        [{ text: 'OK', style: 'default' }],
       );
       console.log('Navigation error:', error);
     }
@@ -292,7 +309,7 @@ const MenuScreen = () => {
           <Text style={styles.modalTitle}>Select Food Item to Edit</Text>
           <FlatList
             data={menuItems}
-            keyExtractor={item => item.id}
+            keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <TouchableHighlight
                 underlayColor="#eee"
@@ -300,7 +317,10 @@ const MenuScreen = () => {
                 style={styles.foodItem}
               >
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Image source={{ uri: item.image }} style={styles.foodImage} />
+                  <Image
+                    source={{ uri: item.image }}
+                    style={styles.foodImage}
+                  />
                   <View style={{ marginLeft: 12 }}>
                     <Text style={styles.foodName}>{item.name}</Text>
                     <Text style={styles.foodCategory}>{item.category}</Text>
@@ -325,7 +345,10 @@ const MenuScreen = () => {
     if (action === 'add') {
       Alert.alert('Coming Soon', 'Add menu item feature is coming soon!');
     } else {
-      Alert.alert('Coming Soon', 'Categories management feature is coming soon!');
+      Alert.alert(
+        'Coming Soon',
+        'Categories management feature is coming soon!',
+      );
     }
   };
 
@@ -335,21 +358,29 @@ const MenuScreen = () => {
   });
 
   const groupedOptions = {
-    main: menuOptions.filter(option => option.category === 'main'),
-    items: menuOptions.filter(option => option.category === 'items'),
-    categories: menuOptions.filter(option => option.category === 'categories'),
-    settings: menuOptions.filter(option => option.category === 'settings'),
+    main: menuOptions.filter((option) => option.category === 'main'),
+    items: menuOptions.filter((option) => option.category === 'items'),
+    categories: menuOptions.filter(
+      (option) => option.category === 'categories',
+    ),
+    settings: menuOptions.filter((option) => option.category === 'settings'),
   };
 
-  const renderSection = (title: string, options: MenuOption[], startIndex: number) => (
+  const renderSection = (
+    title: string,
+    options: MenuOption[],
+    startIndex: number,
+  ) => (
     <View style={{ marginBottom: 24 }}>
-      <Text style={{ 
-        fontSize: 18, 
-        fontWeight: '700', 
-        color: '#1a1a2e', // Changed from white to dark
-        marginBottom: 16,
-        paddingLeft: 4,
-      }}>
+      <Text
+        style={{
+          fontSize: 18,
+          fontWeight: '700',
+          color: '#1a1a2e', // Changed from white to dark
+          marginBottom: 16,
+          paddingLeft: 4,
+        }}
+      >
         {title}
       </Text>
       <View style={{ gap: 12 }}>
@@ -358,17 +389,24 @@ const MenuScreen = () => {
             key={option.title}
             style={{
               opacity: cardAnimations[startIndex + index] || fadeAnim,
-              transform: [{
-                translateX: (cardAnimations[startIndex + index] || fadeAnim).interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [100 * (index % 2 === 0 ? 1 : -1), 0],
-                })
-              }, {
-                scale: (cardAnimations[startIndex + index] || fadeAnim).interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [0.9, 1],
-                })
-              }]
+              transform: [
+                {
+                  translateX: (
+                    cardAnimations[startIndex + index] || fadeAnim
+                  ).interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [100 * (index % 2 === 0 ? 1 : -1), 0],
+                  }),
+                },
+                {
+                  scale: (
+                    cardAnimations[startIndex + index] || fadeAnim
+                  ).interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.9, 1],
+                  }),
+                },
+              ],
             }}
           >
             <TouchableOpacity
@@ -391,61 +429,73 @@ const MenuScreen = () => {
                 }}
               >
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <View style={{
-                    width: 50,
-                    height: 50,
-                    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                    borderRadius: 25,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginRight: 16,
-                  }}>
-                    <MaterialCommunityIcons 
-                      name={option.icon as any} 
-                      size={24} 
-                      color={option.iconColor} 
+                  <View
+                    style={{
+                      width: 50,
+                      height: 50,
+                      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                      borderRadius: 25,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginRight: 16,
+                    }}
+                  >
+                    <MaterialCommunityIcons
+                      name={option.icon as any}
+                      size={24}
+                      color={option.iconColor}
                     />
                   </View>
                   <View style={{ flex: 1 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                      <Text style={{ 
-                        fontSize: 16, 
-                        fontWeight: '600', 
-                        color: '#ffffff',
-                        marginBottom: 2,
-                      }}>
+                    <View
+                      style={{ flexDirection: 'row', alignItems: 'center' }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 16,
+                          fontWeight: '600',
+                          color: '#ffffff',
+                          marginBottom: 2,
+                        }}
+                      >
                         {option.title}
                       </Text>
                       {!option.isImplemented && (
-                        <View style={{
-                          backgroundColor: 'rgba(255, 255, 255, 0.3)',
-                          borderRadius: 8,
-                          paddingHorizontal: 6,
-                          paddingVertical: 2,
-                          marginLeft: 8,
-                        }}>
-                          <Text style={{
-                            fontSize: 10,
-                            color: '#ffffff',
-                            fontWeight: '600',
-                          }}>
+                        <View
+                          style={{
+                            backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                            borderRadius: 8,
+                            paddingHorizontal: 6,
+                            paddingVertical: 2,
+                            marginLeft: 8,
+                          }}
+                        >
+                          <Text
+                            style={{
+                              fontSize: 10,
+                              color: '#ffffff',
+                              fontWeight: '600',
+                            }}
+                          >
                             SOON
                           </Text>
                         </View>
                       )}
                     </View>
-                    <Text style={{ 
-                      fontSize: 12, 
-                      color: 'rgba(255, 255, 255, 0.9)',
-                      lineHeight: 16,
-                    }}>
+                    <Text
+                      style={{
+                        fontSize: 12,
+                        color: 'rgba(255, 255, 255, 0.9)',
+                        lineHeight: 16,
+                      }}
+                    >
                       {option.description}
                     </Text>
                   </View>
-                  <MaterialCommunityIcons 
-                    name="chevron-right" 
-                    size={20} 
-                    color="rgba(255, 255, 255, 0.8)" 
+                  <MaterialCommunityIcons
+                    name="chevron-right"
+                    size={20}
+                    color="rgba(255, 255, 255, 0.8)"
                   />
                 </View>
               </LinearGradient>
@@ -488,88 +538,125 @@ const MenuScreen = () => {
                     marginBottom: 16,
                   }}
                 >
-                  <MaterialCommunityIcons name="chef-hat" size={40} color="#ffffff" />
+                  <MaterialCommunityIcons
+                    name="chef-hat"
+                    size={40}
+                    color="#ffffff"
+                  />
                 </LinearGradient>
               </Animated.View>
             </View>
-            
-            <Text style={{ 
-              fontSize: 32, 
-              fontWeight: 'bold', 
-              color: '#1a1a2e',
-              textAlign: 'center',
-              marginBottom: 8,
-            }}>
+
+            <Text
+              style={{
+                fontSize: 32,
+                fontWeight: 'bold',
+                color: '#1a1a2e',
+                textAlign: 'center',
+                marginBottom: 8,
+              }}
+            >
               Menu Management
             </Text>
-            <Text style={{ 
-              color: '#666666', 
-              fontSize: 16,
-              textAlign: 'center',
-              paddingHorizontal: 20,
-            }}>
+            <Text
+              style={{
+                color: '#666666',
+                fontSize: 16,
+                textAlign: 'center',
+                paddingHorizontal: 20,
+              }}
+            >
               Manage your restaurant menu with style
             </Text>
           </Animated.View>
 
           {/* Update Statistics Section background */}
-          <Animated.View style={{ 
-            opacity: fadeAnim,
-            backgroundColor: '#f5f5f5',
-            borderRadius: 16, // Reduced from 20
-            padding: 16, // Reduced from 20
-            borderWidth: 1,
-            borderColor: '#e0e0e0',
-            marginBottom: 16, // Reduced from 20
-          }}>
-            <Text style={{ 
-              fontSize: 16, // Reduced from 18
-              fontWeight: '600',
-              color: '#1a1a2e',
-              marginBottom: 12, // Reduced from 16
-              textAlign: 'center',
-            }}>
+          <Animated.View
+            style={{
+              opacity: fadeAnim,
+              backgroundColor: '#f5f5f5',
+              borderRadius: 16, // Reduced from 20
+              padding: 16, // Reduced from 20
+              borderWidth: 1,
+              borderColor: '#e0e0e0',
+              marginBottom: 16, // Reduced from 20
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 16, // Reduced from 18
+                fontWeight: '600',
+                color: '#1a1a2e',
+                marginBottom: 12, // Reduced from 16
+                textAlign: 'center',
+              }}
+            >
               Menu Statistics
             </Text>
-            
+
             <View style={{ flexDirection: 'row', paddingHorizontal: 8 }}>
               {[
-                { label: 'Menu Items', value: '45', color: '#4facfe', icon: 'food' },
-                { label: 'Categories', value: '8', color: '#43e97b', icon: 'tag-multiple' },
-                { label: 'Popular', value: '12', color: '#fa709a', icon: 'star' },
+                {
+                  label: 'Menu Items',
+                  value: '45',
+                  color: '#4facfe',
+                  icon: 'food',
+                },
+                {
+                  label: 'Categories',
+                  value: '8',
+                  color: '#43e97b',
+                  icon: 'tag-multiple',
+                },
+                {
+                  label: 'Popular',
+                  value: '12',
+                  color: '#fa709a',
+                  icon: 'star',
+                },
               ].map((stat, index) => (
-                <Animated.View 
+                <Animated.View
                   key={stat.label}
-                  style={{ 
-                    flex: 1, 
+                  style={{
+                    flex: 1,
                     alignItems: 'center',
                     opacity: statsAnimations[index],
                   }}
                 >
-                  <View style={{
-                    width: 40, // Reduced from 50
-                    height: 40, // Reduced from 50
-                    borderRadius: 20,
-                    backgroundColor: stat.color,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginBottom: 6, // Reduced from 8
-                  }}>
-                    <MaterialCommunityIcons name={stat.icon as any} size={20} color="#ffffff" />
+                  <View
+                    style={{
+                      width: 40, // Reduced from 50
+                      height: 40, // Reduced from 50
+                      borderRadius: 20,
+                      backgroundColor: stat.color,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: 6, // Reduced from 8
+                    }}
+                  >
+                    <MaterialCommunityIcons
+                      name={stat.icon as any}
+                      size={20}
+                      color="#ffffff"
+                    />
                   </View>
-                  <Text style={{ 
-                    fontSize: 20, // Reduced from 24
-                    fontWeight: 'bold',
-                    color: '#1a1a2e',
-                    marginBottom: 2,
-                  }}>
+                  <Text
+                    style={{
+                      fontSize: 20, // Reduced from 24
+                      fontWeight: 'bold',
+                      color: '#1a1a2e',
+                      marginBottom: 2,
+                    }}
+                  >
                     {stat.value}
                   </Text>
-                  <Text style={{ 
-                    fontSize: 11,
-                    color: '#666666',
-                    textAlign: 'center',
-                  }}>
+                  <Text
+                    style={{
+                      fontSize: 11,
+                      color: '#666666',
+                      textAlign: 'center',
+                    }}
+                  >
                     {stat.label}
                   </Text>
                 </Animated.View>
@@ -583,45 +670,46 @@ const MenuScreen = () => {
             style={{
               flex: 1,
               opacity: fadeAnim,
-              transform: [
-                { translateY: slideAnim },
-                { scale: scaleAnim }
-              ],
+              transform: [{ translateY: slideAnim }, { scale: scaleAnim }],
             }}
             contentContainerStyle={{ paddingBottom: 100 }}
           >
             {/* Menu Items Section */}
             {renderSection('Menu Items', groupedOptions.items, 1)}
-            
+
             {/* Categories Section */}
             {renderSection('Categories', groupedOptions.categories, 3)}
-            
+
             {/* Settings Section */}
             {renderSection('Settings', groupedOptions.settings, 6)}
 
             {/* Quick Actions Section */}
-            <Animated.View 
-              style={{ 
+            <Animated.View
+              style={{
                 opacity: fadeAnim,
-                transform: [{
-                  translateY: fadeAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [80, 0],
-                  })
-                }],
+                transform: [
+                  {
+                    translateY: fadeAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [80, 0],
+                    }),
+                  },
+                ],
                 marginBottom: 24,
               }}
             >
-              <Text style={{ 
-                fontSize: 18, 
-                fontWeight: '700', 
-                color: '#1a2a2e', 
-                marginBottom: 16,
-                paddingLeft: 4,
-              }}>
+              <Text
+                style={{
+                  fontSize: 18,
+                  fontWeight: '700',
+                  color: '#1a2a2e',
+                  marginBottom: 16,
+                  paddingLeft: 4,
+                }}
+              >
                 Quick Actions
               </Text>
-              
+
               <View style={{ flexDirection: 'row', gap: 12, marginBottom: 24 }}>
                 <TouchableOpacity
                   style={{ flex: 1 }}
@@ -643,13 +731,24 @@ const MenuScreen = () => {
                       elevation: 6,
                     }}
                   >
-                    <MaterialCommunityIcons name="plus" size={20} color="#ffffff" style={{ marginRight: 8 }} />
-                    <Text style={{ color: '#ffffff', fontWeight: '600', fontSize: 16 }}>
+                    <MaterialCommunityIcons
+                      name="plus"
+                      size={20}
+                      color="#ffffff"
+                      style={{ marginRight: 8 }}
+                    />
+                    <Text
+                      style={{
+                        color: '#ffffff',
+                        fontWeight: '600',
+                        fontSize: 16,
+                      }}
+                    >
                       Add Item
                     </Text>
                   </LinearGradient>
                 </TouchableOpacity>
-                
+
                 <TouchableOpacity
                   style={{ flex: 1 }}
                   onPress={() => handleQuickAction('categories')}
@@ -670,8 +769,19 @@ const MenuScreen = () => {
                       elevation: 6,
                     }}
                   >
-                    <MaterialCommunityIcons name="format-list-bulleted" size={20} color="#ffffff" style={{ marginRight: 8 }} />
-                    <Text style={{ color: '#ffffff', fontWeight: '600', fontSize: 16 }}>
+                    <MaterialCommunityIcons
+                      name="format-list-bulleted"
+                      size={20}
+                      color="#ffffff"
+                      style={{ marginRight: 8 }}
+                    />
+                    <Text
+                      style={{
+                        color: '#ffffff',
+                        fontWeight: '600',
+                        fontSize: 16,
+                      }}
+                    >
                       Categories
                     </Text>
                   </LinearGradient>

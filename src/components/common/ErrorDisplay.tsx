@@ -28,7 +28,9 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.content}>
         <MaterialIcons name="error-outline" size={64} color={colors.error} />
-        <Text style={[styles.title, { color: colors.onSurface }]}>{displayTitle}</Text>
+        <Text style={[styles.title, { color: colors.onSurface }]}>
+          {displayTitle}
+        </Text>
         <Text style={[styles.message, { color: colors.onSurfaceVariant }]}>
           {displayMessage}
         </Text>

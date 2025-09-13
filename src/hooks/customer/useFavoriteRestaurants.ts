@@ -49,7 +49,7 @@ const mockFavoriteRestaurants: RestaurantCardType[] = [
 ];
 
 // Simulate API delay
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const useFavoriteRestaurants = () => {
   const user = useAuthUser();
@@ -78,7 +78,10 @@ export const useFavoriteRestaurants = () => {
     gcTime: 10 * 60 * 1000, // 10 minutes
     retry: (failureCount, error) => {
       // Don't retry on authentication errors
-      if (error instanceof Error && error.message === 'User not authenticated') {
+      if (
+        error instanceof Error &&
+        error.message === 'User not authenticated'
+      ) {
         return false;
       }
       // Retry up to 3 times for other errors

@@ -31,9 +31,14 @@ export const ResponsiveText: React.FC<ResponsiveTextProps> = ({
   const textStyle: TextStyle = {
     fontSize,
     color,
-    fontWeight: weight === 'normal' ? '400' :
-                weight === 'medium' ? '500' :
-                weight === 'semibold' ? '600' : '700',
+    fontWeight:
+      weight === 'normal'
+        ? '400'
+        : weight === 'medium'
+          ? '500'
+          : weight === 'semibold'
+            ? '600'
+            : '700',
   };
 
   return (
@@ -49,21 +54,21 @@ export const ResponsiveText: React.FC<ResponsiveTextProps> = ({
 };
 
 // Specialized text components
-export const ResponsiveHeading: React.FC<Omit<ResponsiveTextProps, 'size' | 'weight'>> = (props) => (
-  <ResponsiveText {...props} size="2xl" weight="bold" />
-);
+export const ResponsiveHeading: React.FC<
+  Omit<ResponsiveTextProps, 'size' | 'weight'>
+> = (props) => <ResponsiveText {...props} size="2xl" weight="bold" />;
 
-export const ResponsiveSubheading: React.FC<Omit<ResponsiveTextProps, 'size' | 'weight'>> = (props) => (
-  <ResponsiveText {...props} size="xl" weight="semibold" />
-);
+export const ResponsiveSubheading: React.FC<
+  Omit<ResponsiveTextProps, 'size' | 'weight'>
+> = (props) => <ResponsiveText {...props} size="xl" weight="semibold" />;
 
-export const ResponsiveBody: React.FC<Omit<ResponsiveTextProps, 'size' | 'weight'>> = (props) => (
-  <ResponsiveText {...props} size="base" weight="normal" />
-);
+export const ResponsiveBody: React.FC<
+  Omit<ResponsiveTextProps, 'size' | 'weight'>
+> = (props) => <ResponsiveText {...props} size="base" weight="normal" />;
 
-export const ResponsiveCaption: React.FC<Omit<ResponsiveTextProps, 'size' | 'weight'>> = (props) => (
-  <ResponsiveText {...props} size="sm" weight="normal" />
-);
+export const ResponsiveCaption: React.FC<
+  Omit<ResponsiveTextProps, 'size' | 'weight'>
+> = (props) => <ResponsiveText {...props} size="sm" weight="normal" />;
 
 // Hook for custom typography
 export const useTypography = () => {

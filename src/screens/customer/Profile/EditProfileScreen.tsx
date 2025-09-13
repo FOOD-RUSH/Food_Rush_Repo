@@ -74,13 +74,19 @@ const EditProfileScreen = ({
           placeholder={t('email')}
           value={email}
           onChangeText={setEmail}
-          leftIcon={<Ionicons size={23} name="mail-outline" color={colors.onSurface} />}
+          leftIcon={
+            <Ionicons size={23} name="mail-outline" color={colors.onSurface} />
+          }
         />
         <InputField
           leftIcon={
             <View className="flex-row items-center">
               <Text className="text-2xl">🇨🇲</Text>
-              <MaterialIcons name="keyboard-arrow-down" size={25} color={colors.onSurface} />
+              <MaterialIcons
+                name="keyboard-arrow-down"
+                size={25}
+                color={colors.onSurface}
+              />
             </View>
           }
           placeholder={t('phone_number')}
@@ -102,8 +108,8 @@ const EditProfileScreen = ({
           }}
           className="active:opacity-75 mb-2"
           onPress={handleUpdate}
-        loading={updateProfileMutation.status === 'pending'}
-        disabled={updateProfileMutation.status === 'pending'}
+          loading={updateProfileMutation.status === 'pending'}
+          disabled={updateProfileMutation.status === 'pending'}
         >
           {t('update')}
         </Button>

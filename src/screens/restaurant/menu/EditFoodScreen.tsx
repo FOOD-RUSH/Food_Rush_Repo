@@ -1,5 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, Image, ScrollView, TouchableOpacity, Animated, StatusBar, Dimensions, KeyboardTypeOptions } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  Animated,
+  StatusBar,
+  Dimensions,
+  KeyboardTypeOptions,
+} from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -21,17 +31,17 @@ interface FoodItem {
 }
 
 type EditFoodScreenProps = NativeStackScreenProps<
-  RestaurantMenuStackParamList, 
+  RestaurantMenuStackParamList,
   'EditMenuItem'
 >;
 
 export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
   const navigation = useNavigation();
-  
+
   // FIXED: Use itemId from route params and create a mock food item
   // In a real app, you would fetch the item data using the itemId
   const { itemId } = route.params;
-  
+
   // Mock function to get food item by ID (replace with your actual data fetching logic)
   const getFoodItemById = (id: string): FoodItem => {
     // This would typically be a database call or API request
@@ -42,7 +52,7 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
       price: '12.99',
       description: 'A delicious sample food item',
       category: 'Main Course',
-      image: 'https://via.placeholder.com/300x200'
+      image: 'https://via.placeholder.com/300x200',
     };
   };
 
@@ -65,7 +75,7 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
     new Animated.Value(0),
     new Animated.Value(0),
     new Animated.Value(0),
-    new Animated.Value(0)
+    new Animated.Value(0),
   ]).current;
   const buttonSlideAnim = useRef(new Animated.Value(100)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -101,15 +111,16 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
         }),
       ]),
       // Form fields stagger animation
-      Animated.stagger(150, 
-        formAnimations.map(anim => 
+      Animated.stagger(
+        150,
+        formAnimations.map((anim) =>
           Animated.spring(anim, {
             toValue: 1,
             tension: 50,
             friction: 8,
             useNativeDriver: true,
-          })
-        )
+          }),
+        ),
       ),
       // Buttons animation
       Animated.spring(buttonSlideAnim, {
@@ -139,7 +150,7 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
           duration: 2000,
           useNativeDriver: true,
         }),
-      ])
+      ]),
     ).start();
 
     // Floating animation for decorative elements
@@ -155,7 +166,7 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
           duration: 3000,
           useNativeDriver: true,
         }),
-      ])
+      ]),
     ).start();
   };
 
@@ -196,7 +207,7 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
   const handleSave = () => {
     // Save animation
     const saveScale = new Animated.Value(1);
-    
+
     Animated.sequence([
       Animated.timing(saveScale, {
         toValue: 0.95,
@@ -315,7 +326,9 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
               <Ionicons name="arrow-back" size={24} color="#ffffff" />
             </TouchableOpacity>
             <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#ffffff' }}>
+              <Text
+                style={{ fontSize: 24, fontWeight: 'bold', color: '#ffffff' }}
+              >
                 Edit Item
               </Text>
               <Text style={{ fontSize: 14, color: 'rgba(255, 255, 255, 0.7)' }}>
@@ -336,7 +349,7 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
             </TouchableOpacity>
           </Animated.View>
 
-          <ScrollView 
+          <ScrollView
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 40 }}
           >
@@ -353,11 +366,11 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
                   transform: [
                     { scale: imageScaleAnim },
                     { scale: pulseAnim },
-                    { rotate: rotateInterpolate }
+                    { rotate: rotateInterpolate },
                   ],
                 }}
               >
-                <TouchableOpacity 
+                <TouchableOpacity
                   onPress={handleImagePick}
                   activeOpacity={0.8}
                   style={{
@@ -373,7 +386,11 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
                   }}
                 >
                   <LinearGradient
-                    colors={['rgba(0, 0, 0, 0.3)', 'transparent', 'rgba(0, 0, 0, 0.5)']}
+                    colors={[
+                      'rgba(0, 0, 0, 0.3)',
+                      'transparent',
+                      'rgba(0, 0, 0, 0.5)',
+                    ]}
                     style={{
                       position: 'absolute',
                       top: 0,
@@ -394,7 +411,10 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
                     />
                   ) : (
                     <LinearGradient
-                      colors={['rgba(255, 255, 255, 0.1)', 'rgba(255, 255, 255, 0.05)']}
+                      colors={[
+                        'rgba(255, 255, 255, 0.1)',
+                        'rgba(255, 255, 255, 0.05)',
+                      ]}
                       style={{
                         width: '100%',
                         height: '100%',
@@ -402,25 +422,37 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
                         justifyContent: 'center',
                       }}
                     >
-                      <MaterialCommunityIcons name="camera" size={40} color="#ffffff" />
-                      <Text style={{ color: '#ffffff', marginTop: 8 }}>No Image</Text>
+                      <MaterialCommunityIcons
+                        name="camera"
+                        size={40}
+                        color="#ffffff"
+                      />
+                      <Text style={{ color: '#ffffff', marginTop: 8 }}>
+                        No Image
+                      </Text>
                     </LinearGradient>
                   )}
-                  
+
                   {/* Camera overlay */}
-                  <View style={{
-                    position: 'absolute',
-                    top: 12,
-                    right: 12,
-                    width: 40,
-                    height: 40,
-                    borderRadius: 20,
-                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    zIndex: 3,
-                  }}>
-                    <MaterialCommunityIcons name="camera" size={20} color="#007AFF" />
+                  <View
+                    style={{
+                      position: 'absolute',
+                      top: 12,
+                      right: 12,
+                      width: 40,
+                      height: 40,
+                      borderRadius: 20,
+                      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      zIndex: 3,
+                    }}
+                  >
+                    <MaterialCommunityIcons
+                      name="camera"
+                      size={20}
+                      color="#007AFF"
+                    />
                   </View>
 
                   {/* Edit overlay */}
@@ -435,12 +467,14 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
                       zIndex: 3,
                     }}
                   >
-                    <Text style={{ 
-                      color: '#ffffff', 
-                      fontSize: 12, 
-                      textAlign: 'center',
-                      fontWeight: '500',
-                    }}>
+                    <Text
+                      style={{
+                        color: '#ffffff',
+                        fontSize: 12,
+                        textAlign: 'center',
+                        fontWeight: '500',
+                      }}
+                    >
                       Tap to change image
                     </Text>
                   </LinearGradient>
@@ -450,66 +484,71 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
               {/* Form Fields */}
               <View style={{ gap: 20 }}>
                 {[
-                  { 
-                    label: "Food Name", 
-                    value: name, 
-                    onChangeText: setName, 
-                    icon: "food",
-                    placeholder: "Enter food name"
+                  {
+                    label: 'Food Name',
+                    value: name,
+                    onChangeText: setName,
+                    icon: 'food',
+                    placeholder: 'Enter food name',
                   },
-                  { 
-                    label: "Price", 
-                    value: price, 
-                    onChangeText: setPrice, 
-                    icon: "currency-usd",
-                    keyboardType: "decimal-pad",
-                    placeholder: "0.00"
+                  {
+                    label: 'Price',
+                    value: price,
+                    onChangeText: setPrice,
+                    icon: 'currency-usd',
+                    keyboardType: 'decimal-pad',
+                    placeholder: '0.00',
                   },
-                  { 
-                    label: "Category", 
-                    value: category, 
-                    onChangeText: setCategory, 
-                    icon: "tag",
-                    placeholder: "Select category"
+                  {
+                    label: 'Category',
+                    value: category,
+                    onChangeText: setCategory,
+                    icon: 'tag',
+                    placeholder: 'Select category',
                   },
-                  { 
-                    label: "Description", 
-                    value: description, 
-                    onChangeText: setDescription, 
-                    icon: "text",
+                  {
+                    label: 'Description',
+                    value: description,
+                    onChangeText: setDescription,
+                    icon: 'text',
                     multiline: true,
                     numberOfLines: 4,
-                    placeholder: "Describe the dish..."
+                    placeholder: 'Describe the dish...',
                   },
                 ].map((field, index) => (
                   <Animated.View
                     key={field.label}
                     style={{
                       opacity: formAnimations[index],
-                      transform: [{
-                        translateX: formAnimations[index].interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [120 * (index % 2 === 0 ? 1 : -1), 0],
-                        })
-                      }, {
-                        scale: formAnimations[index].interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [0.9, 1],
-                        })
-                      }]
+                      transform: [
+                        {
+                          translateX: formAnimations[index].interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [120 * (index % 2 === 0 ? 1 : -1), 0],
+                          }),
+                        },
+                        {
+                          scale: formAnimations[index].interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [0.9, 1],
+                          }),
+                        },
+                      ],
                     }}
                   >
-                    <View style={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                      borderRadius: 15,
-                      borderWidth: 1,
-                      borderColor: 'rgba(255, 255, 255, 0.2)',
-                      shadowColor: '#000',
-                      shadowOffset: { width: 0, height: 4 },
-                      shadowOpacity: 0.1,
-                      shadowRadius: 8,
-                      elevation: 4,
-                    }}>
+                    <View
+                      style={{
+                        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                        borderRadius: 15,
+                        borderWidth: 1,
+                        borderColor: 'rgba(255, 255, 255, 0.2)',
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 4 },
+                        shadowOpacity: 0.1,
+                        shadowRadius: 8,
+                        elevation: 4,
+                      }}
+                    >
                       <TextInput
                         mode="outlined"
                         label={field.label}
@@ -529,7 +568,7 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
                             placeholder: 'rgba(255, 255, 255, 0.6)',
                             background: 'transparent',
                             outline: 'rgba(255, 255, 255, 0.3)',
-                          }
+                          },
                         }}
                         textColor="#ffffff"
                         placeholderTextColor="rgba(255, 255, 255, 0.6)"
@@ -537,7 +576,12 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
                           borderColor: 'rgba(255, 255, 255, 0.3)',
                           borderRadius: 15,
                         }}
-                        left={<TextInput.Icon icon={field.icon} color="rgba(255, 255, 255, 0.7)" />}
+                        left={
+                          <TextInput.Icon
+                            icon={field.icon}
+                            color="rgba(255, 255, 255, 0.7)"
+                          />
+                        }
                       />
                     </View>
                   </Animated.View>
@@ -551,14 +595,19 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
                   transform: [{ translateY: buttonSlideAnim }],
                 }}
               >
-                <View style={{ flexDirection: 'row', gap: 16, marginBottom: 24 }}>
+                <View
+                  style={{ flexDirection: 'row', gap: 16, marginBottom: 24 }}
+                >
                   <TouchableOpacity
                     style={{ flex: 1 }}
                     onPress={handleCancel}
                     activeOpacity={0.8}
                   >
                     <LinearGradient
-                      colors={['rgba(255, 255, 255, 0.1)', 'rgba(255, 255, 255, 0.05)']}
+                      colors={[
+                        'rgba(255, 255, 255, 0.1)',
+                        'rgba(255, 255, 255, 0.05)',
+                      ]}
                       style={{
                         paddingVertical: 18,
                         borderRadius: 15,
@@ -567,16 +616,18 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
                         borderColor: 'rgba(255, 255, 255, 0.2)',
                       }}
                     >
-                      <Text style={{ 
-                        color: '#ffffff', 
-                        fontWeight: '600', 
-                        fontSize: 16 
-                      }}>
+                      <Text
+                        style={{
+                          color: '#ffffff',
+                          fontWeight: '600',
+                          fontSize: 16,
+                        }}
+                      >
                         Cancel
                       </Text>
                     </LinearGradient>
                   </TouchableOpacity>
-                  
+
                   <TouchableOpacity
                     style={{ flex: 1 }}
                     onPress={handleSave}
@@ -595,13 +646,22 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
                         elevation: 6,
                       }}
                     >
-                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <MaterialCommunityIcons name="content-save" size={20} color="#ffffff" style={{ marginRight: 8 }} />
-                        <Text style={{ 
-                          color: '#ffffff', 
-                          fontWeight: '700', 
-                          fontSize: 16 
-                        }}>
+                      <View
+                        style={{ flexDirection: 'row', alignItems: 'center' }}
+                      >
+                        <MaterialCommunityIcons
+                          name="content-save"
+                          size={20}
+                          color="#ffffff"
+                          style={{ marginRight: 8 }}
+                        />
+                        <Text
+                          style={{
+                            color: '#ffffff',
+                            fontWeight: '700',
+                            fontSize: 16,
+                          }}
+                        >
                           Save Changes
                         </Text>
                       </View>
@@ -611,12 +671,12 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
 
                 {/* Quick Actions */}
                 <View style={{ flexDirection: 'row', gap: 12 }}>
-                  <TouchableOpacity
-                    style={{ flex: 1 }}
-                    activeOpacity={0.8}
-                  >
+                  <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.8}>
                     <LinearGradient
-                      colors={['rgba(52, 199, 89, 0.2)', 'rgba(52, 199, 89, 0.1)']}
+                      colors={[
+                        'rgba(52, 199, 89, 0.2)',
+                        'rgba(52, 199, 89, 0.1)',
+                      ]}
                       style={{
                         paddingVertical: 12,
                         borderRadius: 12,
@@ -625,22 +685,24 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
                         borderColor: 'rgba(52, 199, 89, 0.3)',
                       }}
                     >
-                      <Text style={{ 
-                        color: '#34c759', 
-                        fontWeight: '600', 
-                        fontSize: 14 
-                      }}>
+                      <Text
+                        style={{
+                          color: '#34c759',
+                          fontWeight: '600',
+                          fontSize: 14,
+                        }}
+                      >
                         Mark Available
                       </Text>
                     </LinearGradient>
                   </TouchableOpacity>
 
-                  <TouchableOpacity
-                    style={{ flex: 1 }}
-                    activeOpacity={0.8}
-                  >
+                  <TouchableOpacity style={{ flex: 1 }} activeOpacity={0.8}>
                     <LinearGradient
-                      colors={['rgba(255, 149, 0, 0.2)', 'rgba(255, 149, 0, 0.1)']}
+                      colors={[
+                        'rgba(255, 149, 0, 0.2)',
+                        'rgba(255, 149, 0, 0.1)',
+                      ]}
                       style={{
                         paddingVertical: 12,
                         borderRadius: 12,
@@ -649,11 +711,13 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
                         borderColor: 'rgba(255, 149, 0, 0.3)',
                       }}
                     >
-                      <Text style={{ 
-                        color: '#ff9500', 
-                        fontWeight: '600', 
-                        fontSize: 14 
-                      }}>
+                      <Text
+                        style={{
+                          color: '#ff9500',
+                          fontWeight: '600',
+                          fontSize: 14,
+                        }}
+                      >
                         Mark Popular
                       </Text>
                     </LinearGradient>
@@ -665,5 +729,5 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
         </CommonView>
       </LinearGradient>
     </>
-  )
-  }
+  );
+};

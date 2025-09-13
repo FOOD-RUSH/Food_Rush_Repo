@@ -45,6 +45,21 @@ export const CategoryFilters = [
   },
   {
     id: 8,
+    image: FoodCategory.bread,
+    title: 'local_dish',
+  },
+  {
+    id: 9,
+    image: FoodCategory.pancakes,
+    title: 'breakfast',
+  },
+  {
+    id: 10,
+    image: FoodCategory.french_fries,
+    title: 'fastfood',
+  },
+  {
+    id: 11,
     image: FoodCategory.others,
     title: 'more',
   },

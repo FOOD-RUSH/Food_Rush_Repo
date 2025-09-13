@@ -29,7 +29,11 @@ export default function ConfirmOrderScreen({ route, navigation }: Props) {
       <Text style={styles.subtitle}>Order ID: {id}</Text>
 
       <View style={styles.row}>
-        <Button title={loading ? 'Confirming...' : 'Confirm Order'} onPress={handleConfirm} disabled={loading} />
+        <Button
+          title={loading ? 'Confirming...' : 'Confirm Order'}
+          onPress={handleConfirm}
+          disabled={loading}
+        />
       </View>
 
       <View style={styles.row}>

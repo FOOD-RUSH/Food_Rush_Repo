@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
-import {
-  View,
-  TouchableOpacity,
-  ScrollView,
-  Alert,
-} from 'react-native';
+import { View, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { useTheme, Button, TextInput } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import CommonView from '@/src/components/common/CommonView';
-import { ResponsiveContainer, ResponsiveImage, ResponsiveText } from '@/src/components/common';
+import {
+  ResponsiveContainer,
+  ResponsiveImage,
+  ResponsiveText,
+} from '@/src/components/common';
 import { useResponsive } from '@/src/hooks/useResponsive';
 
-interface RestaurantReviewScreenProps extends RootStackScreenProps<'RestaurantReview'> {}
+interface RestaurantReviewScreenProps
+  extends RootStackScreenProps<'RestaurantReview'> {}
 
 const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
   navigation,
@@ -40,16 +40,12 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
     }
 
     // Here you would typically submit the review to your backend
-    Alert.alert(
-      t('success'),
-      t('review_submitted_successfully'),
-      [
-        {
-          text: 'OK',
-          onPress: () => navigation.goBack(),
-        },
-      ]
-    );
+    Alert.alert(t('success'), t('review_submitted_successfully'), [
+      {
+        text: 'OK',
+        onPress: () => navigation.goBack(),
+      },
+    ]);
   };
 
   const handleCancel = () => {
@@ -58,7 +54,13 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
 
   const renderStars = () => {
     return (
-      <View style={{ flexDirection: 'row', justifyContent: 'center', marginVertical: getResponsiveSpacing(16) }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'center',
+          marginVertical: getResponsiveSpacing(16),
+        }}
+      >
         {[1, 2, 3, 4, 5].map((star) => (
           <TouchableOpacity
             key={star}
@@ -85,14 +87,19 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
       <ScrollView
         style={{ flex: 1, backgroundColor: colors.background }}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ flexGrow: 1, paddingBottom: getResponsiveSpacing(32) }}
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingBottom: getResponsiveSpacing(32),
+        }}
       >
         {/* Back Button */}
-        <View style={{
-          paddingHorizontal: getResponsiveSpacing(16),
-          paddingTop: getResponsiveSpacing(16),
-          paddingBottom: getResponsiveSpacing(8)
-        }}>
+        <View
+          style={{
+            paddingHorizontal: getResponsiveSpacing(16),
+            paddingTop: getResponsiveSpacing(16),
+            paddingBottom: getResponsiveSpacing(8),
+          }}
+        >
           <TouchableOpacity
             onPress={handleCancel}
             style={{
@@ -105,29 +112,31 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
             }}
             activeOpacity={0.7}
           >
-            <Ionicons
-              name="arrow-back"
-              size={24}
-              color={colors.onSurface}
-            />
+            <Ionicons name="arrow-back" size={24} color={colors.onSurface} />
           </TouchableOpacity>
         </View>
 
         <ResponsiveContainer padding="lg">
           {/* Restaurant Image */}
-          <View style={{
-            alignItems: 'center',
-            marginBottom: getResponsiveSpacing(24)
-          }}>
-            <View style={{
-              width: isSmallDevice ? 120 : 150,
-              height: isSmallDevice ? 120 : 150,
-              borderRadius: 16,
-              overflow: 'hidden',
-              backgroundColor: colors.surfaceVariant,
-            }}>
+          <View
+            style={{
+              alignItems: 'center',
+              marginBottom: getResponsiveSpacing(24),
+            }}
+          >
+            <View
+              style={{
+                width: isSmallDevice ? 120 : 150,
+                height: isSmallDevice ? 120 : 150,
+                borderRadius: 16,
+                overflow: 'hidden',
+                backgroundColor: colors.surfaceVariant,
+              }}
+            >
               <ResponsiveImage
-                source={restaurantImage || require('@/assets/images/R-Logo.png')}
+                source={
+                  restaurantImage || require('@/assets/images/R-Logo.png')
+                }
                 size="xl"
                 aspectRatio={1}
                 style={{
@@ -138,7 +147,12 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
           </View>
 
           {/* Main Question */}
-          <View style={{ alignItems: 'center', marginBottom: getResponsiveSpacing(16) }}>
+          <View
+            style={{
+              alignItems: 'center',
+              marginBottom: getResponsiveSpacing(16),
+            }}
+          >
             <ResponsiveText
               size={isSmallDevice ? 'xl' : '2xl'}
               weight="bold"
@@ -179,7 +193,12 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
 
           {/* Rating Display */}
           {rating > 0 && (
-            <View style={{ alignItems: 'center', marginBottom: getResponsiveSpacing(24) }}>
+            <View
+              style={{
+                alignItems: 'center',
+                marginBottom: getResponsiveSpacing(24),
+              }}
+            >
               <ResponsiveText
                 size="lg"
                 weight="semibold"
@@ -211,7 +230,7 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
               }}
               contentStyle={{
                 paddingHorizontal: getResponsiveSpacing(16),
-                paddingVertical: getResponsiveSpacing(12),
+                paddingVertical: 12,
                 color: colors.onSurfaceVariant,
               }}
               textAlignVertical="top"
@@ -219,10 +238,12 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
           </View>
 
           {/* Action Buttons */}
-          <View style={{
-            flexDirection: 'row',
-            gap: getResponsiveSpacing(12),
-          }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              gap: getResponsiveSpacing(12),
+            }}
+          >
             <Button
               mode="outlined"
               onPress={handleCancel}
@@ -248,13 +269,15 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
               style={{
                 flex: 1,
                 borderRadius: 25,
-                backgroundColor: rating === 0 ? colors.surfaceVariant : colors.primary,
+                backgroundColor:
+                  rating === 0 ? colors.surfaceVariant : colors.primary,
               }}
               contentStyle={{ paddingVertical: getResponsiveSpacing(12) }}
               labelStyle={{
                 fontSize: 16,
                 fontWeight: '600',
-                color: rating === 0 ? colors.onSurfaceVariant : colors.onPrimary,
+                color:
+                  rating === 0 ? colors.onSurfaceVariant : colors.onPrimary,
               }}
             >
               {t('submit')}

@@ -1,7 +1,24 @@
 // Responsive Components
-export { ResponsiveContainer, ResponsiveCard, ResponsiveGrid } from './ResponsiveContainer';
-export { ResponsiveImage, ResponsiveAvatar, ResponsiveIcon, ResponsiveBanner, useResponsiveImage } from './ResponsiveImage';
-export { ResponsiveText, ResponsiveHeading, ResponsiveSubheading, ResponsiveBody, ResponsiveCaption, useTypography } from './ResponsiveText';
+export {
+  ResponsiveContainer,
+  ResponsiveCard,
+  ResponsiveGrid,
+} from './ResponsiveContainer';
+export {
+  ResponsiveImage,
+  ResponsiveAvatar,
+  ResponsiveIcon,
+  ResponsiveBanner,
+  useResponsiveImage,
+} from './ResponsiveImage';
+export {
+  ResponsiveText,
+  ResponsiveHeading,
+  ResponsiveSubheading,
+  ResponsiveBody,
+  ResponsiveCaption,
+  useTypography,
+} from './ResponsiveText';
 
 // Existing Components
 export { default as CommonView } from './CommonView';

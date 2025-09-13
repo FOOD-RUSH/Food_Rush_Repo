@@ -4,7 +4,6 @@
 export * from './apiClient';
 export * from './authApi';
 export * from './restaurant.service';
-export * from './payment.service';
 export * from './notification.service';
 export * from './orders.service';
 

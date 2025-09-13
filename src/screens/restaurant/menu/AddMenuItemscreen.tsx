@@ -29,23 +29,31 @@ const AddMenuItemScreen = () => {
     <CommonView>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View className="mb-6">
-          <Text className="text-2xl font-bold text-gray-800">Add Menu Item</Text>
-          <Text className="text-gray-500 mt-2">Create a new delicious item</Text>
+          <Text className="text-2xl font-bold text-gray-800">
+            Add Menu Item
+          </Text>
+          <Text className="text-gray-500 mt-2">
+            Create a new delicious item
+          </Text>
         </View>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           className="h-48 bg-gray-100 rounded-xl mb-6 items-center justify-center"
           onPress={handleImagePick}
         >
           {image ? (
-            <Image 
-              source={{ uri: image }} 
+            <Image
+              source={{ uri: image }}
               className="h-full w-full rounded-xl"
               resizeMode="cover"
             />
           ) : (
             <>
-              <MaterialCommunityIcons name="camera-plus" size={40} color="#007AFF" />
+              <MaterialCommunityIcons
+                name="camera-plus"
+                size={40}
+                color="#007AFF"
+              />
               <Text className="text-blue-500 mt-2">Add Food Image</Text>
             </>
           )}
@@ -96,7 +104,7 @@ const AddMenuItemScreen = () => {
             >
               Cancel
             </Button>
-            
+
             <Button
               mode="contained"
               onPress={() => {}}

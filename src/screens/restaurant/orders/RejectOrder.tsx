@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { SafeAreaView, View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import {
+  SafeAreaView,
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+} from 'react-native';
 import type { RouteProp } from '@react-navigation/native';
 import type { StackNavigationProp } from '@react-navigation/stack';
 
@@ -44,7 +51,11 @@ export default function RejectOrderScreen({ route, navigation }: Props) {
       />
 
       <View style={styles.row}>
-        <Button title={loading ? 'Rejecting...' : 'Reject Order'} onPress={handleReject} disabled={loading} />
+        <Button
+          title={loading ? 'Rejecting...' : 'Reject Order'}
+          onPress={handleReject}
+          disabled={loading}
+        />
       </View>
 
       <View style={styles.row}>
@@ -60,6 +71,13 @@ const styles = StyleSheet.create({
   container: { flex: 1, padding: 16 },
   title: { fontSize: 20, fontWeight: '600', marginBottom: 8 },
   subtitle: { fontSize: 14, color: '#666', marginBottom: 12 },
-  input: { borderWidth: 1, borderColor: '#ddd', padding: 12, borderRadius: 6, minHeight: 80, marginBottom: 12 },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    padding: 12,
+    borderRadius: 6,
+    minHeight: 80,
+    marginBottom: 12,
+  },
   row: { marginVertical: 8 },
 });

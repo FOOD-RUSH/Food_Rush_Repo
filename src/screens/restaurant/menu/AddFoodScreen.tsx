@@ -1,4 +1,11 @@
-import { View, Text, Image, ScrollView, TouchableOpacity, Animated } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  Animated,
+} from 'react-native';
 import React, { useRef, useState } from 'react';
 import { TextInput } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
@@ -40,16 +47,20 @@ export const AddFoodScreen = () => {
         >
           {/* Header Section */}
           <View className="mb-6">
-            <Text className="text-2xl font-bold text-gray-800">Add New Item</Text>
+            <Text className="text-2xl font-bold text-gray-800">
+              Add New Item
+            </Text>
             <Text className="text-gray-500 mt-2">
               Fill in the details to add a new menu item
             </Text>
           </View>
 
           {/* Image Upload Section */}
-          <TouchableOpacity 
+          <TouchableOpacity
             className="h-48 bg-gray-100 rounded-2xl mb-6 items-center justify-center"
-            onPress={() => {/* Handle image upload */}}
+            onPress={() => {
+              /* Handle image upload */
+            }}
           >
             <Ionicons name="camera-outline" size={40} color="#007AFF" />
             <Text className="text-blue-500 mt-2">Add Food Image</Text>
@@ -95,22 +106,30 @@ export const AddFoodScreen = () => {
 
           {/* Action Buttons */}
           <View className="flex-row space-x-4 mt-8 mb-6">
-            <TouchableOpacity 
+            <TouchableOpacity
               className="flex-1 bg-gray-100 py-4 rounded-full"
-              onPress={() => {/* Handle cancel */}}
+              onPress={() => {
+                /* Handle cancel */
+              }}
             >
-              <Text className="text-center text-gray-700 font-semibold">Cancel</Text>
+              <Text className="text-center text-gray-700 font-semibold">
+                Cancel
+              </Text>
             </TouchableOpacity>
-            
-            <TouchableOpacity 
+
+            <TouchableOpacity
               className="flex-1 bg-blue-500 py-4 rounded-full"
-              onPress={() => {/* Handle save */}}
+              onPress={() => {
+                /* Handle save */
+              }}
             >
-              <Text className="text-center text-white font-semibold">Save Item</Text>
+              <Text className="text-center text-white font-semibold">
+                Save Item
+              </Text>
             </TouchableOpacity>
           </View>
         </Animated.View>
       </ScrollView>
     </CommonView>
-  )
-}
+  );
+};

@@ -13,18 +13,22 @@ const MenuSettingsScreen = () => {
     <CommonView>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View className="mb-6">
-          <Text className="text-2xl font-bold text-gray-800">Menu Settings</Text>
-          <Text className="text-gray-500 mt-2">Customize your menu preferences</Text>
+          <Text className="text-2xl font-bold text-gray-800">
+            Menu Settings
+          </Text>
+          <Text className="text-gray-500 mt-2">
+            Customize your menu preferences
+          </Text>
         </View>
 
         <View className="bg-white rounded-xl overflow-hidden">
           <List.Section>
             <List.Subheader>General Settings</List.Subheader>
-            
+
             <List.Item
               title="Auto-accept Orders"
               description="Automatically accept incoming orders"
-              left={props => <List.Icon {...props} icon="cart-check" />}
+              left={(props) => <List.Icon {...props} icon="cart-check" />}
               right={() => (
                 <Switch
                   value={autoAcceptOrders}
@@ -37,7 +41,7 @@ const MenuSettingsScreen = () => {
             <List.Item
               title="Show Out of Stock Items"
               description="Display items that are currently unavailable"
-              left={props => <List.Icon {...props} icon="eye-off" />}
+              left={(props) => <List.Icon {...props} icon="eye-off" />}
               right={() => (
                 <Switch
                   value={showOutOfStock}
@@ -50,7 +54,7 @@ const MenuSettingsScreen = () => {
             <List.Item
               title="Item Customization"
               description="Allow customers to customize orders"
-              left={props => <List.Icon {...props} icon="tune" />}
+              left={(props) => <List.Icon {...props} icon="tune" />}
               right={() => (
                 <Switch
                   value={enableCustomization}
@@ -62,19 +66,11 @@ const MenuSettingsScreen = () => {
         </View>
 
         <View className="mt-6 space-y-4">
-          <Button
-            mode="contained"
-            onPress={() => {}}
-            icon="content-save"
-          >
+          <Button mode="contained" onPress={() => {}} icon="content-save">
             Save Changes
           </Button>
 
-          <Button
-            mode="outlined"
-            onPress={() => {}}
-            icon="refresh"
-          >
+          <Button mode="outlined" onPress={() => {}} icon="refresh">
             Reset to Defaults
           </Button>
         </View>

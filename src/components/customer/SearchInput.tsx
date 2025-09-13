@@ -39,7 +39,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
   };
 
   return (
-    <View className='flex-1 flex-row items-center'>
+    <View className="flex-1 flex-row items-center">
       <TextInput
         placeholder={placeholder || t('search_for_food')}
         mode="outlined"

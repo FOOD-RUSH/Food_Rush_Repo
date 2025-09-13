@@ -33,7 +33,10 @@ export const notificationApi = {
 
   // Mark notification as read
   markAsRead: (notificationId: string) => {
-    return apiClient.patch<Notification>(`/notifications/${notificationId}/read`, {});
+    return apiClient.patch<Notification>(
+      `/notifications/${notificationId}/read`,
+      {},
+    );
   },
 
   // Mark all notifications as read
@@ -48,12 +51,17 @@ export const notificationApi = {
 
   // Get notification settings
   getSettings: (userId: string) => {
-    return apiClient.get<NotificationSettings>(`/notifications/settings/${userId}`);
+    return apiClient.get<NotificationSettings>(
+      `/notifications/settings/${userId}`,
+    );
   },
 
   // Update notification settings
   updateSettings: (userId: string, settings: Partial<NotificationSettings>) => {
-    return apiClient.patch<NotificationSettings>(`/notifications/settings/${userId}`, settings);
+    return apiClient.patch<NotificationSettings>(
+      `/notifications/settings/${userId}`,
+      settings,
+    );
   },
 
   // Get unread notification count
@@ -63,11 +71,17 @@ export const notificationApi = {
 
   // Subscribe to push notifications
   subscribeToPush: (userId: string, token: string) => {
-    return apiClient.post<void>(`/notifications/push/subscribe`, { userId, token });
+    return apiClient.post<void>(`/notifications/push/subscribe`, {
+      userId,
+      token,
+    });
   },
 
   // Unsubscribe from push notifications
   unsubscribeFromPush: (userId: string, token: string) => {
-    return apiClient.post<void>(`/notifications/push/unsubscribe`, { userId, token });
+    return apiClient.post<void>(`/notifications/push/unsubscribe`, {
+      userId,
+      token,
+    });
   },
 };

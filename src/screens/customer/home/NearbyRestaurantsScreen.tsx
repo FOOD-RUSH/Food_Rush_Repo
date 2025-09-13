@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { View, Text, FlatList, RefreshControl } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import CommonView from '@/src/components/common/CommonView';
 import { RestaurantCard } from '@/src/components/customer/RestaurantCard';
-import { useGetRestaurantsNearBy } from '@/src/hooks/customer/useCustomerApi';
+import { useNearbyRestaurants } from '@/src/hooks/customer';
 import { RootStackScreenProps } from '@/src/navigation/types';
 // Location system removed - using hardcoded coordinates
 import LoadingScreen from '@/src/components/common/LoadingScreen';
@@ -16,17 +16,18 @@ const NearbyRestaurantsScreen = ({
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
 
-  // Get nearby restaurants using hardcoded coordinates
+  // Get nearby restaurants using location service
   const {
-    data: nearbyRestaurantsResponse,
+    data: nearbyRestaurants,
     isLoading,
     error,
     refetch,
     isRefetching,
-  } = useGetRestaurantsNearBy();
-
-  // Extract data from response
-  const nearbyRestaurants = nearbyRestaurantsResponse?.data || [];
+  } = useNearbyRestaurants({
+    radiusKm: 15,
+    limit: 20,
+    isOpen: true,
+  });
 
   const handleRefresh = () => {
     refetch();
@@ -35,13 +36,17 @@ const NearbyRestaurantsScreen = ({
   const renderRestaurant = ({ item }: { item: any }) => (
     <RestaurantCard
       key={item.id}
-      restaurantID={item.id}
-      restaurantName={item.name}
-      image={item.image}
+      id={item.id}
+      name={item.name}
+      address={item.address}
+      isOpen={item.isOpen}
+      verificationStatus={item.verificationStatus}
       rating={item.rating}
-      deliveryFee={item.deliveryFee}
-      distanceFromUser={item.distance}
-      estimatedTime={item.estimatedDeliveryTime}
+      ratingCount={item.ratingCount}
+      image={item.image}
+      distance={item.distance}
+      deliveryPrice={item.deliveryPrice}
+      estimatedTime={30}
     />
   );
 

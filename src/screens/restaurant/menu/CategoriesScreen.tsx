@@ -14,22 +14,30 @@ const CategoriesScreen = () => {
   const [categories, setCategories] = useState<Category[]>([]);
 
   const renderCategory = ({ item }: { item: Category }) => (
-    <TouchableOpacity 
+    <TouchableOpacity
       className="bg-white p-4 rounded-xl mb-3 flex-row items-center"
-      onPress={() => {/* Navigate to edit category */}}
+      onPress={() => {
+        /* Navigate to edit category */
+      }}
     >
       <View className="w-12 h-12 bg-blue-100 rounded-full items-center justify-center">
-        <MaterialCommunityIcons name="food-fork-drink" size={24} color="#007AFF" />
+        <MaterialCommunityIcons
+          name="food-fork-drink"
+          size={24}
+          color="#007AFF"
+        />
       </View>
-      
+
       <View className="flex-1 ml-4">
         <Text className="text-lg font-semibold text-gray-800">{item.name}</Text>
         <Text className="text-sm text-gray-500">{item.itemCount} items</Text>
       </View>
 
-      <TouchableOpacity 
+      <TouchableOpacity
         className="w-10 h-10 items-center justify-center"
-        onPress={() => {/* Handle edit */}}
+        onPress={() => {
+          /* Handle edit */
+        }}
       >
         <MaterialCommunityIcons name="pencil" size={24} color="#666666" />
       </TouchableOpacity>
@@ -47,7 +55,7 @@ const CategoriesScreen = () => {
         <FlatList
           data={categories}
           renderItem={renderCategory}
-          keyExtractor={item => item.id}
+          keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 80 }}
         />
@@ -61,7 +69,9 @@ const CategoriesScreen = () => {
             bottom: 0,
             backgroundColor: '#007AFF',
           }}
-          onPress={() => {/* Navigate to add category */}}
+          onPress={() => {
+            /* Navigate to add category */
+          }}
         />
       </View>
     </CommonView>

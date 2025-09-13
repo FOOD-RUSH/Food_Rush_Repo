@@ -39,7 +39,7 @@ export const TYPOGRAPHY_SCALE = {
 // Helper function to get font style
 export const getFontStyle = (
   variant: keyof typeof TYPOGRAPHY_SCALE = 'body',
-  family: keyof typeof FONT_FAMILIES = 'primary'
+  family: keyof typeof FONT_FAMILIES = 'primary',
 ) => {
   return {
     fontFamily: FONT_FAMILIES[family],

@@ -42,33 +42,57 @@ const AboutScreen = ({ navigation }: Props) => {
         }}
       >
         <LinearGradient
-          colors={["#667eea", "#764ba2"]}
+          colors={['#667eea', '#764ba2']}
           style={styles.header}
           start={[0, 0]}
           end={[1, 1]}
         >
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backBtn}
+          >
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>About</Text>
-          <MaterialCommunityIcons name="information-outline" size={32} color="#fff" style={{ marginLeft: 10 }} />
+          <MaterialCommunityIcons
+            name="information-outline"
+            size={32}
+            color="#fff"
+            style={{ marginLeft: 10 }}
+          />
         </LinearGradient>
       </Animated.View>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
-        <Animated.View style={{ opacity: contentAnim, marginTop: 24, alignItems: 'center' }}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 32 }}
+      >
+        <Animated.View
+          style={{ opacity: contentAnim, marginTop: 24, alignItems: 'center' }}
+        >
           <View style={styles.logoContainer}>
-            <LinearGradient colors={["#764ba2", "#667eea"]} style={styles.logoBg}>
-              <MaterialCommunityIcons name="silverware-fork-knife" size={48} color="#fff" />
+            <LinearGradient
+              colors={['#764ba2', '#667eea']}
+              style={styles.logoBg}
+            >
+              <MaterialCommunityIcons
+                name="silverware-fork-knife"
+                size={48}
+                color="#fff"
+              />
             </LinearGradient>
           </View>
           <Text style={styles.appName}>Food Rush</Text>
           <Text style={styles.version}>Version 1.0.0</Text>
           <Text style={styles.description}>
-            Food Rush is a modern restaurant management app designed to simplify your business operations, manage orders, track analytics, and enhance customer satisfaction.
+            Food Rush is a modern restaurant management app designed to simplify
+            your business operations, manage orders, track analytics, and
+            enhance customer satisfaction.
           </Text>
           <View style={styles.sectionBox}>
             <Text style={styles.sectionTitle}>Credits</Text>
-            <Text style={styles.creditText}>Developed by The Food Rush Team</Text>
+            <Text style={styles.creditText}>
+              Developed by The Food Rush Team
+            </Text>
             <Text style={styles.creditText}> 2025 All Rights Reserved</Text>
           </View>
         </Animated.View>

@@ -1,4 +1,9 @@
-import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig, AxiosError } from 'axios';
+import axios, {
+  AxiosInstance,
+  AxiosResponse,
+  AxiosRequestConfig,
+  AxiosError,
+} from 'axios';
 import { Platform } from 'react-native';
 import TokenManager from './tokenManager';
 
@@ -17,7 +22,9 @@ class ApiClient {
 
   constructor() {
     this.client = axios.create({
-      baseURL: process.env.EXPO_PUBLIC_API_URL || 'https://foodrush-be.onrender.com/api/v1',
+      baseURL:
+        process.env.EXPO_PUBLIC_API_URL ||
+        'https://foodrush-be.onrender.com/api/v1',
       timeout: 15000,
       headers: {
         'Content-Type': 'application/json',
@@ -36,7 +43,8 @@ class ApiClient {
           config.headers.Authorization = `Bearer ${token}`;
         }
         config.headers['X-Device-Platform'] = Platform.OS;
-        config.headers['X-App-Version'] = process.env.EXPO_PUBLIC_APP_VERSION || '1.0.0';
+        config.headers['X-App-Version'] =
+          process.env.EXPO_PUBLIC_APP_VERSION || '1.0.0';
         return config;
       },
       (error) => Promise.reject(error),
@@ -57,12 +65,17 @@ class ApiClient {
         }
 
         // Skip token refresh for auth endpoints (login, register, etc.)
-        const isAuthEndpoint = originalRequest.url?.includes('/auth/') || 
-                              originalRequest.url?.includes('/login') || 
-                              originalRequest.url?.includes('/register');
+        const isAuthEndpoint =
+          originalRequest.url?.includes('/auth/') ||
+          originalRequest.url?.includes('/login') ||
+          originalRequest.url?.includes('/register');
 
         // Handle 401 Unauthorized errors (token refresh)
-        if (error.response.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
+        if (
+          error.response.status === 401 &&
+          !originalRequest._retry &&
+          !isAuthEndpoint
+        ) {
           // Check if we have a refresh token before attempting refresh
           const refreshToken = await TokenManager.getRefreshToken();
           if (!refreshToken) {
@@ -106,7 +119,9 @@ class ApiClient {
             originalRequest.headers.Authorization = `Bearer ${accessToken}`;
 
             // Notify all waiting requests
-            this.refreshSubscribers.forEach(callback => callback(accessToken));
+            this.refreshSubscribers.forEach((callback) =>
+              callback(accessToken),
+            );
             this.refreshSubscribers = [];
 
             return this.client(originalRequest);
@@ -129,7 +144,10 @@ class ApiClient {
 
         // Handle other errors - preserve original error for auth endpoints
         const apiError: ApiError = {
-          message: (error.response?.data as any)?.message || error.message || 'An error occurred',
+          message:
+            (error.response?.data as any)?.message ||
+            error.message ||
+            'An error occurred',
           status: error.response?.status,
           code: (error.response?.data as any)?.code || 'UNKNOWN_ERROR',
           details: (error.response?.data as any)?.details,
@@ -140,7 +158,10 @@ class ApiClient {
     );
   }
 
-  public async get<T>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+  public async get<T>(
+    url: string,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<T>> {
     try {
       return await this.client.get<T>(url, config);
     } catch (error) {
@@ -198,7 +219,8 @@ class ApiClient {
   private handleApiError(error: any): ApiError {
     if (error.isAxiosError) {
       return {
-        message: error.response?.data?.message || error.message || 'An error occurred',
+        message:
+          error.response?.data?.message || error.message || 'An error occurred',
         status: error.response?.status,
         code: error.code,
         details: error.response?.data,

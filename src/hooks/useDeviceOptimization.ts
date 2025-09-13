@@ -47,7 +47,8 @@ const IS_LOW_END = SCREEN_WIDTH < 360 || PIXEL_RATIO < 2;
 // Detect device capabilities
 const detectDeviceCapabilities = (): DeviceCapabilities => {
   const totalMemory = 0; // Would need native module for actual memory detection
-  const isHighEndDevice = IS_TABLET || (SCREEN_WIDTH >= 400 && PIXEL_RATIO >= 3);
+  const isHighEndDevice =
+    IS_TABLET || (SCREEN_WIDTH >= 400 && PIXEL_RATIO >= 3);
   const hasLargeMemory = totalMemory > 2048 || isHighEndDevice; // Assume high-end devices have good memory
 
   let recommendedQuality: 'low' | 'medium' | 'high' | 'ultra' = 'medium';
@@ -70,7 +71,9 @@ const detectDeviceCapabilities = (): DeviceCapabilities => {
 };
 
 // Generate performance settings based on device capabilities
-const getPerformanceSettings = (capabilities: DeviceCapabilities): PerformanceSettings => {
+const getPerformanceSettings = (
+  capabilities: DeviceCapabilities,
+): PerformanceSettings => {
   const { isHighEnd, recommendedQuality } = capabilities;
 
   switch (recommendedQuality) {
@@ -213,13 +216,16 @@ export const useOptimizedAnimationSettings = () => {
 export const useOptimizedListSettings = () => {
   const { performance, capabilities } = useDeviceOptimization();
 
-  return useMemo(() => ({
-    enableVirtualization: performance.listVirtualization,
-    initialNumToRender: capabilities.recommendedQuality === 'low' ? 5 : 10,
-    maxToRenderPerBatch: capabilities.recommendedQuality === 'low' ? 5 : 10,
-    windowSize: capabilities.recommendedQuality === 'low' ? 5 : 10,
-    removeClippedSubviews: performance.memoryOptimization,
-  }), [performance, capabilities]);
+  return useMemo(
+    () => ({
+      enableVirtualization: performance.listVirtualization,
+      initialNumToRender: capabilities.recommendedQuality === 'low' ? 5 : 10,
+      maxToRenderPerBatch: capabilities.recommendedQuality === 'low' ? 5 : 10,
+      windowSize: capabilities.recommendedQuality === 'low' ? 5 : 10,
+      removeClippedSubviews: performance.memoryOptimization,
+    }),
+    [performance, capabilities],
+  );
 };
 
 // Device info utilities
@@ -238,10 +244,14 @@ export const getDeviceInfo = () => ({
 export const usePerformanceMonitor = () => {
   const deviceConfig = useDeviceOptimization();
 
-  return useMemo(() => ({
-    shouldThrottleAnimations: deviceConfig.capabilities.recommendedQuality === 'low',
-    shouldReduceImageQuality: deviceConfig.performance.imageQuality === 'low',
-    shouldUseSimpleGestures: deviceConfig.performance.gestureOptimization,
-    recommendedBatchSize: deviceConfig.capabilities.isHighEnd ? 20 : 10,
-  }), [deviceConfig]);
+  return useMemo(
+    () => ({
+      shouldThrottleAnimations:
+        deviceConfig.capabilities.recommendedQuality === 'low',
+      shouldReduceImageQuality: deviceConfig.performance.imageQuality === 'low',
+      shouldUseSimpleGestures: deviceConfig.performance.gestureOptimization,
+      recommendedBatchSize: deviceConfig.capabilities.isHighEnd ? 20 : 10,
+    }),
+    [deviceConfig],
+  );
 };

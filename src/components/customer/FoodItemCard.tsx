@@ -5,40 +5,40 @@ import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { Card, Text, useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
-import { images } from '@/assets/images';
 import { useResponsive } from '@/src/hooks/useResponsive';
 import { ResponsiveImage, ResponsiveText } from '@/src/components/common';
 
 export interface FoodItemCardProps {
   foodId: string;
-  restarantId: string;
+  restaurantId: string;
   FoodName?: string;
   FoodPrice: number;
   FoodImage: any;
-  RestarantName: string;
+  RestaurantName: string;
   distanceFromUser: number;
   DeliveryPrice: number;
-  rating?: number;
-  ratingCount?: number;
   hasPromo?: boolean;
   onLike?: () => void;
   loved?: boolean;
+  // Additional props from API
+  distanceKm?: number;
+  isAvailable?: boolean;
 }
 
 const FoodItemCard = ({
   foodId,
-  restarantId,
+  restaurantId,
   FoodName,
   FoodPrice,
   FoodImage,
-  RestarantName,
+  RestaurantName,
   distanceFromUser,
   DeliveryPrice,
-  rating = 4.5,
-  ratingCount = 1000,
   hasPromo = false,
   onLike,
   loved = false,
+  distanceKm,
+  isAvailable = true,
 }: FoodItemCardProps) => {
   const navigation =
     useNavigation<CustomerHomeStackScreenProps<'HomeScreen'>['navigation']>();
@@ -53,7 +53,6 @@ const FoodItemCard = ({
       onPress={() => {
         navigation.navigate('FoodDetails', {
           foodId: foodId,
-          restaurantId: restarantId,
         });
       }}
       activeOpacity={0.8}
@@ -89,7 +88,12 @@ const FoodItemCard = ({
           }}
         >
           {/* Left side - Food Image with PROMO badge */}
-          <View style={{ position: 'relative', marginRight: getResponsiveSpacing(16) }}>
+          <View
+            style={{
+              position: 'relative',
+              marginRight: getResponsiveSpacing(16),
+            }}
+          >
             <ResponsiveImage
               source={FoodImage}
               size={isSmallDevice ? 'md' : 'lg'}
@@ -158,7 +162,7 @@ const FoodItemCard = ({
               {FoodName}
             </ResponsiveText>
 
-            {/* Distance and Rating */}
+            {/* Distance */}
             <View
               style={{
                 flexDirection: 'row',
@@ -167,27 +171,30 @@ const FoodItemCard = ({
               }}
             >
               <Text className={`text-[12px] ${colors.onSurface}`}>
-                {distanceFromUser} km
+                {(distanceKm || distanceFromUser).toFixed(1)} km
               </Text>
-              <Text
-                style={{
-                  color: colors.onSurface,
-                  fontSize: 12,
-                  marginHorizontal: 4,
-                }}
-              >
-                |
-              </Text>
-              <Ionicons name="star" size={12} color="#FFD700" />
-              <Text
-                style={{
-                  color: colors.onSurface,
-                  fontSize: 12,
-                  marginLeft: 2,
-                }}
-              >
-                {rating.toFixed(1)} ({ratingCount})
-              </Text>
+              {!isAvailable && (
+                <>
+                  <Text
+                    style={{
+                      color: colors.onSurface,
+                      fontSize: 12,
+                      marginHorizontal: 4,
+                    }}
+                  >
+                    |
+                  </Text>
+                  <Text
+                    style={{
+                      color: '#F44336',
+                      fontSize: 12,
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    UNAVAILABLE
+                  </Text>
+                </>
+              )}
             </View>
 
             {/* Price and Delivery */}

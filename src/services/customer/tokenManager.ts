@@ -40,7 +40,9 @@ class TokenManager {
   // Retrieve refresh token
   static async getRefreshToken() {
     try {
-      const refreshToken = await SecureStore.getItemAsync(this.REFRESH_TOKEN_KEY);
+      const refreshToken = await SecureStore.getItemAsync(
+        this.REFRESH_TOKEN_KEY,
+      );
       return refreshToken;
     } catch (error) {
       console.error('Error retrieving refresh token:', error);
@@ -53,7 +55,7 @@ class TokenManager {
     try {
       await Promise.all([
         SecureStore.setItemAsync(this.TOKEN_KEY, accessToken),
-        SecureStore.setItemAsync(this.REFRESH_TOKEN_KEY, refreshToken)
+        SecureStore.setItemAsync(this.REFRESH_TOKEN_KEY, refreshToken),
       ]);
       return true;
     } catch (error) {
@@ -89,7 +91,7 @@ class TokenManager {
     try {
       await Promise.all([
         SecureStore.deleteItemAsync(this.TOKEN_KEY),
-        SecureStore.deleteItemAsync(this.REFRESH_TOKEN_KEY)
+        SecureStore.deleteItemAsync(this.REFRESH_TOKEN_KEY),
       ]);
       return true;
     } catch (error) {

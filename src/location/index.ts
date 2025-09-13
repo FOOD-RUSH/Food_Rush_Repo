@@ -1,16 +1,36 @@
-// src/location/index.ts - Simple exports for MVP
-export { default as LocationService } from './LocationService';
-export { useLocation } from './useLocation';
-export { useLocationStore } from './store';
-export { default as LocationPermissionModal } from './LocationPermissionModal';
-export { default as AddressInputModal } from './AddressInputModal';
-
-// Re-export types
 export type {
-  Coordinates,
-  Address,
-  ManualAddressInput,
-  GeocodeResponse,
-  LocationPermissionOptions,
+  Location,
   LocationState,
+  LocationOptions,
+  LocationResult,
+  PermissionStatus,
+  SavedAddress,
+  Coordinates,
 } from './types';
+
+export { default as LocationService } from './LocationService';
+
+export {
+  useLocationStore,
+  useLocationData,
+  useLocationLoading,
+  useLocationError,
+  useLocationPermission,
+  useSavedAddresses,
+  useDefaultAddressId,
+  useLocationActions,
+  type LocationStore,
+} from './store';
+
+export { useLocation } from './useLocation';
+
+export {
+  LOCATION_CONFIG,
+  YAOUNDE_CENTER,
+  CAMEROON_BOUNDS,
+  YAOUNDE_NEIGHBORHOODS,
+  YAOUNDE_LANDMARKS,
+  isValidCameroonCoordinate,
+  formatYaoundeAddress,
+} from './constants';
+

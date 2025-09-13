@@ -8,36 +8,31 @@ import { useTheme, Card, Text } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 
 interface RestaurantCardProps {
-  deliveryFee?: number | string;
-  restaurantName: string;
-  distanceFromUser?: number;
-  estimatedTime?: any;
-  rating?: number;
-  image?: any;
-  restaurantID: string;
-  discount?: string; // Optional discount text
-  discountColor?: string; // Optional discount background color
-  // New optional props for future backend fields
+  name: string;
+  address: string;
+  isOpen: boolean;
+  verificationStatus: 'PENDING_VERIFICATION' | 'APPROVED';
+  rating: number | null;
+  ratingCount: number;
+  id: string;
   deliveryPrice?: number;
+  estimatedTime?: number;
+  image?: any; // Default image since not in API
   distance?: number;
 }
 
 export const RestaurantCard = ({
-  deliveryFee,
-  restaurantID,
-  restaurantName,
-  distanceFromUser,
-  estimatedTime,
-  rating = 4.5,
+  name,
+  address,
+  isOpen = true,
+  verificationStatus,
+  rating = null,
+  ratingCount = 0,
+  id,
   image,
-  discount,
-  discountColor = '#ff4444',
-  deliveryPrice,
-  distance,
+  deliveryPrice = 500,
+  estimatedTime = 20,
 }: RestaurantCardProps) => {
-  // Use deliveryPrice if available, otherwise fallback to deliveryFee
-  const finalDeliveryFee = deliveryPrice || (typeof deliveryFee === 'string' ? parseFloat(deliveryFee) : deliveryFee) || 0;
-  const finalDistance = distance || distanceFromUser || 0;
   const navigation =
     useNavigation<CustomerHomeStackScreenProps<'HomeScreen'>['navigation']>();
   const { colors } = useTheme();
@@ -47,7 +42,7 @@ export const RestaurantCard = ({
     <TouchableOpacity
       onPress={() => {
         navigation.navigate('RestaurantDetails', {
-          restaurantId: restaurantID,
+          restaurantId: id,
         });
       }}
       activeOpacity={0.9}
@@ -107,66 +102,35 @@ export const RestaurantCard = ({
             <Ionicons name="heart-outline" size={20} color={colors.onSurface} />
           </TouchableOpacity>
 
-          {/* Discount Badge - Only show if discount prop is provided */}
-          {discount && (
-            <View
-              style={{
-                position: 'absolute',
-                top: 12,
-                left: 12,
-                backgroundColor: discountColor,
-                borderRadius: 12,
-                paddingHorizontal: 12,
-                paddingVertical: 6,
-                elevation: 2,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.2,
-                shadowRadius: 3,
-              }}
-            >
-              <Text
-                style={{
-                  color: 'white',
-                  fontSize: 12,
-                  fontWeight: 'bold',
-                  textAlign: 'center',
-                }}
-              >
-                {discount}
-              </Text>
-            </View>
-          )}
-
           {/* Bottom badges */}
           <View
             style={{
               position: 'absolute',
               bottom: 12,
-              left: 12,
+              right: 12,
               flexDirection: 'row',
               gap: 8,
             }}
           >
+            {/* Status badge */}
+
+            {/* Open/Closed status */}
             <View
               style={{
-                backgroundColor: colors.surface,
+                backgroundColor: isOpen ? '#4CAF50' : '#F44336',
                 borderRadius: 16,
-                paddingHorizontal: 12,
-                paddingVertical: 6,
+                paddingHorizontal: 8,
+                paddingVertical: 4,
                 elevation: 2,
               }}
             >
               <Text
-                style={{
-                  fontSize: 12,
-                  fontWeight: 'bold',
-                  color: colors.onSurface,
-                }}
+                style={{ fontSize: 10, color: 'white', fontWeight: 'bold' }}
               >
-                {finalDeliveryFee}F
+                {isOpen ? 'OPEN' : 'CLOSED'}
               </Text>
             </View>
+
             <View
               style={{
                 backgroundColor: 'rgba(0, 0, 0, 0.7)',
@@ -179,14 +143,17 @@ export const RestaurantCard = ({
             >
               <Ionicons name="star" size={12} color="yellow" />
               <Text style={{ fontSize: 12, color: 'white', marginLeft: 4 }}>
-                {rating}
+                {rating} ({ratingCount})
               </Text>
             </View>
           </View>
         </View>
 
         <Card.Content style={{ padding: 16 }}>
-          <View style={{ marginBottom: 12 }}>
+          <View
+            style={{ marginBottom: 12 }}
+            className="flex-row justify-between"
+          >
             <Text
               style={{
                 fontSize: 18,
@@ -194,9 +161,24 @@ export const RestaurantCard = ({
                 color: colors.onSurface,
               }}
             >
-              {restaurantName}
+              {name}
             </Text>
           </View>
+
+          {/* Address display */}
+          {address && (
+            <View style={{ marginBottom: 8 }}>
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: colors.onSurfaceVariant,
+                }}
+                numberOfLines={1}
+              >
+                📍 {address}
+              </Text>
+            </View>
+          )}
 
           <View
             style={{
@@ -206,23 +188,14 @@ export const RestaurantCard = ({
             }}
           >
             <View style={{ flex: 1 }}>
-              <View
+              <Text
                 style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginBottom: 4,
+                  fontSize: 14,
+                  color: colors.primary,
+                  fontWeight: '600',
                 }}
               >
-                <Ionicons name="location" size={14} color={colors.primary} />
-                <Text
-                  style={{ fontSize: 14, color: colors.primary, marginLeft: 4 }}
-                >
-                  {finalDistance}km
-                </Text>
-              </View>
-              <Text style={{ fontSize: 12, color: colors.onSurface }}>
-                {finalDeliveryFee}
-                {/* {t('delivery_fee_unit')} */} XAF
+                {deliveryPrice} XAF delivery
               </Text>
             </View>
 
@@ -234,7 +207,7 @@ export const RestaurantCard = ({
                   color: colors.onSurface,
                 }}
               >
-                {estimatedTime}
+                {estimatedTime}-{estimatedTime + 10} min
               </Text>
             </View>
           </View>

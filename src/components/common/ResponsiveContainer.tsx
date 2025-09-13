@@ -25,11 +25,16 @@ export const ResponsiveContainer: React.FC<ResponsiveContainerProps> = ({
 
   const containerWidth = fullWidth ? '100%' : getContainerWidth(maxWidth);
 
-  const paddingValue = padding === 'none' ? 0 :
-                      padding === 'sm' ? getResponsiveSpacing(8) :
-                      padding === 'md' ? getResponsiveSpacing(16) :
-                      padding === 'lg' ? getResponsiveSpacing(24) :
-                      getResponsiveSpacing(32);
+  const paddingValue =
+    padding === 'none'
+      ? 0
+      : padding === 'sm'
+        ? getResponsiveSpacing(8)
+        : padding === 'md'
+          ? getResponsiveSpacing(16)
+          : padding === 'lg'
+            ? getResponsiveSpacing(24)
+            : getResponsiveSpacing(32);
 
   const containerStyle: ViewStyle = {
     width: containerWidth,
@@ -38,25 +43,19 @@ export const ResponsiveContainer: React.FC<ResponsiveContainerProps> = ({
   };
 
   return (
-    <View
-      style={[containerStyle, style]}
-      className={className}
-    >
+    <View style={[containerStyle, style]} className={className}>
       {children}
     </View>
   );
 };
 
 // Specialized container variants
-export const ResponsiveCard: React.FC<ResponsiveContainerProps & {
-  mode?: 'elevated' | 'outlined' | 'contained';
-  borderRadius?: number;
-}> = ({
-  children,
-  mode = 'elevated',
-  borderRadius = 12,
-  ...props
-}) => {
+export const ResponsiveCard: React.FC<
+  ResponsiveContainerProps & {
+    mode?: 'elevated' | 'outlined' | 'contained';
+    borderRadius?: number;
+  }
+> = ({ children, mode = 'elevated', borderRadius = 12, ...props }) => {
   const { colors } = { colors: { surface: '#ffffff', outline: '#e2e8f0' } }; // Fallback colors
 
   const cardStyle: ViewStyle = {
@@ -82,15 +81,12 @@ export const ResponsiveCard: React.FC<ResponsiveContainerProps & {
   );
 };
 
-export const ResponsiveGrid: React.FC<ResponsiveContainerProps & {
-  columns?: number;
-  spacing?: number;
-}> = ({
-  children,
-  columns = 2,
-  spacing = 16,
-  ...props
-}) => {
+export const ResponsiveGrid: React.FC<
+  ResponsiveContainerProps & {
+    columns?: number;
+    spacing?: number;
+  }
+> = ({ children, columns = 2, spacing = 16, ...props }) => {
   const { getGridColumns, getResponsiveSpacing } = useResponsive();
 
   const responsiveColumns = getGridColumns(columns);

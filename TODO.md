@@ -1,6 +1,7 @@
 # Remove Location System - Implementation Plan
 
 ## Information Gathered
+
 - Location system consists of useLocation hook, LocationService, store, types, and modals
 - Used in HomeScreen, HomeHeader, NearbyRestaurantsScreen, AddressEditModal
 - APIs use coordinates for nearby restaurants functionality in useCustomerApi.ts and restaurant.service.ts
@@ -10,6 +11,7 @@
 - NearbyRestaurantsScreen uses location for nearby restaurants
 
 ## Plan
+
 - [x] Remove location system usage from HomeScreen.tsx
 - [x] Hardcode address values in HomeHeader.tsx
 - [x] Keep AddressInputModalNew.tsx unchanged
@@ -19,6 +21,7 @@
 - [x] Remove location imports and dependencies from affected files
 
 ## Dependent Files to Edit
+
 - [x] src/screens/customer/home/HomeScreen.tsx
 - [x] src/components/customer/HomeHeader.tsx
 - [x] src/components/customer/AddressEditModal.tsx
@@ -27,6 +30,7 @@
 - [x] src/screens/customer/home/NearbyRestaurantsScreen.tsx
 
 ## Followup Steps
+
 - [ ] Test app compilation
 - [ ] Verify HomeHeader shows hardcoded address
 - [ ] Verify address screen works as before

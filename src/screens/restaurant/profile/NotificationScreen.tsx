@@ -63,19 +63,45 @@ const NotificationScreen = ({ navigation }: Props) => {
     ]).start();
   }, []);
 
-  const renderNotification = ({ item }: { item: typeof notifications[0] }) => (
+  const renderNotification = ({
+    item,
+  }: {
+    item: (typeof notifications)[0];
+  }) => (
     <Animated.View
       style={{
         opacity: listAnim,
-        transform: [{ translateY: listAnim.interpolate({ inputRange: [0, 1], outputRange: [40, 0] }) }],
+        transform: [
+          {
+            translateY: listAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [40, 0],
+            }),
+          },
+        ],
       }}
     >
-      <View style={[styles.notificationItem, !item.read && styles.unreadNotification]}>
-        <View style={[styles.iconContainer, { backgroundColor: item.color + '22' }]}> 
-          <MaterialCommunityIcons name={item.icon as any} size={26} color={item.color} />
+      <View
+        style={[
+          styles.notificationItem,
+          !item.read && styles.unreadNotification,
+        ]}
+      >
+        <View
+          style={[styles.iconContainer, { backgroundColor: item.color + '22' }]}
+        >
+          <MaterialCommunityIcons
+            name={item.icon as any}
+            size={26}
+            color={item.color}
+          />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={[styles.notificationTitle, !item.read && styles.unreadText]}>{item.title}</Text>
+          <Text
+            style={[styles.notificationTitle, !item.read && styles.unreadText]}
+          >
+            {item.title}
+          </Text>
           <Text style={styles.notificationMessage}>{item.message}</Text>
           <Text style={styles.notificationTime}>{item.time}</Text>
         </View>
@@ -93,23 +119,34 @@ const NotificationScreen = ({ navigation }: Props) => {
         }}
       >
         <LinearGradient
-          colors={["#667eea", "#764ba2"]}
+          colors={['#667eea', '#764ba2']}
           style={styles.header}
           start={[0, 0]}
           end={[1, 1]}
         >
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backBtn}
+          >
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Notifications</Text>
-          <MaterialCommunityIcons name="bell-outline" size={32} color="#fff" style={{ marginLeft: 10 }} />
+          <MaterialCommunityIcons
+            name="bell-outline"
+            size={32}
+            color="#fff"
+            style={{ marginLeft: 10 }}
+          />
         </LinearGradient>
       </Animated.View>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 32 }}
+      >
         <Text style={styles.sectionTitle}>Recent Notifications</Text>
         <FlatList
           data={notifications}
-          keyExtractor={item => item.id}
+          keyExtractor={(item) => item.id}
           renderItem={renderNotification}
           contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 6 }}
         />

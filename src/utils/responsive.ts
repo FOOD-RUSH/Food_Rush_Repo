@@ -33,7 +33,8 @@ export const moderateScale = (size: number, factor = 0.5): number => {
 
 // Device type detection
 export const isSmallDevice = SCREEN_WIDTH < breakpoints.sm;
-export const isMediumDevice = SCREEN_WIDTH >= breakpoints.sm && SCREEN_WIDTH < breakpoints.md;
+export const isMediumDevice =
+  SCREEN_WIDTH >= breakpoints.sm && SCREEN_WIDTH < breakpoints.md;
 export const isLargeDevice = SCREEN_WIDTH >= breakpoints.md;
 export const isTablet = SCREEN_WIDTH >= breakpoints.lg;
 export const isLandscape = SCREEN_WIDTH > SCREEN_HEIGHT;
@@ -54,7 +55,10 @@ export const getResponsiveSpacing = (baseSize: number) => {
 
 // Font size scaling
 export const getResponsiveFontSize = (baseSize: number) => {
-  const scaleFactor = Math.min(SCREEN_WIDTH / guidelineBaseWidth, SCREEN_HEIGHT / guidelineBaseHeight);
+  const scaleFactor = Math.min(
+    SCREEN_WIDTH / guidelineBaseWidth,
+    SCREEN_HEIGHT / guidelineBaseHeight,
+  );
   return Math.round(PixelRatio.roundToNearestPixel(baseSize * scaleFactor));
 };
 
@@ -100,13 +104,15 @@ export const getCurrentDimensions = () => currentDimensions;
 // Utility for creating responsive style objects
 export const createResponsiveStyle = <T extends Record<string, any>>(
   styles: T,
-  responsiveOverrides?: Partial<Record<keyof typeof breakpoints, Partial<T>>>
+  responsiveOverrides?: Partial<Record<keyof typeof breakpoints, Partial<T>>>,
 ): T => {
   if (!responsiveOverrides) return styles;
 
   const currentBreakpoint = Object.entries(breakpoints)
     .reverse()
-    .find(([, width]) => SCREEN_WIDTH >= width)?.[0] as keyof typeof breakpoints;
+    .find(
+      ([, width]) => SCREEN_WIDTH >= width,
+    )?.[0] as keyof typeof breakpoints;
 
   if (currentBreakpoint && responsiveOverrides[currentBreakpoint]) {
     return { ...styles, ...responsiveOverrides[currentBreakpoint] };

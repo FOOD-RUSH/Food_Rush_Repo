@@ -96,7 +96,9 @@ export const TEST_SCREEN_CONFIGS: TestScreenConfig[] = [
 export const mockDimensions = (config: TestScreenConfig) => {
   // This is a simplified version for development testing
   // In a real test environment, you would use Jest mocks
-  console.log(`Mocking dimensions for ${config.name}: ${config.width}x${config.height}`);
+  console.log(
+    `Mocking dimensions for ${config.name}: ${config.width}x${config.height}`,
+  );
 
   return () => {
     console.log(`Restoring original dimensions`);
@@ -108,7 +110,9 @@ export const createResponsiveTestSuite = (componentName: string) => {
   console.log(`Creating responsive test suite for ${componentName}`);
 
   TEST_SCREEN_CONFIGS.forEach((config) => {
-    console.log(`Test config: ${config.name} (${config.width}x${config.height})`);
+    console.log(
+      `Test config: ${config.name} (${config.width}x${config.height})`,
+    );
     console.log(`- Is tablet: ${config.isTablet}`);
     console.log(`- Pixel ratio: ${config.pixelRatio}`);
     console.log(`- Description: ${config.description}`);
@@ -123,12 +127,12 @@ export const createResponsiveTestSuite = (componentName: string) => {
 
 // Utility to get test configuration by name
 export const getTestConfig = (name: string): TestScreenConfig | undefined => {
-  return TEST_SCREEN_CONFIGS.find(config => config.name === name);
+  return TEST_SCREEN_CONFIGS.find((config) => config.name === name);
 };
 
 // Generate test data for different screen sizes
 export const generateResponsiveTestData = () => {
-  return TEST_SCREEN_CONFIGS.map(config => ({
+  return TEST_SCREEN_CONFIGS.map((config) => ({
     ...config,
     expectedBreakpoints: {
       isSmallDevice: config.width < 380,
@@ -160,7 +164,7 @@ export const createPerformanceTestSuite = (componentName: string) => {
   return {
     componentName,
     configs: TEST_SCREEN_CONFIGS,
-    budgets: TEST_SCREEN_CONFIGS.map(config => ({
+    budgets: TEST_SCREEN_CONFIGS.map((config) => ({
       name: config.name,
       budget: config.isTablet ? 100 : 50,
     })),
@@ -192,7 +196,9 @@ export const createVisualTestSuite = (componentName: string) => {
   console.log(`👁️ Creating visual test suite for ${componentName}`);
 
   TEST_SCREEN_CONFIGS.forEach((config) => {
-    console.log(`${config.name}: ${config.width}x${config.height} (${config.description})`);
+    console.log(
+      `${config.name}: ${config.width}x${config.height} (${config.description})`,
+    );
   });
 
   return {

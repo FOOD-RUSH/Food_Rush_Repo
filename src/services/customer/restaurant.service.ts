@@ -1,108 +1,178 @@
-import { RestaurantCard, FoodProps, RestaurantProfile } from '../../types';
+import { RestaurantCard, FoodProps, RestaurantProfile, MenuProps } from '../../types';
 import { apiClient } from './apiClient';
 
-// Hardcoded coordinates for Yaoundé (location system removed)
-const DEFAULT_COORDINATES = {
-  latitude: 3.8667,
-  longitude: 11.5167,
-};
-
-// Restaurant query parameters
+// Updated query parameters to match API documentation
 export interface RestaurantQuery {
-  isOpen: boolean;
+  isOpen?: boolean;
   nearLat?: number;
   nearLng?: number;
-  minDistanceKm?: number;
-  maxDistanceKm?: number;
   radiusKm?: number;
-  distance?: 'distance' | 'createdAt';
-  sortDir?: 'ASC' | 'DESC';
+  verificationStatus?: 'PENDING_VERIFICATION' | 'APPROVED' | 'REJECTED';
+  menuMode?: 'FIXED' | 'DAILY';
   limit?: number;
-
-};
-
-interface foodItems {
-  data: FoodProps[]
+  page?: number;
 }
+
+export interface FoodQuery {
+  nearLat?: number;
+  nearLng?: number;
+}
+
+interface FoodItems {
+  data: FoodProps[];
+}
+interface FoodItem {
+  data: MenuProps;
+}
+
 interface RestaurantItems {
-  data: RestaurantCard[]
+  data: RestaurantCard[];
 }
+interface RestaurantReturn {
+  data: RestaurantProfile;
+}
+
 export const restaurantApi = {
-  // Get all Menus
-  getAllMenu: async () => {
-    return apiClient.get<foodItems>('/menu/all').then((res) => {
-      console.log(res.data.data)
-      return res.data.data
-    })
-  },
-  getMenuBrowseAll: async (query: RestaurantQuery) => {
-    return apiClient.get<FoodProps[]>('/menu/browse', { params: query }).then((res) =>
-      res.data
-    )
-  },
-  // Get all restaurants with filtering and pagination
-  getAllRestaurants: async (query?: RestaurantQuery) => {
-    return apiClient.get<RestaurantItems>('/restaurants/browse', { params: query }).then((res) => {
-      // Map backend response to match component expectations
-      const mappedData = res.data.data.map((restaurant: any) => ({
-        ...restaurant,
-        restaurantId: restaurant.id, // Map id to restaurantId for component compatibility
-        distanceFromUser: restaurant.distance || 0, // Map distance to distanceFromUser
-        deliveryFee: restaurant.deliveryPrice?.toString() || restaurant.deliveryFee || '0', // Handle delivery price
-      }));
-      return mappedData;
-    });
+  // Get all restaurants with filtering
+  getAllRestaurants: async (query: RestaurantQuery) => {
+    try {
+      const response = await apiClient.get<RestaurantItems>(
+        '/restaurants/browse',
+        { ...query },
+      );
+      console.log('Restaurants API Response:', response.data);
+      return response.data.data;
+    } catch (error) {
+      console.error('Error fetching restaurants:', error);
+      throw error;
+    }
   },
 
-  // Get a specific restaurant by ID
-  getRestaurantById: async (id: string) => {
-    return apiClient.get<RestaurantProfile>(`/restaurants/${id}`);
+  // Get nearby restaurants
+  getNearbyRestaurants: async (query: RestaurantQuery) => {
+    try {
+      const response = await apiClient.get<RestaurantItems>(
+        '/restaurants/nearby',
+        { params: query },
+      );
+      console.log('Nearby Restaurants API Response:', response.data);
+      return response.data.data;
+    } catch (error) {
+      console.error('Error fetching nearby restaurants:', error);
+      throw error;
+    }
   },
 
-  // Get restaurant menu with optional category filter
-  getRestaurantMenu: (id: string, category?: string) => {
-    const url = category
-      ? `/restaurants/${id}/menu?category=${category}`
-      : `/restaurants/${id}/menu`;
-    return apiClient.get<FoodProps[]>(url);
+  // Get all nearby menu items (consolidates getAllMenu and getMenuBrowseAll)
+  getAllMenuItems: async (query: FoodQuery) => {
+    try {
+      const response = await apiClient.get<FoodItems>('/menu/all/nearby', {
+        ...query,
+      });
+      console.log('All Menu Items API Response:', response.data);
+      return response.data.data;
+    } catch (error) {
+      console.error('Error fetching menu items:', error);
+      throw error;
+    }
+  },
+  getAllMenu2: async () => {
+    try {
+      const response = await apiClient.get<FoodItems>('/menu/all');
+      return response.data.data;
+    } catch (error) {
+      console.error('Error fetching menu items:', error);
+      throw error;
+    }
   },
 
-  // Get nearby restaurants based on location (uses hardcoded coordinates)
-  getNearbyRestaurants: (
-    latitude: number = DEFAULT_COORDINATES.latitude,
-    longitude: number = DEFAULT_COORDINATES.longitude,
-    radius: number = 5,
+  // Get menu item by ID (updated to match API docs)
+  getMenuItemById: async (id: string, nearLat?: number, nearLng?: number) => {
+    try {
+      const response = await apiClient.get<FoodItem>(`/menu-items/${id}`, {
+        params: { nearLat, nearLng },
+      });
+      return response.data.data;
+    } catch (error) {
+      console.error(`Error fetching menu item ${id}:`, error);
+      throw error;
+    }
+  },
+
+  // Get restaurant details (new endpoint from API docs)
+  getRestaurantDetails: async (
+    id: string,
+    nearLat?: number,
+    nearLng?: number,
   ) => {
-    return apiClient.get<RestaurantCard[]>(
-      `/restaurants/nearby`, { params: { latitude, longitude, radius } }
-    );
+    try {
+      const response = await apiClient.get<RestaurantReturn>(
+        `/restaurants/${id}/detail`,
+        { params: { nearLat, nearLng } },
+      );
+      console.log(response.data);
+      return response.data.data;
+    } catch (error) {
+      console.error(`Error fetching restaurant details ${id}:`, error);
+      throw error;
+    }
   },
 
-  // Get a specific menu item
-  getMenuItemById: (restaurantId: string, menuId: string) => {
-    return apiClient.get<FoodProps>(`/restaurants/${restaurantId}/menu/${menuId}`);
-
+  // Rate restaurant (new endpoint from API docs)
+  rateRestaurant: async (id: string, score: number) => {
+    try {
+      const response = await apiClient.post(`/restaurants/${id}/rate`, {
+        score,
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Error rating restaurant ${id}:`, error);
+      throw error;
+    }
   },
 
-
-  // Get restaurant reviews
-  getRestaurantReviews: (restaurantId: string, page: number = 1, limit: number = 10) => {
-    return apiClient.get<any>(`/restaurants/${restaurantId}/reviews`, {
-      params: { page, limit }
-    });
+  // Delete restaurant rating (new endpoint from API docs)
+  deleteRestaurantRating: async (id: string) => {
+    try {
+      const response = await apiClient.delete(`/restaurants/${id}/rate`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error deleting rating for restaurant ${id}:`, error);
+      throw error;
+    }
   },
 
-  // Get restaurant categories
-  getRestaurantCategories: (restaurantId: string) => {
-    return apiClient.get<string[]>(`/restaurants/${restaurantId}/categories`);
+  // Like restaurant (new endpoint from API docs)
+  likeRestaurant: async (id: string) => {
+    try {
+      const response = await apiClient.post(`/restaurants/${id}/like`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error liking restaurant ${id}:`, error);
+      throw error;
+    }
   },
 
+  // Unlike restaurant (new endpoint from API docs)
+  unlikeRestaurant: async (id: string) => {
+    try {
+      const response = await apiClient.delete(`/restaurants/${id}/like`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error unliking restaurant ${id}:`, error);
+      throw error;
+    }
+  },
 
-
-  // Get restaurant by cuisine
-  getRestaurantsByCuisine: (cuisine: string, limit: number = 10) => {
-    return apiClient.get<RestaurantCard[]>('/restaurants/cuisine', {
-      params: { cuisine, limit }
-    });
+  // Get liked restaurants (new endpoint from API docs)
+  getLikedRestaurants: async () => {
+    try {
+      const response =
+        await apiClient.get<RestaurantItems>('/restaurants/liked');
+      return response.data.data || [];
+    } catch (error) {
+      console.error('Error fetching liked restaurants:', error);
+      throw error;
+    }
   },
 };

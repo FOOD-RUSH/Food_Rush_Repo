@@ -13,13 +13,13 @@ import CommonView from '@/src/components/common/CommonView';
 
 export const DashboardScreen = ({ navigation }: any) => {
   const [timeRange, setTimeRange] = useState('week');
-  
+
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
   const scaleAnim = useRef(new Animated.Value(0.9)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
-  
+
   const screenWidth = Dimensions.get('window').width;
 
   useEffect(() => {
@@ -73,17 +73,41 @@ export const DashboardScreen = ({ navigation }: any) => {
       avgOrder: { value: '$26.38', change: '+3%', color: '#FFD93D' },
     },
     recentOrders: [
-      { id: '#1234', customer: 'John Doe', amount: '$24.50', status: 'completed', time: '2 min ago' },
-      { id: '#1235', customer: 'Jane Smith', amount: '$18.75', status: 'preparing', time: '5 min ago' },
-      { id: '#1236', customer: 'Mike Johnson', amount: '$32.20', status: 'delivered', time: '8 min ago' },
-      { id: '#1237', customer: 'Sarah Wilson', amount: '$15.90', status: 'pending', time: '12 min ago' },
+      {
+        id: '#1234',
+        customer: 'John Doe',
+        amount: '$24.50',
+        status: 'completed',
+        time: '2 min ago',
+      },
+      {
+        id: '#1235',
+        customer: 'Jane Smith',
+        amount: '$18.75',
+        status: 'preparing',
+        time: '5 min ago',
+      },
+      {
+        id: '#1236',
+        customer: 'Mike Johnson',
+        amount: '$32.20',
+        status: 'delivered',
+        time: '8 min ago',
+      },
+      {
+        id: '#1237',
+        customer: 'Sarah Wilson',
+        amount: '$15.90',
+        status: 'pending',
+        time: '12 min ago',
+      },
     ],
     topItems: [
       { name: 'Margherita Pizza', orders: 28, revenue: '$420', trend: 'up' },
       { name: 'Caesar Salad', orders: 19, revenue: '$285', trend: 'up' },
       { name: 'Pasta Carbonara', orders: 15, revenue: '$225', trend: 'down' },
       { name: 'Grilled Salmon', orders: 12, revenue: '$360', trend: 'up' },
-    ]
+    ],
   };
 
   const navigateToAnalytics = () => {
@@ -110,7 +134,7 @@ export const DashboardScreen = ({ navigation }: any) => {
     title: string,
     data: any,
     icon: string,
-    index: number
+    index: number,
   ) => {
     const animatedStyle = {
       opacity: fadeAnim,
@@ -161,24 +185,49 @@ export const DashboardScreen = ({ navigation }: any) => {
                 marginBottom: 12,
               }}
             >
-              <MaterialCommunityIcons name={icon as any} size={24} color="white" />
+              <MaterialCommunityIcons
+                name={icon as any}
+                size={24}
+                color="white"
+              />
             </Animated.View>
-            
-            <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#1D1D1F', marginBottom: 4 }}>
+
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: 'bold',
+                color: '#1D1D1F',
+                marginBottom: 4,
+              }}
+            >
               {data.value}
             </Text>
-            
-            <Text style={{ color: '#8E8E93', fontSize: 12, fontWeight: '500', marginBottom: 6 }}>
+
+            <Text
+              style={{
+                color: '#8E8E93',
+                fontSize: 12,
+                fontWeight: '500',
+                marginBottom: 6,
+              }}
+            >
               {title}
             </Text>
-            
+
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <MaterialCommunityIcons
                 name="trending-up"
                 size={14}
                 color="#34C759"
               />
-              <Text style={{ color: '#34C759', fontSize: 12, fontWeight: '600', marginLeft: 3 }}>
+              <Text
+                style={{
+                  color: '#34C759',
+                  fontSize: 12,
+                  fontWeight: '600',
+                  marginLeft: 3,
+                }}
+              >
                 {data.change}
               </Text>
             </View>
@@ -204,7 +253,14 @@ export const DashboardScreen = ({ navigation }: any) => {
         elevation: 8,
       }}
     >
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: 16,
+        }}
+      >
         <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#1D1D1F' }}>
           Recent Orders
         </Text>
@@ -212,7 +268,7 @@ export const DashboardScreen = ({ navigation }: any) => {
           <Text style={{ color: '#007AFF', fontWeight: '600' }}>View All</Text>
         </TouchableOpacity>
       </View>
-      
+
       {dashboardData.recentOrders.map((order, index) => (
         <Animated.View
           key={order.id}
@@ -229,51 +285,72 @@ export const DashboardScreen = ({ navigation }: any) => {
             flexDirection: 'row',
             alignItems: 'center',
             paddingVertical: 12,
-            borderBottomWidth: index < dashboardData.recentOrders.length - 1 ? 1 : 0,
+            borderBottomWidth:
+              index < dashboardData.recentOrders.length - 1 ? 1 : 0,
             borderBottomColor: '#F2F2F7',
           }}
         >
-          <View style={{
-            width: 40,
-            height: 40,
-            borderRadius: 20,
-            backgroundColor: getStatusColor(order.status),
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginRight: 12,
-          }}>
+          <View
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              backgroundColor: getStatusColor(order.status),
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginRight: 12,
+            }}
+          >
             <MaterialCommunityIcons
               name={getStatusIcon(order.status)}
               size={20}
               color="white"
             />
           </View>
-          
+
           <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 16, fontWeight: '600', color: '#1D1D1F', marginBottom: 2 }}>
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: '600',
+                color: '#1D1D1F',
+                marginBottom: 2,
+              }}
+            >
               {order.customer}
             </Text>
             <Text style={{ fontSize: 14, color: '#8E8E93' }}>
               {order.id} • {order.time}
             </Text>
           </View>
-          
+
           <View style={{ alignItems: 'flex-end' }}>
-            <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#1D1D1F', marginBottom: 2 }}>
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: 'bold',
+                color: '#1D1D1F',
+                marginBottom: 2,
+              }}
+            >
               {order.amount}
             </Text>
-            <View style={{
-              paddingHorizontal: 8,
-              paddingVertical: 2,
-              borderRadius: 8,
-              backgroundColor: getStatusBg(order.status),
-            }}>
-              <Text style={{
-                fontSize: 12,
-                fontWeight: '600',
-                color: getStatusColor(order.status),
-                textTransform: 'capitalize',
-              }}>
+            <View
+              style={{
+                paddingHorizontal: 8,
+                paddingVertical: 2,
+                borderRadius: 8,
+                backgroundColor: getStatusBg(order.status),
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 12,
+                  fontWeight: '600',
+                  color: getStatusColor(order.status),
+                  textTransform: 'capitalize',
+                }}
+              >
                 {order.status}
               </Text>
             </View>
@@ -299,10 +376,17 @@ export const DashboardScreen = ({ navigation }: any) => {
         elevation: 8,
       }}
     >
-      <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#1D1D1F', marginBottom: 16 }}>
+      <Text
+        style={{
+          fontSize: 20,
+          fontWeight: 'bold',
+          color: '#1D1D1F',
+          marginBottom: 16,
+        }}
+      >
         Top Selling Items
       </Text>
-      
+
       {dashboardData.topItems.map((item, index) => (
         <Animated.View
           key={item.name}
@@ -319,27 +403,44 @@ export const DashboardScreen = ({ navigation }: any) => {
             flexDirection: 'row',
             alignItems: 'center',
             paddingVertical: 12,
-            borderBottomWidth: index < dashboardData.topItems.length - 1 ? 1 : 0,
+            borderBottomWidth:
+              index < dashboardData.topItems.length - 1 ? 1 : 0,
             borderBottomColor: '#F2F2F7',
           }}
         >
-          <View style={{
-            width: 6,
-            height: 40,
-            borderRadius: 3,
-            backgroundColor: index === 0 ? '#FFD700' : index === 1 ? '#C0C0C0' : index === 2 ? '#CD7F32' : '#8E8E93',
-            marginRight: 12,
-          }} />
-          
+          <View
+            style={{
+              width: 6,
+              height: 40,
+              borderRadius: 3,
+              backgroundColor:
+                index === 0
+                  ? '#FFD700'
+                  : index === 1
+                    ? '#C0C0C0'
+                    : index === 2
+                      ? '#CD7F32'
+                      : '#8E8E93',
+              marginRight: 12,
+            }}
+          />
+
           <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 16, fontWeight: '600', color: '#1D1D1F', marginBottom: 4 }}>
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: '600',
+                color: '#1D1D1F',
+                marginBottom: 4,
+              }}
+            >
               {item.name}
             </Text>
             <Text style={{ fontSize: 14, color: '#8E8E93' }}>
               {item.orders} orders • {item.revenue}
             </Text>
           </View>
-          
+
           <MaterialCommunityIcons
             name={item.trend === 'up' ? 'trending-up' : 'trending-down'}
             size={20}
@@ -366,10 +467,17 @@ export const DashboardScreen = ({ navigation }: any) => {
         elevation: 8,
       }}
     >
-      <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#1D1D1F', marginBottom: 16 }}>
+      <Text
+        style={{
+          fontSize: 20,
+          fontWeight: 'bold',
+          color: '#1D1D1F',
+          marginBottom: 16,
+        }}
+      >
         Quick Actions
       </Text>
-      
+
       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
         {[
           { title: 'New Order', icon: 'plus-circle', color: '#667eea' },
@@ -411,37 +519,52 @@ export const DashboardScreen = ({ navigation }: any) => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'completed': return '#34C759';
-      case 'delivered': return '#007AFF';
-      case 'preparing': return '#FF9500';
-      case 'pending': return '#FF3B30';
-      default: return '#8E8E93';
+      case 'completed':
+        return '#34C759';
+      case 'delivered':
+        return '#007AFF';
+      case 'preparing':
+        return '#FF9500';
+      case 'pending':
+        return '#FF3B30';
+      default:
+        return '#8E8E93';
     }
   };
 
   const getStatusBg = (status: string) => {
     switch (status) {
-      case 'completed': return '#34C75920';
-      case 'delivered': return '#007AFF20';
-      case 'preparing': return '#FF950020';
-      case 'pending': return '#FF3B3020';
-      default: return '#8E8E9320';
+      case 'completed':
+        return '#34C75920';
+      case 'delivered':
+        return '#007AFF20';
+      case 'preparing':
+        return '#FF950020';
+      case 'pending':
+        return '#FF3B3020';
+      default:
+        return '#8E8E9320';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'completed': return 'check-circle';
-      case 'delivered': return 'truck-delivery';
-      case 'preparing': return 'chef-hat';
-      case 'pending': return 'clock-outline';
-      default: return 'help-circle';
+      case 'completed':
+        return 'check-circle';
+      case 'delivered':
+        return 'truck-delivery';
+      case 'preparing':
+        return 'chef-hat';
+      case 'pending':
+        return 'clock-outline';
+      default:
+        return 'help-circle';
     }
   };
 
   return (
     <CommonView>
-      <ScrollView 
+      <ScrollView
         showsVerticalScrollIndicator={false}
         bounces={true}
         style={{ flex: 1 }}
@@ -455,16 +578,24 @@ export const DashboardScreen = ({ navigation }: any) => {
             paddingBottom: 30,
           }}
         >
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
             <View>
-              <Text style={{ fontSize: 32, fontWeight: 'bold', color: '#1D1D1F' }}>
+              <Text
+                style={{ fontSize: 32, fontWeight: 'bold', color: '#1D1D1F' }}
+              >
                 Dashboard
               </Text>
               <Text style={{ color: '#8E8E93', marginTop: 4, fontSize: 16 }}>
                 Welcome back! Here&#39;s your overview
               </Text>
             </View>
-            
+
             <View style={{ flexDirection: 'row', gap: 12 }}>
               <TouchableOpacity
                 style={{
@@ -476,9 +607,13 @@ export const DashboardScreen = ({ navigation }: any) => {
                   alignItems: 'center',
                 }}
               >
-                <MaterialCommunityIcons name="bell-outline" size={22} color="#1D1D1F" />
+                <MaterialCommunityIcons
+                  name="bell-outline"
+                  size={22}
+                  color="#1D1D1F"
+                />
               </TouchableOpacity>
-              
+
               <TouchableOpacity
                 onPress={navigateToAnalytics}
                 style={{
@@ -495,8 +630,14 @@ export const DashboardScreen = ({ navigation }: any) => {
                   elevation: 5,
                 }}
               >
-                <MaterialCommunityIcons name="chart-box" size={18} color="white" />
-                <Text style={{ color: 'white', marginLeft: 6, fontWeight: '600' }}>
+                <MaterialCommunityIcons
+                  name="chart-box"
+                  size={18}
+                  color="white"
+                />
+                <Text
+                  style={{ color: 'white', marginLeft: 6, fontWeight: '600' }}
+                >
                   Analytics
                 </Text>
               </TouchableOpacity>
@@ -549,13 +690,33 @@ export const DashboardScreen = ({ navigation }: any) => {
 
         {/* Stats Cards */}
         <View style={{ flexDirection: 'row', marginBottom: 24 }}>
-          {renderStatCard('Orders', dashboardData.todayStats.orders, 'cart-outline', 0)}
-          {renderStatCard('Revenue', dashboardData.todayStats.revenue, 'cash-multiple', 1)}
+          {renderStatCard(
+            'Orders',
+            dashboardData.todayStats.orders,
+            'cart-outline',
+            0,
+          )}
+          {renderStatCard(
+            'Revenue',
+            dashboardData.todayStats.revenue,
+            'cash-multiple',
+            1,
+          )}
         </View>
-        
+
         <View style={{ flexDirection: 'row', marginBottom: 24 }}>
-          {renderStatCard('Customers', dashboardData.todayStats.customers, 'account-group', 2)}
-          {renderStatCard('Avg Order', dashboardData.todayStats.avgOrder, 'calculator', 3)}
+          {renderStatCard(
+            'Customers',
+            dashboardData.todayStats.customers,
+            'account-group',
+            2,
+          )}
+          {renderStatCard(
+            'Avg Order',
+            dashboardData.todayStats.avgOrder,
+            'calculator',
+            3,
+          )}
         </View>
 
         {/* Recent Orders */}
@@ -568,5 +729,5 @@ export const DashboardScreen = ({ navigation }: any) => {
         {renderQuickActions()}
       </ScrollView>
     </CommonView>
-  )
-}
+  );
+};

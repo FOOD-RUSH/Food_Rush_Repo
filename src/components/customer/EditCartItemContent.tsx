@@ -1,11 +1,5 @@
 import React, { useCallback, useState, useMemo } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  TextInput,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, Image } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useCartStore, CartItem } from '@/src/stores/customerStores/cartStore';
@@ -27,12 +21,12 @@ const EditCartItemContent: React.FC<CartItemProps> = ({
   const [pquantity, setQuantity] = useState(quantity);
   const [instructions, setInstructions] = useState(specialInstructions || '');
 
-  // Cart actions - Fixed: Removed state selector that could cause re-renders
+  // Cart actions
   const updateItemQuantity = useCartStore((state) => state.modifyCart);
   const removeItem = useCartStore((state) => state.deleteCart);
   const addtoCart = useCartStore((state) => state.addtoCart);
 
-  // Handle quantity changes - Fixed: Removed dependency on pquantity in useCallback
+  // Handle quantity changes
   const handleIncrease = useCallback(() => {
     setQuantity((prev) => (prev < 99 ? prev + 1 : prev));
   }, []);
@@ -41,7 +35,7 @@ const EditCartItemContent: React.FC<CartItemProps> = ({
     setQuantity((prev) => (prev > 1 ? prev - 1 : prev));
   }, []);
 
-  // Handle save changes - Fixed: Stable dependencies
+  // Handle save changes
   const handleSave = useCallback(() => {
     // Update quantity
     updateItemQuantity(id, pquantity);
@@ -72,150 +66,128 @@ const EditCartItemContent: React.FC<CartItemProps> = ({
     );
   }, [quantity, pquantity, specialInstructions, instructions]);
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background,
-      padding: 20,
-    },
-    sectionContainer: {
-      marginBottom: 24,
-      backgroundColor: colors.surface,
-      borderRadius: 16,
-      padding: 20,
-      elevation: 1,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.08,
-      shadowRadius: 4,
-    },
-    sectionTitle: {
-      color: colors.onSurface,
-      fontSize: 16,
-      fontWeight: '600',
-      marginBottom: 16,
-      letterSpacing: 0.15,
-    },
-    quantityContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: colors.primaryContainer,
-      borderRadius: 20,
-      padding: 6,
-      alignSelf: 'flex-start',
-      elevation: 3,
-      shadowColor: colors.primary,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.2,
-      shadowRadius: 6,
-    },
-    quantityButton: {
-      width: 44,
-      height: 44,
-      borderRadius: 22,
-      alignItems: 'center',
-      justifyContent: 'center',
-      elevation: 2,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.15,
-      shadowRadius: 3,
-    },
-    quantityButtonActive: {
-      backgroundColor: colors.primary,
-    },
-    quantityButtonInactive: {
-      backgroundColor: colors.surfaceVariant,
-    },
-    quantityText: {
-      color: colors.onPrimaryContainer,
-      fontSize: 20,
-      fontWeight: '700',
-      marginHorizontal: 24,
-      minWidth: 36,
-      textAlign: 'center',
-    },
-    textInput: {
-      borderWidth: 2,
-      borderColor: colors.outline,
-      borderRadius: 12,
-      padding: 16,
-      backgroundColor: colors.surface,
-      color: colors.onSurface,
-      fontSize: 14,
-      textAlignVertical: 'top',
-      minHeight: 100,
-      elevation: 1,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.05,
-      shadowRadius: 2,
-    },
-    saveButton: {
-      paddingVertical: 16,
-      borderRadius: 16,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: colors.primary,
-      elevation: 4,
-      shadowColor: colors.primary,
-      shadowOffset: { width: 0, height: 3 },
-      shadowOpacity: 0.25,
-      shadowRadius: 6,
-    },
-    saveButtonText: {
-      color: colors.onPrimary,
-      fontSize: 16,
-      fontWeight: '700',
-      letterSpacing: 0.5,
-      textTransform: 'uppercase',
-    },
-  });
-
   return (
-    <View style={styles.container}>
-      {/* Quantity Selector */}
-      <View style={styles.sectionContainer}>
-        <Text style={styles.sectionTitle}>{t('quantity')}</Text>
+    <View style={{ flex: 1, padding: 16 }}>
+      {/* Header with item name */}
+      <View style={{ alignItems: 'center', marginBottom: 8 }}>
+        <Text
+          style={{
+            color: colors.onSurface,
+            fontSize: 18,
+            fontWeight: '600',
+            textAlign: 'center',
+          }}
+          numberOfLines={2}
+        >
+          {menuItem.name}
+        </Text>
+      </View>
 
-        <View style={styles.quantityContainer}>
+      {/* Item Image */}
+
+      {/* Quantity Selector */}
+      <View
+        style={{
+          backgroundColor: colors.surface,
+          borderRadius: 12,
+          padding: 16,
+          marginBottom: 16,
+          borderWidth: 1,
+          borderColor: colors.outline + '20',
+        }}
+      >
+        <Text
+          style={{
+            color: colors.onSurface,
+            fontSize: 16,
+            fontWeight: '600',
+            marginBottom: 12,
+          }}
+        >
+          {t('quantity')}
+        </Text>
+
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
           {/* Decrease Button */}
           <TouchableOpacity
             onPress={handleDecrease}
             disabled={pquantity <= 1}
-            style={[
-              styles.quantityButton,
-              pquantity > 1
-                ? styles.quantityButtonActive
-                : styles.quantityButtonInactive,
-            ]}
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              backgroundColor:
+                pquantity > 1 ? colors.primary : colors.surfaceVariant,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
             activeOpacity={0.7}
           >
             <MaterialIcons
               name="remove"
-              size={22}
+              size={20}
               color={pquantity > 1 ? colors.onPrimary : colors.onSurfaceVariant}
             />
           </TouchableOpacity>
 
           {/* Quantity Display */}
-          <Text style={styles.quantityText}>{pquantity}</Text>
+          <Text
+            style={{
+              color: colors.onSurface,
+              fontSize: 18,
+              fontWeight: '700',
+              marginHorizontal: 20,
+              minWidth: 30,
+              textAlign: 'center',
+            }}
+          >
+            {pquantity}
+          </Text>
 
           {/* Increase Button */}
           <TouchableOpacity
             onPress={handleIncrease}
             disabled={pquantity >= 99}
-            style={[styles.quantityButton, styles.quantityButtonActive]}
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              backgroundColor: colors.primary,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
             activeOpacity={0.7}
           >
-            <MaterialIcons name="add" size={22} color={colors.onPrimary} />
+            <MaterialIcons name="add" size={20} color={colors.onPrimary} />
           </TouchableOpacity>
         </View>
       </View>
 
       {/* Special Instructions */}
-      <View style={styles.sectionContainer}>
-        <Text style={styles.sectionTitle}>
+      <View
+        style={{
+          backgroundColor: colors.surface,
+          borderRadius: 12,
+          padding: 16,
+          marginBottom: 16,
+          borderWidth: 1,
+          borderColor: colors.outline + '20',
+        }}
+      >
+        <Text
+          style={{
+            color: colors.onSurface,
+            fontSize: 16,
+            fontWeight: '600',
+            marginBottom: 12,
+          }}
+        >
           {t('special_instructions_optional')}
         </Text>
 
@@ -224,23 +196,82 @@ const EditCartItemContent: React.FC<CartItemProps> = ({
           onChangeText={setInstructions}
           placeholder={t('special_instructions_placeholder')}
           multiline
-          numberOfLines={3}
-          style={styles.textInput}
+          numberOfLines={2}
+          style={{
+            borderWidth: 1,
+            borderColor: colors.outline,
+            borderRadius: 8,
+            padding: 12,
+            backgroundColor: colors.surface,
+            color: colors.onSurface,
+            fontSize: 14,
+            textAlignVertical: 'top',
+            minHeight: 80,
+          }}
           placeholderTextColor={colors.onSurfaceVariant}
         />
       </View>
 
-      {/* Save Button */}
-      <TouchableOpacity
-        onPress={handleSave}
-        disabled={!hasChanges}
-        style={styles.saveButton}
-        activeOpacity={0.8}
+      {/* Action Buttons */}
+      <View
+        style={{
+          flexDirection: 'row',
+          gap: 12,
+        }}
       >
-        <Text style={styles.saveButtonText}>
-          {hasChanges ? t('save_changes') : t('no_changes')}
-        </Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          onPress={onDismiss}
+          style={{
+            flex: 1,
+            paddingVertical: 12,
+            paddingHorizontal: 16,
+            borderRadius: 12,
+            backgroundColor: colors.surfaceVariant,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderWidth: 1,
+            borderColor: colors.outline,
+          }}
+          activeOpacity={0.7}
+        >
+          <Text
+            style={{
+              color: colors.onSurfaceVariant,
+              fontSize: 16,
+              fontWeight: '600',
+            }}
+          >
+            {t('cancel')}
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={handleSave}
+          disabled={!hasChanges}
+          style={{
+            flex: 1,
+            paddingVertical: 12,
+            paddingHorizontal: 16,
+            borderRadius: 12,
+            backgroundColor: hasChanges
+              ? colors.primary
+              : colors.surfaceVariant,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+          activeOpacity={0.8}
+        >
+          <Text
+            style={{
+              color: hasChanges ? colors.onPrimary : colors.onSurfaceVariant,
+              fontSize: 16,
+              fontWeight: '600',
+            }}
+          >
+            {t('save')}
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };

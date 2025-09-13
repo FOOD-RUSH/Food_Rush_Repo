@@ -2,18 +2,14 @@ import React, { useState } from 'react';
 import { Pressable, ScrollView, FlatList } from 'react-native-gesture-handler';
 import { Text, View, StatusBar, Dimensions, Image, Alert } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import {
-  TouchableRipple,
-  Chip,
-  Button,
-  ActivityIndicator,
-  useTheme,
-} from 'react-native-paper';
+import { TouchableRipple, Chip, Button, useTheme } from 'react-native-paper';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import MenuItemCard from '@/src/components/customer/MenuItemCard';
 import ClassicFoodCard from '@/src/components/customer/ClassicFoodCard';
-import { useRestaurantId } from '@/src/hooks/customer';
+import { useRestaurantDetails } from '@/src/hooks/customer/useCustomerApi';
 import { useTranslation } from 'react-i18next';
+import { images } from '@/assets/images';
+import { LoadingScreen } from '@/src/components/common';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -27,13 +23,13 @@ const RestaurantDetailScreen = ({
   const [isFavorite, setIsFavorite] = useState(false);
   const restaurantId = route.params.restaurantId;
 
-  // fetching restaurant Details
+  // fetching restaurant Details with new hook
   const {
     data: restaurantDetails,
     isLoading,
     error,
     refetch,
-  } = useRestaurantId(restaurantId);
+  } = useRestaurantDetails(restaurantId); // uses location from hook
 
   const handleGoBack = () => {
     navigation.goBack();
@@ -59,28 +55,12 @@ const RestaurantDetailScreen = ({
 
   const handleViewOffers = () => {};
 
-  const categories = [
-    'All',
-    ...new Set(restaurantDetails?.menu?.map((item) => item.category) || []),
-  ];
-  const filteredMenuItems =
-    selectedCategory === 'All'
-      ? restaurantDetails?.menu
-      : restaurantDetails?.menu.filter(
-          (item) => item.category === selectedCategory,
-        );
+  // Since category is not in API, use 'All' only for now
+  const categories = ['All'];
+  const filteredMenuItems = restaurantDetails?.menu || [];
 
   if (isLoading) {
-    return (
-      <View
-        className={`flex-1 justify-center items-center ${colors.background}`}
-      >
-        <ActivityIndicator size="large" color={colors.primary} animating />
-        <Text className={`mt-4 `} style={{ color: colors.onSurface }}>
-          {t('loading_restaurant_details')}
-        </Text>
-      </View>
-    );
+    return <LoadingScreen />;
   }
 
   if (!restaurantDetails) {
@@ -113,7 +93,11 @@ const RestaurantDetailScreen = ({
       {/* Header Image with Navigation */}
       <View className="relative">
         <Image
-          source={restaurantDetails.image}
+          source={
+            restaurantDetails.image
+              ? { uri: restaurantDetails.image }
+              : images.onboarding2
+          }
           width={screenWidth}
           height={200}
           resizeMode="cover"
@@ -147,14 +131,14 @@ const RestaurantDetailScreen = ({
             </Pressable>
           </View>
         </View>
-        {/* Status Badge */}
+        {/* Status Badge - Default to open since not in API */}
         <View className="absolute bottom-4 right-4">
           <Chip
             icon="clock-outline"
-            className={`${restaurantDetails.isOpen ? 'bg-green-500' : 'bg-red-500'}`}
+            className="bg-green-500"
             textStyle={{ color: 'white' }}
           >
-            {restaurantDetails.isOpen ? t('open') : t('closed')}
+            {t('open')}
           </Chip>
         </View>
       </View>
@@ -172,22 +156,22 @@ const RestaurantDetailScreen = ({
             </Text>
             <View className="flex-row items-center">
               <Text className={`mr-1 `} style={{ color: colors.primary }}>
-                {restaurantDetails.cuisine || t('vegetarian')}
+                {t('restaurant')}
               </Text>
               <Text className="font-semibold" style={{ color: colors.primary }}>
-                {/* {restaurantDetails.priceRange} */} 500FCFA
+                500 XAF
               </Text>
             </View>
           </View>
 
           <Text className={`mb-4 `} style={{ color: colors.onSurface }}>
-            {restaurantDetails.description}
+            Restaurant Description
           </Text>
 
           <View className="flex-row items-center mb-2">
             <Ionicons name="time-outline" size={16} color={colors.onSurface} />
             <Text className={`ml-2 `} style={{ color: colors.onSurface }}>
-              {restaurantDetails.openTime}
+              {t('open')}
             </Text>
           </View>
         </View>
@@ -201,10 +185,10 @@ const RestaurantDetailScreen = ({
                 className={`ml-2 font-semibold text-base `}
                 style={{ color: colors.onSurface }}
               >
-                {restaurantDetails.ratings}
+                {restaurantDetails.rating || 4.5}
               </Text>
               <Text className={`ml-1 `} style={{ color: colors.onSurface }}>
-                ({restaurantDetails.reviewCount} reviews)
+                ({restaurantDetails.ratingCount} reviews)
               </Text>
             </View>
             <MaterialIcons
@@ -229,7 +213,7 @@ const RestaurantDetailScreen = ({
                   className={`font-semibold text-base`}
                   style={{ color: colors.primary }}
                 >
-                  {restaurantDetails.distance}
+                  {t('delivery_address')}
                 </Text>
                 <View className="flex-row items-center mt-1">
                   <Text
@@ -246,7 +230,7 @@ const RestaurantDetailScreen = ({
                     className={`ml-1 text-sm `}
                     style={{ color: colors.onSurface }}
                   >
-                    {restaurantDetails.deliveryFee}
+                    500 XAF
                   </Text>
                   <Text className="mx-2" style={{ color: colors.onSurface }}>
                     |
@@ -255,7 +239,7 @@ const RestaurantDetailScreen = ({
                     className={`text-sm `}
                     style={{ color: colors.onSurface }}
                   >
-                    {restaurantDetails.deliveryTime}
+                    30 mins
                   </Text>
                 </View>
               </View>
@@ -301,9 +285,17 @@ const RestaurantDetailScreen = ({
             {t('for_you')}
           </Text>
           <FlatList
-            data={restaurantDetails.specialOffers}
+            data={restaurantDetails.menu} // Show first 3 menu items
             renderItem={({ item }) => (
-              <ClassicFoodCard foodName={item.name} id={item.id} />
+              <ClassicFoodCard
+                foodName={item.name}
+                id={item.id}
+                foodPrice={parseFloat(item.price)}
+                restaurantName={item.restaurant.name}
+                distance={item.distanceKm || 0}
+                rating={4.5}
+                imageUrl={item.pictureUrl}
+              />
             )}
             keyExtractor={(item) => item.id}
             horizontal
@@ -352,15 +344,7 @@ const RestaurantDetailScreen = ({
           {/* Menu Items */}
           <FlatList
             data={filteredMenuItems}
-            renderItem={({ item }) => (
-              <MenuItemCard
-                id={item.id}
-                name={item.name}
-                price={item.price}
-                restaurantID={item.restaurant?.id}
-                description={item.description}
-              />
-            )}
+            renderItem={({ item }) => <MenuItemCard item={item} />}
             keyExtractor={(item) => item.id}
             scrollEnabled={false}
             showsVerticalScrollIndicator={false}
