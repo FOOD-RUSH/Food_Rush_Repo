@@ -45,42 +45,32 @@ export interface UpdateOrderStatusRequest {
 
 export const restaurantOrderApi = {
   // Get all orders for the restaurant
-  getOrders: (params?: { status?: string; page?: number; limit?: number }) => {
-    return restaurantApiClient.get<OrderResponse>('/restaurants/orders', { params });
+  getOrders: (params?: { status?: string; limit?: number; offset?: number }) => {
+    return restaurantApiClient.get<OrderResponse>('/orders/my-restaurant', { params });
+  },
+
+  // Get orders for a specific restaurant
+  getOrdersByRestaurantId: (restaurantId: string) => {
+    return restaurantApiClient.get<OrderResponse>(`/orders/restaurant/${restaurantId}`);
   },
 
   // Get order by ID
   getOrderById: (orderId: string) => {
-    return restaurantApiClient.get<{ status_code: number; message: string; data: Order }>(`/restaurants/orders/${orderId}`);
+    return restaurantApiClient.get<{ status_code: number; message: string; data: Order }>(`/orders/${orderId}`);
   },
 
-  // Update order status
-  updateOrderStatus: (data: UpdateOrderStatusRequest) => {
-    return restaurantApiClient.put('/restaurants/orders/status', data);
-  },
-
-  // Get order statistics
-  getOrderStats: () => {
-    return restaurantApiClient.get('/restaurants/orders/stats');
-  },
-
-  // Accept order
-  acceptOrder: (orderId: string) => {
-    return restaurantApiClient.put(`/restaurants/orders/${orderId}/accept`);
+  // Confirm order
+  confirmOrder: (orderId: string) => {
+    return restaurantApiClient.post(`/orders/${orderId}/confirm`);
   },
 
   // Reject order
-  rejectOrder: (orderId: string, reason?: string) => {
-    return restaurantApiClient.put(`/restaurants/orders/${orderId}/reject`, { reason });
+  rejectOrder: (orderId: string) => {
+    return restaurantApiClient.post(`/orders/${orderId}/reject`);
   },
 
-  // Mark order as ready
-  markAsReady: (orderId: string) => {
-    return restaurantApiClient.put(`/restaurants/orders/${orderId}/ready`);
-  },
-
-  // Mark order as delivered
-  markAsDelivered: (orderId: string) => {
-    return restaurantApiClient.put(`/restaurants/orders/${orderId}/delivered`);
+  // Get all orders (general endpoint)
+  getAllOrders: () => {
+    return restaurantApiClient.get<OrderResponse>('/orders');
   },
 };

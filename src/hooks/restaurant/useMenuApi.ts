@@ -8,10 +8,11 @@ import {
   MenuCategory
 } from "@/src/services/restaurant/menuApi";
 
-export const useGetMenuItems = (params?: { categoryId?: string; isAvailable?: boolean; page?: number; limit?: number }) => {
+export const useGetMenuItems = (restaurantId: string, params?: { categoryId?: string; isAvailable?: boolean; page?: number; limit?: number }) => {
   return useQuery({
-    queryKey: ['restaurant-menu-items', params],
-    queryFn: () => restaurantMenuApi.getMenuItems(params).then(res => res.data),
+    queryKey: ['restaurant-menu-items', restaurantId, params],
+    queryFn: () => restaurantMenuApi.getMenuItems(restaurantId, params).then(res => res.data.data),
+    enabled: !!restaurantId,
   });
 };
 
@@ -27,7 +28,8 @@ export const useCreateMenuItem = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: CreateMenuItemRequest) => restaurantMenuApi.createMenuItem(data),
+    mutationFn: ({ restaurantId, data }: { restaurantId: string; data: CreateMenuItemRequest }) =>
+      restaurantMenuApi.createMenuItem(restaurantId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['restaurant-menu-items'] });
       queryClient.invalidateQueries({ queryKey: ['restaurant-menu-stats'] });
@@ -39,8 +41,8 @@ export const useUpdateMenuItem = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ itemId, data }: { itemId: string; data: UpdateMenuItemRequest }) =>
-      restaurantMenuApi.updateMenuItem(itemId, data),
+    mutationFn: ({ restaurantId, itemId, data }: { restaurantId: string; itemId: string; data: UpdateMenuItemRequest }) =>
+      restaurantMenuApi.updateMenuItem(restaurantId, itemId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['restaurant-menu-items'] });
       queryClient.invalidateQueries({ queryKey: ['restaurant-menu-item'] });
@@ -52,7 +54,8 @@ export const useDeleteMenuItem = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (itemId: string) => restaurantMenuApi.deleteMenuItem(itemId),
+    mutationFn: ({ restaurantId, itemId }: { restaurantId: string; itemId: string }) =>
+      restaurantMenuApi.deleteMenuItem(restaurantId, itemId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['restaurant-menu-items'] });
       queryClient.invalidateQueries({ queryKey: ['restaurant-menu-stats'] });
@@ -64,8 +67,8 @@ export const useToggleMenuItemAvailability = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ itemId, isAvailable }: { itemId: string; isAvailable: boolean }) =>
-      restaurantMenuApi.toggleMenuItemAvailability(itemId, isAvailable),
+    mutationFn: ({ restaurantId, itemId, isAvailable }: { restaurantId: string; itemId: string; isAvailable: boolean }) =>
+      restaurantMenuApi.toggleMenuItemAvailability(restaurantId, itemId, isAvailable),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['restaurant-menu-items'] });
     },
@@ -119,5 +122,54 @@ export const useMenuStats = () => {
   return useQuery({
     queryKey: ['restaurant-menu-stats'],
     queryFn: () => restaurantMenuApi.getMenuStats().then(res => res.data),
+  });
+};
+
+// New hooks for additional APIs
+export const useGetAllMenus = (params?: { page?: number; limit?: number }) => {
+  return useQuery({
+    queryKey: ['all-menus', params],
+    queryFn: () => restaurantMenuApi.getAllMenus(params).then(res => res.data),
+  });
+};
+
+export const useGetNearbyMenus = (params: { nearlat: number; nearlng: number; radiuskm: number; limit?: number; offset?: number }) => {
+  return useQuery({
+    queryKey: ['nearby-menus', params],
+    queryFn: () => restaurantMenuApi.getNearbyMenus(params).then(res => res.data),
+    enabled: !!(params.nearlat && params.nearlng && params.radiuskm),
+  });
+};
+
+export const useBrowseMenus = (params: {
+  nearLat: number;
+  nearLng: number;
+  minDistanceKm?: number;
+  maxDistanceKm?: number;
+  minDeliveryFee?: number;
+  maxDeliveryFee?: number;
+  radiusKm?: number;
+  sortBy?: 'distance' | 'fee' | 'createdAt';
+  sortDir?: 'ASC' | 'DESC';
+  limit?: number;
+  offset?: number;
+}) => {
+  return useQuery({
+    queryKey: ['browse-menus', params],
+    queryFn: () => restaurantMenuApi.browseMenus(params).then(res => res.data),
+    enabled: !!(params.nearLat && params.nearLng),
+  });
+};
+
+export const useUploadMenuItemPicture = () => {
+  return useMutation({
+    mutationFn: ({ restaurantId, formData }: { restaurantId: string; formData: FormData }) =>
+      restaurantMenuApi.uploadMenuItemPicture(restaurantId, formData),
+  });
+};
+
+export const useUploadImage = () => {
+  return useMutation({
+    mutationFn: (formData: FormData) => restaurantMenuApi.uploadImage(formData),
   });
 };

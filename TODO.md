@@ -1,21 +1,23 @@
-# Search Screen Fixes - TODO List
+# TODO List for Profile Screen Updates and App Flow
 
-## Files to Fix:
-- [ ] src/screens/customer/home/SearchScreen.tsx
-- [ ] src/components/customer/FilterModal.tsx
+## 1. Change Profile Screen Colors to Grey
+- [x] Edit ProfileScreen.tsx to change icon colors to grey (#666666) for account_settings, restaurant_settings, support options
+- [x] Keep other options (payment_billing, notifications, about) with blue color (#007AFF)
 
-## SearchScreen.tsx Tasks:
-- [ ] Remove duplicate Text import
-- [ ] Fix category filtering logic to use actual categories
-- [ ] Remove unused type parameter from useSearchFood hook
-- [ ] Remove unused activeFilterCategory state or implement functionality
-- [ ] Update filter button categories to match available categories
+## 2. Verify App Flow (User Selection -> Login)
+- [x] Confirm OnboardingScreen UserTypeSelection directs to correct login based on selection
+- [x] Test AuthNavigator uses selectedUserType for RestaurantLoginScreen vs LoginScreen
+- [x] Create UserTypeSelectionScreen with clean, animated design and blue theme
+- [x] Integrate UserTypeSelectionScreen with RootNavigator
 
-## FilterModal.tsx Tasks:
-- [ ] Add props to receive current filter state
-- [ ] Implement functionality to show relevant section based on activeFilterCategory
-- [ ] Initialize state with current filter values
+## 3. Add API Testing Screen
+- [ ] Check and update navigation types for new ApiTestingScreen
+- [ ] Add ApiTestingScreen route to RestaurantNavigator.tsx
+- [ ] Create ApiTestingScreen.tsx with input fields for endpoint, method, headers, body
+- [ ] Add API testing option to profileOptions in ProfileScreen.tsx
+- [ ] Implement API call functionality and response display
 
-## Integration Tasks:
-- [ ] Update SearchScreen to pass current filters to FilterModal
-- [ ] Test the search and filtering functionality
+## 4. Testing
+- [ ] Test color changes in profile screen
+- [ ] Test navigation flow from user selection to login
+- [ ] Test API testing functionality with sample endpoints

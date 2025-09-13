@@ -27,9 +27,7 @@ const AccountSettingsScreen = ({ navigation }: Props) => {
 
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [smsNotifications, setSmsNotifications] = useState(false);
-  const [username, setUsername] = useState('restaurant_owner');
-  const [email, setEmail] = useState('owner@restaurant.com');
-  const [phone, setPhone] = useState('+1 234 567 8900');
+
   const [showLanguageSelector, setShowLanguageSelector] = useState(false);
 
   // Theme from global store
@@ -89,69 +87,19 @@ const AccountSettingsScreen = ({ navigation }: Props) => {
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Account & Settings</Text>
-          <MaterialCommunityIcons name="account-cog-outline" size={32} color="#fff" style={{ marginLeft: 10 }} />
+          <Text style={styles.headerTitle}>{t('settings')}</Text>
+          <MaterialCommunityIcons name="account-cog-outline" size={30} color="#fff" style={{ marginLeft: 10 }} />
         </LinearGradient>
       </Animated.View>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
         <Animated.View style={{ opacity: contentAnim, marginTop: 24 }}>
-          <Text style={styles.sectionTitle}>Profile Info</Text>
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Username</Text>
-            <TextInput
-              style={styles.input}
-              value={username}
-              onChangeText={setUsername}
-              placeholder="Username"
-              placeholderTextColor="#aaa"
-            />
-          </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Email</Text>
-            <TextInput
-              style={styles.input}
-              value={email}
-              onChangeText={setEmail}
-              placeholder="Email"
-              placeholderTextColor="#aaa"
-              keyboardType="email-address"
-            />
-          </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Phone</Text>
-            <TextInput
-              style={styles.input}
-              value={phone}
-              onChangeText={setPhone}
-              placeholder="Phone"
-              placeholderTextColor="#aaa"
-              keyboardType="phone-pad"
-            />
-          </View>
-          <Text style={styles.sectionTitle}>Notification Preferences</Text>
-          <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>Email Notifications</Text>
-            <Switch
-              value={emailNotifications}
-              onValueChange={setEmailNotifications}
-              trackColor={{ false: '#ccc', true: RESTAURANT_COLORS.PRIMARY }}
-              thumbColor={emailNotifications ? RESTAURANT_COLORS.PRIMARY : '#fff'}
-            />
-          </View>
-          <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>SMS Notifications</Text>
-            <Switch
-              value={smsNotifications}
-              onValueChange={setSmsNotifications}
-              trackColor={{ false: '#ccc', true: RESTAURANT_COLORS.PRIMARY }}
-              thumbColor={smsNotifications ? RESTAURANT_COLORS.PRIMARY : '#fff'}
-            />
-          </View>
-
+          
+          {/* <Text style={styles.sectionTitle}>Notification Preferences</Text> */}
+        
           {/* App Preferences */}
-          <Text style={styles.sectionTitle}>App Preferences</Text>
+          <Text style={styles.sectionTitle}>{t('app_preferences')}</Text>
           <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>Dark Mode</Text>
+            <Text style={styles.switchLabel}>{t('dark_mode')}</Text>
             <Switch
               value={isDarkMode}
               onValueChange={toggleDarkMode}
@@ -160,7 +108,7 @@ const AccountSettingsScreen = ({ navigation }: Props) => {
             />
           </View>
           <View style={styles.selectorRow}>
-            <Text style={styles.switchLabel}>Language</Text>
+            <Text style={styles.switchLabel}>{t('language')}</Text>
             <TouchableOpacity
               style={styles.languageSelector}
               onPress={() => setShowLanguageSelector(true)}
@@ -176,10 +124,6 @@ const AccountSettingsScreen = ({ navigation }: Props) => {
               <Ionicons name="chevron-down" size={16} color={colors.outline} />
             </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.saveBtn}>
-            <Ionicons name="save-outline" size={22} color="#fff" />
-            <Text style={styles.saveBtnText}>Save Changes</Text>
-          </TouchableOpacity>
         </Animated.View>
       </ScrollView>
 

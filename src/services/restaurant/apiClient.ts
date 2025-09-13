@@ -1,6 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import RestaurantTokenManager from './tokenManager';
-import { useAuthStore } from '@/src/stores/customerStores/AuthStore';
 
 // Rate limiting configuration
 const RATE_LIMIT_CONFIG = {
@@ -136,7 +135,13 @@ class RestaurantApiClient {
           try {
             const refreshToken = await RestaurantTokenManager.getRefreshToken();
             if (!refreshToken) {
-              throw new Error('No refresh token available');
+              // No refresh token available, user needs to login again
+              await RestaurantTokenManager.clearAllTokens();
+              throw {
+                message: 'Your session has expired. Please log in again to continue.',
+                code: 'SESSION_EXPIRED',
+                status: 401,
+              } as EnhancedApiError;
             }
 
             const response = await this.client.post('/restaurants/auth/refresh-token', {
@@ -166,12 +171,11 @@ class RestaurantApiClient {
             // Clear subscribers
             this.refreshSubscribers = [];
 
-            // Refresh failed, logout user
+            // Refresh failed, clear tokens
             await RestaurantTokenManager.clearAllTokens();
-            useAuthStore.getState().logoutUser();
-            
+
             throw {
-              message: 'Session expired. Please log in again.',
+              message: 'Your session has expired. Please log in again to continue.',
               code: 'SESSION_EXPIRED',
             } as EnhancedApiError;
           } finally {

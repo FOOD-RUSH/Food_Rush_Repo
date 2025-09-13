@@ -36,43 +36,55 @@ export const OrderApi = {
     return apiClient.get<Order>(`/orders/${orderId}`);
   },
 
-  // Get all orders for a customer
-  getAllOrders: (customerId: string) => {
-    return apiClient.get<Order[]>(`/orders/customer/${customerId}`);
-  },
-
-  // Cancel an order
-  cancelOrder: (orderId: string) => {
-    return apiClient.patch<Order>(`/orders/${orderId}/cancel`, {});
-  },
-
-  // Update order status
-  updateOrderStatus: (orderId: string, data: UpdateOrderStatusRequest) => {
-    return apiClient.patch<Order>(`/orders/${orderId}/status`, data);
-  },
-
-  // Get order tracking information
-  getOrderTracking: (orderId: string) => {
-    return apiClient.get<any>(`/orders/${orderId}/tracking`);
-  },
-
-  // Add rating and review to order
-  addOrderReview: (orderId: string, reviewData: { rating: number; comment: string }) => {
-    return apiClient.post<void>(`/orders/${orderId}/review`, reviewData);
-  },
-
-  // Get order receipt
-  getOrderReceipt: (orderId: string) => {
-    return apiClient.get<any>(`/orders/${orderId}/receipt`);
-  },
-
-  // Get order history with filters
-  getOrderHistory: (customerId: string, filters?: { 
-    status?: Order['status']; 
-    limit?: number; 
-    page?: number 
+  // Get all orders for a customer with filters
+  getAllOrders: (customerId: string, filters?: {
+    status?: string;
+    limit?: number;
+    offset?: number;
   }) => {
-    return apiClient.get<Order[]>(`/orders/customer/${customerId}/history`, {
+    return apiClient.get<Order[]>(`/orders/customer/${customerId}`, {
+      params: filters
+    });
+  },
+
+  // Get customer's orders
+  getMyOrders: (filters?: {
+    status?: string;
+    limit?: number;
+    offset?: number;
+  }) => {
+    return apiClient.get<Order[]>(`/orders/my`, {
+      params: filters
+    });
+  },
+
+  // Confirm order received
+  confirmOrderReceived: (orderId: string) => {
+    return apiClient.post<Order>(`/orders/${orderId}/confirm-received`);
+  },
+
+  // Customer confirm order
+  customerConfirm: (orderId: string) => {
+    return apiClient.post<Order>(`/orders/${orderId}/customer-confirm`);
+  },
+
+  // Confirm order
+  confirmOrder: (orderId: string) => {
+    return apiClient.post<Order>(`/orders/${orderId}/confirm`);
+  },
+
+  // Reject order
+  rejectOrder: (orderId: string) => {
+    return apiClient.post<Order>(`/orders/${orderId}/reject`);
+  },
+
+  // Get order history with filters (using my orders endpoint)
+  getOrderHistory: (filters?: {
+    status?: string;
+    limit?: number;
+    offset?: number;
+  }) => {
+    return apiClient.get<Order[]>(`/orders/my`, {
       params: filters
     });
   },

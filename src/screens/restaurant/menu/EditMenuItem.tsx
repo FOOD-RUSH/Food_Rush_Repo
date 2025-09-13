@@ -4,6 +4,7 @@ import { TextInput, Button, Switch, Card, Chip } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import CommonView from '@/src/components/common/CommonView';
+import { saveImageLocally, generateImageId } from '@/src/utils/imageStorage';
 
 interface MenuItem {
   id: string;
@@ -34,15 +35,22 @@ const EditMenuItemScreen = ({
   const categories = ['Appetizers', 'Main Course', 'Desserts', 'Beverages', 'Salads', 'Pizza', 'Burgers'];
 
   const handleImagePick = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.8,
-    });
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
 
-    if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      if (!result.canceled) {
+        const imageId = generateImageId();
+        const localUri = await saveImageLocally(result.assets[0].uri, imageId);
+        setImage(localUri);
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      // You could show an alert here
     }
   };
 

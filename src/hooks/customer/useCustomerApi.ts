@@ -115,6 +115,14 @@ export const useCreateOrder = () => {
         mutationFn: (orderData: any) => OrderApi.createOrder(orderData).then(res => res.data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['orders'] });
+        },
+        onError: (error: any) => {
+            // Handle session expired errors gracefully
+            if (error?.code === 'SESSION_EXPIRED' || error?.message?.includes('session has expired')) {
+                console.log('Session expired during order creation');
+                return;
+            }
+            throw error;
         }
     })
 }
@@ -126,6 +134,13 @@ export const useOrderById = (orderId: string) => {
         queryKey: ['orders', orderId],
         queryFn: () => OrderApi.getOrderById(orderId).then(res => res.data),
         enabled: !!orderId && isAuthenticated,
+        retry: (failureCount, error: any) => {
+            // Don't retry on session expired errors
+            if (error?.code === 'SESSION_EXPIRED' || error?.message?.includes('session has expired')) {
+                return false;
+            }
+            return failureCount < 3;
+        }
     })
 }
 
@@ -136,15 +151,30 @@ export const useAllOrders = (customerId: string) => {
         queryKey: ['orders', customerId],
         queryFn: () => OrderApi.getAllOrders(customerId).then(res => res.data),
         enabled: !!customerId && isAuthenticated,
+        retry: (failureCount, error: any) => {
+            // Don't retry on session expired errors
+            if (error?.code === 'SESSION_EXPIRED' || error?.message?.includes('session has expired')) {
+                return false;
+            }
+            return failureCount < 3;
+        }
     })
 }
 
 export const useCancelOrder = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (orderId: string) => OrderApi.cancelOrder(orderId).then(res => res.data),
+        mutationFn: (orderId: string) => OrderApi.rejectOrder(orderId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['orders'] });
+        },
+        onError: (error: any) => {
+            // Handle session expired errors gracefully
+            if (error?.code === 'SESSION_EXPIRED' || error?.message?.includes('session has expired')) {
+                console.log('Session expired during order cancellation');
+                return;
+            }
+            throw error;
         }
     })
 }

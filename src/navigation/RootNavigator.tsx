@@ -6,7 +6,6 @@ import { Linking, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { MaterialIcons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
-import OrderReceiptScreen from '../screens/customer/Order/OrderReceiptScreen';
 
 // Navigation types and helpers
 import { RootStackParamList } from './types';
@@ -25,16 +24,16 @@ import { useCartStore } from '../stores/customerStores/cartStore';
 
 // Navigators
 import AuthNavigator from './AuthNavigator';
-import CustomerNavigator, {
-  CustomerHelpCenterStackScreen,
-} from './CustomerNavigator';
+import CustomerNavigator, { CustomerHelpCenterStackScreen } from './CustomerNavigator';
 import RestaurantNavigator from './RestaurantNavigator';
 
 // Components and screens
 import LoadingScreen from '../components/common/LoadingScreen';
 import OnboardingScreen from '../components/onBoardingScreen';
+import UserTypeSelectionScreen from '../screens/common/UserTypeSelectionScreen';
 
 // Full-screen screens (no tabs)
+import OrderReceiptScreen from '../screens/customer/Order/OrderReceiptScreen';
 import CheckOutScreen from '../screens/customer/home/CheckOutScreen';
 import SearchScreen from '@/src/screens/customer/home/SearchScreen';
 import CartScreen from '../screens/customer/home/CartScreen';
@@ -48,95 +47,62 @@ import EditProfileScreen from '../screens/customer/Profile/EditProfileScreen';
 import FavoriteRestaurants from '../screens/customer/Profile/FavoriteRestaurants';
 import PaymentScreen from '../screens/customer/Profile/PaymentScreen';
 import LanguageScreen from '../screens/customer/Profile/LanguageScreen';
+import ProfileEditScreen from '../screens/restaurant/profile/ProfileEditScreen';
 import AddressScreen from '../screens/customer/Profile/AddressScreen';
 
-// Data
+// Data & theme
 import { OnboardingSlides } from '@/src/utils/onboardingData';
 import { useAppTheme, useAppNavigationTheme } from '../config/theme';
+import OrderHistoryScreen from '../screens/restaurant/orders/OrderHistoryScreen';
 
-// Stack navigator
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-// Screen option presets for better organization and reuse
+// Screen option presets
 const createScreenOptions = (colors: any, t: any) => ({
   default: {
     headerShown: false,
     gestureEnabled: true,
     animation: 'slide_from_right' as const,
-    lazy: true,
-    unmountOnBlur: false,
-    contentStyle: {
-      backgroundColor: colors.background,
-    },
-    headerStyle: {
-      backgroundColor: colors.card,
-      elevation: 0,
-      shadowOpacity: 0,
-    },
+    contentStyle: { backgroundColor: colors.background },
+    headerStyle: { backgroundColor: colors.card, elevation: 0, shadowOpacity: 0 },
     headerTintColor: colors.text,
   },
-
   modal: {
     presentation: 'modal' as const,
     headerShown: true,
     animation: 'slide_from_bottom' as const,
     gestureDirection: 'vertical' as const,
-    contentStyle: {
-      backgroundColor: colors.background,
-    },
-    headerStyle: {
-      backgroundColor: colors.card,
-      elevation: 0,
-      shadowOpacity: 0,
-    },
+    contentStyle: { backgroundColor: colors.background },
+    headerStyle: { backgroundColor: colors.card, elevation: 0, shadowOpacity: 0 },
     headerTintColor: colors.text,
   },
-
   card: {
     presentation: 'card' as const,
     headerShown: true,
     headerTransparent: true,
     headerBackTitleVisible: false,
     animation: 'slide_from_right' as const,
-    contentStyle: {
-      backgroundColor: colors.background,
-    },
+    contentStyle: { backgroundColor: colors.background },
     headerTintColor: colors.text,
   },
-
   profileCard: {
     presentation: 'card' as const,
     headerShown: true,
     headerTitleAlign: 'center' as const,
     animation: 'slide_from_right' as const,
     headerShadowVisible: false,
-    contentStyle: {
-      backgroundColor: colors.background,
-    },
-    headerStyle: {
-      backgroundColor: colors.card,
-      elevation: 0,
-      shadowOpacity: 0,
-    },
+    contentStyle: { backgroundColor: colors.background },
+    headerStyle: { backgroundColor: colors.card, elevation: 0, shadowOpacity: 0 },
     headerTintColor: colors.text,
   },
-
   checkout: {
     headerShown: true,
     headerTitleAlign: 'center' as const,
     animation: 'slide_from_right' as const,
-    gestureEnabled: true,
-    contentStyle: {
-      backgroundColor: colors.background,
-    },
-    headerStyle: {
-      backgroundColor: colors.card,
-      elevation: 0,
-      shadowOpacity: 0,
-    },
+    contentStyle: { backgroundColor: colors.background },
+    headerStyle: { backgroundColor: colors.card, elevation: 0, shadowOpacity: 0 },
     headerTintColor: colors.text,
   },
-
   fullScreen: {
     presentation: 'fullScreenModal' as const,
     headerShown: false,
@@ -146,16 +112,16 @@ const createScreenOptions = (colors: any, t: any) => ({
 });
 
 const RootNavigator: React.FC = () => {
-  // Store hooks with performance-optimized selectors
   const isAuthenticated = useIsAuthenticated();
-  const user = useAuthUser();
   const hasHydrated = useHasHydrated();
   const isOnboardingComplete = useOnboardingComplete();
-  const userType = useAppUserType();
+  const userType = useAppUserType(); // 👈 from AppStore
+  const user = useAuthUser(); // 👈 from AuthStore
+
   const themeMode = useAppStore((state) => state.theme);
   const { t } = useTranslation('translation');
 
-  // Cart store actions
+  // Cart
   const clearCart = useCartStore((state) => state.clearCart);
   const cartItems = useCartStore((state) => state.items);
 
@@ -166,109 +132,90 @@ const RootNavigator: React.FC = () => {
   const theme = useAppTheme(themeMode);
   const navigationTheme = useAppNavigationTheme();
 
-  // Memoized screen options for better performance
-  const screenOptions = useMemo(
-    () => createScreenOptions(theme.colors, t),
-    [theme.colors, t],
-  );
+  const screenOptions = useMemo(() => createScreenOptions(theme.colors, t), [theme.colors, t]);
+
   const handleClearCart = useCallback(() => {
     if (cartItems.length === 0) {
-      Toast.show({
-        type: 'info',
-        text1: t('info'),
-        text2: t('cart_empty'),
-        position: 'bottom',
-      });
+      Toast.show({ type: 'info', text1: t('info'), text2: t('cart_empty'), position: 'bottom' });
       return;
     }
-
     clearCart();
-    Toast.show({
-      type: 'success',
-      text1: t('success'),
-      text2: t('cart_cleared_successfully'),
-      position: 'top',
-    });
+    Toast.show({ type: 'success', text1: t('success'), text2: t('cart_cleared_successfully'), position: 'top' });
   }, [cartItems.length, clearCart, t]);
 
-
-  // Memoized cart screen options
   const cartScreenOptions = useMemo(
     () => ({
       headerTitle: t('my_cart'),
       headerBackTitleVisible: false,
       headerRight: () => (
-        <TouchableOpacity
-          onPress={handleClearCart}
-          style={{ marginRight: 16 }}
-        >
-          <MaterialIcons
-            name="delete-forever"
-            size={24}
-            color={navigationTheme.colors.notification}
-          />
+        <TouchableOpacity onPress={handleClearCart} style={{ marginRight: 16 }}>
+          <MaterialIcons name="delete-forever" size={24} color={navigationTheme.colors.notification} />
         </TouchableOpacity>
       ),
     }),
     [t, handleClearCart, navigationTheme.colors.notification],
   );
 
-  // Event handlers
   const handleOnboardingComplete = useCallback(
     (selectedUserType: 'customer' | 'restaurant') => {
+      console.log('Onboarding complete with userType:', selectedUserType);
       setUserType(selectedUserType);
       completeOnboarding();
     },
     [completeOnboarding, setUserType],
   );
 
-  
-  const handleLogin = useCallback(
+  const handleUserTypeSelection = useCallback(
     (selectedUserType: 'customer' | 'restaurant') => {
+      console.log('User type selected in RootNavigator:', selectedUserType);
       setUserType(selectedUserType);
-      completeOnboarding();
     },
-    [completeOnboarding, setUserType],
+    [setUserType],
   );
 
-  // Navigation ready handler
   const handleNavigationReady = useCallback(() => {
-    const subscription = Linking.addEventListener('url', ({ url }) => {
-      handleDeepLink(url);
-    });
-
+    const subscription = Linking.addEventListener('url', ({ url }) => handleDeepLink(url));
     return () => subscription?.remove();
   }, []);
 
-  // Determine initial route name based on app state
+  // 🔥 FIXED: Initial route decision with proper user type flow
   const getInitialRouteName = useCallback((): keyof RootStackParamList => {
+    console.log('🔍 getInitialRouteName - isAuthenticated:', isAuthenticated, 'userType:', userType);
+    
+    // If not authenticated, ALWAYS show user type selection first
+    // This ensures users can choose their type even if there's a cached value
     if (!isAuthenticated) {
-      console.log('navigating to login');
+      console.log('❌ Not authenticated → UserTypeSelection (allowing user to choose)');
       return 'RestaurantApp';
     }
 
+    // User is authenticated, route based on userType and verification status
     switch (userType) {
       case 'customer':
+        console.log('✅ Authenticated customer → CustomerApp');
         return 'CustomerApp';
+        
       case 'restaurant':
-        // Check restaurant verification status
         const verificationStatus = user?.verificationStatus || user?.restaurant?.verificationStatus;
+        console.log('🏪 Restaurant verification status:', verificationStatus);
+        
         if (verificationStatus === 'PENDING_VERIFICATION' || verificationStatus === 'PENDING') {
-          console.log('Restaurant not approved, navigating to awaiting approval');
-          return 'Auth'; // This will show AwaitingApproval screen
+          console.log('⏳ Restaurant pending verification → Auth (AwaitingApproval)');
+          return 'Auth';
         }
+        console.log('✅ Authenticated restaurant → RestaurantApp');
         return 'RestaurantApp';
+        
       default:
-        return 'Auth';
+        console.log('❓ Unknown userType → UserTypeSelection');
+        return 'UserTypeSelection';
     }
   }, [isAuthenticated, userType, user]);
 
-  // Render loading screen while hydrating
-  if (!hasHydrated) {
-    return <LoadingScreen />;
-  }
+  // Wait until hydration
+  if (!hasHydrated) return <LoadingScreen />;
 
-  // Render onboarding if not completed
+  // Show onboarding first
   if (!isOnboardingComplete) {
     return (
       <>
@@ -276,14 +223,12 @@ const RootNavigator: React.FC = () => {
         <OnboardingScreen
           OnboardingSlides={OnboardingSlides}
           onComplete={handleOnboardingComplete}
-          onLogin={handleLogin}
+          onLogin={handleUserTypeSelection}
         />
       </>
-      
     );
   }
 
-  // Main app navigation
   return (
     <>
       <StatusBar style={theme.dark ? 'light' : 'dark'} />
@@ -294,172 +239,58 @@ const RootNavigator: React.FC = () => {
         fallback={<LoadingScreen />}
         onReady={handleNavigationReady}
       >
-        <Stack.Navigator
-          initialRouteName={getInitialRouteName()}
-          screenOptions={screenOptions.default}
-        >
-          {/* Main App Navigators */}
-          <Stack.Screen
-            name="Auth"
-            component={AuthNavigator}
-            options={{ headerShown: false }}
-          />
+        <Stack.Navigator initialRouteName={getInitialRouteName()} screenOptions={screenOptions.default}>
+          {/* UserType selection - FIXED: Remove gestureEnabled: false to allow back navigation */}
+          <Stack.Screen name="UserTypeSelection" options={{ headerShown: false }}>
+            {(props) => <UserTypeSelectionScreen {...props} onUserTypeSelect={handleUserTypeSelection} />}
+          </Stack.Screen>
 
-          <Stack.Screen
-            name="CustomerApp"
-            component={CustomerNavigator}
-            options={{ headerShown: false }}
-          />
+          {/* Auth (customer & restaurant handled inside AuthNavigator) */}
+          <Stack.Screen name="Auth" component={AuthNavigator} options={{ headerShown: false }} />
 
-          <Stack.Screen
-            name="RestaurantApp"
-            component={RestaurantNavigator}
-            options={{ headerShown: false }}
-          />
+          {/* Main apps */}
+          <Stack.Screen name="CustomerApp" component={CustomerNavigator} options={{ headerShown: false }} />
+          <Stack.Screen name="RestaurantApp" component={RestaurantNavigator} options={{ headerShown: false }} />
 
-          {/* Modal Screens */}
+          {/* Modals */}
           <Stack.Group screenOptions={screenOptions.modal}>
-            <Stack.Screen
-              name="Cart"
-              component={CartScreen}
-              options={cartScreenOptions}
-            />
-
-            <Stack.Screen
-              name="Notifications"
-              component={NotificationsScreen}
-              options={{
-                headerTitle: t('notifications'),
-              }}
-            />
+            <Stack.Screen name="Cart" component={CartScreen} options={cartScreenOptions} />
+            <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ headerTitle: t('notifications') }} />
           </Stack.Group>
 
-          {/* Full Screen Modal */}
-          <Stack.Screen
-            name="SearchScreen"
-            component={SearchScreen}
-            options={screenOptions.fullScreen}
-          />
+          {/* FullScreen */}
+          <Stack.Screen name="SearchScreen" component={SearchScreen} options={screenOptions.fullScreen} />
 
-          {/* Card Presentation Screens */}
+          {/* Card Screens */}
           <Stack.Group screenOptions={screenOptions.card}>
-            <Stack.Screen
-              name="FoodDetails"
-              component={FoodDetailsScreen}
-              options={{
-                headerTitle: '',
-                headerTransparent: true,
-                headerStyle: {
-                  backgroundColor: 'transparent',
-                },
-              }}
-            />
-
-            <Stack.Screen
-              name="RestaurantDetails"
-              component={RestaurantDetailScreen}
-              options={{
-                headerTitle: '',
-                headerTransparent: true,
-                headerStyle: {
-                  backgroundColor: 'transparent',
-                },
-              }}
-            />
-
-            <Stack.Screen
-              name="AddressScreen"
-              component={AddressScreen}
-              options={{
-                headerTitle: t('address'),
-                headerBackVisible: true,
-              }}
-            />
-            <Stack.Screen
-              name="NearbyRestaurants"
-              component={NearbyRestaurantsScreen}
-              options={{
-                headerTitle: t('restaurants_near_you'),
-              }}
-            />
+            <Stack.Screen name='RestaurantOrderHistory' component={OrderHistoryScreen} options={{headerTitle: "Order History", }} />
+            <Stack.Screen name="FoodDetails" component={FoodDetailsScreen} options={{ headerTitle: '', headerTransparent: true }} />
+            <Stack.Screen name="RestaurantDetails" component={RestaurantDetailScreen} options={{ headerTitle: '', headerTransparent: true }} />
+            <Stack.Screen name="AddressScreen" component={AddressScreen} options={{ headerTitle: t('address') }} />
+            <Stack.Screen name="NearbyRestaurants" component={NearbyRestaurantsScreen} options={{ headerTitle: t('restaurants_near_you') }} />
           </Stack.Group>
 
-          {/* Profile Screens */}
+          {/* Profile */}
           <Stack.Group screenOptions={screenOptions.profileCard}>
-            <Stack.Screen
-              name="EditProfile"
-              component={EditProfileScreen}
-              options={{
-                headerTitle: t('edit_profile'),
-              }}
-            />
-
-            <Stack.Screen
-              name="Help"
-              component={CustomerHelpCenterStackScreen}
-              options={{
-                headerTitle: t('help_center'),
-              }}
-            />
-
-            <Stack.Screen
-              name="FavoriteRestaurantScreen"
-              component={FavoriteRestaurants}
-              options={{
-                headerTitle: t('favorite_restaurants'),
-              }}
-            />
-
-            <Stack.Screen
-              name="PaymentMethods"
-              component={PaymentScreen}
-              options={{
-                headerTitle: t('payment_methods'),
-              }}
-            />
-
-            <Stack.Screen
-              name="LanguageScreen"
-              component={LanguageScreen}
-              options={{
-                headerTitle: t('language_settings'),
-              }}
-            />
+            <Stack.Screen name="EditProfile" component={EditProfileScreen} options={{ headerTitle: t('edit_profile') }} />
+            <Stack.Screen name="Help" component={CustomerHelpCenterStackScreen} options={{ headerTitle: t('help_center') }} />
+            <Stack.Screen name="FavoriteRestaurantScreen" component={FavoriteRestaurants} options={{ headerTitle: t('favorite_restaurants') }} />
+            <Stack.Screen name="PaymentMethods" component={PaymentScreen} options={{ headerTitle: t('payment_methods') }} />
+            <Stack.Screen name="LanguageScreen" component={LanguageScreen} options={{ headerTitle: t('language_settings') }} />
+            {/* restaurant screens */}
+            <Stack.Screen name='RestaurantEditProfile' component={ProfileEditScreen} options ={{headerTitle: t('edit_profile')}} />
           </Stack.Group>
 
-          {/* Checkout Screen */}
+
+          {/* Checkout */}
           <Stack.Screen
             name="Checkout"
             component={CheckOutScreen}
-            options={{
-              ...screenOptions.checkout,
-              headerTitle: t('checkout_order'),
-              contentStyle: {
-                marginTop: -34,
-              },
-            }}
+            options={{ ...screenOptions.checkout, headerTitle: t('checkout_order'), contentStyle: { marginTop: -34 } }}
           />
 
-          {/* Future screens can be added here */}
-          <Stack.Screen 
-            name="OrderReceipt" 
-            component={OrderReceiptScreen}
-            options={{
-              ...screenOptions.fullScreen,
-              headerTitle: t('order_receipt'),
-            }}
-          />
-          {/* 
-          <Stack.Screen 
-            name="OrderTracking" 
-            component={OrderTrackingScreen}
-            options={{
-              ...screenOptions.checkout,
-              headerTitle: 'Track Order',
-              gestureEnabled: false, // Prevent swipe back during tracking
-            }}
-          />
-          */}
+          {/* Order Receipt */}
+          <Stack.Screen name="OrderReceipt" component={OrderReceiptScreen} options={{ ...screenOptions.fullScreen, headerTitle: t('order_receipt') }} />
         </Stack.Navigator>
       </NavigationContainer>
     </>

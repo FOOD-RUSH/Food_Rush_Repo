@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, Image, ScrollView, TouchableOpacity, Animated, StatusBar, Dimensions, KeyboardTypeOptions } from 'react-native';
+import { View, Text, Image, ScrollView, TouchableOpacity, Animated, StatusBar, Dimensions, KeyboardTypeOptions, Alert } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
 import CommonView from '@/src/components/common/CommonView';
+import { saveImageLocally, generateImageId } from '@/src/utils/imageStorage';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RestaurantMenuStackParamList } from '@/src/navigation/types';
+import { useAuthUser } from '@/src/stores/customerStores/AuthStore';
+import { useGetMenuItemById, useUpdateMenuItem, useUploadImage } from '@/src/hooks/restaurant/useMenuApi';
 
 const { width, height } = Dimensions.get('window');
 
@@ -27,33 +30,33 @@ type EditFoodScreenProps = NativeStackScreenProps<
 
 export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
   const navigation = useNavigation();
-  
-  // FIXED: Use itemId from route params and create a mock food item
-  // In a real app, you would fetch the item data using the itemId
+  const user = useAuthUser();
+  const restaurantId = user?.restaurantId;
+
   const { itemId } = route.params;
-  
-  // TODO: Replace with actual API call to fetch food item by ID
-  const getFoodItemById = (id: string): FoodItem => {
-    // This would typically be a database call or API request
-    // For now, return empty data
-    return {
-      id: id,
-      name: '',
-      price: '',
-      description: '',
-      category: '',
-      image: ''
-    };
-  };
 
-  // Get the food item using the itemId
-  const foodItem = getFoodItemById(itemId);
+  // API hooks
+  const { data: menuItem, isLoading, error } = useGetMenuItemById(itemId);
+  const updateMenuItemMutation = useUpdateMenuItem();
+  const uploadImageMutation = useUploadImage();
 
-  const [name, setName] = useState(foodItem.name);
-  const [price, setPrice] = useState(foodItem.price);
-  const [description, setDescription] = useState(foodItem.description);
-  const [category, setCategory] = useState(foodItem.category);
-  const [image, setImage] = useState(foodItem.image);
+  const [name, setName] = useState('');
+  const [price, setPrice] = useState('');
+  const [description, setDescription] = useState('');
+  const [category, setCategory] = useState('');
+  const [image, setImage] = useState('');
+
+  // Update state when menuItem data is loaded
+  useEffect(() => {
+    if (menuItem) {
+      const item = menuItem as any;
+      setName(item.name || '');
+      setPrice(item.price?.toString() || '');
+      setDescription(item.description || '');
+      setCategory(item.categoryId || '');
+      setImage(item.imageUrl || '');
+    }
+  }, [menuItem]);
 
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -160,68 +163,95 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
   };
 
   const handleImagePick = async () => {
-    // Image change animation
-    Animated.sequence([
-      Animated.timing(imageRotateAnim, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-      Animated.timing(imageScaleAnim, {
-        toValue: 0.9,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-      Animated.timing(imageScaleAnim, {
-        toValue: 1,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      imageRotateAnim.setValue(0);
-    });
+    try {
+      // Image change animation
+      Animated.sequence([
+        Animated.timing(imageRotateAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: true,
+        }),
+        Animated.timing(imageScaleAnim, {
+          toValue: 0.9,
+          duration: 100,
+          useNativeDriver: true,
+        }),
+        Animated.timing(imageScaleAnim, {
+          toValue: 1,
+          duration: 100,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        imageRotateAnim.setValue(0);
+      });
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.8,
-    });
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
 
-    if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      if (!result.canceled) {
+        const asset = result.assets[0];
+
+        // Upload image to server
+        const formData = new FormData();
+        formData.append('image', {
+          uri: asset.uri,
+          type: 'image/jpeg',
+          name: `menu-item-${Date.now()}.jpg`,
+        } as any);
+
+        try {
+          const uploadResponse = await uploadImageMutation.mutateAsync(formData);
+          const responseData = uploadResponse.data as any;
+          const imageUrl = responseData?.url || responseData?.imageUrl || responseData?.image;
+          setImage(imageUrl);
+        } catch (uploadError) {
+          console.error('Error uploading image:', uploadError);
+          Alert.alert('Upload Error', 'Failed to upload image. Please try again.');
+          // Fallback to local storage
+          const imageId = generateImageId();
+          const localUri = await saveImageLocally(asset.uri, imageId);
+          setImage(localUri);
+        }
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      Alert.alert('Error', 'Failed to pick image');
     }
   };
 
-  const handleSave = () => {
-    // Save animation
-    const saveScale = new Animated.Value(1);
-    
-    Animated.sequence([
-      Animated.timing(saveScale, {
-        toValue: 0.95,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-      Animated.timing(saveScale, {
-        toValue: 1,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-    ]).start();
+  const handleSave = async () => {
+    if (!restaurantId) {
+      Alert.alert('Error', 'Restaurant ID not found. Please log in again.');
+      return;
+    }
 
-    // Create updated food item
-    const updatedFoodItem: FoodItem = {
-      id: itemId,
-      name,
-      price,
-      description,
-      category,
-      image,
-    };
+    try {
+      const updateData = {
+        name: name.trim(),
+        description: description.trim(),
+        price: parseFloat(price),
+        categoryId: category.trim() || 'default',
+        imageUrl: image || undefined,
+        isAvailable: true, // You might want to get this from current state
+      };
 
-    console.log('Saving changes for item:', itemId, updatedFoodItem);
-    // Add your save logic here - typically an API call to update the item
+      await updateMenuItemMutation.mutateAsync({
+        restaurantId,
+        itemId,
+        data: updateData,
+      });
+
+      Alert.alert('Success', 'Menu item updated successfully!', [
+        { text: 'OK', onPress: () => navigation.goBack() }
+      ]);
+    } catch (error) {
+      console.error('Error updating menu item:', error);
+      Alert.alert('Error', 'Failed to update menu item. Please try again.');
+    }
   };
 
   const handleCancel = () => {

@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, FlatList, Animated, TouchableOpacity, ScrollView } from 'react-native';
-import { Searchbar, Chip } from 'react-native-paper';
+import { Searchbar, Chip, useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import CommonView from '@/src/components/common/CommonView';
+import { RootStackScreenProps } from '@/src/navigation/types';
 
 interface HistoryOrder {
   id: string;
@@ -16,11 +17,12 @@ interface HistoryOrder {
   rating?: number;
 }
 
-const OrderHistoryScreen = () => {
+const OrderHistoryScreen : React.FC<RootStackScreenProps<'RestaurantOrderHistory'>> = ({navigation, route}) => {
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const {colors} = useTheme()
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -65,7 +67,7 @@ const OrderHistoryScreen = () => {
             ★
           </Text>
         ))}
-        <Text style={{ color: '#666', fontSize: 12, marginLeft: 4 }}>
+        <Text style={{ color:  colors.onSurfaceVariant, fontSize: 12, marginLeft: 4 }}>
           ({rating}/5)
         </Text>
       </View>
@@ -92,7 +94,7 @@ const OrderHistoryScreen = () => {
       >
         <TouchableOpacity 
           style={{
-            backgroundColor: 'white',
+            backgroundColor: colors.onSurfaceVariant,
             padding: 16,
             borderRadius: 12,
             marginBottom: 12,
@@ -110,7 +112,7 @@ const OrderHistoryScreen = () => {
             alignItems: 'center', 
             marginBottom: 8 
           }}>
-            <Text style={{ fontSize: 18, fontWeight: '600', color: '#333' }}>
+            <Text style={{ fontSize: 18, fontWeight: '600', color:  colors.onBackground }}>
               Order #{item.id}
             </Text>
             <View style={{ 
@@ -120,7 +122,7 @@ const OrderHistoryScreen = () => {
               borderRadius: 16 
             }}>
               <Text style={{ 
-                color: 'white', 
+                color:  colors.onBackground, 
                 fontSize: 12, 
                 fontWeight: '600',
                 textTransform: 'uppercase'
@@ -136,8 +138,8 @@ const OrderHistoryScreen = () => {
             alignItems: 'center', 
             marginBottom: 8 
           }}>
-            <Text style={{ color: '#666', fontSize: 16 }}>{item.customerName}</Text>
-            <Text style={{ color: '#666', fontSize: 14 }}>{item.completedTime}</Text>
+            <Text style={{ color:  colors.onBackground, fontSize: 16 }}>{item.customerName}</Text>
+            <Text style={{ color:  colors.onBackground, fontSize: 14 }}>{item.completedTime}</Text>
           </View>
 
           <View style={{ marginBottom: 8 }}>
@@ -190,7 +192,7 @@ const OrderHistoryScreen = () => {
                   }}
                   onPress={() => {/* Reorder functionality */}}
                 >
-                  <Text style={{ color: 'white', fontSize: 12, fontWeight: '600' }}>
+                  <Text style={{ color:  colors.onBackground, fontSize: 12, fontWeight: '600' }}>
                     {t('reorder')}
                   </Text>
                 </TouchableOpacity>
@@ -215,16 +217,16 @@ const OrderHistoryScreen = () => {
   return (
     <CommonView>
       <View style={{ flex: 1 }}>
-        <View style={{ marginBottom: 24 }}>
-          <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#333' }}>{t('order_history')}</Text>
-          <Text style={{ color: '#666', marginTop: 8 }}>{t('view_past_orders')}</Text>
+        <View style={{ marginBottom: 24, marginTop: 8 }}>
+          <Text style={{ fontSize: 28, fontWeight: 'bold', color:  colors.onBackground }}>{t('order_history')}</Text>
+          <Text style={{ color:  colors.onBackground, marginTop: 8 }}>{t('view_past_orders')}</Text>
         </View>
 
         {/* Stats Summary */}
         <View style={{
           flexDirection: 'row',
           justifyContent: 'space-around',
-          backgroundColor: 'white',
+          backgroundColor:  colors.surfaceVariant,
           padding: 16,
           borderRadius: 12,
           marginBottom: 16,
@@ -238,19 +240,19 @@ const OrderHistoryScreen = () => {
             <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#007AFF' }}>
               {getTotalOrders()}
             </Text>
-            <Text style={{ color: '#666', fontSize: 12 }}>{t('total_orders')}</Text>
+            <Text style={{ color:  colors.onBackground, fontSize: 12 }}>{t('total_orders')}</Text>
           </View>
           <View style={{ alignItems: 'center' }}>
             <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#34C759' }}>
               {getCompletedOrders()}
             </Text>
-            <Text style={{ color: '#666', fontSize: 12 }}>{t('completed')}</Text>
+            <Text style={{ color:  colors.onBackground, fontSize: 12 }}>{t('completed')}</Text>
           </View>
           <View style={{ alignItems: 'center' }}>
             <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#FF9500' }}>
               ${getTotalRevenue().toFixed(2)}
             </Text>
-            <Text style={{ color: '#666', fontSize: 12 }}>{t('revenue')}</Text>
+            <Text style={{ color:  colors.onBackground, fontSize: 12 }}>{t('revenue')}</Text>
           </View>
         </View>
 
@@ -258,7 +260,8 @@ const OrderHistoryScreen = () => {
           placeholder={t('search_order_history')}
           onChangeText={setSearchQuery}
           value={searchQuery}
-          style={{ marginBottom: 16, borderRadius: 12 }}
+          style={{ marginBottom: 16, borderRadius: 12, backgroundColor: colors.surfaceVariant, borderColor: colors.outlineVariant, borderWidth: 1 }}
+          iconColor={colors.onBackground}
         />
 
         <ScrollView 
@@ -271,7 +274,9 @@ const OrderHistoryScreen = () => {
               key={`filter-${filter}`}
               selected={selectedFilter === filter}
               onPress={() => setSelectedFilter(filter)}
-              style={{ marginRight: 8 }}
+              style={{ marginRight: 8, height: 35, backgroundColor: selectedFilter  === filter? "#007aff" : colors.surface, borderWidth: 1, borderColor: colors.outline }}
+              textStyle={{color:  selectedFilter  === filter?  'white': colors.onBackground}}
+              selectedColor='white'
             >
               {filter.charAt(0).toUpperCase() + filter.slice(1)}
             </Chip>
@@ -286,7 +291,7 @@ const OrderHistoryScreen = () => {
           contentContainerStyle={{ paddingBottom: 20 }}
           ListEmptyComponent={() => (
             <View style={{ alignItems: 'center', marginTop: 40 }}>
-              <Text style={{ color: '#666', fontSize: 16 }}>{t('no_order_history_found')}</Text>
+              <Text style={{ color:  colors.onBackground, fontSize: 16 }}>{t('no_order_history_found')}</Text>
               <Text style={{ color: '#999', fontSize: 14, marginTop: 4 }}>
                 {t('past_orders_description')}
               </Text>

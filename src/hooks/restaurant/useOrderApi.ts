@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { restaurantOrderApi, UpdateOrderStatusRequest } from "@/src/services/restaurant/orderApi";
 
-export const useGetOrders = (params?: { status?: string; page?: number; limit?: number }) => {
+export const useGetOrders = (params?: { status?: string; limit?: number; offset?: number }) => {
   return useQuery({
     queryKey: ['restaurant-orders', params],
     queryFn: () => restaurantOrderApi.getOrders(params).then(res => res.data.data),
@@ -17,25 +17,23 @@ export const useGetOrderById = (orderId: string) => {
   });
 };
 
-export const useUpdateOrderStatus = () => {
+export const useConfirmOrder = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: UpdateOrderStatusRequest) =>
-      restaurantOrderApi.updateOrderStatus(data),
+    mutationFn: (orderId: string) => restaurantOrderApi.confirmOrder(orderId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['restaurant-orders'] });
     },
-  });
-};
-
-export const useAcceptOrder = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (orderId: string) => restaurantOrderApi.acceptOrder(orderId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['restaurant-orders'] });
+    onError: (error: any) => {
+      // Handle session expired errors gracefully
+      if (error?.code === 'SESSION_EXPIRED' || error?.message?.includes('session has expired')) {
+        console.log('Session expired during order confirmation');
+        // Don't show error to user, let the app handle logout
+        return;
+      }
+      // For other errors, let them bubble up
+      throw error;
     },
   });
 };
@@ -44,40 +42,20 @@ export const useRejectOrder = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ orderId, reason }: { orderId: string; reason?: string }) =>
-      restaurantOrderApi.rejectOrder(orderId, reason),
+    mutationFn: (orderId: string) =>
+      restaurantOrderApi.rejectOrder(orderId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['restaurant-orders'] });
     },
-  });
-};
-
-export const useMarkOrderAsReady = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (orderId: string) => restaurantOrderApi.markAsReady(orderId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['restaurant-orders'] });
+    onError: (error: any) => {
+      // Handle session expired errors gracefully
+      if (error?.code === 'SESSION_EXPIRED' || error?.message?.includes('session has expired')) {
+        console.log('Session expired during order rejection');
+        // Don't show error to user, let the app handle logout
+        return;
+      }
+      // For other errors, let them bubble up
+      throw error;
     },
-  });
-};
-
-export const useMarkOrderAsDelivered = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (orderId: string) => restaurantOrderApi.markAsDelivered(orderId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['restaurant-orders'] });
-    },
-  });
-};
-
-export const useOrderStats = () => {
-  return useQuery({
-    queryKey: ['restaurant-order-stats'],
-    queryFn: () => restaurantOrderApi.getOrderStats().then(res => res.data),
-    refetchInterval: 60000, // Refetch every minute
   });
 };

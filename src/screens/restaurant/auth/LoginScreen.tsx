@@ -48,7 +48,7 @@ interface ThemeColors {
 
 const blueTheme: ThemeColors = {
   primary: '#2563EB',
-  primaryLight: '#3B82F6',
+  primaryLight: '#204685ff',
   primaryDark: '#1D4ED8',
   white: '#FFFFFF',
   lightBlue: '#EFF6FF',
@@ -176,7 +176,7 @@ const RestaurantLoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                 status: apiUser.status,
                 isEmailVerified: apiUser.isEmailVerified,
                 isPhoneVerified: apiUser.isPhoneVerified,
-                phoneNumber: '',
+                phoneNumber: apiUser.phoneNumber || '',
               };
 
               setUser(user);

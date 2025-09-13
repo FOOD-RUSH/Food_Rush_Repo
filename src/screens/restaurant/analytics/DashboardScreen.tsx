@@ -10,9 +10,11 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import CommonView from '@/src/components/common/CommonView';
+import { useTheme } from 'react-native-paper';
 
 export const DashboardScreen = ({ navigation }: any) => {
   const [timeRange, setTimeRange] = useState('week');
+  const {colors} = useTheme();
   
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -138,7 +140,7 @@ export const DashboardScreen = ({ navigation }: any) => {
         <TouchableOpacity
           activeOpacity={0.9}
           style={{
-            backgroundColor: 'white',
+            backgroundColor: colors.surfaceVariant,
             borderRadius: 18,
             padding: 18,
             shadowColor: '#000',
@@ -164,7 +166,7 @@ export const DashboardScreen = ({ navigation }: any) => {
               <MaterialCommunityIcons name={icon as any} size={24} color="white" />
             </Animated.View>
             
-            <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#1D1D1F', marginBottom: 4 }}>
+            <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.onBackground, marginBottom: 4 }}>
               {data.value}
             </Text>
             
@@ -193,7 +195,7 @@ export const DashboardScreen = ({ navigation }: any) => {
       style={{
         opacity: fadeAnim,
         transform: [{ translateY: slideAnim }, { scale: scaleAnim }],
-        backgroundColor: 'white',
+        backgroundColor: colors.surfaceVariant,
         borderRadius: 20,
         padding: 20,
         marginBottom: 20,
@@ -205,7 +207,7 @@ export const DashboardScreen = ({ navigation }: any) => {
       }}
     >
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#1D1D1F' }}>
+        <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.onBackground }}>
           Recent Orders
         </Text>
         <TouchableOpacity>
@@ -230,7 +232,7 @@ export const DashboardScreen = ({ navigation }: any) => {
             alignItems: 'center',
             paddingVertical: 12,
             borderBottomWidth: index < dashboardData.recentOrders.length - 1 ? 1 : 0,
-            borderBottomColor: '#F2F2F7',
+            borderBottomColor:colors.outline,
           }}
         >
           <View style={{
@@ -250,7 +252,7 @@ export const DashboardScreen = ({ navigation }: any) => {
           </View>
           
           <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 16, fontWeight: '600', color: '#1D1D1F', marginBottom: 2 }}>
+            <Text style={{ fontSize: 16, fontWeight: '600', color: colors.onBackground, marginBottom: 2 }}>
               {order.customer}
             </Text>
             <Text style={{ fontSize: 14, color: '#8E8E93' }}>
@@ -259,7 +261,7 @@ export const DashboardScreen = ({ navigation }: any) => {
           </View>
           
           <View style={{ alignItems: 'flex-end' }}>
-            <Text style={{ fontSize: 16, fontWeight: 'bold', color: '#1D1D1F', marginBottom: 2 }}>
+            <Text style={{ fontSize: 16, fontWeight: 'bold', color: colors.onBackground, marginBottom: 2 }}>
               {order.amount}
             </Text>
             <View style={{
@@ -288,7 +290,7 @@ export const DashboardScreen = ({ navigation }: any) => {
       style={{
         opacity: fadeAnim,
         transform: [{ translateY: slideAnim }, { scale: scaleAnim }],
-        backgroundColor: 'white',
+        backgroundColor: colors.surfaceVariant,
         borderRadius: 20,
         padding: 20,
         marginBottom: 20,
@@ -299,7 +301,7 @@ export const DashboardScreen = ({ navigation }: any) => {
         elevation: 8,
       }}
     >
-      <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#1D1D1F', marginBottom: 16 }}>
+      <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.onBackground, marginBottom: 16 }}>
         Top Selling Items
       </Text>
       
@@ -332,7 +334,7 @@ export const DashboardScreen = ({ navigation }: any) => {
           }} />
           
           <View style={{ flex: 1 }}>
-            <Text style={{ fontSize: 16, fontWeight: '600', color: '#1D1D1F', marginBottom: 4 }}>
+            <Text style={{ fontSize: 16, fontWeight: '600', color: colors.onBackground, marginBottom: 4 }}>
               {item.name}
             </Text>
             <Text style={{ fontSize: 14, color: '#8E8E93' }}>
@@ -350,64 +352,6 @@ export const DashboardScreen = ({ navigation }: any) => {
     </Animated.View>
   );
 
-  const renderQuickActions = () => (
-    <Animated.View
-      style={{
-        opacity: fadeAnim,
-        transform: [{ translateY: slideAnim }, { scale: scaleAnim }],
-        backgroundColor: 'white',
-        borderRadius: 20,
-        padding: 20,
-        marginBottom: 40,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.12,
-        shadowRadius: 20,
-        elevation: 8,
-      }}
-    >
-      <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#1D1D1F', marginBottom: 16 }}>
-        Quick Actions
-      </Text>
-      
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-        {[
-          { title: 'New Order', icon: 'plus-circle', color: '#667eea' },
-          { title: 'Menu', icon: 'food', color: '#f093fb' },
-          { title: 'Reports', icon: 'chart-line', color: '#4facfe' },
-          { title: 'Settings', icon: 'cog', color: '#43e97b' },
-        ].map((action, index) => (
-          <TouchableOpacity
-            key={action.title}
-            activeOpacity={0.8}
-            style={{ alignItems: 'center', flex: 1 }}
-          >
-            <Animated.View
-              style={{
-                transform: [{ scale: pulseAnim }],
-                width: 60,
-                height: 60,
-                borderRadius: 30,
-                backgroundColor: action.color,
-                justifyContent: 'center',
-                alignItems: 'center',
-                marginBottom: 8,
-              }}
-            >
-              <MaterialCommunityIcons
-                name={action.icon as any}
-                size={26}
-                color="white"
-              />
-            </Animated.View>
-            <Text style={{ fontSize: 12, fontWeight: '600', color: '#1D1D1F' }}>
-              {action.title}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </Animated.View>
-  );
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -456,8 +400,8 @@ export const DashboardScreen = ({ navigation }: any) => {
           }}
         >
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <View>
-              <Text style={{ fontSize: 32, fontWeight: 'bold', color: '#1D1D1F' }}>
+            <View className='flex-1 flex-col '>
+              <Text style={{ fontSize: 28, fontWeight: 'bold', color: colors.onBackground }}>
                 Dashboard
               </Text>
               <Text style={{ color: '#8E8E93', marginTop: 4, fontSize: 16 }}>
@@ -564,8 +508,6 @@ export const DashboardScreen = ({ navigation }: any) => {
         {/* Top Items */}
         {renderTopItems()}
 
-        {/* Quick Actions */}
-        {renderQuickActions()}
       </ScrollView>
     </CommonView>
   )

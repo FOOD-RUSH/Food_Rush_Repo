@@ -4,8 +4,8 @@ import { DefaultTheme, DarkTheme, Theme as NavigationTheme } from '@react-naviga
 // Restaurant theme colors - Food delivery inspired palette
 const COLORS = {
   // Primary brand colors - Orange/Red gradient for food delivery
-  PRIMARY: '#FF6B35', // Vibrant orange
-  PRIMARY_DARK: '#E55A2B', // Darker orange
+  PRIMARY: '#007aff', 
+  PRIMARY_DARK: '#463e3bff', 
   SECONDARY: '#FFD23F', // Golden yellow
   SECONDARY_DARK: '#F4C430', // Darker yellow
   
@@ -17,22 +17,22 @@ const COLORS = {
   
   // Neutral colors
   BACKGROUND_LIGHT: '#FAFAFA',
-  BACKGROUND_DARK: '#1A1A1A',
+  BACKGROUND_DARK: '#0f172a',
   SURFACE_LIGHT: '#FFFFFF',
-  SURFACE_DARK: '#2D2D2D',
-  TEXT_LIGHT: '#2C2C2C',
-  TEXT_DARK: '#FFFFFF',
+  SURFACE_DARK: '#1e293b',
+  TEXT_LIGHT: '#040404ff',
+  TEXT_DARK: '#fff', // Blue text in dark mode
   TEXT_SECONDARY_LIGHT: '#666666',
-  TEXT_SECONDARY_DARK: '#CCCCCC',
+  TEXT_SECONDARY_DARK: '#0b0c0cff', // Lighter blue for secondary text
   
   // Border and divider colors
-  BORDER_LIGHT: '#E0E0E0',
-  BORDER_DARK: '#404040',
+  BORDER_LIGHT: '#cbd5e1',
+  BORDER_DARK: '#64748b',
   
   // Gradient colors for buttons and headers
-  GRADIENT_START: '#FF6B35',
+  GRADIENT_START: '#393939ff',
   GRADIENT_END: '#F7931E',
-  GRADIENT_DARK_START: '#E55A2B',
+  GRADIENT_DARK_START: '#5e5755ff',
   GRADIENT_DARK_END: '#D84315',
 } as const;
 
@@ -44,7 +44,7 @@ export const restaurantLightTheme: MD3Theme = {
     secondary: COLORS.SECONDARY,
     tertiary: COLORS.SUCCESS,
     surface: COLORS.SURFACE_LIGHT,
-    surfaceVariant: COLORS.BACKGROUND_LIGHT,
+    surfaceVariant:'#f8fafc',
     background: COLORS.BACKGROUND_LIGHT,
     error: COLORS.ERROR,
     errorContainer: '#fef2f2',
@@ -66,7 +66,7 @@ export const restaurantDarkTheme: MD3Theme = {
     secondary: COLORS.SECONDARY,
     tertiary: COLORS.SUCCESS,
     surface: COLORS.SURFACE_DARK,
-    surfaceVariant: '#3A3A3A',
+    surfaceVariant: '#334155',
     background: COLORS.BACKGROUND_DARK,
     error: COLORS.ERROR,
     errorContainer: '#7f1d1d',

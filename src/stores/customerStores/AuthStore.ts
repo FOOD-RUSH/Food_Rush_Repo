@@ -15,10 +15,15 @@ export interface User {
   isEmailVerified: boolean;
   isPhoneVerified: boolean;
   phoneNumber: string;
+  profilePicture?: string | null;
   // Optional restaurant fields if role is restaurant
   restaurantId?: string;
   restaurantName?: string;
   verificationStatus?: string;
+  address?:string;
+  bio?:string;
+  website?:string;
+  cuisine?:string;
 }
 
 interface AuthState {

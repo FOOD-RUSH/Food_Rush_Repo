@@ -4,17 +4,13 @@ import {
   Text,
   Animated,
   TouchableOpacity,
-  TextInput,
-  SafeAreaView,
-  StatusBar,
-  Dimensions,
   Alert,
   ScrollView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Badge, Chip } from 'react-native-paper';
+import { Badge, TextInput, Chip, useTheme } from 'react-native-paper';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
 import CommonView from '@/src/components/common/CommonView';
@@ -51,7 +47,7 @@ const MenuScreen = () => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const filterAnim = useRef(new Animated.Value(0)).current;
-
+  const { colors } = useTheme();
   useEffect(() => {
     Animated.timing(fadeAnim, { toValue: 1, duration: 800, useNativeDriver: true }).start();
     Animated.timing(filterAnim, { toValue: 1, duration: 600, delay: 400, useNativeDriver: true }).start();
@@ -144,7 +140,8 @@ const MenuScreen = () => {
         <TouchableOpacity
           style={{
             backgroundColor: 'white',
-            padding: 16,
+            paddingVertical: 16,
+            paddingHorizontal: 8,
             borderRadius: 16,
             flexDirection: 'row',
             alignItems: 'center',
@@ -206,15 +203,13 @@ const MenuScreen = () => {
     }
   };
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
       <CommonView>
-        <View style={{ flex: 1, paddingHorizontal: 20 }}>
+        <View style={{ flex: 1, paddingHorizontal: 12 }}>
           {/* Header */}
-          <Animated.View style={{ opacity: fadeAnim, marginBottom: 16 }}>
+          <Animated.View style={{ opacity: fadeAnim, marginBottom: 14 }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
               <View>
-                <Text style={{ fontSize: 28, fontWeight: 'bold', color: '#111' }}>{t('menu_dashboard')}</Text>
+                <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#111' }}>{t('menu_dashboard')}</Text>
                 <Text style={{ color: '#6B7280', marginTop: 2 }}>{t('manage_restaurant_menu')}</Text>
               </View>
               <TouchableOpacity 
@@ -230,40 +225,35 @@ const MenuScreen = () => {
           </Animated.View>
 
           {/* Search */}
-          <Animated.View style={{ opacity: fadeAnim, marginBottom: 12 }}>
-            <Animated.View style={{
-              backgroundColor: 'white',
-              borderRadius: 12,
-              height: 45,
-              flexDirection: 'row',
-              alignItems: 'center',
-              paddingHorizontal: 12,
-              borderWidth: isFocused ? 2 : 0,
-              borderColor: '#3B82F6',
-              transform: [{ scale: scaleAnim }],
-              elevation: 2,
-            }}>
-              {(isFocused || searchQuery) && (
-                <MaterialCommunityIcons name="magnify" size={20} color="#3B82F6" />
-              )}
-              <TextInput
-                placeholder={t('search_menu_options')}
-                placeholderTextColor="#93C5FD"
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                style={{
-                  flex: 1,
-                  height: 45,
-                  fontSize: 16,
-                  color: '#3B82F6',
-                  marginLeft: (isFocused || searchQuery) ? 8 : 0,
-                  textAlign: (isFocused || searchQuery) ? 'left' : 'center'
-                }}
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => { if (!searchQuery) setIsFocused(false); }}
+
+
+<TextInput
+            placeholder={t('search_menu_options')}
+            left={
+              <TextInput.Icon
+                icon="magnify"
+                size={30}
+                color={colors.onSurface}
               />
-            </Animated.View>
-          </Animated.View>
+            }
+            mode="outlined"
+            outlineStyle={{
+              borderColor: colors.surface,
+              borderWidth: 1,
+              borderRadius: 20,
+              backgroundColor: colors.surface,
+            }}
+            style={{
+              backgroundColor: colors.surface,
+            }}
+            className="py-1 px-3 rounded-2xl"
+            placeholderTextColor={colors.onBackground}
+            pointerEvents="box-only"
+            onChangeText={setSearchQuery}
+
+          />
+
+
 
           {/* Filters */}
 <Animated.View
@@ -273,7 +263,7 @@ className="mb-4 mt-2"
 <ScrollView 
   horizontal
   showsHorizontalScrollIndicator={false}
-  contentContainerStyle={{ paddingVertical: 8, paddingHorizontal: 4 }}
+  contentContainerStyle={{ paddingVertical: 8, }}
 >
   {['all', 'items', 'categories', 'settings'].map((filter) => (
      <Chip
@@ -367,7 +357,6 @@ className="mb-4 mt-2"
           />
         </View>
       </CommonView>
-    </SafeAreaView>
   );
 };
 

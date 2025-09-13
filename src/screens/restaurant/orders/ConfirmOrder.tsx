@@ -14,13 +14,29 @@ export default function ConfirmOrderScreen({ route, navigation }: Props) {
 
   const handleConfirm = async () => {
     setLoading(true);
-    // TODO: CALL ENDPOINT -> POST /api/v1/orders/{id}/confirm
-    // Example:
-    // await fetch(`/api/v1/orders/${id}/confirm`, { method: 'POST' });
+    try {
+      // Call the confirm order endpoint
+      const response = await fetch(`https://foodrush-be.onrender.com/api/v1/orders/${id}/confirm`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Add authorization header if needed
+        },
+      });
 
-    // After success navigate or show result
-    setLoading(false);
-    navigation.replace('OrderDetails', { id });
+      if (response.ok) {
+        // After success navigate or show result
+        navigation.replace('OrderDetails', { id });
+      } else {
+        console.error('Failed to confirm order');
+        // Handle error
+      }
+    } catch (error) {
+      console.error('Error confirming order:', error);
+      // Handle error
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

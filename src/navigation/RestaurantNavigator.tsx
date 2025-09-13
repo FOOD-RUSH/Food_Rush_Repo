@@ -94,12 +94,7 @@ function RestaurantOrdersStackScreen() {
         }}
       />
 
-      <RestaurantOrdersStack.Screen
-        name="OrderHistory"
-        component={OrderHistoryScreen}
-        options={{ title: 'Order History' }}
-
-      />
+     
 
     </RestaurantOrdersStack.Navigator>
   );
@@ -235,19 +230,11 @@ function RestaurantProfileStackScreen() {
         component={ProfileScreen}
         options={{ title: t('profile') }}
       />
-      <RestaurantProfileStack.Screen
-        name="ProfileEditProfile"
-        component={ProfileEditScreen}
-        options={{
-          presentation: 'modal', // Modal style for a nice UX
-          animation: 'slide_from_bottom', // Smooth animation
-        }}
-      />
       {/* New Profile Option Screens */}
       <RestaurantProfileStack.Screen
         name="PaymentBilling"
         component={PaymentBillingScreen}
-        options={{ title: 'Payment & Billing', animation: 'slide_from_right' }}
+        options={{ title: 'Payment & Billing', animation: 'slide_from_left' }}
       />
       <RestaurantProfileStack.Screen
         name="Notification"
@@ -257,22 +244,22 @@ function RestaurantProfileStackScreen() {
       <RestaurantProfileStack.Screen
         name="AccountSettings"
         component={AccountSettingsScreen}
-        options={{ title: 'Account & Settings', animation: 'slide_from_right' }}
+        options={{ title: 'Account & Settings', animation: 'slide_from_left' }}
       />
       <RestaurantProfileStack.Screen
         name="Support"
         component={SupportScreen}
-        options={{ title: 'Support', animation: 'slide_from_right' }}
+        options={{ title: 'Support', animation: 'slide_from_left' }}
       />
       <RestaurantProfileStack.Screen
         name="About"
         component={AboutScreen}
-        options={{ title: 'About', animation: 'slide_from_right' }}
+        options={{ title: 'About', animation: 'slide_from_left' }}
       />
       <RestaurantProfileStack.Screen
         name="RestaurantSettings"
         component={RestaurantSettingsScreen}
-        options={{ title: 'Restaurant Settings', animation: 'slide_from_right' }}
+        options={{ title: 'Restaurant Settings', animation: 'slide_from_left' }}
       />
 
     </RestaurantProfileStack.Navigator>
@@ -319,7 +306,7 @@ export default function RestaurantNavigator() {
  borderTopRightRadius: 40,
       borderTopLeftRadius: 40,
       marginTop: -50,
-      paddingTop: 10,          shadowColor: '#000',
+      paddingTop: 10,          shadowColor: '#000000ff',
           shadowOffset: {
             width: 0,
             height: -2,

@@ -14,9 +14,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useTranslation } from 'react-i18next';
 import CommonView from '@/src/components/common/CommonView';
 import { useFocusEffect } from '@react-navigation/native';
+import { useTheme } from 'react-native-paper';
 
 export const AnalyticsScreen = ({ navigation }: any) => {
   const { t } = useTranslation();
+  const {colors} = useTheme()
   const [timeRange, setTimeRange] = useState('week');
   const [selectedMetric, setSelectedMetric] = useState('revenue');
   
@@ -170,7 +172,7 @@ export const AnalyticsScreen = ({ navigation }: any) => {
         style={[
           animatedStyle,
           {
-            backgroundColor: 'white',
+            backgroundColor: colors.surfaceVariant,
             borderRadius: 20,
             padding: 20,
             marginBottom: 16,
@@ -189,13 +191,13 @@ export const AnalyticsScreen = ({ navigation }: any) => {
         >
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <View>
-              <Text style={{ color: '#8E8E93', fontSize: 14, fontWeight: '500' }}>
+              <Text style={{ color: colors.onBackground, fontSize: 14, fontWeight: '500' }}>
                 {title}
               </Text>
               <Text style={{ 
                 fontSize: isLarge ? 32 : 24, 
                 fontWeight: 'bold', 
-                color: '#1D1D1F',
+                color: colors.onBackground,
                 marginTop: 4 
               }}>
                 {data.current}
@@ -279,7 +281,7 @@ export const AnalyticsScreen = ({ navigation }: any) => {
         style={{
           opacity: fadeAnim,
           transform: [{ translateY: slideAnim }, { scale: scaleAnim }],
-          backgroundColor: 'white',
+          backgroundColor: colors.surfaceVariant,
           borderRadius: 20,
           padding: 20,
           marginBottom: 20,
@@ -291,7 +293,7 @@ export const AnalyticsScreen = ({ navigation }: any) => {
         }}
       >
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-          <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#1D1D1F' }}>
+          <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.onBackground }}>
             {selectedMetric.charAt(0).toUpperCase() + selectedMetric.slice(1)} {t('trend')}
           </Text>
           <LinearGradient
@@ -388,7 +390,7 @@ export const AnalyticsScreen = ({ navigation }: any) => {
         >
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <View>
-              <Text style={{ fontSize: 32, fontWeight: 'bold', color: '#1D1D1F' }}>
+              <Text style={{ fontSize: 32, fontWeight: 'bold', color: colors.onBackground }}>
                 {t('analytics')}
               </Text>
               <Text style={{ color: '#8E8E93', marginTop: 4, fontSize: 16 }}>
@@ -427,7 +429,7 @@ export const AnalyticsScreen = ({ navigation }: any) => {
             transform: [{ translateY: slideAnim }],
             flexDirection: 'row',
             marginBottom: 24,
-            backgroundColor: '#F2F2F7',
+            backgroundColor: colors.surfaceVariant,
             borderRadius: 16,
             padding: 4,
           }}
@@ -440,7 +442,7 @@ export const AnalyticsScreen = ({ navigation }: any) => {
                 flex: 1,
                 paddingVertical: 12,
                 borderRadius: 12,
-                backgroundColor: timeRange === range ? 'white' : 'transparent',
+                backgroundColor: timeRange === range ? colors.surface : 'transparent',
                 alignItems: 'center',
                 shadowColor: timeRange === range ? '#000' : 'transparent',
                 shadowOffset: { width: 0, height: 2 },
@@ -451,7 +453,7 @@ export const AnalyticsScreen = ({ navigation }: any) => {
             >
               <Text
                 style={{
-                  color: timeRange === range ? '#007AFF' : '#8E8E93',
+                  color: timeRange === range ? colors.primary :colors.onBackground,
                   fontWeight: timeRange === range ? '600' : '500',
                   fontSize: 16,
                 }}
@@ -481,7 +483,7 @@ export const AnalyticsScreen = ({ navigation }: any) => {
           style={{
             opacity: fadeAnim,
             transform: [{ translateY: slideAnim }, { scale: scaleAnim }],
-            backgroundColor: 'white',
+            backgroundColor: colors.surfaceVariant,
             borderRadius: 20,
             padding: 20,
             marginBottom: 40,
@@ -492,27 +494,27 @@ export const AnalyticsScreen = ({ navigation }: any) => {
             elevation: 8,
           }}
         >
-          <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#1D1D1F', marginBottom: 16 }}>
+          <Text style={{ fontSize: 20, fontWeight: 'bold', color:colors.onBackground, marginBottom: 16 }}>
             {t('performance_summary')}
           </Text>
 
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
-            <Text style={{ color: '#8E8E93', fontSize: 16 }}>{t('peak_hours')}</Text>
-            <Text style={{ color: '#1D1D1F', fontWeight: '600', fontSize: 16 }}>N/A</Text>
+            <Text style={{ color: colors.onBackground, fontSize: 16 }}>{t('peak_hours')}</Text>
+            <Text style={{ color:colors.onBackground, fontWeight: '600', fontSize: 16 }}>N/A</Text>
           </View>
 
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
-            <Text style={{ color: '#8E8E93', fontSize: 16 }}>{t('top_category')}</Text>
-            <Text style={{ color: '#1D1D1F', fontWeight: '600', fontSize: 16 }}>N/A</Text>
+            <Text style={{ color: colors.onBackground, fontSize: 16 }}>{t('top_category')}</Text>
+            <Text style={{ color:colors.onBackground, fontWeight: '600', fontSize: 16 }}>N/A</Text>
           </View>
 
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
-            <Text style={{ color: '#8E8E93', fontSize: 16 }}>{t('avg_order_value')}</Text>
+            <Text style={{ color: colors.onBackground, fontSize: 16 }}>{t('avg_order_value')}</Text>
             <Text style={{ color: '#34C759', fontWeight: '600', fontSize: 16 }}>$0.00</Text>
           </View>
 
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={{ color: '#8E8E93', fontSize: 16 }}>{t('growth_rate')}</Text>
+            <Text style={{ color: colors.onBackground, fontSize: 16 }}>{t('growth_rate')}</Text>
             <Text style={{ color: '#34C759', fontWeight: '600', fontSize: 16 }}>0%</Text>
           </View>
         </Animated.View>

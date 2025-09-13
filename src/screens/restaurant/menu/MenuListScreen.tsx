@@ -1,14 +1,16 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { 
-  View, 
-  Text, 
-  FlatList, 
-  Animated, 
-  TouchableOpacity, 
-  Image, 
-  StatusBar, 
+import {
+  View,
+  Text,
+  FlatList,
+  Animated,
+  TouchableOpacity,
+  Image,
+  StatusBar,
   Platform,
-  Dimensions 
+  Dimensions,
+  ActivityIndicator,
+  Alert
 } from 'react-native';
 import { FAB, Searchbar, Card, Badge, Switch } from 'react-native-paper';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -16,6 +18,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import CommonView from '@/src/components/common/CommonView';
+import { useAuthUser } from '@/src/stores/customerStores/AuthStore';
+import { useGetMenuItems, useToggleMenuItemAvailability } from '@/src/hooks/restaurant/useMenuApi';
+import { RestaurantMenuStackScreenProps } from '@/src/navigation/types';
 
 const { width } = Dimensions.get('window');
 
@@ -39,63 +44,39 @@ interface FilterButton {
 }
 
 const MenuListScreen = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<RestaurantMenuStackScreenProps<'MenuList'>['navigation']>();
   const { t } = useTranslation();
+  const user = useAuthUser();
+  const restaurantId = user?.restaurantId;
+
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([
-    {
-      id: '1',
-      name: 'Margherita Pizza',
-      price: 18.99,
-      category: 'Pizza',
-      image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80',
-      isAvailable: true,
-      isPopular: true,
-      rating: 4.8,
-      description: 'Classic Italian pizza with fresh mozzarella'
-    },
-    {
-      id: '2',
-      name: 'Caesar Salad',
-      price: 12.50,
-      category: 'Salads',
-      image: 'https://images.unsplash.com/photo-1550304943-4f24f54ddde9?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80',
-      isAvailable: false,
-      isPopular: false,
-      rating: 4.5,
-      description: 'Crisp romaine with parmesan and croutons'
-    },
-    {
-      id: '3',
-      name: 'Beef Burger',
-      price: 15.75,
-      category: 'Burgers',
-      image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80',
-      isAvailable: true,
-      isPopular: true,
-      rating: 4.7,
-      description: 'Juicy beef patty with fresh vegetables'
-    },
-    {
-      id: '4',
-      name: 'Chocolate Cake',
-      price: 8.99,
-      category: 'Desserts',
-      image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80',
-      isAvailable: true,
-      isPopular: false,
-      rating: 4.6,
-      description: 'Rich and decadent chocolate cake'
-    }
-  ]);
+
+  // API hooks
+  const { data: menuItems = [], isLoading, error, refetch } = useGetMenuItems(restaurantId || '', {
+    page: 1,
+    limit: 50
+  });
+
+  const toggleAvailabilityMutation = useToggleMenuItemAvailability();
 
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
   const headerSlideAnim = useRef(new Animated.Value(-100)).current;
   const fabAnim = useRef(new Animated.Value(0)).current;
-  const itemAnimations = useRef(menuItems.map(() => new Animated.Value(0))).current;
+  const itemAnimations = useRef<Animated.Value[]>([]).current;
+
+  // Initialize animations when menuItems change
+  useEffect(() => {
+    const items = menuItems as MenuItem[];
+    if (items && items.length > 0) {
+      itemAnimations.length = 0; // Clear existing animations
+      items.forEach(() => {
+        itemAnimations.push(new Animated.Value(0));
+      });
+    }
+  }, [menuItems]);
 
   useEffect(() => {
     // Start entrance animations
@@ -121,8 +102,8 @@ const MenuListScreen = () => {
         }),
       ]),
       // Menu items stagger animation
-      Animated.stagger(100, 
-        itemAnimations.map(anim => 
+      Animated.stagger(100,
+        itemAnimations.map(anim =>
           Animated.spring(anim, {
             toValue: 1,
             tension: 60,
@@ -141,7 +122,7 @@ const MenuListScreen = () => {
     ]);
 
     entranceSequence.start();
-  }, []);
+  }, [itemAnimations]);
 
   const handleBack = () => {
     // Exit animation before navigating back
@@ -162,25 +143,36 @@ const MenuListScreen = () => {
   };
 
   const handleItemPress = (item: MenuItem) => {
-    console.log('Navigate to edit item:', item.name);
-    // Navigate to edit menu item screen
+    navigation.navigate('EditMenuItem', { itemId: item.id });
   };
 
   const handleAddFood = () => {
-    console.log('Navigate to AddFood screen');
-    // Navigate to add menu item screen
+    navigation.navigate('AddMenuItem');
   };
 
   const handleFilterPress = (filter: string) => {
     setActiveFilter(filter);
   };
 
-  const toggleAvailability = (itemId: string) => {
-    setMenuItems(prevItems =>
-      prevItems.map(item =>
-        item.id === itemId ? { ...item, isAvailable: !item.isAvailable } : item
-      )
-    );
+  const toggleAvailability = async (itemId: string) => {
+    if (!restaurantId) return;
+
+    try {
+      const currentItem = (menuItems as MenuItem[]).find(item => item.id === itemId);
+      if (!currentItem) return;
+
+      await toggleAvailabilityMutation.mutateAsync({
+        restaurantId,
+        itemId,
+        isAvailable: !currentItem.isAvailable
+      });
+
+      // Refetch to get updated data
+      refetch();
+    } catch (error) {
+      console.error('Error toggling availability:', error);
+      Alert.alert('Error', 'Failed to update item availability');
+    }
   };
 
   const MenuItemCard: React.FC<{ item: MenuItem; index: number }> = ({ item, index }) => {
@@ -305,7 +297,8 @@ const MenuListScreen = () => {
 
   // Filter items based on search query and active filter
   const getFilteredItems = () => {
-    let filtered = menuItems.filter(item =>
+    const items = menuItems as MenuItem[];
+    let filtered = items.filter(item =>
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.category.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -351,6 +344,16 @@ const MenuListScreen = () => {
     }
   ];
 
+  // Show error if no restaurant ID
+  if (!restaurantId) {
+    return (
+      <View style={{ flex: 1, backgroundColor: '#F8FAFC', justifyContent: 'center', alignItems: 'center' }}>
+        <Text className="text-xl font-bold text-gray-800 mb-2">Restaurant not found</Text>
+        <Text className="text-gray-500 text-center px-8">Please log in as a restaurant owner to manage your menu.</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={{ flex: 1, backgroundColor: '#F8FAFC' }}>
       <StatusBar barStyle="dark-content" backgroundColor="#F8FAFC" />
@@ -375,7 +378,7 @@ const MenuListScreen = () => {
               <Text className="text-gray-500">Manage your restaurant menu</Text>
             </View>
             <View className="bg-blue-50 px-3 py-2 rounded-full">
-              <Text className="text-blue-600 font-semibold text-sm">{menuItems.length} items</Text>
+              <Text className="text-blue-600 font-semibold text-sm">{(menuItems as MenuItem[]).length} items</Text>
             </View>
           </View>
         </Animated.View>
@@ -434,60 +437,93 @@ const MenuListScreen = () => {
           </View>
 
           {/* Stats Bar */}
-          <Card className="mx-6 mb-6" style={{ elevation: 2 }}>
-            <Card.Content className="py-4">
-              <View className="flex-row justify-around">
-                <View className="items-center">
-                  <Text className="text-xl font-bold text-green-600">
-                    {menuItems.filter(item => item.isAvailable).length}
-                  </Text>
-                  <Text className="text-sm text-gray-600">Available</Text>
+          {!isLoading && !error && (
+            <Card className="mx-6 mb-6" style={{ elevation: 2 }}>
+              <Card.Content className="py-4">
+                <View className="flex-row justify-around">
+                  <View className="items-center">
+                    <Text className="text-xl font-bold text-green-600">
+                      {(menuItems as MenuItem[]).filter(item => item.isAvailable).length}
+                    </Text>
+                    <Text className="text-sm text-gray-600">Available</Text>
+                  </View>
+
+                  <View className="items-center">
+                    <Text className="text-xl font-bold text-orange-600">
+                      {(menuItems as MenuItem[]).filter(item => item.isPopular).length}
+                    </Text>
+                    <Text className="text-sm text-gray-600">Popular</Text>
+                  </View>
+
+                  <View className="items-center">
+                    <Text className="text-xl font-bold text-red-600">
+                      {(menuItems as MenuItem[]).filter(item => !item.isAvailable).length}
+                    </Text>
+                    <Text className="text-sm text-gray-600">Sold Out</Text>
+                  </View>
                 </View>
-                
-                <View className="items-center">
-                  <Text className="text-xl font-bold text-orange-600">
-                    {menuItems.filter(item => item.isPopular).length}
-                  </Text>
-                  <Text className="text-sm text-gray-600">Popular</Text>
-                </View>
-                
-                <View className="items-center">
-                  <Text className="text-xl font-bold text-red-600">
-                    {menuItems.filter(item => !item.isAvailable).length}
-                  </Text>
-                  <Text className="text-sm text-gray-600">Sold Out</Text>
-                </View>
+              </Card.Content>
+            </Card>
+          )}
+
+          {/* Loading State */}
+          {isLoading && (
+            <View className="items-center justify-center py-20">
+              <ActivityIndicator size="large" color="#3B82F6" />
+              <Text className="text-gray-600 mt-4">Loading menu items...</Text>
+            </View>
+          )}
+
+          {/* Error State */}
+          {error && !isLoading && (
+            <View className="items-center justify-center py-20">
+              <View className="w-24 h-24 bg-red-100 rounded-full items-center justify-center mb-6">
+                <MaterialCommunityIcons name="alert-circle" size={48} color="#EF4444" />
               </View>
-            </Card.Content>
-          </Card>
+              <Text className="text-xl font-bold text-gray-800 mb-2 text-center">
+                Failed to load menu items
+              </Text>
+              <Text className="text-gray-500 text-center px-8 mb-4">
+                {error.message || 'Something went wrong while loading your menu'}
+              </Text>
+              <TouchableOpacity
+                onPress={() => refetch()}
+                className="bg-blue-500 px-6 py-3 rounded-full"
+              >
+                <Text className="text-white font-semibold">Try Again</Text>
+              </TouchableOpacity>
+            </View>
+          )}
 
           {/* Menu List */}
-          <FlatList
-            data={filteredItems}
-            renderItem={renderMenuItem}
-            keyExtractor={item => item.id}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 100 }}
-            ListEmptyComponent={() => (
-              <Animated.View
-                className="items-center justify-center py-20"
-                style={{ opacity: fadeAnim }}
-              >
-                <View className="w-24 h-24 bg-gray-100 rounded-full items-center justify-center mb-6">
-                  <MaterialCommunityIcons name="food-off" size={48} color="#9CA3AF" />
-                </View>
-                <Text className="text-xl font-bold text-gray-800 mb-2 text-center">
-                  {searchQuery ? 'No items found' : 'No menu items yet'}
-                </Text>
-                <Text className="text-gray-500 text-center px-8">
-                  {searchQuery
-                    ? `No items match "${searchQuery}"`
-                    : 'Start building your menu by adding your first item'
-                  }
-                </Text>
-              </Animated.View>
-            )}
-          />
+          {!isLoading && !error && (
+            <FlatList
+              data={filteredItems}
+              renderItem={renderMenuItem}
+              keyExtractor={item => item.id}
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingBottom: 100 }}
+              ListEmptyComponent={() => (
+                <Animated.View
+                  className="items-center justify-center py-20"
+                  style={{ opacity: fadeAnim }}
+                >
+                  <View className="w-24 h-24 bg-gray-100 rounded-full items-center justify-center mb-6">
+                    <MaterialCommunityIcons name="food-off" size={48} color="#9CA3AF" />
+                  </View>
+                  <Text className="text-xl font-bold text-gray-800 mb-2 text-center">
+                    {searchQuery ? 'No items found' : 'No menu items yet'}
+                  </Text>
+                  <Text className="text-gray-500 text-center px-8">
+                    {searchQuery
+                      ? `No items match "${searchQuery}"`
+                      : 'Start building your menu by adding your first item'
+                    }
+                  </Text>
+                </Animated.View>
+              )}
+            />
+          )}
         </Animated.View>
 
         {/* FAB */}

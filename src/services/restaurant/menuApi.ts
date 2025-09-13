@@ -14,7 +14,10 @@ export interface MenuItem {
   updatedAt: string;
 }
 
-export interface MenuCategory {
+interface MenuItems {
+  data : MenuItems
+}
+ export interface MenuCategory {
   id: string;
   name: string;
   description?: string;
@@ -54,32 +57,54 @@ export interface MenuStats {
 }
 
 export const restaurantMenuApi = {
-  // Menu Items
-  getMenuItems: (params?: { categoryId?: string; isAvailable?: boolean; page?: number; limit?: number }) => {
-    return restaurantApiClient.get('/restaurants/menu/items', { params });
+  // Menu Items for specific restaurant
+  getMenuItems: (restaurantId: string, params?: { categoryId?: string; isAvailable?: boolean; page?: number; limit?: number }) => {
+    return restaurantApiClient.get<MenuItems>(`/restauants/${restaurantId}/menu`, { params:{ ...params} });
   },
 
   getMenuItemById: (itemId: string) => {
-    return restaurantApiClient.get(`/restaurants/menu/items/${itemId}`);
+    return restaurantApiClient.get<MenuItem>(`/menu-item/${itemId}`);
   },
 
-  createMenuItem: (data: CreateMenuItemRequest) => {
-    return restaurantApiClient.post('/restaurants/menu/items', data);
+  createMenuItem: (restaurantId: string, data: CreateMenuItemRequest) => {
+    return restaurantApiClient.post(`/restauant/${restaurantId}/menu`, {...data});
   },
 
-  updateMenuItem: (itemId: string, data: UpdateMenuItemRequest) => {
-    return restaurantApiClient.put(`/restaurants/menu/items/${itemId}`, data);
+  updateMenuItem: (restaurantId: string, itemId: string, data: UpdateMenuItemRequest) => {
+    return restaurantApiClient.put(`/restauant/${restaurantId}/menu/${itemId}`, {...data});
   },
 
-  deleteMenuItem: (itemId: string) => {
-    return restaurantApiClient.delete(`/restaurants/menu/items/${itemId}`);
+  deleteMenuItem: (restaurantId: string, itemId: string) => {
+    return restaurantApiClient.delete(`/restauant/${restaurantId}/menu/${itemId}`);
   },
 
-  toggleMenuItemAvailability: (itemId: string, isAvailable: boolean) => {
-    return restaurantApiClient.put(`/restaurants/menu/items/${itemId}/availability`, { isAvailable });
+  toggleMenuItemAvailability: (restaurantId: string, itemId: string, isAvailable: boolean) => {
+    return restaurantApiClient.put(`/restauant/${restaurantId}/menu/${itemId}`, { isAvailable });
   },
 
-  // Categories
+  // Upload menu item picture
+  uploadMenuItemPicture: (restaurantId: string, formData: FormData) => {
+    return restaurantApiClient.post(`/restauant/${restaurantId}/menu/picture`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+
+  
+
+  // Image upload
+  uploadImage: (formData: FormData) => {
+    return restaurantApiClient.post('/uploads/image', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  },
+
+  // Legacy category methods (keeping for compatibility, but may not be used with new API)
+  // to be added in backend 
+  // TODO 
   getCategories: (params?: { isActive?: boolean; page?: number; limit?: number }) => {
     return restaurantApiClient.get('/restaurants/menu/categories', { params });
   },

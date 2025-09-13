@@ -89,6 +89,7 @@ export interface RestaurantLoginResponse {
     accessToken: string;
     refreshToken: string;
     user: {
+      phoneNumber: string;
       id: string;
       email: string;
       fullName: string;
@@ -97,7 +98,7 @@ export interface RestaurantLoginResponse {
       isEmailVerified: boolean;
       isPhoneVerified: boolean;
     };
-    restaurants: Array<{
+    restaurants: {
       id: string;
       name: string;
       address: string;
@@ -118,7 +119,7 @@ export interface RestaurantLoginResponse {
       deliverySurgeMultiplier: number | null;
       createdAt: string;
       updatedAt: string;
-    }>;
+    }[];
     defaultRestaurantId: string;
   };
 }

@@ -15,19 +15,30 @@ export default function RejectOrderScreen({ route, navigation }: Props) {
 
   const handleReject = async () => {
     setLoading(true);
-    // TODO: CALL ENDPOINT -> POST /api/v1/orders/{id}/reject
-    // Provide optional body: { "reason": "<reason>" }
-    // Example:
-    // await fetch(`/api/v1/orders/${id}/reject`, {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ reason })
-    // });
+    try {
+      // Call the reject order endpoint
+      const response = await fetch(`https://foodrush-be.onrender.com/api/v1/orders/${id}/reject`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Add authorization header if needed
+        },
+        body: reason ? JSON.stringify({ reason }) : undefined,
+      });
 
-    // After success navigate or show result
-    setLoading(false);
-    // Navigate to a confirmation/result screen for restaurant or order details
-    navigation.replace('OrderDetails', { id });
+      if (response.ok) {
+        // After success navigate or show result
+        navigation.replace('OrderDetails', { id });
+      } else {
+        console.error('Failed to reject order');
+        // Handle error
+      }
+    } catch (error) {
+      console.error('Error rejecting order:', error);
+      // Handle error
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

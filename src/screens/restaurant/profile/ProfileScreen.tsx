@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,510 +7,124 @@ import {
   Animated,
   Alert,
   StyleSheet,
-  Modal,
-  SafeAreaView,
-  FlatList,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Button, Avatar, Divider, Badge } from 'react-native-paper';
+import { Button, Avatar, Divider, useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import CommonView from '@/src/components/common/CommonView';
-// Ionicons import removed as unused
 import { RestaurantProfileStackScreenProps } from '../../../navigation/types';
-// Removed old language selector from profile; now lives in Account Settings
-// useAppStore import removed; theme is managed in Account Settings
+import { useAuthUser } from '@/src/stores/customerStores/AuthStore';
 
-// Type definitions
-type NotificationType = 'order' | 'inventory' | 'payment' | 'schedule';
-
-interface NotificationItem {
-  id: number;
-  title: string;
-  message: string;
-  time: string;
-  type: NotificationType;
-  read: boolean;
-}
-
-interface ModalComponentProps {
-  visible: boolean;
-  onClose: () => void;
-}
-
-interface RestaurantInfo {
-  name: string;
-  description: string;
-  cuisine: string;
-  rating: number;
-  totalReviews: number;
-  phone: string;
-  email: string;
-  address: string;
-  hours: Record<string, string>;
-  features: string[];
-  established: string;
-}
-
-interface UserProfile {
-  name: string;
-  email: string;
-  phone: string;
-  restaurantName: string;
-  joinDate: string;
-  address: string;
-}
-
-interface ProfileOption {
-  title: string;
-  subtitle: string;
-  icon: keyof typeof MaterialCommunityIcons.glyphMap;
-  onPress: () => void;
-}
-
-// Add proper typing for the component
 type ProfileScreenProps = RestaurantProfileStackScreenProps<'ProfileScreen'>;
 
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const { t } = useTranslation();
-  // Colors from theme not used here
-  // Theme controls removed from this screen; managed in Account Settings
-  // State management
-  const [user] = useState<UserProfile>({
-    name: '',
-    email: '',
-    phone: '',
-    restaurantName: '',
-    joinDate: '',
-    address: '',
-  });
+  const user = useAuthUser(); // ✅ Use AuthStore
+  const {colors} = useTheme()
 
-  const [showNotifications, setShowNotifications] = useState<boolean>(false);
-  const [showRestaurantProfile, setShowRestaurantProfile] = useState<boolean>(false);
-  const [unreadNotifications] = useState<number>(2);
-
-  // Removed local dark mode toggle; use Account Settings
-
-  // Animation refs
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
 
-  // Notification data
-  const [notifications] = useState<NotificationItem[]>([]);
-
-  // Restaurant data
-  const [restaurant] = useState<RestaurantInfo>({
-    name: '',
-    description: '',
-    cuisine: '',
-    rating: 0,
-    totalReviews: 0,
-    phone: '',
-    email: '',
-    address: '',
-    hours: {},
-    features: [],
-    established: '',
-  });
-
-  // Profile options configuration
-  const profileOptions: ProfileOption[] = [
+  const profileOptions = [
+    {
+      title: t('edit_profile'),
+      subtitle: t('update_personal_restaurant_info' as any),
+      icon: 'account-edit-outline' as const,
+      onPress: () => navigation.navigate('RestaurantEditProfile'),
+      iconColor: '#007AFF',
+    },
     {
       title: t('payment_billing'),
       subtitle: t('manage_payment_methods'),
-      icon: 'credit-card-outline',
+      icon: 'credit-card-outline' as const,
       onPress: () => navigation.navigate('PaymentBilling'),
     },
     {
       title: t('notifications'),
       subtitle: t('view_manage_notifications'),
-      icon: 'bell-outline',
+      icon: 'bell-outline' as const,
       onPress: () => navigation.navigate('Notification'),
     },
-    {
+      {
       title: t('account_settings'),
-      subtitle: t('update_account_info'),
-      icon: 'account-cog-outline',
+      subtitle: t('account_settings'),
+      icon: 'setting' as const,
       onPress: () => navigation.navigate('AccountSettings'),
-    },
-    {
-      title: t('restaurant_settings'),
-      subtitle: t('edit_restaurant_details'),
-      icon: 'store-cog-outline',
-      onPress: () => navigation.navigate('RestaurantSettings'),
     },
     {
       title: t('support'),
       subtitle: t('get_help_contact'),
-      icon: 'lifebuoy',
+      icon: 'lifebuoy' as const,
       onPress: () => navigation.navigate('Support'),
+      iconColor: '#666666',
     },
     {
       title: t('about'),
       subtitle: t('learn_more_app'),
-      icon: 'information-outline',
+      icon: 'information-outline' as const,
       onPress: () => navigation.navigate('About'),
     },
+  
   ];
 
-  // Effects
   useEffect(() => {
     Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 600,
-        useNativeDriver: true,
-      }),
-      Animated.spring(slideAnim, {
-        toValue: 0,
-        useNativeDriver: true,
-      }),
+      Animated.timing(fadeAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
+      Animated.spring(slideAnim, { toValue: 0, useNativeDriver: true }),
     ]).start();
   }, [fadeAnim, slideAnim]);
 
-  // Utility functions
-  const getNotificationIcon = (type: NotificationType): keyof typeof MaterialCommunityIcons.glyphMap => {
-    const iconMap: Record<NotificationType, keyof typeof MaterialCommunityIcons.glyphMap> = {
-      order: 'shopping',
-      inventory: 'package-variant',
-      payment: 'credit-card',
-      schedule: 'calendar-clock',
-    };
-    return iconMap[type] || 'bell';
-  };
-
-  const getNotificationColor = (type: NotificationType): string => {
-    const colorMap: Record<NotificationType, string> = {
-      order: '#4CAF50',
-      inventory: '#FF9800',
-      payment: '#2196F3',
-      schedule: '#9C27B0',
-    };
-    return colorMap[type] || '#666';
-  };
-
-  // Event handlers
-  const handleEditProfile = () => {
-    Alert.alert(
-      'Edit Profile',
-      'Profile editing feature is coming soon!',
-      [{ text: 'OK', style: 'default' }]
-    );
-  };
-
   const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Logout', 
-          style: 'destructive',
-          onPress: () => {
-            console.log('User logged out');
-          }
-        }
-      ]
-    );
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Logout', style: 'destructive', onPress: () => console.log('User logged out') },
+    ]);
   };
 
-  const handleNotificationPress = (item: NotificationItem) => {
-    Alert.alert('Notification', item.message);
-  };
-
-  // FIXED: This function now properly navigates to the edit screen with data
-  const openEditProfile = () => {
-    // Pass current user data to the edit screen
-    const userProfile = {
-      name: user.name,
-      email: user.email,
-      phone: user.phone,
-      restaurantName: user.restaurantName,
-      address: user.address,
-      bio: '', // Add if you have this data
-      website: '', // Add if you have this data
-      cuisine: restaurant.cuisine, // Using restaurant data for cuisine
-    };
-
-    navigation.navigate('ProfileEditProfile', { userProfile });
-  };
-
-  // Render functions
-  const renderNotification = ({ item }: { item: NotificationItem }) => (
-    <TouchableOpacity 
-      style={[
-        styles.notificationItem,
-        !item.read && styles.unreadNotification
-      ]}
-      onPress={() => handleNotificationPress(item)}
-    >
-      <View style={styles.notificationLeft}>
-        <View style={[
-          styles.notificationIconContainer,
-          { backgroundColor: getNotificationColor(item.type) + '20' }
-        ]}>
-          <MaterialCommunityIcons
-            name={getNotificationIcon(item.type)}
-            size={20}
-            color={getNotificationColor(item.type)}
-          />
-        </View>
-        <View style={styles.notificationContent}>
-          <Text style={[
-            styles.notificationTitle,
-            !item.read && styles.unreadText
-          ]}>
-            {item.title}
-          </Text>
-          <Text style={styles.notificationMessage} numberOfLines={2}>
-            {item.message}
-          </Text>
-          <Text style={styles.notificationTime}>{item.time}</Text>
-        </View>
-      </View>
-      {!item.read && <View style={styles.unreadDot} />}
-    </TouchableOpacity>
-  );
-
-  const renderHours = () => {
-    return Object.entries(restaurant.hours).map(([days, hours]) => (
-      <View key={days} style={styles.hoursRow}>
-        <Text style={styles.hoursDay}>{days}</Text>
-        <Text style={styles.hoursTime}>{hours}</Text>
-      </View>
-    ));
-  };
-
-  const renderFeatures = () => {
-    return restaurant.features.map((feature, index) => (
-      <View key={index} style={styles.featureTag}>
-        <Text style={styles.featureText}>{feature}</Text>
-      </View>
-    ));
-  };
-
-  // Modal Components
-  const NotificationModal: React.FC<ModalComponentProps> = ({ visible, onClose }) => (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      presentationStyle="pageSheet"
-      onRequestClose={onClose}
-    >
-      <SafeAreaView style={styles.modalContainer}>
-        <View style={styles.modalHeader}>
-          <Text style={styles.modalTitle}>{t('notifications')}</Text>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <MaterialCommunityIcons name="close" size={24} color="#333" />
-          </TouchableOpacity>
-        </View>
-        <FlatList
-          data={notifications}
-          renderItem={renderNotification}
-          keyExtractor={(item) => item.id.toString()}
-          style={styles.notificationsList}
-          showsVerticalScrollIndicator={false}
-        />
-      </SafeAreaView>
-    </Modal>
-  );
-
-  const RestaurantModal: React.FC<ModalComponentProps> = ({ visible, onClose }) => (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      presentationStyle="pageSheet"
-      onRequestClose={onClose}
-    >
-      <SafeAreaView style={styles.modalContainer}>
-        <View style={styles.modalHeader}>
-          <Text style={styles.modalTitle}>{t('restaurant_profile')}</Text>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <MaterialCommunityIcons name="close" size={24} color="#333" />
-          </TouchableOpacity>
-        </View>
-        
-        <ScrollView style={styles.restaurantProfileContent} showsVerticalScrollIndicator={false}>
-          <View style={styles.restaurantHeader}>
-            <Avatar.Text
-              size={60}
-              label={restaurant.name.split(' ').map(n => n[0]).join('')}
-              style={styles.restaurantAvatar}
-            />
-            <Text style={styles.restaurantNameModal}>{restaurant.name}</Text>
-            <Text style={styles.restaurantDescription}>{restaurant.description}</Text>
-            
-            <View style={styles.ratingContainer}>
-              <MaterialCommunityIcons name="star" size={20} color="#FFD700" />
-              <Text style={styles.ratingText}>{restaurant.rating}</Text>
-              <Text style={styles.reviewText}>({restaurant.totalReviews} {t('reviews')})</Text>
-            </View>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{t('contact_information')}</Text>
-            <View style={styles.contactRow}>
-              <MaterialCommunityIcons name="phone" size={20} color="#007AFF" />
-              <Text style={styles.contactText}>{restaurant.phone}</Text>
-            </View>
-            <View style={styles.contactRow}>
-              <MaterialCommunityIcons name="email" size={20} color="#007AFF" />
-              <Text style={styles.contactText}>{restaurant.email}</Text>
-            </View>
-            <View style={styles.contactRow}>
-              <MaterialCommunityIcons name="map-marker" size={20} color="#007AFF" />
-              <Text style={styles.contactText}>{restaurant.address}</Text>
-            </View>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{t('operating_hours')}</Text>
-            {renderHours()}
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{t('restaurant_features')}</Text>
-            <View style={styles.featuresContainer}>
-              {renderFeatures()}
-            </View>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Details</Text>
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>{t('cuisine_type')}</Text>
-              <Text style={styles.detailValue}>{restaurant.cuisine}</Text>
-            </View>
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>{t('established')}</Text>
-              <Text style={styles.detailValue}>{restaurant.established}</Text>
-            </View>
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </Modal>
-  );
-
-
- return (
+  return (
     <CommonView>
-      {/* Top Action Buttons */}
-      <View style={styles.topButtons}>
-        <TouchableOpacity
-          style={styles.topButton}
-          onPress={() => setShowNotifications(true)}
-        >
-          <MaterialCommunityIcons name="bell" size={24} color="#007AFF" />
-          {unreadNotifications > 0 && (
-            <Badge size={16} style={styles.notificationBadge}>
-              {unreadNotifications}
-            </Badge>
-          )}
-        </TouchableOpacity>
-        
-        <TouchableOpacity
-          style={styles.topButton}
-          onPress={() => setShowRestaurantProfile(true)}
-        >
-          <MaterialCommunityIcons name="store" size={24} color="#007AFF" />
-        </TouchableOpacity>
-      </View>
-
-      {/* Theme and language controls moved to Account Settings */}
-
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        <Animated.View
-          style={[
-            styles.profileHeader,
-            {
-              opacity: fadeAnim,
-              transform: [{ translateY: slideAnim }],
-            },
-          ]}
-        >
+        <Animated.View style={[styles.profileHeader, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
           <Avatar.Text
             size={80}
-            label={user.name.split(' ').map(n => n[0]).join('')}
-            style={styles.avatar}
+            label={user?.fullName ? user.fullName.split(' ').map(n => n[0]).join('') : ''}
+            style={[styles.avatar,{} ]}
           />
-          <Text style={styles.userName}>{user.name}</Text>
-          <Text style={styles.restaurantName}>{user.restaurantName}</Text>
-          <Text style={styles.userEmail}>{user.email}</Text>
-          
-          <Button
-            mode="outlined"
-            onPress={handleEditProfile}
-            style={styles.editButton}
-            icon="account-edit"
-          >
-            Edit Profile
-          </Button>
+          <Text style={[styles.userName, {color: colors.onSurface}]}>{user?.fullName || ''}</Text>
+          <Text style={[styles.restaurantName,  {color: colors.onSurface}]}>{user?.restaurantName || ''}</Text>
+          <Text style={[styles.userEmail,  {color: colors.onSurface}]}>{user?.email || ''}</Text>
         </Animated.View>
 
-        <Animated.View
-          style={[
-            styles.profileInfo,
-            {
-              opacity: fadeAnim,
-              transform: [{ translateY: slideAnim }],
-            },
-          ]}
-        >
+        <Animated.View style={[styles.profileInfo, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
           <View style={styles.infoRow}>
             <MaterialCommunityIcons name="phone" size={20} color="#666" />
-            <Text style={styles.infoText}>{user.phone}</Text>
+            <Text style={[styles.infoText, {color: colors.onSurface}]}>{user?.phoneNumber || ''}</Text>
           </View>
           <View style={styles.infoRow}>
             <MaterialCommunityIcons name="map-marker" size={20} color="#666" />
-            <Text style={styles.infoText}>{user.address}</Text>
+            <Text style={[styles.infoText, {color: colors.onBackground}]}>{user?.address || ''}</Text>
           </View>
           <View style={styles.infoRow}>
             <MaterialCommunityIcons name="calendar" size={20} color="#666" />
-            <Text style={styles.infoText}>{t('member_since')} {user.joinDate}</Text>
+            <Text style={[styles.infoText, {color: colors.onBackground}]}>{t('member_since')} {user?.joinDate || ''}</Text>
           </View>
         </Animated.View>
 
-        <TouchableOpacity
-          style={{
-            marginTop: 16,
-            marginHorizontal: 24,
-            paddingVertical: 12,
-            backgroundColor: '#764ba2',
-            borderRadius: 8,
-            alignItems: 'center',
-          }}
-          onPress={openEditProfile}
-        >
-          <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>{t('edit_profile')}</Text>
-        </TouchableOpacity>
-
         <Divider style={styles.divider} />
 
-        <Animated.View
-          style={[
-            styles.optionsContainer,
-            {
-              opacity: fadeAnim,
-              transform: [{ translateY: slideAnim }],
-            },
-          ]}
-        >
+        <Animated.View style={[styles.optionsContainer, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
           {profileOptions.map((option, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.optionItem}
-              onPress={option.onPress}
-            >
+            <TouchableOpacity key={index} style={styles.optionItem} onPress={option.onPress}>
               <View style={styles.optionLeft}>
                 <MaterialCommunityIcons
                   name={option.icon}
                   size={24}
-                  color="#007AFF"
+                  color={option.iconColor ?? '#007AFF'}
                   style={styles.optionIcon}
                 />
                 <View>
-                  <Text style={styles.optionTitle}>{option.title}</Text>
-                  <Text style={styles.optionSubtitle}>{option.subtitle}</Text>
+                  <Text style={[styles.optionTitle,  {color: colors.onSurface}]}>{option.title}</Text>
+                  <Text style={[styles.optionSubtitle,  {color: colors.onSurface}]}>{option.subtitle}</Text>
                 </View>
               </View>
               <MaterialCommunityIcons name="chevron-right" size={20} color="#ccc" />
@@ -518,354 +132,37 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           ))}
         </Animated.View>
 
-        <Animated.View
-          style={[
-            styles.logoutContainer,
-            {
-              opacity: fadeAnim,
-              transform: [{ translateY: slideAnim }],
-            },
-          ]}
-        >
-          <Button
-            mode="contained"
-            onPress={handleLogout}
-            style={styles.logoutButton}
-            buttonColor="#FF3B30"
-            icon="logout"
-          >
-            Logout
+        <Animated.View style={[styles.logoutContainer, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
+          <Button mode="contained" onPress={handleLogout} style={styles.logoutButton} buttonColor="#007aff" icon="logout">
+            <Text style={{color: 'white'}}>Logout</Text>
           </Button>
+          <Text style={styles.appVersion}>Version 1.0.0</Text>
         </Animated.View>
       </ScrollView>
-
-      {/* Modals */}
-      <NotificationModal
-        visible={showNotifications}
-        onClose={() => setShowNotifications(false)}
-      />
-      
-      <RestaurantModal
-        visible={showRestaurantProfile}
-        onClose={() => setShowRestaurantProfile(false)}
-      />
     </CommonView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  controlsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingBottom: 10,
-  },
-  controlItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  controlLabel: {
-    fontSize: 16,
-    color: '#333',
-    marginRight: 8,
-  },
-  topButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    paddingTop: 20,
-  },
-  topButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#F0F0F0',
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-  },
-  notificationBadge: {
-    position: 'absolute',
-    top: -2,
-    right: -2,
-    backgroundColor: '#FF3B30',
-  },
-  profileHeader: {
-    alignItems: 'center',
-    paddingVertical: 30,
-    paddingHorizontal: 20,
-  },
-  avatar: {
-    backgroundColor: '#007AFF',
-    marginBottom: 15,
-  },
-  userName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 5,
-  },
-  restaurantName: {
-    fontSize: 18,
-    color: '#007AFF',
-    marginBottom: 5,
-  },
-  userEmail: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 20,
-  },
-  editButton: {
-    marginTop: 10,
-  },
-  profileInfo: {
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  infoText: {
-    marginLeft: 15,
-    fontSize: 16,
-    color: '#333',
-  },
-  divider: {
-    marginVertical: 20,
-  },
-  optionsContainer: {
-    paddingHorizontal: 20,
-  },
-  optionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 15,
-    paddingHorizontal: 0,
-  },
-  optionLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  optionIcon: {
-    marginRight: 15,
-  },
-  optionTitle: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
-  },
-  optionSubtitle: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 2,
-  },
-  logoutContainer: {
-    paddingHorizontal: 20,
-    paddingVertical: 30,
-  },
-  logoutButton: {
-    paddingVertical: 5,
-  },
-  // Modal Styles
-  modalContainer: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  closeButton: {
-    padding: 5,
-  },
-  // Notification Modal Styles
-  notificationsList: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  notificationItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 15,
-    paddingHorizontal: 15,
-    marginVertical: 5,
-    backgroundColor: '#F9F9F9',
-    borderRadius: 10,
-  },
-  unreadNotification: {
-    backgroundColor: '#E3F2FD',
-  },
-  notificationLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  notificationIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 15,
-  },
-  notificationContent: {
-    flex: 1,
-  },
-  notificationTitle: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
-    marginBottom: 4,
-  },
-  unreadText: {
-    fontWeight: 'bold',
-  },
-  notificationMessage: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 4,
-  },
-  notificationTime: {
-    fontSize: 12,
-    color: '#999',
-  },
-  unreadDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#007AFF',
-  },
-  // Restaurant Profile Modal Styles
-  restaurantProfileContent: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  restaurantHeader: {
-    alignItems: 'center',
-    paddingVertical: 20,
-  },
-  restaurantAvatar: {
-    backgroundColor: '#007AFF',
-    marginBottom: 15,
-  },
-  restaurantNameModal: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
-  },
-  restaurantDescription: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 15,
-    paddingHorizontal: 20,
-  },
-  ratingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  ratingText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginLeft: 5,
-  },
-  reviewText: {
-    fontSize: 14,
-    color: '#666',
-    marginLeft: 5,
-  },
-  section: {
-    marginBottom: 25,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 15,
-  },
-  contactRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  contactText: {
-    marginLeft: 15,
-    fontSize: 16,
-    color: '#333',
-  },
-  hoursRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 15,
-    backgroundColor: '#F9F9F9',
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  hoursDay: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
-  },
-  hoursTime: {
-    fontSize: 14,
-    color: '#666',
-  },
-  featuresContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-  },
-  featureTag: {
-    backgroundColor: '#E3F2FD',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-  },
-  featureText: {
-    fontSize: 14,
-    color: '#007AFF',
-    fontWeight: '500',
-  },
-  detailRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  detailLabel: {
-    fontSize: 16,
-    color: '#666',
-  },
-  detailValue: {
-    fontSize: 16,
-    color: '#333',
-    fontWeight: '500',
-  },
+  container: { flex: 1 },
+  profileHeader: { alignItems: 'center', paddingVertical: 30, paddingHorizontal: 20 },
+  avatar: { backgroundColor: '#007AFF', marginBottom: 15 },
+  userName: { fontSize: 24, fontWeight: 'bold', marginBottom: 5 },
+  restaurantName: { fontSize: 18, marginBottom: 5 },
+  userEmail: { fontSize: 16, marginBottom: 20 },
+  profileInfo: { paddingHorizontal: 20, marginBottom: 20 },
+  infoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 15 },
+  infoText: { marginLeft: 15, fontSize: 16 },
+  divider: { marginVertical: 20 },
+  optionsContainer: { paddingHorizontal: 20 },
+  optionItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 15, paddingHorizontal: 0 },
+  optionLeft: { flexDirection: 'row', alignItems: 'center', flex: 1 },
+  optionIcon: { marginRight: 15 },
+  optionTitle: { fontSize: 16, fontWeight: '500' },
+  optionSubtitle: { fontSize: 14, marginTop: 2 },
+  logoutContainer: { paddingHorizontal: 20, paddingVertical: 30 },
+  logoutButton: { paddingVertical: 5 },
+  appVersion: { textAlign: 'center', fontSize: 12,  marginTop: 20 },
 });
 
 export default ProfileScreen;

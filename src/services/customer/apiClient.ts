@@ -69,8 +69,8 @@ class ApiClient {
             // No refresh token available, user needs to login again
             await TokenManager.clearAllTokens();
             throw {
-              message: 'Please log in again.',
-              code: 'UNAUTHENTICATED',
+              message: 'Your session has expired. Please log in again to continue.',
+              code: 'SESSION_EXPIRED',
               status: 401,
             } as ApiError;
           }
@@ -119,7 +119,7 @@ class ApiClient {
             // Refresh failed, logout user
             await TokenManager.clearAllTokens();
             throw {
-              message: 'Session expired. Please log in again.',
+              message: 'Your session has expired. Please log in again to continue.',
               code: 'SESSION_EXPIRED',
             } as ApiError;
           } finally {

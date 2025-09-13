@@ -10,6 +10,7 @@ import { MaterialTopTabScreenProps } from '@react-navigation/material-top-tabs';
 
 // Root Stack - Screens that should NOT show tabs (full-screen)
 export type RootStackParamList = {
+  UserTypeSelection:undefined;
   Onboarding: undefined;
   Auth: NavigatorScreenParams<AuthStackParamList>;
   CustomerApp: NavigatorScreenParams<CustomerTabParamList>;
@@ -41,6 +42,11 @@ export type RootStackParamList = {
   LanguageScreen: undefined;
   NearbyRestaurants: undefined;
   OrderReceipt: { orderId: string };
+  
+  // restaurant screens 
+  RestaurantEditProfile: undefined;
+   RestaurantOrderHistory: undefined;
+
 };
 
 // Auth Stack (unchanged)
@@ -107,7 +113,7 @@ export type RestaurantTabParamList = {
 export type RestaurantOrdersStackParamList = {
   OrdersScreen: undefined;
   OrderDetails: { orderId: string };
-  OrderHistory: undefined;
+ 
   LiveOrders: undefined;
   RejectOrder: { id: string };
   ConfirmOrder: { id: string };
@@ -135,18 +141,6 @@ export type RestaurantAnalyticsStackParamList = {
 
 export type RestaurantProfileStackParamList = {
   ProfileScreen: undefined;
-  ProfileEditProfile: {
-    userProfile?: {
-      name: string;
-      email: string;
-      phone: string;
-      restaurantName: string;
-      address: string;
-      bio?: string;
-      website?: string;
-      cuisine?: string;
-    };
-  };
   RestaurantSettings: undefined;
   AccountSettings: undefined;
   About: undefined;
@@ -154,6 +148,7 @@ export type RestaurantProfileStackParamList = {
   Support: undefined;
   BusinessSettings: undefined;
   PaymentBilling: undefined;
+  ApiTesting: undefined;
 };
 
 // Navigation Prop Types
@@ -244,3 +239,16 @@ declare global {
     interface RootParamList extends RootStackParamList {}
   }
 }
+// Shared user type
+export interface User {
+  id: string;
+  fullName: string;
+  email: string;
+  phoneNumber: string;
+  restaurantName: string;
+  address?: string;
+  bio?: string;
+  website?: string;
+  cuisine?: string;
+}
+

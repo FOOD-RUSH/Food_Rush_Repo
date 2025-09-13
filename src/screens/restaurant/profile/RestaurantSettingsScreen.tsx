@@ -13,6 +13,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { RestaurantProfileStackScreenProps } from '../../../navigation/types';
 import { RESTAURANT_COLORS } from '@/src/config/restaurantTheme';
+import { useAppStore } from '@/src/stores/customerStores';
 
 // Type for props
 // This screen is registered as 'RestaurantSettings' in RestaurantProfileStackParamList
@@ -28,6 +29,7 @@ const RestaurantSettingsScreen = ({ navigation }: Props) => {
   const [cuisine, setCuisine] = useState('Italian, American');
   const [acceptingOrders, setAcceptingOrders] = useState(true);
   const [showOnMap, setShowOnMap] = useState(true);
+  const resetApp = useAppStore(state => state.resetApp);
 
   useEffect(() => {
     Animated.sequence([
@@ -117,7 +119,7 @@ const RestaurantSettingsScreen = ({ navigation }: Props) => {
               thumbColor={showOnMap ? RESTAURANT_COLORS.PRIMARY : '#fff'}
             />
           </View>
-          <TouchableOpacity style={styles.saveBtn}>
+          <TouchableOpacity style={styles.saveBtn} onPress={resetApp}>
             <Ionicons name="save-outline" size={22} color="#fff" />
             <Text style={styles.saveBtnText}>Save Changes</Text>
           </TouchableOpacity>

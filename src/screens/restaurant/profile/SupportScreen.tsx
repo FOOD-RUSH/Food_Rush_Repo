@@ -92,7 +92,7 @@ const SupportScreen = ({ navigation }: Props) => {
             <MaterialCommunityIcons name="email-outline" size={22} color="#fff" />
             <Text style={styles.contactBtnText}>Email Support</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.contactBtn} onPress={() => Linking.openURL('https://wa.me/1234567890')}>
+          <TouchableOpacity style={styles.contactBtn} onPress={() => Linking.openURL('https://wa.me/650979844')}>
             <MaterialCommunityIcons name="chat-outline" size={22} color="#fff" />
             <Text style={styles.contactBtnText}>Chat on WhatsApp</Text>
           </TouchableOpacity>
