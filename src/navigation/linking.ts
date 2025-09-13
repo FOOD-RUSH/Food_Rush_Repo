@@ -68,47 +68,41 @@ export const linking: LinkingOptions<RootStackParamList> = {
         screens: {
           Orders: {
             screens: {
-              OrdersScreen: 'restaurant/orders',
-              OrderDetails: 'restaurant/order/:orderId',
-              OrderHistory: 'restaurant/orders/history',
-              LiveOrders: 'restaurant/orders/live',
+              OrdersList: 'restaurant/orders',
             },
           },
           Menu: {
             screens: {
-              MenuScreen: 'restaurant/menu',
-              AddMenuItem: 'restaurant/menu/add',
-              EditMenuItem: 'restaurant/menu/edit/:itemId',
-              Categories: 'restaurant/menu/categories',
-              AddCategory: 'restaurant/menu/category/add',
-              EditCategory: 'restaurant/menu/category/edit/:categoryId',
-              MenuSettings: 'restaurant/menu/settings',
+              MenuItemsList: 'restaurant/menu',
             },
           },
           Analytics: {
             screens: {
-              AnalyticsScreen: 'restaurant/analytics',
-              SalesReport: 'restaurant/analytics/sales',
-              CustomerInsights: 'restaurant/analytics/customers',
-              PopularItems: 'restaurant/analytics/popular',
-              PerformanceMetrics: 'restaurant/analytics/performance',
+              AnalyticsOverview: 'restaurant/analytics',
             },
           },
-          Profile: {
+          Notifications: {
             screens: {
-              ProfileScreen: 'restaurant/profile',
-              EditProfile: 'restaurant/profile/edit',
-              RestaurantSettings: 'restaurant/profile/settings',
-              BusinessHours: 'restaurant/profile/hours',
-              DeliverySettings: 'restaurant/profile/delivery',
-              Notifications: 'restaurant/profile/notifications',
-              Help: 'restaurant/profile/help',
-              BusinessSettings: 'restaurant/profile/business',
-              PayoutSettings: 'restaurant/profile/payouts',
+              NotificationsList: 'restaurant/notifications',
+            },
+          },
+          Account: {
+            screens: {
+              AccountHome: 'restaurant/account',
             },
           },
         },
       },
+      // Restaurant full-screen screens (RootStack)
+      RestaurantOrderDetails: 'restaurant/order/:orderId',
+      RestaurantBestSellers: 'restaurant/analytics/bestsellers',
+      RestaurantTimeHeatmap: 'restaurant/analytics/heatmap',
+      RestaurantMenuItemForm: 'restaurant/menu/item',
+      RestaurantCategoriesManager: 'restaurant/menu/categories',
+      RestaurantProfile: 'restaurant/profile',
+      RestaurantSettings: 'restaurant/settings',
+      RestaurantSupport: 'restaurant/support',
+      RestaurantAbout: 'restaurant/about',
     },
   },
 };

@@ -1,39 +1,40 @@
 import { MD3LightTheme, MD3DarkTheme, MD3Theme } from 'react-native-paper';
 import { DefaultTheme, DarkTheme, Theme as NavigationTheme } from '@react-navigation/native';
 
-// Restaurant theme colors - Food delivery inspired palette
+// Restaurant theme colors - Centered around #007aff
 const COLORS = {
-  // Primary brand colors - Orange/Red gradient for food delivery
+  // Primary brand colors - All variations of #007aff
   PRIMARY: '#007aff', 
-  PRIMARY_DARK: '#463e3bff', 
-  SECONDARY: '#FFD23F', // Golden yellow
+  PRIMARY_LIGHT: '#4DA3FF', // Lighter shade of #007aff
+  PRIMARY_DARK: '#0056CC', // Darker shade of #007aff
+  SECONDARY: '#FFD23F', // Golden yellow for contrast
   SECONDARY_DARK: '#F4C430', // Darker yellow
   
-  // Accent colors
+  // Accent colors that complement #007aff
   SUCCESS: '#00C851', // Green for success states
   WARNING: '#FF8800', // Orange for warnings
   ERROR: '#FF4444', // Red for errors
-  INFO: '#33B5E5', // Blue for info
+  INFO: '#007aff', // Use primary blue for info
   
   // Neutral colors
   BACKGROUND_LIGHT: '#FAFAFA',
   BACKGROUND_DARK: '#0f172a',
   SURFACE_LIGHT: '#FFFFFF',
   SURFACE_DARK: '#1e293b',
-  TEXT_LIGHT: '#040404ff',
-  TEXT_DARK: '#fff', // Blue text in dark mode
-  TEXT_SECONDARY_LIGHT: '#666666',
-  TEXT_SECONDARY_DARK: '#0b0c0cff', // Lighter blue for secondary text
+  TEXT_LIGHT: '#1e293b',
+  TEXT_DARK: '#f1f5f9',
+  TEXT_SECONDARY_LIGHT: '#64748b',
+  TEXT_SECONDARY_DARK: '#94a3b8',
   
   // Border and divider colors
   BORDER_LIGHT: '#cbd5e1',
   BORDER_DARK: '#64748b',
   
-  // Gradient colors for buttons and headers
-  GRADIENT_START: '#393939ff',
-  GRADIENT_END: '#F7931E',
-  GRADIENT_DARK_START: '#5e5755ff',
-  GRADIENT_DARK_END: '#D84315',
+  // Gradient colors based on #007aff
+  GRADIENT_START: '#007aff',
+  GRADIENT_END: '#4DA3FF',
+  GRADIENT_DARK_START: '#0056CC',
+  GRADIENT_DARK_END: '#007aff',
 } as const;
 
 export const restaurantLightTheme: MD3Theme = {
@@ -48,7 +49,7 @@ export const restaurantLightTheme: MD3Theme = {
     background: COLORS.BACKGROUND_LIGHT,
     error: COLORS.ERROR,
     errorContainer: '#fef2f2',
-    onPrimary: COLORS.TEXT_DARK,
+    onPrimary: '#ffffff',
     onSecondary: COLORS.TEXT_LIGHT,
     onSurface: COLORS.TEXT_LIGHT,
     onBackground: COLORS.TEXT_LIGHT,
@@ -70,7 +71,7 @@ export const restaurantDarkTheme: MD3Theme = {
     background: COLORS.BACKGROUND_DARK,
     error: COLORS.ERROR,
     errorContainer: '#7f1d1d',
-    onPrimary: COLORS.TEXT_DARK,
+    onPrimary: '#ffffff',
     onSecondary: COLORS.TEXT_LIGHT,
     onSurface: COLORS.TEXT_DARK,
     onBackground: COLORS.TEXT_DARK,

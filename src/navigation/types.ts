@@ -43,9 +43,26 @@ export type RootStackParamList = {
   NearbyRestaurants: undefined;
   OrderReceipt: { orderId: string };
   
-  // restaurant screens 
+  // Restaurant full-screen screens (NO TABS)
+  RestaurantOrderDetails: { orderId: string };
+  RestaurantOrderActions: { orderId: string };
+  RestaurantConfirmOrder: { orderId: string };
+  RestaurantRejectOrder: { orderId: string };
+  RestaurantMenuItemForm: { itemId?: string };
+  RestaurantAddCategory: undefined;
+  RestaurantEditCategory: { categoryId: string };
+  RestaurantCategoriesManager: undefined;
+  RestaurantBestSellers: undefined;
+  RestaurantTimeHeatmap: undefined;
+  RestaurantNotificationDetails: { notificationId: string };
+  RestaurantProfile: undefined;
+  RestaurantLocation: undefined;
+  RestaurantThemeSettings: undefined;
+  RestaurantSettings: undefined;
+  RestaurantSupport: undefined;
+  RestaurantAbout: undefined;
   RestaurantEditProfile: undefined;
-   RestaurantOrderHistory: undefined;
+  RestaurantOrderHistory: undefined;
 
 };
 
@@ -102,53 +119,34 @@ export type CustomerHelpCenterStackParamList = {
   ContactUs: undefined;
 };
 
-// Restaurant types (unchanged)
+// Restaurant types - Updated with new structure
 export type RestaurantTabParamList = {
   Orders: NavigatorScreenParams<RestaurantOrdersStackParamList>;
   Menu: NavigatorScreenParams<RestaurantMenuStackParamList>;
   Analytics: NavigatorScreenParams<RestaurantAnalyticsStackParamList>;
-  Profile: NavigatorScreenParams<RestaurantProfileStackParamList>;
+  Notifications: NavigatorScreenParams<RestaurantNotificationsStackParamList>;
+  Account: NavigatorScreenParams<RestaurantAccountStackParamList>;
 };
 
+// Restaurant Tab Stacks - Only screens that should show tabs
 export type RestaurantOrdersStackParamList = {
-  OrdersScreen: undefined;
-  OrderDetails: { orderId: string };
- 
-  LiveOrders: undefined;
-  RejectOrder: { id: string };
-  ConfirmOrder: { id: string };
+  OrdersList: undefined;
 };
 
 export type RestaurantMenuStackParamList = {
-  MenuScreen: undefined;
-  AddMenuItem: undefined;
-  EditMenuItem: { itemId: string };
-  Categories: undefined;
-  AddCategory: undefined;
-  EditCategory: { categoryId: string };
-  MenuSettings: undefined;
-  MenuList: undefined; // Add this for the menu list view
+  MenuItemsList: undefined;
 };
 
 export type RestaurantAnalyticsStackParamList = {
-  AnalyticsScreen: undefined;
-  DashboardScreen: undefined;
-  SalesReport: undefined;
-  CustomerInsights: undefined;
-  PopularItems: undefined;
-  PerformanceMetrics: undefined;
+  AnalyticsOverview: undefined;
 };
 
-export type RestaurantProfileStackParamList = {
-  ProfileScreen: undefined;
-  RestaurantSettings: undefined;
-  AccountSettings: undefined;
-  About: undefined;
-  Notification: undefined;
-  Support: undefined;
-  BusinessSettings: undefined;
-  PaymentBilling: undefined;
-  ApiTesting: undefined;
+export type RestaurantNotificationsStackParamList = {
+  NotificationsList: undefined;
+};
+
+export type RestaurantAccountStackParamList = {
+  AccountHome: undefined;
 };
 
 // Navigation Prop Types
@@ -223,11 +221,18 @@ export type RestaurantAnalyticsStackScreenProps<
   RestaurantTabScreenProps<'Analytics'>
 >;
 
-export type RestaurantProfileStackScreenProps<
-  T extends keyof RestaurantProfileStackParamList,
+export type RestaurantNotificationsStackScreenProps<
+  T extends keyof RestaurantNotificationsStackParamList,
 > = CompositeScreenProps<
-  NativeStackScreenProps<RestaurantProfileStackParamList, T>,
-  RestaurantTabScreenProps<'Profile'>
+  NativeStackScreenProps<RestaurantNotificationsStackParamList, T>,
+  RestaurantTabScreenProps<'Notifications'>
+>;
+
+export type RestaurantAccountStackScreenProps<
+  T extends keyof RestaurantAccountStackParamList,
+> = CompositeScreenProps<
+  NativeStackScreenProps<RestaurantAccountStackParamList, T>,
+  RestaurantTabScreenProps<'Account'>
 >;
 
 // User type enum

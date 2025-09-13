@@ -42,6 +42,24 @@ import FoodDetailsScreen from '../screens/customer/home/FoodDetailsScreen';
 import RestaurantDetailScreen from '../screens/customer/home/RestaurantDetailScreen';
 import NearbyRestaurantsScreen from '../screens/customer/home/NearbyRestaurantsScreen';
 
+// Restaurant full-screen screens
+import OrderDetailsScreen from '../screens/restaurant/orders/OrderDetailsScreen';
+import ConfirmOrder from '../screens/restaurant/orders/ConfirmOrder';
+import RejectOrder from '../screens/restaurant/orders/RejectOrder';
+import {AddFoodScreen} from '../screens/restaurant/menu/AddFoodScreen';
+import {EditFoodScreen} from '../screens/restaurant/menu/EditFoodScreen';
+import FoodCategoriesScreen from '../screens/restaurant/menu/FoodCategoriesScreen';
+import AddCategoryScreen from '../screens/restaurant/menu/AddCategoryScreen';
+import BestSellers from '../screens/restaurant/analytics/BestSellers';
+import TimeHeatmap from '../screens/restaurant/analytics/TimeHeatmap';
+import ProfileScreen from '../screens/restaurant/profile/ProfileScreen';
+import PaymentBillingScreen from '../screens/restaurant/profile/PaymentBillingScreen';
+import AccountSettingsScreen from '../screens/restaurant/profile/AccountSettingsScreen';
+import SupportScreen from '../screens/restaurant/profile/SupportScreen';
+import AboutScreen from '../screens/restaurant/profile/AboutScreen';
+import RestaurantLocationScreen from '../screens/restaurant/profile/RestaurantLocationScreen';
+import ThemeSettingsScreen from '../screens/restaurant/profile/ThemeSettingsScreen';
+
 // Profile screens
 import EditProfileScreen from '../screens/customer/Profile/EditProfileScreen';
 import FavoriteRestaurants from '../screens/customer/Profile/FavoriteRestaurants';
@@ -268,6 +286,21 @@ const RootNavigator: React.FC = () => {
             <Stack.Screen name="RestaurantDetails" component={RestaurantDetailScreen} options={{ headerTitle: '', headerTransparent: true }} />
             <Stack.Screen name="AddressScreen" component={AddressScreen} options={{ headerTitle: t('address') }} />
             <Stack.Screen name="NearbyRestaurants" component={NearbyRestaurantsScreen} options={{ headerTitle: t('restaurants_near_you') }} />
+            
+            {/* Restaurant full-screen screens */}
+            <Stack.Screen name="RestaurantOrderDetails" component={OrderDetailsScreen} options={{ headerTitle: t('order_details') }} />
+            <Stack.Screen name="RestaurantBestSellers" component={BestSellers} options={{ headerTitle: t('best_sellers') }} />
+            <Stack.Screen name="RestaurantTimeHeatmap" component={TimeHeatmap} options={{ headerTitle: t('time_heatmap') }} />
+            <Stack.Screen name="RestaurantCategoriesManager" component={FoodCategoriesScreen} options={{ headerTitle: t('categories') }} />
+          </Stack.Group>
+          
+          {/* Restaurant Modals */}
+          <Stack.Group screenOptions={screenOptions.modal}>
+            <Stack.Screen name="RestaurantConfirmOrder" component={ConfirmOrder} options={{ headerTitle: t('confirm_order') }} />
+            <Stack.Screen name="RestaurantRejectOrder" component={RejectOrder} options={{ headerTitle: t('reject_order') }} />
+            <Stack.Screen name="RestaurantMenuItemForm" component={AddFoodScreen} options={{ headerTitle: t('menu_item') }} />
+            <Stack.Screen name="RestaurantAddCategory" component={AddCategoryScreen} options={{ headerTitle: t('add_category') }} />
+            <Stack.Screen name="RestaurantEditCategory" component={AddCategoryScreen} options={{ headerTitle: t('edit_category') }} />
           </Stack.Group>
 
           {/* Profile */}
@@ -277,8 +310,15 @@ const RootNavigator: React.FC = () => {
             <Stack.Screen name="FavoriteRestaurantScreen" component={FavoriteRestaurants} options={{ headerTitle: t('favorite_restaurants') }} />
             <Stack.Screen name="PaymentMethods" component={PaymentScreen} options={{ headerTitle: t('payment_methods') }} />
             <Stack.Screen name="LanguageScreen" component={LanguageScreen} options={{ headerTitle: t('language_settings') }} />
-            {/* restaurant screens */}
+            
+            {/* Restaurant profile screens */}
             <Stack.Screen name='RestaurantEditProfile' component={ProfileEditScreen} options ={{headerTitle: t('edit_profile')}} />
+            <Stack.Screen name="RestaurantProfile" component={ProfileScreen} options={{ headerTitle: t('restaurant_profile') }} />
+            <Stack.Screen name="RestaurantLocation" component={RestaurantLocationScreen} options={{ headerTitle: t('restaurant_location') }} />
+            <Stack.Screen name="RestaurantThemeSettings" component={ThemeSettingsScreen} options={{ headerTitle: t('theme_language_settings') }} />
+            <Stack.Screen name="RestaurantSettings" component={AccountSettingsScreen} options={{ headerTitle: t('settings') }} />
+            <Stack.Screen name="RestaurantSupport" component={SupportScreen} options={{ headerTitle: t('support') }} />
+            <Stack.Screen name="RestaurantAbout" component={AboutScreen} options={{ headerTitle: t('about') }} />
           </Stack.Group>
 
 
