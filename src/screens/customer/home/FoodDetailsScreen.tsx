@@ -139,6 +139,23 @@ const FoodDetailsScreen = ({
               {MenuDetails.name}
             </Text>
 
+            {/* Category Badge */}
+            {MenuDetails.category && (
+              <View className="mt-2 mb-2">
+                <View 
+                  className="self-start px-3 py-1 rounded-full"
+                  style={{ backgroundColor: colors.primaryContainer }}
+                >
+                  <Text 
+                    className="text-sm font-medium"
+                    style={{ color: colors.onPrimaryContainer }}
+                  >
+                    {MenuDetails.category}
+                  </Text>
+                </View>
+              </View>
+            )}
+
             <Seperator />
 
             <Text variant="bodyLarge">{MenuDetails.description}</Text>

@@ -73,7 +73,7 @@ export interface FoodProps {
   description: string;
   price: number;
   image?: any;
-  // category?: any;
+  category?: string; // Added category as optional field
   isAvailable?: boolean
 
   restaurant?: {

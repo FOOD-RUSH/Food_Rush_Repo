@@ -2,15 +2,18 @@ import { View, Text, Image, ScrollView, TouchableOpacity, Animated, Alert, Dimen
 import React, { useRef, useState } from 'react';
 import { TextInput, useTheme } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
 import * as Haptics from 'expo-haptics';
 import CommonView from '@/src/components/common/CommonView';
-import { saveImageLocally, generateImageId } from '@/src/utils/imageStorage';
+import CategoryDropdown from '@/src/components/common/CategoryDropdown';
+import TimePicker from '@/src/components/common/TimePicker';
 import { useAuthUser } from '@/src/stores/customerStores/AuthStore';
-import { useCreateMenuItem, useUploadImage } from '@/src/hooks/restaurant/useMenuApi';
+import { useCreateMenuItem } from '@/src/hooks/restaurant/useMenuApi';
 import { useNavigation } from '@react-navigation/native';
 import { RestaurantMenuStackScreenProps } from '@/src/navigation/types';
 import { useTranslation } from 'react-i18next';
+import { FoodCategory } from '@/src/types/MenuItem';
+import { pickImageWithBase64 } from '@/src/utils/imageUtils';
+import { toISOString, createDailyScheduleISO } from '@/src/utils/timeUtils';
 
 const { width: screenWidth } = Dimensions.get('window');
 const isSmallScreen = screenWidth < 375;
@@ -26,13 +29,15 @@ export const AddFoodScreen = () => {
   const [foodName, setFoodName] = useState('');
   const [price, setPrice] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('');
+  const [category, setCategory] = useState<FoodCategory | ''>('');
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
+  const [startTime, setStartTime] = useState<Date | null>(null);
+  const [endTime, setEndTime] = useState<Date | null>(null);
   const [isUploading, setIsUploading] = useState(false);
 
   // API hooks
   const createMenuItemMutation = useCreateMenuItem();
-  const uploadImageMutation = useUploadImage();
 
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -57,48 +62,14 @@ export const AddFoodScreen = () => {
   const handleImagePick = async () => {
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      
-      // Request permissions
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert(t('permission_needed'), t('please_grant_photo_permission'));
-        return;
-      }
-
       setIsUploading(true);
 
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 0.8,
-      });
-
-      if (!result.canceled) {
-        const asset = result.assets[0];
-
-        // Upload image to server
-        const formData = new FormData();
-        formData.append('image', {
-          uri: asset.uri,
-          type: 'image/jpeg',
-          name: `menu-item-${Date.now()}.jpg`,
-        } as any);
-
-        try {
-          const uploadResponse = await uploadImageMutation.mutateAsync(formData);
-          const responseData = uploadResponse.data as any;
-          const imageUrl = responseData?.url || responseData?.imageUrl || responseData?.image;
-          setImageUri(imageUrl);
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        } catch (uploadError) {
-          console.error('Error uploading image:', uploadError);
-          Alert.alert(t('upload_error'), t('failed_to_upload_image'));
-          // Fallback to local storage
-          const imageId = generateImageId();
-          const localUri = await saveImageLocally(asset.uri, imageId);
-          setImageUri(localUri);
-        }
+      const result = await pickImageWithBase64();
+      
+      if (result) {
+        setImageUri(result.uri);
+        setImageBase64(result.base64 || null);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
     } catch (error) {
       console.error('Error picking image:', error);
@@ -114,8 +85,21 @@ export const AddFoodScreen = () => {
       return;
     }
 
-    if (!foodName.trim() || !price.trim()) {
+    if (!foodName.trim() || !price.trim() || !category) {
       Alert.alert(t('error'), t('please_fill_required_fields'));
+      return;
+    }
+
+    // Validate price
+    const priceValue = parseFloat(price);
+    if (isNaN(priceValue) || priceValue <= 0) {
+      Alert.alert(t('error'), t('please_enter_valid_price'));
+      return;
+    }
+
+    // Validate time range if both are provided
+    if (startTime && endTime && startTime >= endTime) {
+      Alert.alert(t('error'), t('start_time_must_be_before_end_time'));
       return;
     }
 
@@ -125,10 +109,12 @@ export const AddFoodScreen = () => {
       const menuItemData = {
         name: foodName.trim(),
         description: description.trim(),
-        price: parseFloat(price),
-        categoryId: category.trim() || 'default',
-        imageUrl: imageUri || undefined,
+        price: priceValue,
+        category: category as FoodCategory,
         isAvailable: true,
+        picture: imageBase64 || undefined,
+        startAt: startTime ? createDailyScheduleISO(startTime.getHours(), startTime.getMinutes()) : undefined,
+        endAt: endTime ? createDailyScheduleISO(endTime.getHours(), endTime.getMinutes()) : undefined,
       };
 
       await createMenuItemMutation.mutateAsync({
@@ -329,39 +315,14 @@ export const AddFoodScreen = () => {
                 className={`${isSmallScreen ? 'text-sm' : 'text-base'} font-semibold mb-2`}
                 style={{ color: colors.onSurface }}
               >
-                {t('category')}
+                {t('category')} *
               </Text>
-              <View 
-                className="rounded-2xl"
-                style={{ 
-                  backgroundColor: colors.surface,
-                  elevation: 2,
-                  shadowColor: '#000',
-                  shadowOffset: { width: 0, height: 1 },
-                  shadowOpacity: 0.1,
-                  shadowRadius: 3,
-                }}
-              >
-                <TextInput
-                  mode="flat"
-                  value={category}
-                  onChangeText={setCategory}
-                  placeholder={t('enter_category')}
-                  style={{ 
-                    backgroundColor: 'transparent',
-                    fontSize: isSmallScreen ? 16 : 17,
-                  }}
-                  contentStyle={{
-                    paddingHorizontal: 16,
-                    paddingVertical: isSmallScreen ? 12 : 14,
-                  }}
-                  underlineStyle={{ display: 'none' }}
-                  activeUnderlineColor="transparent"
-                  textColor={colors.onSurface}
-                  placeholderTextColor={colors.onSurfaceVariant}
-                  left={<TextInput.Icon icon="tag" color={colors.onSurfaceVariant} />}
-                />
-              </View>
+              <CategoryDropdown
+                value={category}
+                onValueChange={setCategory}
+                placeholder={t('select_category')}
+                error={false}
+              />
             </View>
 
             {/* Description */}
@@ -405,6 +366,45 @@ export const AddFoodScreen = () => {
                   placeholderTextColor={colors.onSurfaceVariant}
                 />
               </View>
+            </View>
+
+            {/* Daily Schedule Section */}
+            <View>
+              <Text 
+                className={`${isSmallScreen ? 'text-sm' : 'text-base'} font-semibold mb-4`}
+                style={{ color: colors.onSurface }}
+              >
+                {t('daily_schedule')} ({t('optional')})
+              </Text>
+              
+              <View className="flex-row space-x-4">
+                {/* Start Time */}
+                <View className="flex-1">
+                  <TimePicker
+                    value={startTime}
+                    onTimeChange={setStartTime}
+                    label={t('start_time')}
+                    placeholder={t('select_start_time')}
+                  />
+                </View>
+                
+                {/* End Time */}
+                <View className="flex-1">
+                  <TimePicker
+                    value={endTime}
+                    onTimeChange={setEndTime}
+                    label={t('end_time')}
+                    placeholder={t('select_end_time')}
+                  />
+                </View>
+              </View>
+              
+              <Text 
+                className={`${isSmallScreen ? 'text-xs' : 'text-sm'} mt-2`}
+                style={{ color: colors.onSurfaceVariant }}
+              >
+                {t('schedule_help_text')}
+              </Text>
             </View>
           </View>
 

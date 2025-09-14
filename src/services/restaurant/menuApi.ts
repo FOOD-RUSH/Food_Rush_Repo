@@ -1,13 +1,16 @@
 import { restaurantApiClient } from './apiClient';
+import { FoodCategory } from '../../types/MenuItem';
 
 export interface MenuItem {
   id: string;
   name: string;
   description: string;
   price: number;
-  categoryId: string;
+  category: FoodCategory;
   imageUrl?: string;
   isAvailable: boolean;
+  startAt?: string; // ISO 8601 format
+  endAt?: string;   // ISO 8601 format
   preparationTime?: number;
   allergens?: string[];
   createdAt: string;
@@ -28,14 +31,16 @@ interface MenuItems {
   updatedAt: string;
 }
 
+// Updated to match backend API requirements
 export interface CreateMenuItemRequest {
   name: string;
   description: string;
-  price: number;
-  categoryId: string;
-  imageUrl?: string;
-  preparationTime?: number;
-  allergens?: string[];
+  price: number; // Changed from string to number
+  category: FoodCategory;
+  isAvailable: boolean;
+  picture?: string; // Binary string (jpg or png image file)
+  startAt?: string; // ISO 8601 format for daily scheduling
+  endAt?: string;   // ISO 8601 format for daily scheduling
 }
 
 export interface UpdateMenuItemRequest extends Partial<CreateMenuItemRequest> {
@@ -67,7 +72,7 @@ export const restaurantMenuApi = {
   },
 
   createMenuItem: (restaurantId: string, data: CreateMenuItemRequest) => {
-    return restaurantApiClient.post(`/restauant/${restaurantId}/menu`, {...data});
+    return restaurantApiClient.post(`/restaurants/${restaurantId}/menu`, {...data});
   },
 
   updateMenuItem: (restaurantId: string, itemId: string, data: UpdateMenuItemRequest) => {
