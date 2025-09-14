@@ -11,6 +11,7 @@ import CommonView from '@/src/components/common/CommonView';
 import { RestaurantOrdersStackScreenProps } from '@/src/navigation/types';
 import { useGetOrders, useConfirmOrder, useRejectOrder } from '@/src/hooks/restaurant/useOrderApi';
 import { Order } from '@/src/services/restaurant/orderApi';
+import RestaurantAvailabilityToggle from '@/src/components/restaurant/RestaurantAvailabilityToggle';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -364,6 +365,14 @@ const OrdersList: React.FC<RestaurantOrdersStackScreenProps<'OrdersList'>> = () 
               </View>
             )}
           </View>
+        </View>
+
+        {/* Restaurant Availability Toggle */}
+        <View style={{ paddingHorizontal: 16, paddingTop: 12 }}>
+          <RestaurantAvailabilityToggle
+            showAsCard={false}
+            compact={true}
+          />
         </View>
 
         {/* Tabs */}

@@ -9,7 +9,7 @@ import * as Haptics from 'expo-haptics';
 import CommonView from '@/src/components/common/CommonView';
 import { RestaurantAccountStackScreenProps } from '@/src/navigation/types';
 import { useAuthUser } from '@/src/stores/customerStores/AuthStore';
-import RestaurantStatusControl from '@/src/components/restaurant/RestaurantStatusControl';
+import RestaurantAvailabilityToggle from '@/src/components/restaurant/RestaurantAvailabilityToggle';
 
 const { width: screenWidth } = Dimensions.get('window');
 const isSmallScreen = screenWidth < 375;
@@ -107,7 +107,7 @@ const AccountHome: React.FC<RestaurantAccountStackScreenProps<'AccountHome'>> = 
   const navigation = useNavigation();
   const user = useAuthUser();
   
-  const [restaurantStatus, setRestaurantStatus] = useState<'online' | 'offline' | 'busy'>('offline');
+  const [restaurantStatus, setRestaurantStatus] = useState<'online' | 'offline'>('offline');
 
   // Mock restaurant data - replace with actual data from store/API
   const restaurantData = {
@@ -141,8 +141,8 @@ const AccountHome: React.FC<RestaurantAccountStackScreenProps<'AccountHome'>> = 
     );
   };
 
-  const handleStatusChange = (status: 'online' | 'offline' | 'busy') => {
-    setRestaurantStatus(status);
+  const handleStatusChange = (isOpen: boolean) => {
+    setRestaurantStatus(isOpen ? 'online' : 'offline');
   };
 
   return (
@@ -218,9 +218,9 @@ const AccountHome: React.FC<RestaurantAccountStackScreenProps<'AccountHome'>> = 
           </View>
         </View>
 
-        {/* Restaurant Status Control */}
+        {/* Restaurant Availability Toggle */}
         <View className={`${isSmallScreen ? 'mx-4 mb-4' : 'mx-6 mb-6'}`}>
-          <RestaurantStatusControl
+          <RestaurantAvailabilityToggle
             currentStatus={restaurantStatus}
             onStatusChange={handleStatusChange}
             showAsCard={true}

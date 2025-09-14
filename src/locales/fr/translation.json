@@ -545,5 +545,12 @@
   "no_items_found": "Aucun article trouvé",
   "no_menu_items_yet": "Aucun article de menu pour le moment",
   "no_items_match": "Aucun article ne correspond",
-  "start_building_menu": "Commencez à construire votre menu en ajoutant votre premier article !"
+  "start_building_menu": "Commencez à construire votre menu en ajoutant votre premier article !",
+  "restaurant_availability": "Disponibilité du Restaurant",
+  "open_restaurant": "Ouvrir le Restaurant",
+  "close_restaurant": "Fermer le Restaurant",
+  "confirm_close_restaurant_message": "Êtes-vous sûr de vouloir fermer votre restaurant ? Vous cesserez de recevoir de nouvelles commandes.",
+  "close": "Fermer",
+  "accepting_orders_normally": "Accepte les commandes normalement",
+  "not_accepting_orders": "N'accepte pas les commandes"
 }
