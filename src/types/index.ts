@@ -33,6 +33,7 @@ export interface FoodProps {
   createdAt: string;
   updatedAt: string;
   distanceKm: number | null;
+  category?: string; // Added category field for filtering
   // Remove old UI fields not in API: image, restaurantId, rating, distance, deliveryPrice
 }
 
@@ -182,4 +183,56 @@ export interface PaymentTransaction {
 
 export interface SelectProps extends PickerProps {
   label?: string;
+}
+
+// Restaurant Review Types
+export interface RestaurantReview {
+  id: string;
+  score: number;
+  review: string;
+  createdAt: string;
+  user: {
+    id: string;
+    fullName: string;
+    profilePicture: string | null;
+  };
+}
+
+export interface RestaurantReviewsResponse {
+  status_code: number;
+  message: string;
+  data: RestaurantReview[];
+}
+
+// Notification Types
+export interface Notification {
+  id: string;
+  title: string;
+  body: string;
+  type: 'SYSTEM' | 'ORDER' | 'PROMOTION' | 'DELIVERY';
+  data?: {
+    restaurantId?: string;
+    orderId?: string;
+    [key: string]: any;
+  };
+  readAt: string | null;
+  createdAt: string;
+}
+
+export interface NotificationResponse {
+  status_code: number;
+  message: string;
+  data: {
+    items: Notification[];
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
+}
+
+export interface UnreadCountResponse {
+  status_code: number;
+  message: string;
+  data: number;
 }

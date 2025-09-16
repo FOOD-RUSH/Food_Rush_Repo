@@ -31,8 +31,19 @@ export interface LocationStore extends LocationState, LocationActions {}
 
 const initialState: LocationState = {
   location: null,
-  savedAddresses: [],
-  defaultAddressId: null,
+  savedAddresses: [
+    {
+      id: 'default-address',
+      label: 'Home',
+      fullAddress: 'Time Square NYC, Manhattan',
+      latitude: 40.7580,
+      longitude: -73.9855,
+      isDefault: true,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    },
+  ],
+  defaultAddressId: 'default-address',
   isLoading: false,
   error: null,
   hasPermission: false,

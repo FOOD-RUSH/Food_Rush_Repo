@@ -1,7 +1,8 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useRef } from 'react';
 import CommonView from '@/src/components/common/CommonView';
 import { TextInput, useTheme } from 'react-native-paper';
-import { CategoryFilters, images } from '@/assets/images';
+import { images } from '@/assets/images';
+import { getMainCategories, mapApiCategoriesToUI } from '@/src/constants/categories';
 import CategoryItem from '@/src/components/customer/CategoryItem';
 import HomeHeader from '@/src/components/customer/HomeHeader';
 import FoodItemCard from '@/src/components/customer/FoodItemCard';
@@ -22,18 +23,20 @@ import Animated, {
 } from 'react-native-reanimated';
 import Carousel from 'react-native-reanimated-carousel';
 import ClassicFoodCard from '@/src/components/customer/ClassicFoodCard';
-import PromotionCard from '@/src/components/customer/PromotionCard';
+
 import { useTranslation } from 'react-i18next';
 import {
   useGetAllMenuItem,
   useAllRestaurants,
   useNearbyRestaurants,
+  useMenuCategories,
 } from '@/src/hooks/customer/useCustomerApi';
 import { FoodProps, RestaurantCard as RestaurantProps } from '@/src/types';
 import RestaurantCardSkeleton from '@/src/components/customer/RestaurantCardSkeleton';
 import FoodItemCardSkeleton from '@/src/components/customer/FoodItemCardSkeleton';
 import ClassicFoodCardSkeleton from '@/src/components/customer/ClassicFoodCardSkeleton';
 import ErrorDisplay from '@/src/components/common/ErrorDisplay';
+import EmptyState from '@/src/components/common/EmptyState';
 
 const { width } = Dimensions.get('window');
 
@@ -110,7 +113,6 @@ CarouselItem.displayName = 'CarouselItem';
 type HomeSectionItem =
   | { type: 'header'; title: string; onPress: () => void }
   | { type: 'search' }
-  | { type: 'promotion' }
   | { type: 'category'; data: any[] }
   | { type: 'carousel'; data: FoodProps[] }
   | { type: 'recommended'; data: FoodProps[] }
@@ -120,12 +122,21 @@ type HomeSectionItem =
       skeletonType: 'carousel' | 'foods' | 'restaurants';
       count: number;
     }
-  | { type: 'error'; errorType: 'food' | 'restaurant'; onRetry: () => void };
+  | { type: 'error'; errorType: 'food' | 'restaurant'; onRetry: () => void }
+  | {
+      type: 'empty';
+      emptyType: 'carousel' | 'recommended' | 'restaurants';
+      onActionPress?: () => void;
+    };
 
 const HomeScreen = ({ navigation }: HomeScreenProps) => {
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
   const [refreshing, setRefreshing] = useState(false);
+  
+  // Use refs to prevent unnecessary re-renders
+  const lastRefreshTime = useRef<number>(0);
+  const refreshThrottle = 2000; // 2 seconds throttle
 
   // Updated data fetching with new hooks
   const {
@@ -153,6 +164,13 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
     refetch: refetchMenu,
   } = useGetAllMenuItem();
 
+  const {
+    data: categoriesData,
+    isLoading: categoriesLoading,
+    error: categoriesError,
+    refetch: refetchCategories,
+  } = useMenuCategories();
+
   // Determine which data to use
   const restaurantData =
     nearbyRestaurants && nearbyRestaurants.length > 0
@@ -164,17 +182,26 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
   const isLoading = nearbyLoading || allLoading || menuLoading;
   const hasError = (nearbyError && allError) || menuError;
 
+  // Memoized categories data
+  const categoriesForDisplay = useMemo(() => {
+    if (categoriesData && categoriesData.length > 0) {
+      return mapApiCategoriesToUI(categoriesData);
+    }
+    // Fallback to static categories if API fails
+    return getMainCategories();
+  }, [categoriesData]);
+
   // Simplified refresh handler
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await Promise.all([refetchNearby(), refetchAll(), refetchMenu()]);
+      await Promise.all([refetchNearby(), refetchAll(), refetchMenu(), refetchCategories()]);
     } catch (error) {
       console.error('Refresh error:', error);
     } finally {
       setRefreshing(false);
     }
-  }, [refetchNearby, refetchAll, refetchMenu]);
+  }, [refetchNearby, refetchAll, refetchMenu, refetchCategories]);
 
   // Navigation handlers
   const handleSearchPress = useCallback(() => {
@@ -228,10 +255,10 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
         FoodName={item.name}
         FoodPrice={parseFloat(item.price)}
         FoodImage={item.pictureUrl}
-        RestarantName={item.restaurant.name}
         distanceFromUser={item.distanceKm || 0}
         DeliveryPrice={500} // Default value
         isAvailable={item.isAvailable}
+          RestaurantName={item.restaurant?.name}  
       />
     ),
     [],
@@ -239,7 +266,12 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
 
   const renderCategoryItem = useCallback(
     ({ item }: { item: any }) => (
-      <CategoryItem key={item.id} image={item.image} title={item.title} />
+      <CategoryItem 
+        key={item.id} 
+        image={item.image} 
+        title={item.title}
+        categoryId={item.id.toString()}
+      />
     ),
     [],
   );
@@ -260,15 +292,11 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
       // Search Bar
       { type: 'search' },
 
-      // Promotions Section
-      { type: 'header', title: t('promotion'), onPress: () => {} },
-      { type: 'promotion' },
-
       // Quick Filters Section
-      { type: 'header', title: t('quick_filters'), onPress: () => {} },
+      { type: 'header', title: t('categories'), onPress: () => {} },
       {
         type: 'category',
-        data: CategoryFilters,
+        data: categoriesForDisplay,
       },
 
       // Discounts Guaranteed - Carousel Section
@@ -284,6 +312,12 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
       });
     } else if (hasError) {
       data.push({ type: 'error', errorType: 'food', onRetry: refetchMenu });
+    } else if (carouselData.length === 0) {
+      data.push({
+        type: 'empty',
+        emptyType: 'carousel',
+        onActionPress: () => navigation.navigate('SearchScreen', { type: 'search' }),
+      });
     } else {
       data.push({ type: 'carousel', data: carouselData });
     }
@@ -303,6 +337,12 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
       });
     } else if (menuError) {
       data.push({ type: 'error', errorType: 'food', onRetry: refetchMenu });
+    } else if (recommendedFoodData.length === 0) {
+      data.push({
+        type: 'empty',
+        emptyType: 'recommended',
+        onActionPress: () => navigation.navigate('SearchScreen', { type: 'search' }),
+      });
     } else {
       data.push({ type: 'recommended', data: recommendedFoodData });
     }
@@ -326,8 +366,14 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
         errorType: 'restaurant',
         onRetry: refetchNearby,
       });
+    } else if (!restaurantData || restaurantData.length === 0) {
+      data.push({
+        type: 'empty',
+        emptyType: 'restaurants',
+        onActionPress: handleNearbyRestaurantsPress,
+      });
     } else {
-      data.push({ type: 'restaurants', data: restaurantData || [] });
+      data.push({ type: 'restaurants', data: restaurantData });
     }
 
     return data;
@@ -341,9 +387,11 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
     carouselData,
     recommendedFoodData,
     restaurantData,
+    categoriesForDisplay,
     refetchMenu,
     refetchNearby,
     handleNearbyRestaurantsPress,
+    navigation,
   ]);
 
   // Render item based on type
@@ -389,17 +437,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
             </View>
           );
 
-        case 'promotion':
-          return (
-            <View className="px-4 mb-4">
-              <PromotionCard
-                color="#007aff"
-                image={images.onboarding3}
-                percentage={40}
-                days={4}
-              />
-            </View>
-          );
+
 
         case 'category':
           return (
@@ -535,6 +573,51 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
                     : t('network_error_restaurant')
                 }
                 onRetry={item.onRetry}
+              />
+            </View>
+          );
+
+        case 'empty':
+          const getEmptyStateProps = () => {
+            switch (item.emptyType) {
+              case 'carousel':
+                return {
+                  icon: 'pricetag-outline' as const,
+                  title: t('no_discounts_available'),
+                  description: t('no_discounts_description'),
+                  actionText: t('view_all_food'),
+                };
+              case 'recommended':
+                return {
+                  icon: 'restaurant-outline' as const,
+                  title: t('no_recommendations'),
+                  description: t('no_recommendations_description'),
+                  actionText: t('explore_menu'),
+                };
+              case 'restaurants':
+                return {
+                  icon: 'storefront-outline' as const,
+                  title: t('no_restaurants_found'),
+                  description: t('no_restaurants_description'),
+                  actionText: t('explore_restaurants'),
+                };
+              default:
+                return {
+                  icon: 'alert-circle-outline' as const,
+                  title: t('no_food_items_found'),
+                  description: t('no_food_items_description'),
+                  actionText: t('browse_categories'),
+                };
+            }
+          };
+
+          const emptyProps = getEmptyStateProps();
+          return (
+            <View className="px-4 mb-4">
+              <EmptyState
+                {...emptyProps}
+                onActionPress={item.onActionPress}
+                size="small"
               />
             </View>
           );

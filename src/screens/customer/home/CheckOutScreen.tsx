@@ -129,6 +129,37 @@ const CheckOutScreen = ({
       return;
     }
 
+    // Check if required information is available
+    if (!defaultAddress) {
+      Alert.alert(
+        t('error'),
+        t('please_add_delivery_address'),
+        [
+          {
+            text: t('add_address'),
+            onPress: () => navigation.navigate('AddressScreen'),
+          },
+          { text: t('cancel'), style: 'cancel' },
+        ]
+      );
+      return;
+    }
+
+    if (!selectedPaymentMethod) {
+      Alert.alert(
+        t('error'),
+        t('please_select_payment_method'),
+        [
+          {
+            text: t('select_payment'),
+            onPress: () => navigation.navigate('PaymentMethods'),
+          },
+          { text: t('cancel'), style: 'cancel' },
+        ]
+      );
+      return;
+    }
+
     // Present the enhanced checkout content with cart management
     present(<CheckoutContent onConfirm={confirmOrder} onDismiss={dismiss} />, {
       snapPoints: ['40%'], // Allow for more content
@@ -137,7 +168,7 @@ const CheckOutScreen = ({
       showHandle: true,
       backdropOpacity: 0.5,
     });
-  }, [cartItems.length, present, confirmOrder, dismiss, t]);
+  }, [cartItems.length, defaultAddress, selectedPaymentMethod, present, confirmOrder, dismiss, navigation, t]);
 
   // Optimized render item
   const renderCheckoutItem: ListRenderItem<CartItem> = useCallback(

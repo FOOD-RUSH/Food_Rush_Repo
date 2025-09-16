@@ -1,0 +1,161 @@
+{
+  "development_workflows": {
+    "feature_development": {
+      "name": "Feature Development Workflow",
+      "description": "Standard workflow for developing new features",
+      "steps": [
+        {
+          "name": "Create Feature Branch",
+          "command": "git checkout -b feature/{{feature-name}}",
+          "description": "Create a new branch for the feature"
+        },
+        {
+          "name": "Generate Component",
+          "command": "qodo generate component {{ComponentName}}",
+          "description": "Generate component boilerplate"
+        },
+        {
+          "name": "Write Tests",
+          "command": "qodo generate test {{ComponentName}}",
+          "description": "Generate test files"
+        },
+        {
+          "name": "Run Linting",
+          "command": "npm run lint",
+          "description": "Check code quality"
+        },
+        {
+          "name": "Run Tests",
+          "command": "npm test",
+          "description": "Execute test suite"
+        },
+        {
+          "name": "Code Review",
+          "command": "qodo review",
+          "description": "AI-powered code review"
+        }
+      ]
+    },
+    "bug_fix": {
+      "name": "Bug Fix Workflow",
+      "description": "Workflow for fixing bugs",
+      "steps": [
+        {
+          "name": "Create Bugfix Branch",
+          "command": "git checkout -b bugfix/{{bug-description}}",
+          "description": "Create a new branch for the bug fix"
+        },
+        {
+          "name": "Reproduce Bug",
+          "command": "qodo analyze bug {{bug-id}}",
+          "description": "Analyze and reproduce the bug"
+        },
+        {
+          "name": "Write Regression Test",
+          "command": "qodo generate test --type regression",
+          "description": "Create test to prevent regression"
+        },
+        {
+          "name": "Fix Implementation",
+          "description": "Implement the bug fix"
+        },
+        {
+          "name": "Verify Fix",
+          "command": "npm test",
+          "description": "Ensure tests pass"
+        },
+        {
+          "name": "Code Review",
+          "command": "qodo review --focus security",
+          "description": "Review fix for security implications"
+        }
+      ]
+    },
+    "release_preparation": {
+      "name": "Release Preparation",
+      "description": "Prepare app for release",
+      "steps": [
+        {
+          "name": "Version Bump",
+          "command": "npm version {{version-type}}",
+          "description": "Bump version number"
+        },
+        {
+          "name": "Update Changelog",
+          "command": "qodo generate changelog",
+          "description": "Generate changelog from commits"
+        },
+        {
+          "name": "Run Full Test Suite",
+          "command": "npm run test:full",
+          "description": "Execute comprehensive tests"
+        },
+        {
+          "name": "Bundle Analysis",
+          "command": "qodo analyze bundle",
+          "description": "Analyze bundle size and performance"
+        },
+        {
+          "name": "Security Audit",
+          "command": "qodo audit security",
+          "description": "Check for security vulnerabilities"
+        },
+        {
+          "name": "Build for Production",
+          "command": "expo build",
+          "description": "Create production build"
+        }
+      ]
+    }
+  },
+  "automation_rules": {
+    "on_file_save": [
+      {
+        "condition": "file_type === 'typescript'",
+        "actions": ["format", "lint"]
+      },
+      {
+        "condition": "file_path.includes('components')",
+        "actions": ["validate_props", "check_accessibility"]
+      }
+    ],
+    "on_commit": [
+      {
+        "condition": "always",
+        "actions": ["lint", "test_changed_files", "security_check"]
+      }
+    ],
+    "on_pull_request": [
+      {
+        "condition": "always",
+        "actions": ["full_review", "performance_check", "bundle_analysis"]
+      }
+    ]
+  },
+  "custom_commands": {
+    "setup_new_screen": {
+      "description": "Set up a new screen with navigation and basic structure",
+      "steps": [
+        "qodo generate screen {{ScreenName}}",
+        "qodo generate test {{ScreenName}}",
+        "qodo update navigation --add {{ScreenName}}"
+      ]
+    },
+    "refactor_component": {
+      "description": "Refactor existing component with best practices",
+      "steps": [
+        "qodo analyze component {{ComponentName}}",
+        "qodo suggest improvements {{ComponentName}}",
+        "qodo generate test {{ComponentName}} --update"
+      ]
+    },
+    "optimize_performance": {
+      "description": "Analyze and optimize app performance",
+      "steps": [
+        "qodo analyze performance",
+        "qodo suggest optimizations",
+        "qodo generate performance report"
+      ]
+    }
+  }
+}

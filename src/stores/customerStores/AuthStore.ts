@@ -83,25 +83,45 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         // Authentication actions
         logoutUser: async () => {
           try {
-            // Clear tokens from storage
-            await TokenManager.clearAllTokens();
+            set({ isLoading: true });
 
-            // Reset auth state
-            set({
-              ...initialState,
-              selectedUserType: get().selectedUserType, // Preserve selected user type
+            // Use the centralized app reset utility
+            const { performCompleteAppReset } = await import('../../utils/appReset');
+            const result = await performCompleteAppReset({
+              preserveOnboarding: true,
+              preserveUserTypeSelection: true,
+              navigateToAuth: true,
             });
 
-            // Navigate to auth screen
-            reset('Auth');
+            if (result.success) {
+              // Reset auth state locally
+              set({
+                ...initialState,
+                selectedUserType: get().selectedUserType, // Preserve selected user type
+              });
+            } else {
+              throw new Error('App reset failed');
+            }
           } catch (error) {
             console.error('Error during logout:', error);
-            // Still reset state even if token clearing fails
+            
+            // Fallback: try manual cleanup
+            try {
+              await TokenManager.clearAllTokens();
+              const { useCartStore } = await import('./cartStore');
+              useCartStore.getState().clearCart();
+            } catch (fallbackError) {
+              console.error('Error during fallback cleanup:', fallbackError);
+            }
+
             set({
               ...initialState,
               selectedUserType: get().selectedUserType,
+              error: 'Logout completed with some errors',
             });
             reset('Auth');
+          } finally {
+            set({ isLoading: false });
           }
         },
 

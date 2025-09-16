@@ -1,16 +1,13 @@
-// services/NotificationService.ts
+// Simple MVP Production-Ready Notification Service
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
-import { apiClient } from '../services/customer';
+import { apiClient } from '../services/customer/apiClient';
 
-// Configure notification behavior
+// Configure notification behavior for production
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    // shouldShowAlert: true,
-    // shouldPlaySound: true,
-    // shouldSetBadge: false,
     shouldPlaySound: true,
     shouldSetBadge: false,
     shouldShowBanner: true,
@@ -25,38 +22,51 @@ export interface LocalNotificationData {
   scheduleAfter?: number; // seconds from now
 }
 
-export interface OrderStatus {
+export interface OrderNotification {
   orderId: string;
-  status:
-    | 'pending'
-    | 'confirmed'
-    | 'preparing'
-    | 'ready_for_pickup'
-    | 'out_for_delivery'
-    | 'delivered'
-    | 'cancelled';
-
+  status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'picked_up' | 'delivered' | 'cancelled';
+  customerName?: string;
+  restaurantName?: string;
   estimatedTime?: number;
+}
+
+export interface NotificationConfig {
+  userType: 'customer' | 'restaurant';
+  userId?: string;
 }
 
 class NotificationService {
   private expoPushToken: string | null = null;
-  private apiBaseUrl: string;
+  private config: NotificationConfig;
+  private isInitialized: boolean = false;
 
-  constructor(apiBaseUrl: string) {
-    this.apiBaseUrl = apiBaseUrl;
+  constructor(config: NotificationConfig) {
+    this.config = config;
   }
 
   // Initialize notification service
-  async initialize(): Promise<void> {
+  async initialize(): Promise<boolean> {
+    if (this.isInitialized) {
+      console.log('Notification service already initialized');
+      return true;
+    }
+
     try {
-      await this.requestPermissions();
+      const hasPermission = await this.requestPermissions();
+      if (!hasPermission) {
+        console.warn('Notification permissions denied');
+        return false;
+      }
+
       await this.registerForPushNotifications();
       this.setupNotificationListeners();
-      console.log('NOtification service initialized successfully');
+      this.isInitialized = true;
+
+      console.log(`${this.config.userType} notification service initialized successfully`);
+      return true;
     } catch (error) {
-      console.log('Failed to initialize notification service: ', error);
-      throw error;
+      console.error('Failed to initialize notification service:', error);
+      return false;
     }
   }
 
@@ -117,31 +127,20 @@ class NotificationService {
     }
   }
 
-  // Send token to NestJS backend
+  // Send token to backend
   async sendTokenToBackend(token: string): Promise<void> {
     try {
-      const response = await fetch(`${this.apiBaseUrl}/push-tokens`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // Add authentication headers here if needed
-          // 'Authorization': `Bearer ${userToken}`,
-        },
-        body: JSON.stringify({
-          expoPushToken: token,
-          platform: Platform.OS,
-        }),
+      const response = await apiClient.post('/notifications/device', {
+        expoPushToken: token,
+        platform: Platform.OS,
+        userType: this.config.userType,
+        userId: this.config.userId,
       });
 
-      // const response = await apiClient.post('push-tokens', {expoPushToken: token, Platform: Platform.OS})
-
-      if (!response.ok) {
-        throw new Error(`Failed to register token: ${response.statusText}`);
-      }
-
-      console.log('Token registered successfully');
+      console.log('Push token registered successfully with backend');
     } catch (error) {
-      console.error('Error sending token to backend:', error);
+      console.error('Error registering push token with backend:', error);
+      // Don't throw error - app should continue working even if backend registration fails
     }
   }
 
@@ -149,23 +148,28 @@ class NotificationService {
   setupNotificationListeners(): void {
     // Handle notifications when app is in foreground
     Notifications.addNotificationReceivedListener((notification) => {
-      console.log('Notification received in foreground:', notification);
+      console.log(`[${this.config.userType}] Notification received:`, notification.request.content.title);
     });
 
     // Handle notification taps
     Notifications.addNotificationResponseReceivedListener((response) => {
-      console.log('Notification tapped:', response);
+      console.log(`[${this.config.userType}] Notification tapped:`, response.notification.request.content.title);
       const data = response.notification.request.content.data;
       this.handleNotificationTap(data);
     });
   }
 
   // Handle notification tap actions
-  handleNotificationTap(data: any): void {
+  private handleNotificationTap(data: any): void {
     if (data?.orderId) {
-      // Navigate to order details screen
-      console.log('Navigate to order:', data.orderId);
-      // NavigationService.navigate('OrderDetails', { orderId: data.orderId });
+      console.log(`Navigate to order details: ${data.orderId}`);
+      // TODO: Implement navigation to order details
+      // This should be handled by the app's navigation service
+    }
+
+    if (data?.type === 'promotion' && data?.promotionId) {
+      console.log(`Navigate to promotion: ${data.promotionId}`);
+      // TODO: Implement navigation to promotion details
     }
   }
 
@@ -184,60 +188,132 @@ class NotificationService {
     return notificationId;
   }
 
-  // Send order status local notification
-  async sendOrderStatusNotification(orderStatus: OrderStatus): Promise<string> {
-    const notifications = {
-      pending: {
-        title: '🎉 Commande en Cour!',
-        body: `Votre commande #${orderStatus.orderId} es en cour. Préparation en cours...`,
-      },
-      confirmed: {
-        title: '🎉 Commande confirmée!',
-        body: `Votre commande #${orderStatus.orderId} a été confirmée. Préparation en cours...`,
-      },
-      preparing: {
-        title: '👨‍🍳 Préparation en cours',
-        body: `Votre commande #${orderStatus.orderId} est en cours de préparation.`,
-      },
-      out_for_delivery: {
-        title: '🚗 Livraison en route!',
-        body: `Votre commande #${orderStatus.orderId} est en route vers vous.`,
-      },
-      delivered: {
-        title: '✅ Commande livrée!',
-        body: `Votre commande #${orderStatus.orderId} a été livrée. Bon appétit!`,
-      },
-      cancelled: {
-        title: '🎉 Commande en Cour!',
-        body: `Votre commande #${orderStatus.orderId} a ete annule. `,
-      },
-      ready_for_pickup: {
-        title: '🎉 Commande pret pour la Livrason!',
-        body: `Votre commande #${orderStatus.orderId} a ete annule. `,
-      },
-    };
+  // Send order notification (works for both customer and restaurant)
+  async sendOrderNotification(orderData: OrderNotification): Promise<string> {
+    const { orderId, status, customerName, restaurantName } = orderData;
 
-    const notification = notifications[orderStatus.status];
+    // Different messages for customer vs restaurant
+    const notifications = this.config.userType === 'customer'
+      ? this.getCustomerNotifications(orderId, status, restaurantName)
+      : this.getRestaurantNotifications(orderId, status, customerName);
+
+    const notification = notifications[status];
+    if (!notification) {
+      throw new Error(`Unknown order status: ${status}`);
+    }
 
     return this.sendLocalNotification({
       title: notification.title,
       body: notification.body,
       data: {
-        orderId: orderStatus.orderId,
-        status: orderStatus.status,
+        orderId,
+        status,
+        type: 'order',
+        userType: this.config.userType,
       },
     });
   }
 
-  // Schedule local notification for later
-  async scheduleOrderReminder(
-    orderId: string,
+  // Customer notification messages
+  private getCustomerNotifications(orderId: string, status: string, restaurantName?: string) {
+    const restaurant = restaurantName ? ` from ${restaurantName}` : '';
+
+    return {
+      pending: {
+        title: '🕐 Order Placed',
+        body: `Your order #${orderId}${restaurant} is being processed.`,
+      },
+      confirmed: {
+        title: '✅ Order Confirmed',
+        body: `Your order #${orderId}${restaurant} has been confirmed and is being prepared.`,
+      },
+      preparing: {
+        title: '👨‍🍳 Preparing Your Order',
+        body: `Your order #${orderId}${restaurant} is being prepared with care.`,
+      },
+      ready: {
+        title: '🎉 Order Ready',
+        body: `Your order #${orderId}${restaurant} is ready for pickup!`,
+      },
+      picked_up: {
+        title: '🚗 Out for Delivery',
+        body: `Your order #${orderId}${restaurant} is on its way to you!`,
+      },
+      delivered: {
+        title: '✅ Order Delivered',
+        body: `Your order #${orderId}${restaurant} has been delivered. Enjoy your meal!`,
+      },
+      cancelled: {
+        title: '❌ Order Cancelled',
+        body: `Your order #${orderId}${restaurant} has been cancelled.`,
+      },
+    };
+  }
+
+  // Restaurant notification messages
+  private getRestaurantNotifications(orderId: string, status: string, customerName?: string) {
+    const customer = customerName ? ` for ${customerName}` : '';
+
+    return {
+      pending: {
+        title: '🔔 New Order',
+        body: `New order #${orderId}${customer} received. Please confirm.`,
+      },
+      confirmed: {
+        title: '✅ Order Confirmed',
+        body: `Order #${orderId}${customer} confirmed. Start preparing.`,
+      },
+      preparing: {
+        title: '👨‍🍳 Preparing Order',
+        body: `Order #${orderId}${customer} is being prepared.`,
+      },
+      ready: {
+        title: '🎉 Order Ready',
+        body: `Order #${orderId}${customer} is ready for pickup.`,
+      },
+      picked_up: {
+        title: '🚗 Order Picked Up',
+        body: `Order #${orderId}${customer} has been picked up for delivery.`,
+      },
+      delivered: {
+        title: '✅ Order Delivered',
+        body: `Order #${orderId}${customer} has been delivered successfully.`,
+      },
+      cancelled: {
+        title: '❌ Order Cancelled',
+        body: `Order #${orderId}${customer} has been cancelled.`,
+      },
+    };
+  }
+
+  // Send promotion notification
+  async sendPromotionNotification(title: string, message: string, promotionId?: string): Promise<string> {
+    return this.sendLocalNotification({
+      title: `🎉 ${title}`,
+      body: message,
+      data: {
+        type: 'promotion',
+        promotionId,
+        userType: this.config.userType,
+      },
+    });
+  }
+
+  // Schedule reminder notification
+  async scheduleReminder(
+    title: string,
+    message: string,
     minutesFromNow: number,
+    data?: any
   ): Promise<string> {
     return this.sendLocalNotification({
-      title: '⏰ Rappel de commande',
-      body: `N'oubliez pas votre commande #${orderId}!`,
-      data: { orderId, type: 'reminder' },
+      title: `⏰ ${title}`,
+      body: message,
+      data: {
+        type: 'reminder',
+        userType: this.config.userType,
+        ...data
+      },
       scheduleAfter: minutesFromNow * 60,
     });
   }
@@ -247,27 +323,66 @@ class NotificationService {
     await Notifications.cancelScheduledNotificationAsync(notificationId);
   }
 
-  // Cancel all notifications for an order
-  async cancelOrderNotifications(orderId: string): Promise<void> {
-    const scheduledNotifications =
-      await Notifications.getAllScheduledNotificationsAsync();
+  // Cancel notifications by type or data
+  async cancelNotificationsByData(filterData: any): Promise<void> {
+    const scheduledNotifications = await Notifications.getAllScheduledNotificationsAsync();
 
     for (const notification of scheduledNotifications) {
-      if (notification.content.data?.orderId === orderId) {
-        await Notifications.cancelScheduledNotificationAsync(
-          notification.identifier,
-        );
+      const notificationData = notification.content.data;
+      let shouldCancel = true;
+
+      // Check if all filter criteria match
+      for (const [key, value] of Object.entries(filterData)) {
+        if (notificationData?.[key] !== value) {
+          shouldCancel = false;
+          break;
+        }
+      }
+
+      if (shouldCancel) {
+        await Notifications.cancelScheduledNotificationAsync(notification.identifier);
       }
     }
   }
-  // cancel all Notifications
-  async cancelNotifcation(): Promise<void> {
+
+  // Cancel all notifications
+  async cancelAllNotifications(): Promise<void> {
     await Notifications.cancelAllScheduledNotificationsAsync();
+  }
+
+  // Get notification statistics
+  async getNotificationStats(): Promise<{
+    scheduled: number;
+    delivered: number;
+    permissions: Notifications.NotificationPermissionsStatus;
+  }> {
+    const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+    const permissions = await Notifications.getPermissionsAsync();
+
+    return {
+      scheduled: scheduled.length,
+      delivered: 0, // This would need to be tracked separately
+      permissions,
+    };
   }
   // Get current push token
   getExpoPushToken(): string | null {
     return this.expoPushToken;
   }
+
+  // Check if service is initialized
+  isServiceInitialized(): boolean {
+    return this.isInitialized;
+  }
+
+  // Get user type
+  getUserType(): 'customer' | 'restaurant' {
+    return this.config.userType;
+  }
 }
+
+// Export singleton instances for customer and restaurant
+export const customerNotificationService = new NotificationService({ userType: 'customer' });
+export const restaurantNotificationService = new NotificationService({ userType: 'restaurant' });
 
 export default NotificationService;

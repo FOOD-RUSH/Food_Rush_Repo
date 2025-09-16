@@ -109,12 +109,8 @@ export const ServiceNavigation = {
     navigateFromService('Notifications');
   },
 
-  showCart: (fromScreen?: string) => {
-    if (fromScreen) {
-      navigateFromService('Cart', { fromScreen });
-    } else {
-      navigateFromService('Cart');
-    }
+  showCart: () => {
+    navigateFromService('Cart');
   },
 
   logout: () => {
@@ -134,8 +130,8 @@ export const ServiceNavigation = {
 // These should be used WITH the navigation prop, not instead of it
 export const createNavigationHelpers = <T extends any>(navigation: T) => ({
   // Full-screen navigation helpers
-  goToCart: (fromScreen?: string) => {
-    (navigation as any).navigate('Cart', { fromScreen });
+  goToCart: () => {
+    (navigation as any).navigate('Cart');
   },
 
   goToCheckout: (cartId?: string) => {

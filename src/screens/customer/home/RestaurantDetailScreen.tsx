@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Pressable, ScrollView, FlatList } from 'react-native-gesture-handler';
 import { Text, View, StatusBar, Dimensions, Image, Alert } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
@@ -49,15 +49,74 @@ const RestaurantDetailScreen = ({
     Alert.alert(t('share'), t('share_restaurant_functionality'));
   };
 
-  const handleViewReviews = () => {};
+  const handleViewReviews = () => {
+    navigation.navigate('RestaurantReviews', {
+      restaurantId,
+      restaurantName: restaurantDetails?.name || 'Restaurant',
+    });
+  };
 
   const handleViewLocation = () => {};
 
   const handleViewOffers = () => {};
 
-  // Since category is not in API, use 'All' only for now
-  const categories = ['All'];
-  const filteredMenuItems = restaurantDetails?.menu || [];
+  // Extract unique categories from menu items
+  const categories = useMemo(() => {
+    if (!restaurantDetails?.menu) return ['All'];
+    
+    const uniqueCategories = new Set<string>();
+    restaurantDetails.menu.forEach(item => {
+      // Try to categorize based on item name/description
+      const itemName = item.name.toLowerCase();
+      const itemDescription = item.description?.toLowerCase() || '';
+      
+      if (itemName.includes('local') || itemDescription.includes('local')) {
+        uniqueCategories.add('Local Dishes');
+      } else if (itemName.includes('snack') || itemDescription.includes('snack')) {
+        uniqueCategories.add('Snacks');
+      } else if (itemName.includes('drink') || itemDescription.includes('drink')) {
+        uniqueCategories.add('Drinks');
+      } else if (itemName.includes('breakfast') || itemDescription.includes('breakfast')) {
+        uniqueCategories.add('Breakfast');
+      } else if (itemName.includes('burger') || itemName.includes('fast')) {
+        uniqueCategories.add('Fast Food');
+      } else {
+        uniqueCategories.add('Main Dishes');
+      }
+    });
+    
+    return ['All', ...Array.from(uniqueCategories)];
+  }, [restaurantDetails?.menu]);
+
+  // Filter menu items based on selected category
+  const filteredMenuItems = useMemo(() => {
+    if (!restaurantDetails?.menu || selectedCategory === 'All') {
+      return restaurantDetails?.menu || [];
+    }
+    
+    return restaurantDetails.menu.filter(item => {
+      const itemName = item.name.toLowerCase();
+      const itemDescription = item.description?.toLowerCase() || '';
+      
+      switch (selectedCategory) {
+        case 'Local Dishes':
+          return itemName.includes('local') || itemDescription.includes('local');
+        case 'Snacks':
+          return itemName.includes('snack') || itemDescription.includes('snack');
+        case 'Drinks':
+          return itemName.includes('drink') || itemDescription.includes('drink');
+        case 'Breakfast':
+          return itemName.includes('breakfast') || itemDescription.includes('breakfast');
+        case 'Fast Food':
+          return itemName.includes('burger') || itemName.includes('fast');
+        case 'Main Dishes':
+        default:
+          return !itemName.includes('local') && !itemName.includes('snack') && 
+                 !itemName.includes('drink') && !itemName.includes('breakfast') &&
+                 !itemName.includes('burger') && !itemName.includes('fast');
+      }
+    });
+  }, [restaurantDetails?.menu, selectedCategory]);
 
   if (isLoading) {
     return <LoadingScreen />;

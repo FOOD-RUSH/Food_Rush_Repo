@@ -33,11 +33,14 @@ export const useMyOrders = (params?: {
 export const useActiveOrders = () => {
   return useQuery({
     queryKey: ['orders', 'active'],
-    queryFn: () =>
-      OrderApi.getMyOrders({
-        status: 'pending,confirmed,preparing,ready,picked_up',
-        limit: 20,
-      }),
+    queryFn: async () => {
+      // Get all orders and filter on frontend since backend doesn't support comma-separated status
+      const allOrders = await OrderApi.getMyOrders({ limit: 50 });
+      
+      // Filter for active orders (not completed/delivered/cancelled)
+      const activeStatuses = ['pending', 'confirmed', 'preparing', 'ready', 'picked_up'];
+      return allOrders.filter(order => activeStatuses.includes(order.status));
+    },
     staleTime: 15 * 1000, // 15 seconds for active orders
     gcTime: CACHE_CONFIG.CACHE_TIME,
     retry: CACHE_CONFIG.MAX_RETRIES,
@@ -50,11 +53,14 @@ export const useActiveOrders = () => {
 export const useCompletedOrders = (limit = 50) => {
   return useQuery({
     queryKey: ['orders', 'completed', limit],
-    queryFn: () =>
-      OrderApi.getMyOrders({
-        status: 'delivered',
-        limit,
-      }),
+    queryFn: async () => {
+      // Get all orders and filter on frontend
+      const allOrders = await OrderApi.getMyOrders({ limit });
+      
+      // Filter for completed orders
+      const completedStatuses = ['delivered', 'cancelled'];
+      return allOrders.filter(order => completedStatuses.includes(order.status));
+    },
     staleTime: 5 * 60 * 1000, // 5 minutes for completed orders
     gcTime: 10 * 60 * 1000,
     retry: CACHE_CONFIG.MAX_RETRIES,

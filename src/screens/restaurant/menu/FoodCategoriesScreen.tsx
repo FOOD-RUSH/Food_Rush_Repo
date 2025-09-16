@@ -22,7 +22,7 @@ const FoodCategoriesScreen = () => {
     }).start();
   }, []);
 
-  const renderCategory = (category: Category, index: number) => {
+  const CategoryItem = ({ category, index }: { category: Category; index: number }) => {
     const scaleAnim = useRef(new Animated.Value(0.9)).current;
 
     useEffect(() => {
@@ -31,14 +31,13 @@ const FoodCategoriesScreen = () => {
         delay: index * 100,
         useNativeDriver: true,
       }).start();
-    }, []);
+    }, [index, scaleAnim]);
 
     return (
       <Animated.View
         style={{
           transform: [{ scale: scaleAnim }],
         }}
-        key={category.id}
       >
         <View className="flex-row items-center bg-white p-4 rounded-xl mb-3 shadow-sm">
           <View className="w-12 h-12 bg-blue-100 rounded-full items-center justify-center">
@@ -114,7 +113,9 @@ const FoodCategoriesScreen = () => {
 
         {/* Categories List */}
         <View>
-          {categories.map((category, index) => renderCategory(category, index))}
+          {categories.map((category, index) => (
+            <CategoryItem key={category.id} category={category} index={index} />
+          ))}
         </View>
       </Animated.View>
     </CommonView>

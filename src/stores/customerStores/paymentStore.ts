@@ -25,7 +25,7 @@ interface PaymentActions {
 
 const initialState: PaymentState = {
   paymentMethods: ['mtn_mobile_money', 'orange_money'],
-  selectedPaymentMethod: null,
+  selectedPaymentMethod: 'mtn_mobile_money', // Default to MTN Mobile Money
   isPaymentLoading: false,
   paymentError: null,
 };

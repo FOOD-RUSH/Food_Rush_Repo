@@ -12,6 +12,8 @@ import { LanguageProvider } from '@/src/contexts/LanguageContext';
 import { BottomSheetProvider } from '@/src/components/common/BottomSheet/BottomSheetContext';
 import { AppStateProvider } from '@/src/contexts/AppStateContext';
 import { PerformanceProvider } from '@/src/contexts/PerformanceContext';
+import { CartReminderProvider } from '@/src/contexts/CartReminderProvider';
+import { NotificationProvider } from '@/src/contexts/NotificationContext';
 import i18n from '@/src/locales/i18n';
 
 interface AppContextProviderProps {
@@ -48,7 +50,11 @@ const AppStateProviders = memo<AppContextProviderProps>(({ children }) => {
       <PerformanceProvider>
         <LanguageProvider>
           <ThemeProvider>
-            <NetworkProvider>{children}</NetworkProvider>
+            <NetworkProvider>
+              <NotificationProvider>
+                <CartReminderProvider>{children}</CartReminderProvider>
+              </NotificationProvider>
+            </NetworkProvider>
           </ThemeProvider>
         </LanguageProvider>
       </PerformanceProvider>

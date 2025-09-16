@@ -21,7 +21,11 @@ import {
   useOnboardingComplete,
   useAppUserType,
 } from '../stores/customerStores/AppStore';
-import { useIsAuthenticated } from '../stores/customerStores/AuthStore';
+import {
+  useIsAuthenticated,
+  useUserType,
+  useAuthLoading,
+} from '../stores/customerStores/AuthStore';
 import { useCartStore } from '../stores/customerStores/cartStore';
 
 // Navigators
@@ -38,10 +42,12 @@ import OnboardingScreen from '../components/onBoardingScreen';
 // Full-screen screens (no tabs)
 import CheckOutScreen from '../screens/customer/home/CheckOutScreen';
 import SearchScreen from '@/src/screens/customer/home/SearchScreen';
+import CategoryMenuScreen from '@/src/screens/customer/home/CategoryMenuScreen';
 import CartScreen from '../screens/customer/home/CartScreen';
-import NotificationsScreen from '../screens/restaurant/profile/NotificationsScreen';
+import NotificationScreen from '../screens/customer/home/NotificationScreen';
 import FoodDetailsScreen from '../screens/customer/home/FoodDetailsScreen';
 import RestaurantDetailScreen from '../screens/customer/home/RestaurantDetailScreen';
+import RestaurantReviewsScreen from '../screens/customer/home/RestaurantReviewsScreen';
 import NearbyRestaurantsScreen from '../screens/customer/home/NearbyRestaurantsScreen';
 import OrderTrackingScreen from '../screens/customer/Order/OrderTrackingScreen';
 
@@ -153,9 +159,14 @@ const RootNavigator: React.FC = () => {
   const isAuthenticated = useIsAuthenticated();
   const hasHydrated = useHasHydrated();
   const isOnboardingComplete = useOnboardingComplete();
-  const userType = useAppUserType();
+  const authUserType = useUserType(); // Primary source from AuthStore
+  const appUserType = useAppUserType(); // Secondary source from AppStore
+  const isAuthLoading = useAuthLoading();
   const themeMode = useAppStore((state) => state.theme);
   const { t } = useTranslation('translation');
+
+  // Use AuthStore as primary source for user type, fallback to AppStore
+  const userType = authUserType || appUserType;
 
   // Cart store actions
   const clearCart = useCartStore((state) => state.clearCart);
@@ -163,6 +174,13 @@ const RootNavigator: React.FC = () => {
 
   // App store actions
   const { completeOnboarding, setUserType } = useAppStore();
+
+  // Synchronize user type between stores
+  React.useEffect(() => {
+    if (authUserType && authUserType !== appUserType) {
+      setUserType(authUserType);
+    }
+  }, [authUserType, appUserType, setUserType]);
 
   // Theme
   const theme = useAppTheme(themeMode);
@@ -239,23 +257,39 @@ const RootNavigator: React.FC = () => {
 
   // Determine initial route name based on app state
   const getInitialRouteName = useCallback((): keyof RootStackParamList => {
+    // If auth is loading, we'll handle this in the render logic
+    if (isAuthLoading) {
+      return 'Auth'; // Temporary, will show loading screen
+    }
+
+    // If not authenticated, go to auth
     if (!isAuthenticated) {
-      console.log('navigating to login');
+      console.log('User not authenticated, navigating to Auth');
       return 'Auth';
     }
 
+    // If authenticated but no user type, go to auth to re-select
+    if (!userType) {
+      console.log('User authenticated but no user type, navigating to Auth');
+      return 'Auth';
+    }
+
+    // Navigate based on user type
     switch (userType) {
       case 'customer':
+        console.log('Navigating to CustomerApp');
         return 'CustomerApp';
       case 'restaurant':
+        console.log('Navigating to RestaurantApp');
         return 'RestaurantApp';
       default:
+        console.log('Unknown user type, navigating to Auth');
         return 'Auth';
     }
-  }, [isAuthenticated, userType]);
+  }, [isAuthenticated, userType, isAuthLoading]);
 
-  // Render loading screen while hydrating
-  if (!hasHydrated) {
+  // Render loading screen while hydrating or auth is loading
+  if (!hasHydrated || isAuthLoading) {
     return <LoadingScreen />;
   }
 
@@ -317,7 +351,7 @@ const RootNavigator: React.FC = () => {
 
             <Stack.Screen
               name="Notifications"
-              component={NotificationsScreen}
+              component={NotificationScreen}
               options={{
                 headerTitle: t('notifications'),
               }}
@@ -329,6 +363,20 @@ const RootNavigator: React.FC = () => {
             name="SearchScreen"
             component={SearchScreen}
             options={screenOptions.fullScreen}
+          />
+
+          <Stack.Screen
+            name="CategoryMenu"
+            component={CategoryMenuScreen}
+            options={{
+              presentation: 'fullScreenModal',
+              headerShown: true,
+              gestureEnabled: true,
+              animation: 'slide_from_bottom',
+              contentStyle: {
+                marginTop: -34
+              }
+            }}
           />
 
           {/* Card Presentation Screens */}
@@ -379,6 +427,14 @@ const RootNavigator: React.FC = () => {
               options={{
                 headerTitle: '',
                 ...screenOptions.fullScreen,
+              }}
+            />
+
+            <Stack.Screen
+              name="RestaurantReviews"
+              component={RestaurantReviewsScreen}
+              options={{
+                headerShown: false,
               }}
             />
           </Stack.Group>

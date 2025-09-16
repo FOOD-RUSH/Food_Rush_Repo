@@ -1,122 +1,135 @@
-import { Dimensions, PixelRatio, Platform } from 'react-native';
+import { useWindowDimensions } from 'react-native';
+import { useMemo } from 'react';
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-
-// Breakpoint definitions for consistent responsive behavior
-export const breakpoints = {
-  xs: 375,
-  sm: 640,
-  md: 768,
-  lg: 1024,
-  xl: 1280,
-  '2xl': 1536,
+// Breakpoint definitions based on common device sizes
+export const BREAKPOINTS = {
+  xs: 0,     // Small phones (iPhone SE, small Android)
+  sm: 576,   // Large phones (iPhone 12, Pixel)
+  md: 768,   // Tablets (iPad Mini, small tablets)
+  lg: 992,   // Large tablets (iPad Pro, large tablets)
+  xl: 1200,  // Desktop/Large screens
 } as const;
 
-// Guideline sizes based on iPhone 6/7/8 dimensions
-const guidelineBaseWidth = 375;
-const guidelineBaseHeight = 812;
+export type Breakpoint = keyof typeof BREAKPOINTS;
 
-// Responsive scale functions
-export const scale = (size: number): number => {
-  const scaleFactor = SCREEN_WIDTH / guidelineBaseWidth;
-  return Math.round(PixelRatio.roundToNearestPixel(size * scaleFactor));
+// Hook to get current breakpoint
+export const useBreakpoint = (): Breakpoint => {
+  const { width } = useWindowDimensions();
+  
+  return useMemo(() => {
+    if (width >= BREAKPOINTS.xl) return 'xl';
+    if (width >= BREAKPOINTS.lg) return 'lg';
+    if (width >= BREAKPOINTS.md) return 'md';
+    if (width >= BREAKPOINTS.sm) return 'sm';
+    return 'xs';
+  }, [width]);
 };
 
-export const verticalScale = (size: number): number => {
-  const scaleFactor = SCREEN_HEIGHT / guidelineBaseHeight;
-  return Math.round(PixelRatio.roundToNearestPixel(size * scaleFactor));
+// Hook to check if current screen is at least a certain breakpoint
+export const useBreakpointValue = <T>(values: Partial<Record<Breakpoint, T>>): T | undefined => {
+  const breakpoint = useBreakpoint();
+  
+  return useMemo(() => {
+    // Try current breakpoint first
+    if (values[breakpoint] !== undefined) {
+      return values[breakpoint];
+    }
+    
+    // Fallback to smaller breakpoints
+    const breakpointOrder: Breakpoint[] = ['xl', 'lg', 'md', 'sm', 'xs'];
+    const currentIndex = breakpointOrder.indexOf(breakpoint);
+    
+    for (let i = currentIndex + 1; i < breakpointOrder.length; i++) {
+      const fallbackBreakpoint = breakpointOrder[i];
+      if (values[fallbackBreakpoint] !== undefined) {
+        return values[fallbackBreakpoint];
+      }
+    }
+    
+    return undefined;
+  }, [breakpoint, values]);
 };
 
-export const moderateScale = (size: number, factor = 0.5): number => {
-  return size + (scale(size) - size) * factor;
+// Hook to get responsive dimensions
+export const useResponsiveDimensions = () => {
+  const { width, height } = useWindowDimensions();
+  const breakpoint = useBreakpoint();
+  
+  return useMemo(() => ({
+    width,
+    height,
+    breakpoint,
+    isPhone: breakpoint === 'xs' || breakpoint === 'sm',
+    isTablet: breakpoint === 'md' || breakpoint === 'lg',
+    isDesktop: breakpoint === 'xl',
+    isLandscape: width > height,
+    isPortrait: height > width,
+  }), [width, height, breakpoint]);
 };
 
-// Device type detection
-export const isSmallDevice = SCREEN_WIDTH < breakpoints.sm;
-export const isMediumDevice =
-  SCREEN_WIDTH >= breakpoints.sm && SCREEN_WIDTH < breakpoints.md;
-export const isLargeDevice = SCREEN_WIDTH >= breakpoints.md;
-export const isTablet = SCREEN_WIDTH >= breakpoints.lg;
-export const isLandscape = SCREEN_WIDTH > SCREEN_HEIGHT;
-
-// Touch target sizes (accessibility compliant)
-export const touchTargets = {
-  minSize: Platform.OS === 'ios' ? 44 : 48,
-  preferredSize: isSmallDevice ? 44 : 48,
-  largeSize: isSmallDevice ? 48 : 56,
-};
-
-// Spacing scale based on device size
-export const getResponsiveSpacing = (baseSize: number) => {
-  if (isSmallDevice) return baseSize * 0.8;
-  if (isTablet) return baseSize * 1.2;
-  return baseSize;
-};
-
-// Font size scaling
-export const getResponsiveFontSize = (baseSize: number) => {
-  const scaleFactor = Math.min(
-    SCREEN_WIDTH / guidelineBaseWidth,
-    SCREEN_HEIGHT / guidelineBaseHeight,
-  );
-  return Math.round(PixelRatio.roundToNearestPixel(baseSize * scaleFactor));
-};
-
-// Container width calculations
-export const getContainerWidth = (maxWidth?: number) => {
-  const defaultMaxWidth = isTablet ? 800 : 375;
-  const targetWidth = maxWidth || defaultMaxWidth;
-  return Math.min(SCREEN_WIDTH - 32, targetWidth); // 32px for padding
-};
-
-// Grid calculations
-export const getGridColumns = (preferredColumns: number) => {
-  if (isSmallDevice) return 1;
-  if (isTablet) return Math.min(preferredColumns, 3);
-  return preferredColumns;
-};
-
-// Image size calculations
-export const getResponsiveImageSize = (baseSize: number) => {
-  const scaleFactor = SCREEN_WIDTH / guidelineBaseWidth;
-  const scaledSize = baseSize * scaleFactor;
-  return Math.min(scaledSize, baseSize * 1.5); // Cap at 150% of base size
-};
-
-// Safe area calculations
-export const getSafeAreaInsets = () => {
-  const topInset = Platform.OS === 'ios' ? (isSmallDevice ? 44 : 47) : 24;
-  const bottomInset = Platform.OS === 'ios' ? (isSmallDevice ? 34 : 44) : 24;
-  return { top: topInset, bottom: bottomInset };
-};
-
-// Performance optimized dimension updates
-let currentDimensions = { width: SCREEN_WIDTH, height: SCREEN_HEIGHT };
-
-export const updateDimensions = () => {
-  const newDimensions = Dimensions.get('window');
-  currentDimensions = newDimensions;
-  return newDimensions;
-};
-
-export const getCurrentDimensions = () => currentDimensions;
-
-// Utility for creating responsive style objects
-export const createResponsiveStyle = <T extends Record<string, any>>(
-  styles: T,
-  responsiveOverrides?: Partial<Record<keyof typeof breakpoints, Partial<T>>>,
-): T => {
-  if (!responsiveOverrides) return styles;
-
-  const currentBreakpoint = Object.entries(breakpoints)
-    .reverse()
-    .find(
-      ([, width]) => SCREEN_WIDTH >= width,
-    )?.[0] as keyof typeof breakpoints;
-
-  if (currentBreakpoint && responsiveOverrides[currentBreakpoint]) {
-    return { ...styles, ...responsiveOverrides[currentBreakpoint] };
+// Utility to get responsive spacing
+export const getResponsiveSpacing = (breakpoint: Breakpoint): number => {
+  switch (breakpoint) {
+    case 'xs': return 8;
+    case 'sm': return 12;
+    case 'md': return 16;
+    case 'lg': return 20;
+    case 'xl': return 24;
+    default: return 16;
   }
+};
 
-  return styles;
+// Utility to get responsive font sizes
+export const getResponsiveFontSize = (
+  variant: 'h1' | 'h2' | 'h3' | 'h4' | 'body' | 'caption',
+  breakpoint: Breakpoint
+): number => {
+  const fontSizes = {
+    h1: { xs: 24, sm: 28, md: 32, lg: 36, xl: 40 },
+    h2: { xs: 20, sm: 24, md: 28, lg: 32, xl: 36 },
+    h3: { xs: 18, sm: 20, md: 24, lg: 28, xl: 32 },
+    h4: { xs: 16, sm: 18, md: 20, lg: 24, xl: 28 },
+    body: { xs: 14, sm: 16, md: 16, lg: 18, xl: 20 },
+    caption: { xs: 12, sm: 14, md: 14, lg: 16, xl: 18 },
+  };
+  
+  return fontSizes[variant][breakpoint];
+};
+
+// Utility to get responsive grid columns
+export const getResponsiveColumns = (
+  columns: Partial<Record<Breakpoint, number>>,
+  breakpoint: Breakpoint
+): number => {
+  return columns[breakpoint] || columns.xs || 1;
+};
+
+// Utility to get container max width
+export const getContainerMaxWidth = (breakpoint: Breakpoint): number => {
+  switch (breakpoint) {
+    case 'xs': return BREAKPOINTS.sm;
+    case 'sm': return BREAKPOINTS.md;
+    case 'md': return BREAKPOINTS.lg;
+    case 'lg': return BREAKPOINTS.xl;
+    case 'xl': return 1400; // Max container width
+    default: return BREAKPOINTS.sm;
+  }
+};
+
+// Utility for responsive padding/margin
+export const getResponsivePadding = (
+  size: 'xs' | 'sm' | 'md' | 'lg' | 'xl',
+  breakpoint: Breakpoint
+): number => {
+  const basePadding = getResponsiveSpacing(breakpoint);
+  
+  const multipliers = {
+    xs: 0.5,
+    sm: 0.75,
+    md: 1,
+    lg: 1.5,
+    xl: 2,
+  };
+  
+  return basePadding * multipliers[size];
 };

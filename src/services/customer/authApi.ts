@@ -76,7 +76,15 @@ export const authApi = {
   },
 
   refreshToken: (refreshToken: string) => {
-    return apiClient.post<{ accessToken: string }>('/auth/refresh-token', {
+    return apiClient.post<{
+      status_code: number;
+      message: string;
+      data: {
+        accessToken: string;
+        refreshToken: string;
+        user: User;
+      };
+    }>('/auth/refresh-token', {
       refreshToken,
     });
   },
@@ -107,6 +115,15 @@ export const authApi = {
     return apiClient.post<ChangePasswordResponse>('/auth/reset-password', {
       ...data,
     });
+  },
+
+  // Resend verification OTP
+  resendVerification: (email: string) => {
+    return apiClient.post<{
+      status_code: number;
+      message: string;
+      data?: any;
+    }>('/auth/resend-verification', { email });
   },
 
   // Social authentication

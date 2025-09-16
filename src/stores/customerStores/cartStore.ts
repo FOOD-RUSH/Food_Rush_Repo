@@ -3,6 +3,7 @@ import { Alert } from 'react-native';
 import { create } from 'zustand';
 import { createJSONStorage, devtools, persist } from 'zustand/middleware';
 import { MenuProps } from '../../types';
+import { cartReminderService } from '../../services/customer/cartReminderService';
 
 export interface CartItem {
   id: string;
@@ -15,8 +16,10 @@ export interface CartItem {
 interface CartState {
   items: CartItem[];
   restaurantID: string | null;
+  restaurantName: string | null;
   lastActivity: number;
   error: string | null;
+  reminderEnabled: boolean;
 }
 
 interface CartActions {
@@ -30,6 +33,11 @@ interface CartActions {
   canAddItem: (item: MenuProps) => boolean;
   isItemInCart: (foodId: string) => boolean;
   getItemQuantityInCart: (foodId: string) => number;
+  // Cart reminder actions
+  enableReminders: () => void;
+  disableReminders: () => void;
+  scheduleCartReminders: () => Promise<void>;
+  cancelCartReminders: () => Promise<void>;
 }
 
 // Helper functions
@@ -43,15 +51,37 @@ const calculateCartTotal = (items: CartItem[]): number => {
   return items.reduce((sum, item) => sum + calculateItemTotal(item), 0);
 };
 
-const updateActivity = (set: any) => {
-  set({ lastActivity: Date.now() });
+const updateActivity = (set: any, get: any) => {
+  const now = Date.now();
+  set({ lastActivity: now });
+  
+  // Schedule cart reminders when activity is updated
+  const state = get();
+  if (state.reminderEnabled && state.items.length > 0) {
+    // Use setTimeout to avoid blocking the UI
+    setTimeout(() => {
+      cartReminderService.scheduleCartReminders(
+        state.items.reduce((sum: number, item: CartItem) => sum + item.quantity, 0),
+        state.restaurantName || undefined,
+        now
+      ).catch(error => {
+        console.error('Failed to schedule cart reminders:', error);
+      });
+    }, 100);
+  }
 };
 
 const clearCartState = (set: any) => {
   set({
     items: [],
     restaurantID: null,
+    restaurantName: null,
     lastActivity: Date.now(),
+  });
+  
+  // Cancel cart reminders when cart is cleared
+  cartReminderService.cancelAllCartReminders().catch(error => {
+    console.error('Failed to cancel cart reminders:', error);
   });
 };
 
@@ -62,8 +92,10 @@ export const useCartStore = create<CartState & CartActions>()(
         // Initial state
         items: [],
         restaurantID: null,
+        restaurantName: null,
         lastActivity: Date.now(),
         error: null,
+        reminderEnabled: true, // Enable reminders by default
 
         canAddItem: (item) => {
           const { restaurantID, items } = get();
@@ -132,7 +164,7 @@ export const useCartStore = create<CartState & CartActions>()(
                           : cartItem,
                       );
                       set({ items: updatedItems });
-                      updateActivity(set);
+                      updateActivity(set, get);
                       Alert.alert(
                         'Updated Successfully', 
                         `Added ${quantity} more "${item.name}" to your cart. Total quantity: ${newTotalQuantity}`,
@@ -154,7 +186,7 @@ export const useCartStore = create<CartState & CartActions>()(
                           : cartItem,
                       );
                       set({ items: updatedItems });
-                      updateActivity(set);
+                      updateActivity(set, get);
                       Alert.alert(
                         'Updated Successfully', 
                         `Updated "${item.name}" quantity to ${quantity} in your cart`,
@@ -177,13 +209,16 @@ export const useCartStore = create<CartState & CartActions>()(
               };
               newItems = [...items, newItem];
 
-              // Set restaurant ID if first item
+              // Set restaurant ID and name if first item
               if (items.length === 0) {
-                set({ restaurantID: item.restaurantId || null });
+                set({ 
+                  restaurantID: item.restaurantId || null,
+                  restaurantName: item.restaurantName || null
+                });
               }
 
               set({ items: newItems });
-              updateActivity(set);
+              updateActivity(set, get);
               Alert.alert('Success', 'Successfully added item to cart', [{ text: 'OK' }]);
             }
           } catch (error: any) {
@@ -204,7 +239,7 @@ export const useCartStore = create<CartState & CartActions>()(
             );
 
             set({ items: newItems });
-            updateActivity(set);
+            updateActivity(set, get);
           } catch (error: any) {
             set({ error: error.message || 'Failed to modify cart item' });
           }
@@ -219,7 +254,7 @@ export const useCartStore = create<CartState & CartActions>()(
               clearCartState(set);
             } else {
               set({ items: filteredItems });
-              updateActivity(set);
+              updateActivity(set, get);
             }
           } catch (error: any) {
             set({ error: error.message || 'Failed to delete item from cart' });
@@ -235,7 +270,7 @@ export const useCartStore = create<CartState & CartActions>()(
               clearCartState(set);
             } else {
               set({ items: filteredItems });
-              updateActivity(set);
+              updateActivity(set, get);
             }
           } catch (error: any) {
             set({ error: error.message || 'Failed to delete item from cart' });
@@ -264,6 +299,57 @@ export const useCartStore = create<CartState & CartActions>()(
           const item = items.find((item) => item.menuItem.id === foodId);
           return item ? item.quantity : 0;
         },
+
+        // Cart reminder actions
+        enableReminders: () => {
+          set({ reminderEnabled: true });
+          // Schedule reminders for current cart if it has items
+          const state = get();
+          if (state.items.length > 0) {
+            setTimeout(() => {
+              cartReminderService.scheduleCartReminders(
+                state.items.reduce((sum, item) => sum + item.quantity, 0),
+                state.restaurantName || undefined,
+                state.lastActivity
+              ).catch(error => {
+                console.error('Failed to schedule cart reminders:', error);
+              });
+            }, 100);
+          }
+        },
+
+        disableReminders: () => {
+          set({ reminderEnabled: false });
+          // Cancel all existing reminders
+          cartReminderService.cancelAllCartReminders().catch(error => {
+            console.error('Failed to cancel cart reminders:', error);
+          });
+        },
+
+        scheduleCartReminders: async () => {
+          const state = get();
+          if (state.reminderEnabled && state.items.length > 0) {
+            try {
+              await cartReminderService.scheduleCartReminders(
+                state.items.reduce((sum, item) => sum + item.quantity, 0),
+                state.restaurantName || undefined,
+                state.lastActivity
+              );
+            } catch (error) {
+              console.error('Failed to schedule cart reminders:', error);
+              set({ error: 'Failed to schedule cart reminders' });
+            }
+          }
+        },
+
+        cancelCartReminders: async () => {
+          try {
+            await cartReminderService.cancelAllCartReminders();
+          } catch (error) {
+            console.error('Failed to cancel cart reminders:', error);
+            set({ error: 'Failed to cancel cart reminders' });
+          }
+        },
       }),
       {
         name: 'cart-store',
@@ -271,6 +357,9 @@ export const useCartStore = create<CartState & CartActions>()(
         partialize: (state) => ({
           items: state.items,
           restaurantID: state.restaurantID,
+          restaurantName: state.restaurantName,
+          lastActivity: state.lastActivity,
+          reminderEnabled: state.reminderEnabled,
         }),
       },
     ),
@@ -302,3 +391,13 @@ export const useIsItemInCart = (foodId: string) =>
 
 export const useItemQuantityInCart = (foodId: string) =>
   useCartStore((state) => state.getItemQuantityInCart(foodId));
+
+// Cart reminder selectors
+export const useCartReminderEnabled = () => 
+  useCartStore((state) => state.reminderEnabled);
+
+export const useCartRestaurantName = () => 
+  useCartStore((state) => state.restaurantName);
+
+export const useCartLastActivity = () => 
+  useCartStore((state) => state.lastActivity);

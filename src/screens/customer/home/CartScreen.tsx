@@ -46,17 +46,9 @@ const CartScreen = ({ navigation }: RootStackScreenProps<'Cart'>) => {
       return;
     }
 
-    if (restaurantID) {
-      navigation.navigate('Checkout', { cartId: restaurantID });
-    } else {
-      Toast.show({
-        type: 'error',
-        text1: t('error') || 'Error',
-        text2:
-          t('unable_to_proceed_to_checkout') || 'Unable to proceed to checkout',
-        position: 'top',
-      });
-    }
+    // Always proceed to checkout if there are items, even without restaurantID
+    // The checkout screen can handle missing restaurant info
+    navigation.navigate('Checkout', { cartId: restaurantID || 'unknown' });
   }, [cartItems.length, restaurantID, navigation, t]);
 
   // Optimized render item with useCallback to prevent unnecessary re-renders

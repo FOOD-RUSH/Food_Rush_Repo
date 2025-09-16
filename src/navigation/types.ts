@@ -27,6 +27,9 @@ export type RootStackParamList = {
     categoryId?: string;
     type: 'search' | 'category';
   };
+  CategoryMenu: {
+    categoryTitle: string;
+  };
   // profile screens
   EditProfile: undefined;
   ProfileDetails: undefined;
@@ -44,6 +47,10 @@ export type RootStackParamList = {
     restaurantId?: string;
     restaurantName?: string;
     restaurantImage?: string;
+  };
+  RestaurantReviews: {
+    restaurantId: string;
+    restaurantName: string;
   };
 };
 

@@ -28,6 +28,8 @@
       }
     },
     "android": {
+      "package": "com.mrcalculus.foodrush",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/Foodrushlogo.png",
         "backgroundColor": "#06102b"

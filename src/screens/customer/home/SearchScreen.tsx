@@ -18,6 +18,7 @@ import SearchInput from '@/src/components/customer/SearchInput';
 import FilterModal, {
   GeneralFilterOptions,
 } from '@/src/components/customer/FilterModal';
+import { getAllCategories } from '@/src/constants/categories';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import { FoodProps } from '@/src/types';
 import { useGetAllMenu } from '@/src/hooks/customer';
@@ -50,6 +51,29 @@ const useSearchFood = (query: string, filters: GeneralFilterOptions) => {
           item.description?.toLowerCase().includes(searchTerm) ||
           item.restaurant?.name.toLowerCase().includes(searchTerm),
       );
+    }
+
+    // Apply category filter
+    if (filters.category) {
+      results = results.filter((item) => {
+        const itemName = item.name.toLowerCase();
+        const itemDescription = item.description?.toLowerCase() || '';
+        
+        switch (filters.category) {
+          case 'local-dishes':
+            return itemName.includes('local') || itemDescription.includes('local');
+          case 'snacks':
+            return itemName.includes('snack') || itemDescription.includes('snack');
+          case 'drinks':
+            return itemName.includes('drink') || itemDescription.includes('drink');
+          case 'breakfast':
+            return itemName.includes('breakfast') || itemDescription.includes('breakfast');
+          case 'fast-food':
+            return itemName.includes('burger') || itemName.includes('fast');
+          default:
+            return itemName.includes(filters.category) || itemDescription.includes(filters.category);
+        }
+      });
     }
 
     // Apply price range filter
@@ -167,6 +191,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
     deliveryTime: 'any',
     deliveryFee: 'any',
     distanceRange: 'any',
+    category: null,
   });
 
   const { results, isPending, isRefetching, error, refetch } = useSearchFood(
@@ -205,6 +230,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
   // Check if any filters are active
   const hasActiveFilters = useMemo(() => {
     return (
+      filters.category !== null ||
       filters.priceRange !== null ||
       filters.deliveryTime !== 'any' ||
       filters.deliveryFee !== 'any' ||
@@ -214,6 +240,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
 
   const getActiveFiltersCount = useMemo(() => {
     let count = 0;
+    if (filters.category) count++;
     if (filters.priceRange) count++;
     if (filters.deliveryTime !== 'any') count++;
     if (filters.deliveryFee !== 'any') count++;
@@ -308,6 +335,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
           ]}
           onPress={() => {
             setFilters({
+              category: null,
               priceRange: null,
               deliveryTime: 'any',
               deliveryFee: 'any',

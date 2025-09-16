@@ -1,87 +1,52 @@
 import { apiClient } from './apiClient';
+import type { 
+  Notification, 
+  NotificationResponse, 
+  UnreadCountResponse 
+} from '@/src/types';
 
-export interface Notification {
-  id: string;
-  title: string;
+export interface NotificationListParams {
+  limit?: number;
+  page?: number;
+}
+
+export interface NotificationApiResponse {
+  status_code: number;
   message: string;
-  type: 'order' | 'promotion' | 'system' | 'delivery';
-  isRead: boolean;
-  createdAt: string;
-  orderId?: string;
-  deepLink?: string;
-}
-
-export interface NotificationPreferences {
-  orderUpdates: boolean;
-  promotions: boolean;
-  systemAlerts: boolean;
-  deliveryUpdates: boolean;
-}
-
-export interface NotificationSettings {
-  pushEnabled: boolean;
-  emailEnabled: boolean;
-  smsEnabled: boolean;
-  preferences: NotificationPreferences;
+  data?: any;
 }
 
 export const notificationApi = {
-  // Get all notifications for user
-  getNotifications: (userId: string) => {
-    return apiClient.get<Notification[]>(`/notifications/user/${userId}`);
-  },
-
-  // Mark notification as read
-  markAsRead: (notificationId: string) => {
-    return apiClient.patch<Notification>(
-      `/notifications/${notificationId}/read`,
-      {},
-    );
-  },
-
-  // Mark all notifications as read
-  markAllAsRead: (userId: string) => {
-    return apiClient.patch<void>(`/notifications/user/${userId}/read-all`, {});
-  },
-
-  // Delete notification
-  deleteNotification: (notificationId: string) => {
-    return apiClient.delete<void>(`/notifications/${notificationId}`);
-  },
-
-  // Get notification settings
-  getSettings: (userId: string) => {
-    return apiClient.get<NotificationSettings>(
-      `/notifications/settings/${userId}`,
-    );
-  },
-
-  // Update notification settings
-  updateSettings: (userId: string, settings: Partial<NotificationSettings>) => {
-    return apiClient.patch<NotificationSettings>(
-      `/notifications/settings/${userId}`,
-      settings,
-    );
-  },
-
-  // Get unread notification count
-  getUnreadCount: (userId: string) => {
-    return apiClient.get<number>(`/notifications/unread-count/${userId}`);
-  },
-
-  // Subscribe to push notifications
-  subscribeToPush: (userId: string, token: string) => {
-    return apiClient.post<void>(`/notifications/push/subscribe`, {
-      userId,
-      token,
+  // GET /my - Get notifications with pagination
+  getNotifications: async (params: NotificationListParams = { limit: 20, page: 1 }) => {
+    const response = await apiClient.get<NotificationResponse>('/notifications/my', {
+      params,
     });
+    return response.data;
   },
 
-  // Unsubscribe from push notifications
-  unsubscribeFromPush: (userId: string, token: string) => {
-    return apiClient.post<void>(`/notifications/push/unsubscribe`, {
-      userId,
-      token,
-    });
+  // PATCH /:id/read - Mark a specific notification as read
+  markAsRead: async (notificationId: string) => {
+    const response = await apiClient.patch<NotificationApiResponse>(
+      `/notifications/${notificationId}/read`
+    );
+    return response.data;
+  },
+
+  // PATCH /read-all - Mark all notifications as read for authenticated user
+  markAllAsRead: async () => {
+    const response = await apiClient.patch<NotificationApiResponse>(
+      '/notifications/read-all'
+    );
+    return response.data;
+  },
+
+  // GET /unread-count - Get number of unread notifications for authenticated user
+  getUnreadCount: async () => {
+    const response = await apiClient.get<UnreadCountResponse>('/notifications/unread-count');
+    return response.data;
   },
 };
+
+// Export types for convenience
+export type { Notification, NotificationResponse, UnreadCountResponse };

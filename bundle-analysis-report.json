@@ -1,0 +1,33 @@
+{
+  "timestamp": "2025-09-16T09:39:18.725Z",
+  "totalDependencies": 69,
+  "analysis": {
+    "unused": [],
+    "restaurantOnly": [],
+    "large": [
+      {
+        "name": "@expo/vector-icons",
+        "used": true,
+        "version": "^14.1.0"
+      },
+      {
+        "name": "react-native-reanimated",
+        "used": true,
+        "version": "~3.17.4"
+      },
+      {
+        "name": "react-native-paper",
+        "used": true,
+        "version": "^5.14.5"
+      }
+    ],
+    "recommendations": []
+  },
+  "recommendations": [
+    "Remove unused dependencies",
+    "Implement code splitting by user type",
+    "Optimize icon usage with tree shaking",
+    "Implement responsive image loading",
+    "Use lazy loading for non-critical components"
+  ]
+}

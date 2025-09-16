@@ -1,7 +1,6 @@
 import {
   View,
   Text,
-  Image,
   ScrollView,
   TouchableOpacity,
   Animated,
@@ -37,7 +36,7 @@ export const AddFoodScreen = () => {
   }, []);
 
   return (
-    <CommonView>
+    <CommonView >
       <ScrollView showsVerticalScrollIndicator={false}>
         <Animated.View
           style={{

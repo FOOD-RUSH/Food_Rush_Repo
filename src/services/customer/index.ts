@@ -5,6 +5,7 @@ export * from './apiClient';
 export * from './authApi';
 export * from './restaurant.service';
 export * from './notification.service';
+export * from './cartReminderService';
 export * from './orders.service';
 
 // Location service is now available at @/src/location

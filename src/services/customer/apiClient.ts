@@ -6,6 +6,7 @@ import axios, {
 } from 'axios';
 import { Platform } from 'react-native';
 import TokenManager from './tokenManager';
+import { User } from '../../types';
 
 // Define error types
 export interface ApiError {
@@ -15,20 +16,36 @@ export interface ApiError {
   details?: any;
 }
 
+// Define refresh token response type
+interface RefreshTokenResponse {
+  status_code: number;
+  message: string;
+  data: {
+    accessToken: string;
+    refreshToken: string;
+    user: User;
+  };
+}
+
 class ApiClient {
   private client: AxiosInstance;
   private isRefreshing = false;
   private refreshSubscribers: ((token: string) => void)[] = [];
-
+  
   constructor() {
     this.client = axios.create({
       baseURL:
         process.env.EXPO_PUBLIC_API_URL ||
         'https://foodrush-be.onrender.com/api/v1',
-      timeout: 15000,
+      timeout: 30000, // Increased timeout for production
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Cache-Control': 'no-cache',
       },
+      // Security headers
+      withCredentials: false,
+      maxRedirects: 0,
     });
 
     this.setupInterceptors();
@@ -42,9 +59,11 @@ class ApiClient {
         if (token && config.headers) {
           config.headers.Authorization = `Bearer ${token}`;
         }
+        // Add security and tracking headers
         config.headers['X-Device-Platform'] = Platform.OS;
         config.headers['X-App-Version'] =
           process.env.EXPO_PUBLIC_APP_VERSION || '1.0.0';
+        
         return config;
       },
       (error) => Promise.reject(error),
@@ -52,7 +71,9 @@ class ApiClient {
 
     // Response interceptor with improved token refresh logic
     this.client.interceptors.response.use(
-      (response: AxiosResponse) => response,
+      (response: AxiosResponse) => {
+        return response;
+      },
       async (error: AxiosError) => {
         const originalRequest = error.config as any;
 
@@ -102,18 +123,44 @@ class ApiClient {
           this.isRefreshing = true;
 
           try {
-            const response = await this.client.post('/auth/refresh-token', {
-              refreshToken,
-            });
+            // Create a new axios instance for refresh to avoid interceptors
+            const refreshResponse = await axios.post<RefreshTokenResponse>(
+              `${this.client.defaults.baseURL}/auth/refresh-token`,
+              { refresh_token: refreshToken},
+              {
+                timeout: 10000,
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-Device-Platform': Platform.OS,
+                },
+              }
+            );
 
-            const { accessToken } = response.data;
-
-            if (!accessToken) {
-              throw new Error('No access token in refresh response');
+            // Extract data from the correct response format
+            const responseData = refreshResponse.data;
+            if (!responseData.data || responseData.status_code !== 201) {
+              throw new Error('Invalid refresh response format');
             }
 
-            // Use tokenManager instead of direct AsyncStorage
-            await TokenManager.setToken(accessToken);
+            const { accessToken, refreshToken: newRefreshToken, user } = responseData.data;
+
+            if (!accessToken || !newRefreshToken) {
+              throw new Error('Missing tokens in refresh response');
+            }
+
+            // Store both tokens
+            await TokenManager.setTokens(accessToken, newRefreshToken);
+
+            // Update user data in auth store (lazy import to avoid circular dependency)
+            try {
+              const { useAuthStore } = await import('../../stores/customerStores/AuthStore');
+              const authStore = useAuthStore.getState();
+              authStore.setUser(user);
+              authStore.setIsAuthenticated(true);
+            } catch (storeError) {
+              console.warn('Failed to update auth store after token refresh:', storeError);
+              // Continue with the request even if store update fails
+            }
 
             // Update the authorization header
             originalRequest.headers.Authorization = `Bearer ${accessToken}`;

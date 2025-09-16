@@ -5,3 +5,4 @@ export * from './AppStore';
 export * from './AuthStore';
 export * from './cartStore';
 export * from './notificationStore';
+export * from './paymentStore';

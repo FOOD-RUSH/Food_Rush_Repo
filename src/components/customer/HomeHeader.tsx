@@ -1,12 +1,13 @@
 // HomeHeader.tsx - Updated with production UX
 import React, { useCallback } from 'react';
 import { TouchableOpacity, View, Text } from 'react-native';
-import { Avatar, useTheme } from 'react-native-paper';
+import { Avatar, useTheme, Badge } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { icons } from '@/assets/images';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from '@/src/location/useLocation';
-import { useCartItems } from '@/src/stores/customerStores/cartStore';
+import { useCartItemCount } from '@/src/stores/customerStores/cartStore';
+import { useUnreadCount } from '@/src/stores/customerStores/notificationStore';
 
 interface HomeHeaderProps {
   navigation: any;
@@ -15,7 +16,8 @@ interface HomeHeaderProps {
 const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
-  const cartItems = useCartItems();
+  const cartItemCount = useCartItemCount();
+  const unreadNotificationCount = useUnreadCount();
 
   const {
     location,
@@ -31,7 +33,14 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
     requestOnMount: false, // Don't auto-request permission (better UX)
   });
 
-  const cartItemCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+  // Navigation handlers
+  const handleNotificationPress = useCallback(() => {
+    navigation.navigate('Notifications');
+  }, [navigation]);
+
+  const handleCartPress = useCallback(() => {
+    navigation.navigate('Cart');
+  }, [navigation]);
 
   const getDisplayAddress = () => {
     if (locationLoading) {
@@ -133,12 +142,94 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
               {isUsingFallback && !locationLoading && (
                 <View className="flex-row items-center mt-1">
                   <View className="px-2 py-0.5 bg-orange-100 rounded-full">
-                    <Text className="text-white text-xs font-bold">
-                {cartItemCount > 99 ? '99+' : cartItemCount}
-              </Text>
+                    <Text className="text-orange-600 text-xs font-medium">
+                      {t('fallback_location', 'Approximate')}
+                    </Text>
+                  </View>
+                </View>
+              )}
             </View>
+
+            <Ionicons
+              name={getLocationIcon()}
+              size={16}
+              color={getLocationIconColor()}
+              style={{ marginLeft: 4 }}
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Right Section - Notification and Cart Icons */}
+      <View className="flex-row items-center" style={{ gap: 12 }}>
+        {/* Notification Icon */}
+        <TouchableOpacity
+          onPress={handleNotificationPress}
+          className="relative"
+          activeOpacity={0.7}
+        >
+          <View
+            className="w-12 h-12 rounded-full items-center justify-center"
+            style={{
+              backgroundColor: colors.surface,
+              borderWidth: 1,
+              borderColor: colors.outline,
+            }}
+          >
+            <Ionicons
+              name="notifications-outline"
+              size={22}
+              color={colors.onSurface}
+            />
+          </View>
+          {unreadNotificationCount > 0 && (
+            <Badge
+              size={18}
+              style={{
+                position: 'absolute',
+                top: -2,
+                right: -2,
+                backgroundColor: colors.error,
+              }}
+            >
+              {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
+            </Badge>
           )}
-          <Ionicons name="bag-outline" color={colors.onSurface} size={22} />
+        </TouchableOpacity>
+
+        {/* Cart Icon */}
+        <TouchableOpacity
+          onPress={handleCartPress}
+          className="relative"
+          activeOpacity={0.7}
+        >
+          <View
+            className="w-12 h-12 rounded-full items-center justify-center"
+            style={{
+              backgroundColor: colors.surface,
+              borderWidth: 1,
+              borderColor: colors.outline,
+            }}
+          >
+            <Ionicons
+              name="bag-outline"
+              size={22}
+              color={colors.onSurface}
+            />
+          </View>
+          {cartItemCount > 0 && (
+            <Badge
+              size={18}
+              style={{
+                position: 'absolute',
+                top: -2,
+                right: -2,
+                backgroundColor: colors.primary,
+              }}
+            >
+              {cartItemCount > 99 ? '99+' : cartItemCount}
+            </Badge>
+          )}
         </TouchableOpacity>
       </View>
     </View>

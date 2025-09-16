@@ -10,12 +10,14 @@ import {
 import { useTheme, Button } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { getAllCategories } from '@/src/constants/categories';
 
 export interface GeneralFilterOptions {
   priceRange: 'budget' | 'medium' | 'premium' | null;
   deliveryTime: 'under30' | '30-60' | '60+' | 'any';
   deliveryFee: 'free' | 'under1000' | 'under2000' | 'any';
   distanceRange: '0-5' | '5-10' | '10+' | 'any';
+  category: string | null;
 }
 
 interface FilterModalProps {
@@ -48,6 +50,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
       deliveryTime: 'any',
       deliveryFee: 'any',
       distanceRange: 'any',
+      category: null,
     });
   };
 
@@ -60,6 +63,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
       deliveryTime: 'any',
       deliveryFee: 'any',
       distanceRange: 'any',
+      category: null,
     };
 
     setSelectedFilters((prev) => ({
@@ -68,7 +72,20 @@ const FilterModal: React.FC<FilterModalProps> = ({
     }));
   };
 
+  const categories = getAllCategories();
+
   const filterSections = [
+    {
+      key: 'category' as const,
+      title: t('food_category'),
+      icon: 'restaurant-menu',
+      options: categories.map(cat => ({
+        value: cat.title,
+        label: cat.displayName,
+        description: cat.description || '',
+        icon: 'restaurant',
+      })),
+    },
     {
       key: 'priceRange' as const,
       title: t('price_range'),
@@ -173,6 +190,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
 
   const getActiveFiltersCount = () => {
     let count = 0;
+    if (selectedFilters.category) count++;
     if (selectedFilters.priceRange) count++;
     if (selectedFilters.deliveryTime !== 'any') count++;
     if (selectedFilters.deliveryFee !== 'any') count++;

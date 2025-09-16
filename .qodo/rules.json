@@ -1,0 +1,160 @@
+{
+  "code_quality_rules": {
+    "react_native": {
+      "no_inline_styles": {
+        "enabled": true,
+        "severity": "warning",
+        "description": "Avoid inline styles, use StyleSheet.create() instead"
+      },
+      "use_safe_area_view": {
+        "enabled": true,
+        "severity": "error",
+        "description": "Use SafeAreaView for screen components to handle device notches"
+      },
+      "optimize_images": {
+        "enabled": true,
+        "severity": "warning",
+        "description": "Use optimized image formats and sizes for better performance"
+      },
+      "avoid_console_log": {
+        "enabled": true,
+        "severity": "warning",
+        "description": "Remove console.log statements in production code"
+      },
+      "use_memo_for_expensive_operations": {
+        "enabled": true,
+        "severity": "info",
+        "description": "Use useMemo or useCallback for expensive operations"
+      }
+    },
+    "expo": {
+      "validate_app_config": {
+        "enabled": true,
+        "severity": "error",
+        "description": "Ensure app.json/app.config.js is properly configured"
+      },
+      "check_permissions": {
+        "enabled": true,
+        "severity": "warning",
+        "description": "Verify all required permissions are declared"
+      },
+      "optimize_bundle_size": {
+        "enabled": true,
+        "severity": "info",
+        "description": "Monitor and optimize app bundle size"
+      }
+    },
+    "typescript": {
+      "strict_null_checks": {
+        "enabled": true,
+        "severity": "error",
+        "description": "Enable strict null checks for better type safety"
+      },
+      "no_any_type": {
+        "enabled": true,
+        "severity": "warning",
+        "description": "Avoid using 'any' type, use specific types instead"
+      },
+      "interface_over_type": {
+        "enabled": true,
+        "severity": "info",
+        "description": "Prefer interfaces over type aliases for object shapes"
+      }
+    },
+    "performance": {
+      "avoid_anonymous_functions_in_render": {
+        "enabled": true,
+        "severity": "warning",
+        "description": "Avoid creating anonymous functions in render methods"
+      },
+      "use_flat_list_for_large_lists": {
+        "enabled": true,
+        "severity": "error",
+        "description": "Use FlatList or SectionList for large data sets instead of ScrollView"
+      },
+      "optimize_re_renders": {
+        "enabled": true,
+        "severity": "info",
+        "description": "Use React.memo, useMemo, and useCallback to optimize re-renders"
+      }
+    },
+    "accessibility": {
+      "add_accessibility_labels": {
+        "enabled": true,
+        "severity": "warning",
+        "description": "Add accessibility labels to interactive elements"
+      },
+      "proper_heading_structure": {
+        "enabled": true,
+        "severity": "info",
+        "description": "Use proper heading structure for screen readers"
+      },
+      "sufficient_touch_targets": {
+        "enabled": true,
+        "severity": "warning",
+        "description": "Ensure touch targets are at least 44x44 points"
+      }
+    },
+    "security": {
+      "no_hardcoded_secrets": {
+        "enabled": true,
+        "severity": "error",
+        "description": "Don't hardcode API keys, tokens, or sensitive data"
+      },
+      "validate_user_input": {
+        "enabled": true,
+        "severity": "error",
+        "description": "Always validate and sanitize user input"
+      },
+      "secure_storage": {
+        "enabled": true,
+        "severity": "warning",
+        "description": "Use secure storage for sensitive data"
+      }
+    }
+  },
+  "naming_conventions": {
+    "components": {
+      "pattern": "PascalCase",
+      "file_extension": ".tsx",
+      "example": "UserProfile.tsx"
+    },
+    "screens": {
+      "pattern": "PascalCase",
+      "suffix": "Screen",
+      "file_extension": ".tsx",
+      "example": "HomeScreen.tsx"
+    },
+    "hooks": {
+      "pattern": "camelCase",
+      "prefix": "use",
+      "file_extension": ".ts",
+      "example": "useAuth.ts"
+    },
+    "services": {
+      "pattern": "PascalCase",
+      "suffix": "Service",
+      "file_extension": ".ts",
+      "example": "ApiService.ts"
+    },
+    "types": {
+      "pattern": "PascalCase",
+      "file_extension": ".ts",
+      "example": "UserTypes.ts"
+    },
+    "constants": {
+      "pattern": "SCREAMING_SNAKE_CASE",
+      "file_extension": ".ts",
+      "example": "API_CONSTANTS.ts"
+    }
+  },
+  "file_structure_rules": {
+    "max_files_per_directory": 20,
+    "max_directory_depth": 5,
+    "required_index_files": true,
+    "component_co_location": {
+      "enabled": true,
+      "description": "Keep related files (component, styles, tests) together"
+    }
+  }
+}

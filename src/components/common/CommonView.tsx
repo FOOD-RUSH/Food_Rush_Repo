@@ -1,11 +1,10 @@
-import { View, StatusBar } from 'react-native';
+import { View, StatusBar, StyleProp, ViewStyle } from 'react-native';
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from 'react-native-paper';
 
 interface CommonViewProps {
   children: React.ReactNode;
-
   showStatusBar?: boolean;
   paddingHorizontal?: number;
   safeAreaEdges?: Array<'top' | 'right' | 'bottom' | 'left'>;

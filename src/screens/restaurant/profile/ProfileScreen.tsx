@@ -16,6 +16,8 @@ import { Button, Avatar, Divider, Badge } from 'react-native-paper';
 import CommonView from '@/src/components/common/CommonView';
 import { Ionicons } from '@expo/vector-icons';
 import { RestaurantProfileStackScreenProps } from '../../../navigation/types';
+import { useAuthStore, useAuthLoading } from '../../../stores/customerStores/AuthStore';
+import Toast from 'react-native-toast-message';
 
 // Type definitions
 type NotificationType = 'order' | 'inventory' | 'payment' | 'schedule';
@@ -68,6 +70,10 @@ interface ProfileOption {
 type ProfileScreenProps = RestaurantProfileStackScreenProps<'ProfileScreen'>;
 
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
+  // Auth store
+  const logoutUser = useAuthStore((state) => state.logoutUser);
+  const isLoggingOut = useAuthLoading();
+
   // State management
   const [user] = useState<UserProfile>({
     name: 'Restaurant Owner',
@@ -231,16 +237,44 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   };
 
   const handleLogout = () => {
-    Alert.alert('Logout', 'Are you sure you want to logout?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Logout',
-        style: 'destructive',
-        onPress: () => {
-          console.log('User logged out');
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout? This will clear your session and return you to the login screen.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              Toast.show({
+                type: 'info',
+                text1: 'Logging out...',
+                text2: 'Please wait while we sign you out',
+                position: 'top',
+              });
+              
+              await logoutUser();
+              
+              Toast.show({
+                type: 'success',
+                text1: 'Logged out successfully',
+                text2: 'You have been signed out of your account',
+                position: 'top',
+              });
+            } catch (error) {
+              console.error('Logout error:', error);
+              Toast.show({
+                type: 'error',
+                text1: 'Logout Error',
+                text2: 'There was an issue logging out. Please try again.',
+                position: 'top',
+              });
+            }
+          },
         },
-      },
-    ]);
+      ],
+    );
   };
 
   const handleNotificationPress = (item: NotificationItem) => {
@@ -583,9 +617,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             onPress={handleLogout}
             style={styles.logoutButton}
             buttonColor="#FF3B30"
-            icon="logout"
+            icon={isLoggingOut ? undefined : "logout"}
+            loading={isLoggingOut}
+            disabled={isLoggingOut}
           >
-            Logout
+            {isLoggingOut ? 'Logging out...' : 'Logout'}
           </Button>
         </Animated.View>
       </ScrollView>

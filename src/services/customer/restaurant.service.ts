@@ -1,4 +1,4 @@
-import { RestaurantCard, FoodProps, RestaurantProfile, MenuProps } from '../../types';
+import { RestaurantCard, FoodProps, RestaurantProfile, MenuProps, RestaurantReviewsResponse } from '../../types';
 import { apiClient } from './apiClient';
 
 // Updated query parameters to match API documentation
@@ -32,13 +32,37 @@ interface RestaurantReturn {
   data: RestaurantProfile;
 }
 
+// Category API types
+export interface CategoryItem {
+  value: string;
+  label: string;
+}
+
+interface CategoriesResponse {
+  data: CategoryItem[];
+}
+
 export const restaurantApi = {
+  // Get all menu categories
+  getMenuCategories: async () => {
+    try {
+      const response = await apiClient.get<CategoriesResponse>(
+        '/menu/all/categories'
+      );
+      console.log('Menu Categories API Response:', response.data);
+      return response.data.data;
+    } catch (error) {
+      console.error('Error fetching menu categories:', error);
+      throw error;
+    }
+  },
+
   // Get all restaurants with filtering
   getAllRestaurants: async (query: RestaurantQuery) => {
     try {
       const response = await apiClient.get<RestaurantItems>(
         '/restaurants/browse',
-        { ...query },
+        { params: query },
       );
       console.log('Restaurants API Response:', response.data);
       return response.data.data;
@@ -67,7 +91,7 @@ export const restaurantApi = {
   getAllMenuItems: async (query: FoodQuery) => {
     try {
       const response = await apiClient.get<FoodItems>('/menu/all/nearby', {
-        ...query,
+        params: query,
       });
       console.log('All Menu Items API Response:', response.data);
       return response.data.data;
@@ -88,6 +112,7 @@ export const restaurantApi = {
 
   // Get menu item by ID (updated to match API docs)
   getMenuItemById: async (id: string, nearLat?: number, nearLng?: number) => {
+
     try {
       const response = await apiClient.get<FoodItem>(`/menu-items/${id}`, {
         params: { nearLat, nearLng },
@@ -172,6 +197,20 @@ export const restaurantApi = {
       return response.data.data || [];
     } catch (error) {
       console.error('Error fetching liked restaurants:', error);
+      throw error;
+    }
+  },
+
+  // Get restaurant reviews
+  getRestaurantReviews: async (id: string) => {
+    try {
+      const response = await apiClient.get<RestaurantReviewsResponse>(
+        `/restaurants/${id}/reviews`
+      );
+      console.log('Restaurant Reviews API Response:', response.data);
+      return response.data.data;
+    } catch (error) {
+      console.error(`Error fetching reviews for restaurant ${id}:`, error);
       throw error;
     }
   },
