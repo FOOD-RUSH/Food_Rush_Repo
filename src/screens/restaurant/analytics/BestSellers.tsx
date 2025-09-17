@@ -5,7 +5,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
 import CommonView from '@/src/components/common/CommonView';
-import { RestaurantAnalyticsStackScreenProps } from '@/src/navigation/types';
+import {  RootStackScreenProps } from '@/src/navigation/types';
 
 interface BestSellerItem {
   id: string;
@@ -17,7 +17,7 @@ interface BestSellerItem {
   trend: 'up' | 'down' | 'stable';
 }
 
-const BestSellers: React.FC<RestaurantAnalyticsStackScreenProps<'BestSellers'>> = () => {
+const BestSellers: React.FC<RootStackScreenProps<'RestaurantBestSellers'>> = () => {
   const { colors } = useTheme();
   const { t } = useTranslation();
 

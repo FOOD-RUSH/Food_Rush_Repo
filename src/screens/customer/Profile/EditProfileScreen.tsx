@@ -8,7 +8,7 @@ import InputField from '@/src/components/customer/InputField';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import { Button, useTheme } from 'react-native-paper';
 import CommonView from '@/src/components/common/CommonView';
-import { useAuthUser } from '@/src/stores/customerStores/AuthStore';
+import { useUser } from '@/src/stores/customerStores/AuthStore';
 import { useUpdateProfile } from '@/src/hooks/customer/useAuthhooks';
 
 const EditProfileScreen = ({
@@ -16,7 +16,7 @@ const EditProfileScreen = ({
   route,
 }: RootStackScreenProps<'EditProfile'>) => {
   const { t } = useTranslation('translation');
-  const LoggedInUser = useAuthUser();
+  const LoggedInUser = useUser();
 
   const [fullName, setFullName] = useState(LoggedInUser?.fullName || '');
   const [email, setEmail] = useState(LoggedInUser?.email || '');

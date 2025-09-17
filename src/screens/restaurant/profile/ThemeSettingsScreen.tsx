@@ -4,7 +4,6 @@ import { useTheme, Card, RadioButton, Switch } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
-
 import CommonView from '@/src/components/common/CommonView';
 import { useAppStore } from '@/src/stores/customerStores/AppStore';
 
@@ -221,15 +220,7 @@ const ThemeSettingsScreen: React.FC = () => {
     <CommonView>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
-        <View style={{ padding: 16, paddingBottom: 0 }}>
-          <Text style={{ fontSize: 28, fontWeight: 'bold', color: colors.onBackground }}>
-            {t('theme_language_settings')}
-          </Text>
-          <Text style={{ fontSize: 14, color: colors.onSurfaceVariant, marginTop: 4 }}>
-            {t('customize_app_appearance_language')}
-          </Text>
-        </View>
-
+       
         {/* Theme Settings */}
         <View style={{ padding: 16 }}>
           <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.onSurface, marginBottom: 16 }}>

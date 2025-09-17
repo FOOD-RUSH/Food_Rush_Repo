@@ -18,8 +18,8 @@ import { useTranslation } from 'react-i18next';
 
 import CommonView from '@/src/components/common/CommonView';
 import { RootStackScreenProps } from '@/src/navigation/types';
-import { useAuthUser } from '@/src/stores/customerStores/AuthStore';
-import { useUpdateProfile } from '@/src/hooks/customer/useAuthhooks';
+import { useUser } from '@/src/stores/customerStores/AuthStore';
+import { useUpdateRestaurantProfile } from '@/src/hooks/restaurant/useAuthhooks';
 import { saveImageLocally, generateImageId } from '@/src/utils/imageStorage';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -58,7 +58,7 @@ const FormField: React.FC<FormFieldProps> = ({
         className={`${isSmallScreen ? 'text-sm' : 'text-base'} font-semibold mb-2`}
         style={{ color: colors.onSurface }}
       >
-        {label} {required && <Text style={{ color: '#FF3B30' }}>*</Text>}
+        {label} {required && <Text style={{ color: colors.error }}>*</Text>}
       </Text>
       
       <View 
@@ -66,9 +66,9 @@ const FormField: React.FC<FormFieldProps> = ({
           backgroundColor: colors.surface,
           borderRadius: 16,
           borderWidth: 2,
-          borderColor: isFocused ? '#007aff' : colors.outline,
+          borderColor: isFocused ? colors.primary : colors.outline,
           elevation: isFocused ? 3 : 1,
-          shadowColor: isFocused ? '#007aff' : '#000',
+          shadowColor: isFocused ? colors.primary : colors.shadow || '#000',
           shadowOffset: { width: 0, height: 1 },
           shadowOpacity: isFocused ? 0.2 : 0.1,
           shadowRadius: isFocused ? 4 : 2,
@@ -79,7 +79,7 @@ const FormField: React.FC<FormFieldProps> = ({
             <MaterialCommunityIcons 
               name={icon as any} 
               size={isSmallScreen ? 20 : 22} 
-              color={isFocused ? '#007aff' : colors.onSurfaceVariant} 
+              color={isFocused ? colors.primary : colors.onSurfaceVariant} 
             />
           </View>
           
@@ -118,7 +118,7 @@ const FormField: React.FC<FormFieldProps> = ({
 const ProfileEditScreen: React.FC<RootStackScreenProps<'RestaurantEditProfile'>> = ({ navigation }) => {
   const { colors } = useTheme();
   const { t } = useTranslation();
-  const loggedInUser = useAuthUser();
+  const loggedInUser = useUser();
   
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -141,7 +141,7 @@ const ProfileEditScreen: React.FC<RootStackScreenProps<'RestaurantEditProfile'>>
   );
   const [isUploading, setIsUploading] = useState(false);
 
-  const updateProfileMutation = useUpdateProfile();
+  const updateProfileMutation = useUpdateRestaurantProfile();
 
   React.useEffect(() => {
     Animated.parallel([
@@ -189,7 +189,7 @@ const ProfileEditScreen: React.FC<RootStackScreenProps<'RestaurantEditProfile'>>
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
     } catch (error) {
-      console.error('Error picking image:', error);
+      // Error handling for image picking
       Alert.alert(t('error'), t('failed_to_pick_image'));
     } finally {
       setIsUploading(false);
@@ -216,7 +216,7 @@ const ProfileEditScreen: React.FC<RootStackScreenProps<'RestaurantEditProfile'>>
         { text: t('ok'), onPress: () => navigation.goBack() }
       ]);
     } catch (error) {
-      console.error('Failed to update profile:', error);
+      // Error handling for profile update
       Alert.alert(t('error'), t('failed_to_update_profile'));
     }
   };
@@ -257,7 +257,7 @@ const ProfileEditScreen: React.FC<RootStackScreenProps<'RestaurantEditProfile'>>
                     height: isSmallScreen ? 100 : 110,
                     borderRadius: isSmallScreen ? 50 : 55,
                     borderWidth: 4,
-                    borderColor: '#007aff',
+                    borderColor: colors.primary,
                   }}
                   resizeMode="cover"
                 />
@@ -265,7 +265,7 @@ const ProfileEditScreen: React.FC<RootStackScreenProps<'RestaurantEditProfile'>>
                 <Avatar.Text
                   size={isSmallScreen ? 100 : 110}
                   label={formData.fullName.charAt(0).toUpperCase() || 'R'}
-                  style={{ backgroundColor: '#007aff' }}
+                  style={{ backgroundColor: colors.primary }}
                   labelStyle={{ 
                     fontSize: isSmallScreen ? 36 : 40, 
                     fontWeight: 'bold',
@@ -283,7 +283,7 @@ const ProfileEditScreen: React.FC<RootStackScreenProps<'RestaurantEditProfile'>>
                   width: isSmallScreen ? 32 : 36,
                   height: isSmallScreen ? 32 : 36,
                   borderRadius: isSmallScreen ? 16 : 18,
-                  backgroundColor: '#007aff',
+                  backgroundColor: colors.primary,
                   justifyContent: 'center',
                   alignItems: 'center',
                   borderWidth: 3,
@@ -447,7 +447,7 @@ const ProfileEditScreen: React.FC<RootStackScreenProps<'RestaurantEditProfile'>>
           disabled={!isFormValid || updateProfileMutation.isPending}
           loading={updateProfileMutation.isPending}
           style={{
-            backgroundColor: isFormValid && !updateProfileMutation.isPending ? '#007aff' : colors.surfaceVariant,
+            backgroundColor: isFormValid && !updateProfileMutation.isPending ? colors.primary : colors.surfaceVariant,
             borderRadius: 16,
             paddingVertical: isSmallScreen ? 4 : 6,
           }}

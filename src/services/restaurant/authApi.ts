@@ -1,4 +1,4 @@
-import { restaurantApiClient } from './apiClient';
+import { apiClient } from '../apiClient';
 
 export interface RestaurantRegisterRequest {
   role: string;
@@ -126,42 +126,42 @@ export interface RestaurantLoginResponse {
 
 export const restaurantAuthApi = {
   register: (data: RestaurantRegisterRequest) => {
-    return restaurantApiClient.post<RestaurantRegisterResponse>('/restaurants/auth/register-and-create', {...data});
+    return apiClient.post<RestaurantRegisterResponse>('/restaurants/auth/register-and-create', {...data});
   },
 
   login: (credentials: { email: string; password: string }) => {
-    return restaurantApiClient.post<RestaurantLoginResponse>('/restaurants/auth/login', {...credentials});
+    return apiClient.post<RestaurantLoginResponse>('/restaurants/auth/login', {...credentials});
   },
 
   verifyOTP: (data: { userId: string; otp: string; type: 'email' }) => {
-    return restaurantApiClient.post('/restaurants/auth/verify-otp', data);
+    return apiClient.post('/restaurants/auth/verify-otp', {...data});
   },
 
-  logout: () => {
-    return restaurantApiClient.post('/restaurants/auth/logout');
-  },
+  // logout: () => {
+  //   return apiClient.post('/restaurants/auth/logout');
+  // },
 
   refreshToken: (refreshToken: string) => {
-    return restaurantApiClient.post('/restaurants/auth/refresh-token', { refreshToken });
+    return apiClient.post<{ accessToken: string; refreshToken: string }>('/auth/refresh-token', { refreshToken });
   },
 
   updateProfile: (data: any) => {
-    return restaurantApiClient.put('/restaurants/auth/profile', data);
+    return apiClient.put('/restaurants/auth/profile', data);
   },
 
   getProfile: () => {
-    return restaurantApiClient.get('/restaurants/auth/profile');
+    return apiClient.get('/auth/profile');
   },
 
   requestPasswordReset: (data: { email: string }) => {
-    return restaurantApiClient.post('/restaurants/auth/forgot-password', data);
+    return apiClient.post('/auth/forgot-password', data);
   },
 
   resetPassword: (data: { email: string; otp: string; newPassword: string }) => {
-    return restaurantApiClient.post('/restaurants/auth/reset-password', data);
+    return apiClient.post('/auth/reset-password', data);
   },
 
   resendVerification: (email: string) => {
-    return restaurantApiClient.post('/restaurants/auth/resend-verification', { email });
+    return apiClient.post('/restaurants/auth/resend-verification', { email });
   },
 };

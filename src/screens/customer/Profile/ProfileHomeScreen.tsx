@@ -23,19 +23,19 @@ const ProfileHomeScreen = ({
   const { colors } = useTheme();
   const theme = useAppStore((state) => state.theme);
   const setTheme = useAppStore((state) => state.setTheme);
-  const logoutUser = useAuthStore((state) => state.logoutUser);
+  const logout = useAuthStore((state) => state.logout);
   const { present, dismiss, isPresented } = useBottomSheet();
   const { t } = useTranslation('translation');
 
   const handleLogout = useCallback(() => {
     try {
       console.log('Logging out user');
-      logoutUser();
+      logout();
     } catch (error) {
       console.error('Logout error:', error);
       Alert.alert(t('error'), t('failed_to_logout'));
     }
-  }, [logoutUser, t]);
+  }, [logout, t]);
 
   const showLogoutModal = useCallback(() => {
     // Prevent multiple presentations

@@ -274,6 +274,11 @@ export const useCartStore = create<CartState & CartActions>()(
       {
         name: 'cart-store',
         storage: createJSONStorage(() => AsyncStorage),
+        version: 1,
+        migrate: (persistedState: any, version: number) => {
+          // No migrations needed yet, but this prevents the warning
+          return persistedState;
+        },
         // Only persist essential data
         partialize: (state) => ({
           items: state.items,

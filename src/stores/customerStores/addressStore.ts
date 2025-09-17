@@ -88,6 +88,11 @@ export const useAddressStore = create<AddressState & AddressActions>()(
     {
       name: 'address-storage',
       storage: createJSONStorage(() => AsyncStorage),
+      version: 1,
+      migrate: (persistedState: any, version: number) => {
+        // No migrations needed yet, but this prevents the warning
+        return persistedState;
+      },
       partialize: (state) => ({
         addresses: state.addresses,
       }),

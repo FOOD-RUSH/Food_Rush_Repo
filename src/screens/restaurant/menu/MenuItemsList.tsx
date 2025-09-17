@@ -8,6 +8,9 @@ import * as Haptics from 'expo-haptics';
 
 import CommonView from '@/src/components/common/CommonView';
 import { RestaurantMenuStackScreenProps } from '@/src/navigation/types';
+import { useRestaurantCategoryOptions } from '@/src/hooks/restaurant/useCategoriesApi';
+import { useGetMenuItems, useDeleteMenuItem, useToggleMenuItemAvailability } from '@/src/hooks/restaurant/useMenuApi';
+import { useUser } from '@/src/stores/customerStores/AuthStore';
 
 const { width: screenWidth } = Dimensions.get('window');
 const isSmallScreen = screenWidth < 375;
@@ -20,7 +23,8 @@ interface MenuItem {
   price: number;
   category: string;
   isAvailable: boolean;
-  image?: string;
+  pictureUrl?: string;
+  createdAt?: string;
 }
 
 interface ErrorState {
@@ -32,63 +36,42 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
   const { colors } = useTheme();
   const { t } = useTranslation();
   const navigation = useNavigation();
+  const user = useUser();
+  const restaurantId = user?.restaurantId;
+  
+  const { data: apiCategories, isLoading: isCategoriesLoading } = useRestaurantCategoryOptions();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<ErrorState>({ hasError: false, message: '' });
-  const [refreshing, setRefreshing] = useState(false);
 
-  // Mock data with images - replace with actual API call
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([
-    {
-      id: '1',
-      name: 'Jollof Rice with Chicken',
-      description: 'Traditional Nigerian jollof rice served with grilled chicken',
-      price: 2500,
-      category: 'Main Course',
-      isAvailable: true,
-      image: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=300&h=200&fit=crop',
-    },
-    {
-      id: '2',
-      name: 'Pepper Soup',
-      description: 'Spicy Nigerian pepper soup with assorted meat',
-      price: 1800,
-      category: 'Soup',
-      isAvailable: true,
-      image: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=300&h=200&fit=crop',
-    },
-    {
-      id: '3',
-      name: 'Fried Rice',
-      description: 'Delicious fried rice with vegetables and chicken',
-      price: 2200,
-      category: 'Main Course',
-      isAvailable: false,
-      image: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=300&h=200&fit=crop',
-    },
-    {
-      id: '4',
-      name: 'Suya',
-      description: 'Grilled spiced meat skewers',
-      price: 1500,
-      category: 'Appetizer',
-      isAvailable: true,
-      image: 'https://images.unsplash.com/photo-1529042410759-befb1204b468?w=300&h=200&fit=crop',
-    },
-    {
-      id: '5',
-      name: 'Chin Chin',
-      description: 'Crunchy fried pastry cubes',
-      price: 800,
-      category: 'Dessert',
-      isAvailable: true,
-      image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300&h=200&fit=crop',
-    },
-  ]);
+  // API hooks
+  const { 
+    data: menuItems = [], 
+    isLoading, 
+    refetch,
+    error: apiError 
+  } = useGetMenuItems(
+    restaurantId || '', 
+    selectedCategory === 'all' ? undefined : selectedCategory
+  );
+  
+  const deleteMenuItemMutation = useDeleteMenuItem();
+  const toggleAvailabilityMutation = useToggleMenuItemAvailability();
 
-  const categories = ['all', ...Array.from(new Set(menuItems.map(item => item.category)))];
+  // Set error state based on API error
+  React.useEffect(() => {
+    if (apiError) {
+      setError({ hasError: true, message: 'Failed to load menu items' });
+    } else {
+      setError({ hasError: false, message: '' });
+    }
+  }, [apiError]);
+
+  // Combine API categories with 'all' option and existing menu item categories
+  const menuCategories = Array.from(new Set(menuItems.map(item => item.category)));
+  const allCategories = apiCategories ? apiCategories.map(cat => cat.label) : [];
+  const categories = ['all', ...new Set([...allCategories, ...menuCategories])];
 
   const filteredItems = menuItems.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -116,28 +99,27 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
   };
 
   const handleToggleAvailability = async (itemId: string) => {
+    if (!restaurantId) return;
+    
     try {
-      setIsLoading(true);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const currentItem = menuItems.find(item => item.id === itemId);
+      if (!currentItem) return;
       
-      setMenuItems(prev => 
-        prev.map(item => 
-          item.id === itemId 
-            ? { ...item, isAvailable: !item.isAvailable }
-            : item
-        )
-      );
+      await toggleAvailabilityMutation.mutateAsync({
+        restaurantId,
+        itemId,
+        isAvailable: !currentItem.isAvailable
+      });
     } catch (error) {
       setError({ hasError: true, message: 'Failed to update item availability' });
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const handleDeleteItem = (itemId: string, itemName: string) => {
+    if (!restaurantId) return;
+    
     Alert.alert(
       t('delete_item'),
       `${t('are_you_sure_delete')} "${itemName}"?`,
@@ -148,15 +130,13 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
           style: 'destructive',
           onPress: async () => {
             try {
-              setIsLoading(true);
-              // Simulate API call
-              await new Promise(resolve => setTimeout(resolve, 500));
-              setMenuItems(prev => prev.filter(item => item.id !== itemId));
+              await deleteMenuItemMutation.mutateAsync({
+                restaurantId,
+                itemId
+              });
               Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
             } catch (error) {
               setError({ hasError: true, message: 'Failed to delete item' });
-            } finally {
-              setIsLoading(false);
             }
           },
         },
@@ -175,14 +155,10 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
 
   const onRefresh = async () => {
     try {
-      setRefreshing(true);
       setError({ hasError: false, message: '' });
-      // Simulate API refresh
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await refetch();
     } catch (error) {
       setError({ hasError: true, message: 'Failed to refresh menu items' });
-    } finally {
-      setRefreshing(false);
     }
   };
 
@@ -203,9 +179,9 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
       <View className={`flex-row ${isSmallScreen ? 'p-3' : 'p-4'}`}>
         {/* Enhanced Image Container - Takes more space */}
         <View className={`${isSmallScreen ? 'w-28 h-28' : 'w-32 h-32'} mr-4`}>
-          {item.image ? (
+          {item.pictureUrl ? (
             <Image
-              source={{ uri: item.image }}
+              source={{ uri: item.pictureUrl }}
               style={{
                 width: '100%',
                 height: '100%',
@@ -284,7 +260,7 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
               onValueChange={() => handleToggleAvailability(item.id)}
               trackColor={{ false: '#E5E7EB', true: '#007aff' }}
               thumbColor={item.isAvailable ? '#ffffff' : '#f4f3f4'}
-              disabled={isLoading}
+              disabled={toggleAvailabilityMutation.isPending}
               style={{ 
                 transform: [{ scaleX: isSmallScreen ? 0.9 : 1 }, { scaleY: isSmallScreen ? 0.9 : 1 }] 
               }}
@@ -388,7 +364,7 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
     <CommonView>
       <View className="flex-1">
         {/* Header - Enhanced typography and spacing */}
-        <View className={`${isSmallScreen ? 'px-4 pt-4' : 'px-6 pt-6'} pb-2`}>
+        <View className="pb-2">
           <View className="flex-row justify-between items-center">
             <View className="flex-1">
               <Text 
@@ -419,7 +395,7 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
         </View>
 
         {/* Enhanced Search Bar - Centralized placeholder and icon */}
-        <View className={`${isSmallScreen ? 'px-4 pt-4' : 'px-6 pt-6'} pb-2`}>
+        <View className="pt-4 pb-2">
           <View 
             style={{
               backgroundColor: colors.surface,
@@ -455,7 +431,7 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
         </View>
 
         {/* Category Filter - Enhanced spacing and typography */}
-        <View className={`${isSmallScreen ? 'px-4 pt-3 pb-2' : 'px-6 pt-4 pb-3'}`}>
+        <View className="pt-3 pb-2">
           <FlatList
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -492,11 +468,10 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
           renderItem={renderMenuItem}
           keyExtractor={item => item.id}
           contentContainerStyle={{ 
-            paddingHorizontal: isSmallScreen ? 12 : 16, 
             paddingTop: isSmallScreen ? 8 : 12,
             paddingBottom: 100, // Space for FAB
           }}
-          refreshing={refreshing}
+          refreshing={isLoading}
           onRefresh={onRefresh}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={

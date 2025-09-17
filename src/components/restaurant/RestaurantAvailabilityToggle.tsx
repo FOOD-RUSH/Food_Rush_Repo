@@ -12,7 +12,8 @@ import Animated, {
   interpolateColor 
 } from 'react-native-reanimated';
 
-import { useUpdateRestaurantStatus } from '@/src/hooks/restaurant/useRestaurantApi';
+import { useToggleRestaurantStatus } from '@/src/hooks/restaurant/useRestaurantApi';
+import { useUser } from '@/src/stores/customerStores/AuthStore';
 
 const { width: screenWidth } = Dimensions.get('window');
 const isSmallScreen = screenWidth < 375;
@@ -32,8 +33,10 @@ const RestaurantAvailabilityToggle: React.FC<RestaurantAvailabilityToggleProps> 
 }) => {
   const { colors } = useTheme();
   const { t } = useTranslation();
+  const user = useUser();
+  const restaurantId = user?.restaurantId;
   const [isOpen, setIsOpen] = useState<boolean>(currentStatus === 'online');
-  const updateStatusMutation = useUpdateRestaurantStatus();
+  const toggleStatusMutation = useToggleRestaurantStatus(isOpen, restaurantId || '');
 
   const animatedValue = useSharedValue(isOpen ? 1 : 0);
 
@@ -49,9 +52,9 @@ const RestaurantAvailabilityToggle: React.FC<RestaurantAvailabilityToggleProps> 
       setIsOpen(newStatus);
       
       // Update status via API
-      await updateStatusMutation.mutateAsync({ 
-        status: newStatus ? 'online' : 'offline' 
-      });
+      if (restaurantId) {
+        await toggleStatusMutation.mutateAsync();
+      }
       
       // Call callback if provided
       onStatusChange?.(newStatus);
@@ -193,7 +196,7 @@ const RestaurantAvailabilityToggle: React.FC<RestaurantAvailabilityToggleProps> 
           <Switch
             value={isOpen}
             onValueChange={confirmToggle}
-            disabled={updateStatusMutation.isPending}
+            disabled={toggleStatusMutation.isPending}
             thumbColor={isOpen ? '#00D084' : '#FF3B30'}
             trackColor={{ 
               false: '#FF3B3030', 
@@ -204,7 +207,7 @@ const RestaurantAvailabilityToggle: React.FC<RestaurantAvailabilityToggleProps> 
             }}
           />
           
-          {updateStatusMutation.isPending && (
+          {toggleStatusMutation.isPending && (
             <MaterialCommunityIcons 
               name="loading" 
               size={16} 
@@ -220,7 +223,7 @@ const RestaurantAvailabilityToggle: React.FC<RestaurantAvailabilityToggleProps> 
         <View style={{ flexDirection: 'row', marginTop: 16, gap: 12 }}>
           <TouchableOpacity
             onPress={() => !isOpen && handleToggle()}
-            disabled={isOpen || updateStatusMutation.isPending}
+            disabled={isOpen || toggleStatusMutation.isPending}
             style={{
               flex: 1,
               backgroundColor: isOpen ? colors.surfaceVariant : '#00D08420',
@@ -244,7 +247,7 @@ const RestaurantAvailabilityToggle: React.FC<RestaurantAvailabilityToggleProps> 
           
           <TouchableOpacity
             onPress={() => isOpen && confirmToggle()}
-            disabled={!isOpen || updateStatusMutation.isPending}
+            disabled={!isOpen || toggleStatusMutation.isPending}
             style={{
               flex: 1,
               backgroundColor: !isOpen ? colors.surfaceVariant : '#FF3B3020',

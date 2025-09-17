@@ -1,13 +1,13 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, ActivityIndicator } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
-import { FoodCategory, FOOD_CATEGORIES, FOOD_CATEGORIES_FR } from '../../types/MenuItem';
+import { useCategoryOptions } from '@/src/hooks/customer/useCategoriesApi';
 
 interface CategoryDropdownProps {
-  value: FoodCategory | '';
-  onValueChange: (value: FoodCategory) => void;
+  value: string;
+  onValueChange: (value: string) => void;
   placeholder?: string;
   error?: boolean;
   disabled?: boolean;
@@ -21,15 +21,45 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({
   disabled = false,
 }) => {
   const { colors } = useTheme();
-  const { i18n } = useTranslation();
+  const { t } = useTranslation();
+  const { data: categories, isLoading, error: apiError } = useCategoryOptions();
   
-  // Use French translations if current language is French
-  const categoryLabels = i18n.language === 'fr' ? FOOD_CATEGORIES_FR : FOOD_CATEGORIES;
+  if (isLoading) {
+    return (
+      <View style={{
+        backgroundColor: colors.surface,
+        borderRadius: 16,
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: 48,
+      }}>
+        <ActivityIndicator size="small" color={colors.primary} />
+        <Text style={{ color: colors.onSurfaceVariant, marginLeft: 8 }}>
+          {t('loading_categories')}
+        </Text>
+      </View>
+    );
+  }
   
-  const data = Object.entries(categoryLabels).map(([key, label]) => ({
-    label,
-    value: key as FoodCategory,
-  }));
+  if (apiError) {
+    return (
+      <View style={{
+        backgroundColor: colors.errorContainer,
+        borderRadius: 16,
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        minHeight: 48,
+        justifyContent: 'center',
+      }}>
+        <Text style={{ color: colors.onErrorContainer, textAlign: 'center' }}>
+          {t('failed_to_load_categories')}
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <Dropdown
@@ -66,13 +96,13 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({
         height: 20,
         tintColor: colors.onSurfaceVariant,
       }}
-      data={data}
+      data={categories}
       search
       maxHeight={300}
-      labelField=\"label\"
-      valueField=\"value\"
-      placeholder={placeholder || 'Select category'}
-      searchPlaceholder=\"Search categories...\"
+      labelField="label"
+      valueField="value"
+      placeholder={placeholder || t('select_category')}
+      searchPlaceholder={t('search_categories')}
       value={value}
       onChange={(item) => {
         onValueChange(item.value);

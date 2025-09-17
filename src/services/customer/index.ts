@@ -1,7 +1,7 @@
 // API Services Index
 // This file exports all customer API services for easy import
 
-export * from './apiClient';
+export { apiClient } from '../apiClient';
 export * from './authApi';
 export * from './restaurant.service';
 export * from './payment.service';

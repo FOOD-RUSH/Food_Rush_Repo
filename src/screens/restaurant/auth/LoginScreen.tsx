@@ -164,7 +164,7 @@ const RestaurantLoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
           onSuccess: (response) => {
             const responseData = response.data as RestaurantLoginResponse;
             if (responseData?.data?.user) {
-              const { setUser, setIsAuthenticated } = useAuthStore.getState();
+              const { setUser } = useAuthStore.getState();
 
               // ✅ Ensure all required fields in User are present
               const apiUser = responseData.data.user;
@@ -180,7 +180,7 @@ const RestaurantLoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
               };
 
               setUser(user);
-              setIsAuthenticated(true);
+              // User is now authenticated through the setUser call
               navigation.getParent()?.navigate('RestaurantApp');
             }
           },

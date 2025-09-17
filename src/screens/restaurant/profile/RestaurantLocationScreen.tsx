@@ -368,15 +368,7 @@ const RestaurantLocationScreen: React.FC = () => {
   return (
     <CommonView>
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header */}
-        <View style={{ padding: 16, paddingBottom: 0 }}>
-          <Text style={{ fontSize: 28, fontWeight: 'bold', color: colors.onBackground }}>
-            {t('restaurant_location')}
-          </Text>
-          <Text style={{ fontSize: 14, color: colors.onSurfaceVariant, marginTop: 4 }}>
-            {t('update_your_restaurant_location')}
-          </Text>
-        </View>
+        {/* Removed custom header - using navigator header instead */}
 
         {/* Current Location Display */}
         {!isEditing && (

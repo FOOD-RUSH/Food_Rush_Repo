@@ -36,7 +36,10 @@ interface UserType {
   title: string;
 }
 
-interface OnboardingScreenProps {
+// Import navigation types
+import type { OnboardingScreenProps as NavigationProps } from '../navigation/types';
+
+interface OnboardingScreenProps extends NavigationProps {
   OnboardingSlides: OnboardingInfo[];
   onComplete: (userType: 'customer' | 'restaurant') => void;
   onLogin: (selectedUserType: 'customer' | 'restaurant') => void;
@@ -543,9 +546,15 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
   OnboardingSlides,
   onComplete,
   onLogin,
+  route,
 }) => {
-  const [showWelcome, setShowWelcome] = useState(true);
-  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  // Get route parameters
+  const { step, skipWelcome } = route?.params || {};
+  
+  const [showWelcome, setShowWelcome] = useState(!skipWelcome);
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(
+    Math.max(0, Math.min((step || 1) - 1, OnboardingSlides.length - 1))
+  );
   const [showUserSelection, setShowUserSelection] = useState(false);
   const [selectedType, setSelectedType] = useState<
     'customer' | 'restaurant' | null
@@ -576,9 +585,6 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
 
   const handleLogin = useCallback(() => {
     if (selectedType) {
-      // Set the selected user type in the auth store
-      const { useAuthStore } = require('../stores/customerStores/AuthStore');
-      useAuthStore.getState().setSelectedUserType(selectedType);
       onLogin(selectedType);
     }
   }, [selectedType, onLogin]);

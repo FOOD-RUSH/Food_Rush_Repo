@@ -190,6 +190,10 @@ export const usePaymentStore = create<PaymentState & PaymentActions>()(
           selectedPaymentMethod: state.selectedPaymentMethod,
         }),
         version: 1,
+        migrate: (persistedState: any, version: number) => {
+          // No migrations needed yet, but this prevents the warning
+          return persistedState;
+        },
       }
     ),
     { name: 'PaymentStore' }

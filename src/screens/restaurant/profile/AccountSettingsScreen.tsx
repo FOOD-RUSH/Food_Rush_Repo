@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { SupportedLanguage } from '@/src/locales/i18n';
 import { RadioButton, useTheme } from 'react-native-paper';
 import { RESTAURANT_COLORS } from '@/src/config/restaurantTheme';
+import CommonView from '@/src/components/common/CommonView';
 
 type Props = RestaurantProfileStackScreenProps<'AccountSettings'>;
 
@@ -71,26 +72,7 @@ const AccountSettingsScreen = ({ navigation }: Props) => {
   const styles = getStyles(isDarkMode);
 
   return (
-    <View style={styles.container}>
-      {/* Animated Gradient Header */}
-      <Animated.View
-        style={{
-          transform: [{ translateY: headerAnim }],
-        }}
-      >
-        <LinearGradient
-          colors={[RESTAURANT_COLORS.GRADIENT_START, RESTAURANT_COLORS.GRADIENT_END]}
-          style={styles.header}
-          start={[0, 0]}
-          end={[1, 1]}
-        >
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={24} color="#fff" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>{t('settings')}</Text>
-          <MaterialCommunityIcons name="account-cog-outline" size={30} color="#fff" style={{ marginLeft: 10 }} />
-        </LinearGradient>
-      </Animated.View>
+    <CommonView>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
         <Animated.View style={{ opacity: contentAnim, marginTop: 24 }}>
           
@@ -171,7 +153,7 @@ const AccountSettingsScreen = ({ navigation }: Props) => {
           </View>
         </View>
       )}
-    </View>
+    </CommonView>
   );
 };
 

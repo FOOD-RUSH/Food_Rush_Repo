@@ -4,9 +4,8 @@ import { TouchableOpacity, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { AuthStackParamList } from './types';
 
-// Import from AppStore (where RootNavigator saves userType)
-import { useAppUserType, useAppStore } from '../stores/customerStores/AppStore';
-import { useIsAuthenticated, useAuthUser } from '../stores/customerStores/AuthStore';
+// Import from AuthStore
+import { useIsAuthenticated, useUser, useAuthActions } from '../stores/customerStores/AuthStore';
 
 // Customer auth
 import LoginScreen from '../screens/auth/LoginScreen';
@@ -23,14 +22,11 @@ import AwaitingApprovalScreen from '../screens/restaurant/auth/AwaitingApprovalS
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
 
 // Component for switching user types
-const UserTypeSwitcher: React.FC = () => {
+const UserTypeSwitcher: React.FC<{ currentUserType: 'customer' | 'restaurant' }> = ({ currentUserType }) => {
   const navigation = useNavigation();
-  const userType = useAppUserType();
-  const { setUserType } = useAppStore();
   
   const switchUserType = () => {
-    // Switch to the opposite user type
-    setUserType(userType === 'restaurant' ? 'customer' : 'restaurant');
+    // Navigate to user type selection to switch
     // @ts-ignore
     navigation.navigate('UserTypeSelection');
   };
@@ -51,19 +47,19 @@ const UserTypeSwitcher: React.FC = () => {
         color: '#666',
         fontWeight: '500'
       }}>
-        {userType === 'restaurant' ? 'Switch to Customer' : 'Switch to Restaurant'}
+        {currentUserType === 'restaurant' ? 'Switch to Customer' : 'Switch to Restaurant'}
       </Text>
     </TouchableOpacity>
   );
 };
 
-const AuthNavigator: React.FC = () => {
-  const userType = useAppUserType();
-  const isAuthenticated = useIsAuthenticated();
-  const user = useAuthUser();
+interface AuthNavigatorProps {
+  userType?: 'customer' | 'restaurant';
+}
 
-  console.log('AuthNavigator - userType from store:', userType);
-  console.log('AuthNavigator - isAuthenticated:', isAuthenticated);
+const AuthNavigator: React.FC<AuthNavigatorProps> = ({ userType = 'customer' }) => {
+  const isAuthenticated = useIsAuthenticated();
+  const user = useUser();
 
   // Check if restaurant is pending approval
   const isPendingRestaurant =
@@ -81,15 +77,13 @@ const AuthNavigator: React.FC = () => {
   const LoginComponent = userType === 'restaurant' ? RestaurantLoginScreen : LoginScreen;
   const SignupComponent = userType === 'restaurant' ? RestaurantSignupScreen : SignupScreen;
 
-  console.log('AuthNavigator - Using login component for:', userType);
-
   // Determine initial route
   const initialRouteName = isPendingRestaurant ? 'AwaitingApproval' : 'SignIn';
 
   return (
     <AuthStack.Navigator
       screenOptions={{ 
-        headerShown: true, // Show header to display user type switcher
+        headerShown: true,
         gestureEnabled: true, 
         animation: 'slide_from_right',
         headerStyle: { backgroundColor: '#FFFFFF' },
@@ -103,7 +97,7 @@ const AuthNavigator: React.FC = () => {
         component={LoginComponent}
         options={{
           title: userType === 'restaurant' ? 'Restaurant Login' : 'Customer Login',
-          headerRight: () => <UserTypeSwitcher />
+          headerRight: () => <UserTypeSwitcher currentUserType={userType} />
         }}
       />
       <AuthStack.Screen 
@@ -111,7 +105,7 @@ const AuthNavigator: React.FC = () => {
         component={SignupComponent}
         options={{
           title: userType === 'restaurant' ? 'Restaurant Signup' : 'Customer Signup',
-          headerRight: () => <UserTypeSwitcher />
+          headerRight: () => <UserTypeSwitcher currentUserType={userType} />
         }}
       />
       <AuthStack.Screen 
@@ -137,7 +131,7 @@ const AuthNavigator: React.FC = () => {
         component={AwaitingApprovalScreen}
         options={{ 
           title: 'Pending Approval',
-          headerLeft: () => null, // Remove back button for pending approval
+          headerLeft: () => null,
           gestureEnabled: false
         }}
       />

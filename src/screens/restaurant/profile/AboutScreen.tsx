@@ -10,11 +10,19 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
+import CommonView from '@/src/components/common/CommonView';
 import { RestaurantProfileStackScreenProps } from '../../../navigation/types';
+import { RESTAURANT_COLORS } from '@/src/config/restaurantTheme';
+import { useAppStore } from '@/src/stores/customerStores/AppStore';
 
 type Props = RestaurantProfileStackScreenProps<'About'>;
 
 const AboutScreen = ({ navigation }: Props) => {
+  const { t } = useTranslation();
+  const themeMode = useAppStore((s) => s.theme);
+  const isDarkMode = themeMode === 'dark';
+  
   const headerAnim = useRef(new Animated.Value(-100)).current;
   const contentAnim = useRef(new Animated.Value(0)).current;
 
@@ -33,54 +41,37 @@ const AboutScreen = ({ navigation }: Props) => {
     ]).start();
   }, []);
 
+  const styles = getStyles(isDarkMode);
+
   return (
-    <View style={styles.container}>
-      {/* Animated Gradient Header */}
-      <Animated.View
-        style={{
-          transform: [{ translateY: headerAnim }],
-        }}
-      >
-        <LinearGradient
-          colors={["#667eea", "#764ba2"]}
-          style={styles.header}
-          start={[0, 0]}
-          end={[1, 1]}
-        >
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-            <Ionicons name="arrow-back" size={24} color="#fff" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>About</Text>
-          <MaterialCommunityIcons name="information-outline" size={32} color="#fff" style={{ marginLeft: 10 }} />
-        </LinearGradient>
-      </Animated.View>
+    <CommonView >
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
         <Animated.View style={{ opacity: contentAnim, marginTop: 24, alignItems: 'center' }}>
           <View style={styles.logoContainer}>
-            <LinearGradient colors={["#764ba2", "#667eea"]} style={styles.logoBg}>
+            <LinearGradient colors={[RESTAURANT_COLORS.GRADIENT_END, RESTAURANT_COLORS.GRADIENT_START]} style={styles.logoBg}>
               <MaterialCommunityIcons name="silverware-fork-knife" size={48} color="#fff" />
             </LinearGradient>
           </View>
-          <Text style={styles.appName}>Food Rush</Text>
-          <Text style={styles.version}>Version 1.0.0</Text>
+          <Text style={styles.appName}>{t('food_rush')}</Text>
+          <Text style={styles.version}>{t('version_1_0_0')}</Text>
           <Text style={styles.description}>
-            Food Rush is a modern restaurant management app designed to simplify your business operations, manage orders, track analytics, and enhance customer satisfaction.
+            {t('food_rush_description')}
           </Text>
           <View style={styles.sectionBox}>
-            <Text style={styles.sectionTitle}>Credits</Text>
-            <Text style={styles.creditText}>Developed by The Food Rush Team</Text>
-            <Text style={styles.creditText}> 2025 All Rights Reserved</Text>
+            <Text style={styles.sectionTitle}>{t('credits')}</Text>
+            <Text style={styles.creditText}>{t('developed_by_food_rush_team')}</Text>
+            <Text style={styles.creditText}>{t('copyright_2025')}</Text>
           </View>
         </Animated.View>
       </ScrollView>
-    </View>
+    </CommonView>
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (isDarkMode: boolean) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f8fc',
+    backgroundColor: isDarkMode ? RESTAURANT_COLORS.BACKGROUND_DARK : RESTAURANT_COLORS.BACKGROUND_LIGHT,
   },
   header: {
     flexDirection: 'row',
@@ -91,7 +82,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 32,
     borderBottomRightRadius: 32,
     elevation: 8,
-    shadowColor: '#764ba2',
+    shadowColor: RESTAURANT_COLORS.PRIMARY,
     shadowOpacity: 0.25,
     shadowOffset: { width: 0, height: 6 },
     shadowRadius: 16,
@@ -120,7 +111,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 8,
     elevation: 4,
-    shadowColor: '#764ba2',
+    shadowColor: RESTAURANT_COLORS.PRIMARY,
     shadowOpacity: 0.15,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 8,
@@ -128,42 +119,44 @@ const styles = StyleSheet.create({
   appName: {
     fontSize: 26,
     fontWeight: 'bold',
-    color: '#764ba2',
+    color: RESTAURANT_COLORS.PRIMARY,
     marginTop: 6,
   },
   version: {
     fontSize: 15,
-    color: '#aaa',
+    color: isDarkMode ? RESTAURANT_COLORS.TEXT_SECONDARY_DARK : RESTAURANT_COLORS.TEXT_SECONDARY_LIGHT,
     marginBottom: 16,
   },
   description: {
     fontSize: 16,
-    color: '#333',
+    color: isDarkMode ? RESTAURANT_COLORS.TEXT_DARK : RESTAURANT_COLORS.TEXT_LIGHT,
     textAlign: 'center',
     marginHorizontal: 24,
     marginBottom: 24,
   },
   sectionBox: {
-    backgroundColor: '#fff',
+    backgroundColor: isDarkMode ? RESTAURANT_COLORS.SURFACE_DARK : RESTAURANT_COLORS.SURFACE_LIGHT,
     borderRadius: 14,
     padding: 20,
     marginHorizontal: 20,
     marginTop: 18,
     alignItems: 'center',
-    shadowColor: '#764ba2',
+    shadowColor: RESTAURANT_COLORS.PRIMARY,
     shadowOpacity: 0.08,
     shadowOffset: { width: 0, height: 1 },
     shadowRadius: 4,
+    borderWidth: 1,
+    borderColor: isDarkMode ? RESTAURANT_COLORS.BORDER_DARK : RESTAURANT_COLORS.BORDER_LIGHT,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#764ba2',
+    color: RESTAURANT_COLORS.PRIMARY,
     marginBottom: 10,
   },
   creditText: {
     fontSize: 15,
-    color: '#333',
+    color: isDarkMode ? RESTAURANT_COLORS.TEXT_DARK : RESTAURANT_COLORS.TEXT_LIGHT,
     marginTop: 2,
   },
 });

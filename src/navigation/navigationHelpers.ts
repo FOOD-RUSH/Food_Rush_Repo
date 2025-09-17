@@ -79,28 +79,95 @@ export function handleDeepLink(url: string) {
   // Parse URL and navigate accordingly
   console.log('Handling deep link:', url);
 
-  // Example implementation
-  const parsedUrl = new URL(url);
-  const path = parsedUrl.pathname;
+  try {
+    const parsedUrl = new URL(url);
+    const path = parsedUrl.pathname;
+    const searchParams = new URLSearchParams(parsedUrl.search);
 
-  if (path.startsWith('/restaurant/')) {
-    const restaurantId = path.split('/')[2];
-    if (restaurantId) {
-      navigateFromService('RestaurantDetails', { restaurantId });
+    // Core app flow deep links
+    if (path === '/onboarding' || path.startsWith('/onboarding/')) {
+      const stepParam = path.split('/')[2] || searchParams.get('step');
+      const step = stepParam ? parseInt(stepParam, 10) : undefined;
+      const skipWelcome = searchParams.get('skipWelcome') === 'true';
+      
+      navigateFromService('Onboarding', {
+        step: step && !isNaN(step) ? step : undefined,
+        skipWelcome,
+      });
+      return;
     }
-  } else if (path.startsWith('/food/')) {
-    const segments = path.split('/');
-    const foodId = segments[2];
-    const restaurantId = segments[4];
-    if (foodId && restaurantId) {
-      navigateFromService('FoodDetails', { foodId, restaurantId });
+
+    if (path === '/user-type-selection') {
+      const fromOnboarding = searchParams.get('fromOnboarding') === 'true';
+      const returnTo = searchParams.get('returnTo') as keyof RootStackParamList;
+      
+      navigateFromService('UserTypeSelection', {
+        fromOnboarding,
+        returnTo: returnTo || undefined,
+      });
+      return;
     }
+
+    // Restaurant deep links
+    if (path.startsWith('/restaurant/')) {
+      const restaurantId = path.split('/')[2];
+      if (restaurantId) {
+        navigateFromService('RestaurantDetails', { restaurantId });
+      }
+      return;
+    }
+    
+    // Food details deep links
+    if (path.startsWith('/food/')) {
+      const segments = path.split('/');
+      const foodId = segments[2];
+      const restaurantId = segments[4];
+      if (foodId && restaurantId) {
+        navigateFromService('FoodDetails', { foodId, restaurantId });
+      }
+      return;
+    }
+
+    // Order tracking deep links
+    if (path.startsWith('/order/') && path.includes('/track')) {
+      const orderId = path.split('/')[2];
+      if (orderId) {
+        navigateFromService('OrderTracking', { orderId });
+      }
+      return;
+    }
+
+    // Auth deep links
+    if (path.startsWith('/auth/') || path.startsWith('/signin') || path.startsWith('/signup')) {
+      navigateFromService('Auth');
+      return;
+    }
+
+    console.warn('Unhandled deep link path:', path);
+  } catch (error) {
+    console.error('Error parsing deep link:', error);
+    // Fallback to home
+    navigateFromService('CustomerApp');
   }
-  // Add more deep link handlers as needed
 }
 
 // Navigation actions for services (push notifications, etc.)
 export const ServiceNavigation = {
+  // Core app flow navigation
+  startOnboarding: (step?: number, skipWelcome?: boolean) => {
+    navigateFromService('Onboarding', { step, skipWelcome });
+  },
+
+  showUserTypeSelection: (fromOnboarding?: boolean, returnTo?: keyof RootStackParamList) => {
+    navigateFromService('UserTypeSelection', { fromOnboarding, returnTo });
+  },
+
+  completeOnboarding: (userType: 'customer' | 'restaurant') => {
+    // Navigate to auth with user type context
+    navigateFromService('Auth');
+  },
+
+  // Order and cart actions
   goToOrderTracking: (orderId: string) => {
     navigateFromService('OrderTracking', { orderId });
   },
@@ -110,13 +177,10 @@ export const ServiceNavigation = {
   },
 
   showCart: (fromScreen?: string) => {
-    if (fromScreen) {
-      navigateFromService('Cart', { fromScreen });
-    } else {
-      navigateFromService('Cart');
-    }
+    navigateFromService('Cart');
   },
 
+  // App switching
   logout: () => {
     reset('Auth');
   },
@@ -128,14 +192,36 @@ export const ServiceNavigation = {
   switchToRestaurantApp: () => {
     reset('RestaurantApp');
   },
+
+  // Reset to onboarding (for account switching, etc.)
+  resetToOnboarding: () => {
+    reset('Onboarding');
+  },
+
+  resetToUserTypeSelection: () => {
+    reset('UserTypeSelection');
+  },
 };
 
 // Type-safe navigation helpers for components
 // These should be used WITH the navigation prop, not instead of it
 export const createNavigationHelpers = <T extends any>(navigation: T) => ({
+  // Core app flow helpers
+  goToOnboarding: (step?: number, skipWelcome?: boolean) => {
+    (navigation as any).navigate('Onboarding', { step, skipWelcome });
+  },
+
+  goToUserTypeSelection: (fromOnboarding?: boolean, returnTo?: keyof RootStackParamList) => {
+    (navigation as any).navigate('UserTypeSelection', { fromOnboarding, returnTo });
+  },
+
+  goToAuth: () => {
+    (navigation as any).navigate('Auth');
+  },
+
   // Full-screen navigation helpers
   goToCart: (fromScreen?: string) => {
-    (navigation as any).navigate('Cart', { fromScreen });
+    (navigation as any).navigate('Cart');
   },
 
   goToCheckout: (cartId?: string) => {

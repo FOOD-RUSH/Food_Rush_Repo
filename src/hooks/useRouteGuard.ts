@@ -1,11 +1,14 @@
 import { useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { useAuthStore } from '@/src/stores/customerStores/AuthStore';
+import { useIsAuthenticated, useUser } from '@/src/stores/customerStores/AuthStore';
+import { useSelectedUserType } from '@/src/stores/customerStores/AppStore';
 import Toast from 'react-native-toast-message';
 
 export const useRouteGuard = (requiredRole: 'customer' | 'restaurant') => {
   const navigation = useNavigation();
-  const { userType, isAuthenticated } = useAuthStore();
+  const userType = useSelectedUserType();
+  const isAuthenticated = useIsAuthenticated();
+  const user = useUser();
 
   useEffect(() => {
     // If not authenticated, redirect to auth
@@ -28,8 +31,7 @@ export const useRouteGuard = (requiredRole: 'customer' | 'restaurant') => {
         navigation.navigate('CustomerApp' as never);
       } else if (userType === 'restaurant') {
         // Check if restaurant is approved
-        const user = useAuthStore.getState().user;
-        const verificationStatus = user?.verificationStatus || user?.restaurant?.verificationStatus;
+        const verificationStatus = user?.verificationStatus;
         
         if (verificationStatus === 'PENDING_VERIFICATION' || verificationStatus === 'PENDING') {
           navigation.navigate('AwaitingApproval' as never);
@@ -42,8 +44,7 @@ export const useRouteGuard = (requiredRole: 'customer' | 'restaurant') => {
 
     // If restaurant user, check verification status
     if (requiredRole === 'restaurant' && userType === 'restaurant') {
-      const user = useAuthStore.getState().user;
-      const verificationStatus = user?.verificationStatus || user?.restaurant?.verificationStatus;
+      const verificationStatus = user?.verificationStatus;
       
       if (verificationStatus === 'PENDING_VERIFICATION' || verificationStatus === 'PENDING') {
         Toast.show({
@@ -57,7 +58,7 @@ export const useRouteGuard = (requiredRole: 'customer' | 'restaurant') => {
         return;
       }
     }
-  }, [isAuthenticated, userType, requiredRole, navigation]);
+  }, [isAuthenticated, userType, requiredRole, navigation, user?.verificationStatus]);
 
   return {
     isAuthorized: isAuthenticated && userType === requiredRole,
@@ -73,7 +74,7 @@ export const useRestaurantRouteGuard = () => useRouteGuard('restaurant');
 // Route guard for authenticated users (any type)
 export const useAuthenticatedRouteGuard = () => {
   const navigation = useNavigation();
-  const { isAuthenticated } = useAuthStore();
+  const isAuthenticated = useIsAuthenticated();
 
   useEffect(() => {
     if (!isAuthenticated) {

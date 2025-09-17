@@ -1,76 +1,80 @@
 import React, { useState } from 'react';
-import { SafeAreaView, View, Text, TextInput, Button, StyleSheet } from 'react-native';
-import type { RouteProp } from '@react-navigation/native';
-import type { StackNavigationProp } from '@react-navigation/stack';
+import { View, Text, Alert } from 'react-native';
+import { Button, TextInput, useTheme } from 'react-native-paper';
+import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
+import { useRejectOrder } from '@/src/hooks/restaurant/useOrderApi';
+import { RootStackParamList } from '@/src/navigation/types';
+import CommonView from '@/src/components/common/CommonView';
 
-type Props = {
-  route: RouteProp<Record<string, { id: string }>, string>;
-  navigation: StackNavigationProp<Record<string, object>, string>;
-};
-
-export default function RejectOrderScreen({ route, navigation }: Props) {
-  const id = route.params?.id;
+const RejectOrder: React.FC = () => {
+  const route = useRoute<RouteProp<RootStackParamList, 'RestaurantRejectOrder'>>();
+  const navigation = useNavigation();
+  const { t } = useTranslation();
+  const { colors } = useTheme();
+  const { orderId } = route.params;
+  const rejectOrderMutation = useRejectOrder();
   const [reason, setReason] = useState('');
-  const [loading, setLoading] = useState(false);
 
   const handleReject = async () => {
-    setLoading(true);
     try {
-      // Call the reject order endpoint
-      const response = await fetch(`https://foodrush-be.onrender.com/api/v1/orders/${id}/reject`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          // Add authorization header if needed
-        },
-        body: reason ? JSON.stringify({ reason }) : undefined,
-      });
-
-      if (response.ok) {
-        // After success navigate or show result
-        navigation.replace('OrderDetails', { id });
-      } else {
-        console.error('Failed to reject order');
-        // Handle error
-      }
+      await rejectOrderMutation.mutateAsync(orderId);
+      Alert.alert(t('success'), t('order_rejected_successfully'));
+      navigation.goBack();
     } catch (error) {
-      console.error('Error rejecting order:', error);
-      // Handle error
-    } finally {
-      setLoading(false);
+      if (error instanceof Error) {
+        Alert.alert(t('error'), error.message || t('failed_to_reject_order'));
+      } else {
+        Alert.alert(t('error'), t('unexpected_error_occurred'));
+      }
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Reject Order</Text>
-      <Text style={styles.subtitle}>Order ID: {id}</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Optional reason for rejection"
-        value={reason}
-        onChangeText={setReason}
-        multiline
-      />
-
-      <View style={styles.row}>
-        <Button title={loading ? 'Rejecting...' : 'Reject Order'} onPress={handleReject} disabled={loading} />
+    <CommonView>
+      <View className="flex-1 p-6">
+        <Text className="text-2xl font-bold mb-2" style={{ color: colors.onSurface }}>
+          {t('reject_order')}
+        </Text>
+        <Text className="text-base mb-6" style={{ color: colors.onSurfaceVariant }}>
+          {t('order_id')}: {orderId}
+        </Text>
+        
+        <View className="mb-6">
+          <Text className="text-sm font-medium mb-2" style={{ color: colors.onSurface }}>
+            {t('reason_for_rejection')} ({t('optional')})
+          </Text>
+          <TextInput
+            mode="outlined"
+            placeholder={t('enter_reason')}
+            value={reason}
+            onChangeText={setReason}
+            multiline
+            numberOfLines={4}
+            style={{ backgroundColor: colors.surface }}
+          />
+        </View>
+        
+        <View className="space-y-4">
+          <Button 
+            mode="outlined" 
+            onPress={() => navigation.goBack()}
+            className="mb-4"
+          >
+            {t('cancel')}
+          </Button>
+          
+          <Button 
+            mode="contained" 
+            onPress={handleReject} 
+            loading={rejectOrderMutation.isPending}
+          >
+            {t('reject')}
+          </Button>
+        </View>
       </View>
-
-      <View style={styles.row}>
-        <Button title="Cancel" onPress={() => navigation.goBack()} />
-      </View>
-
-      {/* TODO: If you want, trigger other endpoints here (notify customer, update analytics, etc.) */}
-    </SafeAreaView>
+    </CommonView>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
-  title: { fontSize: 20, fontWeight: '600', marginBottom: 8 },
-  subtitle: { fontSize: 14, color: '#666', marginBottom: 12 },
-  input: { borderWidth: 1, borderColor: '#ddd', padding: 12, borderRadius: 6, minHeight: 80, marginBottom: 12 },
-  row: { marginVertical: 8 },
-});
+export default RejectOrder;

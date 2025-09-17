@@ -4,9 +4,9 @@ import { TextInput, useTheme } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import CommonView from '@/src/components/common/CommonView';
-import CategoryDropdown from '@/src/components/common/CategoryDropdown';
+import ApiCategoryDropdown from '@/src/components/common/ApiCategoryDropdown';
 import TimePicker from '@/src/components/common/TimePicker';
-import { useAuthUser } from '@/src/stores/customerStores/AuthStore';
+import { useUser } from '@/src/stores/customerStores/AuthStore';
 import { useCreateMenuItem } from '@/src/hooks/restaurant/useMenuApi';
 import { useNavigation } from '@react-navigation/native';
 import { RestaurantMenuStackScreenProps } from '@/src/navigation/types';
@@ -23,13 +23,13 @@ export const AddFoodScreen = () => {
   const navigation = useNavigation<RestaurantMenuStackScreenProps<'AddMenuItem'>['navigation']>();
   const { colors } = useTheme();
   const { t } = useTranslation();
-  const user = useAuthUser();
+  const user = useUser();
   const restaurantId = user?.restaurantId;
 
   const [foodName, setFoodName] = useState('');
   const [price, setPrice] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState<FoodCategory | ''>('');
+  const [category, setCategory] = useState<string>('');
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [startTime, setStartTime] = useState<Date | null>(null);
@@ -110,7 +110,7 @@ export const AddFoodScreen = () => {
         name: foodName.trim(),
         description: description.trim(),
         price: priceValue,
-        category: category as FoodCategory,
+        category: category,
         isAvailable: true,
         picture: imageBase64 || undefined,
         startAt: startTime ? createDailyScheduleISO(startTime.getHours(), startTime.getMinutes()) : undefined,
@@ -143,7 +143,7 @@ export const AddFoodScreen = () => {
             opacity: fadeAnim,
             transform: [{ translateY: slideAnim }],
           }}
-          className={`${isSmallScreen ? 'px-4 pt-4' : 'px-6 pt-6'}`}
+          className="pt-4"
         >
           {/* Header Section - Enhanced typography */}
           <View className="mb-8">
@@ -317,9 +317,9 @@ export const AddFoodScreen = () => {
               >
                 {t('category')} *
               </Text>
-              <CategoryDropdown
-                value={category}
-                onValueChange={setCategory}
+              <ApiCategoryDropdown
+                selectedValue={category}
+                onValueChange={(value, label) => setCategory(value)}
                 placeholder={t('select_category')}
                 error={false}
               />

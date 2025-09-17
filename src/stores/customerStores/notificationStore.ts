@@ -201,6 +201,10 @@ export const useNotificationStore = create<NotificationState & NotificationActio
           settings: state.settings,
         }),
         version: 1,
+        migrate: (persistedState: any, version: number) => {
+          // No migrations needed yet, but this prevents the warning
+          return persistedState;
+        },
       }
     ),
     { name: 'NotificationStore' }

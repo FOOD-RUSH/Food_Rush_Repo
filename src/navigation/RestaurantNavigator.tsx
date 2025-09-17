@@ -12,7 +12,6 @@ import {
   RestaurantMenuStackParamList,
   RestaurantOrdersStackParamList,
   RestaurantTabParamList,
-  RestaurantNotificationsStackParamList,
   RestaurantAccountStackParamList,
 } from './types';
 
@@ -20,7 +19,6 @@ import {
 import OrdersList from '../screens/restaurant/orders/OrdersList';
 import MenuItemsList from '../screens/restaurant/menu/MenuItemsList';
 import AnalyticsOverview from '../screens/restaurant/analytics/AnalyticsOverview';
-import NotificationsList from '../screens/restaurant/notifications/NotificationsList';
 import AccountHome from '../screens/restaurant/account/AccountHome';
 
 // Create navigators
@@ -31,8 +29,6 @@ const RestaurantMenuStack =
   createNativeStackNavigator<RestaurantMenuStackParamList>();
 const RestaurantAnalyticsStack =
   createNativeStackNavigator<RestaurantAnalyticsStackParamList>();
-const RestaurantNotificationsStack =
-  createNativeStackNavigator<RestaurantNotificationsStackParamList>();
 const RestaurantAccountStack =
   createNativeStackNavigator<RestaurantAccountStackParamList>();
 
@@ -85,22 +81,6 @@ function RestaurantAnalyticsStackScreen() {
   );
 }
 
-function RestaurantNotificationsStackScreen() {
-  return (
-    <RestaurantNotificationsStack.Navigator
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
-      <RestaurantNotificationsStack.Screen
-        name="NotificationsList"
-        component={NotificationsList}
-        options={{ title: 'Notifications' }}
-      />
-    </RestaurantNotificationsStack.Navigator>
-  );
-}
-
 function RestaurantAccountStackScreen() {
   return (
     <RestaurantAccountStack.Navigator
@@ -137,9 +117,6 @@ export default function RestaurantNavigator() {
               break;
             case 'Analytics':
               iconName = focused ? 'bar-chart' : 'bar-chart-outline';
-              break;
-            case 'Notifications':
-              iconName = focused ? 'notifications' : 'notifications-outline';
               break;
             case 'Account':
               iconName = focused ? 'person' : 'person-outline';
@@ -199,15 +176,6 @@ export default function RestaurantNavigator() {
         component={RestaurantAnalyticsStackScreen}
         options={{
           tabBarLabel: t('analytics'),
-          tabBarBackground: () => <View style={{ backgroundColor: colors.surface }} />,
-        }}
-      />
-
-      <RestaurantTab.Screen
-        name="Notifications"
-        component={RestaurantNotificationsStackScreen}
-        options={{
-          tabBarLabel: t('notifications'),
           tabBarBackground: () => <View style={{ backgroundColor: colors.surface }} />,
         }}
       />

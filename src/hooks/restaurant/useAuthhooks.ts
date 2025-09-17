@@ -24,7 +24,11 @@ export const useVerifyRestaurantOTP = () => {
 
 export const useLogoutRestaurant = () => {
   return useMutation({
-    mutationFn: () => restaurantAuthApi.logout(),
+    mutationFn: async () => {
+      // No API call - just clear local storage and state
+      console.log('Performing restaurant logout - clearing storage and state');
+      return Promise.resolve();
+    },
   });
 };
 

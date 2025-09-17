@@ -13,14 +13,19 @@ import { Button, Avatar, Divider, useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import CommonView from '@/src/components/common/CommonView';
 import { RestaurantProfileStackScreenProps } from '../../../navigation/types';
-import { useAuthUser } from '@/src/stores/customerStores/AuthStore';
+import { useUser } from '@/src/stores/customerStores/AuthStore';
+import { useRestaurantProfile } from '@/src/hooks/restaurant/useRestaurantApi';
 
 type ProfileScreenProps = RestaurantProfileStackScreenProps<'ProfileScreen'>;
 
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
   const { t } = useTranslation();
-  const user = useAuthUser(); // ✅ Use AuthStore
+  const user = useUser(); // ✅ Use AuthStore
+  const { data: restaurantProfile } = useRestaurantProfile();
   const {colors} = useTheme()
+  
+  // Use restaurant profile data if available, fallback to user data
+  const profileData = restaurantProfile || user;
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
@@ -87,26 +92,26 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         <Animated.View style={[styles.profileHeader, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
           <Avatar.Text
             size={80}
-            label={user?.fullName ? user.fullName.split(' ').map(n => n[0]).join('') : ''}
+            label={profileData?.fullName ? profileData.fullName.split(' ').map(n => n[0]).join('') : profileData?.name ? profileData.name.split(' ').map(n => n[0]).join('') : 'R'}
             style={[styles.avatar,{} ]}
           />
-          <Text style={[styles.userName, {color: colors.onSurface}]}>{user?.fullName || ''}</Text>
-          <Text style={[styles.restaurantName,  {color: colors.onSurface}]}>{user?.restaurantName || ''}</Text>
-          <Text style={[styles.userEmail,  {color: colors.onSurface}]}>{user?.email || ''}</Text>
+          <Text style={[styles.userName, {color: colors.onSurface}]}>{profileData?.fullName || profileData?.name || ''}</Text>
+          <Text style={[styles.restaurantName,  {color: colors.onSurface}]}>{profileData?.restaurantName || profileData?.name || ''}</Text>
+          <Text style={[styles.userEmail,  {color: colors.onSurface}]}>{profileData?.email || ''}</Text>
         </Animated.View>
 
         <Animated.View style={[styles.profileInfo, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
           <View style={styles.infoRow}>
             <MaterialCommunityIcons name="phone" size={20} color="#666" />
-            <Text style={[styles.infoText, {color: colors.onSurface}]}>{user?.phoneNumber || ''}</Text>
+            <Text style={[styles.infoText, {color: colors.onSurface}]}>{profileData?.phoneNumber || profileData?.phone || ''}</Text>
           </View>
           <View style={styles.infoRow}>
             <MaterialCommunityIcons name="map-marker" size={20} color="#666" />
-            <Text style={[styles.infoText, {color: colors.onBackground}]}>{user?.address || ''}</Text>
+            <Text style={[styles.infoText, {color: colors.onBackground}]}>{profileData?.address || ''}</Text>
           </View>
           <View style={styles.infoRow}>
             <MaterialCommunityIcons name="calendar" size={20} color="#666" />
-            <Text style={[styles.infoText, {color: colors.onBackground}]}>{t('member_since')} {user?.joinDate || ''}</Text>
+            <Text style={[styles.infoText, {color: colors.onBackground}]}>{t('member_since')} {profileData?.joinDate || profileData?.createdAt ? new Date(profileData.createdAt).toLocaleDateString() : ''}</Text>
           </View>
         </Animated.View>
 

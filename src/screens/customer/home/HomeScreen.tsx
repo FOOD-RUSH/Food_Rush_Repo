@@ -1,10 +1,10 @@
 import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import CommonView from '@/src/components/common/CommonView';
 import { TextInput, useTheme } from 'react-native-paper';
-import { CategoryFilters } from '@/src/constants/categories';
+import { useCategoryOptions } from '@/src/hooks/customer/useCategoriesApi';
 import { images } from '@/assets/images';
 import CategoryItem from '@/src/components/customer/CategoryItem';
-import HomeHeader from '@/src/components/customer/HomeHeader';
+// Removed HomeHeader as per requirement to remove customer headers
 import FoodItemCard from '@/src/components/customer/FoodItemCard';
 import {
   ScrollView,
@@ -157,6 +157,9 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
   const { t } = useTranslation('translation');
   const [refreshing, setRefreshing] = useState(false);
   const [showPermissionModal, setShowPermissionModal] = useState(false);
+  
+  // Get categories from API
+  const { data: categories, isLoading: isCategoriesLoading } = useCategoryOptions();
 
   // Location hook with optimized options
   const {
@@ -359,11 +362,11 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
   );
 
   const renderCategoryItem = useCallback(
-    ({ item }: { item: any }) => (
+    ({ item }: { item: { value: string; label: string } }) => (
       <CategoryItem 
-        key={item.id} 
-        image={item.image} 
-        title={item.title} 
+        key={item.value} 
+        image={images.onboarding1} // Use default image for now
+        title={item.label} 
       />
     ),
     []
@@ -398,12 +401,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
         }
         accessibilityLabel={t('home')}
       >
-        {/* Header */}
-        <HomeHeader
-          navigation={navigation}
-          location={location}
-          onLocationPress={handleAddressPress}
-        />
+        {/* Removed HomeHeader as per requirement to remove customer headers */}
 
         {/* Search Bar */}
         <View
@@ -459,19 +457,28 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
           onPress={() => {}} 
         />
         <View className="mb-4">
-          <FlatList
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            data={CategoryFilters}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={renderCategoryItem}
-            className="px-2"
-            contentContainerStyle={{ paddingHorizontal: 8 }}
-            removeClippedSubviews={true}
-            initialNumToRender={4}
-            maxToRenderPerBatch={2}
-            windowSize={6}
-          />
+          {isCategoriesLoading ? (
+            <LoadingSection 
+              count={4}
+              SkeletonComponent={() => (
+                <View style={{ width: 80, height: 80, backgroundColor: colors.surfaceVariant, borderRadius: 8, margin: 4 }} />
+              )}
+            />
+          ) : (
+            <FlatList
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              data={categories}
+              keyExtractor={(item) => item.value}
+              renderItem={renderCategoryItem}
+              className="px-2"
+              contentContainerStyle={{ paddingHorizontal: 8 }}
+              removeClippedSubviews={true}
+              initialNumToRender={4}
+              maxToRenderPerBatch={2}
+              windowSize={6}
+            />
+          )}
         </View>
 
         {/* Discounts Guaranteed - Carousel Section */}

@@ -5,6 +5,20 @@ export const linking: LinkingOptions<RootStackParamList> = {
   prefixes: ['fooddeliveryapp://', 'https://foodrush.com'],
   config: {
     screens: {
+      // Core app flow screens
+      Onboarding: {
+        path: 'onboarding/:step?',
+        parse: {
+          step: (step: string) => parseInt(step, 10) || 1,
+        },
+        stringify: {
+          step: (step?: number) => step?.toString() || '1',
+        },
+      },
+      UserTypeSelection: {
+        path: 'user-type-selection',
+        exact: true,
+      },
       Auth: {
         screens: {
           SignIn: 'signin',

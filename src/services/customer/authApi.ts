@@ -1,5 +1,5 @@
 import { User } from '../../types';
-import { apiClient } from './apiClient';
+import { apiClient } from '../apiClient';
 
 export interface LoginRequest {
   email: string;
@@ -72,12 +72,12 @@ export const authApi = {
     return apiClient.post<LoginResponseData>('/auth/verify-otp', { ...data });
   },
 
-  logout: () => {
-    return apiClient.post<void>('/auth/logout');
-  },
+  // logout: () => {
+  //   return apiClient.post<void>('/auth/logout');
+  // },
 
   refreshToken: (refreshToken: string) => {
-    return apiClient.post<{ accessToken: string }>('/auth/refresh-token', {
+    return apiClient.post<{ accessToken: string; refreshToken: string }>('/auth/refresh-token', {
       refreshToken,
     });
   },

@@ -1,4 +1,4 @@
-import { restaurantApiClient } from './apiClient';
+import { apiClient } from '../apiClient';
 
 export interface OrderItem {
   id: string;
@@ -46,31 +46,27 @@ export interface UpdateOrderStatusRequest {
 export const restaurantOrderApi = {
   // Get all orders for the restaurant
   getOrders: (params?: { status?: string; limit?: number; offset?: number }) => {
-    return restaurantApiClient.get<OrderResponse>('/orders/my-restaurant', { params });
+    return apiClient.get<OrderResponse>('/orders/my-restaurant', { params });
   },
 
   // Get orders for a specific restaurant
   getOrdersByRestaurantId: (restaurantId: string) => {
-    return restaurantApiClient.get<OrderResponse>(`/orders/restaurant/${restaurantId}`);
+    return apiClient.get<OrderResponse>(`/orders/restaurant/${restaurantId}`);
   },
 
   // Get order by ID
   getOrderById: (orderId: string) => {
-    return restaurantApiClient.get<{ status_code: number; message: string; data: Order }>(`/orders/${orderId}`);
+    return apiClient.get<{ status_code: number; message: string; data: Order }>(`/orders/${orderId}`);
   },
 
   // Confirm order
   confirmOrder: (orderId: string) => {
-    return restaurantApiClient.post(`/orders/${orderId}/confirm`);
+    return apiClient.post(`/orders/${orderId}/confirm`);
   },
 
   // Reject order
   rejectOrder: (orderId: string) => {
-    return restaurantApiClient.post(`/orders/${orderId}/reject`);
+    return apiClient.post(`/orders/${orderId}/reject`);
   },
 
-  // Get all orders (general endpoint)
-  getAllOrders: () => {
-    return restaurantApiClient.get<OrderResponse>('/orders');
-  },
 };

@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { RestaurantProfileStackScreenProps } from '../../../navigation/types';
 import { RESTAURANT_COLORS } from '@/src/config/restaurantTheme';
 import { useAppStore } from '@/src/stores/customerStores';
@@ -21,6 +22,10 @@ import { useAppStore } from '@/src/stores/customerStores';
 type Props = RestaurantProfileStackScreenProps<'RestaurantSettings'>;
 
 const RestaurantSettingsScreen = ({ navigation }: Props) => {
+  const { t } = useTranslation();
+  const themeMode = useAppStore((s) => s.theme);
+  const isDarkMode = themeMode === 'dark';
+  
   const headerAnim = useRef(new Animated.Value(-100)).current;
   const contentAnim = useRef(new Animated.Value(0)).current;
 
@@ -46,6 +51,8 @@ const RestaurantSettingsScreen = ({ navigation }: Props) => {
     ]).start();
   }, []);
 
+  const styles = getStyles(isDarkMode);
+
   return (
     <View style={styles.container}>
       {/* Animated Gradient Header */}
@@ -63,46 +70,46 @@ const RestaurantSettingsScreen = ({ navigation }: Props) => {
           <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Restaurant Settings</Text>
+          <Text style={styles.headerTitle}>{t('restaurant_settings')}</Text>
           <MaterialCommunityIcons name="store-cog-outline" size={32} color="#fff" style={{ marginLeft: 10 }} />
         </LinearGradient>
       </Animated.View>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
         <Animated.View style={{ opacity: contentAnim, marginTop: 24 }}>
-          <Text style={styles.sectionTitle}>Restaurant Info</Text>
+          <Text style={styles.sectionTitle}>{t('restaurant_info')}</Text>
           <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Name</Text>
+            <Text style={styles.inputLabel}>{t('name')}</Text>
             <TextInput
               style={styles.input}
               value={restaurantName}
               onChangeText={setRestaurantName}
-              placeholder="Restaurant Name"
-              placeholderTextColor="#aaa"
+              placeholder={t('enter_restaurant_name')}
+              placeholderTextColor={isDarkMode ? RESTAURANT_COLORS.TEXT_SECONDARY_DARK : RESTAURANT_COLORS.TEXT_SECONDARY_LIGHT}
             />
           </View>
           <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Address</Text>
+            <Text style={styles.inputLabel}>{t('address')}</Text>
             <TextInput
               style={styles.input}
               value={address}
               onChangeText={setAddress}
-              placeholder="Address"
-              placeholderTextColor="#aaa"
+              placeholder={t('enter_restaurant_address')}
+              placeholderTextColor={isDarkMode ? RESTAURANT_COLORS.TEXT_SECONDARY_DARK : RESTAURANT_COLORS.TEXT_SECONDARY_LIGHT}
             />
           </View>
           <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>Cuisine</Text>
+            <Text style={styles.inputLabel}>{t('cuisine')}</Text>
             <TextInput
               style={styles.input}
               value={cuisine}
               onChangeText={setCuisine}
-              placeholder="Cuisine"
-              placeholderTextColor="#aaa"
+              placeholder={t('enter_cuisine_type')}
+              placeholderTextColor={isDarkMode ? RESTAURANT_COLORS.TEXT_SECONDARY_DARK : RESTAURANT_COLORS.TEXT_SECONDARY_LIGHT}
             />
           </View>
-          <Text style={styles.sectionTitle}>Preferences</Text>
+          <Text style={styles.sectionTitle}>{t('preferences')}</Text>
           <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>Accepting Orders</Text>
+            <Text style={styles.switchLabel}>{t('accepting_orders')}</Text>
             <Switch
               value={acceptingOrders}
               onValueChange={setAcceptingOrders}
@@ -111,7 +118,7 @@ const RestaurantSettingsScreen = ({ navigation }: Props) => {
             />
           </View>
           <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>Show on Map</Text>
+            <Text style={styles.switchLabel}>{t('show_on_map')}</Text>
             <Switch
               value={showOnMap}
               onValueChange={setShowOnMap}
@@ -121,7 +128,7 @@ const RestaurantSettingsScreen = ({ navigation }: Props) => {
           </View>
           <TouchableOpacity style={styles.saveBtn} onPress={resetApp}>
             <Ionicons name="save-outline" size={22} color="#fff" />
-            <Text style={styles.saveBtnText}>Save Changes</Text>
+            <Text style={styles.saveBtnText}>{t('save_changes')}</Text>
           </TouchableOpacity>
         </Animated.View>
       </ScrollView>
@@ -129,10 +136,10 @@ const RestaurantSettingsScreen = ({ navigation }: Props) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (isDarkMode: boolean) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: RESTAURANT_COLORS.BACKGROUND_LIGHT,
+    backgroundColor: isDarkMode ? RESTAURANT_COLORS.BACKGROUND_DARK : RESTAURANT_COLORS.BACKGROUND_LIGHT,
   },
   header: {
     flexDirection: 'row',
@@ -176,29 +183,29 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   input: {
-    backgroundColor: RESTAURANT_COLORS.SURFACE_LIGHT,
+    backgroundColor: isDarkMode ? RESTAURANT_COLORS.SURFACE_DARK : RESTAURANT_COLORS.SURFACE_LIGHT,
     borderRadius: 10,
     padding: 12,
     fontSize: 16,
     borderWidth: 1.2,
-    borderColor: RESTAURANT_COLORS.BORDER_LIGHT,
-    color: RESTAURANT_COLORS.TEXT_LIGHT,
+    borderColor: isDarkMode ? RESTAURANT_COLORS.BORDER_DARK : RESTAURANT_COLORS.BORDER_LIGHT,
+    color: isDarkMode ? RESTAURANT_COLORS.TEXT_DARK : RESTAURANT_COLORS.TEXT_LIGHT,
   },
   switchRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: RESTAURANT_COLORS.SURFACE_LIGHT,
+    backgroundColor: isDarkMode ? RESTAURANT_COLORS.SURFACE_DARK : RESTAURANT_COLORS.SURFACE_LIGHT,
     borderRadius: 10,
     padding: 14,
     marginHorizontal: 20,
     marginBottom: 10,
     borderWidth: 1.2,
-    borderColor: RESTAURANT_COLORS.BORDER_LIGHT,
+    borderColor: isDarkMode ? RESTAURANT_COLORS.BORDER_DARK : RESTAURANT_COLORS.BORDER_LIGHT,
   },
   switchLabel: {
     fontSize: 15,
-    color: RESTAURANT_COLORS.TEXT_LIGHT,
+    color: isDarkMode ? RESTAURANT_COLORS.TEXT_DARK : RESTAURANT_COLORS.TEXT_LIGHT,
     fontWeight: '500',
   },
   saveBtn: {

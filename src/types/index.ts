@@ -318,8 +318,8 @@ export type OrderStatus =
   | 'pending'
   | 'confirmed'
   | 'preparing'
-  | 'ready'
-  | 'picked_up'
+  | 'ready_for_pickup'
+  | 'out_for_delivery'
   | 'delivered'
   | 'cancelled';
 

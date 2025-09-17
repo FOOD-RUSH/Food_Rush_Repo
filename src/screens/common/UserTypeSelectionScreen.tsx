@@ -13,7 +13,8 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { useAppStore } from '@/src/stores/customerStores/AppStore';
+import { useAppActions } from '@/src/stores/customerStores/AppStore';
+import type { UserTypeSelectionScreenProps as NavigationProps } from '../../navigation/types';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -41,15 +42,19 @@ const COLORS = {
   success: '#059669',
 };
 
-interface UserTypeSelectionScreenProps {
+interface UserTypeSelectionScreenProps extends NavigationProps {
   onUserTypeSelect?: (userType: 'customer' | 'restaurant') => void;
 }
 
 const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({ 
-  onUserTypeSelect 
+  onUserTypeSelect,
+  route,
 }) => {
   const navigation = useNavigation();
-  const { setUserType } = useAppStore();
+  const { setSelectedUserType } = useAppActions();
+  
+  // Get route parameters
+  const { fromOnboarding, returnTo } = route?.params || {};
 
   // State for screen dimensions
   const [screenData, setScreenData] = useState(Dimensions.get('window'));
@@ -143,19 +148,13 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
       // Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     }
     
-    // Set userType in store
-    setUserType(userType);
+    // Set userType in store for backup
+    setSelectedUserType(userType);
     
-    // Call the callback if provided
+    // Call the callback - navigation will be handled by RootNavigator
     if (onUserTypeSelect) {
       onUserTypeSelect(userType);
     }
-    
-    // Navigate to Auth screen with reset to prevent back navigation
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Auth' }],
-    });
   };
 
   return (

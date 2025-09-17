@@ -3,15 +3,13 @@ import {
   restaurantMenuApi,
   CreateMenuItemRequest,
   UpdateMenuItemRequest,
-  CreateCategoryRequest,
-  MenuItem,
-  MenuCategory
 } from "@/src/services/restaurant/menuApi";
+// Removed CreateCategoryRequest - backend only returns categories
 
-export const useGetMenuItems = (restaurantId: string, params?: { categoryId?: string; isAvailable?: boolean; page?: number; limit?: number }) => {
+export const useGetMenuItems = (restaurantId: string,  category?: string) => {
   return useQuery({
-    queryKey: ['restaurant-menu-items', restaurantId, params],
-    queryFn: () => restaurantMenuApi.getMenuItems(restaurantId, params).then(res => res.data.data),
+    queryKey: ['restaurant-menu-items', restaurantId, category],
+    queryFn: () => restaurantMenuApi.getMenuItems(restaurantId, category!).then(res => res.data.data),
     enabled: !!restaurantId,
   });
 };
@@ -72,104 +70,5 @@ export const useToggleMenuItemAvailability = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['restaurant-menu-items'] });
     },
-  });
-};
-
-export const useGetCategories = (params?: { isActive?: boolean; page?: number; limit?: number }) => {
-  return useQuery({
-    queryKey: ['restaurant-categories', params],
-    queryFn: () => restaurantMenuApi.getCategories(params).then(res => res.data),
-  });
-};
-
-export const useCreateCategory = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (data: CreateCategoryRequest) => restaurantMenuApi.createCategory(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['restaurant-categories'] });
-      queryClient.invalidateQueries({ queryKey: ['restaurant-menu-stats'] });
-    },
-  });
-};
-
-export const useUpdateCategory = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ categoryId, data }: { categoryId: string; data: any }) =>
-      restaurantMenuApi.updateCategory(categoryId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['restaurant-categories'] });
-    },
-  });
-};
-
-export const useDeleteCategory = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (categoryId: string) => restaurantMenuApi.deleteCategory(categoryId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['restaurant-categories'] });
-      queryClient.invalidateQueries({ queryKey: ['restaurant-menu-stats'] });
-    },
-  });
-};
-
-export const useMenuStats = () => {
-  return useQuery({
-    queryKey: ['restaurant-menu-stats'],
-    queryFn: () => restaurantMenuApi.getMenuStats().then(res => res.data),
-  });
-};
-
-// New hooks for additional APIs
-export const useGetAllMenus = (params?: { page?: number; limit?: number }) => {
-  return useQuery({
-    queryKey: ['all-menus', params],
-    queryFn: () => restaurantMenuApi.getAllMenus(params).then(res => res.data),
-  });
-};
-
-export const useGetNearbyMenus = (params: { nearlat: number; nearlng: number; radiuskm: number; limit?: number; offset?: number }) => {
-  return useQuery({
-    queryKey: ['nearby-menus', params],
-    queryFn: () => restaurantMenuApi.getNearbyMenus(params).then(res => res.data),
-    enabled: !!(params.nearlat && params.nearlng && params.radiuskm),
-  });
-};
-
-export const useBrowseMenus = (params: {
-  nearLat: number;
-  nearLng: number;
-  minDistanceKm?: number;
-  maxDistanceKm?: number;
-  minDeliveryFee?: number;
-  maxDeliveryFee?: number;
-  radiusKm?: number;
-  sortBy?: 'distance' | 'fee' | 'createdAt';
-  sortDir?: 'ASC' | 'DESC';
-  limit?: number;
-  offset?: number;
-}) => {
-  return useQuery({
-    queryKey: ['browse-menus', params],
-    queryFn: () => restaurantMenuApi.browseMenus(params).then(res => res.data),
-    enabled: !!(params.nearLat && params.nearLng),
-  });
-};
-
-export const useUploadMenuItemPicture = () => {
-  return useMutation({
-    mutationFn: ({ restaurantId, formData }: { restaurantId: string; formData: FormData }) =>
-      restaurantMenuApi.uploadMenuItemPicture(restaurantId, formData),
-  });
-};
-
-export const useUploadImage = () => {
-  return useMutation({
-    mutationFn: (formData: FormData) => restaurantMenuApi.uploadImage(formData),
   });
 };

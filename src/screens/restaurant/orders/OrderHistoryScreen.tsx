@@ -45,9 +45,9 @@ const OrderHistoryScreen : React.FC<RootStackScreenProps<'RestaurantOrderHistory
 
   const getStatusColor = (status: HistoryOrder['status']) => {
     switch (status) {
-      case 'completed': return '#34C759';
-      case 'cancelled': return '#FF3B30';
-      default: return '#8E8E93';
+      case 'completed': return colors.success || '#34C759';
+      case 'cancelled': return colors.error;
+      default: return colors.onSurfaceVariant;
     }
   };
 
@@ -59,7 +59,7 @@ const OrderHistoryScreen : React.FC<RootStackScreenProps<'RestaurantOrderHistory
           <Text
             key={`star-${star}`}
             style={{
-              color: star <= rating ? '#FFD700' : '#E5E5EA',
+              color: star <= rating ? '#FFD700' : colors.outline,
               fontSize: 16,
               marginRight: 2,
             }}
@@ -94,11 +94,11 @@ const OrderHistoryScreen : React.FC<RootStackScreenProps<'RestaurantOrderHistory
       >
         <TouchableOpacity 
           style={{
-            backgroundColor: colors.onSurfaceVariant,
+            backgroundColor: colors.surface,
             padding: 16,
             borderRadius: 12,
             marginBottom: 12,
-            shadowColor: '#000',
+            shadowColor: colors.shadow || '#000',
             shadowOffset: { width: 0, height: 2 },
             shadowOpacity: 0.1,
             shadowRadius: 4,
@@ -113,7 +113,7 @@ const OrderHistoryScreen : React.FC<RootStackScreenProps<'RestaurantOrderHistory
             marginBottom: 8 
           }}>
             <Text style={{ fontSize: 18, fontWeight: '600', color:  colors.onBackground }}>
-              Order #{item.id}
+              {t('order_prefix')}{item.id}
             </Text>
             <View style={{ 
               backgroundColor: getStatusColor(item.status), 
@@ -143,10 +143,10 @@ const OrderHistoryScreen : React.FC<RootStackScreenProps<'RestaurantOrderHistory
           </View>
 
           <View style={{ marginBottom: 8 }}>
-            <Text style={{ color: '#007AFF', fontSize: 14, marginBottom: 4 }}>
+            <Text style={{ color: colors.primary, fontSize: 14, marginBottom: 4 }}>
               📍 {item.restaurant}
             </Text>
-            <Text style={{ color: '#999', fontSize: 12 }}>
+            <Text style={{ color: colors.onSurfaceVariant, fontSize: 12 }}>
               📅 {new Date(item.orderDate).toLocaleDateString('en-US', {
                 weekday: 'long',
                 year: 'numeric',
@@ -164,10 +164,10 @@ const OrderHistoryScreen : React.FC<RootStackScreenProps<'RestaurantOrderHistory
 
           <View style={{ 
             borderTopWidth: 1, 
-            borderTopColor: '#f0f0f0', 
+            borderTopColor: colors.outline, 
             paddingTop: 8 
           }}>
-            <Text style={{ color: '#888', fontSize: 14, marginBottom: 8 }}>
+            <Text style={{ color: colors.onSurfaceVariant, fontSize: 14, marginBottom: 8 }}>
               {item.items.join(', ')}
             </Text>
             <View style={{
@@ -178,14 +178,14 @@ const OrderHistoryScreen : React.FC<RootStackScreenProps<'RestaurantOrderHistory
               <Text style={{ 
                 fontSize: 18, 
                 fontWeight: 'bold', 
-                color: '#007AFF',
+                color: colors.primary,
               }}>
-                ${item.total.toFixed(2)}
+                {item.total.toLocaleString()} {t('currency_xaf')}
               </Text>
               {item.status === 'completed' && (
                 <TouchableOpacity
                   style={{
-                    backgroundColor: '#007AFF',
+                    backgroundColor: colors.primary,
                     paddingHorizontal: 12,
                     paddingVertical: 6,
                     borderRadius: 8,
@@ -237,20 +237,20 @@ const OrderHistoryScreen : React.FC<RootStackScreenProps<'RestaurantOrderHistory
           elevation: 3,
         }}>
           <View style={{ alignItems: 'center' }}>
-            <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#007AFF' }}>
+            <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.primary }}>
               {getTotalOrders()}
             </Text>
             <Text style={{ color:  colors.onBackground, fontSize: 12 }}>{t('total_orders')}</Text>
           </View>
           <View style={{ alignItems: 'center' }}>
-            <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#34C759' }}>
+            <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.success || '#34C759' }}>
               {getCompletedOrders()}
             </Text>
             <Text style={{ color:  colors.onBackground, fontSize: 12 }}>{t('completed')}</Text>
           </View>
           <View style={{ alignItems: 'center' }}>
-            <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#FF9500' }}>
-              ${getTotalRevenue().toFixed(2)}
+            <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.warning || '#FF9500' }}>
+              {getTotalRevenue().toLocaleString()} {t('currency_xaf')}
             </Text>
             <Text style={{ color:  colors.onBackground, fontSize: 12 }}>{t('revenue')}</Text>
           </View>
@@ -274,8 +274,8 @@ const OrderHistoryScreen : React.FC<RootStackScreenProps<'RestaurantOrderHistory
               key={`filter-${filter}`}
               selected={selectedFilter === filter}
               onPress={() => setSelectedFilter(filter)}
-              style={{ marginRight: 8, height: 35, backgroundColor: selectedFilter  === filter? "#007aff" : colors.surface, borderWidth: 1, borderColor: colors.outline }}
-              textStyle={{color:  selectedFilter  === filter?  'white': colors.onBackground}}
+              style={{ marginRight: 8, height: 35, backgroundColor: selectedFilter  === filter? colors.primary : colors.surface, borderWidth: 1, borderColor: colors.outline }}
+              textStyle={{color:  selectedFilter  === filter?  'white': colors.onSurface}}
               selectedColor='white'
             >
               {filter.charAt(0).toUpperCase() + filter.slice(1)}

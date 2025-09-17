@@ -1,157 +1,252 @@
-// AuthStore.ts
 import { create } from 'zustand';
-import { createJSONStorage, devtools, persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { navigate } from '../../navigation/navigationHelpers';
-import TokenManager from '@/src/services/customer/tokenManager';
+import TokenManager from '@/src/services/tokenManager';
+import { apiClient } from '@/src/services/apiClient';
 
-// ✅ Export User interface so it can be imported in screens
+// Simple User interface
 export interface User {
   id: string;
   email: string;
-  fullName: string;
+  firstName: string;
+  lastName: string;
   role: 'customer' | 'restaurant';
-  status: string;
-  isEmailVerified: boolean;
-  isPhoneVerified: boolean;
-  phoneNumber: string;
-  profilePicture?: string | null;
-  // Optional restaurant fields if role is restaurant
+  isVerified?: boolean;
   restaurantId?: string;
-  restaurantName?: string;
-  verificationStatus?: string;
-  address?:string;
-  bio?:string;
-  website?:string;
-  cuisine?:string;
+  verificationStatus?: 'PENDING' | 'APPROVED' | 'REJECTED' | 'PENDING_VERIFICATION';
 }
 
+// Auth Store State
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  userType: 'customer' | 'restaurant' | null;
-  selectedUserType: 'customer' | 'restaurant' | null;
   error: string | null;
-  registrationData: {
-    email?: string;
-    phoneNumber?: string;
-    userId?: string;
-  } | null;
+  isInitialized: boolean;
+  _isInitializing: boolean; // Internal flag to prevent concurrent initialization
 }
 
+// Auth Store Actions
 interface AuthActions {
-  setUser: (user: User | null) => void;
-  setIsAuthenticated: (value: boolean) => void;
-  setIsLoading: (value: boolean) => void;
+  // Core auth
+  login: (email: string, password: string, userType: 'customer' | 'restaurant') => Promise<boolean>;
+  logout: () => Promise<void>;
+  
+  // State management
   setError: (error: string | null) => void;
-  setSelectedUserType: (userType: 'customer' | 'restaurant') => void;
-  setRegistrationData: (data: AuthState['registrationData']) => void;
-  logoutUser: () => Promise<void>;
   clearError: () => void;
-  resetAuth: () => void;
-  checkAuthStatus: () => Promise<void>;
+  
+  // Initialization
+  initialize: () => Promise<void>;
 }
 
-const initialState: AuthState = {
+const initialState: Omit<AuthState, '_isInitializing'> = {
   user: null,
   isAuthenticated: false,
   isLoading: false,
-  userType: null,
-  selectedUserType: null,
   error: null,
-  registrationData: null,
+  isInitialized: false,
 };
 
 export const useAuthStore = create<AuthState & AuthActions>()(
-  devtools(
-    persist(
-      (set, get) => ({
-        ...initialState,
-        setUser: (user) => {
-          let processedUser = user;
-          if (user?.role === 'restaurant' && user.restaurantId && user.restaurantName) {
-            processedUser = { ...user };
+  persist(
+    (set, get) => ({
+      ...initialState,
+      _isInitializing: false,
+
+      // Initialize auth on app start
+      initialize: async () => {
+        const state = get();
+        
+        // Prevent multiple initialization calls
+        if (state.isInitialized || state._isInitializing) {
+          return;
+        }
+
+        try {
+          set({ _isInitializing: true, isLoading: true });
+          
+          const tokenData = await TokenManager.getTokenData();
+          
+          if (!tokenData?.accessToken) {
+            set({ 
+              isAuthenticated: false, 
+              user: null, 
+              isLoading: false,
+              isInitialized: true,
+              _isInitializing: false,
+              error: null,
+            });
+            return;
           }
+
+          // Validate token with backend
+          const response = await apiClient.get('/auth/me');
+          const user = response.data.data?.user || response.data.user || response.data;
+          
+          if (!user) {
+            throw new Error('Invalid user data received');
+          }
+          
           set({
-            user: processedUser,
-            userType: processedUser?.role ?? null,
+            user,
+            isAuthenticated: true,
+            isLoading: false,
+            isInitialized: true,
+            _isInitializing: false,
             error: null,
           });
-        },
-        setIsAuthenticated: (isAuthenticated) => set({ isAuthenticated, error: isAuthenticated ? null : get().error }),
-        setIsLoading: (isLoading) => set({ isLoading }),
-        setError: (error) => set({ error }),
-        setSelectedUserType: (selectedUserType) => set({ selectedUserType }),
-        setRegistrationData: (registrationData) => set({ registrationData }),
-        logoutUser: async () => {
+        } catch (error: any) {
+          console.warn('Auth initialization failed:', error);
+          
+          // Clear tokens on failure
           try {
-            await TokenManager.clearAllTokens();
-            set({ ...initialState, selectedUserType: get().selectedUserType });
-            navigate('Auth');
-          } catch (error) {
-            console.error('Error during logout:', error);
-            set({ ...initialState, selectedUserType: get().selectedUserType });
-            navigate('Auth');
+            await TokenManager.clearTokens();
+          } catch (clearError) {
+            console.warn('Failed to clear tokens:', clearError);
           }
-        },
-        checkAuthStatus: async () => {
-          try {
-            set({ isLoading: true });
-            const accessToken = await TokenManager.getToken();
-            const refreshToken = await TokenManager.getRefreshToken();
-            if (accessToken && refreshToken) set({ isAuthenticated: true });
-            else set({ isAuthenticated: false, user: null, userType: null });
-          } catch {
-            set({ isAuthenticated: false, user: null, userType: null });
-          } finally {
-            set({ isLoading: false });
-          }
-        },
-        clearError: () => set({ error: null }),
-        resetAuth: () => set({ ...initialState, selectedUserType: get().selectedUserType }),
-      }),
-      {
-        name: 'auth-storage',
-        storage: createJSONStorage(() => AsyncStorage),
-        partialize: (state) => ({
-          user: state.user,
-          isAuthenticated: state.isAuthenticated,
-          userType: state.userType,
-          selectedUserType: state.selectedUserType,
-          registrationData: state.registrationData,
-        }),
-        version: 3,
-        migrate: (persistedState: any, version: number) => {
-          if (version < 2) return { ...persistedState, registrationData: null, error: null, isLoading: false };
-          return persistedState;
-        },
-        onRehydrateStorage: () => (state) => state?.checkAuthStatus(),
+          
+          set({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false,
+            isInitialized: true,
+            _isInitializing: false,
+            error: null, // Don't show initialization errors to user
+          });
+        }
       },
-    ),
-    { name: 'AuthStore' },
-  ),
+
+      // Login
+      login: async (email: string, password: string, userType: 'customer' | 'restaurant') => {
+        const state = get();
+        
+        // Prevent multiple login attempts
+        if (state.isLoading) {
+          return false;
+        }
+
+        try {
+          set({ isLoading: true, error: null });
+
+          const response = await apiClient.post('/auth/login', {
+            email,
+            password,
+            userType,
+          });
+
+          const { user, accessToken, refreshToken } = response.data.data || response.data;
+
+          if (!user || !accessToken) {
+            throw new Error('Invalid login response');
+          }
+
+          await TokenManager.setTokens({
+            accessToken,
+            refreshToken,
+            userType,
+          });
+          
+          set({
+            user,
+            isAuthenticated: true,
+            isLoading: false,
+            error: null,
+          });
+
+          return true;
+        } catch (error: any) {
+          const errorMessage = error.response?.data?.message || 'Login failed';
+          set({
+            isAuthenticated: false,
+            user: null,
+            isLoading: false,
+            error: errorMessage,
+          });
+          return false;
+        }
+      },
+
+      // Logout
+      logout: async () => {
+        const state = get();
+        
+        // Prevent multiple logout calls or logout when not authenticated
+        if (state.isLoading) {
+          return;
+        }
+
+        try {
+          set({ isLoading: true });
+          
+          // Try to call logout endpoint (optional)
+          try {
+            if (state.isAuthenticated) {
+              await apiClient.post('/auth/logout');
+            }
+          } catch (apiError) {
+            console.warn('Logout API call failed:', apiError);
+            // Continue with local logout even if API call fails
+          }
+          
+          // Clear tokens
+          await TokenManager.clearTokens();
+          
+          // Reset to initial state but keep initialization status
+          set({ 
+            ...initialState,
+            isInitialized: true,
+            _isInitializing: false,
+          });
+        } catch (error) {
+          console.error('Logout error:', error);
+          
+          // Force clear tokens and state even on error
+          try {
+            await TokenManager.clearTokens();
+          } catch (clearError) {
+            console.warn('Failed to clear tokens during error recovery:', clearError);
+          }
+          
+          set({ 
+            ...initialState,
+            isInitialized: true,
+            _isInitializing: false,
+          });
+        }
+      },
+
+      // Error management
+      setError: (error) => {
+        const currentState = get();
+        if (currentState.error !== error) {
+          set({ error });
+        }
+      },
+      
+      clearError: () => {
+        const currentState = get();
+        if (currentState.error !== null) {
+          set({ error: null });
+        }
+      },
+    }),
+    {
+      name: 'auth-store',
+      storage: createJSONStorage(() => AsyncStorage),
+      partialize: (state) => ({}), // Don't persist auth state, only tokens via TokenManager
+    }
+  )
 );
 
-export const useAuthUser = () => useAuthStore((state) => state.user);
+// Simple selector hooks
+export const useAuth = () => useAuthStore();
+export const useUser = () => useAuthStore((state) => state.user);
 export const useIsAuthenticated = () => useAuthStore((state) => state.isAuthenticated);
 export const useAuthLoading = () => useAuthStore((state) => state.isLoading);
 export const useAuthError = () => useAuthStore((state) => state.error);
-export const useUserType = () => useAuthStore((state) => state.userType);
-export const useSelectedUserType = () => useAuthStore((state) => state.selectedUserType);
-export const useRegistrationData = () => useAuthStore((state) => state.registrationData);
-export const useAuthStatus = () => useAuthStore((state) => ({
-  isAuthenticated: state.isAuthenticated,
-  isLoading: state.isLoading,
-  user: state.user,
-  error: state.error,
-}));
-export const useAuthActions = () => useAuthStore((state) => ({
-  setUser: state.setUser,
-  setIsAuthenticated: state.setIsAuthenticated,
-  setError: state.setError,
-  clearError: state.clearError,
-  logoutUser: state.logoutUser,
-  resetAuth: state.resetAuth,
-  setRegistrationData: state.setRegistrationData,
-}));
+export const useAuthInitialized = () => useAuthStore((state) => state.isInitialized);
+
+// Utility hooks
+export const useIsCustomer = () => useAuthStore((state) => state.user?.role === 'customer');
+export const useIsRestaurant = () => useAuthStore((state) => state.user?.role === 'restaurant');

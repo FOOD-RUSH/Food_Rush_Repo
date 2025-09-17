@@ -15,23 +15,27 @@ import RestaurantAvailabilityToggle from '@/src/components/restaurant/Restaurant
 
 const Tab = createMaterialTopTabNavigator();
 
-// Constants
+// Constants - Updated to match backend order statuses
 const ORDER_STATUSES = {
-  NEW: 'new',
-  PREPARING: 'preparing', 
-  READY: 'ready',
-  COMPLETED: 'completed',
-  CANCELED: 'canceled'
+  PENDING: 'pending',
+  CONFIRMED: 'confirmed',
+  PREPARING: 'preparing',
+  READY_FOR_PICKUP: 'ready_for_pickup',
+  OUT_FOR_DELIVERY: 'out_for_delivery',
+  DELIVERED: 'delivered',
+  CANCELLED: 'cancelled'
 } as const;
 
-const STATUS_COLORS = {
-  new: '#007aff',
-  preparing: '#FF8800',
-  ready: '#00C851',
-  completed: '#8B5CF6',
-  canceled: '#FF4444',
-  default: '#6B7280'
-};
+const getStatusColors = (colors: any) => ({
+  pending: colors.primary,
+  confirmed: '#4CAF50',
+  preparing: colors.warning || '#FF8800',
+  ready_for_pickup: colors.success || '#00C851', 
+  out_for_delivery: '#2196F3',
+  delivered: '#8B5CF6',
+  cancelled: colors.error,
+  default: colors.onSurfaceVariant
+});
 
 interface OrderCardProps {
   item: Order;
@@ -69,14 +73,17 @@ const OrderCard: React.FC<OrderCardProps> = ({ item, index, onPress, showActions
     ]).start();
   }, [index, scaleAnim, translateXAnim]);
 
-  const getStatusColor = (status: string) => STATUS_COLORS[status as keyof typeof STATUS_COLORS] || STATUS_COLORS.default;
+  const getStatusColor = (status: string) => {
+    const statusColors = getStatusColors(colors);
+    return statusColors[status as keyof typeof statusColors] || statusColors.default;
+  };
 
   const handleConfirm = async () => {
     try {
       await confirmOrderMutation.mutateAsync(item.id);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (error) {
-      console.error('Failed to confirm order:', error);
+      // Error handling is managed by the mutation hook
     }
   };
 
@@ -85,7 +92,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ item, index, onPress, showActions
       await rejectOrderMutation.mutateAsync(item.id);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (error) {
-      console.error('Failed to reject order:', error);
+      // Error handling is managed by the mutation hook
     }
   };
 
@@ -101,7 +108,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ item, index, onPress, showActions
   };
 
   const isOverdue = () => {
-    if (item.status !== 'new') return false;
+    if (item.status !== 'pending') return false;
     const orderTime = new Date(item.createdAt || item.time);
     const now = new Date();
     const diffInMinutes = Math.floor((now.getTime() - orderTime.getTime()) / (1000 * 60));
@@ -122,8 +129,8 @@ const OrderCard: React.FC<OrderCardProps> = ({ item, index, onPress, showActions
           marginHorizontal: 4,
           padding: isSmallScreen ? 12 : 16,
           borderLeftWidth: 4,
-          borderLeftColor: isOverdue() ? '#FF4444' : getStatusColor(item.status),
-          shadowColor: '#000',
+          borderLeftColor: isOverdue() ? colors.error : getStatusColor(item.status),
+          shadowColor: colors.shadow || '#000',
           shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.1,
           shadowRadius: 4,
@@ -142,17 +149,17 @@ const OrderCard: React.FC<OrderCardProps> = ({ item, index, onPress, showActions
                 color: colors.onSurface,
               }}
             >
-              #{item.id}
+              {t('order_hash')}{item.id}
             </Text>
-            {item.status === 'new' && (
+            {item.status === 'pending' && (
               <Badge
                 style={{
-                  backgroundColor: '#007aff',
+                  backgroundColor: colors.primary,
                   marginLeft: 8,
                 }}
                 size={20}
               >
-                NEW
+                {t('pending').toUpperCase()}
               </Badge>
             )}
           </View>
@@ -160,12 +167,12 @@ const OrderCard: React.FC<OrderCardProps> = ({ item, index, onPress, showActions
             <MaterialCommunityIcons
               name="clock-outline"
               size={16}
-              color={isOverdue() ? '#FF4444' : colors.onSurfaceVariant}
+              color={isOverdue() ? colors.error : colors.onSurfaceVariant}
             />
             <Text
               style={{
                 fontSize: 12,
-                color: isOverdue() ? '#FF4444' : colors.onSurfaceVariant,
+                color: isOverdue() ? colors.error : colors.onSurfaceVariant,
                 marginLeft: 4,
                 fontWeight: isOverdue() ? 'bold' : 'normal',
               }}
@@ -190,7 +197,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ item, index, onPress, showActions
             style={{
               fontSize: 16,
               fontWeight: 'bold',
-              color: '#007aff',
+              color: colors.primary,
             }}
           >
             {item.total.toLocaleString()} XAF
@@ -209,12 +216,12 @@ const OrderCard: React.FC<OrderCardProps> = ({ item, index, onPress, showActions
           {item.items.map(i => `${i.quantity}x ${i.name}`).join(', ')}
         </Text>
 
-        {/* Actions for New Orders */}
-        {showActions && item.status === 'new' && (
+        {/* Actions for Pending Orders */}
+        {showActions && item.status === 'pending' && (
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
             <TouchableOpacity
               style={{
-                backgroundColor: '#FF4444',
+                backgroundColor: colors.error,
                 paddingHorizontal: 20,
                 paddingVertical: 8,
                 borderRadius: 8,
@@ -228,7 +235,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ item, index, onPress, showActions
             </TouchableOpacity>
             <TouchableOpacity
               style={{
-                backgroundColor: '#007aff',
+                backgroundColor: colors.primary,
                 paddingHorizontal: 20,
                 paddingVertical: 8,
                 borderRadius: 8,
@@ -330,8 +337,14 @@ const OrderTab: React.FC<OrderTabProps> = ({ status, showActions = false }) => {
 const OrdersList: React.FC<RestaurantOrdersStackScreenProps<'OrdersList'>> = () => {
   const { colors } = useTheme();
   const { t } = useTranslation();
-  const { data: newOrdersData } = useGetOrders({ status: 'new' });
-  const newOrdersCount = newOrdersData?.orders?.length || 0;
+  const navigation = useNavigation();
+  const { data: pendingOrdersData } = useGetOrders({ status: 'pending' });
+  const pendingOrdersCount = pendingOrdersData?.orders?.length || 0;
+
+  const handleNotificationPress = () => {
+    Haptics.selectionAsync();
+    navigation.navigate('RestaurantNotifications');
+  };
 
   return (
     <CommonView>
@@ -339,7 +352,7 @@ const OrdersList: React.FC<RestaurantOrdersStackScreenProps<'OrdersList'>> = () 
         {/* Header */}
         <View style={{ padding: 16, paddingBottom: 0 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <View>
+            <View style={{ flex: 1 }}>
               <Text style={{ fontSize: 28, fontWeight: 'bold', color: colors.onBackground }}>
                 {t('orders')}
               </Text>
@@ -347,23 +360,48 @@ const OrdersList: React.FC<RestaurantOrdersStackScreenProps<'OrdersList'>> = () 
                 {t('manage_your_orders')}
               </Text>
             </View>
-            {newOrdersCount > 0 && (
-              <View
+            
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              {pendingOrdersCount > 0 && (
+                <View
+                  style={{
+                    backgroundColor: colors.primary,
+                    paddingHorizontal: 12,
+                    paddingVertical: 6,
+                    borderRadius: 20,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                  }}
+                >
+                  <MaterialCommunityIcons name="bell" size={16} color="white" />
+                  <Text style={{ color: 'white', fontWeight: 'bold', marginLeft: 4 }}>
+                    {pendingOrdersCount} {t('pending')}
+                  </Text>
+                </View>
+              )}
+              
+              {/* Notification Icon Button */}
+              <TouchableOpacity
+                onPress={handleNotificationPress}
                 style={{
-                  backgroundColor: '#007aff',
-                  paddingHorizontal: 12,
-                  paddingVertical: 6,
-                  borderRadius: 20,
-                  flexDirection: 'row',
-                  alignItems: 'center',
+                  backgroundColor: colors.surface,
+                  padding: 12,
+                  borderRadius: 12,
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 4,
+                  elevation: 3,
                 }}
+                activeOpacity={0.7}
               >
-                <MaterialCommunityIcons name="bell" size={16} color="white" />
-                <Text style={{ color: 'white', fontWeight: 'bold', marginLeft: 4 }}>
-                  {newOrdersCount} {t('new')}
-                </Text>
-              </View>
-            )}
+                <MaterialCommunityIcons 
+                  name="bell-outline" 
+                  size={24} 
+                  color={colors.onSurface} 
+                />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
 
@@ -387,12 +425,18 @@ const OrdersList: React.FC<RestaurantOrdersStackScreenProps<'OrdersList'>> = () 
           }}
         >
           <Tab.Screen
-            name="New"
+            name="Pending"
             options={{
-              tabBarLabel: `${t('new')} ${newOrdersCount > 0 ? `(${newOrdersCount})` : ''}`,
+              tabBarLabel: `${t('pending')} ${pendingOrdersCount > 0 ? `(${pendingOrdersCount})` : ''}`,
             }}
           >
-            {() => <OrderTab status="new" showActions={true} />}
+            {() => <OrderTab status="pending" showActions={true} />}
+          </Tab.Screen>
+          <Tab.Screen
+            name="Confirmed"
+            options={{ tabBarLabel: t('confirmed') }}
+          >
+            {() => <OrderTab status="confirmed" />}
           </Tab.Screen>
           <Tab.Screen
             name="Preparing"
@@ -401,22 +445,28 @@ const OrdersList: React.FC<RestaurantOrdersStackScreenProps<'OrdersList'>> = () 
             {() => <OrderTab status="preparing" />}
           </Tab.Screen>
           <Tab.Screen
-            name="Ready"
-            options={{ tabBarLabel: t('ready') }}
+            name="ReadyForPickup"
+            options={{ tabBarLabel: t('ready_for_pickup') }}
           >
-            {() => <OrderTab status="ready" />}
+            {() => <OrderTab status="ready_for_pickup" />}
           </Tab.Screen>
           <Tab.Screen
-            name="Completed"
-            options={{ tabBarLabel: t('completed') }}
+            name="OutForDelivery"
+            options={{ tabBarLabel: t('out_for_delivery') }}
           >
-            {() => <OrderTab status="completed" />}
+            {() => <OrderTab status="out_for_delivery" />}
           </Tab.Screen>
           <Tab.Screen
-            name="Canceled"
-            options={{ tabBarLabel: t('canceled') }}
+            name="Delivered"
+            options={{ tabBarLabel: t('delivered') }}
           >
-            {() => <OrderTab status="canceled" />}
+            {() => <OrderTab status="delivered" />}
+          </Tab.Screen>
+          <Tab.Screen
+            name="Cancelled"
+            options={{ tabBarLabel: t('cancelled') }}
+          >
+            {() => <OrderTab status="cancelled" />}
           </Tab.Screen>
         </Tab.Navigator>
       </View>

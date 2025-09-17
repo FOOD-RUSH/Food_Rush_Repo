@@ -1,147 +1,153 @@
 import { create } from 'zustand';
-import {
-  createJSONStorage,
-  devtools,
-  persist,
-  subscribeWithSelector,
-} from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-type Theme = 'light' | 'dark' | 'system';
-type UserType = 'customer' | 'restaurant' | null;
-
+// App Store State
 interface AppState {
   // Onboarding
   isOnboardingComplete: boolean;
 
-  // User preferences
-  theme: Theme;
-  userType: UserType;
+  // User type selection
+  selectedUserType: 'customer' | 'restaurant' | null;
 
   // App state
+  theme: 'light' | 'dark';
   isFirstLaunch: boolean;
-  lastActiveTimestamp: number;
-
-  // Hydration state
-  _hasHydrated: boolean;
+  isHydrated: boolean;
 }
 
+// App Store Actions
 interface AppActions {
   // Onboarding
   completeOnboarding: () => void;
 
-  // User preferences
-  setUserType: (type: Exclude<UserType, null>) => void;
-  setTheme: (theme: Theme) => void;
+  // User type
+  setSelectedUserType: (type: 'customer' | 'restaurant') => void;
+  clearSelectedUserType: () => void;
+
+  // Theme
+  setTheme: (theme: 'light' | 'dark') => void;
 
   // App lifecycle
   setFirstLaunch: (isFirst: boolean) => void;
-  updateLastActive: () => void;
-
-  // Hydration
   setHydrated: (hydrated: boolean) => void;
 
   // Reset
-  resetApp: () => void;
+  reset: () => void;
 }
 
-const initialState: Omit<AppState, '_hasHydrated'> = {
+const initialState: Omit<AppState, 'isHydrated'> = {
   isOnboardingComplete: false,
+  selectedUserType: null,
   theme: 'light',
-  userType: null,
   isFirstLaunch: true,
-  lastActiveTimestamp: Date.now(),
 };
 
+// Remove subscribeWithSelector wrapper - this is likely causing the loop
 export const useAppStore = create<AppState & AppActions>()(
-  devtools(
-    subscribeWithSelector(
-      persist(
-        (set, get) => ({
+  persist(
+    (set, get) => ({
+      ...initialState,
+      isHydrated: false,
+
+      // Complete onboarding
+      completeOnboarding: () => {
+        set({
+          isOnboardingComplete: true,
+          isFirstLaunch: false,
+        });
+      },
+
+      // User type selection
+      setSelectedUserType: (selectedUserType) => {
+        set({ selectedUserType });
+      },
+
+      clearSelectedUserType: () => {
+        set({ selectedUserType: null });
+      },
+
+      // Theme
+      setTheme: (theme) => {
+        set({ theme });
+      },
+
+      // App lifecycle
+      setFirstLaunch: (isFirstLaunch) => {
+        set({ isFirstLaunch });
+      },
+
+      setHydrated: (isHydrated) => {
+        // Prevent setting hydrated to true multiple times
+        const currentState = get();
+        if (currentState.isHydrated !== isHydrated) {
+          set({ isHydrated });
+        }
+      },
+
+      // Reset all app state
+      reset: () => {
+        set({
           ...initialState,
-          _hasHydrated: false,
-
-          // Onboarding actions
-          completeOnboarding: () => {
-            set({
-              isOnboardingComplete: true,
-              isFirstLaunch: false,
-            });
-          },
-
-          // User preference actions
-          setUserType: (userType) => {
-            const currentUserType = get().userType;
-            if (currentUserType !== userType) {
-              set({ userType });
-            }
-          },
-
-          
-          setTheme: (theme) => {
-            const currentTheme = get().theme;
-            if (currentTheme !== theme) {
-              set({ theme });
-            }
-          },
-
-          // App lifecycle actions
-          setFirstLaunch: (isFirstLaunch) => {
-            set({ isFirstLaunch });
-          },
-
-          updateLastActive: () => {
-            set({ lastActiveTimestamp: Date.now() });
-          },
-
-          // Hydration actions
-          setHydrated: (hydrated) => {
-            set({ _hasHydrated: hydrated });
-          },
-
-          // Reset action
-          resetApp: () => {
-            set({
-              ...initialState,
-              _hasHydrated: true, // Keep hydration state
-            });
-          },
-        }),
-        {
-          name: 'app-storage',
-          storage: createJSONStorage(() => AsyncStorage),
-          partialize: (state) => ({
-            isOnboardingComplete: state.isOnboardingComplete,
-            theme: state.theme,
-            userType: state.userType,
-            isFirstLaunch: state.isFirstLaunch,
-            lastActiveTimestamp: state.lastActiveTimestamp,
-          }),
-          version: 2,
-          onRehydrateStorage: () => (state) => {
-            state?.setHydrated(true);
-          },
-        },
-      ),
-    ),
-    { name: 'AppStore' },
-  ),
+          isHydrated: true,
+        });
+      },
+    }),
+    {
+      name: 'app-store',
+      storage: createJSONStorage(() => AsyncStorage),
+      partialize: (state) => ({
+        isOnboardingComplete: state.isOnboardingComplete,
+        selectedUserType: state.selectedUserType,
+        theme: state.theme,
+        isFirstLaunch: state.isFirstLaunch,
+      }),
+      onRehydrateStorage: () => (state, error) => {
+        if (error) {
+          console.error('Failed to rehydrate app store:', error);
+          return;
+        }
+        
+        // Use setTimeout to avoid calling setHydrated during render
+        setTimeout(() => {
+          if (state && !state.isHydrated) {
+            state.setHydrated(true);
+          }
+        }, 0);
+      },
+    }
+  )
 );
 
-// Performance-optimized selector hooks
+// Simple selector hooks with equality checks
+export const useApp = () => useAppStore();
+export const useOnboardingComplete = () => useAppStore((state) => state.isOnboardingComplete);
+export const useSelectedUserType = () => useAppStore((state) => state.selectedUserType);
 export const useTheme = () => useAppStore((state) => state.theme);
-export const useAppUserType = () => useAppStore((state) => state.userType);
-export const useOnboardingComplete = () =>
-  useAppStore((state) => state.isOnboardingComplete);
-export const useIsFirstLaunch = () =>
-  useAppStore((state) => state.isFirstLaunch);
-export const useHasHydrated = () => useAppStore((state) => state._hasHydrated);
+export const useIsFirstLaunch = () => useAppStore((state) => state.isFirstLaunch);
+export const useIsHydrated = () => useAppStore((state) => state.isHydrated);
+export const useHasHydrated = () => useAppStore((state) => state.isHydrated);
+
+// Memoized actions hook
+export const useAppActions = () => {
+  return useAppStore((state) => ({
+    completeOnboarding: state.completeOnboarding,
+    setSelectedUserType: state.setSelectedUserType,
+    clearSelectedUserType: state.clearSelectedUserType,
+    setTheme: state.setTheme,
+    setFirstLaunch: state.setFirstLaunch,
+    setHydrated: state.setHydrated,
+    reset: state.reset,
+  }));
+};
 
 // Computed selectors
-export const useIsAppReady = () =>
-  useAppStore((state) => state._hasHydrated && state.isOnboardingComplete);
+export const useNeedsOnboarding = () =>
+  useAppStore((state) => state.isHydrated && !state.isOnboardingComplete);
 
-// Subscribe to theme changes for system integration
-export const subscribeToThemeChanges = (callback: (theme: Theme) => void) => {
-  return useAppStore.subscribe((state) => state.theme, callback);
-};
+export const useCanProceedToAuth = () =>
+  useAppStore((state) =>
+    state.isHydrated &&
+    state.isOnboardingComplete &&
+    state.selectedUserType !== null
+  );

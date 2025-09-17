@@ -9,8 +9,8 @@ import CommonView from '@/src/components/common/CommonView';
 import { saveImageLocally, generateImageId } from '@/src/utils/imageStorage';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RestaurantMenuStackParamList } from '@/src/navigation/types';
-import { useAuthUser } from '@/src/stores/customerStores/AuthStore';
-import { useGetMenuItemById, useUpdateMenuItem, useUploadImage } from '@/src/hooks/restaurant/useMenuApi';
+import { useUser } from '@/src/stores/customerStores/AuthStore';
+import { useGetMenuItemById, useUpdateMenuItem } from '@/src/hooks/restaurant/useMenuApi';
 
 const { width, height } = Dimensions.get('window');
 
@@ -30,7 +30,7 @@ type EditFoodScreenProps = NativeStackScreenProps<
 
 export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
   const navigation = useNavigation();
-  const user = useAuthUser();
+  const user = useUser();
   const restaurantId = user?.restaurantId;
 
   const { itemId } = route.params;
@@ -38,7 +38,6 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
   // API hooks
   const { data: menuItem, isLoading, error } = useGetMenuItemById(itemId);
   const updateMenuItemMutation = useUpdateMenuItem();
-  const uploadImageMutation = useUploadImage();
 
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
@@ -195,27 +194,10 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
       if (!result.canceled) {
         const asset = result.assets[0];
 
-        // Upload image to server
-        const formData = new FormData();
-        formData.append('image', {
-          uri: asset.uri,
-          type: 'image/jpeg',
-          name: `menu-item-${Date.now()}.jpg`,
-        } as any);
-
-        try {
-          const uploadResponse = await uploadImageMutation.mutateAsync(formData);
-          const responseData = uploadResponse.data as any;
-          const imageUrl = responseData?.url || responseData?.imageUrl || responseData?.image;
-          setImage(imageUrl);
-        } catch (uploadError) {
-          console.error('Error uploading image:', uploadError);
-          Alert.alert('Upload Error', 'Failed to upload image. Please try again.');
-          // Fallback to local storage
-          const imageId = generateImageId();
-          const localUri = await saveImageLocally(asset.uri, imageId);
-          setImage(localUri);
-        }
+        // Save image locally for now (until upload API is implemented)
+        const imageId = generateImageId();
+        const localUri = await saveImageLocally(asset.uri, imageId);
+        setImage(localUri);
       }
     } catch (error) {
       console.error('Error picking image:', error);

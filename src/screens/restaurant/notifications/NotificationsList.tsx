@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
 
 import CommonView from '@/src/components/common/CommonView';
-import { RestaurantNotificationsStackScreenProps } from '@/src/navigation/types';
+import { RootStackScreenProps } from '@/src/navigation/types';
 
 interface Notification {
   id: string;
@@ -20,7 +20,7 @@ interface Notification {
   priority: 'low' | 'medium' | 'high';
 }
 
-const NotificationsList: React.FC<RestaurantNotificationsStackScreenProps<'NotificationsList'>> = () => {
+const NotificationsList: React.FC<RootStackScreenProps<'RestaurantNotifications'>> = () => {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const navigation = useNavigation();
@@ -262,34 +262,26 @@ const NotificationsList: React.FC<RestaurantNotificationsStackScreenProps<'Notif
   return (
     <CommonView>
       <View style={{ flex: 1 }}>
-        {/* Header */}
-        <View style={{ padding: 16, paddingBottom: 0 }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <View>
-              <Text style={{ fontSize: 28, fontWeight: 'bold', color: colors.onBackground }}>
-                {t('notifications')}
+        {/* Removed custom header - using navigator header instead */}
+        {/* Mark all as read button moved to header right */}
+        {unreadCount > 0 && (
+          <View style={{ padding: 16, paddingBottom: 0 }}>
+            <TouchableOpacity
+              onPress={markAllAsRead}
+              style={{
+                backgroundColor: '#007aff',
+                paddingHorizontal: 16,
+                paddingVertical: 8,
+                borderRadius: 20,
+                alignSelf: 'flex-end',
+              }}
+            >
+              <Text style={{ color: 'white', fontSize: 14, fontWeight: '600' }}>
+                {t('mark_all_read')}
               </Text>
-              <Text style={{ fontSize: 14, color: colors.onSurfaceVariant, marginTop: 4 }}>
-                {unreadCount > 0 ? `${unreadCount} ${t('unread_notifications')}` : t('all_caught_up')}
-              </Text>
-            </View>
-            {unreadCount > 0 && (
-              <TouchableOpacity
-                onPress={markAllAsRead}
-                style={{
-                  backgroundColor: '#007aff',
-                  paddingHorizontal: 12,
-                  paddingVertical: 6,
-                  borderRadius: 16,
-                }}
-              >
-                <Text style={{ color: 'white', fontSize: 12, fontWeight: '600' }}>
-                  {t('mark_all_read')}
-                </Text>
-              </TouchableOpacity>
-            )}
+            </TouchableOpacity>
           </View>
-        </View>
+        )}
 
         {/* Filters */}
         <View style={{ padding: 16, paddingTop: 12 }}>

@@ -10,7 +10,7 @@ import AddressEditModal, {
   AddressData,
 } from '@/src/components/customer/AddressEditModal';
 import { useAddressStore } from '@/src/stores/customerStores/addressStore';
-import { useAuthUser } from '@/src/stores/customerStores/AuthStore';
+import { useUser } from '@/src/stores/customerStores/AuthStore';
 
 const AddressScreen = ({
   navigation,
@@ -33,7 +33,7 @@ const AddressScreen = ({
   const clearError = useAddressStore((state) => state.clearError);
 
   // Auth user
-  const user = useAuthUser();
+  const user = useUser();
 
   // Location data
   const { location } = useLocation({

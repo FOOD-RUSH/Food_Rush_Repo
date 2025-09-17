@@ -4,7 +4,7 @@ import { useTheme, Card, Chip } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 
 import CommonView from '@/src/components/common/CommonView';
-import { RestaurantAnalyticsStackScreenProps } from '@/src/navigation/types';
+import { RestaurantAnalyticsStackScreenProps, RootStackScreenProps } from '@/src/navigation/types';
 
 interface HeatmapData {
   hour: number;
@@ -13,7 +13,7 @@ interface HeatmapData {
   intensity: number; // 0-1 scale
 }
 
-const TimeHeatmap: React.FC<RestaurantAnalyticsStackScreenProps<'TimeHeatmap'>> = () => {
+const TimeHeatmap: React.FC<RootStackScreenProps<'RestaurantTimeHeatmap'>> = () => {
   const { colors } = useTheme();
   const { t } = useTranslation();
   

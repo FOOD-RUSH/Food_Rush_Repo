@@ -1,5 +1,5 @@
 import { RestaurantCard, FoodProps, RestaurantProfile } from '../../types';
-import { apiClient } from './apiClient';
+import { apiClient } from '../apiClient';
 
 // Restaurant query parameters
 export interface RestaurantQuery {

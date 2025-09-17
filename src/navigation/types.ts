@@ -10,8 +10,15 @@ import { MaterialTopTabScreenProps } from '@react-navigation/material-top-tabs';
 
 // Root Stack - Screens that should NOT show tabs (full-screen)
 export type RootStackParamList = {
-  UserTypeSelection:undefined;
-  Onboarding: undefined;
+  // Core app flow screens
+  Onboarding: {
+    step?: number;
+    skipWelcome?: boolean;
+  } | undefined;
+  UserTypeSelection: {
+    fromOnboarding?: boolean;
+    returnTo?: keyof RootStackParamList;
+  } | undefined;
   Auth: NavigatorScreenParams<AuthStackParamList>;
   CustomerApp: NavigatorScreenParams<CustomerTabParamList>;
   RestaurantApp: NavigatorScreenParams<RestaurantTabParamList>;
@@ -49,12 +56,12 @@ export type RootStackParamList = {
   RestaurantConfirmOrder: { orderId: string };
   RestaurantRejectOrder: { orderId: string };
   RestaurantMenuItemForm: { itemId?: string };
-  RestaurantAddCategory: undefined;
-  RestaurantEditCategory: { categoryId: string };
+  // Removed RestaurantAddCategory and RestaurantEditCategory - backend only returns categories
   RestaurantCategoriesManager: undefined;
   RestaurantBestSellers: undefined;
   RestaurantTimeHeatmap: undefined;
   RestaurantNotificationDetails: { notificationId: string };
+  RestaurantNotifications: undefined;
   RestaurantProfile: undefined;
   RestaurantLocation: undefined;
   RestaurantThemeSettings: undefined;
@@ -63,6 +70,7 @@ export type RootStackParamList = {
   RestaurantAbout: undefined;
   RestaurantEditProfile: undefined;
   RestaurantOrderHistory: undefined;
+  RestaurantPaymentBilling: undefined;
 
 };
 
@@ -124,7 +132,6 @@ export type RestaurantTabParamList = {
   Orders: NavigatorScreenParams<RestaurantOrdersStackParamList>;
   Menu: NavigatorScreenParams<RestaurantMenuStackParamList>;
   Analytics: NavigatorScreenParams<RestaurantAnalyticsStackParamList>;
-  Notifications: NavigatorScreenParams<RestaurantNotificationsStackParamList>;
   Account: NavigatorScreenParams<RestaurantAccountStackParamList>;
 };
 
@@ -139,10 +146,6 @@ export type RestaurantMenuStackParamList = {
 
 export type RestaurantAnalyticsStackParamList = {
   AnalyticsOverview: undefined;
-};
-
-export type RestaurantNotificationsStackParamList = {
-  NotificationsList: undefined;
 };
 
 export type RestaurantAccountStackParamList = {
@@ -221,19 +224,16 @@ export type RestaurantAnalyticsStackScreenProps<
   RestaurantTabScreenProps<'Analytics'>
 >;
 
-export type RestaurantNotificationsStackScreenProps<
-  T extends keyof RestaurantNotificationsStackParamList,
-> = CompositeScreenProps<
-  NativeStackScreenProps<RestaurantNotificationsStackParamList, T>,
-  RestaurantTabScreenProps<'Notifications'>
->;
-
 export type RestaurantAccountStackScreenProps<
   T extends keyof RestaurantAccountStackParamList,
 > = CompositeScreenProps<
   NativeStackScreenProps<RestaurantAccountStackParamList, T>,
   RestaurantTabScreenProps<'Account'>
 >;
+
+// Core app flow screen props
+export type OnboardingScreenProps = RootStackScreenProps<'Onboarding'>;
+export type UserTypeSelectionScreenProps = RootStackScreenProps<'UserTypeSelection'>;
 
 // User type enum
 export type UserType = 'customer' | 'restaurant';

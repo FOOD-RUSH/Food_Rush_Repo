@@ -2,7 +2,7 @@
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { authApi, OTPCredentials } from "@/src/services/customer/authApi";
-import TokenManager from "@/src/services/customer/tokenManager";
+import TokenManager from "@/src/services/tokenManager";
 import { useAuthStore } from "@/src/stores/customerStores/AuthStore";
 
 const CACHE_CONFIG = {
@@ -27,7 +27,7 @@ export const useCurrentUser = () => {
 
                 // If unauthorized, clear auth state
                 if (error?.status === 401 || error?.response?.status === 401) {
-                    useAuthStore.getState().logoutUser();
+                    useAuthStore.getState().logout();
                 }
 
                 throw error;
@@ -109,7 +109,7 @@ export const useProfileManager = () => {
 
 export const useLogin = () => {
     const queryClient = useQueryClient();
-    const { setUser, setIsAuthenticated, clearError } = useAuthStore();
+    const { setUser, clearError } = useAuthStore();
 
     return useMutation({
         mutationFn: (credentials: { email: string, password: string }) => authApi.login(credentials),
@@ -136,7 +136,11 @@ export const useLogin = () => {
                 }
 
                 console.log('Storing tokens...');
-                const tokensStored = await TokenManager.setTokens(accessToken, refreshToken);
+                const tokensStored = await TokenManager.setTokens({
+                    accessToken,
+                    refreshToken,
+                    userType: 'customer'
+                });
 
                 if (!tokensStored) {
                     throw new Error('Failed to store authentication tokens');
@@ -148,7 +152,7 @@ export const useLogin = () => {
 
                 // Update auth state
                 setUser(user);
-                setIsAuthenticated(true);
+                // Authentication is now determined by user presence
 
                 // Cache user data
                 queryClient.setQueryData(['auth', 'me'], user);
@@ -163,8 +167,7 @@ export const useLogin = () => {
             } catch (error) {
                 console.error('Error in login success handler:', error);
                 // Clean up on error
-                await TokenManager.clearAllTokens();
-                setIsAuthenticated(false);
+                await TokenManager.clearTokens();
                 setUser(null);
                 throw error;
             }
@@ -173,11 +176,10 @@ export const useLogin = () => {
             console.error('Login failed:', error);
 
             // Clean up auth state on login failure
-            setIsAuthenticated(false);
             setUser(null);
 
             // Clear any stored tokens
-            TokenManager.clearAllTokens().catch(console.error);
+            TokenManager.clearTokens().catch(console.error);
 
             // Don't set error in store here, let the component handle it
             // The error will be available via the mutation's error state
@@ -193,7 +195,7 @@ export const useRegister = () => {
 
 export const useVerifyOTP = () => {
     const queryClient = useQueryClient();
-    const { setUser, setIsAuthenticated, clearError } = useAuthStore();
+    const { setUser, clearError } = useAuthStore();
 
     return useMutation({
         mutationFn: (otpData: OTPCredentials) => authApi.verifyOTP(otpData),
@@ -206,14 +208,18 @@ export const useVerifyOTP = () => {
                     throw new Error('Invalid verification response: missing required data');
                 }
 
-                const tokensStored = await TokenManager.setTokens(accessToken, refreshToken);
+                const tokensStored = await TokenManager.setTokens({
+                    accessToken,
+                    refreshToken,
+                    userType: 'customer'
+                });
                 if (!tokensStored) {
                     throw new Error('Failed to store authentication tokens');
                 }
 
                 clearError();
                 setUser(user);
-                setIsAuthenticated(true);
+                // Authentication is now determined by user presence
 
                 queryClient.setQueryData(['auth', 'me'], user);
                 queryClient.invalidateQueries({ queryKey: ['addresses'] });
@@ -222,17 +228,15 @@ export const useVerifyOTP = () => {
 
             } catch (error) {
                 console.error('Error in OTP verification success handler:', error);
-                await TokenManager.clearAllTokens();
-                setIsAuthenticated(false);
+                await TokenManager.clearTokens();
                 setUser(null);
                 throw error;
             }
         },
         onError: (error: any) => {
             console.error('OTP verification failed:', error);
-            setIsAuthenticated(false);
             setUser(null);
-            TokenManager.clearAllTokens().catch(console.error);
+            TokenManager.clearTokens().catch(console.error);
         }
     })
 }
@@ -254,17 +258,23 @@ export const useUpdateProfile = () => {
 
 export const useLogout = () => {
     const queryClient = useQueryClient();
-    const { logoutUser } = useAuthStore();
+    const { logout } = useAuthStore();
 
     return useMutation({
-        mutationFn: () => authApi.logout(),
+        mutationFn: async () => {
+            // No API call - just clear local storage and state
+            console.log('Performing local logout - clearing storage and state');
+            return Promise.resolve();
+        },
         onSuccess: async () => {
-            await logoutUser();
+            await logout();
             queryClient.clear();
+            console.log('Logout completed successfully');
         },
         onError: async (error) => {
-            console.error('Logout API call failed, but proceeding with local logout:', error);
-            await logoutUser();
+            console.error('Logout error:', error);
+            // Force logout even if something fails
+            await logout();
             queryClient.clear();
         }
     })
