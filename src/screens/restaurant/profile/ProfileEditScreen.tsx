@@ -16,7 +16,6 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { BlurView } from 'expo-blur';
 import { RestaurantProfileStackScreenProps } from '../../../navigation/types';
 
 const { width, height } = Dimensions.get('window');
@@ -539,7 +538,7 @@ const ProfileEditScreen: React.FC<ProfileEditScreenProps> = ({
 
       {/* Success Modal */}
       <Modal visible={showSuccessModal} transparent animationType="none">
-        <BlurView intensity={20} style={styles.modalOverlay}>
+        <View style={styles.modalOverlay}>
           <Animated.View
             style={[
               styles.successModal,
@@ -568,7 +567,7 @@ const ProfileEditScreen: React.FC<ProfileEditScreenProps> = ({
               Your profile has been successfully updated.
             </Text>
           </Animated.View>
-        </BlurView>
+        </View>
       </Modal>
     </View>
   );
@@ -604,7 +603,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     justifyContent: 'center',
     alignItems: 'center',
-    // Fixed: Proper shadow styling
     ...Platform.select({
       ios: {
         shadowColor: '#764ba2',
@@ -639,7 +637,6 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     justifyContent: 'center',
     alignItems: 'center',
-    // Fixed: Proper shadow styling
     ...Platform.select({
       ios: {
         shadowColor: '#764ba2',
@@ -685,7 +682,6 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderColor: '#e1e8ed',
-    // Fixed: Proper shadow styling
     ...Platform.select({
       ios: {
         shadowColor: '#764ba2',
@@ -700,7 +696,6 @@ const styles = StyleSheet.create({
   },
   focusedInput: {
     borderColor: '#764ba2',
-    // Fixed: Proper shadow styling for focused state
     ...Platform.select({
       ios: {
         shadowOpacity: 0.15,
@@ -755,7 +750,6 @@ const styles = StyleSheet.create({
     height: 56,
     borderRadius: 28,
     overflow: 'hidden',
-    // Fixed: Proper shadow styling
     ...Platform.select({
       ios: {
         shadowColor: '#764ba2',
@@ -792,7 +786,6 @@ const styles = StyleSheet.create({
     padding: 32,
     alignItems: 'center',
     marginHorizontal: 40,
-    // Fixed: Proper shadow styling
     ...Platform.select({
       ios: {
         shadowColor: '#000',

@@ -347,6 +347,7 @@ const UserTypeSelectionScreen = memo(
   }) => {
     const { colors } = useTheme();
     const { t } = useTranslation('translation');
+    const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = useWindowDimensions();
 
     const handleUserTypePress = useCallback(
       (userType: 'customer' | 'restaurant') => {
@@ -354,8 +355,24 @@ const UserTypeSelectionScreen = memo(
       },
       [onSelectUserType],
     );
-    const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } =
-      useWindowDimensions();
+
+    const getCardStyle = useCallback(
+      (isSelected: boolean) => ({
+        borderRadius: 20,
+        backgroundColor: colors.surfaceVariant,
+        borderWidth: 3,
+        borderColor: isSelected ? colors.primary : 'transparent',
+        padding: 4,
+        marginBottom: 20,
+        overflow: 'hidden',
+        elevation: isSelected ? 8 : 2,
+        shadowColor: isSelected ? colors.primary : '#000',
+        shadowOffset: { width: 0, height: isSelected ? 4 : 2 },
+        shadowOpacity: isSelected ? 0.3 : 0.1,
+        shadowRadius: isSelected ? 8 : 4,
+      }),
+      [colors],
+    );
 
     const getButtonStyle = useCallback(
       (isSelected: boolean) => ({
@@ -379,6 +396,11 @@ const UserTypeSelectionScreen = memo(
       [],
     );
 
+    // Responsive dimensions
+    const cardHeight = Math.min(SCREEN_HEIGHT * 0.28, 220);
+    const cardWidth = SCREEN_WIDTH - 48;
+    const imageHeight = cardHeight - 60; // Account for text and padding
+
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
         <StatusBar
@@ -392,18 +414,19 @@ const UserTypeSelectionScreen = memo(
           style={{
             flex: 1,
             paddingHorizontal: 24,
-            paddingTop: 32,
-            paddingBottom: 50,
+            paddingTop: 40,
+            paddingBottom: 32,
           }}
         >
           {/* Header */}
-          <View style={{ marginBottom: 32 }}>
+          <View style={{ marginBottom: 40 }}>
             <Text
               style={{
-                fontSize: 28,
+                fontSize: 32,
                 fontWeight: 'bold',
-                marginBottom: 8,
+                marginBottom: 12,
                 color: colors.onBackground,
+                textAlign: 'center',
               }}
             >
               {t('what_are_your_needs')}
@@ -412,6 +435,8 @@ const UserTypeSelectionScreen = memo(
               style={{
                 fontSize: 18,
                 color: colors.onBackground,
+                textAlign: 'center',
+                opacity: 0.8,
               }}
             >
               {t('choose_your_role')}
@@ -419,69 +444,104 @@ const UserTypeSelectionScreen = memo(
           </View>
 
           {/* User Type Cards */}
-          <View style={{ flex: 1, justifyContent: 'center' }}>
-            {userTypes.map((type) => (
-              <View key={type.id} style={{ marginBottom: 14 }}>
-                <TouchableOpacity
-                  activeOpacity={0.8}
+          <View style={{ flex: 1, justifyContent: 'center', paddingVertical: 20 }}>
+            {userTypes.map((type, index) => (
+              <TouchableOpacity
+                key={type.id}
+                activeOpacity={0.8}
+                style={[
+                  getCardStyle(selectedType === type.id),
+                  {
+                    height: cardHeight,
+                    width: cardWidth,
+                    alignSelf: 'center',
+                  },
+                ]}
+                onPress={() => handleUserTypePress(type.id)}
+              >
+                {/* Image Container */}
+                <View 
                   style={{
+                    height: imageHeight,
+                    width: '100%',
                     borderRadius: 16,
-                    backgroundColor: colors.surfaceVariant,
-                    padding: 8,
-                    height: SCREEN_HEIGHT / 3.5,
-                    width: SCREEN_WIDTH - 48,
                     overflow: 'hidden',
+                    position: 'relative',
                   }}
-                  onPress={() => handleUserTypePress(type.id)}
                 >
-                  <View style={{ flex: 1 }}>
-                    <Image
-                      source={type.image}
-                      style={{ width: '100%', height: '100%' }}
-                      resizeMode="cover"
-                    />
+                  <Image
+                    source={type.image}
+                    style={{ 
+                      width: '100%', 
+                      height: '100%',
+                    }}
+                    resizeMode="cover"
+                  />
 
-                    {/* Selection indicator */}
-                    {selectedType === type.id && (
-                      <View
-                        style={{
-                          position: 'absolute',
-                          top: 16,
-                          right: 16,
-                          backgroundColor: colors.primary,
-                          borderRadius: 20,
-                          padding: 8,
-                        }}
-                      >
-                        <Ionicons name="checkmark" size={20} color="white" />
-                      </View>
-                    )}
-                  </View>
+                  {/* Selection indicator */}
+                  {selectedType === type.id && (
+                    <View
+                      style={{
+                        position: 'absolute',
+                        top: 12,
+                        right: 12,
+                        backgroundColor: colors.primary,
+                        borderRadius: 20,
+                        padding: 8,
+                        elevation: 4,
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.3,
+                        shadowRadius: 4,
+                      }}
+                    >
+                      <Ionicons name="checkmark" size={20} color="white" />
+                    </View>
+                  )}
 
+                  {/* Gradient overlay for better text readability */}
+                  <View
+                    style={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      height: 60,
+                      backgroundColor: 'rgba(0,0,0,0.3)',
+                    }}
+                  />
+                </View>
+
+                {/* Title */}
+                <View
+                  style={{
+                    paddingHorizontal: 16,
+                    paddingVertical: 12,
+                    alignItems: 'center',
+                  }}
+                >
                   <Text
                     style={{
                       fontSize: 20,
                       fontWeight: 'bold',
                       textAlign: 'center',
-                      marginTop: 8,
-                      color: colors.onSurface,
+                      color: selectedType === type.id ? colors.primary : colors.onSurface,
                     }}
                   >
                     {t(type.title)}
-                    {/* {type.title} */}
                   </Text>
-                </TouchableOpacity>
-              </View>
+                </View>
+              </TouchableOpacity>
             ))}
           </View>
 
           {/* Continue Button */}
-          <View style={{ paddingTop: 24 }}>
+          <View style={{ paddingTop: 32 }}>
             <Button
               mode="contained"
               onPress={onLogin}
               disabled={!selectedType}
-              contentStyle={{ paddingVertical: 14 }}
+              contentStyle={{ paddingVertical: 16 }}
               style={getButtonStyle(!!selectedType)}
               labelStyle={getButtonLabelStyle(!!selectedType)}
             >
@@ -492,13 +552,13 @@ const UserTypeSelectionScreen = memo(
               <Text
                 style={{
                   textAlign: 'center',
-                  marginTop: 12,
-                  fontSize: 14,
-                  color: colors.onSurface,
+                  marginTop: 16,
+                  fontSize: 16,
+                  color: colors.primary,
+                  fontWeight: '500',
                 }}
               >
-                {t('you_selected')}
-                {selectedType === 'customer' ? t('customer') : t('restaurant')}
+                {t('you_selected')} {selectedType === 'customer' ? t('customer') : t('restaurant')}
               </Text>
             )}
           </View>
