@@ -11,14 +11,8 @@ import { MaterialTopTabScreenProps } from '@react-navigation/material-top-tabs';
 // Root Stack - Screens that should NOT show tabs (full-screen)
 export type RootStackParamList = {
   // Core app flow screens
-  Onboarding: {
-    step?: number;
-    skipWelcome?: boolean;
-  } | undefined;
-  UserTypeSelection: {
-    fromOnboarding?: boolean;
-    returnTo?: keyof RootStackParamList;
-  } | undefined;
+Onboarding: undefined;
+  UserTypeSelection: undefined;
   Auth: NavigatorScreenParams<AuthStackParamList>;
   CustomerApp: NavigatorScreenParams<CustomerTabParamList>;
   RestaurantApp: NavigatorScreenParams<RestaurantTabParamList>;

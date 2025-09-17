@@ -1,6 +1,5 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import { subscribeWithSelector } from 'zustand/middleware';
+import { persist, createJSONStorage, subscribeWithSelector } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // App Store State
@@ -49,8 +48,6 @@ persist(
 subscribeWithSelector((set, get) => ({
 ...initialState,
 isHydrated: false,
-
-pf
 
   // Complete onboarding
   completeOnboarding: () => {

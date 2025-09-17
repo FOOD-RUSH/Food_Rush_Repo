@@ -1,5 +1,5 @@
 import { Order } from '@/src/types/index';
-import { apiClient } from '../apiClient';
+import { apiClient } from '@/src/services/shared/apiClient';
 
 // Order creation request
 export interface CreateOrderRequest {

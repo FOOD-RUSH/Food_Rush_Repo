@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { AuthStackParamList } from './types';
 
 // Import from AuthStore
-import { useIsAuthenticated, useUser, useAuthActions } from '../stores/customerStores/AuthStore';
+import { useIsAuthenticated, useAuthUser } from '../stores/customerStores/AuthStore';
 
 // Customer auth
 import LoginScreen from '../screens/auth/LoginScreen';
@@ -59,7 +59,7 @@ interface AuthNavigatorProps {
 
 const AuthNavigator: React.FC<AuthNavigatorProps> = ({ userType = 'customer' }) => {
   const isAuthenticated = useIsAuthenticated();
-  const user = useUser();
+  const user = useAuthUser();
 
   // Check if restaurant is pending approval
   const isPendingRestaurant =

@@ -5,7 +5,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
-import { queryClient } from '@/src/services/queryClient';
+import { queryClient } from '@/src/services/shared/queryClient';
 import { ThemeProvider } from '@/src/components/ThemeProvider';
 import { NetworkProvider } from '@/src/contexts/NetworkContext';
 import { LanguageProvider } from '@/src/contexts/LanguageContext';

@@ -23,48 +23,6 @@ export interface User {
     verificationStatus: string;
   };
 }
-// {
-//   "status_code": 200,
-//   "message": "Authentication request successful",
-//   "data": {
-//     "sub": "9a14155d-5b82-44bf-b196-9dcec0f50be7",
-//     "id": "9a14155d-5b82-44bf-b196-9dcec0f50be7",
-//     "email": "tochukwupaul21@gmail.com",
-//     "fullName": "Dhdjsn",
-//     "phoneNumber": "+237239767981",
-//     "profilePicture": null,
-//     "role": "customer",
-//     "status": "active"
-//   }
-// }
-
-// app state
-
-//Properties of Food
-// {
-//       "id": "4244d47c-0656-4515-bf31-80eb018c86cb",
-//       "name": "Ndole",
-//       "description": "Ndole with boiled plantains and stuffed bread with some pepper and complements",
-//       "price": "1000.00",
-//       "isAvailable": true,
-//       "pictureUrl": "/uploads/menu/1755705024296-139753304.png",
-//       "restaurant": {
-//         "id": "cd28f1b3-0f2f-42fa-88ad-91fead122695",
-//         "name": "Paulos",
-//         "latitude": null,
-//         "longitude": null
-//       },
-//       "startAt": null,
-//       "endAt": null,
-//       "createdAt": "2025-08-20T15:50:24.716Z",
-//       "updatedAt": "2025-08-20T15:50:24.716Z",
-//       "distanceKm": null
-//     },
-// restaurant/menu/browse 
-// 
-// 
-// 
-// 
 
 
 export interface FoodProps {

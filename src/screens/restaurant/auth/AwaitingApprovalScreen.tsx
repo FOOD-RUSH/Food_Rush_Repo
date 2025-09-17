@@ -25,7 +25,7 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
 }) => {
   const { colors } = useTheme();
   const { t } = useTranslation();
-  const { logout } = useAuthStore();
+  const { logoutUser } = useAuthStore();
 
   const { restaurantId, userId } = route.params || {};
 
@@ -43,7 +43,7 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
           style: 'destructive',
           onPress: async () => {
             try {
-              await logout();
+              await logoutUser();
               navigation.getParent()?.navigate('Onboarding');
             } catch (error) {
               console.error('Logout error:', error);
@@ -58,7 +58,7 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
         },
       ],
     );
-  }, [logout, navigation, t]);
+  }, [logoutUser, navigation, t]);
 
   const handleRefresh = useCallback(async () => {
     Toast.show({

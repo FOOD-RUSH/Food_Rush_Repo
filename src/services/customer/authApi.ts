@@ -1,5 +1,5 @@
 import { User } from '../../types';
-import { apiClient } from '../apiClient';
+import { apiClient } from '@/src/services/shared/apiClient';
 
 export interface LoginRequest {
   email: string;

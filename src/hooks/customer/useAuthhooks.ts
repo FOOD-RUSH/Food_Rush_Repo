@@ -2,7 +2,7 @@
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { authApi, OTPCredentials } from "@/src/services/customer/authApi";
-import TokenManager from "@/src/services/tokenManager";
+import TokenManager from "@/src/services/shared/tokenManager";
 import { useAuthStore } from "@/src/stores/customerStores/AuthStore";
 
 const CACHE_CONFIG = {

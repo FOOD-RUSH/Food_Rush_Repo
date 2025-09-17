@@ -1,4 +1,4 @@
-import { apiClient } from "../apiClient";
+import { apiClient } from '@/src/services/shared/apiClient';
 
 
 export const restauarantRatingsApi = (restaurantId: string) => {

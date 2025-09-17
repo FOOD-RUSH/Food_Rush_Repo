@@ -1,4 +1,4 @@
-import { apiClient } from '../apiClient';
+import { apiClient } from '@/src/services/shared/apiClient';
 import { FoodCategory } from '../../types/MenuItem';
 
 export interface MenuItem {

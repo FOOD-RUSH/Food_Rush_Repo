@@ -5,10 +5,10 @@ import {
   Image,
   ImageBackground,
   TouchableOpacity,
-  Dimensions,
   StatusBar,
-  Animated,
   ImageSourcePropType,
+  Animated,
+  useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme, Button } from 'react-native-paper';
@@ -16,18 +16,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { images } from '@/assets/images';
 import { useTranslation } from 'react-i18next';
 import { LanguageSelector } from './common/LanguageSelector';
+
 interface OnboardingInfo {
   image: ImageSourcePropType;
   title: string;
   description: string;
 }
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('screen');
-
 // Constants
 const WELCOME_TIMEOUT = 7000;
 const ANIMATION_DURATION = 800;
-const CARD_ANIMATION_DURATION = 100;
 
 // Types
 interface UserType {
@@ -36,13 +34,11 @@ interface UserType {
   title: string;
 }
 
-// Import navigation types
-import type { OnboardingScreenProps as NavigationProps } from '../navigation/types';
-
-interface OnboardingScreenProps extends NavigationProps {
+interface OnboardingScreenProps {
   OnboardingSlides: OnboardingInfo[];
-  onComplete: (userType: 'customer' | 'restaurant') => void;
+  onComplete: () => void;
   onLogin: (selectedUserType: 'customer' | 'restaurant') => void;
+  navigation?: any;
 }
 
 // User types configuration
@@ -61,6 +57,8 @@ const userTypes: UserType[] = [
 
 // Welcome Screen Component
 const OnboardingWelcome = memo(({ onComplete }: { onComplete: () => void }) => {
+  const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = useWindowDimensions();
+
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -283,7 +281,7 @@ const OnboardingSlide = memo(
                   <TouchableOpacity
                     onPress={onNext}
                     style={{
-                      backgroundColor: colors.surface,
+                      backgroundColor: colors.primary,
                       paddingVertical: 12,
                       paddingHorizontal: 24,
                       borderRadius: 25,
@@ -337,228 +335,17 @@ const OnboardingSlide = memo(
   },
 );
 
-// User Type Selection Screen
-const UserTypeSelectionScreen = memo(
-  ({
-    onSelectUserType,
-    onLogin,
-    selectedType,
-  }: {
-    onSelectUserType: (userType: 'customer' | 'restaurant') => void;
-    onLogin: () => void;
-    selectedType: 'customer' | 'restaurant' | null;
-  }) => {
-    const { colors } = useTheme();
-    const { t } = useTranslation('translation');
-    const scaleAnims = useRef<Record<string, Animated.Value>>({
-      customer: new Animated.Value(1),
-      restaurant: new Animated.Value(1),
-    }).current;
 
-    const handleUserTypePress = useCallback(
-      (userType: 'customer' | 'restaurant') => {
-        // Animate card selection
-        Animated.sequence([
-          Animated.timing(scaleAnims[userType], {
-            toValue: 0.95,
-            duration: CARD_ANIMATION_DURATION,
-            useNativeDriver: true,
-          }),
-          Animated.timing(scaleAnims[userType], {
-            toValue: 1,
-            duration: CARD_ANIMATION_DURATION,
-            useNativeDriver: true,
-          }),
-        ]).start();
-
-        onSelectUserType(userType);
-      },
-      [scaleAnims, onSelectUserType],
-    );
-
-    const getButtonStyle = useCallback(
-      (isSelected: boolean) => ({
-        borderRadius: 30,
-        backgroundColor: isSelected ? colors.primary : colors.surfaceVariant,
-        elevation: isSelected ? 4 : 0,
-        shadowColor: isSelected ? colors.primary : 'transparent',
-        shadowOffset: { width: 0, height: isSelected ? 2 : 0 },
-        shadowOpacity: isSelected ? 0.3 : 0,
-        shadowRadius: isSelected ? 4 : 0,
-      }),
-      [colors],
-    );
-
-    const getButtonLabelStyle = useCallback(
-      (isSelected: boolean) => ({
-        fontSize: 18,
-        fontWeight: '600' as const,
-        color: isSelected ? 'white' : '#9CA3AF',
-      }),
-      [],
-    );
-
-    return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-        <StatusBar
-          barStyle={
-            colors.onSurface === '#1e293b' ? 'dark-content' : 'light-content'
-          }
-          backgroundColor={colors.background}
-        />
-
-        <View
-          style={{
-            flex: 1,
-            paddingHorizontal: 24,
-            paddingTop: 32,
-            paddingBottom: 40,
-          }}
-        >
-          {/* Header */}
-          <View style={{ marginBottom: 32 }}>
-            <Text
-              style={{
-                fontSize: 28,
-                fontWeight: 'bold',
-                marginBottom: 8,
-                color: colors.onBackground,
-              }}
-            >
-              {t('what_are_your_needs')}
-            </Text>
-            <Text
-              style={{
-                fontSize: 18,
-                color: colors.onBackground,
-              }}
-            >
-              {t('choose_your_role')}
-            </Text>
-          </View>
-
-          {/* User Type Cards */}
-          <View style={{ flex: 1, justifyContent: 'center' }}>
-            {userTypes.map((type) => (
-              <Animated.View
-                key={type.id}
-                style={{
-                  transform: [
-                    {
-                      scale: selectedType === type.id ? scaleAnims[type.id] : 1,
-                    },
-                  ],
-                  marginBottom: 24,
-                }}
-              >
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  style={{
-                    borderRadius: 16,
-                    borderWidth: 2,
-                    borderColor:
-                      selectedType === type.id
-                        ? colors.primary
-                        : colors.outline,
-                    backgroundColor: colors.surfaceVariant,
-                    padding: 8,
-                    height: SCREEN_HEIGHT / 3.5,
-                    width: SCREEN_WIDTH - 48,
-                    overflow: 'hidden',
-                  }}
-                  onPress={() => handleUserTypePress(type.id)}
-                >
-                  <View style={{ flex: 1 }}>
-                    <Image
-                      source={type.image}
-                      style={{ width: '100%', height: '100%' }}
-                      resizeMode="cover"
-                    />
-
-                    {/* Selection indicator */}
-                    {selectedType === type.id && (
-                      <View
-                        style={{
-                          position: 'absolute',
-                          top: 16,
-                          right: 16,
-                          backgroundColor: colors.primary,
-                          borderRadius: 20,
-                          padding: 8,
-                        }}
-                      >
-                        <Ionicons name="checkmark" size={20} color="white" />
-                      </View>
-                    )}
-                  </View>
-
-                  <Text
-                    style={{
-                      fontSize: 20,
-                      fontWeight: 'bold',
-                      textAlign: 'center',
-                      marginTop: 8,
-                      color: colors.onSurface,
-                    }}
-                  >
-                    {/* {t(type.title)} */} {type.title}
-                  </Text>
-                </TouchableOpacity>
-              </Animated.View>
-            ))}
-          </View>
-
-          {/* Continue Button */}
-          <View style={{ paddingTop: 24 }}>
-            <Button
-              mode="contained"
-              onPress={onLogin}
-              disabled={!selectedType}
-              contentStyle={{ paddingVertical: 14 }}
-              style={getButtonStyle(!!selectedType)}
-              labelStyle={getButtonLabelStyle(!!selectedType)}
-            >
-              {selectedType ? t('continue') : t('select_user_type')}
-            </Button>
-
-            {selectedType && (
-              <Text
-                style={{
-                  textAlign: 'center',
-                  marginTop: 12,
-                  fontSize: 14,
-                  color: colors.onSurface,
-                }}
-              >
-                {t('you_selected')}
-                {selectedType === 'customer' ? t('customer') : t('restaurant')}
-              </Text>
-            )}
-          </View>
-        </View>
-      </SafeAreaView>
-    );
-  },
-);
 
 // Main Onboarding Screen
 const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
   OnboardingSlides,
   onComplete,
   onLogin,
-  route,
+  navigation,
 }) => {
-  // Get route parameters
-  const { step, skipWelcome } = route?.params || {};
-  
-  const [showWelcome, setShowWelcome] = useState(!skipWelcome);
-  const [currentSlideIndex, setCurrentSlideIndex] = useState(
-    Math.max(0, Math.min((step || 1) - 1, OnboardingSlides.length - 1))
-  );
-  const [showUserSelection, setShowUserSelection] = useState(false);
-  const [selectedType, setSelectedType] = useState<
-    'customer' | 'restaurant' | null
-  >(null);
+  const [showWelcome, setShowWelcome] = useState(true);
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
   const handleWelcomeComplete = useCallback(() => {
     setShowWelcome(false);
@@ -568,40 +355,25 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
     if (currentSlideIndex < OnboardingSlides.length - 1) {
       setCurrentSlideIndex((prev) => prev + 1);
     } else {
-      setShowUserSelection(true);
+      // Onboarding slides complete, navigate to user type selection
+      onComplete();
+      if (navigation) {
+        navigation.replace('UserTypeSelection');
+      }
     }
-  }, [currentSlideIndex, OnboardingSlides.length]);
+  }, [currentSlideIndex, OnboardingSlides.length, onComplete, navigation]);
 
   const handleSkip = useCallback(() => {
-    setShowUserSelection(true);
-  }, []);
-
-  const handleUserTypeSelection = useCallback(
-    (userType: 'customer' | 'restaurant') => {
-      setSelectedType(userType);
-    },
-    [],
-  );
-
-  const handleLogin = useCallback(() => {
-    if (selectedType) {
-      onLogin(selectedType);
+    // Skip to user type selection
+    onComplete();
+    if (navigation) {
+      navigation.replace('UserTypeSelection');
     }
-  }, [selectedType, onLogin]);
+  }, [onComplete, navigation]);
 
   // Render appropriate screen based on state
   if (showWelcome) {
     return <OnboardingWelcome onComplete={handleWelcomeComplete} />;
-  }
-
-  if (showUserSelection) {
-    return (
-      <UserTypeSelectionScreen
-        onSelectUserType={handleUserTypeSelection}
-        onLogin={handleLogin}
-        selectedType={selectedType}
-      />
-    );
   }
 
   return (
@@ -618,6 +390,5 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
 // Set display names for debugging
 OnboardingWelcome.displayName = 'OnboardingWelcome';
 OnboardingSlide.displayName = 'OnboardingSlide';
-UserTypeSelectionScreen.displayName = 'UserTypeSelectionScreen';
 
 export default memo(OnboardingScreen);

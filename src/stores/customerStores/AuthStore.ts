@@ -1,252 +1,236 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { createJSONStorage, devtools, persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import TokenManager from '@/src/services/tokenManager';
-import { apiClient } from '@/src/services/apiClient';
+import { User } from '../../types';
+import { reset } from '../../navigation/navigationHelpers';
+import TokenManager from '@/src/services/shared/tokenManager';
 
-// Simple User interface
-export interface User {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: 'customer' | 'restaurant';
-  isVerified?: boolean;
-  restaurantId?: string;
-  verificationStatus?: 'PENDING' | 'APPROVED' | 'REJECTED' | 'PENDING_VERIFICATION';
-}
-
-// Auth Store State
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  userType: 'customer' | 'restaurant' | null;
+  selectedUserType: 'customer' | 'restaurant' | null;
   error: string | null;
-  isInitialized: boolean;
-  _isInitializing: boolean; // Internal flag to prevent concurrent initialization
+  // Add registration state for better UX
+  registrationData: {
+    email?: string;
+    phoneNumber?: string;
+    userId?: string;
+  } | null;
 }
 
-// Auth Store Actions
 interface AuthActions {
-  // Core auth
-  login: (email: string, password: string, userType: 'customer' | 'restaurant') => Promise<boolean>;
-  logout: () => Promise<void>;
-  
-  // State management
+  // State setters
+  setUser: (user: User | null) => void;
+  setIsAuthenticated: (value: boolean) => void;
+  setIsLoading: (value: boolean) => void;
   setError: (error: string | null) => void;
+  setSelectedUserType: (userType: 'customer' | 'restaurant') => void;
+  setRegistrationData: (data: AuthState['registrationData']) => void;
+
+  // Authentication actions
+  logoutUser: () => Promise<void>;
+
+  // Utility actions
   clearError: () => void;
-  
-  // Initialization
-  initialize: () => Promise<void>;
+  resetAuth: () => void;
+
+  // Auth status checkers
+  checkAuthStatus: () => Promise<void>;
 }
 
-const initialState: Omit<AuthState, '_isInitializing'> = {
+const initialState: AuthState = {
   user: null,
   isAuthenticated: false,
   isLoading: false,
+  userType: null,
+  selectedUserType: null,
   error: null,
-  isInitialized: false,
+  registrationData: null,
 };
 
 export const useAuthStore = create<AuthState & AuthActions>()(
-  persist(
-    (set, get) => ({
-      ...initialState,
-      _isInitializing: false,
+  devtools(
+    persist(
+      (set, get) => ({
+        ...initialState,
 
-      // Initialize auth on app start
-      initialize: async () => {
-        const state = get();
-        
-        // Prevent multiple initialization calls
-        if (state.isInitialized || state._isInitializing) {
-          return;
-        }
+        // State setters
+        setUser: (user) => {
+          set({
+            user,
+            userType: user?.role as 'customer' | 'restaurant' | null,
+            error: null, // Clear error on successful user set
+          });
+        },
 
-        try {
-          set({ _isInitializing: true, isLoading: true });
-          
-          const tokenData = await TokenManager.getTokenData();
-          
-          if (!tokenData?.accessToken) {
-            set({ 
-              isAuthenticated: false, 
-              user: null, 
-              isLoading: false,
-              isInitialized: true,
-              _isInitializing: false,
-              error: null,
+        setIsAuthenticated: (isAuthenticated) => {
+          set({
+            isAuthenticated,
+            error: isAuthenticated ? null : get().error, // Only clear error on successful auth
+          });
+        },
+
+        setIsLoading: (isLoading) => set({ isLoading }),
+
+        setError: (error) => set({ error }),
+
+        setSelectedUserType: (selectedUserType) => set({ selectedUserType }),
+
+        setRegistrationData: (registrationData) => set({ registrationData }),
+
+        // Authentication actions
+        logoutUser: async () => {
+          try {
+            set({ isLoading: true });
+
+            // Use the centralized app reset utility
+            const { performCompleteAppReset } = await import('../../utils/appReset');
+            const result = await performCompleteAppReset({
+              preserveOnboarding: true,
+              preserveUserTypeSelection: true,
+              navigateToAuth: true,
             });
-            return;
-          }
 
-          // Validate token with backend
-          const response = await apiClient.get('/auth/me');
-          const user = response.data.data?.user || response.data.user || response.data;
-          
-          if (!user) {
-            throw new Error('Invalid user data received');
-          }
-          
-          set({
-            user,
-            isAuthenticated: true,
-            isLoading: false,
-            isInitialized: true,
-            _isInitializing: false,
-            error: null,
-          });
-        } catch (error: any) {
-          console.warn('Auth initialization failed:', error);
-          
-          // Clear tokens on failure
-          try {
-            await TokenManager.clearTokens();
-          } catch (clearError) {
-            console.warn('Failed to clear tokens:', clearError);
-          }
-          
-          set({
-            user: null,
-            isAuthenticated: false,
-            isLoading: false,
-            isInitialized: true,
-            _isInitializing: false,
-            error: null, // Don't show initialization errors to user
-          });
-        }
-      },
-
-      // Login
-      login: async (email: string, password: string, userType: 'customer' | 'restaurant') => {
-        const state = get();
-        
-        // Prevent multiple login attempts
-        if (state.isLoading) {
-          return false;
-        }
-
-        try {
-          set({ isLoading: true, error: null });
-
-          const response = await apiClient.post('/auth/login', {
-            email,
-            password,
-            userType,
-          });
-
-          const { user, accessToken, refreshToken } = response.data.data || response.data;
-
-          if (!user || !accessToken) {
-            throw new Error('Invalid login response');
-          }
-
-          await TokenManager.setTokens({
-            accessToken,
-            refreshToken,
-            userType,
-          });
-          
-          set({
-            user,
-            isAuthenticated: true,
-            isLoading: false,
-            error: null,
-          });
-
-          return true;
-        } catch (error: any) {
-          const errorMessage = error.response?.data?.message || 'Login failed';
-          set({
-            isAuthenticated: false,
-            user: null,
-            isLoading: false,
-            error: errorMessage,
-          });
-          return false;
-        }
-      },
-
-      // Logout
-      logout: async () => {
-        const state = get();
-        
-        // Prevent multiple logout calls or logout when not authenticated
-        if (state.isLoading) {
-          return;
-        }
-
-        try {
-          set({ isLoading: true });
-          
-          // Try to call logout endpoint (optional)
-          try {
-            if (state.isAuthenticated) {
-              await apiClient.post('/auth/logout');
+            if (result.success) {
+              // Reset auth state locally
+              set({
+                ...initialState,
+                selectedUserType: get().selectedUserType, // Preserve selected user type
+              });
+            } else {
+              throw new Error('App reset failed');
             }
-          } catch (apiError) {
-            console.warn('Logout API call failed:', apiError);
-            // Continue with local logout even if API call fails
-          }
-          
-          // Clear tokens
-          await TokenManager.clearTokens();
-          
-          // Reset to initial state but keep initialization status
-          set({ 
-            ...initialState,
-            isInitialized: true,
-            _isInitializing: false,
-          });
-        } catch (error) {
-          console.error('Logout error:', error);
-          
-          // Force clear tokens and state even on error
-          try {
-            await TokenManager.clearTokens();
-          } catch (clearError) {
-            console.warn('Failed to clear tokens during error recovery:', clearError);
-          }
-          
-          set({ 
-            ...initialState,
-            isInitialized: true,
-            _isInitializing: false,
-          });
-        }
-      },
+          } catch (error) {
+            console.error('Error during logout:', error);
+            
+            // Fallback: try manual cleanup
+            try {
+              await TokenManager.clearAllTokens();
+              const { useCartStore } = await import('./cartStore');
+              useCartStore.getState().clearCart();
+            } catch (fallbackError) {
+              console.error('Error during fallback cleanup:', fallbackError);
+            }
 
-      // Error management
-      setError: (error) => {
-        const currentState = get();
-        if (currentState.error !== error) {
-          set({ error });
-        }
+            set({
+              ...initialState,
+              selectedUserType: get().selectedUserType,
+              error: 'Logout completed with some errors',
+            });
+            reset('Auth');
+          } finally {
+            set({ isLoading: false });
+          }
+        },
+
+        // Check authentication status on app start
+        checkAuthStatus: async () => {
+          try {
+            set({ isLoading: true });
+
+            const accessToken = await TokenManager.getToken();
+            const refreshToken = await TokenManager.getRefreshToken();
+
+            if (accessToken && refreshToken) {
+              // Token exists, but we need to verify it's valid
+              // This will be handled by the API interceptor
+              set({ isAuthenticated: true });
+            } else {
+              // No tokens found
+              set({
+                isAuthenticated: false,
+                user: null,
+                userType: null,
+              });
+            }
+          } catch (error) {
+            console.error('Error checking auth status:', error);
+            set({
+              isAuthenticated: false,
+              user: null,
+              userType: null,
+            });
+          } finally {
+            set({ isLoading: false });
+          }
+        },
+
+        // Utility actions
+        clearError: () => set({ error: null }),
+
+        resetAuth: () => {
+          set({
+            ...initialState,
+            selectedUserType: get().selectedUserType, // Preserve selected user type
+          });
+        },
+      }),
+      {
+        name: 'auth-storage',
+        storage: createJSONStorage(() => AsyncStorage),
+        partialize: (state) => ({
+          user: state.user,
+          isAuthenticated: state.isAuthenticated,
+          userType: state.userType,
+          selectedUserType: state.selectedUserType,
+          registrationData: state.registrationData,
+          // Don't persist loading and error states
+        }),
+        version: 2, // Increment version to handle schema changes
+        migrate: (persistedState: any, version: number) => {
+          // Handle migration from older versions
+          if (version < 2) {
+            return {
+              ...persistedState,
+              registrationData: null,
+              error: null,
+              isLoading: false,
+            };
+          }
+          return persistedState;
+        },
+        onRehydrateStorage: () => (state) => {
+          // Check auth status when store is rehydrated
+          if (state) {
+            state.checkAuthStatus();
+          }
+        },
       },
-      
-      clearError: () => {
-        const currentState = get();
-        if (currentState.error !== null) {
-          set({ error: null });
-        }
-      },
-    }),
-    {
-      name: 'auth-store',
-      storage: createJSONStorage(() => AsyncStorage),
-      partialize: (state) => ({}), // Don't persist auth state, only tokens via TokenManager
-    }
-  )
+    ),
+    { name: 'AuthStore' },
+  ),
 );
 
-// Simple selector hooks
-export const useAuth = () => useAuthStore();
-export const useUser = () => useAuthStore((state) => state.user);
-export const useIsAuthenticated = () => useAuthStore((state) => state.isAuthenticated);
+// Selector hooks for better performance and type safety
+export const useAuthUser = () => useAuthStore((state) => state.user);
+export const useIsAuthenticated = () =>
+  useAuthStore((state) => state.isAuthenticated);
 export const useAuthLoading = () => useAuthStore((state) => state.isLoading);
 export const useAuthError = () => useAuthStore((state) => state.error);
-export const useAuthInitialized = () => useAuthStore((state) => state.isInitialized);
+export const useUserType = () => useAuthStore((state) => state.userType);
+export const useSelectedUserType = () =>
+  useAuthStore((state) => state.selectedUserType);
+export const useRegistrationData = () =>
+  useAuthStore((state) => state.registrationData);
 
-// Utility hooks
-export const useIsCustomer = () => useAuthStore((state) => state.user?.role === 'customer');
-export const useIsRestaurant = () => useAuthStore((state) => state.user?.role === 'restaurant');
+// Compound selectors for complex state combinations
+export const useAuthStatus = () =>
+  useAuthStore((state) => ({
+    isAuthenticated: state.isAuthenticated,
+    isLoading: state.isLoading,
+    user: state.user,
+    error: state.error,
+  }));
+
+export const useAuthActions = () =>
+  useAuthStore((state) => ({
+    setUser: state.setUser,
+    setIsAuthenticated: state.setIsAuthenticated,
+    setError: state.setError,
+    clearError: state.clearError,
+    logoutUser: state.logoutUser,
+    resetAuth: state.resetAuth,
+    setRegistrationData: state.setRegistrationData,
+  }));
