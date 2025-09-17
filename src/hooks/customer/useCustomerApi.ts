@@ -1,185 +1,161 @@
-// useCustomerApi.ts
-import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { restaurantApi, RestaurantQuery } from "@/src/services/customer/restaurant.service";
-import { OrderApi } from "@/src/services/customer/orders.service";
-import { useAuthStore } from "@/src/stores/customerStores/AuthStore";
-
-export interface RestaurantFilters {
-    cuisine?: string[];
-    minRating?: number;
-    maxDeliveryTime?: number;
-    maxDeliveryFee?: number;
-    isOpen?: boolean;
-    coordinates?: {
-        latitude: number;
-        longitude: number;
-        radius?: number;
-    };
-}
-
-
+// hooks/customer/index.ts - Updated to match your existing pattern
+import { useQuery } from '@tanstack/react-query';
+import {
+  restaurantApi,
+  RestaurantQuery,
+} from '@/src/services/customer/restaurant.service';
+import { useLocationForQueries } from './useLocationService';
 
 const CACHE_CONFIG = {
-    STALE_TIME: 5 * 60 * 1000, // 5 minutes
-    CACHE_TIME: 10 * 60 * 1000, // 10 minutes
-    RETRY_DELAY: 1000,
-    MAX_RETRIES: 3,
+  STALE_TIME: 5 * 60 * 1000, // 5 minutes
+  CACHE_TIME: 10 * 60 * 1000, // 10 minutes
+  MAX_RETRIES: 3,
 };
 
-// Restaurant hooks
+// Hook for fetching menu categories
+export const useMenuCategories = () => {
+  return useQuery({
+    queryKey: ['menu', 'categories'],
+    queryFn: async () => {
+      try {
+        const result = await restaurantApi.getMenuCategories();
+        return result;
+      } catch (error) {
+        console.error('Error fetching menu categories:', error);
+        throw error;
+      }
+    },
+    staleTime: CACHE_CONFIG.STALE_TIME * 2, // Categories change less frequently
+    gcTime: CACHE_CONFIG.CACHE_TIME * 2,
+    retry: CACHE_CONFIG.MAX_RETRIES,
+  });
+};
+
+// Updated to match your existing naming convention
+export const useGetAllMenu = (options: { enabled?: boolean } = {}) => {
+  const { nearLat, nearLng, locationQueryKey } = useLocationForQueries();
+
+  return useQuery({
+    queryKey: ['menu', 'all', ...locationQueryKey],
+    queryFn: async () => {
+      try {
+        const result = await restaurantApi.getAllMenuItems({
+          nearLat,
+          nearLng,
+        });
+        return result;
+      } catch (error) {
+        console.error('Error fetching all menu:', error);
+        throw error;
+      }
+    },
+    enabled: (options.enabled ?? true) && !!(nearLat && nearLng),
+    staleTime: CACHE_CONFIG.STALE_TIME,
+    gcTime: CACHE_CONFIG.CACHE_TIME,
+    retry: CACHE_CONFIG.MAX_RETRIES,
+  });
+};
+
+export const useGetAllMenuItem = () => {
+  return useQuery({
+    queryKey: ['menu', 'all'],
+    queryFn: async () => {
+      try {
+        const result = await restaurantApi.getAllMenu2();
+        return result;
+      } catch (error) {
+        console.error('Error fetching all menu:', error);
+        throw error;
+      }
+    },
+    staleTime: CACHE_CONFIG.STALE_TIME,
+    gcTime: CACHE_CONFIG.CACHE_TIME,
+    retry: CACHE_CONFIG.MAX_RETRIES,
+  });
+};
+
+// Hook for restaurant details with automatic location
+export const useRestaurantDetails = (id: string) => {
+  const { nearLat, nearLng, locationQueryKey } = useLocationForQueries();
+
+  return useQuery({
+    queryKey: ['restaurant-details', id, ...locationQueryKey],
+    queryFn: () => restaurantApi.getRestaurantDetails(id, nearLat, nearLng),
+    enabled: !!id,
+    staleTime: CACHE_CONFIG.STALE_TIME,
+    gcTime: CACHE_CONFIG.CACHE_TIME,
+    retry: CACHE_CONFIG.MAX_RETRIES,
+  });
+};
+// Hook for nearby restaurants with automatic location
+export const useNearbyRestaurants = () => {
+  const { nearLat, nearLng, locationQueryKey } = useLocationForQueries();
+
+  return useQuery({
+    queryKey: ['nearby-restaurants', ...locationQueryKey, { nearLat, nearLng }],
+    queryFn: () =>
+      restaurantApi.getNearbyRestaurants({
+        nearLat,
+        nearLng,
+        verificationStatus: 'APPROVED',
+        isOpen: true,
+      }),
+    enabled: !!(nearLat && nearLng),
+    staleTime: CACHE_CONFIG.STALE_TIME,
+    gcTime: CACHE_CONFIG.CACHE_TIME,
+    retry: CACHE_CONFIG.MAX_RETRIES,
+  });
+};
+// Additional hooks for the simplified version
 export const useAllRestaurants = (query: RestaurantQuery) => {
-    return useQuery({
-        queryKey: ['restaurants', query],// import { paymentApi } from "@/src/services/customer/payment.service";
+  const { nearLat, nearLng, locationQueryKey } = useLocationForQueries();
 
-        queryFn: () => restaurantApi.getAllRestaurants(query),
-        staleTime: CACHE_CONFIG.STALE_TIME,
-        gcTime: CACHE_CONFIG.CACHE_TIME,
-        retry: CACHE_CONFIG.MAX_RETRIES,
-
-    })
+  return useQuery({
+    queryKey: ['restaurants', 'all', ...locationQueryKey, query],
+    queryFn: async () => {
+      try {
+        const result = await restaurantApi.getAllRestaurants({
+          ...query,
+          nearLat: nearLat,
+          nearLng: nearLng,
+          isOpen: true,
+          verificationStatus: 'APPROVED',
+        });
+        return result;
+      } catch (error) {
+        console.error('Error fetching all restaurants:', error);
+        throw error;
+      }
+    },
+    staleTime: CACHE_CONFIG.STALE_TIME,
+    gcTime: CACHE_CONFIG.CACHE_TIME,
+    retry: CACHE_CONFIG.MAX_RETRIES,
+    enabled: !!(nearLat && nearLng),
+  });
 };
 
-export const useRestaurantId = (id: string, category?: string) => {
-    return useQuery({
-        queryKey: ['restaurant', id,],
-        queryFn: () => restaurantApi.getRestaurantById(id).then(res => res.data),
-        staleTime: CACHE_CONFIG.STALE_TIME,
-        gcTime: CACHE_CONFIG.CACHE_TIME,
-        enabled: !!id,
-    })
-}
-export const useGetAllMenu = (options?: { enabled?: boolean }) => {
-    return useQuery({
-        queryKey: ['All_menu'],
-        queryFn: () => restaurantApi.getAllMenu(),
-        enabled: options?.enabled ?? true,
+// Hook for menu item by ID with automatic location
+export const useMenuItemById = (id: string) => {
+  const { nearLat, nearLng, locationQueryKey } = useLocationForQueries();
 
+  return useQuery({
+    queryKey: ['menu-item', id, ...locationQueryKey],
+    queryFn: () => restaurantApi.getMenuItemById(id, nearLat, nearLng),
+    // enabled: enabled && !!id,
+    staleTime: CACHE_CONFIG.STALE_TIME,
+    gcTime: CACHE_CONFIG.CACHE_TIME,
+    retry: CACHE_CONFIG.MAX_RETRIES,
+  });
+};
 
-
-
-    })
-}
-
-export const useGetAllMenuBrowse = (query: RestaurantQuery | null, options?: { enabled?: boolean }) => {
-    return useQuery({
-        queryKey: ['All_menu', query],
-        queryFn: () => restaurantApi.getMenuBrowseAll({ ...query! }),
-        staleTime: CACHE_CONFIG.STALE_TIME,
-        gcTime: CACHE_CONFIG.CACHE_TIME,
-        retry: CACHE_CONFIG.MAX_RETRIES,
-        enabled: options?.enabled ?? !!query,
-
-
-
-    })
-}
-
-export const useGetMenuById = (restaurantId: string, menuId: string) => {
-   return useQuery({
-        queryKey: ['menuItem', menuId],
-        queryFn: () => restaurantApi.getMenuItemById(restaurantId, menuId).then(res => res.data),
-         staleTime: 5 * 60 * 1000, // 5 minutes
-        gcTime: 30 * 60 * 1000, // 30 minutes (previously cacheTime)
-        
-    })
-}
-
-export const useGetRestaurantsNearBy = (
-    longitude: number,
-    latitude: number
-) => {
-
-    return useQuery({
-        queryKey: ['nearby_restaurant'],
-        queryFn: async () => {
-            if (!longitude || !latitude) {
-                throw new Error('No coordinates available');
-            }
-            return restaurantApi.getNearbyRestaurants(longitude, latitude);
-        },
-        enabled: !!longitude && !!latitude,
-        staleTime: 5 * 60 * 1000, // 5 minutes
-        gcTime: 30 * 60 * 1000, // 30 minutes (previously cacheTime)
-        retry: 3,
-        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-    })
-}
-
-
-
-
-// Order hooks
-export const useCreateOrder = () => {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (orderData: any) => OrderApi.createOrder(orderData).then(res => res.data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['orders'] });
-        },
-        onError: (error: any) => {
-            // Handle session expired errors gracefully
-            if (error?.code === 'SESSION_EXPIRED' || error?.message?.includes('session has expired')) {
-                console.log('Session expired during order creation');
-                return;
-            }
-            throw error;
-        }
-    })
-}
-
-export const useOrderById = (orderId: string) => {
-    const isAuthenticated = useAuthStore(state => state.isAuthenticated);
-
-    return useQuery({
-        queryKey: ['orders', orderId],
-        queryFn: () => OrderApi.getOrderById(orderId).then(res => res.data),
-        enabled: !!orderId && isAuthenticated,
-        retry: (failureCount, error: any) => {
-            // Don't retry on session expired errors
-            if (error?.code === 'SESSION_EXPIRED' || error?.message?.includes('session has expired')) {
-                return false;
-            }
-            return failureCount < 3;
-        }
-    })
-}
-
-export const useAllOrders = (customerId: string) => {
-    const isAuthenticated = useAuthStore(state => state.isAuthenticated);
-
-    return useQuery({
-        queryKey: ['orders', customerId],
-        queryFn: () => OrderApi.getAllOrders(customerId).then(res => res.data),
-        enabled: !!customerId && isAuthenticated,
-        retry: (failureCount, error: any) => {
-            // Don't retry on session expired errors
-            if (error?.code === 'SESSION_EXPIRED' || error?.message?.includes('session has expired')) {
-                return false;
-            }
-            return failureCount < 3;
-        }
-    })
-}
-
-export const useCancelOrder = () => {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (orderId: string) => OrderApi.rejectOrder(orderId),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['orders'] });
-        },
-        onError: (error: any) => {
-            // Handle session expired errors gracefully
-            if (error?.code === 'SESSION_EXPIRED' || error?.message?.includes('session has expired')) {
-                console.log('Session expired during order cancellation');
-                return;
-            }
-            throw error;
-        }
-    })
-}
-
-// Menu Hooks 
-
-
-
+// Hook for restaurant reviews
+export const useRestaurantReviews = (restaurantId: string) => {
+  return useQuery({
+    queryKey: ['restaurant-reviews', restaurantId],
+    queryFn: () => restaurantApi.getRestaurantReviews(restaurantId),
+    enabled: !!restaurantId,
+    staleTime: CACHE_CONFIG.STALE_TIME,
+    gcTime: CACHE_CONFIG.CACHE_TIME,
+    retry: CACHE_CONFIG.MAX_RETRIES,
+  });
+};

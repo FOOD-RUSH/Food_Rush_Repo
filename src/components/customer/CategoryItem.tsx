@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { View, Text, Image, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { CustomerHomeStackScreenProps } from '@/src/navigation/types';
+import { RootStackScreenProps } from '@/src/navigation/types';
 import { useTheme, ActivityIndicator } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -29,8 +29,7 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
   badgeText,
   itemCount,
 }) => {
-  const navigation =
-    useNavigation<CustomerHomeStackScreenProps<'HomeScreen'>['navigation']>();
+  const navigation = useNavigation<RootStackScreenProps<keyof any>['navigation']>();
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
   const [imageError, setImageError] = useState(false);
@@ -45,18 +44,16 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
         return;
       }
 
-      // Default navigation behavior - navigate to SearchScreen with category filter
-      navigation.navigate('SearchScreen', {
-        type: 'category',
-        category: title,
-        categoryId: categoryId || title.toLowerCase().replace(/\s+/g, '-'),
+      // Default navigation behavior - navigate to CategoryMenu screen
+      navigation.navigate('CategoryMenu', {
+        categoryTitle: title,
       });
 
       console.log('Navigating to category:', { title, categoryId });
     } catch (error) {
       console.error('Error navigating to category:', error);
       Alert.alert(t('navigation_error'), t('unable_to_open_category'), [
-        { text: 'OK'},
+        { text: 'OK' },
       ]);
     }
   }, [navigation, title, categoryId, isLoading, disabled, onPress, t]);
@@ -76,23 +73,24 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
     >
       <View
         style={{
-          borderRadius: 16,
-          margin: 8,
-          justifyContent: 'center',
-          alignItems: 'center',
-          padding: 16,
+          borderRadius: 12,
+          margin: 6,
+          padding: 12,
           backgroundColor: colors.surface,
           shadowColor: colors.shadow,
           shadowOffset: {
             width: 0,
-            height: 2,
+            height: 1,
           },
-          shadowOpacity: 0.1,
-          shadowRadius: 3.84,
-          elevation: 5,
-          minHeight: 100,
-          minWidth: 90,
+          shadowOpacity: 0.08,
+          shadowRadius: 2,
+          elevation: 3,
+          width: 100,
+          height: 90,
           position: 'relative',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
       >
         {/* Badge */}
@@ -124,11 +122,11 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
         {/* Image or Loading */}
         <View
           style={{
-            height: 56,
-            width: 56,
+            height: 40,
+            width: 40,
             justifyContent: 'center',
             alignItems: 'center',
-            marginBottom: 12,
+            marginBottom: 8,
           }}
         >
           {isLoading ? (
@@ -136,24 +134,24 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
           ) : imageError ? (
             <View
               style={{
-                height: 56,
-                width: 56,
+                height: 40,
+                width: 40,
                 backgroundColor: colors.surfaceVariant,
-                borderRadius: 28,
+                borderRadius: 20,
                 justifyContent: 'center',
                 alignItems: 'center',
               }}
             >
               <MaterialIcons
                 name="restaurant"
-                size={28}
+                size={20}
                 color={colors.onSurfaceVariant}
               />
             </View>
           ) : (
             <Image
               source={image}
-              style={{ height: 40, width: 40 }}
+              style={{ height: 32, width: 32 }}
               resizeMode="contain"
               onError={handleImageError}
             />
@@ -163,32 +161,28 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
         {/* Category Title */}
         <Text
           style={{
-            fontSize: 14,
+            fontSize: 12,
             fontWeight: '600',
-            textAlign: 'center',
             color: colors.onSurface,
-            maxWidth: 90,
-            lineHeight: 18,
+            textAlign: 'center',
           }}
           numberOfLines={2}
           ellipsizeMode="tail"
         >
-          {title}
+          {t(`category_${title.toLowerCase().replace(/[\s-]/g, '_')}`, title)}
         </Text>
 
         {/* Item Count */}
         {itemCount !== undefined && (
           <Text
             style={{
-              fontSize: 12,
+              fontSize: 10,
               color: colors.onSurfaceVariant,
-              marginTop: 4,
+              marginTop: 2,
               textAlign: 'center',
             }}
           >
-            {itemCount}
-            {t('item')}
-            {itemCount !== 1 ? t('items_suffix') : ''}
+            {itemCount} {t('items')}
           </Text>
         )}
 
@@ -203,7 +197,7 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
               bottom: 0,
               backgroundColor: colors.surface,
               opacity: 0.8,
-              borderRadius: 16,
+              borderRadius: 12,
               justifyContent: 'center',
               alignItems: 'center',
             }}

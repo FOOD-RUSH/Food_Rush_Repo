@@ -1,6 +1,10 @@
 import { MD3LightTheme, MD3DarkTheme, MD3Theme } from 'react-native-paper';
 import { useColorScheme } from 'react-native';
-import { DefaultTheme, DarkTheme, Theme as NavigationTheme } from '@react-navigation/native';
+import {
+  DefaultTheme,
+  DarkTheme,
+  Theme as NavigationTheme,
+} from '@react-navigation/native';
 import { useAppStore } from '../stores/customerStores/AppStore';
 import {
   restaurantDarkNavigationTheme,
@@ -23,6 +27,39 @@ const COLORS = {
   TERTIARY_LIGHT: '#f3f4f6',
   TERTIARY_DARK: '#22c55e',
   ERROR: '#ef4444',
+} as const;
+
+// Futuristic Font Configuration using system fonts (ZERO bundle size)
+export const FUTURISTIC_FONTS = {
+  primary: {
+    fontFamily: 'monospace', // System monospace font
+    fontWeight: '400' as const,
+  },
+  secondary: {
+    fontFamily: 'monospace',
+    fontWeight: '400' as const,
+  },
+  accent: {
+    fontFamily: 'monospace',
+    fontWeight: '400' as const,
+  },
+  display: {
+    fontFamily: 'monospace',
+    fontWeight: '700' as const,
+  },
+  mono: {
+    fontFamily: 'monospace',
+    fontWeight: '400' as const,
+  },
+} as const;
+
+// Font scale factors for different contexts
+export const FONT_SCALES = {
+  heading: 1.2,
+  subheading: 1.1,
+  body: 1.0,
+  caption: 0.9,
+  small: 0.8,
 } as const;
 
 export const lightTheme: MD3Theme = {
@@ -114,7 +151,9 @@ export const useNavigationTheme = (themeMode: ThemeMode): NavigationTheme => {
   const systemColorScheme = useColorScheme();
 
   if (themeMode === 'system') {
-    return systemColorScheme === 'dark' ? darkNavigationTheme : lightNavigationTheme;
+    return systemColorScheme === 'dark'
+      ? darkNavigationTheme
+      : lightNavigationTheme;
   }
 
   return themeMode === 'dark' ? darkNavigationTheme : lightNavigationTheme;

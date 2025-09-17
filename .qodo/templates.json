@@ -1,0 +1,31 @@
+{
+  "component_templates": {
+    "functional_component": {
+      "path": "src/components",
+      "template": "import React from 'react';\nimport { View, Text, StyleSheet } from 'react-native';\n\ninterface {{ComponentName}}Props {\n  // Define props here\n}\n\nconst {{ComponentName}}: React.FC<{{ComponentName}}Props> = (props) => {\n  return (\n    <View style={styles.container}>\n      <Text>{{ComponentName}}</Text>\n    </View>\n  );\n};\n\nconst styles = StyleSheet.create({\n  container: {\n    flex: 1,\n    justifyContent: 'center',\n    alignItems: 'center',\n  },\n});\n\nexport default {{ComponentName}};"
+    },
+    "screen_component": {
+      "path": "src/screens",
+      "template": "import React from 'react';\nimport { View, Text, StyleSheet, SafeAreaView } from 'react-native';\nimport { StackNavigationProp } from '@react-navigation/stack';\nimport { RouteProp } from '@react-navigation/native';\n\ntype {{ScreenName}}NavigationProp = StackNavigationProp<RootStackParamList, '{{ScreenName}}'>;\ntype {{ScreenName}}RouteProp = RouteProp<RootStackParamList, '{{ScreenName}}'>;\n\ninterface {{ScreenName}}Props {\n  navigation: {{ScreenName}}NavigationProp;\n  route: {{ScreenName}}RouteProp;\n}\n\nconst {{ScreenName}}: React.FC<{{ScreenName}}Props> = ({ navigation, route }) => {\n  return (\n    <SafeAreaView style={styles.container}>\n      <View style={styles.content}>\n        <Text style={styles.title}>{{ScreenName}}</Text>\n      </View>\n    </SafeAreaView>\n  );\n};\n\nconst styles = StyleSheet.create({\n  container: {\n    flex: 1,\n    backgroundColor: '#fff',\n  },\n  content: {\n    flex: 1,\n    justifyContent: 'center',\n    alignItems: 'center',\n    padding: 16,\n  },\n  title: {\n    fontSize: 24,\n    fontWeight: 'bold',\n    marginBottom: 16,\n  },\n});\n\nexport default {{ScreenName}};"
+    },
+    "hook": {
+      "path": "src/hooks",
+      "template": "import { useState, useEffect } from 'react';\n\ninterface Use{{HookName}}Return {\n  // Define return type here\n}\n\nconst use{{HookName}} = (): Use{{HookName}}Return => {\n  // Hook implementation\n  \n  return {\n    // Return values\n  };\n};\n\nexport default use{{HookName}};"
+    },
+    "service": {
+      "path": "src/services",
+      "template": "import axios, { AxiosResponse } from 'axios';\nimport { API_BASE_URL } from '../config/api';\n\nclass {{ServiceName}}Service {\n  private baseURL = API_BASE_URL;\n\n  // Service methods here\n  \n  async get{{ServiceName}}(): Promise<any> {\n    try {\n      const response: AxiosResponse = await axios.get(`${this.baseURL}/{{endpoint}}`);\n      return response.data;\n    } catch (error) {\n      throw new Error(`Failed to fetch {{serviceName}}: ${error}`);\n    }\n  }\n}\n\nexport default new {{ServiceName}}Service();"
+    }
+  },
+  "test_templates": {
+    "component_test": {
+      "template": "import React from 'react';\nimport { render, screen } from '@testing-library/react-native';\nimport {{ComponentName}} from '../{{ComponentName}}';\n\ndescribe('{{ComponentName}}', () => {\n  it('renders correctly', () => {\n    render(<{{ComponentName}} />);\n    expect(screen.getByText('{{ComponentName}}')).toBeTruthy();\n  });\n\n  // Add more tests here\n});"
+    },
+    "hook_test": {
+      "template": "import { renderHook, act } from '@testing-library/react-hooks';\nimport use{{HookName}} from '../use{{HookName}}';\n\ndescribe('use{{HookName}}', () => {\n  it('should initialize correctly', () => {\n    const { result } = renderHook(() => use{{HookName}}());\n    \n    // Add assertions here\n  });\n\n  // Add more tests here\n});"
+    },
+    "service_test": {
+      "template": "import {{ServiceName}}Service from '../{{ServiceName}}Service';\nimport axios from 'axios';\n\njest.mock('axios');\nconst mockedAxios = axios as jest.Mocked<typeof axios>;\n\ndescribe('{{ServiceName}}Service', () => {\n  beforeEach(() => {\n    jest.clearAllMocks();\n  });\n\n  it('should fetch {{serviceName}} successfully', async () => {\n    const mockData = { id: 1, name: 'Test' };\n    mockedAxios.get.mockResolvedValue({ data: mockData });\n\n    const result = await {{ServiceName}}Service.get{{ServiceName}}();\n    \n    expect(result).toEqual(mockData);\n    expect(mockedAxios.get).toHaveBeenCalledTimes(1);\n  });\n\n  // Add more tests here\n});"
+    }
+  }
+}

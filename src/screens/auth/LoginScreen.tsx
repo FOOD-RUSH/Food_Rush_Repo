@@ -98,10 +98,24 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
               position: 'top',
             });
 
-            // Navigate to main app - auth state is already updated in the hook
-            navigation.navigate('CustomerApp', {
-              screen: 'Home',
-              params: { screen: 'HomeScreen' },
+            // Navigate to main app and reset navigation stack to prevent going back to login
+            navigation.reset({
+              index: 0,
+              routes: [
+                {
+                  name: 'CustomerApp',
+                  state: {
+                    routes: [
+                      {
+                        name: 'Home',
+                        params: {
+                          screen: 'HomeScreen',
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
             });
           },
           onError: (error: any) => {

@@ -27,7 +27,7 @@ const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
   opacity.value = withRepeat(
     withTiming(1, { duration: 1000, easing: Easing.ease }),
     -1,
-    true
+    true,
   );
 
   const animatedStyle = useAnimatedStyle(() => {

@@ -1,0 +1,153 @@
+{
+  "project": {
+    "name": "food-rush",
+    "type": "react-native",
+    "framework": "expo",
+    "language": "typescript",
+    "description": "A React Native food delivery mobile application built with Expo"
+  },
+  "paths": {
+    "source": "src",
+    "components": "src/components",
+    "screens": "src/screens",
+    "services": "src/services",
+    "utils": "src/utils",
+    "types": "src/types",
+    "assets": "assets",
+    "tests": "__tests__",
+    "docs": "src/docs"
+  },
+  "ignore": [
+    "node_modules/**",
+    ".expo/**",
+    "dist/**",
+    ".git/**",
+    "*.log",
+    ".env.local",
+    ".env.*.local",
+    "coverage/**",
+    "build/**",
+    ".expo-shared/**"
+  ],
+  "include": [
+    "src/**/*.{ts,tsx,js,jsx}",
+    "*.{ts,tsx,js,jsx}",
+    "**/*.test.{ts,tsx,js,jsx}",
+    "**/*.spec.{ts,tsx,js,jsx}"
+  ],
+  "review": {
+    "auto_review": true,
+    "review_drafts": true,
+    "ignore_patterns": [
+      "package-lock.json",
+      "yarn.lock",
+      "*.generated.*",
+      "*.min.js"
+    ],
+    "rules": {
+      "react_native": {
+        "enforce_typescript": true,
+        "check_performance": true,
+        "accessibility_checks": true,
+        "platform_specific_code": true
+      },
+      "expo": {
+        "check_config": true,
+        "validate_assets": true,
+        "check_permissions": true
+      },
+      "code_quality": {
+        "max_function_length": 50,
+        "max_file_length": 300,
+        "complexity_threshold": 10,
+        "enforce_naming_conventions": true
+      },
+      "security": {
+        "check_sensitive_data": true,
+        "validate_api_calls": true,
+        "check_permissions": true
+      }
+    }
+  },
+  "testing": {
+    "framework": "jest",
+    "test_patterns": [
+      "**/__tests__/**/*.{ts,tsx,js,jsx}",
+      "**/*.{test,spec}.{ts,tsx,js,jsx}"
+    ],
+    "coverage": {
+      "enabled": true,
+      "threshold": 80,
+      "exclude": [
+        "src/types/**",
+        "src/constants/**",
+        "**/*.d.ts"
+      ]
+    }
+  },
+  "linting": {
+    "eslint": {
+      "enabled": true,
+      "config_file": ".eslintrc.json"
+    },
+    "prettier": {
+      "enabled": true,
+      "config_file": ".prettierrc"
+    },
+    "typescript": {
+      "enabled": true,
+      "config_file": "tsconfig.json",
+      "strict_mode": true
+    }
+  },
+  "dependencies": {
+    "check_vulnerabilities": true,
+    "auto_update": false,
+    "exclude_dev_dependencies": false,
+    "critical_packages": [
+      "react",
+      "react-native",
+      "expo",
+      "@react-navigation/native"
+    ]
+  },
+  "documentation": {
+    "auto_generate": true,
+    "include_api_docs": true,
+    "formats": ["markdown"],
+    "output_dir": "docs"
+  },
+  "ai_features": {
+    "code_suggestions": true,
+    "auto_fix": true,
+    "explain_code": true,
+    "generate_tests": true,
+    "refactor_suggestions": true,
+    "performance_optimization": true
+  },
+  "integrations": {
+    "git": {
+      "enabled": true,
+      "pre_commit_hooks": true,
+      "commit_message_validation": true
+    },
+    "ci_cd": {
+      "platform": "github_actions",
+      "auto_deploy": false,
+      "run_tests": true
+    }
+  },
+  "mobile_specific": {
+    "platforms": ["ios", "android", "web"],
+    "check_platform_compatibility": true,
+    "performance_monitoring": true,
+    "bundle_analysis": true,
+    "accessibility_testing": true
+  },
+  "expo_specific": {
+    "config_validation": true,
+    "eas_build": true,
+    "ota_updates": true,
+    "app_store_compliance": true
+  }
+}

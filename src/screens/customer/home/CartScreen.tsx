@@ -1,16 +1,10 @@
 import React, { useMemo, useCallback } from 'react';
-import {
-  View,
-  Text,
-  Image,
-  FlatList,
-  ListRenderItem,
-} from 'react-native';
+import { View, Text, Image, FlatList, ListRenderItem } from 'react-native';
 import CommonView from '@/src/components/common/CommonView';
 import CartFoodComponent from '@/src/components/customer/CartFoodComponent';
 import { TouchableRipple, useTheme } from 'react-native-paper';
 import { RootStackScreenProps } from '@/src/navigation/types';
-import { useCartStore, CartItem } from '@/src/stores/customerStores/cartStore';
+import { useCartStore, useCartTotal, CartItem } from '@/src/stores/customerStores/cartStore';
 import { images } from '@/assets/images';
 import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-toast-message';
@@ -21,8 +15,8 @@ const CartScreen = ({ navigation }: RootStackScreenProps<'Cart'>) => {
 
   // Subscribe to specific store slices to minimize re-renders
   const cartItems = useCartStore((state) => state.items);
-  const totalPrice = useCartStore((state) => state.totalprice);
-  const cartId = useCartStore((state) => state.CartID);
+  const totalPrice = useCartTotal();
+  const restaurantID = useCartStore((state) => state.restaurantID);
 
   // Memoize formatted total price
   const formattedTotalPrice = useMemo(
@@ -52,19 +46,10 @@ const CartScreen = ({ navigation }: RootStackScreenProps<'Cart'>) => {
       return;
     }
 
-    if (cartId) {
-      navigation.navigate('Checkout', { cartId });
-    } else {
-      Toast.show({
-        type: 'error',
-        text1: t('error') || 'Error',
-        text2:
-          t('unable_to_proceed_to_checkout') || 'Unable to proceed to checkout',
-        position: 'top',
-      });
-    }
-  }, [cartItems.length, cartId, navigation, t]);
-
+    // Always proceed to checkout if there are items, even without restaurantID
+    // The checkout screen can handle missing restaurant info
+    navigation.navigate('Checkout', { cartId: restaurantID || 'unknown' });
+  }, [cartItems.length, restaurantID, navigation, t]);
 
   // Optimized render item with useCallback to prevent unnecessary re-renders
   const renderCartItem: ListRenderItem<CartItem> = useCallback(
@@ -72,9 +57,9 @@ const CartScreen = ({ navigation }: RootStackScreenProps<'Cart'>) => {
       <CartFoodComponent
         id={item.id}
         menuItem={item.menuItem}
-        ItemtotalPrice={item.ItemtotalPrice}
         quantity={item.quantity}
         specialInstructions={item.specialInstructions}
+        addedAt={item.addedAt}
       />
     ),
     [],
@@ -114,11 +99,7 @@ const CartScreen = ({ navigation }: RootStackScreenProps<'Cart'>) => {
 
   // Early return for empty cart
   if (cartItems.length === 0) {
-    return (
-      <CommonView>
-        {EmptyCartComponent}
-      </CommonView>
-    );
+    return <CommonView>{EmptyCartComponent}</CommonView>;
   }
 
   return (

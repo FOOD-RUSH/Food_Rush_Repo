@@ -3,9 +3,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Image, Platform, TouchableOpacity } from 'react-native';
+import { Image, Platform, TouchableOpacity, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { useAppNavigationTheme } from '../config/theme';
 
@@ -45,9 +44,18 @@ function CustomerHomeStackScreen() {
     <CustomerHomeStack.Navigator
       screenOptions={{
         headerShown: false,
+        // Prevent going back to auth screens
+        gestureEnabled: false,
       }}
     >
-      <CustomerHomeStack.Screen name="HomeScreen" component={HomeScreen} />
+      <CustomerHomeStack.Screen
+        name="HomeScreen"
+        component={HomeScreen}
+        options={{
+          // Prevent going back to auth screens
+          gestureEnabled: false,
+        }}
+      />
     </CustomerHomeStack.Navigator>
   );
 }
@@ -88,7 +96,6 @@ function CustomerOrderStackScreen() {
 }
 
 export function CustomerHelpCenterStackScreen() {
-  
   const navigationTheme = useAppNavigationTheme();
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
@@ -120,7 +127,6 @@ export function CustomerHelpCenterStackScreen() {
 }
 
 function CustomerProfileStackScreen() {
-  
   const navigationTheme = useAppNavigationTheme();
   const { t } = useTranslation('translation');
 
@@ -131,6 +137,7 @@ function CustomerProfileStackScreen() {
         headerStyle: {
           backgroundColor: navigationTheme.colors.card,
         },
+
         headerTitleStyle: {
           color: navigationTheme.colors.text,
         },
@@ -148,6 +155,8 @@ function CustomerProfileStackScreen() {
           headerTitleStyle: {
             color: navigationTheme.colors.text,
           },
+          headerShadowVisible: true,
+
           headerLeft: () => (
             <Image
               source={icons.R_logo}
@@ -201,7 +210,7 @@ TabBarIcon.displayName = 'TabBarIcon';
 
 export default function CustomerNavigator() {
   const insets = useSafeAreaInsets();
-  
+
   const navigationTheme = useAppNavigationTheme();
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
@@ -242,6 +251,38 @@ export default function CustomerNavigator() {
             size={size}
           />
         ),
+        tabBarLabel: ({ focused }) => {
+          // Only show label when tab is focused/selected
+          if (!focused) return null;
+
+          let label = '';
+          switch (route.name) {
+            case 'Home':
+              label = t('home');
+              break;
+            case 'Orders':
+              label = t('orders');
+              break;
+            case 'Profile':
+              label = t('profile');
+              break;
+            default:
+              label = '';
+          }
+
+          return focused ? (
+            <Text
+              style={{
+                fontSize: 12,
+                fontWeight: '600',
+                color: navigationTheme.colors.primary,
+                marginBottom: 4,
+              }}
+            >
+              {label}
+            </Text>
+          ) : null;
+        },
         tabBarActiveTintColor: navigationTheme.colors.primary,
         tabBarInactiveTintColor: colors.onSurfaceVariant,
         tabBarStyle,
@@ -254,13 +295,14 @@ export default function CustomerNavigator() {
         lazy: true,
         unmountOnBlur: false,
         tabBarHideOnKeyboard: true,
+        // Prevent going back to auth screens
+        gestureEnabled: false,
       })}
     >
       <CustomerTab.Screen
         name="Home"
         component={CustomerHomeStackScreen}
         options={{
-          tabBarLabel: t('home'),
           headerShown: false,
         }}
       />
@@ -268,7 +310,6 @@ export default function CustomerNavigator() {
         name="Orders"
         component={CustomerOrderStackScreen}
         options={({ navigation }) => ({
-          tabBarLabel: t('orders'),
           headerRight: () => (
             <TouchableOpacity
               onPress={() => {
@@ -305,7 +346,6 @@ export default function CustomerNavigator() {
         name="Profile"
         component={CustomerProfileStackScreen}
         options={{
-          tabBarLabel: t('profile'),
           headerShown: false,
         }}
       />

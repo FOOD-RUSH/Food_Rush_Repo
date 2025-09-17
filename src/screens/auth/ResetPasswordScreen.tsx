@@ -15,6 +15,7 @@ import { useResetPassword } from '@/src/hooks/customer/useAuthhooks';
 import Toast from 'react-native-toast-message';
 import { useBottomSheet } from '@/src/components/common/BottomSheet/BottomSheetContext';
 import ResettingPassword from '@/src/components/auth/ResettingPassword';
+import OTPInput from '@/src/components/auth/OTPInput';
 import { AuthStackScreenProps } from '@/src/navigation/types';
 
 // Validation schema
@@ -65,52 +66,64 @@ const ResetPasswordScreen = ({
 
   const passwordValue = watch('password');
   const confirmPasswordValue = watch('confirmPassword');
-  const {
-    mutate: ResetPasswordMutation,
-    error,
-    isPending,
-  } = useResetPassword();
+  const { mutate: ResetPasswordMutation, isPending } = useResetPassword();
+
+  const handleLoginPress = useCallback(() => {
+    dismiss();
+    navigation.navigate('SignIn', { userType: 'customer' });
+  }, [dismiss, navigation]);
 
   const onSubmit = useCallback(
     async (data: ResetPasswordForm) => {
-      present(<ResettingPassword isPending={isPending} />);
+      // Show loading state
+      present(<ResettingPassword isPending={true} />);
+
       const { email } = route.params;
       try {
         ResetPasswordMutation(
           { otp: data.otp, email, newPassword: data.password },
           {
             onSuccess: (res) => {
-              dismiss();
-              Toast.show({
-                text1: res.data?.message || 'Password reset successfully',
-                type: 'success',
-              });
-              // Redirect to login screen
-              navigation.navigate('SignIn', { userType: 'customer' });
+              // Show success state with animation
+              present(
+                <ResettingPassword
+                  isPending={false}
+                  isSuccess={true}
+                  onLoginPress={handleLoginPress}
+                />,
+                {
+                  snapPoints: ['50%'],
+                },
+              );
             },
             onError: (error: any) => {
-              dismiss();
-              Toast.show({
-                text1: 'An error occurred',
-                text2: error.message || 'Failed to reset password',
-                type: 'error',
-              });
+              // Show error state
+              present(<ResettingPassword isPending={false} isError={true} />);
+
+              // Auto-dismiss error after 3 seconds
+              setTimeout(() => {
+                dismiss();
+                Toast.show({
+                  text1: 'An error occurred',
+                  text2: error.message || 'Failed to reset password',
+                  type: 'error',
+                });
+              }, 3000);
             },
           },
         );
       } catch (error) {
-        dismiss();
-        console.error('Password reset failed:', error);
+        // Show error state
+        present(<ResettingPassword isPending={false} isError={true} />);
+
+        // Auto-dismiss error after 3 seconds
+        setTimeout(() => {
+          dismiss();
+          console.error('Password reset failed:', error);
+        }, 3000);
       }
     },
-    [
-      present,
-      isPending,
-      route.params,
-      ResetPasswordMutation,
-      dismiss,
-      navigation,
-    ],
+    [present, route.params, ResetPasswordMutation, dismiss, handleLoginPress],
   );
 
   const togglePasswordVisibility = useCallback(() => {
@@ -162,39 +175,24 @@ const ResetPasswordScreen = ({
           <Controller
             control={control}
             name="otp"
-            render={({ field: { onChange, onBlur, value } }) => (
+            render={({ field: { onChange, value } }) => (
               <View className="mb-6">
-                <TextInput
-                  disabled={isPending}
-                  placeholder="Enter your OTP"
+                <Text
+                  className="text-base font-medium mb-3"
+                  style={{ color: colors.onSurface }}
+                >
+                  Enter OTP Code
+                </Text>
+                <OTPInput
                   value={value}
-                  onChangeText={onChange}
-                  onBlur={onBlur}
-                  mode="outlined"
-                  autoCapitalize="none"
-                  style={{ backgroundColor: colors.surfaceVariant }}
-                  outlineStyle={{
-                    borderRadius: 12,
-                    borderWidth: 1,
-                    borderColor: errors.otp ? colors.error : colors.outline,
-                  }}
-                  contentStyle={{
-                    paddingHorizontal: 16,
-                    paddingVertical: 16,
-                  }}
+                  onChange={onChange}
                   error={!!errors.otp}
-                  left={
-                    <TextInput.Icon
-                      icon="key-variant"
-                      color={colors.onSurface}
-                    />
-                  }
-                  maxLength={4}
+                  disabled={isPending}
                 />
                 <HelperText
                   type="error"
                   visible={!!errors.otp}
-                  className="text-xs mt-1"
+                  className="text-xs mt-2 text-center"
                 >
                   {errors.otp?.message}
                 </HelperText>

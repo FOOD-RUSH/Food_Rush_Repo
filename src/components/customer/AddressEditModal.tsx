@@ -5,22 +5,23 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import ReusableModal from './ReusableModal';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from '@/src/location';
+import { useAddressManager } from '@/src/hooks/customer/useAddressManager';
 
 export interface AddressData {
   id?: string;
   label: string;
   fullAddress: string;
-  latitude?: number;
-  longitude?: number;
-  city?: string;
-  region?: string;
-  place?: string;
+  street?: string;
+  coordinates?: {
+    latitude: number;
+    longitude: number;
+  };
   isDefault?: boolean;
 }
 
@@ -44,50 +45,99 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
   const [label, setLabel] = useState('');
   const [fullAddress, setFullAddress] = useState('');
   const [isDefault, setIsDefault] = useState(false);
-
-  // Get current location data
-  const { location } = useLocation({
-    showPermissionAlert: false,
-    fallbackToYaounde: true,
+  const [currentCoordinates, setCurrentCoordinates] = useState({
+    latitude: 3.8667,
+    longitude: 11.5167,
   });
 
-  const currentFullAddress =
-    location?.city && location.region
-      ? `${location.city}, ${location.region}`
-      : 'Current Location';
+  // Use address manager for location integration
+  const {
+    getCurrentLocationForAddress,
+    requestLocationPermission,
+    hasLocationPermission,
+    isProcessing,
+  } = useAddressManager();
 
   useEffect(() => {
     if (initialData) {
-      setLabel(initialData.label);
-      setFullAddress(initialData.fullAddress);
+      setLabel(initialData.label || '');
+      setFullAddress(initialData.fullAddress || '');
       setIsDefault(initialData.isDefault || false);
+      if (initialData.coordinates) {
+        setCurrentCoordinates(initialData.coordinates);
+      } else {
+        setCurrentCoordinates({
+          latitude: 3.8667,
+          longitude: 11.5167,
+        });
+      }
     } else {
       setLabel('');
-      // Auto-populate with current location if available
-      if (location?.latitude && location.longitude) {
-        setFullAddress(currentFullAddress);
-      }
+      setFullAddress('');
       setIsDefault(false);
+      setCurrentCoordinates({
+        latitude: 3.8667,
+        longitude: 11.5167,
+      });
     }
-  }, [initialData, visible, currentFullAddress, location]);
+  }, [initialData, visible]);
 
-  const handleSave = () => {
-    if (label.trim() && fullAddress.trim()) {
-      const addressData: AddressData = {
-        id: initialData?.id,
-        label: label.trim(),
-        fullAddress: fullAddress.trim(),
-        latitude: location?.latitude || undefined,
-        longitude: location?.longitude || undefined,
-        city: location?.city || undefined,
-        region: location?.region || undefined,
-        place: undefined,
-        isDefault,
-      };
-      onSave(addressData);
-      onDismiss();
+  const handleUseCurrentLocation = async () => {
+    try {
+      // Check if we have permission, request if needed
+      if (!hasLocationPermission) {
+        const granted = await requestLocationPermission();
+        if (!granted) {
+          Alert.alert(
+            'Location Permission Required',
+            'To use your current location, please enable location access in your device settings.',
+            [{ text: 'OK' }]
+          );
+          return;
+        }
+      }
+
+      // Get current location
+      const result = await getCurrentLocationForAddress();
+
+      if (result.success && result.address && result.coordinates) {
+        setFullAddress(result.address);
+        setCurrentCoordinates(result.coordinates);
+      } else {
+        Alert.alert(
+          'Location Error',
+          result.error || 'Unable to get your current location. Please enter your address manually.',
+          [{ text: 'OK' }]
+        );
+      }
+    } catch (error) {
+      console.error('Error getting current location:', error);
+      Alert.alert(
+        'Error',
+        'Failed to get your current location. Please try again or enter your address manually.',
+        [{ text: 'OK' }]
+      );
     }
   };
+
+  const handleSave = () => {
+    if (!label.trim() || !fullAddress.trim()) {
+      return; // Don't save if required fields are empty
+    }
+
+    const addressData: AddressData = {
+      id: initialData?.id,
+      label: label.trim(),
+      fullAddress: fullAddress.trim(),
+      street: fullAddress.trim(),
+      coordinates: currentCoordinates,
+      isDefault,
+    };
+
+    onSave(addressData);
+  };
+
+  const isFormValid = label.trim() && fullAddress.trim();
 
   return (
     <ReusableModal
@@ -103,17 +153,19 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
             style={{ color: colors.onSurface }}
             className="text-base font-medium mb-2"
           >
-            {t('label')}
+            {t('label')} *
           </Text>
           <TextInput
             value={label}
             onChangeText={setLabel}
-            placeholder={t('enter_new_address')}
+            placeholder="Home, Work, etc."
             placeholderTextColor={colors.onSurfaceVariant}
             className="px-4 py-3 rounded-xl text-base"
             style={{
               backgroundColor: colors.surfaceVariant,
               color: colors.onSurface,
+              borderWidth: 1,
+              borderColor: colors.outline,
             }}
           />
         </View>
@@ -125,26 +177,33 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
               style={{ color: colors.onSurface }}
               className="text-base font-medium"
             >
-              {t('full_address')}
+              {t('full_address')} *
             </Text>
-            {location?.latitude && location.longitude && (
-              <TouchableOpacity
-                onPress={() => setFullAddress(currentFullAddress)}
-                className="flex-row items-center px-3 py-1 rounded-full"
-                style={{ backgroundColor: '#007aff' }}
-                activeOpacity={0.7}
-              >
-                <Ionicons name="location" size={14} color="white" />
-                <Text className="text-white text-xs font-medium ml-1">
-                  {t('use_current')}
-                </Text>
-              </TouchableOpacity>
-            )}
+            {/* Use current location button */}
+            <TouchableOpacity
+              onPress={handleUseCurrentLocation}
+              disabled={isProcessing}
+              className="flex-row items-center px-3 py-1 rounded-full"
+              style={{
+                backgroundColor: '#007aff',
+                opacity: isProcessing ? 0.6 : 1,
+              }}
+              activeOpacity={0.7}
+            >
+              <Ionicons
+                name={isProcessing ? 'hourglass-outline' : 'location'}
+                size={14}
+                color="white"
+              />
+              <Text className="text-white text-xs font-medium ml-1">
+                {isProcessing ? 'Getting...' : 'Use Current'}
+              </Text>
+            </TouchableOpacity>
           </View>
           <TextInput
             value={fullAddress}
             onChangeText={setFullAddress}
-            placeholder={t('enter_address')}
+            placeholder="Enter your full address"
             placeholderTextColor={colors.onSurfaceVariant}
             multiline={true}
             numberOfLines={3}
@@ -154,6 +213,8 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
               backgroundColor: colors.surfaceVariant,
               color: colors.onSurface,
               minHeight: 80,
+              borderWidth: 1,
+              borderColor: colors.outline,
             }}
           />
         </View>
@@ -161,13 +222,15 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
         {/* Default Address Toggle */}
         <TouchableOpacity
           onPress={() => setIsDefault(!isDefault)}
-          className="flex-row items-center justify-between mb-6"
+          className="flex-row items-center justify-between mb-6 p-3 rounded-xl"
+          style={{ backgroundColor: colors.surfaceVariant }}
+          activeOpacity={0.7}
         >
           <Text
             style={{ color: colors.onSurface }}
             className="text-base font-medium"
           >
-            {t('set_to_default')}
+            Set as default address
           </Text>
           <View
             className="w-6 h-6 rounded-full border-2 items-center justify-center"
@@ -184,15 +247,18 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
         <View className="flex-row gap-3">
           <TouchableOpacity
             onPress={onDismiss}
-            className="flex-1 py-4 rounded-xl items-center justify-center"
-            style={{ backgroundColor: colors.surfaceVariant }}
+            className="flex-1 py-4 rounded-xl items-center justify-center border"
+            style={{
+              backgroundColor: 'transparent',
+              borderColor: colors.outline,
+            }}
             activeOpacity={0.7}
           >
             <Text
-              style={{ color: colors.onSurfaceVariant }}
+              style={{ color: colors.onSurface }}
               className="text-base font-medium"
             >
-              {t('cancel')}
+              Cancel
             </Text>
           </TouchableOpacity>
 
@@ -200,26 +266,19 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
             onPress={handleSave}
             className="flex-1 py-4 rounded-xl items-center justify-center"
             style={{
-              backgroundColor:
-                label.trim() && fullAddress.trim()
-                  ? '#007aff'
-                  : colors.surfaceVariant,
+              backgroundColor: isFormValid ? '#007aff' : colors.surfaceVariant,
+              opacity: isFormValid ? 1 : 0.5,
             }}
             activeOpacity={0.7}
-            disabled={!label.trim() || !fullAddress.trim()}
+            disabled={!isFormValid}
           >
             <Text
               className="text-base font-medium"
               style={{
-                color:
-                  label.trim() && fullAddress.trim()
-                    ? 'white'
-                    : colors.onSurfaceVariant,
+                color: isFormValid ? 'white' : colors.onSurfaceVariant,
               }}
             >
-              {mode === 'add'
-                ? t('add_address_button')
-                : t('update_address_button')}
+              {mode === 'add' ? 'Add Address' : 'Update Address'}
             </Text>
           </TouchableOpacity>
         </View>

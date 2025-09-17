@@ -1,308 +1,219 @@
-import { useCallback, useEffect, useRef, useMemo } from 'react';
-import { Alert, Linking } from 'react-native';
-import { useLocationStore } from './store';
-import { LocationOptions, PermissionStatus } from './types';
+// useLocation.ts
+import { useState, useEffect, useCallback } from 'react';
+import { Alert } from 'react-native';
 import LocationService from './LocationService';
+import { useLocationStore } from './store';
+import { PermissionStatus } from './types';
 
-interface UseLocationOptions extends LocationOptions {
-  autoInit?: boolean;
-  showPermissionAlert?: boolean;
-  showServicesAlert?: boolean;
+interface UseLocationOptions {
+  autoRequest?: boolean; // Only get cached location on mount
+  requestOnMount?: boolean; // Actually request permission on mount (use sparingly)
 }
 
-/**
- * Fixed location hook with stable dependencies and batched updates
- * Optimized for Cameroon network conditions
- */
 export const useLocation = (options: UseLocationOptions = {}) => {
-  const {
-    autoInit = true,
-    showPermissionAlert = true,
-    showServicesAlert = true,
-    fallbackToYaounde = true,
-    enableHighAccuracy = false, // Default to false for better performance
-  } = options;
+  const { autoRequest = true, requestOnMount = false } = options;
 
-  // Store state and actions
+  // Use store for persistence
   const {
-    location,
-    isLoading,
-    error,
-    hasPermission,
-    permissionRequested,
-    servicesEnabled,
+    location: storedLocation,
+    isLoading: storeLoading,
+    error: storeError,
+    hasPermission: storePermission,
     setLocation,
     setLoading,
     setError,
     setPermission,
-    setPermissionRequested,
-    setServicesEnabled,
-    setFallbackLocation,
     clearError,
-    setBatch,
   } = useLocationStore();
 
-  // Stable refs to prevent infinite loops
-  const isRequestingRef = useRef(false);
-  const initializationDoneRef = useRef(false);
-  const optionsRef = useRef(options);
+  const [permissionStatus, setPermissionStatus] = useState<PermissionStatus>(
+    PermissionStatus.NOT_REQUESTED,
+  );
 
-  // Update options ref when options change
+  // Initialize on mount
   useEffect(() => {
-    optionsRef.current = options;
-  }, [options]);
+    const initialize = async () => {
+      try {
+        // Check permission status
+        const status = await LocationService.getPermissionStatus();
+        setPermissionStatus(status);
+        setPermission(status === PermissionStatus.GRANTED);
 
-  // Memoize stable functions
-  const checkServices = useCallback(async (): Promise<boolean> => {
-    try {
-      const enabled = await LocationService.areLocationServicesEnabled();
-      setServicesEnabled(enabled);
-      
-      if (!enabled && optionsRef.current.showServicesAlert) {
-        Alert.alert(
-          'Services de localisation désactivés',
-          'Veuillez activer les services de localisation dans les paramètres de votre appareil pour une meilleure expérience.',
-          [
-            { text: 'Annuler', style: 'cancel' },
-            {
-              text: 'Ouvrir les paramètres',
-              onPress: () => Linking.openSettings(),
-            },
-          ]
-        );
+        if (autoRequest) {
+          // Try to get cached location first (no permission needed)
+          const cachedLocation = LocationService.getCachedLocation();
+          if (cachedLocation) {
+            setLocation(cachedLocation);
+            return;
+          }
+
+          // If we have permission, get current location
+          if (status === PermissionStatus.GRANTED) {
+            await getCurrentLocation();
+          } else if (!storedLocation) {
+            // No permission and no cached location - use fallback
+            const fallback = await LocationService.getCurrentLocation();
+            if (fallback.location) {
+              setLocation(fallback.location);
+            }
+          }
+        }
+
+        // Only auto-request permission if explicitly enabled (not recommended for UX)
+        if (requestOnMount && status === PermissionStatus.NOT_REQUESTED) {
+          await requestPermissionWithLocation();
+        }
+      } catch (error) {
+        console.warn('Error initializing location:', error);
+        // Use fallback location on initialization error
+        const fallback = await LocationService.getCurrentLocation();
+        if (fallback.location) {
+          setLocation(fallback.location);
+        }
       }
-      
-      return enabled;
-    } catch (error) {
-      console.warn('useLocation: Error checking services:', error);
-      setServicesEnabled(false);
-      return false;
-    }
-  }, [setServicesEnabled]);
+    };
 
-  const checkPermission = useCallback(async (): Promise<boolean> => {
+    initialize();
+  }, [autoRequest, requestOnMount]);
+
+  const getCurrentLocation = useCallback(
+    async (forceRefresh = false): Promise<boolean> => {
+      setLoading(true);
+      clearError();
+
+      try {
+        const result = await LocationService.getCurrentLocation(forceRefresh);
+
+        if (result.location) {
+          setLocation(result.location);
+        }
+
+        if (result.error) {
+          setError(result.error);
+        }
+
+        return result.success;
+      } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : 'Failed to get location';
+        setError(errorMsg);
+        return false;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [setLocation, setLoading, setError, clearError],
+  );
+
+  const requestPermissionOnly = useCallback(async (): Promise<boolean> => {
     try {
-      const status = await LocationService.getPermissionStatus();
-      const granted = status === PermissionStatus.GRANTED;
-      setPermission(granted);
-      return granted;
+      const result = await LocationService.requestPermission();
+      setPermissionStatus(result.status);
+      setPermission(result.granted);
+
+      return result.granted;
     } catch (error) {
-      console.warn('useLocation: Error checking permission:', error);
-      setPermission(false);
+      console.error('Error requesting permission:', error);
       return false;
     }
   }, [setPermission]);
 
-  const requestPermission = useCallback(async (): Promise<boolean> => {
-    if (isRequestingRef.current) return false;
+  const requestPermissionWithLocation = useCallback(async (): Promise<boolean> => {
+    setLoading(true);
+    clearError();
 
     try {
-      isRequestingRef.current = true;
-      
-      // Batch updates for better performance
-      setBatch({
-        isLoading: true,
-        error: null,
-      });
-      
-      setPermissionRequested(true);
+      const permResult = await LocationService.requestPermission();
+      setPermissionStatus(permResult.status);
+      setPermission(permResult.granted);
 
-      const granted = await LocationService.requestPermission();
-      setPermission(granted);
-
-      if (!granted && optionsRef.current.showPermissionAlert) {
-        Alert.alert(
-          'Autorisation de localisation refusée',
-          'L\'accès à la localisation a été refusé. Nous utiliserons Yaoundé comme localisation par défaut. Vous pouvez activer l\'accès à la localisation plus tard dans les paramètres.',
-          [
-            { text: 'OK', style: 'default' },
-            {
-              text: 'Ouvrir les paramètres',
-              onPress: () => Linking.openSettings(),
-            },
-          ]
-        );
+      if (permResult.granted) {
+        const locationResult = await LocationService.getCurrentLocation(true);
+        if (locationResult.location) {
+          setLocation(locationResult.location);
+        }
+        if (locationResult.error) {
+          setError(locationResult.error);
+        }
+        return locationResult.success;
+      } else {
+        // Permission denied - use fallback
+        const fallback = await LocationService.getCurrentLocation();
+        if (fallback.location) {
+          setLocation(fallback.location);
+        }
+        setError('Location permission denied');
+        return false;
       }
-
-      return granted;
     } catch (error) {
-      console.warn('useLocation: Error requesting permission:', error);
-      setError(error instanceof Error ? error.message : 'Permission request failed');
+      const errorMsg = error instanceof Error ? error.message : 'Failed to get location';
+      setError(errorMsg);
       return false;
     } finally {
       setLoading(false);
-      isRequestingRef.current = false;
     }
-  }, [setBatch, setPermissionRequested, setPermission, setError, setLoading]);
+  }, [setLocation, setLoading, setError, setPermission, clearError]);
 
-  const getCurrentLocation = useCallback(async (forceRefresh = false): Promise<boolean> => {
-    if (isRequestingRef.current) return false;
+  const showLocationPermissionDialog = useCallback(
+    (onEnable: () => void, onCancel?: () => void) => {
+      Alert.alert(
+        'Enable Location Services',
+        'To show nearby restaurants and provide accurate delivery estimates, please allow location access.',
+        [
+          {
+            text: 'Not Now',
+            style: 'cancel',
+            onPress: onCancel,
+          },
+          {
+            text: 'Enable Location',
+            onPress: onEnable,
+          },
+        ],
+      );
+    },
+    [],
+  );
 
-    try {
-      isRequestingRef.current = true;
-      
-      // Batch initial state update
-      setBatch({
-        isLoading: true,
-        error: null,
-      });
-
-      // Clear cache if force refresh
-      if (forceRefresh) {
-        LocationService.clearCache();
-      }
-
-      const result = await LocationService.getCurrentLocation({
-        enableHighAccuracy: optionsRef.current.enableHighAccuracy,
-        fallbackToYaounde: optionsRef.current.fallbackToYaounde,
-      });
-
-      // Batch final state update
-      setBatch({
-        location: result.location || null,
-        error: result.error || null,
-        isLoading: false,
-      });
-
-      return result.success;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to get location';
-      console.warn('useLocation: Error getting location:', errorMessage);
-      
-      // Batch error state with fallback
-      if (optionsRef.current.fallbackToYaounde) {
-        const fallbackLocation = LocationService.getFallbackLocation();
-        setBatch({
-          location: fallbackLocation,
-          error: errorMessage,
-          isLoading: false,
-        });
-      } else {
-        setBatch({
-          error: errorMessage,
-          isLoading: false,
-        });
-      }
-      
-      return false;
-    } finally {
-      isRequestingRef.current = false;
-    }
-  }, [setBatch]);
-
-  // Initialize location only once with stable dependencies
-  useEffect(() => {
-    if (!autoInit || initializationDoneRef.current) return;
-
-    const initializeLocation = async () => {
-      if (isRequestingRef.current) return;
-      
-      try {
-        initializationDoneRef.current = true;
-
-        // Check services and permission
-        const [servicesOk, hasPermissionNow] = await Promise.all([
-          LocationService.areLocationServicesEnabled(),
-          LocationService.getPermissionStatus(),
-        ]);
-
-        setBatch({
-          servicesEnabled: servicesOk,
-          hasPermission: hasPermissionNow === PermissionStatus.GRANTED,
-        });
-
-        if (!servicesOk) {
-          // Services disabled, use fallback
-          if (fallbackToYaounde) {
-            const fallbackLocation = LocationService.getFallbackLocation();
-            setBatch({
-              location: fallbackLocation,
-              isLoading: false,
-            });
-          }
-          return;
-        }
-
-        if (hasPermissionNow === PermissionStatus.GRANTED) {
-          // Permission granted, get location
-          await getCurrentLocation();
-        } else if (!permissionRequested && hasPermissionNow === PermissionStatus.UNDETERMINED) {
-          // Permission not requested yet, try to request it
-          const granted = await LocationService.requestPermission();
-          setBatch({
-            hasPermission: granted,
-            permissionRequested: true,
-          });
-          
-          if (granted) {
-            await getCurrentLocation();
-          } else if (fallbackToYaounde) {
-            const fallbackLocation = LocationService.getFallbackLocation();
-            setBatch({
-              location: fallbackLocation,
-              isLoading: false,
-            });
-          }
-        } else if (fallbackToYaounde) {
-          // Permission was denied previously, use fallback
-          const fallbackLocation = LocationService.getFallbackLocation();
-          setBatch({
-            location: fallbackLocation,
-            isLoading: false,
-          });
-        }
-      } catch (error) {
-        console.warn('useLocation: Error initializing location:', error);
-        if (fallbackToYaounde) {
-          const fallbackLocation = LocationService.getFallbackLocation();
-          setBatch({
-            location: fallbackLocation,
-            error: error instanceof Error ? error.message : 'Initialization failed',
-            isLoading: false,
-          });
-        }
-      }
-    };
-
-    initializeLocation();
-
-    // Cleanup function
-    return () => {
-      isRequestingRef.current = false;
-    };
-  }, [autoInit, fallbackToYaounde]); // Minimal, stable dependencies
-
-  // Refresh location with proper cleanup
-  const refreshLocation = useCallback(async (): Promise<boolean> => {
+  const refreshLocation = useCallback(() => {
     return getCurrentLocation(true);
   }, [getCurrentLocation]);
 
-  // Memoized computed values to prevent unnecessary re-renders
-  const computedValues = useMemo(() => ({
-    hasValidLocation: location !== null,
-    isUsingFallback: location?.isFallback ?? false,
-    canRequestLocation: servicesEnabled && !hasPermission && !isLoading,
-  }), [location, servicesEnabled, hasPermission, isLoading]);
+  const clearCache = useCallback(() => {
+    LocationService.clearCache();
+  }, []);
+
+  const getCoordinates = useCallback(() => {
+    if (storedLocation) {
+      return {
+        latitude: storedLocation.latitude,
+        longitude: storedLocation.longitude,
+      };
+    }
+    return LocationService.getDefaultCoordinates();
+  }, [storedLocation]);
 
   return {
     // State
-    location,
-    isLoading,
-    error,
-    hasPermission,
-    permissionRequested,
-    servicesEnabled,
-    ...computedValues,
+    location: storedLocation,
+    isLoading: storeLoading,
+    error: storeError,
+    hasPermission: storePermission,
+    permissionStatus,
+
+    // Computed
+    isUsingFallback: storedLocation?.isFallback ?? false,
+    hasValidLocation: storedLocation !== null,
+    coordinates: getCoordinates(),
 
     // Actions
     getCurrentLocation,
+    requestPermissionOnly,
+    requestPermissionWithLocation,
     refreshLocation,
-    requestPermission,
-    checkServices,
-    checkPermission,
-    clearError,
-    
+    clearCache,
+
     // Helpers
-    setFallbackLocation,
+    showLocationPermissionDialog,
+    getCoordinates,
   };
 };

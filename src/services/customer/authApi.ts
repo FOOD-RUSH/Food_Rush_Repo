@@ -11,11 +11,10 @@ export interface LoginResponse {
   accessToken: string;
   refreshToken: string;
 }
-// i need to typescipt data: LoginResponse 
+// i need to typescipt data: LoginResponse
 export interface LoginResponseData {
-  data: LoginResponse
+  data: LoginResponse;
 }
-
 
 export interface RegisterRequest {
   role: string;
@@ -31,8 +30,8 @@ export interface RegisterResponseData {
     phoneNumber: string;
     role: string;
     userId: string;
-    name: string
-  }
+    name: string;
+  };
 }
 export interface OTPCredentials {
   userId: string;
@@ -45,12 +44,12 @@ export interface ResetPasswordRequest {
 }
 
 export interface ChangePasswordRequest {
-  email: string,
-  otp: string,
-  newPassword: string
+  email: string;
+  otp: string;
+  newPassword: string;
 }
 export interface ChangePasswordResponse {
-  message: string
+  message: string;
 }
 
 export interface UpdateProfileRequest {
@@ -77,42 +76,76 @@ export const authApi = {
   // },
 
   refreshToken: (refreshToken: string) => {
+<<<<<<< HEAD
     return apiClient.post<{ accessToken: string; refreshToken: string }>('/auth/refresh-token', {
+=======
+    return apiClient.post<{
+      status_code: number;
+      message: string;
+      data: {
+        accessToken: string;
+        refreshToken: string;
+        user: User;
+      };
+    }>('/auth/refresh-token', {
+>>>>>>> origin/Customer_Setup
       refreshToken,
     });
   },
 
   updateProfile: (data: UpdateProfileRequest) => {
-    return apiClient.put<User>('/auth/profile', { ...data });
+    return apiClient.patch<{
+      status_code: number;
+      message: string;
+      data: User;
+    }>('/auth/profile', { ...data });
   },
 
   getProfile: () => {
-    return apiClient.get<User>('/auth/profile');
+    return apiClient.get<{
+      status_code: number;
+      message: string;
+      data: User;
+    }>('/auth/profile');
   },
 
   requestPasswordReset: (data: ResetPasswordRequest) => {
-    return apiClient.post<ChangePasswordResponse>('/auth/forgot-password', { ...data });
+    return apiClient.post<ChangePasswordResponse>('/auth/forgot-password', {
+      ...data,
+    });
   },
   // FOROGT PASSWORD
   resetPassword: (data: ChangePasswordRequest) => {
-    return apiClient.post<ChangePasswordResponse>('/auth/reset-password', { ...data });
+    return apiClient.post<ChangePasswordResponse>('/auth/reset-password', {
+      ...data,
+    });
   },
 
-  // changePassword: (data: ChangePasswordRequest) => {
-  //   return apiClient.post<void>('/auth/change-password', { ...data });
-  // },
-
-  // Social login
-  googleLogin: (tokenId: string) => {
-    return apiClient.post<LoginResponse>('/auth/google', { tokenId });
-  },
-
-  facebookLogin: (accessToken: string) => {
-    return apiClient.post<LoginResponse>('/auth/facebook', { accessToken });
-  },
-
-  // Resend verification
+  // Resend verification OTP
   resendVerification: (email: string) => {
-    return apiClient.post<void>('/auth/resend-verification', { email });
+    return apiClient.post<{
+      status_code: number;
+      message: string;
+      data?: any;
+    }>('/auth/resend-verification', { email });
+  },
+
+  // Social authentication
+  socialAuth: (data: {
+    provider: 'google' | 'facebook' | 'apple';
+    providerId: string;
+    email: string;
+    fullName: string;
+    profilePicture?: string;
+  }) => {
+    return apiClient.post<{
+      status_code: number;
+      message: string;
+      data: {
+        user: User;
+        accessToken: string;
+        refreshToken: string;
+      };
+    }>('/auth/social-auth', data);
   },
 };

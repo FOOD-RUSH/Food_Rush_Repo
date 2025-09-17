@@ -35,11 +35,13 @@ const OrderHistoryScreen : React.FC<RootStackScreenProps<'RestaurantOrderHistory
   const [historyOrders, setHistoryOrders] = useState<HistoryOrder[]>([]);
 
   // Filter orders based on selected filter and search query
-  const filteredOrders = historyOrders.filter(order => {
-    const matchesFilter = selectedFilter === 'all' || order.status === selectedFilter;
-    const matchesSearch = order.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         order.id.includes(searchQuery) ||
-                         order.restaurant.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredOrders = historyOrders.filter((order) => {
+    const matchesFilter =
+      selectedFilter === 'all' || order.status === selectedFilter;
+    const matchesSearch =
+      order.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      order.id.includes(searchQuery) ||
+      order.restaurant.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
@@ -74,7 +76,13 @@ const OrderHistoryScreen : React.FC<RootStackScreenProps<'RestaurantOrderHistory
     );
   };
 
-  const HistoryCard = ({ item, index }: { item: HistoryOrder; index: number }) => {
+  const HistoryCard = ({
+    item,
+    index,
+  }: {
+    item: HistoryOrder;
+    index: number;
+  }) => {
     const scaleAnim = useRef(new Animated.Value(0.9)).current;
 
     useEffect(() => {
@@ -92,7 +100,7 @@ const OrderHistoryScreen : React.FC<RootStackScreenProps<'RestaurantOrderHistory
           opacity: fadeAnim,
         }}
       >
-        <TouchableOpacity 
+        <TouchableOpacity
           style={{
             backgroundColor: colors.surface,
             padding: 16,
@@ -104,7 +112,9 @@ const OrderHistoryScreen : React.FC<RootStackScreenProps<'RestaurantOrderHistory
             shadowRadius: 4,
             elevation: 3,
           }}
-          onPress={() => {/* Navigate to order details */}}
+          onPress={() => {
+            /* Navigate to order details */
+          }}
         >
           <View style={{ 
             flexDirection: 'row', 
@@ -151,15 +161,13 @@ const OrderHistoryScreen : React.FC<RootStackScreenProps<'RestaurantOrderHistory
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
-                day: 'numeric'
+                day: 'numeric',
               })}
             </Text>
           </View>
 
           {item.rating && (
-            <View style={{ marginBottom: 8 }}>
-              {renderStars(item.rating)}
-            </View>
+            <View style={{ marginBottom: 8 }}>{renderStars(item.rating)}</View>
           )}
 
           <View style={{ 
@@ -190,7 +198,9 @@ const OrderHistoryScreen : React.FC<RootStackScreenProps<'RestaurantOrderHistory
                     paddingVertical: 6,
                     borderRadius: 8,
                   }}
-                  onPress={() => {/* Reorder functionality */}}
+                  onPress={() => {
+                    /* Reorder functionality */
+                  }}
                 >
                   <Text style={{ color:  colors.onBackground, fontSize: 12, fontWeight: '600' }}>
                     {t('reorder')}
@@ -204,15 +214,21 @@ const OrderHistoryScreen : React.FC<RootStackScreenProps<'RestaurantOrderHistory
     );
   };
 
-  const renderHistoryCard = ({ item, index }: { item: HistoryOrder; index: number }) => (
-    <HistoryCard item={item} index={index} />
-  );
+  const renderHistoryCard = ({
+    item,
+    index,
+  }: {
+    item: HistoryOrder;
+    index: number;
+  }) => <HistoryCard item={item} index={index} />;
 
   const getTotalOrders = () => filteredOrders.length;
-  const getCompletedOrders = () => filteredOrders.filter(order => order.status === 'completed').length;
-  const getTotalRevenue = () => filteredOrders
-    .filter(order => order.status === 'completed')
-    .reduce((sum, order) => sum + order.total, 0);
+  const getCompletedOrders = () =>
+    filteredOrders.filter((order) => order.status === 'completed').length;
+  const getTotalRevenue = () =>
+    filteredOrders
+      .filter((order) => order.status === 'completed')
+      .reduce((sum, order) => sum + order.total, 0);
 
   return (
     <CommonView>
@@ -264,8 +280,8 @@ const OrderHistoryScreen : React.FC<RootStackScreenProps<'RestaurantOrderHistory
           iconColor={colors.onBackground}
         />
 
-        <ScrollView 
-          horizontal 
+        <ScrollView
+          horizontal
           showsHorizontalScrollIndicator={false}
           style={{ marginBottom: 16 }}
         >

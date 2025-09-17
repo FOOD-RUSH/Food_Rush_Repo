@@ -7,10 +7,7 @@ import { CustomerProfileStackScreenProps } from '@/src/navigation/types';
 import CommonView from '@/src/components/common/CommonView';
 import { useAppStore } from '@/src/stores/customerStores/AppStore';
 import { useAuthStore } from '@/src/stores/customerStores/AuthStore';
-import { useProfileManager } from '@/src/hooks/customer/useAuthhooks';
 import { useBottomSheet } from '@/src/components/common/BottomSheet/BottomSheetContext';
-import SkeletonLoader from '@/src/components/common/SkeletonLoader';
-import ProfileErrorState from '@/src/components/profile/ProfileErrorState';
 import LogoutContent from '@/src/components/common/BottomSheet/LogoutContent';
 import { icons } from '@/assets/images';
 import { useTranslation } from 'react-i18next';
@@ -18,12 +15,11 @@ import { useTranslation } from 'react-i18next';
 const ProfileHomeScreen = ({
   navigation,
 }: CustomerProfileStackScreenProps<'ProfileHome'>) => {
-  const { user, isLoading, error, refreshProfile } =
-    useProfileManager();
   const { colors } = useTheme();
   const theme = useAppStore((state) => state.theme);
   const setTheme = useAppStore((state) => state.setTheme);
-  const logout = useAuthStore((state) => state.logout);
+  const logoutUser = useAuthStore((state) => state.logoutUser);
+  const user = useAuthStore((state) => state.user);
   const { present, dismiss, isPresented } = useBottomSheet();
   const { t } = useTranslation('translation');
 
@@ -35,7 +31,7 @@ const ProfileHomeScreen = ({
       console.error('Logout error:', error);
       Alert.alert(t('error'), t('failed_to_logout'));
     }
-  }, [logout, t]);
+  }, [t]);
 
   const showLogoutModal = useCallback(() => {
     // Prevent multiple presentations
@@ -81,6 +77,10 @@ const ProfileHomeScreen = ({
     navigation.navigate('EditProfile');
   }, [navigation]);
 
+  const navigateToProfileDetails = useCallback(() => {
+    navigation.navigate('ProfileDetails');
+  }, [navigation]);
+
   const navigateToFavoriteRestaurants = useCallback(() => {
     navigation.navigate('FavoriteRestaurantScreen');
   }, [navigation]);
@@ -115,28 +115,6 @@ const ProfileHomeScreen = ({
     Alert.alert(t('info'), t('security_settings_coming_soon'));
   }, [t]);
 
-  // Handle retry for profile loading
-  const handleRetry = useCallback(async () => {
-    try {
-      await refreshProfile();
-    } catch (error) {
-      console.error('Failed to retry profile fetch:', error);
-    }
-  }, [refreshProfile]);
-
-  // Show error state
-  if (error && !user) {
-    return (
-      <CommonView>
-        <ProfileErrorState
-          error={error?.message || 'Failed to load profile. Please try again.'}
-          onRetry={handleRetry}
-          showRetryButton={true}
-        />
-      </CommonView>
-    );
-  }
-
   return (
     <CommonView>
       <ScrollView
@@ -151,27 +129,12 @@ const ProfileHomeScreen = ({
             className="bg-gray-500"
           />
           <View className="flex-col items-center justify-center flex-1 mx-2">
-            {isLoading ? (
-              <>
-                <SkeletonLoader width={120} height={20} borderRadius={4} style={{ marginBottom: 6 }} />
-                <SkeletonLoader width={80} height={16} borderRadius={4} />
-              </>
-            ) : (
-              <>
-                <Text
-                  style={{ color: colors.onBackground }}
-                  className="font-semibold text-[18px]"
-                >
-                  {user?.fullName}
-                </Text>
-                <Text
-                  style={{ color: colors.onSurfaceVariant }}
-                  className="text-[15px]"
-                >
-                  {user?.phoneNumber}
-                </Text>
-              </>
-            )}
+            <Text
+              style={{ color: colors.onBackground }}
+              className="font-semibold text-[18px]"
+            >
+              {user?.fullName || t('full_name')}
+            </Text>
           </View>
           <TouchableOpacity activeOpacity={0.7} onPress={navigateToEditProfile}>
             <AntDesign name="edit" color={'#007aff'} size={25} />
@@ -185,6 +148,11 @@ const ProfileHomeScreen = ({
         />
 
         {/* Menu items */}
+        <RowView
+          title={t('profile_details')}
+          onPress={navigateToProfileDetails}
+          leftIconName="person-outline"
+        />
         <RowView
           title={t('my_favorite_restaurants')}
           onPress={navigateToFavoriteRestaurants}

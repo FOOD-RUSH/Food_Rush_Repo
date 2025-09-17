@@ -4,12 +4,12 @@ import { TextInputProps } from 'react-native';
 // Basic props
 
 export interface User {
-
-
+  sub: string;
   id: string;
   email: string;
   fullName: string;
   phoneNumber: string;
+<<<<<<< HEAD
   role: 'customer' | 'restaurant';
   isEmailVerified: boolean;
   profilePicture?: null | any;
@@ -24,180 +24,69 @@ export interface User {
   };
 }
 
+=======
+  profilePicture: string | null;
+  role: string;
+  status: string;
+  // Remove old fields not in docs: isEmailVerified
+}
+>>>>>>> origin/Customer_Setup
 
 export interface FoodProps {
   id: string;
   name: string;
   description: string;
+<<<<<<< HEAD
   price: number;
   image?: any;
   category?: string; // Added category as optional field
   isAvailable?: boolean
 
   restaurant?: {
+=======
+  price: string; // Always string in API
+  pictureUrl: string;
+  isAvailable: boolean;
+  restaurant: {
+>>>>>>> origin/Customer_Setup
     id: string;
     name: string;
-    latitude?: string,
-    longitude?: string
-  },
-  rating?: number;
-  distance?: number;
-  deliveryPrice?: number;
-
+    latitude: number | null;
+    longitude: number | null;
+  };
+  startAt: string | null;
+  endAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  distanceKm: number | null;
+  category?: string; // Added category field for filtering
+  // Remove old UI fields not in API: image, restaurantId, rating, distance, deliveryPrice
 }
 
+export interface MenuProps {
+  id: string;
+  name: string;
+  description: string;
+  price: string; // Always string in API
+  image: string;
+  restaurantId: string;
+  isAvailable: boolean;
+}
 
 export interface RestaurantCard {
   id: string;
   name: string;
   address: string;
-  latitude?: number | null;
-  longitude?: number | null;
+  latitude: number | null;
+  longitude: number | null;
   isOpen: boolean;
-  verificationStatus?: string;
-  menuMode?: string;
-  createdAt?: string;
-  // Future fields from backend
-  deliveryPrice?: number;
-  distance?: number;
-  imageUrl?: string;
-  estimatedDeliveryTime?: string;
-  deliveryFee?: string;
-  rating?: number;
-  // Mapped fields for component compatibility
-  restaurantId: string; // Will be mapped from id
-  distanceFromUser?: number; // Will be mapped from distance
+  verificationStatus: 'PENDING_VERIFICATION' | 'APPROVED';
+  menuMode: 'FIXED' | 'DAILY';
+  createdAt: string;
+  rating: number | null;
+  ratingCount: number;
+  // Remove old UI fields: image, deliveryPrice, distance, imageUrl, estimatedDeliveryTime, deliveryFee
 }
-
-
-/* 
-link: restaurants/browse
-  DOCUMENTATION OF BROWSE RESTAURANTS 
-    PARAMTERS: 
-      menuMode: Enum
-      isOpen: boolean
-      verificationStatus: ENum
-      nearLat: number
-      nearLng: number
-
-
-*/
-
-
-/*
-  Getting Menus
-  link: menu/all/nearby
-  params: nearLat: Number, nearLng: number
-
-  link: menu/all/browse- contains filters for location and delivery srvices
-  params {
-    nearLat: Number;
-    nearLng: number;
-    minDistanceKm: number;
-    maxDistanceKm: number;
-    minDeliveryFee: number;
-    maxDeliveryFee: number;
-    radiusKm: Number 
-}
-
-*/
-// Creating Orders
-
-/*
-body: {
-    "customerId": String,
-    "restaurantId": '',
-    "items": [
-        {
-            menuItem_id: '',
-            quantity: 2
-        }
-    ],
-    'deliveryAddress': String,
-    deliveryLatitude: ,
-   deliveryLongitude: , 
-
-}
-   
-returns :
-  {
-  "status_code": 201,
-  "message": "Order created successfully",
-  "data": {
-    "id": "3ad88947-22af-48f7-b7fa-7c2b96a5e543",
-    "customer": {
-      "id": "2497ffd8-6242-4ba0-8922-902a0131cbd4",
-      "fullName": "Paulo",
-      "email": "tochukwupaul21@gmail.com",
-      "phoneNumber": "+237677008986"
-    },
-    "restaurant": {
-      "id": "cd28f1b3-0f2f-42fa-88ad-91fead122695",
-      "name": "Paulos",
-      "address": "Box officees",
-      "phone": "",
-      "isOpen": true,
-      "latitude": null,
-      "longitude": null,
-      "verificationStatus": "APPROVED",
-      "documentUrl": null,
-      "ownerId": "826d1915-f0c1-4ea8-8b9d-ea732a5d9180",
-      "menuMode": "FIXED",
-      "timezone": "Africa/Douala",
-      "deliveryBaseFee": null,
-      "deliveryPerKmRate": null,
-      "deliveryMinFee": null,
-      "deliveryMaxFee": null,
-      "deliveryFreeThreshold": null,
-      "deliverySurgeMultiplier": null,
-      "createdAt": "2025-08-20T15:06:52.277Z",
-      "updatedAt": "2025-08-20T15:07:34.622Z"
-    },
-    "items": [
-      {
-        "id": "79f899fd-17ca-4aa9-9118-d3ddde328293",
-        "menuItem": {
-          "id": "c03629cc-aa1d-477f-b3f5-55725425454c",
-          "name": "Ndole",
-          "description": "Ndole with boiled plantains and stuffed bread with some pepper and complements",
-          "price": "1000.00",
-          "isAvailable": true,
-          "pictureUrl": "/uploads/menu/1755705045654-507834508.png",
-          "startAt": null,
-          "endAt": null,
-          "createdAt": "2025-08-20T15:50:46.073Z",
-          "updatedAt": "2025-08-20T15:50:46.073Z"
-        },
-        "quantity": 2,
-        "unitPrice": "1000.00"
-      }
-    ],
-    "subtotal": "2000.00",
-    "deliveryFee": "500.00",
-    "deliveryDistanceKm": "0.000",
-    "deliveryFeeBreakdown": {
-      "base": 500,
-      "perKmComponent": 0,
-      "surgeMultiplier": 1,
-      "capped": false,
-      "freeApplied": false
-    },
-    "deliveryEtaMinutes": null,
-    "deliveryFeeLocked": false,
-    "deliveryFeeLockedAt": null,
-    "total": "2500.00",
-    "deliveryAddress": "BackerStreet",
-    "deliveryLatitude": "51.5237710",
-    "deliveryLongitude": "-0.1587500",
-    "status": "pending",
-    "rejectionReason": null,
-    "completedAt": null,
-    "createdAt": "2025-08-22T22:11:30.140Z",
-    "updatedAt": "2025-08-22T22:11:30.140Z"
-  }
-}
-*/
-
 
 // Onboarding slides
 export interface OnboardingSlide {
@@ -211,38 +100,14 @@ export interface OnboardingSlide {
 export interface RestaurantProfile {
   id: string;
   name: string;
-  description: string;
-  phone: string;
   address: string;
-  // address: Address
-  openTime: string;
-  isOpen: boolean;
-  // ratings: number;
-  ratings: string;
-  reviewCount: string;
-  distance: string;
-  deliveryFee?: string;
-  image: any;
-  deliveryTime?: string;
+  image: string | null;
+  rating: number | null;
+  ratingCount: number;
   menu: FoodProps[];
-  discounts?: FoodProps[];
-  specialOffers?: FoodProps[];
+  // Remove old fields not in docs: description, phone, openTime, ratings, reviewCount, distance, deliveryFee, deliveryTime, discounts, specialOffers
 }
 
-// Order Types
-export interface Order {
-  id: string;
-  customerId: string;
-  restaurantId: string;
-  deliveryPersonId?: string;
-  items: OrderItem[];
-  status: OrderStatus;
-  totalAmount: number;
-  // deliveryAddress: AddressData;
-  paymentMethod: PaymentMethod;
-  createdAt: Date;
-  estimatedDeliveryTime: Date;
-}
 //  Auth state
 export interface AuthState {
   user: User | null;
@@ -252,14 +117,55 @@ export interface AuthState {
   hasHydrated: boolean;
   authStateChecked: boolean;
 }
+
+// Order Types from backend
+export interface Order {
+  id: string;
+  userId: string;
+  restaurantId: string;
+  items: {
+    foodId: string;
+    name: string;
+    quantity: number;
+    price: number;
+    total: number;
+    specialInstructions?: string;
+  }[];
+  subtotal: number;
+  deliveryPrice: number;
+  total: number;
+  status: OrderStatus;
+  paymentMethod: string;
+  createdAt: string;
+  delivery: {
+    id: string;
+    status: string;
+    deliveredAt: string | null;
+    customerConfirmed: boolean;
+    customerConfirmedAt: string | null;
+    rider: {
+      id: string;
+      fullName: string;
+      email: string;
+      phoneNumber: string;
+    };
+  };
+}
 // Order item
 export interface OrderItem {
-  restaurantId: string;
-  menuItemId: string;
+  id: string;
   quantity: number;
   price: number;
+  imageUrl: string;
+  description?: string;
 }
-
+// OrderMenuItem
+export interface OrderMenuItem {
+  item: OrderItem;
+  quantity: number;
+  totalPrice: number;
+  specialInstructions?: string;
+}
 export declare interface InputFieldProps extends TextInputProps {
   label?: string;
 
@@ -299,9 +205,60 @@ export interface PaymentTransaction {
   status: 'pending' | 'completed' | 'failed';
   transactionId?: string;
   createdAt: Date;
-  
 }
 
 export interface SelectProps extends PickerProps {
   label?: string;
+}
+
+// Restaurant Review Types
+export interface RestaurantReview {
+  id: string;
+  score: number;
+  review: string;
+  createdAt: string;
+  user: {
+    id: string;
+    fullName: string;
+    profilePicture: string | null;
+  };
+}
+
+export interface RestaurantReviewsResponse {
+  status_code: number;
+  message: string;
+  data: RestaurantReview[];
+}
+
+// Notification Types
+export interface Notification {
+  id: string;
+  title: string;
+  body: string;
+  type: 'SYSTEM' | 'ORDER' | 'PROMOTION' | 'DELIVERY';
+  data?: {
+    restaurantId?: string;
+    orderId?: string;
+    [key: string]: any;
+  };
+  readAt: string | null;
+  createdAt: string;
+}
+
+export interface NotificationResponse {
+  status_code: number;
+  message: string;
+  data: {
+    items: Notification[];
+    total: number;
+    page: number;
+    limit: number;
+    pages: number;
+  };
+}
+
+export interface UnreadCountResponse {
+  status_code: number;
+  message: string;
+  data: number;
 }

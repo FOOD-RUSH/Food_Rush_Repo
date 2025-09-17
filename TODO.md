@@ -1,23 +1,38 @@
-# TODO List for Profile Screen Updates and App Flow
+# Remove Location System - Implementation Plan
 
-## 1. Change Profile Screen Colors to Grey
-- [x] Edit ProfileScreen.tsx to change icon colors to grey (#666666) for account_settings, restaurant_settings, support options
-- [x] Keep other options (payment_billing, notifications, about) with blue color (#007AFF)
+## Information Gathered
 
-## 2. Verify App Flow (User Selection -> Login)
-- [x] Confirm OnboardingScreen UserTypeSelection directs to correct login based on selection
-- [x] Test AuthNavigator uses selectedUserType for RestaurantLoginScreen vs LoginScreen
-- [x] Create UserTypeSelectionScreen with clean, animated design and blue theme
-- [x] Integrate UserTypeSelectionScreen with RootNavigator
+- Location system consists of useLocation hook, LocationService, store, types, and modals
+- Used in HomeScreen, HomeHeader, NearbyRestaurantsScreen, AddressEditModal
+- APIs use coordinates for nearby restaurants functionality in useCustomerApi.ts and restaurant.service.ts
+- HomeHeader displays current location address
+- AddressInputModalNew.tsx and AddressEditModal.tsx handle address input
+- "Use current location" button exists in address modals
+- NearbyRestaurantsScreen uses location for nearby restaurants
 
-## 3. Add API Testing Screen
-- [ ] Check and update navigation types for new ApiTestingScreen
-- [ ] Add ApiTestingScreen route to RestaurantNavigator.tsx
-- [ ] Create ApiTestingScreen.tsx with input fields for endpoint, method, headers, body
-- [ ] Add API testing option to profileOptions in ProfileScreen.tsx
-- [ ] Implement API call functionality and response display
+## Plan
 
-## 4. Testing
-- [ ] Test color changes in profile screen
-- [ ] Test navigation flow from user selection to login
-- [ ] Test API testing functionality with sample endpoints
+- [x] Remove location system usage from HomeScreen.tsx
+- [x] Hardcode address values in HomeHeader.tsx
+- [x] Keep AddressInputModalNew.tsx unchanged
+- [x] Disable functionality of "Use current location" button in AddressEditModal.tsx
+- [x] Add hardcoded coordinates to useCustomerApi.ts and restaurant.service.ts
+- [x] Update NearbyRestaurantsScreen.tsx to use hardcoded coordinates
+- [x] Remove location imports and dependencies from affected files
+
+## Dependent Files to Edit
+
+- [x] src/screens/customer/home/HomeScreen.tsx
+- [x] src/components/customer/HomeHeader.tsx
+- [x] src/components/customer/AddressEditModal.tsx
+- [x] src/hooks/customer/useCustomerApi.ts
+- [x] src/services/customer/restaurant.service.ts
+- [x] src/screens/customer/home/NearbyRestaurantsScreen.tsx
+
+## Followup Steps
+
+- [ ] Test app compilation
+- [ ] Verify HomeHeader shows hardcoded address
+- [ ] Verify address screen works as before
+- [ ] Verify "Use current location" button is visible but non-functional
+- [ ] Remove any unused location-related code

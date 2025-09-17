@@ -35,7 +35,7 @@ const EditProfileScreen = ({
         email,
         phoneNumber,
       });
-      Alert.alert(t('success'), t('profile_updated_successfully' as any));
+      Alert.alert(t('success'), t('profile_updated_successfully'));
       navigation.goBack();
     } catch (error) {
       console.error('Failed to update profile:', error);
@@ -74,20 +74,25 @@ const EditProfileScreen = ({
           placeholder={t('email')}
           value={email}
           onChangeText={setEmail}
-          rightIcon={<Ionicons size={23} name="mail-outline" />}
+          leftIcon={
+            <Ionicons size={23} name="mail-outline" color={colors.onSurface} />
+          }
         />
         <InputField
           leftIcon={
-            <>
-              <View className="flex-row items-center">
-                <Text className="text-2xl">🇨🇲</Text>
-                <MaterialIcons name="keyboard-arrow-down" size={25} />
-              </View>
-            </>
+            <View className="flex-row items-center">
+              <Text className="text-2xl">🇨🇲</Text>
+              <MaterialIcons
+                name="keyboard-arrow-down"
+                size={25}
+                color={colors.onSurface}
+              />
+            </View>
           }
           placeholder={t('phone_number')}
           value={phoneNumber}
           onChangeText={setPhoneNumber}
+          keyboardType="phone-pad"
         />
         <Button
           mode="contained"
@@ -103,8 +108,8 @@ const EditProfileScreen = ({
           }}
           className="active:opacity-75 mb-2"
           onPress={handleUpdate}
-        loading={updateProfileMutation.status === 'pending'}
-        disabled={updateProfileMutation.status === 'pending'}
+          loading={updateProfileMutation.status === 'pending'}
+          disabled={updateProfileMutation.status === 'pending'}
         >
           {t('update')}
         </Button>

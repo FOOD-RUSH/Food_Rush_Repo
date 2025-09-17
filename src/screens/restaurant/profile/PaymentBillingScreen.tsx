@@ -81,9 +81,16 @@ const PaymentBillingScreen = ({ navigation }: Props) => {
     ]).start();
   }, []);
 
+<<<<<<< HEAD
   const styles = getStyles(isDarkMode);
 
   const renderPaymentCard = (item: typeof paymentMethods[0], index: number) => (
+=======
+  const renderPaymentCard = (
+    item: (typeof paymentMethods)[0],
+    index: number,
+  ) => (
+>>>>>>> origin/Customer_Setup
     <Animated.View
       key={index}
       style={{
@@ -98,7 +105,11 @@ const PaymentBillingScreen = ({ navigation }: Props) => {
         start={[0, 0]}
         end={[1, 1]}
       >
-        <MaterialCommunityIcons name={item.icon as any} size={32} color="#fff" />
+        <MaterialCommunityIcons
+          name={item.icon as any}
+          size={32}
+          color="#fff"
+        />
         <View style={{ marginLeft: 16 }}>
           <Text style={styles.cardType}>{item.type}</Text>
           {item.last4 ? (
@@ -114,8 +125,42 @@ const PaymentBillingScreen = ({ navigation }: Props) => {
   return (
     <CommonView>
       {/* Animated Gradient Header */}
+<<<<<<< HEAD
        
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 32 }}>
+=======
+      <Animated.View
+        style={{
+          transform: [{ translateY: headerAnim }],
+        }}
+      >
+        <LinearGradient
+          colors={['#764ba2', '#667eea']}
+          style={styles.header}
+          start={[0, 0]}
+          end={[1, 1]}
+        >
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backBtn}
+          >
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Payment & Billing</Text>
+          <MaterialCommunityIcons
+            name="credit-card-outline"
+            size={32}
+            color="#fff"
+            style={{ marginLeft: 10 }}
+          />
+        </LinearGradient>
+      </Animated.View>
+
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 32 }}
+      >
+>>>>>>> origin/Customer_Setup
         {/* Payment Methods Section */}
         <Text style={styles.sectionTitle}>{t('payment_methods')}</Text>
         <View style={styles.cardsContainer}>
@@ -131,7 +176,12 @@ const PaymentBillingScreen = ({ navigation }: Props) => {
           <Text style={styles.sectionTitle}>{t('billing_history')}</Text>
           {billingHistory.map((item) => (
             <View key={item.id} style={styles.historyRow}>
-              <MaterialCommunityIcons name="receipt" size={22} color="#764ba2" style={{ marginRight: 10 }} />
+              <MaterialCommunityIcons
+                name="receipt"
+                size={22}
+                color="#764ba2"
+                style={{ marginRight: 10 }}
+              />
               <View style={{ flex: 1 }}>
                 <Text style={styles.historyDate}>{item.date}</Text>
                 <Text style={styles.historyStatus}>{item.status}</Text>

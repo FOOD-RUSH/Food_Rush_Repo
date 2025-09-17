@@ -2,8 +2,13 @@ import { create } from 'zustand';
 import { createJSONStorage, devtools, persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from '../../types';
+<<<<<<< HEAD
 import { reset } from '../../navigation/navigationHelpers';
 import TokenManager from '@/src/services/shared/tokenManager';
+=======
+import { navigate, reset } from '../../navigation/navigationHelpers';
+import TokenManager from '@/src/services/customer/tokenManager';
+>>>>>>> origin/Customer_Setup
 
 interface AuthState {
   user: User | null;
@@ -233,4 +238,8 @@ export const useAuthActions = () =>
     logoutUser: state.logoutUser,
     resetAuth: state.resetAuth,
     setRegistrationData: state.setRegistrationData,
+<<<<<<< HEAD
   }));
+=======
+  }));
+>>>>>>> origin/Customer_Setup

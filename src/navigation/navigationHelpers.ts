@@ -220,7 +220,7 @@ export const createNavigationHelpers = <T extends any>(navigation: T) => ({
   },
 
   // Full-screen navigation helpers
-  goToCart: (fromScreen?: string) => {
+  goToCart: () => {
     (navigation as any).navigate('Cart');
   },
 

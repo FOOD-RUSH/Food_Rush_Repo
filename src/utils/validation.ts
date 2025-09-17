@@ -99,7 +99,7 @@ export const orderSchema = yup.object().shape({
           .number()
           .min(0, 'Price must be positive')
           .required('Price is required'),
-      })
+      }),
     )
     .min(1, 'At least one item is required')
     .required('Items are required'),
@@ -145,26 +145,15 @@ export const notificationSettingsSchema = yup.object().shape({
   pushEnabled: yup.boolean().required(),
   emailEnabled: yup.boolean().required(),
   smsEnabled: yup.boolean().required(),
-  preferences: yup.object().shape({
-    orderUpdates: yup.boolean().required(),
-    promotions: yup.boolean().required(),
-    systemAlerts: yup.boolean().required(),
-    deliveryUpdates: yup.boolean().required(),
-  }).required(),
-});
-
-// Geolocation validation schema
-export const geolocationSchema = yup.object().shape({
-  latitude: yup
-    .number()
-    .min(-90, 'Latitude must be between -90 and 90')
-    .max(90, 'Latitude must be between -90 and 90')
-    .required('Latitude is required'),
-  longitude: yup
-    .number()
-    .min(-180, 'Longitude must be between -180 and 180')
-    .max(180, 'Longitude must be between -180 and 180')
-    .required('Longitude is required'),
+  preferences: yup
+    .object()
+    .shape({
+      orderUpdates: yup.boolean().required(),
+      promotions: yup.boolean().required(),
+      systemAlerts: yup.boolean().required(),
+      deliveryUpdates: yup.boolean().required(),
+    })
+    .required(),
 });
 
 // Profile update validation schema
@@ -178,10 +167,7 @@ export const profileUpdateSchema = yup.object().shape({
     .string()
     .matches(/^[0-9]{9}$/, 'Invalid Phone number (9 numbers required)')
     .optional(),
-  email: yup
-    .string()
-    .email('Invalid email format')
-    .optional(),
+  email: yup.string().email('Invalid email format').optional(),
 });
 
 // Password change validation schema
@@ -207,8 +193,6 @@ export const validationSchemas = {
   address: addressSchema,
   order: orderSchema,
   payment: paymentSchema,
-  notificationSettings: notificationSettingsSchema,
-  geolocation: geolocationSchema,
   profileUpdate: profileUpdateSchema,
   passwordChange: passwordChangeSchema,
 };

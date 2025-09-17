@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Location, LocationState } from './types';
-import LocationService from './LocationService';
+import { LocationState, Location, SavedAddress } from './types';
+import { generateTimestampId } from '@/src/utils/idGenerator';
 
 interface LocationActions {
   // Core actions
@@ -10,14 +10,19 @@ interface LocationActions {
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   setPermission: (hasPermission: boolean) => void;
-  setPermissionRequested: (requested: boolean) => void;
   setServicesEnabled: (enabled: boolean) => void;
-  
-  // Batched update for performance
-  setBatch: (updates: Partial<LocationState>) => void;
-  
-  // Computed actions
-  setFallbackLocation: () => void;
+  setPermissionRequested: (requested: boolean) => void;
+
+  // Address actions
+  setSavedAddresses: (addresses: SavedAddress[]) => void;
+  addSavedAddress: (
+    address: Omit<SavedAddress, 'id' | 'createdAt' | 'updatedAt'>,
+  ) => void;
+  updateSavedAddress: (id: string, address: Partial<SavedAddress>) => void;
+  deleteSavedAddress: (id: string) => void;
+  setDefaultAddress: (id: string) => void;
+
+  // Helper actions
   clearError: () => void;
   reset: () => void;
 }
@@ -26,73 +31,138 @@ export interface LocationStore extends LocationState, LocationActions {}
 
 const initialState: LocationState = {
   location: null,
+  savedAddresses: [
+    {
+      id: 'default-address',
+      label: 'Home',
+      fullAddress: 'Time Square NYC, Manhattan',
+      latitude: 40.7580,
+      longitude: -73.9855,
+      isDefault: true,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    },
+  ],
+  defaultAddressId: 'default-address',
   isLoading: false,
   error: null,
   hasPermission: false,
   permissionRequested: false,
   servicesEnabled: true,
+  lastPermissionRequest: 0,
 };
 
 export const useLocationStore = create<LocationStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       // Initial state
       ...initialState,
 
-      // Batched update for performance optimization
-      setBatch: (updates) => {
-        set((state) => ({
-          ...state,
-          ...updates,
-        }));
-      },
-
-      // Individual actions (use setBatch when possible)
+      // Core actions
       setLocation: (location) => {
-        set((state) => ({
-          ...state,
+        set({
           location,
           error: null,
           isLoading: false,
-        }));
+        });
       },
 
       setLoading: (isLoading) => {
-        set((state) => ({ ...state, isLoading }));
+        set({ isLoading });
       },
 
       setError: (error) => {
-        set((state) => ({
-          ...state,
+        set({
           error,
           isLoading: false,
-        }));
+        });
       },
 
       setPermission: (hasPermission) => {
-        set((state) => ({ ...state, hasPermission }));
-      },
-
-      setPermissionRequested: (permissionRequested) => {
-        set((state) => ({ ...state, permissionRequested }));
+        set({ 
+          hasPermission,
+          permissionRequested: true,
+          lastPermissionRequest: hasPermission ? Date.now() : get().lastPermissionRequest,
+        });
       },
 
       setServicesEnabled: (servicesEnabled) => {
-        set((state) => ({ ...state, servicesEnabled }));
+        set({ servicesEnabled });
       },
 
-      setFallbackLocation: () => {
-        const fallbackLocation = LocationService.getFallbackLocation();
+      setPermissionRequested: (permissionRequested) => {
+        set({ permissionRequested });
+      },
+
+      // Address actions
+      setSavedAddresses: (savedAddresses) => {
+        set({ savedAddresses });
+      },
+
+      addSavedAddress: (addressData) => {
+        const newAddress: SavedAddress = {
+          id: generateTimestampId(),
+          ...addressData,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        };
+
+        set((state) => {
+          const shouldBeDefault =
+            addressData.isDefault || state.savedAddresses.length === 0;
+
+          return {
+            savedAddresses: [...state.savedAddresses, newAddress],
+            defaultAddressId: shouldBeDefault
+              ? newAddress.id
+              : state.defaultAddressId,
+          };
+        });
+      },
+
+      updateSavedAddress: (id, addressUpdates) => {
         set((state) => ({
-          ...state,
-          location: fallbackLocation,
-          error: null,
-          isLoading: false,
+          savedAddresses: state.savedAddresses.map((addr) =>
+            addr.id === id
+              ? { ...addr, ...addressUpdates, updatedAt: Date.now() }
+              : addr,
+          ),
         }));
       },
 
+      deleteSavedAddress: (id) => {
+        set((state) => {
+          const newAddresses = state.savedAddresses.filter(
+            (addr) => addr.id !== id,
+          );
+
+          const newDefaultId =
+            state.defaultAddressId === id
+              ? newAddresses.length > 0
+                ? newAddresses[0].id
+                : null
+              : state.defaultAddressId;
+
+          return {
+            savedAddresses: newAddresses,
+            defaultAddressId: newDefaultId,
+          };
+        });
+      },
+
+      setDefaultAddress: (id) => {
+        set((state) => ({
+          savedAddresses: state.savedAddresses.map((addr) => ({
+            ...addr,
+            isDefault: addr.id === id,
+          })),
+          defaultAddressId: id,
+        }));
+      },
+
+      // Helper actions
       clearError: () => {
-        set((state) => ({ ...state, error: null }));
+        set({ error: null });
       },
 
       reset: () => {
@@ -102,34 +172,76 @@ export const useLocationStore = create<LocationStore>()(
     {
       name: 'location-storage',
       storage: createJSONStorage(() => AsyncStorage),
-      // Only persist essential values
       partialize: (state) => ({
         location: state.location,
         hasPermission: state.hasPermission,
+        savedAddresses: state.savedAddresses,
+        defaultAddressId: state.defaultAddressId,
         permissionRequested: state.permissionRequested,
+        lastPermissionRequest: state.lastPermissionRequest,
       }),
-      // Optimize storage writes
-      skipHydration: false,
-    }
-  )
+    },
+  ),
 );
 
-// Optimized selectors to prevent unnecessary re-renders
-export const useLocationData = () => useLocationStore((state) => state.location);
-export const useLocationLoading = () => useLocationStore((state) => state.isLoading);
+// Selectors
+export const useLocationData = () =>
+  useLocationStore((state) => state.location);
+
+export const useLocationLoading = () =>
+  useLocationStore((state) => state.isLoading);
+
 export const useLocationError = () => useLocationStore((state) => state.error);
-export const useLocationPermission = () => useLocationStore((state) => state.hasPermission);
 
-// Combined selectors for better performance
-export const useLocationStatus = () => useLocationStore((state) => ({
-  location: state.location,
-  isLoading: state.isLoading,
-  error: state.error,
-  hasPermission: state.hasPermission,
-}));
+export const useLocationPermission = () =>
+  useLocationStore((state) => state.hasPermission);
 
-export const useLocationInfo = () => useLocationStore((state) => ({
-  location: state.location,
-  hasPermission: state.hasPermission,
-  servicesEnabled: state.servicesEnabled,
-}));
+export const useSavedAddresses = () =>
+  useLocationStore((state) => state.savedAddresses);
+
+export const useDefaultAddressId = () =>
+  useLocationStore((state) => state.defaultAddressId);
+
+export const useDefaultAddress = () =>
+  useLocationStore((state) => {
+    const addresses = state.savedAddresses;
+    const defaultId = state.defaultAddressId;
+    return (
+      addresses.find((addr) => addr.id === defaultId) || addresses[0] || null
+    );
+  });
+
+export const useLocationActions = () => {
+  const {
+    setLocation,
+    setLoading,
+    setError,
+    setPermission,
+    setServicesEnabled,
+    setPermissionRequested,
+    clearError,
+    reset,
+    setSavedAddresses,
+    addSavedAddress,
+    updateSavedAddress,
+    deleteSavedAddress,
+    setDefaultAddress,
+  } = useLocationStore();
+
+  return {
+    setLocation,
+    setLoading,
+    setError,
+    setPermission,
+    setServicesEnabled,
+    setPermissionRequested,
+    clearError,
+    reset,
+    setSavedAddresses,
+    addSavedAddress,
+    updateSavedAddress,
+    deleteSavedAddress,
+    setDefaultAddress,
+  };
+};
+

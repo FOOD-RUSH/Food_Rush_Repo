@@ -11,6 +11,8 @@ import { TouchableOpacity, Linking } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import { useTranslation } from 'react-i18next';
+import RestaurantReviewScreen from '../screens/customer/RestaurantReviewScreen';
+
 // Stores
 import {
   useAppStore,
@@ -46,12 +48,16 @@ import UserTypeSelectionScreen from '../screens/common/UserTypeSelectionScreen';
 import OrderReceiptScreen from '../screens/customer/Order/OrderReceiptScreen';
 import CheckOutScreen from '../screens/customer/home/CheckOutScreen';
 import SearchScreen from '@/src/screens/customer/home/SearchScreen';
+import CategoryMenuScreen from '@/src/screens/customer/home/CategoryMenuScreen';
 import CartScreen from '../screens/customer/home/CartScreen';
 import NotificationsList from '../screens/restaurant/notifications/NotificationsList';
 import NotificationsScreen from '../screens/restaurant/profile/NotificationsScreen';
+import NotificationScreen from '../screens/customer/home/NotificationScreen';
 import FoodDetailsScreen from '../screens/customer/home/FoodDetailsScreen';
 import RestaurantDetailScreen from '../screens/customer/home/RestaurantDetailScreen';
+import RestaurantReviewsScreen from '../screens/customer/home/RestaurantReviewsScreen';
 import NearbyRestaurantsScreen from '../screens/customer/home/NearbyRestaurantsScreen';
+import OrderTrackingScreen from '../screens/customer/Order/OrderTrackingScreen';
 
 // Restaurant full-screen screens
 import OrderDetailsScreen from '../screens/restaurant/orders/OrderDetailsScreen';
@@ -82,6 +88,7 @@ import AddressScreen from '../screens/customer/Profile/AddressScreen';
 import { OnboardingSlides } from '@/src/utils/onboardingData';
 import { useAppTheme, useAppNavigationTheme } from '../config/theme';
 import OrderHistoryScreen from '../screens/restaurant/orders/OrderHistoryScreen';
+import ProfileDetailsScreen from '../screens/customer/Profile/ProfileDetailsScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -172,7 +179,8 @@ const RootNavigator: React.FC = () => {
   // App store actions
   const { completeOnboarding, setUserType } = useAppStore();
 
-  useEffect(() => {
+  // Synchronize user type between stores
+  React.useEffect(() => {
     if (authUserType && authUserType !== appUserType) {
       setUserType(authUserType);
     }
@@ -333,6 +341,13 @@ const RootNavigator: React.FC = () => {
             options={{ headerShown: false }}
           />
 
+          {/* Main App Navigators */}
+          <Stack.Screen
+            name="UserTypeSelection"
+            component={UserTypeSelectionScreen}
+            options={{ headerShown: false }}
+          />
+
           {/* Auth */}
           <Stack.Screen name="Auth" options={{ headerShown: false }}>
             {(props) => (
@@ -361,8 +376,10 @@ const RootNavigator: React.FC = () => {
             />
             <Stack.Screen
               name="Notifications"
-              component={NotificationsScreen}
-              options={{ headerTitle: t('notifications') }}
+              component={NotificationScreen}
+              options={{
+                headerTitle: t('notifications'),
+              }}
             />
           </Stack.Group>
 
@@ -373,7 +390,21 @@ const RootNavigator: React.FC = () => {
             options={screenOptions.fullScreen}
           />
 
-          {/* Card Screens */}
+          <Stack.Screen
+            name="CategoryMenu"
+            component={CategoryMenuScreen}
+            options={{
+              presentation: 'fullScreenModal',
+              headerShown: true,
+              gestureEnabled: true,
+              animation: 'slide_from_bottom',
+              contentStyle: {
+                marginTop: -34
+              }
+            }}
+          />
+
+          {/* Card Presentation Screens */}
           <Stack.Group screenOptions={screenOptions.card}>
             <Stack.Screen
               name="RestaurantOrderHistory"
@@ -421,6 +452,23 @@ const RootNavigator: React.FC = () => {
               name="RestaurantCategoriesManager"
               component={FoodCategoriesScreen}
               options={{ headerTitle: t('categories') }}
+            />
+
+            <Stack.Screen
+              name="RestaurantReview"
+              component={RestaurantReviewScreen}
+              options={{
+                headerTitle: '',
+                ...screenOptions.fullScreen,
+              }}
+            />
+
+            <Stack.Screen
+              name="RestaurantReviews"
+              component={RestaurantReviewsScreen}
+              options={{
+                headerShown: false,
+              }}
             />
           </Stack.Group>
 
@@ -542,6 +590,21 @@ const RootNavigator: React.FC = () => {
               options={{
                 headerTitle: t('notifications'),
                 contentStyle: { marginTop: -34 },
+              }}
+            />
+            <Stack.Screen
+              name="ProfileDetails"
+              component={ProfileDetailsScreen}
+              options={{
+                headerTitle: t('profile_details'),
+              }}
+            />
+            <Stack.Screen
+              name="OrderTracking"
+              component={OrderTrackingScreen}
+              options={{
+                headerTitle: 'Track Order',
+                gestureEnabled: false, // Prevent swipe back during tracking
               }}
             />
           </Stack.Group>

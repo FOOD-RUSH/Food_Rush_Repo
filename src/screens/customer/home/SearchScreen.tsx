@@ -15,7 +15,10 @@ import { useTranslation } from 'react-i18next';
 import CommonView from '@/src/components/common/CommonView';
 import FoodItemCard from '@/src/components/customer/FoodItemCard';
 import SearchInput from '@/src/components/customer/SearchInput';
-import FilterModal, { GeneralFilterOptions } from '@/src/components/customer/FilterModal';
+import FilterModal, {
+  GeneralFilterOptions,
+} from '@/src/components/customer/FilterModal';
+import { getAllCategories } from '@/src/constants/categories';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import { FoodProps } from '@/src/types';
 import { useGetAllMenu } from '@/src/hooks/customer';
@@ -26,7 +29,13 @@ interface SearchScreenProps extends RootStackScreenProps<'SearchScreen'> {}
 
 // Simplified search hook focusing on MVP filters only
 const useSearchFood = (query: string, filters: GeneralFilterOptions) => {
-  const { refetch, data: MenuItems, isPending, isRefetching, error } = useGetAllMenu();
+  const {
+    refetch,
+    data: MenuItems,
+    isPending,
+    isRefetching,
+    error,
+  } = useGetAllMenu();
 
   const filteredResults = useMemo(() => {
     if (!MenuItems) return [];
@@ -36,23 +45,48 @@ const useSearchFood = (query: string, filters: GeneralFilterOptions) => {
     // Apply text search
     if (query.trim()) {
       const searchTerm = query.toLowerCase().trim();
-      results = results.filter((item) =>
-        item.name.toLowerCase().includes(searchTerm) ||
-        item.description?.toLowerCase().includes(searchTerm) ||
-        item.restaurant?.name.toLowerCase().includes(searchTerm)
+      results = results.filter(
+        (item) =>
+          item.name.toLowerCase().includes(searchTerm) ||
+          item.description?.toLowerCase().includes(searchTerm) ||
+          item.restaurant?.name.toLowerCase().includes(searchTerm),
       );
+    }
+
+    // Apply category filter
+    if (filters.category) {
+      results = results.filter((item) => {
+        const itemName = item.name.toLowerCase();
+        const itemDescription = item.description?.toLowerCase() || '';
+        
+        switch (filters.category) {
+          case 'local-dishes':
+            return itemName.includes('local') || itemDescription.includes('local');
+          case 'snacks':
+            return itemName.includes('snack') || itemDescription.includes('snack');
+          case 'drinks':
+            return itemName.includes('drink') || itemDescription.includes('drink');
+          case 'breakfast':
+            return itemName.includes('breakfast') || itemDescription.includes('breakfast');
+          case 'fast-food':
+            return itemName.includes('burger') || itemName.includes('fast');
+          default:
+            return itemName.includes(filters.category) || itemDescription.includes(filters.category);
+        }
+      });
     }
 
     // Apply price range filter
     if (filters.priceRange) {
       results = results.filter((item) => {
+        const price = parseFloat(item.price);
         switch (filters.priceRange) {
           case 'budget':
-            return item.price < 2000;
+            return price < 2000;
           case 'medium':
-            return item.price >= 2000 && item.price <= 5000;
+            return price >= 2000 && price <= 5000;
           case 'premium':
-            return item.price > 5000;
+            return price > 5000;
           default:
             return true;
         }
@@ -62,7 +96,7 @@ const useSearchFood = (query: string, filters: GeneralFilterOptions) => {
     // Apply distance filter
     if (filters.distanceRange && filters.distanceRange !== 'any') {
       results = results.filter((item) => {
-        const distance = item.distance || 0;
+        const distance = item.distanceKm || 0;
         switch (filters.distanceRange) {
           case '0-5':
             return distance <= 5;
@@ -79,7 +113,9 @@ const useSearchFood = (query: string, filters: GeneralFilterOptions) => {
     // Apply delivery time filter
     if (filters.deliveryTime && filters.deliveryTime !== 'any') {
       results = results.filter((item) => {
-        const dtRaw = (item.restaurant as any)?.deliveryTime ?? (item.restaurant as any)?.estimatedDeliveryTime;
+        const dtRaw =
+          (item.restaurant as any)?.deliveryTime ??
+          (item.restaurant as any)?.estimatedDeliveryTime;
         if (!dtRaw) return true;
         const match = String(dtRaw).match(/(\d+)/);
         const mins = match ? parseInt(match[0], 10) : NaN;
@@ -100,8 +136,8 @@ const useSearchFood = (query: string, filters: GeneralFilterOptions) => {
     // Apply delivery fee filter
     if (filters.deliveryFee && filters.deliveryFee !== 'any') {
       results = results.filter((item) => {
-        const feeRaw = (item as any).deliveryFee ?? item.deliveryPrice ?? 0;
-        const fee = Number(feeRaw) || 0;
+        // Since deliveryPrice is not in FoodProps, use a default or skip this filter
+        const fee = 0; // Default to free for now
         switch (filters.deliveryFee) {
           case 'free':
             return fee === 0;
@@ -116,7 +152,7 @@ const useSearchFood = (query: string, filters: GeneralFilterOptions) => {
     }
 
     // Default sorting by distance (closest first)
-    results.sort((a, b) => (a.distance || 0) - (b.distance || 0));
+    results.sort((a, b) => (a.distanceKm || 0) - (b.distanceKm || 0));
 
     return results;
   }, [MenuItems, query, filters]);
@@ -145,7 +181,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
 
   // Search state
   const [query, setQuery] = useState('');
-  
+
   // Filter modal visibility
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
 
@@ -155,9 +191,13 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
     deliveryTime: 'any',
     deliveryFee: 'any',
     distanceRange: 'any',
+    category: null,
   });
 
-  const { results, isPending, isRefetching, error, refetch } = useSearchFood(query, filters);
+  const { results, isPending, isRefetching, error, refetch } = useSearchFood(
+    query,
+    filters,
+  );
 
   const handleGoBack = useCallback(() => {
     navigation.goBack();
@@ -169,15 +209,15 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
         <FoodItemCard
           key={item.id}
           foodId={item.id}
-          restarantId={item.restaurant?.id!}
+          restaurantId={item.restaurant?.id!}
           FoodName={item.name}
-          FoodPrice={item.price}
-          FoodImage={item.image || require('@/assets/images/NoOrdersDark.png')}
-          RestarantName={item.restaurant?.name || ''}
-          distanceFromUser={item.distance || 0}
+          FoodPrice={parseFloat(item.price)}
+          FoodImage={
+            item.pictureUrl || require('@/assets/images/NoOrdersDark.png')
+          }
+          RestaurantName={item.restaurant?.name || ''}
+          distanceFromUser={item.distanceKm || 0}
           DeliveryPrice={2000}
-          rating={4.5}
-          ratingCount={100}
           hasPromo={false}
         />
       </View>
@@ -190,6 +230,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
   // Check if any filters are active
   const hasActiveFilters = useMemo(() => {
     return (
+      filters.category !== null ||
       filters.priceRange !== null ||
       filters.deliveryTime !== 'any' ||
       filters.deliveryFee !== 'any' ||
@@ -199,6 +240,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
 
   const getActiveFiltersCount = useMemo(() => {
     let count = 0;
+    if (filters.category) count++;
     if (filters.priceRange) count++;
     if (filters.deliveryTime !== 'any') count++;
     if (filters.deliveryFee !== 'any') count++;
@@ -210,8 +252,13 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
   const Header = () => {
     if (type === 'category') {
       return (
-        <View style={[styles.categoryHeader, { backgroundColor: colors.surface, borderBottomColor: colors.outline }]}>
-          <TouchableOpacity onPress={handleGoBack} style={[styles.backButton, { backgroundColor: colors.primary }]}>
+        <View
+          style={[styles.categoryHeader, { backgroundColor: colors.surface }]}
+        >
+          <TouchableOpacity
+            onPress={handleGoBack}
+            style={[styles.backButton, { backgroundColor: colors.primary }]}
+          >
             <MaterialIcons name="arrow-back" size={20} color="white" />
           </TouchableOpacity>
           <Text style={[styles.categoryTitle, { color: colors.onSurface }]}>
@@ -222,9 +269,14 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
     }
 
     return (
-      <View style={[styles.searchHeader, { backgroundColor: colors.background }]}>
+      <View
+        style={[styles.searchHeader, { backgroundColor: colors.background }]}
+      >
         <View style={styles.searchRow}>
-          <TouchableOpacity onPress={handleGoBack} style={[styles.backButton, { backgroundColor: colors.primary }]}>
+          <TouchableOpacity
+            onPress={handleGoBack}
+            style={[styles.backButton, { backgroundColor: colors.primary }]}
+          >
             <MaterialIcons name="arrow-back" size={20} color="white" />
           </TouchableOpacity>
           <SearchInput value={query} onChangeText={setQuery} />
@@ -235,26 +287,32 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
 
   // Filter bar component (below search bar)
   const FilterBar = () => (
-    <View style={[styles.filterBar, { backgroundColor: colors.surface, borderBottomColor: colors.outline }]}>
+    <View style={[styles.filterBar, { backgroundColor: colors.surface }]}>
       <TouchableOpacity
         style={[
           styles.filterButton,
           hasActiveFilters
             ? { backgroundColor: colors.primaryContainer }
-            : { backgroundColor: colors.surfaceVariant }
+            : { backgroundColor: colors.surfaceVariant },
         ]}
         onPress={() => setIsFilterModalVisible(true)}
       >
         <MaterialIcons
           name="tune"
           size={20}
-          color={hasActiveFilters ? colors.onPrimaryContainer : colors.onSurfaceVariant}
+          color={
+            hasActiveFilters
+              ? colors.onPrimaryContainer
+              : colors.onSurfaceVariant
+          }
         />
         <Text
           style={[
             styles.filterButtonText,
             {
-              color: hasActiveFilters ? colors.onPrimaryContainer : colors.onSurfaceVariant,
+              color: hasActiveFilters
+                ? colors.onPrimaryContainer
+                : colors.onSurfaceVariant,
             },
           ]}
         >
@@ -271,9 +329,13 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
 
       {hasActiveFilters && (
         <TouchableOpacity
-          style={[styles.clearButton, { backgroundColor: colors.errorContainer }]}
+          style={[
+            styles.clearButton,
+            { backgroundColor: colors.errorContainer },
+          ]}
           onPress={() => {
             setFilters({
+              category: null,
               priceRange: null,
               deliveryTime: 'any',
               deliveryFee: 'any',
@@ -281,8 +343,14 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
             });
           }}
         >
-          <MaterialIcons name="clear" size={16} color={colors.onErrorContainer} />
-          <Text style={[styles.clearButtonText, { color: colors.onErrorContainer }]}>
+          <MaterialIcons
+            name="clear"
+            size={16}
+            color={colors.onErrorContainer}
+          />
+          <Text
+            style={[styles.clearButtonText, { color: colors.onErrorContainer }]}
+          >
             {t('clear')}
           </Text>
         </TouchableOpacity>
@@ -296,9 +364,9 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
       <CommonView>
         <SafeAreaView style={{ flex: 1 }}>
           <Header />
-          <ErrorDisplay 
-            onRetry={refetch} 
-            message={t('error_loading_food') || t('something_went_wrong')} 
+          <ErrorDisplay
+            onRetry={refetch}
+            message={t('error_loading_food') || t('something_went_wrong')}
           />
         </SafeAreaView>
       </CommonView>
@@ -330,8 +398,15 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
 
         {/* Results info */}
         {hasActiveFilters && (
-          <View style={[styles.resultsInfo, { backgroundColor: colors.surfaceVariant }]}>
-            <Text style={[styles.resultsText, { color: colors.onSurfaceVariant }]}>
+          <View
+            style={[
+              styles.resultsInfo,
+              { backgroundColor: colors.surfaceVariant },
+            ]}
+          >
+            <Text
+              style={[styles.resultsText, { color: colors.onSurfaceVariant }]}
+            >
               {results.length} {t('results_found')}
             </Text>
           </View>
@@ -363,11 +438,11 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
               color={colors.onSurfaceVariant}
             />
             <Text style={[styles.emptyTitle, { color: colors.onSurface }]}>
-              {query
-                ? t('no_food_found')
-                : t('start_searching_for_food')}
+              {query ? t('no_food_found') : t('start_searching_for_food')}
             </Text>
-            <Text style={[styles.emptySubtitle, { color: colors.onSurfaceVariant }]}>
+            <Text
+              style={[styles.emptySubtitle, { color: colors.onSurfaceVariant }]}
+            >
               {query
                 ? t('try_adjusting_search_or_filters')
                 : t('enter_search_term_to_find_delicious_food')}
@@ -393,12 +468,11 @@ const styles = StyleSheet.create({
   categoryHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
   },
   searchHeader: {
-    paddingVertical: 8,
+    paddingVertical: 4,
   },
   searchRow: {
     flexDirection: 'row',
@@ -413,7 +487,7 @@ const styles = StyleSheet.create({
   categoryTitle: {
     flex: 1,
     textAlign: 'center',
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '600',
     marginRight: 36,
   },
@@ -422,7 +496,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderBottomWidth: 1,
+
     gap: 8,
   },
   filterButton: {
@@ -475,14 +549,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   resultsInfo: {
-    paddingHorizontal: 16,
     paddingVertical: 8,
   },
   resultsText: {
     fontSize: 14,
   },
   listContent: {
-    paddingHorizontal: 16,
     paddingBottom: 20,
   },
   emptyState: {

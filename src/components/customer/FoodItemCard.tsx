@@ -5,43 +5,46 @@ import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { Card, Text, useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
-import { images } from '@/assets/images';
+import { useResponsive } from '@/src/hooks/useResponsive';
+import { ResponsiveImage, ResponsiveText } from '@/src/components/common';
 
 export interface FoodItemCardProps {
   foodId: string;
-  restarantId: string;
+  restaurantId: string;
   FoodName?: string;
   FoodPrice: number;
   FoodImage: any;
-  RestarantName: string;
+  RestaurantName: string;
   distanceFromUser: number;
   DeliveryPrice: number;
-  rating?: number;
-  ratingCount?: number;
   hasPromo?: boolean;
   onLike?: () => void;
   loved?: boolean;
+  // Additional props from API
+  distanceKm?: number;
+  isAvailable?: boolean;
 }
 
 const FoodItemCard = ({
   foodId,
-  restarantId,
+  restaurantId,
   FoodName,
   FoodPrice,
   FoodImage,
-  RestarantName,
+  RestaurantName,
   distanceFromUser,
   DeliveryPrice,
-  rating = 4.5,
-  ratingCount = 1000,
   hasPromo = false,
   onLike,
   loved = false,
+  distanceKm,
+  isAvailable = true,
 }: FoodItemCardProps) => {
   const navigation =
     useNavigation<CustomerHomeStackScreenProps<'HomeScreen'>['navigation']>();
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
+  const { isSmallDevice, getResponsiveSpacing, scale } = useResponsive();
 
   const primaryColor = colors.primary;
 
@@ -50,7 +53,6 @@ const FoodItemCard = ({
       onPress={() => {
         navigation.navigate('FoodDetails', {
           foodId: foodId,
-          restaurantId: restarantId,
         });
       }}
       activeOpacity={0.8}
@@ -58,11 +60,11 @@ const FoodItemCard = ({
       <Card
         mode="outlined"
         style={{
-          margin: 10,
+          margin: getResponsiveSpacing(8),
           borderRadius: 16,
           overflow: 'hidden',
           backgroundColor: colors.surface,
-          marginVertical: 12,
+          marginVertical: getResponsiveSpacing(12),
           borderColor: colors.surface,
           shadowColor: '#000',
           shadowOffset: { width: 0, height: 1 },
@@ -70,29 +72,33 @@ const FoodItemCard = ({
           shadowRadius: 3,
           elevation: 3,
           boxShadow: '1px 0px 10px rgba(0, 0, 0, 0.15)',
-          minWidth: 320, // Added min card width
-          maxWidth: 520, // Added max card width
-          minHeight: 120, // Added min card length
-          maxHeight: 180, // Added max card length
+          minWidth: isSmallDevice ? scale(280) : scale(320),
+          maxWidth: isSmallDevice ? scale(360) : scale(520),
+          minHeight: scale(120),
+          maxHeight: scale(180),
         }}
       >
         {/* Card content with horizontal layout */}
         <View
           style={{
             flexDirection: 'row',
-            padding: 16,
+            padding: getResponsiveSpacing(16),
             alignItems: 'center',
             position: 'relative',
           }}
         >
           {/* Left side - Food Image with PROMO badge */}
-          <View style={{ position: 'relative', marginRight: 16 }}>
-            <Card.Cover
+          <View
+            style={{
+              position: 'relative',
+              marginRight: getResponsiveSpacing(16),
+            }}
+          >
+            <ResponsiveImage
               source={FoodImage}
-              defaultSource={images.onboarding3}
+              size={isSmallDevice ? 'md' : 'lg'}
+              aspectRatio={1}
               style={{
-                height: 100,
-                width: 100,
                 borderRadius: 16,
               }}
             />
@@ -144,19 +150,19 @@ const FoodItemCard = ({
           {/* Right side - Food Details */}
           <View style={{ flex: 1 }}>
             {/* Food Name */}
-            <Text
+            <ResponsiveText
+              size={isSmallDevice ? 'base' : 'lg'}
+              weight="bold"
               style={{
-                fontSize: 16,
-                fontWeight: 'bold',
-                marginBottom: 10,
+                marginBottom: getResponsiveSpacing(8),
                 padding: 4,
                 color: colors.onSurface,
               }}
             >
               {FoodName}
-            </Text>
+            </ResponsiveText>
 
-            {/* Distance and Rating */}
+            {/* Distance */}
             <View
               style={{
                 flexDirection: 'row',
@@ -165,27 +171,30 @@ const FoodItemCard = ({
               }}
             >
               <Text className={`text-[12px] ${colors.onSurface}`}>
-                {distanceFromUser} km
+                {(distanceKm || distanceFromUser).toFixed(1)} km
               </Text>
-              <Text
-                style={{
-                  color: colors.onSurface,
-                  fontSize: 12,
-                  marginHorizontal: 4,
-                }}
-              >
-                |
-              </Text>
-              <Ionicons name="star" size={12} color="#FFD700" />
-              <Text
-                style={{
-                  color: colors.onSurface,
-                  fontSize: 12,
-                  marginLeft: 2,
-                }}
-              >
-                {rating.toFixed(1)} ({ratingCount})
-              </Text>
+              {!isAvailable && (
+                <>
+                  <Text
+                    style={{
+                      color: colors.onSurface,
+                      fontSize: 12,
+                      marginHorizontal: 4,
+                    }}
+                  >
+                    |
+                  </Text>
+                  <Text
+                    style={{
+                      color: '#F44336',
+                      fontSize: 12,
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    UNAVAILABLE
+                  </Text>
+                </>
+              )}
             </View>
 
             {/* Price and Delivery */}
@@ -197,15 +206,15 @@ const FoodItemCard = ({
               }}
             >
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text
+                <ResponsiveText
+                  size={isSmallDevice ? 'base' : 'lg'}
+                  weight="bold"
                   style={{
                     color: colors.primary,
-                    fontSize: 16,
-                    fontWeight: 'bold',
                   }}
                 >
                   {FoodPrice} XAF
-                </Text>
+                </ResponsiveText>
                 <Text
                   style={{
                     color: colors.onSurface,

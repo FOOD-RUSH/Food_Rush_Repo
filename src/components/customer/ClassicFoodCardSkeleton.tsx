@@ -74,23 +74,51 @@ const ClassicFoodCardSkeleton: React.FC = () => {
         </View>
 
         {/* Rating and distance skeleton */}
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 12,
+          }}
+        >
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <SkeletonLoader width={16} height={16} borderRadius={8} />
-            <SkeletonLoader width={20} height={14} borderRadius={7} style={{ marginLeft: 4 }} />
+            <SkeletonLoader
+              width={20}
+              height={14}
+              borderRadius={7}
+              style={{ marginLeft: 4 }}
+            />
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <SkeletonLoader width={16} height={16} borderRadius={8} />
-            <SkeletonLoader width={30} height={14} borderRadius={7} style={{ marginLeft: 4 }} />
+            <SkeletonLoader
+              width={30}
+              height={14}
+              borderRadius={7}
+              style={{ marginLeft: 4 }}
+            />
           </View>
         </View>
 
         {/* Price and delivery info skeleton */}
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
           <SkeletonLoader width={60} height={18} borderRadius={9} />
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <SkeletonLoader width={18} height={18} borderRadius={9} />
-            <SkeletonLoader width={50} height={14} borderRadius={7} style={{ marginLeft: 4 }} />
+            <SkeletonLoader
+              width={50}
+              height={14}
+              borderRadius={7}
+              style={{ marginLeft: 4 }}
+            />
           </View>
         </View>
       </View>

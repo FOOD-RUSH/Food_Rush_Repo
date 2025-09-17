@@ -37,3 +37,10 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
+
+# Qodo
+.qodo/cache/
+.qodo/logs/
+.qodo/temp/
+qodo-report.json
+qodo-analysis.json

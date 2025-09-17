@@ -33,11 +33,7 @@ const FoodItemCardSkeleton: React.FC = () => {
       >
         {/* Left side - Food Image skeleton */}
         <View style={{ position: 'relative', marginRight: 16 }}>
-          <SkeletonLoader
-            width={100}
-            height={100}
-            borderRadius={16}
-          />
+          <SkeletonLoader width={100} height={100} borderRadius={16} />
         </View>
 
         {/* Heart icon skeleton */}
@@ -73,9 +69,19 @@ const FoodItemCardSkeleton: React.FC = () => {
             }}
           >
             <SkeletonLoader width={30} height={12} borderRadius={6} />
-            <SkeletonLoader width={4} height={12} borderRadius={2} style={{ marginHorizontal: 4 }} />
+            <SkeletonLoader
+              width={4}
+              height={12}
+              borderRadius={2}
+              style={{ marginHorizontal: 4 }}
+            />
             <SkeletonLoader width={12} height={12} borderRadius={6} />
-            <SkeletonLoader width={50} height={12} borderRadius={6} style={{ marginLeft: 2 }} />
+            <SkeletonLoader
+              width={50}
+              height={12}
+              borderRadius={6}
+              style={{ marginLeft: 2 }}
+            />
           </View>
 
           {/* Price and Delivery skeleton */}
@@ -88,9 +94,24 @@ const FoodItemCardSkeleton: React.FC = () => {
           >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <SkeletonLoader width={60} height={16} borderRadius={8} />
-              <SkeletonLoader width={4} height={12} borderRadius={2} style={{ marginLeft: 5 }} />
-              <SkeletonLoader width={12} height={12} borderRadius={6} style={{ marginLeft: 5 }} />
-              <SkeletonLoader width={40} height={12} borderRadius={6} style={{ marginLeft: 5 }} />
+              <SkeletonLoader
+                width={4}
+                height={12}
+                borderRadius={2}
+                style={{ marginLeft: 5 }}
+              />
+              <SkeletonLoader
+                width={12}
+                height={12}
+                borderRadius={6}
+                style={{ marginLeft: 5 }}
+              />
+              <SkeletonLoader
+                width={40}
+                height={12}
+                borderRadius={6}
+                style={{ marginLeft: 5 }}
+              />
             </View>
           </View>
         </View>

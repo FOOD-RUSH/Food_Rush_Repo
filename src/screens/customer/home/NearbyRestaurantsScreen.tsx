@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { View, Text, FlatList, RefreshControl } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import CommonView from '@/src/components/common/CommonView';
 import { RestaurantCard } from '@/src/components/customer/RestaurantCard';
-import { useGetRestaurantsNearBy } from '@/src/hooks/customer/useCustomerApi';
+import { useNearbyRestaurants } from '@/src/hooks/customer';
 import { RootStackScreenProps } from '@/src/navigation/types';
-import { useLocation } from '@/src/location';
+// Location system removed - using hardcoded coordinates
 import LoadingScreen from '@/src/components/common/LoadingScreen';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -15,26 +15,19 @@ const NearbyRestaurantsScreen = ({
 }: RootStackScreenProps<'NearbyRestaurants'>) => {
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
-  const { location: currentLocation } = useLocation();
 
-  // Get nearby restaurants using the existing API hook
+  // Get nearby restaurants using location service
   const {
     data: nearbyRestaurants,
     isLoading,
     error,
     refetch,
     isRefetching,
-  } = useGetRestaurantsNearBy(
-    currentLocation?.longitude || 0,
-    currentLocation?.latitude || 0,
-  );
-
-  // Auto-refetch when location changes
-  useEffect(() => {
-    if (currentLocation) {
-      refetch();
-    }
-  }, [currentLocation, refetch]);
+  } = useNearbyRestaurants({
+    radiusKm: 15,
+    limit: 20,
+    isOpen: true,
+  });
 
   const handleRefresh = () => {
     refetch();
@@ -43,13 +36,17 @@ const NearbyRestaurantsScreen = ({
   const renderRestaurant = ({ item }: { item: any }) => (
     <RestaurantCard
       key={item.id}
-      restaurantID={item.id}
-      restaurantName={item.name}
-      image={item.image}
+      id={item.id}
+      name={item.name}
+      address={item.address}
+      isOpen={item.isOpen}
+      verificationStatus={item.verificationStatus}
       rating={item.rating}
-      deliveryFee={item.deliveryFee}
-      distanceFromUser={item.distance}
-      estimatedTime={item.estimatedDeliveryTime}
+      ratingCount={item.ratingCount}
+      image={item.image}
+      distance={item.distance}
+      deliveryPrice={item.deliveryPrice}
+      estimatedTime={30}
     />
   );
 
@@ -71,9 +68,7 @@ const NearbyRestaurantsScreen = ({
         className="text-base text-center leading-6"
         style={{ color: colors.onSurfaceVariant }}
       >
-        {!currentLocation
-          ? t('enable_location_to_find_restaurants')
-          : t('no_restaurants_in_your_area')}
+        {t('no_restaurants_in_your_area')}
       </Text>
     </View>
   );
@@ -115,7 +110,7 @@ const NearbyRestaurantsScreen = ({
           <FlatList
             data={nearbyRestaurants}
             renderItem={renderRestaurant}
-            keyExtractor={(item) => item.restaurantId}
+            keyExtractor={(item) => item.id}
             contentContainerStyle={{ padding: 16 }}
             showsVerticalScrollIndicator={false}
             refreshControl={

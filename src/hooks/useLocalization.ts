@@ -1,4 +1,3 @@
-
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/src/contexts/LanguageContext';
 
@@ -14,7 +13,7 @@ export const useLocalization = () => {
     // Translation functions
     t,
     i18n,
-    
+
     // Language info
     currentLanguage,
   };

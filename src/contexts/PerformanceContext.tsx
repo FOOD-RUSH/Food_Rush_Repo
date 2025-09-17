@@ -144,7 +144,7 @@ export const useAfterInteractions = (
 
   React.useEffect(() => {
     runAfterInteractions(callback);
-  }, deps); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [callback, runAfterInteractions, deps]);
 };
 
 export default PerformanceContext;

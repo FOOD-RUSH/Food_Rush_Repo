@@ -7,7 +7,7 @@ import { SupportedLanguage, LANGUAGES } from '@/src/locales/i18n';
 export const getDeviceLocaleInfo = () => {
   const locales = Localization.getLocales();
   const primaryLocale = locales[0];
-  
+
   return {
     languageCode: primaryLocale?.languageCode || 'en',
     languageTag: primaryLocale?.languageTag || 'en-US',
@@ -27,6 +27,8 @@ export const getSupportedLanguagesList = () => {
 /**
  * Validate if a language code is supported
  */
-export const isSupportedLanguage = (languageCode: string): languageCode is SupportedLanguage => {
+export const isSupportedLanguage = (
+  languageCode: string,
+): languageCode is SupportedLanguage => {
   return Object.keys(LANGUAGES).includes(languageCode);
 };

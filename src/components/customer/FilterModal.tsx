@@ -10,12 +10,14 @@ import {
 import { useTheme, Button } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { getAllCategories } from '@/src/constants/categories';
 
 export interface GeneralFilterOptions {
   priceRange: 'budget' | 'medium' | 'premium' | null;
   deliveryTime: 'under30' | '30-60' | '60+' | 'any';
   deliveryFee: 'free' | 'under1000' | 'under2000' | 'any';
   distanceRange: '0-5' | '5-10' | '10+' | 'any';
+  category: string | null;
 }
 
 interface FilterModalProps {
@@ -34,7 +36,8 @@ const FilterModal: React.FC<FilterModalProps> = ({
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
 
-  const [selectedFilters, setSelectedFilters] = useState<GeneralFilterOptions>(currentFilters);
+  const [selectedFilters, setSelectedFilters] =
+    useState<GeneralFilterOptions>(currentFilters);
 
   const handleApply = () => {
     onApply(selectedFilters);
@@ -47,6 +50,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
       deliveryTime: 'any',
       deliveryFee: 'any',
       distanceRange: 'any',
+      category: null,
     });
   };
 
@@ -59,6 +63,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
       deliveryTime: 'any',
       deliveryFee: 'any',
       distanceRange: 'any',
+      category: null,
     };
 
     setSelectedFilters((prev) => ({
@@ -67,7 +72,20 @@ const FilterModal: React.FC<FilterModalProps> = ({
     }));
   };
 
+  const categories = getAllCategories();
+
   const filterSections = [
+    {
+      key: 'category' as const,
+      title: t('food_category'),
+      icon: 'restaurant-menu',
+      options: categories.map(cat => ({
+        value: cat.title,
+        label: cat.displayName,
+        description: cat.description || '',
+        icon: 'restaurant',
+      })),
+    },
     {
       key: 'priceRange' as const,
       title: t('price_range'),
@@ -172,6 +190,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
 
   const getActiveFiltersCount = () => {
     let count = 0;
+    if (selectedFilters.category) count++;
     if (selectedFilters.priceRange) count++;
     if (selectedFilters.deliveryTime !== 'any') count++;
     if (selectedFilters.deliveryFee !== 'any') count++;
@@ -187,6 +206,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
       animationType="slide"
       transparent
       onRequestClose={onClose}
+      
     >
       <View style={[styles.overlay, { backgroundColor: colors.backdrop }]}>
         <View style={[styles.modal, { backgroundColor: colors.surface }]}>
@@ -197,7 +217,9 @@ const FilterModal: React.FC<FilterModalProps> = ({
                 {t('filters')}
               </Text>
               {getActiveFiltersCount() > 0 && (
-                <Text style={[styles.subtitle, { color: colors.onSurfaceVariant }]}>
+                <Text
+                  style={[styles.subtitle, { color: colors.onSurfaceVariant }]}
+                >
                   {getActiveFiltersCount()} {t('active')}
                 </Text>
               )}
@@ -207,7 +229,10 @@ const FilterModal: React.FC<FilterModalProps> = ({
             </TouchableOpacity>
           </View>
 
-          <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+          <ScrollView
+            style={styles.content}
+            showsVerticalScrollIndicator={false}
+          >
             {filterSections.map((section) => (
               <View key={section.key} style={styles.section}>
                 <View style={styles.sectionHeader}>
@@ -216,14 +241,17 @@ const FilterModal: React.FC<FilterModalProps> = ({
                     size={20}
                     color={colors.primary}
                   />
-                  <Text style={[styles.sectionTitle, { color: colors.onSurface }]}>
+                  <Text
+                    style={[styles.sectionTitle, { color: colors.onSurface }]}
+                  >
                     {section.title}
                   </Text>
                 </View>
 
                 <View style={styles.optionsContainer}>
                   {section.options.map((option) => {
-                    const isSelected = selectedFilters[section.key] === option.value;
+                    const isSelected =
+                      selectedFilters[section.key] === option.value;
                     return (
                       <TouchableOpacity
                         key={option.value}
@@ -238,7 +266,9 @@ const FilterModal: React.FC<FilterModalProps> = ({
                               : colors.outline,
                           },
                         ]}
-                        onPress={() => updateFilter(section.key, option.value as any)}
+                        onPress={() =>
+                          updateFilter(section.key, option.value as any)
+                        }
                       >
                         <View style={styles.optionContent}>
                           <MaterialIcons
@@ -306,7 +336,8 @@ const FilterModal: React.FC<FilterModalProps> = ({
               onPress={handleApply}
               style={styles.applyButton}
             >
-              {t('apply')} {getActiveFiltersCount() > 0 && `(${getActiveFiltersCount()})`}
+              {t('apply')}{' '}
+              {getActiveFiltersCount() > 0 && `(${getActiveFiltersCount()})`}
             </Button>
           </View>
         </View>

@@ -4,8 +4,8 @@
 import { apiClient } from '@/src/services/shared/apiClient';
 export * from './authApi';
 export * from './restaurant.service';
-export * from './payment.service';
 export * from './notification.service';
+export * from './cartReminderService';
 export * from './orders.service';
 
 // Location service is now available at @/src/location

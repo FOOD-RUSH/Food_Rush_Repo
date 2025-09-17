@@ -34,7 +34,6 @@ interface CartFoodComponentProps extends CartItem {
 
 const CartFoodComponent: React.FC<CartFoodComponentProps> = React.memo(
   ({
-    ItemtotalPrice,
     id,
     menuItem,
     quantity,
@@ -50,15 +49,14 @@ const CartFoodComponent: React.FC<CartFoodComponentProps> = React.memo(
     const opacity = useSharedValue(1);
     const scale = useSharedValue(1);
 
-    // Memoize formatted price
-    const formattedPrice = useMemo(
-      () =>
-        (ItemtotalPrice || 0).toLocaleString('fr-FR', {
-          minimumFractionDigits: 0,
-          maximumFractionDigits: 2,
-        }),
-      [ItemtotalPrice],
-    );
+    // Calculate and memoize formatted price
+    const formattedPrice = useMemo(() => {
+      const itemTotal = quantity * parseFloat(menuItem.price || '0');
+      return itemTotal.toLocaleString('fr-FR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
+      });
+    }, [quantity, menuItem.price]);
 
     // Haptic feedback helper
     const triggerHaptic = useCallback(() => {
@@ -66,6 +64,7 @@ const CartFoodComponent: React.FC<CartFoodComponentProps> = React.memo(
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       } catch (error) {
         // Haptics might not be available on all devices
+        console.log(error);
       }
     }, []);
 
@@ -116,7 +115,7 @@ const CartFoodComponent: React.FC<CartFoodComponentProps> = React.memo(
         ],
         { cancelable: true },
       );
-    }, [menuItem.name, handleDelete, translateX, opacity, scale, t]);
+    }, [menuItem.name, handleDelete, t]);
 
     // Simplified pan gesture
     const panGesture = Gesture.Pan()
@@ -150,7 +149,7 @@ const CartFoodComponent: React.FC<CartFoodComponentProps> = React.memo(
     // Reset swipe
     const resetSwipe = useCallback(() => {
       translateX.value = withSpring(0, SPRING_CONFIG);
-    }, [translateX]);
+    }, []);
 
     // Animated styles
     const containerAnimatedStyle = useAnimatedStyle(
@@ -243,8 +242,7 @@ const CartFoodComponent: React.FC<CartFoodComponentProps> = React.memo(
                           ]}
                         >
                           {quantity}
-                          {t('item')}
-                          {quantity > 1 ? t('items_suffix') : ''}
+                          {quantity > 1 ? t('items_suffix') : t('item')}
                         </Text>
                         <Text
                           style={[

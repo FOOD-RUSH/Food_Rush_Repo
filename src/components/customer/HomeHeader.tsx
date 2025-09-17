@@ -1,70 +1,39 @@
-import React, { useCallback, useMemo } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
-import { Avatar, useTheme } from 'react-native-paper';
+// HomeHeader.tsx - Updated with production UX
+import React, { useCallback } from 'react';
+import { TouchableOpacity, View, Text } from 'react-native';
+import { Avatar, useTheme, Badge } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { icons } from '@/assets/images';
-import type { CustomerHomeStackScreenProps } from '@/src/navigation/types';
 import { useTranslation } from 'react-i18next';
-import { Location } from '@/src/location';
-import { useCartItems } from '@/src/stores/customerStores/cartStore';
+import { useLocation } from '@/src/location/useLocation';
+import { useCartItemCount } from '@/src/stores/customerStores/cartStore';
+import { useUnreadCount } from '@/src/stores/customerStores/notificationStore';
 
 interface HomeHeaderProps {
-  navigation: CustomerHomeStackScreenProps<'HomeScreen'>['navigation'];
-  location: Location | null;
-  onLocationPress: () => void;
+  navigation: any;
 }
 
-const HomeHeader: React.FC<HomeHeaderProps> = React.memo(({
-  navigation,
-  location,
-  onLocationPress,
-}) => {
+const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
-  const cartItems = useCartItems();
+  const cartItemCount = useCartItemCount();
+  const unreadNotificationCount = useUnreadCount();
 
-  // Memoize cart count calculation for performance
-  const cartItemCount = useMemo(() => {
-    return cartItems.reduce((total, item) => total + item.quantity, 0);
-  }, [cartItems]);
+  const {
+    location,
+    isLoading: locationLoading,
+    error: locationError,
+    hasPermission,
+    isUsingFallback,
+    requestPermissionWithLocation,
+    refreshLocation,
+    showLocationPermissionDialog,
+  } = useLocation({
+    autoRequest: true, // Get cached/fallback location on mount
+    requestOnMount: false, // Don't auto-request permission (better UX)
+  });
 
-  // Memoize display address calculation
-  const displayAddress = useMemo(() => {
-    if (!location) {
-      return t('select_location');
-    }
-
-    // Show city and region for better UX in Cameroon
-    if (location.city && location.region) {
-      return `${location.city}, ${location.region}`;
-    }
-    if (location.city) {
-      return location.city;
-    }
-    if (location.address) {
-      return location.address.length > 30
-        ? `${location.address.substring(0, 30)}...`
-        : location.address;
-    }
-    return t('select_location');
-  }, [location, t]);
-
-  // Memoize fallback indicator
-  const fallbackIndicator = useMemo(() => {
-    if (!location?.isFallback) return null;
-    
-    return (
-      <View className="flex-row items-center mt-1">
-        <View className="px-2 py-0.5 bg-orange-100 rounded-full">
-          <Text className="text-xs text-orange-700 font-medium">
-            {t('default_location')}
-          </Text>
-        </View>
-      </View>
-    );
-  }, [location?.isFallback, t]);
-
-  // Stable navigation handlers
+  // Navigation handlers
   const handleNotificationPress = useCallback(() => {
     navigation.navigate('Notifications');
   }, [navigation]);
@@ -73,106 +42,199 @@ const HomeHeader: React.FC<HomeHeaderProps> = React.memo(({
     navigation.navigate('Cart');
   }, [navigation]);
 
-  // Memoize cart badge for performance
-  const cartBadge = useMemo(() => {
-    if (cartItemCount <= 0) return null;
-    
+  const getDisplayAddress = () => {
+    if (locationLoading) {
+      return t('getting_location', 'Getting your location...');
+    }
+
+    if (!location) {
+      return t('select_location', 'Tap to set location');
+    }
+
     return (
-      <View className="absolute -top-1 -right-1 bg-red-500 rounded-full min-w-[18px] h-[18px] items-center justify-center">
-        <Text className="text-white text-xs font-bold">
-          {cartItemCount > 99 ? '99+' : cartItemCount}
-        </Text>
-      </View>
+      location.exactLocation ||
+      location.city ||
+      t('select_location', 'Tap to set location')
     );
-  }, [cartItemCount]);
+  };
+
+  const handleLocationPress = useCallback(async () => {
+    if (!hasPermission) {
+      // Show contextual permission dialog
+      showLocationPermissionDialog(
+        async () => {
+          await requestPermissionWithLocation();
+        },
+        () => {
+          // User cancelled - they can still use the app with fallback location
+          console.log('User cancelled location permission');
+        }
+      );
+    } else if (locationError || isUsingFallback) {
+      // Try to refresh location
+      await refreshLocation();
+    } else {
+      // Navigate to location picker/search
+      navigation.navigate('LocationPicker');
+    }
+  }, [
+    hasPermission,
+    locationError,
+    isUsingFallback,
+    showLocationPermissionDialog,
+    requestPermissionWithLocation,
+    refreshLocation,
+    navigation,
+  ]);
+
+  const getLocationIcon = () => {
+    if (locationLoading) return 'time-outline';
+    if (locationError && !hasPermission) return 'location-outline';
+    if (isUsingFallback) return 'location-outline';
+    return 'chevron-down';
+  };
+
+  const getLocationIconColor = () => {
+    if (locationError && !hasPermission) return colors.error;
+    if (isUsingFallback) return colors.onSurfaceVariant;
+    return colors.onSurfaceVariant;
+  };
 
   return (
     <View
       className="flex-row items-center justify-between px-4 py-4"
-      style={{
-        backgroundColor: colors.background,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.outlineVariant,
-      }}
+      style={{ backgroundColor: colors.background }}
     >
       {/* Left Section - Avatar and Location */}
       <View className="flex-row items-center flex-1">
         <Avatar.Image
           source={icons.appleIcon}
-          size={50}
+          size={70}
           style={{ backgroundColor: colors.surfaceVariant }}
         />
 
         <View className="ml-3 flex-1">
-          <Text
-            className="text-xs mb-1"
-            style={{ color: colors.onSurfaceVariant }}
-          >
-            {t('deliver_to')}
+          <Text className="text-xs mb-1" style={{ color: colors.onSurfaceVariant }}>
+            {t('deliver_to', 'Deliver to')}
           </Text>
 
           <TouchableOpacity
             className="flex-row items-center"
-            onPress={onLocationPress}
+            onPress={handleLocationPress}
             activeOpacity={0.7}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            disabled={locationLoading}
           >
             <View className="flex-1">
               <Text
-                className="font-medium text-sm"
-                style={{ color: colors.onSurface }}
+                className="font-medium text-base"
+                style={{
+                  color: locationLoading
+                    ? colors.onSurfaceVariant
+                    : colors.onSurface,
+                }}
                 numberOfLines={1}
                 ellipsizeMode="tail"
               >
-                {displayAddress}
+                {getDisplayAddress()}
               </Text>
 
-              {fallbackIndicator}
+              {/* Status indicators */}
+              {isUsingFallback && !locationLoading && (
+                <View className="flex-row items-center mt-1">
+                  <View className="px-2 py-0.5 bg-orange-100 rounded-full">
+                    <Text className="text-orange-600 text-xs font-medium">
+                      {t('fallback_location', 'Approximate')}
+                    </Text>
+                  </View>
+                </View>
+              )}
             </View>
 
             <Ionicons
-              name="chevron-down"
+              name={getLocationIcon()}
               size={16}
-              color={colors.onSurfaceVariant}
-              style={{ marginLeft: 8 }}
+              color={getLocationIconColor()}
+              style={{ marginLeft: 4 }}
             />
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Right Section - Notification and Cart */}
-      <View className="flex-row items-center gap-3">
-        {/* Notifications Button */}
+      {/* Right Section - Notification and Cart Icons */}
+      <View className="flex-row items-center" style={{ gap: 12 }}>
+        {/* Notification Icon */}
         <TouchableOpacity
-          className="p-2 rounded-full"
-          style={{ backgroundColor: colors.surfaceVariant }}
           onPress={handleNotificationPress}
+          className="relative"
           activeOpacity={0.7}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          <Ionicons
-            name="notifications-outline"
-            color={colors.onSurface}
-            size={22}
-          />
+          <View
+            className="w-12 h-12 rounded-full items-center justify-center"
+            style={{
+              backgroundColor: colors.surface,
+              borderWidth: 1,
+              borderColor: colors.outline,
+            }}
+          >
+            <Ionicons
+              name="notifications-outline"
+              size={22}
+              color={colors.onSurface}
+            />
+          </View>
+          {unreadNotificationCount > 0 && (
+            <Badge
+              size={18}
+              style={{
+                position: 'absolute',
+                top: -2,
+                right: -2,
+                backgroundColor: colors.error,
+              }}
+            >
+              {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
+            </Badge>
+          )}
         </TouchableOpacity>
 
-        {/* Cart Button with Badge */}
+        {/* Cart Icon */}
         <TouchableOpacity
-          className="p-2 rounded-full relative"
-          style={{ backgroundColor: colors.surfaceVariant }}
           onPress={handleCartPress}
+          className="relative"
           activeOpacity={0.7}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
-          {cartBadge}
-          <Ionicons name="bag-outline" color={colors.onSurface} size={22} />
+          <View
+            className="w-12 h-12 rounded-full items-center justify-center"
+            style={{
+              backgroundColor: colors.surface,
+              borderWidth: 1,
+              borderColor: colors.outline,
+            }}
+          >
+            <Ionicons
+              name="bag-outline"
+              size={22}
+              color={colors.onSurface}
+            />
+          </View>
+          {cartItemCount > 0 && (
+            <Badge
+              size={18}
+              style={{
+                position: 'absolute',
+                top: -2,
+                right: -2,
+                backgroundColor: colors.primary,
+              }}
+            >
+              {cartItemCount > 99 ? '99+' : cartItemCount}
+            </Badge>
+          )}
         </TouchableOpacity>
       </View>
     </View>
   );
-});
+};
 
-HomeHeader.displayName = 'HomeHeader';
+export default React.memo(HomeHeader);
 
-export default HomeHeader;

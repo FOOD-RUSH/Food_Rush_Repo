@@ -1,195 +1,197 @@
 import { create } from 'zustand';
 import { createJSONStorage, devtools, persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { notificationApi , Notification, NotificationSettings } from '@/src/services/customer/notification.service';
+import {
+  notificationApi,
+  type NotificationListParams,
+} from '@/src/services/customer/notification.service';
+import type { Notification } from '@/src/types';
 
 interface NotificationState {
   notifications: Notification[];
   unreadCount: number;
-  settings: NotificationSettings | null;
   isLoading: boolean;
+  isLoadingMore: boolean;
   error: string | null;
+  hasNextPage: boolean;
+  currentPage: number;
+  totalPages: number;
+  total: number;
 }
 
 interface NotificationActions {
-  // Fetch notifications
-  fetchNotifications: (userId: string) => Promise<void>;
-  
+  // Fetch notifications with pagination
+  fetchNotifications: (params?: NotificationListParams, append?: boolean) => Promise<void>;
+
+  // Load more notifications (pagination)
+  loadMoreNotifications: () => Promise<void>;
+
   // Mark notification as read
   markAsRead: (notificationId: string) => Promise<void>;
-  
+
   // Mark all notifications as read
-  markAllAsRead: (userId: string) => Promise<void>;
-  
-  // Delete notification
-  deleteNotification: (notificationId: string) => Promise<void>;
-  
-  // Fetch notification settings
-  fetchSettings: (userId: string) => Promise<void>;
-  
-  // Update notification settings
-  updateSettings: (userId: string, settings: Partial<NotificationSettings>) => Promise<void>;
-  
+  markAllAsRead: () => Promise<void>;
+
   // Update unread count
-  updateUnreadCount: (userId: string) => Promise<void>;
-  
+  updateUnreadCount: () => Promise<void>;
+
   // Add new notification (for push notifications)
   addNotification: (notification: Notification) => void;
-  
+
   // Clear error
   clearError: () => void;
-  
+
   // Reset store
   reset: () => void;
+
+  // Refresh notifications (pull to refresh)
+  refreshNotifications: () => Promise<void>;
 }
 
 const initialState: NotificationState = {
   notifications: [],
   unreadCount: 0,
-  settings: null,
   isLoading: false,
+  isLoadingMore: false,
   error: null,
+  hasNextPage: true,
+  currentPage: 1,
+  totalPages: 1,
+  total: 0,
 };
 
-export const useNotificationStore = create<NotificationState & NotificationActions>()(
+export const useNotificationStore = create<
+  NotificationState & NotificationActions
+>()(
   devtools(
     persist(
       (set, get) => ({
         ...initialState,
-        
-        fetchNotifications: async (userId) => {
+
+        fetchNotifications: async (params = { limit: 20, page: 1 }, append = false) => {
           try {
-            set({ isLoading: true, error: null });
-            const response = await notificationApi.getNotifications(userId);
-            
+            const isFirstPage = params.page === 1;
             set({ 
-              notifications: response.data,
-              isLoading: false 
+              isLoading: isFirstPage && !append, 
+              isLoadingMore: !isFirstPage || append,
+              error: null 
             });
+
+            const response = await notificationApi.getNotifications(params);
+
+            if (response.status_code === 200) {
+              const { items, total, page, pages } = response.data;
+
+              set((state) => ({
+                notifications: append ? [...state.notifications, ...items] : items,
+                total,
+                currentPage: page,
+                totalPages: pages,
+                hasNextPage: page < pages,
+                isLoading: false,
+                isLoadingMore: false,
+              }));
+            } else {
+              throw new Error(response.message || 'Failed to fetch notifications');
+            }
           } catch (error: any) {
-            set({ 
+            set({
               error: error.message || 'Failed to fetch notifications',
-              isLoading: false 
+              isLoading: false,
+              isLoadingMore: false,
             });
           }
         },
-        
+
+        loadMoreNotifications: async () => {
+          const { currentPage, hasNextPage, isLoadingMore } = get();
+          
+          if (!hasNextPage || isLoadingMore) return;
+
+          const nextPage = currentPage + 1;
+          await get().fetchNotifications({ limit: 20, page: nextPage }, true);
+        },
+
+        refreshNotifications: async () => {
+          await get().fetchNotifications({ limit: 20, page: 1 }, false);
+        },
+
         markAsRead: async (notificationId) => {
           try {
-            await notificationApi.markAsRead(notificationId);
-            
-            set(state => ({
-              notifications: state.notifications.map(notification => 
-                notification.id === notificationId 
-                  ? { ...notification, isRead: true } 
-                  : notification
-              ),
-              unreadCount: Math.max(0, state.unreadCount - 1)
-            }));
+            const response = await notificationApi.markAsRead(notificationId);
+
+            if (response.status_code === 200) {
+              set((state) => ({
+                notifications: state.notifications.map((notification) =>
+                  notification.id === notificationId
+                    ? { ...notification, readAt: new Date().toISOString() }
+                    : notification,
+                ),
+                unreadCount: Math.max(0, state.unreadCount - 1),
+              }));
+            } else {
+              throw new Error(response.message || 'Failed to mark notification as read');
+            }
           } catch (error: any) {
-            set({ 
-              error: error.message || 'Failed to mark notification as read'
+            set({
+              error: error.message || 'Failed to mark notification as read',
             });
             throw error;
           }
         },
-        
-        markAllAsRead: async (userId) => {
+
+        markAllAsRead: async () => {
           try {
-            await notificationApi.markAllAsRead(userId);
-            
-            set(state => ({
-              notifications: state.notifications.map(notification => ({
-                ...notification,
-                isRead: true
-              })),
-              unreadCount: 0
-            }));
+            const response = await notificationApi.markAllAsRead();
+
+            if (response.status_code === 200) {
+              const now = new Date().toISOString();
+              set((state) => ({
+                notifications: state.notifications.map((notification) => ({
+                  ...notification,
+                  readAt: notification.readAt || now,
+                })),
+                unreadCount: 0,
+              }));
+            } else {
+              throw new Error(response.message || 'Failed to mark all notifications as read');
+            }
           } catch (error: any) {
-            set({ 
-              error: error.message || 'Failed to mark all notifications as read'
+            set({
+              error: error.message || 'Failed to mark all notifications as read',
             });
             throw error;
           }
         },
-        
-        deleteNotification: async (notificationId) => {
+
+        updateUnreadCount: async () => {
           try {
-            await notificationApi.deleteNotification(notificationId);
-            
-            set(state => ({
-              notifications: state.notifications.filter(
-                notification => notification.id !== notificationId
-              )
-            }));
+            const response = await notificationApi.getUnreadCount();
+
+            if (response.status_code === 200) {
+              set({
+                unreadCount: response.data,
+              });
+            }
           } catch (error: any) {
-            set({ 
-              error: error.message || 'Failed to delete notification'
-            });
-            throw error;
-          }
-        },
-        
-        fetchSettings: async (userId) => {
-          try {
-            set({ isLoading: true, error: null });
-            const response = await notificationApi.getSettings(userId);
-            
-            set({ 
-              settings: response.data,
-              isLoading: false 
-            });
-          } catch (error: any) {
-            set({ 
-              error: error.message || 'Failed to fetch notification settings',
-              isLoading: false 
+            set({
+              error: error.message || 'Failed to update unread count',
             });
           }
         },
-        
-        updateSettings: async (userId, settings) => {
-          try {
-            set({ isLoading: true, error: null });
-            const response = await notificationApi.updateSettings(userId, settings);
-            
-            set({ 
-              settings: response.data,
-              isLoading: false 
-            });
-          } catch (error: any) {
-            set({ 
-              error: error.message || 'Failed to update notification settings',
-              isLoading: false 
-            });
-            throw error;
-          }
-        },
-        
-        updateUnreadCount: async (userId) => {
-          try {
-            const response = await notificationApi.getUnreadCount(userId);
-            
-            set({ 
-              unreadCount: response.data
-            });
-          } catch (error: any) {
-            set({ 
-              error: error.message || 'Failed to update unread count'
-            });
-          }
-        },
-        
+
         addNotification: (notification) => {
-          set(state => ({
+          set((state) => ({
             notifications: [notification, ...state.notifications],
-            unreadCount: state.unreadCount + (notification.isRead ? 0 : 1)
+            unreadCount: state.unreadCount + (notification.readAt ? 0 : 1),
+            total: state.total + 1,
           }));
         },
-        
+
         clearError: () => {
           set({ error: null });
         },
-        
+
         reset: () => {
           set(initialState);
         },
@@ -198,22 +200,36 @@ export const useNotificationStore = create<NotificationState & NotificationActio
         name: 'notification-storage',
         storage: createJSONStorage(() => AsyncStorage),
         partialize: (state) => ({
-          settings: state.settings,
+          // Only persist unread count for quick access
+          unreadCount: state.unreadCount,
         }),
         version: 1,
+<<<<<<< HEAD
         migrate: (persistedState: any, version: number) => {
           // No migrations needed yet, but this prevents the warning
           return persistedState;
         },
       }
+=======
+      },
+>>>>>>> origin/Customer_Setup
     ),
-    { name: 'NotificationStore' }
-  )
+    { name: 'NotificationStore' },
+  ),
 );
 
 // Selector hooks for better performance
-export const useNotifications = () => useNotificationStore((state) => state.notifications);
-export const useUnreadCount = () => useNotificationStore((state) => state.unreadCount);
-export const useNotificationSettings = () => useNotificationStore((state) => state.settings);
-export const useNotificationLoading = () => useNotificationStore((state) => state.isLoading);
-export const useNotificationError = () => useNotificationStore((state) => state.error);
+export const useNotifications = () =>
+  useNotificationStore((state) => state.notifications);
+export const useUnreadCount = () =>
+  useNotificationStore((state) => state.unreadCount);
+export const useNotificationLoading = () =>
+  useNotificationStore((state) => state.isLoading);
+export const useNotificationLoadingMore = () =>
+  useNotificationStore((state) => state.isLoadingMore);
+export const useNotificationError = () =>
+  useNotificationStore((state) => state.error);
+export const useNotificationHasNextPage = () =>
+  useNotificationStore((state) => state.hasNextPage);
+export const useNotificationTotal = () =>
+  useNotificationStore((state) => state.total);
