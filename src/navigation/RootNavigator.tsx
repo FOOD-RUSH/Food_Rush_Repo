@@ -38,6 +38,7 @@ import RestaurantNavigator from './RestaurantNavigator';
 // Components and screens
 import LoadingScreen from '../components/common/LoadingScreen';
 import OnboardingScreen from '../components/onBoardingScreen';
+import UserTypeSelectionScreen from '../screens/UserTypeSelectionScreen';
 
 // Full-screen screens (no tabs)
 import CheckOutScreen from '../screens/customer/home/CheckOutScreen';
@@ -230,13 +231,10 @@ const RootNavigator: React.FC = () => {
   );
 
   // Event handlers
-  const handleOnboardingComplete = useCallback(
-    (selectedUserType: 'customer' | 'restaurant') => {
-      setUserType(selectedUserType);
-      completeOnboarding();
-    },
-    [completeOnboarding, setUserType],
-  );
+  const handleOnboardingComplete = useCallback(() => {
+    // Mark onboarding as complete in the store
+    completeOnboarding();
+  }, [completeOnboarding]);
 
   const handleLogin = useCallback(
     (selectedUserType: 'customer' | 'restaurant') => {
@@ -262,15 +260,21 @@ const RootNavigator: React.FC = () => {
       return 'Auth'; // Temporary, will show loading screen
     }
 
+    // If onboarding is not complete, show onboarding
+    if (!isOnboardingComplete) {
+      console.log('Onboarding not complete, showing onboarding');
+      return 'Onboarding';
+    }
+
+    // If onboarding is complete but no user type selected, show user type selection
+    if (!userType) {
+      console.log('No user type selected, showing user type selection');
+      return 'UserTypeSelection';
+    }
+
     // If not authenticated, go to auth
     if (!isAuthenticated) {
       console.log('User not authenticated, navigating to Auth');
-      return 'Auth';
-    }
-
-    // If authenticated but no user type, go to auth to re-select
-    if (!userType) {
-      console.log('User authenticated but no user type, navigating to Auth');
       return 'Auth';
     }
 
@@ -286,25 +290,11 @@ const RootNavigator: React.FC = () => {
         console.log('Unknown user type, navigating to Auth');
         return 'Auth';
     }
-  }, [isAuthenticated, userType, isAuthLoading]);
+  }, [isAuthenticated, userType, isAuthLoading, isOnboardingComplete]);
 
   // Render loading screen while hydrating or auth is loading
   if (!hasHydrated || isAuthLoading) {
     return <LoadingScreen />;
-  }
-
-  // Render onboarding if not completed
-  if (!isOnboardingComplete) {
-    return (
-      <>
-        <StatusBar style="auto" />
-        <OnboardingScreen
-          OnboardingSlides={OnboardingSlides}
-          onComplete={handleOnboardingComplete}
-          onLogin={handleLogin}
-        />
-      </>
-    );
   }
 
   // Main app navigation
@@ -322,6 +312,27 @@ const RootNavigator: React.FC = () => {
           initialRouteName={getInitialRouteName()}
           screenOptions={screenOptions.default}
         >
+          {/* Onboarding Screens */}
+          <Stack.Screen
+            name="Onboarding"
+            options={{ headerShown: false }}
+          >
+            {(props) => (
+              <OnboardingScreen
+                {...props}
+                OnboardingSlides={OnboardingSlides}
+                onComplete={handleOnboardingComplete}
+                onLogin={handleLogin}
+              />
+            )}
+          </Stack.Screen>
+
+          <Stack.Screen
+            name="UserTypeSelection"
+            component={UserTypeSelectionScreen}
+            options={{ headerShown: false }}
+          />
+
           {/* Main App Navigators */}
           <Stack.Screen
             name="Auth"
