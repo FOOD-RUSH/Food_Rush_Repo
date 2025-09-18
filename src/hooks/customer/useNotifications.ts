@@ -1,6 +1,6 @@
 import { useEffect, useCallback } from 'react';
 import { useNotificationStore } from '@/src/stores/customerStores/notificationStore';
-import { useAuthStore } from '@/src/stores/customerStores/AuthStore';
+import { useAuthStore } from '@/src/stores/shared/AuthStore';
 
 /**
  * Custom hook for managing notifications
@@ -8,7 +8,7 @@ import { useAuthStore } from '@/src/stores/customerStores/AuthStore';
  */
 export const useNotifications = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  
+
   const {
     notifications,
     unreadCount,
@@ -45,15 +45,18 @@ export const useNotifications = () => {
   }, [refreshNotifications, updateUnreadCount]);
 
   // Mark notification as read and handle errors
-  const markNotificationAsRead = useCallback(async (notificationId: string) => {
-    try {
-      await markAsRead(notificationId);
-      return true;
-    } catch (error) {
-      console.error('Failed to mark notification as read:', error);
-      return false;
-    }
-  }, [markAsRead]);
+  const markNotificationAsRead = useCallback(
+    async (notificationId: string) => {
+      try {
+        await markAsRead(notificationId);
+        return true;
+      } catch (error) {
+        console.error('Failed to mark notification as read:', error);
+        return false;
+      }
+    },
+    [markAsRead],
+  );
 
   // Mark all notifications as read and handle errors
   const markAllNotificationsAsRead = useCallback(async () => {
@@ -89,7 +92,7 @@ export const useNotifications = () => {
     error,
     hasNextPage,
     total,
-    
+
     // Actions
     refresh,
     loadMore,
@@ -97,7 +100,7 @@ export const useNotifications = () => {
     markAllAsRead: markAllNotificationsAsRead,
     addNotification,
     clearError,
-    
+
     // Computed
     hasNotifications: notifications.length > 0,
     hasUnreadNotifications: unreadCount > 0,
@@ -110,7 +113,9 @@ export const useNotifications = () => {
  */
 export const useUnreadNotificationCount = () => {
   const unreadCount = useNotificationStore((state) => state.unreadCount);
-  const updateUnreadCount = useNotificationStore((state) => state.updateUnreadCount);
+  const updateUnreadCount = useNotificationStore(
+    (state) => state.updateUnreadCount,
+  );
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   // Update unread count when authenticated

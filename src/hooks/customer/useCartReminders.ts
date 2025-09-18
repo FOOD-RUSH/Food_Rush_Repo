@@ -2,12 +2,12 @@
 import { useEffect, useCallback } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
 import { cartReminderService } from '../../services/customer/cartReminderService';
-import { 
-  useCartStore, 
-  useCartItems, 
+import {
+  useCartStore,
+  useCartItems,
   useCartReminderEnabled,
   useCartRestaurantName,
-  useCartLastActivity
+  useCartLastActivity,
 } from '../../stores/customerStores/cartStore';
 
 export const useCartReminders = () => {
@@ -15,7 +15,12 @@ export const useCartReminders = () => {
   const reminderEnabled = useCartReminderEnabled();
   const restaurantName = useCartRestaurantName();
   const lastActivity = useCartLastActivity();
-  const { scheduleCartReminders, cancelCartReminders, enableReminders, disableReminders } = useCartStore();
+  const {
+    scheduleCartReminders,
+    cancelCartReminders,
+    enableReminders,
+    disableReminders,
+  } = useCartStore();
 
   // Initialize cart reminder service
   useEffect(() => {
@@ -35,14 +40,21 @@ export const useCartReminders = () => {
   useEffect(() => {
     const handleAppStateChange = (nextAppState: AppStateStatus) => {
       cartReminderService.handleAppStateChange(nextAppState);
-      
+
       // If app becomes active and we have items, reschedule reminders
-      if (nextAppState === 'active' && cartItems.length > 0 && reminderEnabled) {
+      if (
+        nextAppState === 'active' &&
+        cartItems.length > 0 &&
+        reminderEnabled
+      ) {
         scheduleCartReminders();
       }
     };
 
-    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    const subscription = AppState.addEventListener(
+      'change',
+      handleAppStateChange,
+    );
     return () => subscription?.remove();
   }, [cartItems.length, reminderEnabled, scheduleCartReminders]);
 
@@ -55,7 +67,12 @@ export const useCartReminders = () => {
         cancelCartReminders();
       }
     }
-  }, [cartItems.length, reminderEnabled, scheduleCartReminders, cancelCartReminders]);
+  }, [
+    cartItems.length,
+    reminderEnabled,
+    scheduleCartReminders,
+    cancelCartReminders,
+  ]);
 
   // Utility functions
   const toggleReminders = useCallback(() => {
@@ -74,13 +91,18 @@ export const useCartReminders = () => {
     return cartReminderService.getConfig();
   }, []);
 
-  const updateReminderConfig = useCallback((config: Partial<{
-    firstReminderMinutes: number;
-    secondReminderMinutes: number;
-    maxReminders: number;
-  }>) => {
-    cartReminderService.updateConfig(config);
-  }, []);
+  const updateReminderConfig = useCallback(
+    (
+      config: Partial<{
+        firstReminderMinutes: number;
+        secondReminderMinutes: number;
+        maxReminders: number;
+      }>,
+    ) => {
+      cartReminderService.updateConfig(config);
+    },
+    [],
+  );
 
   return {
     // State
@@ -88,14 +110,14 @@ export const useCartReminders = () => {
     cartItemCount: cartItems.reduce((sum, item) => sum + item.quantity, 0),
     restaurantName,
     lastActivity,
-    
+
     // Actions
     enableReminders,
     disableReminders,
     toggleReminders,
     scheduleCartReminders,
     cancelCartReminders,
-    
+
     // Utilities
     getActiveReminders,
     getReminderConfig,

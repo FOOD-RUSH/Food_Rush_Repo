@@ -6,7 +6,7 @@ import { useBottomSheet } from '@/src/components/common/BottomSheet/BottomSheetC
 import EditCartItemContent from './EditCartItemContent';
 import { useTranslation } from 'react-i18next';
 
-type CheckOutItemProps = CartItem
+type CheckOutItemProps = CartItem;
 
 const CheckOutItem = memo<CheckOutItemProps>(
   ({ id, menuItem, quantity, specialInstructions, addedAt }) => {
@@ -22,7 +22,9 @@ const CheckOutItem = memo<CheckOutItemProps>(
           menuItem={menuItem}
           quantity={quantity}
           specialInstructions={specialInstructions}
-          onDismiss={dismiss} addedAt={addedAt}        />,
+          onDismiss={dismiss}
+          addedAt={addedAt}
+        />,
         {
           snapPoints: ['50%', '75%'],
           enablePanDownToClose: true,
@@ -31,7 +33,16 @@ const CheckOutItem = memo<CheckOutItemProps>(
           backdropOpacity: 0.4,
         },
       );
-    }, [present, id, menuItem, quantity, specialInstructions, dismiss, addedAt, t]);
+    }, [
+      present,
+      id,
+      menuItem,
+      quantity,
+      specialInstructions,
+      dismiss,
+      addedAt,
+      t,
+    ]);
 
     return (
       <View

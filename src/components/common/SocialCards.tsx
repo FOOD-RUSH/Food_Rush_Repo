@@ -93,7 +93,7 @@ const SocialCards = ({
                 style={{ color: colors.onSurfaceVariant }}
               >
                 {t('visit_our')}
-                {social_platform.toLowerCase()}
+                {social_platform?.toLowerCase() || ''}
               </Text>
             )}
           </View>

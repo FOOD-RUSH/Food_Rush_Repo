@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { useTheme, Card, Avatar, Button } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -7,7 +7,7 @@ import * as Haptics from 'expo-haptics';
 
 import CommonView from '@/src/components/common/CommonView';
 import { RestaurantAccountStackScreenProps } from '@/src/navigation/types';
-import { useUser, useAuthActions } from '@/src/stores/customerStores/AuthStore';
+import { useUser, useLogout } from '@/src/stores/customerStores/AuthStore';
 
 interface MenuItemProps {
   icon: string;
@@ -16,16 +16,16 @@ interface MenuItemProps {
   color?: string;
 }
 
-const MenuItem: React.FC<MenuItemProps> = ({ icon, title, onPress, color }) => {
+const MenuItem: React.FC<MenuItemProps> = React.memo(({ icon, title, onPress, color }) => {
   const { colors } = useTheme();
   const iconColor = color || colors.primary;
 
   return (
-    <TouchableOpacity 
-      onPress={onPress} 
-      style={{ 
-        flexDirection: 'row', 
-        alignItems: 'center', 
+    <TouchableOpacity
+      onPress={onPress}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
         paddingVertical: 16,
         paddingHorizontal: 16,
       }}
@@ -42,18 +42,20 @@ const MenuItem: React.FC<MenuItemProps> = ({ icon, title, onPress, color }) => {
           marginRight: 16,
         }}
       >
-        <MaterialCommunityIcons 
-          name={icon as any} 
-          size={20} 
-          color={iconColor} 
+        <MaterialCommunityIcons
+          name={icon as any}
+          size={20}
+          color={iconColor}
         />
       </View>
-      <Text style={{ 
-        flex: 1,
-        fontSize: 16, 
-        fontWeight: '500', 
-        color: colors.onSurface,
-      }}>
+      <Text
+        style={{
+          flex: 1,
+          fontSize: 16,
+          fontWeight: '500',
+          color: colors.onSurface,
+        }}
+      >
         {title}
       </Text>
       <MaterialCommunityIcons
@@ -63,52 +65,51 @@ const MenuItem: React.FC<MenuItemProps> = ({ icon, title, onPress, color }) => {
       />
     </TouchableOpacity>
   );
-};
+});
 
-const AccountHome: React.FC<RestaurantAccountStackScreenProps<'AccountHome'>> = ({ navigation }) => {
+const AccountHome: React.FC<
+  RestaurantAccountStackScreenProps<'AccountHome'>
+> = ({ navigation }) => {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const user = useUser();
-  const { logout } = useAuthActions();
+  const logout = useLogout();
 
-  const handleLogout = () => {
-    Alert.alert(
-      t('logout'),
-      t('are_you_sure_logout'),
-      [
-        { text: t('cancel'), style: 'cancel' },
-        { 
-          text: t('logout'), 
-          style: 'destructive', 
-          onPress: async () => {
-            try {
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-              console.log('Initiating logout...');
-              await logout();
-              console.log('Logout completed successfully');
-            } catch (error) {
-              console.error('Logout error:', error);
-              // Force logout even if it fails
-              try {
-                await logout();
-              } catch (retryError) {
-                console.error('Retry logout also failed:', retryError);
-              }
-            }
+  const handleLogout = useCallback(() => {
+    Alert.alert(t('logout'), t('are_you_sure_logout'), [
+      { text: t('cancel'), style: 'cancel' },
+      {
+        text: t('logout'),
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            await logout();
+          } catch (error) {
+            console.error('Logout error:', error);
           }
         },
-      ]
-    );
-  };
+      },
+    ]);
+  }, [t, logout]);
 
-  // Get display name and email with fallbacks
-  const displayName = user?.fullName || user?.restaurantName || 'User';
-  const displayEmail = user?.email || 'user@example.com';
-  const avatarLabel = user?.fullName 
-    ? user.fullName.split(' ').map(n => n[0]).join('').toUpperCase()
-    : 'U';
+  // Memoize user display data to prevent recalculations
+  const userDisplayData = useMemo(() => {
+    const displayName = user?.fullName || user?.restaurantName || 'User';
+    const displayEmail = user?.email || 'user@example.com';
+    const avatarLabel = user?.fullName
+      ? user.fullName
+          .split(' ')
+          .map((n) => n[0])
+          .join('')
+          .toUpperCase()
+      : 'U';
+    
+    return { displayName, displayEmail, avatarLabel };
+  }, [user?.fullName, user?.restaurantName, user?.email]);
 
-  const menuItems = [
+  // Memoize menu items to prevent recreation
+  const menuItems = useMemo(() => [
     {
       icon: 'account-edit',
       title: t('edit_profile'),
@@ -157,11 +158,11 @@ const AccountHome: React.FC<RestaurantAccountStackScreenProps<'AccountHome'>> = 
       onPress: () => navigation.navigate('RestaurantAbout'),
       color: colors.onSurfaceVariant,
     },
-  ];
+  ], [t, navigation, colors]);
 
   return (
     <CommonView style={{ backgroundColor: colors.background }}>
-      <ScrollView 
+      <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}
       >
@@ -169,55 +170,65 @@ const AccountHome: React.FC<RestaurantAccountStackScreenProps<'AccountHome'>> = 
         <View style={{ padding: 24, alignItems: 'center' }}>
           <Avatar.Text
             size={80}
-            label={avatarLabel}
+            label={userDisplayData.avatarLabel}
             style={{ backgroundColor: colors.primary, marginBottom: 16 }}
             labelStyle={{ fontSize: 28, fontWeight: 'bold' }}
           />
-          
-          <Text style={{ 
-            fontSize: 24, 
-            fontWeight: 'bold', 
-            color: colors.onSurface,
-            textAlign: 'center',
-            marginBottom: 8,
-          }}>
-            {displayName}
+
+          <Text
+            style={{
+              fontSize: 24,
+              fontWeight: 'bold',
+              color: colors.onSurface,
+              textAlign: 'center',
+              marginBottom: 8,
+            }}
+          >
+            {userDisplayData.displayName}
           </Text>
-          
-          <Text style={{ 
-            fontSize: 16, 
-            color: colors.onSurfaceVariant,
-            textAlign: 'center',
-          }}>
-            {displayEmail}
+
+          <Text
+            style={{
+              fontSize: 16,
+              color: colors.onSurfaceVariant,
+              textAlign: 'center',
+            }}
+          >
+            {userDisplayData.displayEmail}
           </Text>
 
           {/* User Role Badge */}
-          <View style={{
-            backgroundColor: colors.primaryContainer,
-            paddingHorizontal: 12,
-            paddingVertical: 6,
-            borderRadius: 12,
-            marginTop: 8,
-          }}>
-            <Text style={{
-              fontSize: 12,
-              fontWeight: '600',
-              color: colors.onPrimaryContainer,
-              textTransform: 'capitalize',
-            }}>
+          <View
+            style={{
+              backgroundColor: colors.primaryContainer,
+              paddingHorizontal: 12,
+              paddingVertical: 6,
+              borderRadius: 12,
+              marginTop: 8,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 12,
+                fontWeight: '600',
+                color: colors.onPrimaryContainer,
+                textTransform: 'capitalize',
+              }}
+            >
               {user?.role || 'User'}
             </Text>
           </View>
         </View>
 
         {/* Menu Items */}
-        <Card style={{ 
-          backgroundColor: colors.surface, 
-          marginHorizontal: 16,
-          marginBottom: 24,
-          borderRadius: 12,
-        }}>
+        <Card
+          style={{
+            backgroundColor: colors.surface,
+            marginHorizontal: 16,
+            marginBottom: 24,
+            borderRadius: 12,
+          }}
+        >
           {menuItems.map((item, index) => (
             <MenuItem
               key={index}
@@ -250,13 +261,15 @@ const AccountHome: React.FC<RestaurantAccountStackScreenProps<'AccountHome'>> = 
           >
             {t('logout')}
           </Button>
-          
-          <Text style={{
-            textAlign: 'center',
-            fontSize: 12,
-            color: colors.onSurfaceVariant,
-            marginTop: 16,
-          }}>
+
+          <Text
+            style={{
+              textAlign: 'center',
+              fontSize: 12,
+              color: colors.onSurfaceVariant,
+              marginTop: 16,
+            }}
+          >
             {t('version')} 1.0.0
           </Text>
         </View>

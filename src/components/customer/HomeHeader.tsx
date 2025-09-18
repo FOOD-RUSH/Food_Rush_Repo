@@ -68,7 +68,7 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
         () => {
           // User cancelled - they can still use the app with fallback location
           console.log('User cancelled location permission');
-        }
+        },
       );
     } else if (locationError || isUsingFallback) {
       // Try to refresh location
@@ -114,7 +114,10 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
         />
 
         <View className="ml-3 flex-1">
-          <Text className="text-xs mb-1" style={{ color: colors.onSurfaceVariant }}>
+          <Text
+            className="text-xs mb-1"
+            style={{ color: colors.onSurfaceVariant }}
+          >
             {t('deliver_to', 'Deliver to')}
           </Text>
 
@@ -211,11 +214,7 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
               borderColor: colors.outline,
             }}
           >
-            <Ionicons
-              name="bag-outline"
-              size={22}
-              color={colors.onSurface}
-            />
+            <Ionicons name="bag-outline" size={22} color={colors.onSurface} />
           </View>
           {cartItemCount > 0 && (
             <Badge
@@ -237,4 +236,3 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
 };
 
 export default React.memo(HomeHeader);
-

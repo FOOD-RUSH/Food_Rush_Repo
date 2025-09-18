@@ -3,7 +3,6 @@ import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
-import { apiClient } from '../services/customer/apiClient';
 
 // Configure notification behavior for production
 Notifications.setNotificationHandler({
@@ -24,7 +23,14 @@ export interface LocalNotificationData {
 
 export interface OrderNotification {
   orderId: string;
-  status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'picked_up' | 'delivered' | 'cancelled';
+  status:
+    | 'pending'
+    | 'confirmed'
+    | 'preparing'
+    | 'ready'
+    | 'picked_up'
+    | 'delivered'
+    | 'cancelled';
   customerName?: string;
   restaurantName?: string;
   estimatedTime?: number;
@@ -62,7 +68,9 @@ class NotificationService {
       this.setupNotificationListeners();
       this.isInitialized = true;
 
-      console.log(`${this.config.userType} notification service initialized successfully`);
+      console.log(
+        `${this.config.userType} notification service initialized successfully`,
+      );
       return true;
     } catch (error) {
       console.error('Failed to initialize notification service:', error);
@@ -130,6 +138,9 @@ class NotificationService {
   // Send token to backend
   async sendTokenToBackend(token: string): Promise<void> {
     try {
+      // Lazy import to avoid circular dependency
+      const { apiClient } = await import('../services/shared/apiClient');
+      
       const response = await apiClient.post('/notifications/device', {
         expoPushToken: token,
         platform: Platform.OS,
@@ -148,12 +159,18 @@ class NotificationService {
   setupNotificationListeners(): void {
     // Handle notifications when app is in foreground
     Notifications.addNotificationReceivedListener((notification) => {
-      console.log(`[${this.config.userType}] Notification received:`, notification.request.content.title);
+      console.log(
+        `[${this.config.userType}] Notification received:`,
+        notification.request.content.title,
+      );
     });
 
     // Handle notification taps
     Notifications.addNotificationResponseReceivedListener((response) => {
-      console.log(`[${this.config.userType}] Notification tapped:`, response.notification.request.content.title);
+      console.log(
+        `[${this.config.userType}] Notification tapped:`,
+        response.notification.request.content.title,
+      );
       const data = response.notification.request.content.data;
       this.handleNotificationTap(data);
     });
@@ -193,9 +210,10 @@ class NotificationService {
     const { orderId, status, customerName, restaurantName } = orderData;
 
     // Different messages for customer vs restaurant
-    const notifications = this.config.userType === 'customer'
-      ? this.getCustomerNotifications(orderId, status, restaurantName)
-      : this.getRestaurantNotifications(orderId, status, customerName);
+    const notifications =
+      this.config.userType === 'customer'
+        ? this.getCustomerNotifications(orderId, status, restaurantName)
+        : this.getRestaurantNotifications(orderId, status, customerName);
 
     const notification = notifications[status];
     if (!notification) {
@@ -215,7 +233,11 @@ class NotificationService {
   }
 
   // Customer notification messages
-  private getCustomerNotifications(orderId: string, status: string, restaurantName?: string) {
+  private getCustomerNotifications(
+    orderId: string,
+    status: string,
+    restaurantName?: string,
+  ) {
     const restaurant = restaurantName ? ` from ${restaurantName}` : '';
 
     return {
@@ -251,7 +273,11 @@ class NotificationService {
   }
 
   // Restaurant notification messages
-  private getRestaurantNotifications(orderId: string, status: string, customerName?: string) {
+  private getRestaurantNotifications(
+    orderId: string,
+    status: string,
+    customerName?: string,
+  ) {
     const customer = customerName ? ` for ${customerName}` : '';
 
     return {
@@ -287,7 +313,11 @@ class NotificationService {
   }
 
   // Send promotion notification
-  async sendPromotionNotification(title: string, message: string, promotionId?: string): Promise<string> {
+  async sendPromotionNotification(
+    title: string,
+    message: string,
+    promotionId?: string,
+  ): Promise<string> {
     return this.sendLocalNotification({
       title: `🎉 ${title}`,
       body: message,
@@ -304,7 +334,7 @@ class NotificationService {
     title: string,
     message: string,
     minutesFromNow: number,
-    data?: any
+    data?: any,
   ): Promise<string> {
     return this.sendLocalNotification({
       title: `⏰ ${title}`,
@@ -312,7 +342,7 @@ class NotificationService {
       data: {
         type: 'reminder',
         userType: this.config.userType,
-        ...data
+        ...data,
       },
       scheduleAfter: minutesFromNow * 60,
     });
@@ -325,7 +355,8 @@ class NotificationService {
 
   // Cancel notifications by type or data
   async cancelNotificationsByData(filterData: any): Promise<void> {
-    const scheduledNotifications = await Notifications.getAllScheduledNotificationsAsync();
+    const scheduledNotifications =
+      await Notifications.getAllScheduledNotificationsAsync();
 
     for (const notification of scheduledNotifications) {
       const notificationData = notification.content.data;
@@ -340,7 +371,9 @@ class NotificationService {
       }
 
       if (shouldCancel) {
-        await Notifications.cancelScheduledNotificationAsync(notification.identifier);
+        await Notifications.cancelScheduledNotificationAsync(
+          notification.identifier,
+        );
       }
     }
   }
@@ -382,7 +415,11 @@ class NotificationService {
 }
 
 // Export singleton instances for customer and restaurant
-export const customerNotificationService = new NotificationService({ userType: 'customer' });
-export const restaurantNotificationService = new NotificationService({ userType: 'restaurant' });
+export const customerNotificationService = new NotificationService({
+  userType: 'customer',
+});
+export const restaurantNotificationService = new NotificationService({
+  userType: 'restaurant',
+});
 
 export default NotificationService;

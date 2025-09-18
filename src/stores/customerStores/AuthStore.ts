@@ -2,13 +2,8 @@ import { create } from 'zustand';
 import { createJSONStorage, devtools, persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from '../../types';
-<<<<<<< HEAD
-import { reset } from '../../navigation/navigationHelpers';
-import TokenManager from '@/src/services/shared/tokenManager';
-=======
 import { navigate, reset } from '../../navigation/navigationHelpers';
-import TokenManager from '@/src/services/customer/tokenManager';
->>>>>>> origin/Customer_Setup
+import TokenManager from '@/src/services/shared/tokenManager';
 
 interface AuthState {
   user: User | null;
@@ -90,31 +85,31 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           try {
             set({ isLoading: true });
 
-            // Use the centralized app reset utility
-            const { performCompleteAppReset } = await import('../../utils/appReset');
-            const result = await performCompleteAppReset({
-              preserveOnboarding: true,
-              preserveUserTypeSelection: true,
-              navigateToAuth: true,
+            // Clear tokens from storage
+            await TokenManager.clearAllTokens();
+
+            // Clear cart store (lazy import to avoid circular dependency)
+            try {
+              const { useCartStore } = await import('./cartStore');
+              useCartStore.getState().clearCart();
+            } catch (cartError) {
+              console.error('Error clearing cart during logout:', cartError);
+            }
+
+            // Reset auth state locally
+            set({
+              ...initialState,
+              selectedUserType: get().selectedUserType, // Preserve selected user type
             });
 
-            if (result.success) {
-              // Reset auth state locally
-              set({
-                ...initialState,
-                selectedUserType: get().selectedUserType, // Preserve selected user type
-              });
-            } else {
-              throw new Error('App reset failed');
-            }
+            // Navigate to user type selection
+            reset('UserTypeSelection');
           } catch (error) {
             console.error('Error during logout:', error);
             
             // Fallback: try manual cleanup
             try {
               await TokenManager.clearAllTokens();
-              const { useCartStore } = await import('./cartStore');
-              useCartStore.getState().clearCart();
             } catch (fallbackError) {
               console.error('Error during fallback cleanup:', fallbackError);
             }
@@ -124,7 +119,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
               selectedUserType: get().selectedUserType,
               error: 'Logout completed with some errors',
             });
-            reset('Auth');
+            reset('UserTypeSelection');
           } finally {
             set({ isLoading: false });
           }
@@ -209,7 +204,8 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 );
 
 // Selector hooks for better performance and type safety
-export const useAuthUser = () => useAuthStore((state) => state.user);
+export const useUser = () => useAuthStore((state) => state.user);
+export const useAuthUser = () => useAuthStore((state) => state.user); // Alias for compatibility
 export const useIsAuthenticated = () =>
   useAuthStore((state) => state.isAuthenticated);
 export const useAuthLoading = () => useAuthStore((state) => state.isLoading);
@@ -229,17 +225,11 @@ export const useAuthStatus = () =>
     error: state.error,
   }));
 
-export const useAuthActions = () =>
-  useAuthStore((state) => ({
-    setUser: state.setUser,
-    setIsAuthenticated: state.setIsAuthenticated,
-    setError: state.setError,
-    clearError: state.clearError,
-    logoutUser: state.logoutUser,
-    resetAuth: state.resetAuth,
-    setRegistrationData: state.setRegistrationData,
-<<<<<<< HEAD
-  }));
-=======
-  }));
->>>>>>> origin/Customer_Setup
+// Individual action hooks to prevent object recreation
+export const useLogout = () => useAuthStore((state) => state.logoutUser);
+export const useSetUser = () => useAuthStore((state) => state.setUser);
+export const useSetIsAuthenticated = () => useAuthStore((state) => state.setIsAuthenticated);
+export const useSetError = () => useAuthStore((state) => state.setError);
+export const useClearError = () => useAuthStore((state) => state.clearError);
+export const useResetAuth = () => useAuthStore((state) => state.resetAuth);
+export const useSetRegistrationData = () => useAuthStore((state) => state.setRegistrationData);

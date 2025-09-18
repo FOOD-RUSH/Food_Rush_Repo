@@ -25,10 +25,9 @@ return
 
 ---
 
-endpoint: menu/all/nearby
-================
-params
-==================
+# endpoint: menu/all/nearby
+
+# params
 
 - nearLat : number
 - nearLng : number

@@ -18,7 +18,7 @@ const RESTAURANT_ONLY_DEPS = [
 // Dependencies that might be unused
 const POTENTIALLY_UNUSED_DEPS = [
   'expo-blur',
-  'expo-symbols', 
+  'expo-symbols',
   'expo-web-browser',
   'expo-crypto',
   'react-native-element-dropdown',
@@ -53,33 +53,38 @@ class BundleAnalyzer {
   getAllSourceFiles() {
     const files = [];
     const srcDir = path.join(process.cwd(), 'src');
-    
+
     const walkDir = (dir) => {
       const items = fs.readdirSync(dir);
-      
+
       for (const item of items) {
         const fullPath = path.join(dir, item);
         const stat = fs.statSync(fullPath);
-        
+
         if (stat.isDirectory()) {
           walkDir(fullPath);
-        } else if (item.endsWith('.ts') || item.endsWith('.tsx') || item.endsWith('.js') || item.endsWith('.jsx')) {
+        } else if (
+          item.endsWith('.ts') ||
+          item.endsWith('.tsx') ||
+          item.endsWith('.js') ||
+          item.endsWith('.jsx')
+        ) {
           files.push(fullPath);
         }
       }
     };
-    
+
     walkDir(srcDir);
     return files;
   }
 
   checkDependencyUsage(depName) {
     let isUsed = false;
-    
+
     for (const file of this.srcFiles) {
       try {
         const content = fs.readFileSync(file, 'utf8');
-        
+
         // Check for various import patterns
         const importPatterns = [
           new RegExp(`from ['"]${depName}['"]`, 'g'),
@@ -87,39 +92,40 @@ class BundleAnalyzer {
           new RegExp(`require\\(['"]${depName}['"]\\)`, 'g'),
           new RegExp(`from ['"]${depName}/`, 'g'),
         ];
-        
+
         for (const pattern of importPatterns) {
           if (pattern.test(content)) {
             isUsed = true;
             break;
           }
         }
-        
+
         if (isUsed) break;
       } catch (error) {
         console.warn(`Could not read file: ${file}`);
       }
     }
-    
+
     return isUsed;
   }
 
   checkRestaurantOnlyUsage(depName) {
     let usedInCustomer = false;
     let usedInRestaurant = false;
-    
+
     for (const file of this.srcFiles) {
       try {
         const content = fs.readFileSync(file, 'utf8');
-        const isRestaurantFile = file.includes('/restaurant/') || file.includes('/Restaurant');
-        
+        const isRestaurantFile =
+          file.includes('/restaurant/') || file.includes('/Restaurant');
+
         const importPatterns = [
           new RegExp(`from ['"]${depName}['"]`, 'g'),
           new RegExp(`import ['"]${depName}['"]`, 'g'),
           new RegExp(`require\\(['"]${depName}['"]\\)`, 'g'),
           new RegExp(`from ['"]${depName}/`, 'g'),
         ];
-        
+
         for (const pattern of importPatterns) {
           if (pattern.test(content)) {
             if (isRestaurantFile) {
@@ -133,7 +139,7 @@ class BundleAnalyzer {
         console.warn(`Could not read file: ${file}`);
       }
     }
-    
+
     return { usedInCustomer, usedInRestaurant };
   }
 
@@ -203,7 +209,7 @@ class BundleAnalyzer {
     // Restaurant-only dependencies
     if (this.results.restaurantOnly.length > 0) {
       console.log('🏪 Move to restaurant-only bundle:');
-      this.results.restaurantOnly.forEach(dep => {
+      this.results.restaurantOnly.forEach((dep) => {
         console.log(`   - ${dep}`);
       });
       console.log('   Estimated customer app reduction: 10-25%\n');
@@ -255,13 +261,13 @@ class BundleAnalyzer {
 
   run() {
     console.log('🚀 Food Rush Bundle Analyzer\n');
-    console.log('=' .repeat(50));
-    
+    console.log('='.repeat(50));
+
     this.analyzeDependencies();
     this.generateRecommendations();
     this.generateReport();
-    
-    console.log('=' .repeat(50));
+
+    console.log('='.repeat(50));
     console.log('✅ Analysis complete!');
     console.log('\nNext steps:');
     console.log('1. Review the recommendations above');

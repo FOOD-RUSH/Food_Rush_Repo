@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StatusBar,
   useWindowDimensions,
+  ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme, Button } from 'react-native-paper';
@@ -44,13 +45,15 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
   const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = useWindowDimensions();
-  
+
   // Store actions
   const { setUserType, completeOnboarding } = useAppStore();
   const { setSelectedUserType } = useAuthStore();
-  
+
   // Local state
-  const [selectedType, setSelectedType] = useState<'customer' | 'restaurant' | null>(null);
+  const [selectedType, setSelectedType] = useState<
+    'customer' | 'restaurant' | null
+  >(null);
 
   const handleUserTypePress = useCallback(
     (userType: 'customer' | 'restaurant') => {
@@ -65,59 +68,27 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
       setUserType(selectedType);
       setSelectedUserType(selectedType);
       completeOnboarding();
-      
+
       // Navigate to Auth screen with user type
       navigation.replace('Auth', {
         screen: 'SignIn',
         params: { userType: selectedType },
       });
     }
-  }, [selectedType, setUserType, setSelectedUserType, completeOnboarding, navigation]);
+  }, [
+    selectedType,
+    setUserType,
+    setSelectedUserType,
+    completeOnboarding,
+    navigation,
+  ]);
 
-  const getCardStyle = useCallback(
-    (isSelected: boolean) => ({
-      borderRadius: 20,
-      backgroundColor: colors.surfaceVariant,
-      borderWidth: 3,
-      borderColor: isSelected ? colors.primary : 'transparent',
-      padding: 4,
-      marginBottom: 20,
-      overflow: 'hidden',
-      elevation: isSelected ? 8 : 2,
-      shadowColor: isSelected ? colors.primary : '#000',
-      shadowOffset: { width: 0, height: isSelected ? 4 : 2 },
-      shadowOpacity: isSelected ? 0.3 : 0.1,
-      shadowRadius: isSelected ? 8 : 4,
-    }),
-    [colors],
-  );
-
-  const getButtonStyle = useCallback(
-    (isSelected: boolean) => ({
-      borderRadius: 30,
-      backgroundColor: isSelected ? colors.primary : colors.surfaceVariant,
-      elevation: isSelected ? 4 : 0,
-      shadowColor: isSelected ? colors.primary : 'transparent',
-      shadowOffset: { width: 0, height: isSelected ? 2 : 0 },
-      shadowOpacity: isSelected ? 0.3 : 0,
-      shadowRadius: isSelected ? 4 : 0,
-    }),
-    [colors],
-  );
-
-  const getButtonLabelStyle = useCallback(
-    (isSelected: boolean) => ({
-      fontSize: 18,
-      fontWeight: '600' as const,
-      color: isSelected ? 'white' : '#9CA3AF',
-    }),
-    [],
-  );
+  // Removed style functions - using inline styles for better performance
 
   // Responsive dimensions
-  const cardHeight = Math.min(SCREEN_HEIGHT * 0.28, 220);
-  const cardWidth = SCREEN_WIDTH - 48;
-  const imageHeight = cardHeight - 60; // Account for text and padding
+  const cardWidth = SCREEN_WIDTH - 32; // Reduced padding
+  const cardHeight = Math.min(SCREEN_HEIGHT * 0.35, 280); // Increased height
+  const imageHeight = cardHeight - 80; // More space for text
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
@@ -128,21 +99,23 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
         backgroundColor={colors.background}
       />
 
-      <View
-        style={{
-          flex: 1,
-          paddingHorizontal: 24,
-          paddingTop: 40,
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingTop: 20, // Reduced top padding
           paddingBottom: 32,
+          minHeight: SCREEN_HEIGHT - 100,
         }}
+        showsVerticalScrollIndicator={false}
       >
         {/* Header */}
-        <View style={{ marginBottom: 40 }}>
+        <View style={{ marginBottom: 32 }}>
           <Text
             style={{
-              fontSize: 32,
+              fontSize: 28,
               fontWeight: 'bold',
-              marginBottom: 12,
+              marginBottom: 8,
               color: colors.onBackground,
               textAlign: 'center',
             }}
@@ -151,10 +124,10 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
           </Text>
           <Text
             style={{
-              fontSize: 18,
+              fontSize: 16,
               color: colors.onBackground,
               textAlign: 'center',
-              opacity: 0.8,
+              opacity: 0.7,
             }}
           >
             {t('choose_your_role')}
@@ -162,35 +135,42 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
         </View>
 
         {/* User Type Cards */}
-        <View style={{ flex: 1, justifyContent: 'center', paddingVertical: 20 }}>
+        <View style={{ gap: 24 }}> {/* Proper spacing between cards */}
           {userTypes.map((type, index) => (
             <TouchableOpacity
               key={type.id}
               activeOpacity={0.8}
               style={[
-                getCardStyle(selectedType === type.id),
                 {
                   height: cardHeight,
                   width: cardWidth,
                   alignSelf: 'center',
+                  borderRadius: 20,
+                  backgroundColor: colors.surface,
+                  borderWidth: 3,
+                  borderColor: selectedType === type.id ? colors.primary : 'transparent',
+                  overflow: 'hidden',
+                  elevation: selectedType === type.id ? 8 : 3,
+                  shadowColor: selectedType === type.id ? colors.primary : '#000',
+                  shadowOffset: { width: 0, height: selectedType === type.id ? 4 : 2 },
+                  shadowOpacity: selectedType === type.id ? 0.3 : 0.1,
+                  shadowRadius: selectedType === type.id ? 8 : 4,
                 },
               ]}
               onPress={() => handleUserTypePress(type.id)}
             >
-              {/* Image Container */}
-              <View 
+              {/* Image Container - Full height, proper width */}
+              <View
                 style={{
                   height: imageHeight,
                   width: '100%',
-                  borderRadius: 16,
-                  overflow: 'hidden',
                   position: 'relative',
                 }}
               >
                 <Image
                   source={type.image}
-                  style={{ 
-                    width: '100%', 
+                  style={{
+                    width: '100%',
                     height: '100%',
                   }}
                   resizeMode="cover"
@@ -201,8 +181,8 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
                   <View
                     style={{
                       position: 'absolute',
-                      top: 12,
-                      right: 12,
+                      top: 16,
+                      right: 16,
                       backgroundColor: colors.primary,
                       borderRadius: 20,
                       padding: 8,
@@ -216,34 +196,30 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
                     <Ionicons name="checkmark" size={20} color="white" />
                   </View>
                 )}
-
-                {/* Gradient overlay for better text readability */}
-                <View
-                  style={{
-                    position: 'absolute',
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    height: 60,
-                    backgroundColor: 'rgba(0,0,0,0.3)',
-                  }}
-                />
               </View>
 
-              {/* Title */}
+              {/* Title Container - Clean rounded rectangle */}
               <View
                 style={{
-                  paddingHorizontal: 16,
-                  paddingVertical: 12,
+                  flex: 1,
+                  backgroundColor: colors.surface,
+                  paddingHorizontal: 20,
+                  paddingVertical: 16,
                   alignItems: 'center',
+                  justifyContent: 'center',
+                  borderBottomLeftRadius: 17,
+                  borderBottomRightRadius: 17,
                 }}
               >
                 <Text
                   style={{
-                    fontSize: 20,
+                    fontSize: 22,
                     fontWeight: 'bold',
                     textAlign: 'center',
-                    color: selectedType === type.id ? colors.primary : colors.onSurface,
+                    color:
+                      selectedType === type.id
+                        ? colors.primary
+                        : colors.onSurface,
                   }}
                 >
                   {t(type.title)}
@@ -254,14 +230,26 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
         </View>
 
         {/* Continue Button */}
-        <View style={{ paddingTop: 32 }}>
+        <View style={{ paddingTop: 40 }}>
           <Button
             mode="contained"
             onPress={handleContinue}
             disabled={!selectedType}
             contentStyle={{ paddingVertical: 16 }}
-            style={getButtonStyle(!!selectedType)}
-            labelStyle={getButtonLabelStyle(!!selectedType)}
+            style={{
+              borderRadius: 30,
+              backgroundColor: selectedType ? colors.primary : colors.surfaceVariant,
+              elevation: selectedType ? 4 : 0,
+              shadowColor: selectedType ? colors.primary : 'transparent',
+              shadowOffset: { width: 0, height: selectedType ? 2 : 0 },
+              shadowOpacity: selectedType ? 0.3 : 0,
+              shadowRadius: selectedType ? 4 : 0,
+            }}
+            labelStyle={{
+              fontSize: 18,
+              fontWeight: '600',
+              color: selectedType ? 'white' : '#9CA3AF',
+            }}
           >
             {selectedType ? t('continue') : t('select_user_type')}
           </Button>
@@ -276,11 +264,12 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
                 fontWeight: '500',
               }}
             >
-              {t('you_selected')} {selectedType === 'customer' ? t('customer') : t('restaurant')}
+              {t('you_selected')}{' '}
+              {selectedType === 'customer' ? t('customer') : t('restaurant')}
             </Text>
           )}
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };

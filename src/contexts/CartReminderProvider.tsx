@@ -15,7 +15,9 @@ const CartReminderContext = createContext<CartReminderContextType>({
 export const useCartReminderContext = () => {
   const context = useContext(CartReminderContext);
   if (!context) {
-    throw new Error('useCartReminderContext must be used within CartReminderProvider');
+    throw new Error(
+      'useCartReminderContext must be used within CartReminderProvider',
+    );
   }
   return context;
 };
@@ -51,7 +53,7 @@ export const CartReminderProvider: React.FC<CartReminderProviderProps> = memo(
       const handleAppStateChange = (nextAppState: AppStateStatus) => {
         if (isInitialized) {
           cartReminderService.handleAppStateChange(nextAppState);
-          
+
           // If app becomes active, reschedule reminders for current cart
           if (nextAppState === 'active') {
             const state = useCartStore.getState();
@@ -62,7 +64,10 @@ export const CartReminderProvider: React.FC<CartReminderProviderProps> = memo(
         }
       };
 
-      const subscription = AppState.addEventListener('change', handleAppStateChange);
+      const subscription = AppState.addEventListener(
+        'change',
+        handleAppStateChange,
+      );
       return () => subscription?.remove();
     }, [isInitialized, scheduleCartReminders]);
 
@@ -70,8 +75,11 @@ export const CartReminderProvider: React.FC<CartReminderProviderProps> = memo(
     useEffect(() => {
       return () => {
         if (isInitialized) {
-          cartReminderService.cancelAllCartReminders().catch(error => {
-            console.error('Failed to cleanup cart reminders on unmount:', error);
+          cartReminderService.cancelAllCartReminders().catch((error) => {
+            console.error(
+              'Failed to cleanup cart reminders on unmount:',
+              error,
+            );
           });
         }
       };
@@ -81,7 +89,7 @@ export const CartReminderProvider: React.FC<CartReminderProviderProps> = memo(
       () => ({
         isInitialized,
       }),
-      [isInitialized]
+      [isInitialized],
     );
 
     return (
@@ -89,7 +97,7 @@ export const CartReminderProvider: React.FC<CartReminderProviderProps> = memo(
         {children}
       </CartReminderContext.Provider>
     );
-  }
+  },
 );
 
 CartReminderProvider.displayName = 'CartReminderProvider';

@@ -7,7 +7,10 @@ class RestaurantNotificationService extends NotificationService {
   }
 
   // Restaurant-specific order notifications
-  async notifyNewOrder(orderId: string, customerName?: string): Promise<string> {
+  async notifyNewOrder(
+    orderId: string,
+    customerName?: string,
+  ): Promise<string> {
     return this.sendOrderNotification({
       orderId,
       status: 'pending',
@@ -15,7 +18,10 @@ class RestaurantNotificationService extends NotificationService {
     });
   }
 
-  async notifyOrderConfirmed(orderId: string, customerName?: string): Promise<string> {
+  async notifyOrderConfirmed(
+    orderId: string,
+    customerName?: string,
+  ): Promise<string> {
     return this.sendOrderNotification({
       orderId,
       status: 'confirmed',
@@ -23,7 +29,10 @@ class RestaurantNotificationService extends NotificationService {
     });
   }
 
-  async notifyOrderPreparing(orderId: string, customerName?: string): Promise<string> {
+  async notifyOrderPreparing(
+    orderId: string,
+    customerName?: string,
+  ): Promise<string> {
     return this.sendOrderNotification({
       orderId,
       status: 'preparing',
@@ -31,7 +40,10 @@ class RestaurantNotificationService extends NotificationService {
     });
   }
 
-  async notifyOrderReady(orderId: string, customerName?: string): Promise<string> {
+  async notifyOrderReady(
+    orderId: string,
+    customerName?: string,
+  ): Promise<string> {
     return this.sendOrderNotification({
       orderId,
       status: 'ready',
@@ -39,7 +51,10 @@ class RestaurantNotificationService extends NotificationService {
     });
   }
 
-  async notifyOrderPickedUp(orderId: string, customerName?: string): Promise<string> {
+  async notifyOrderPickedUp(
+    orderId: string,
+    customerName?: string,
+  ): Promise<string> {
     return this.sendOrderNotification({
       orderId,
       status: 'picked_up',
@@ -47,7 +62,10 @@ class RestaurantNotificationService extends NotificationService {
     });
   }
 
-  async notifyOrderDelivered(orderId: string, customerName?: string): Promise<string> {
+  async notifyOrderDelivered(
+    orderId: string,
+    customerName?: string,
+  ): Promise<string> {
     return this.sendOrderNotification({
       orderId,
       status: 'delivered',
@@ -55,7 +73,10 @@ class RestaurantNotificationService extends NotificationService {
     });
   }
 
-  async notifyOrderCancelled(orderId: string, customerName?: string): Promise<string> {
+  async notifyOrderCancelled(
+    orderId: string,
+    customerName?: string,
+  ): Promise<string> {
     return this.sendOrderNotification({
       orderId,
       status: 'cancelled',
@@ -64,7 +85,10 @@ class RestaurantNotificationService extends NotificationService {
   }
 
   // Restaurant-specific business notifications
-  async notifyDailyReport(totalOrders: number, totalRevenue: number): Promise<string> {
+  async notifyDailyReport(
+    totalOrders: number,
+    totalRevenue: number,
+  ): Promise<string> {
     return this.sendLocalNotification({
       title: '📊 Daily Report',
       body: `Today: ${totalOrders} orders, $${totalRevenue.toFixed(2)} revenue`,
@@ -102,7 +126,10 @@ class RestaurantNotificationService extends NotificationService {
   }
 
   // Restaurant-specific promotions
-  async notifyPromotionPerformance(promotionName: string, ordersCount: number): Promise<string> {
+  async notifyPromotionPerformance(
+    promotionName: string,
+    ordersCount: number,
+  ): Promise<string> {
     return this.sendPromotionNotification(
       'Promotion Update',
       `Your "${promotionName}" promotion has generated ${ordersCount} orders today!`,
@@ -115,7 +142,7 @@ class RestaurantNotificationService extends NotificationService {
       'Menu Update',
       'Remember to update your menu for today!',
       minutesFromNow,
-      { type: 'menu_reminder' }
+      { type: 'menu_reminder' },
     );
   }
 
@@ -124,7 +151,7 @@ class RestaurantNotificationService extends NotificationService {
       'Check Orders',
       'You have pending orders that need attention.',
       minutesFromNow,
-      { type: 'order_check_reminder' }
+      { type: 'order_check_reminder' },
     );
   }
 
@@ -133,7 +160,7 @@ class RestaurantNotificationService extends NotificationService {
       'Business Hours',
       'Your restaurant will close soon. Prepare for closing.',
       minutesFromNow,
-      { type: 'business_hours_reminder' }
+      { type: 'business_hours_reminder' },
     );
   }
 
@@ -144,9 +171,9 @@ class RestaurantNotificationService extends NotificationService {
 
   // Cancel business reminders
   async cancelBusinessReminders(): Promise<void> {
-    await this.cancelNotificationsByData({ 
+    await this.cancelNotificationsByData({
       userType: 'restaurant',
-      type: 'menu_reminder'
+      type: 'menu_reminder',
     });
   }
 

@@ -28,7 +28,7 @@ npx expo start
 
 # Platform-specific development
 npm run android    # Start Android development
-npm run ios        # Start iOS development  
+npm run ios        # Start iOS development
 npm run web        # Start web development
 
 # Code quality
@@ -73,6 +73,7 @@ npm run validate:translations  # Validate translation consistency
 Food Rush is a comprehensive React Native food delivery mobile application that connects customers with restaurants for seamless food ordering and delivery services.
 
 **Key responsibilities:**
+
 - Customer food ordering and delivery tracking
 - Restaurant menu management and order processing
 - Real-time order status updates and notifications
@@ -83,6 +84,7 @@ Food Rush is a comprehensive React Native food delivery mobile application that 
 ## 🏗️ Architecture Overview
 
 ### System Context
+
 ```
 [Customer Mobile App] → [Food Rush Backend API] → [Restaurant Dashboard]
                               ↓
@@ -92,6 +94,7 @@ Food Rush is a comprehensive React Native food delivery mobile application that 
 ```
 
 ### Key Components
+
 - **Authentication System** - JWT-based auth with OTP verification for both customers and restaurants
 - **Navigation System** - Type-safe React Navigation with role-based routing (customer/restaurant flows)
 - **State Management** - Zustand stores for client state, TanStack Query for server state with caching
@@ -100,6 +103,7 @@ Food Rush is a comprehensive React Native food delivery mobile application that 
 - **Notification System** - Expo notifications with cart reminders and order updates
 
 ### Data Flow
+
 1. **User Authentication** - Login/signup with OTP verification, JWT token storage
 2. **App Initialization** - Hydrate stores, check auth state, determine user type (customer/restaurant)
 3. **Navigation Setup** - Route to appropriate app flow based on authentication and user type
@@ -150,30 +154,32 @@ food-rush/
 
 ### Key Files to Know
 
-| File | Purpose | When You'd Touch It |
-|------|---------|---------------------|
-| `App.tsx` | Application entry point with providers | Adding global providers or initialization |
-| `src/navigation/RootNavigator.tsx` | Main navigation logic and routing | Adding new screens or navigation flows |
-| `src/contexts/AppContextProvider.tsx` | Context provider hierarchy | Adding new global contexts |
-| `package.json` | Dependencies and build scripts | Adding new libraries or scripts |
-| `app.json` | Expo configuration and permissions | Configuring app metadata or permissions |
-| `src/stores/customerStores/AppStore.ts` | Global app state management | Managing theme, onboarding, user type |
-| `src/services/queryClient.ts` | API client configuration | Configuring API behavior and caching |
-| `src/types/index.ts` | Core type definitions | Adding new data types or interfaces |
-| `src/locales/en/translation.json` | English translations | Adding new translatable text |
-| `tailwind.config.js` | Styling configuration | Customizing design system |
+| File                                    | Purpose                                | When You'd Touch It                       |
+| --------------------------------------- | -------------------------------------- | ----------------------------------------- |
+| `App.tsx`                               | Application entry point with providers | Adding global providers or initialization |
+| `src/navigation/RootNavigator.tsx`      | Main navigation logic and routing      | Adding new screens or navigation flows    |
+| `src/contexts/AppContextProvider.tsx`   | Context provider hierarchy             | Adding new global contexts                |
+| `package.json`                          | Dependencies and build scripts         | Adding new libraries or scripts           |
+| `app.json`                              | Expo configuration and permissions     | Configuring app metadata or permissions   |
+| `src/stores/customerStores/AppStore.ts` | Global app state management            | Managing theme, onboarding, user type     |
+| `src/services/queryClient.ts`           | API client configuration               | Configuring API behavior and caching      |
+| `src/types/index.ts`                    | Core type definitions                  | Adding new data types or interfaces       |
+| `src/locales/en/translation.json`       | English translations                   | Adding new translatable text              |
+| `tailwind.config.js`                    | Styling configuration                  | Customizing design system                 |
 
 ---
 
 ## 🔧 Technology Stack
 
 ### Core Technologies
+
 - **Language:** TypeScript (5.8.3) - Provides type safety and enhanced developer experience
 - **Framework:** React Native (0.79.5) with Expo (53.0.22) - Cross-platform mobile development
 - **State Management:** Zustand (5.0.7) - Lightweight state management with persistence
 - **Server State:** TanStack Query (5.85.0) - Data fetching, caching, and synchronization
 
 ### Key Libraries
+
 - **React Navigation (7.x)** - Type-safe navigation with stack and tab navigators
 - **NativeWind (4.1.23)** - Tailwind CSS for React Native styling
 - **React Native Paper (5.14.5)** - Material Design components for consistent UI
@@ -182,6 +188,7 @@ food-rush/
 - **Expo Modules** - Location services, notifications, image picker, secure storage
 
 ### Development Tools
+
 - **ESLint** - Code linting with Expo and TypeScript configurations
 - **Prettier** - Code formatting with consistent style rules
 - **Jest** - Testing framework with Expo preset
@@ -193,11 +200,13 @@ food-rush/
 ## 🌐 External Dependencies
 
 ### Required Services
+
 - **Backend API** - RESTful API for user management, orders, restaurants, and payments
 - **Push Notification Service** - Expo push notifications for order updates and cart reminders
 - **Location Services** - Expo Location for geocoding and restaurant proximity
 
 ### Optional Integrations
+
 - **Payment Gateways** - MTN Mobile Money and Orange Money for payment processing
 - **Image Storage** - Cloud storage for restaurant and food images
 - **Analytics Service** - App usage and performance tracking
@@ -219,6 +228,7 @@ ANALYTICS_KEY=        # Analytics service key (if configured)
 ## 🔄 Common Workflows
 
 ### Customer Food Ordering Flow
+
 1. **Browse Restaurants** - View nearby restaurants with ratings and delivery info
 2. **Select Restaurant** - Browse menu items with categories and search functionality
 3. **Add to Cart** - Select items with quantities and special instructions
@@ -228,6 +238,7 @@ ANALYTICS_KEY=        # Analytics service key (if configured)
 **Code path:** `HomeScreen` → `RestaurantDetailScreen` → `FoodDetailsScreen` → `CartScreen` → `CheckOutScreen` → `OrderTrackingScreen`
 
 ### Restaurant Order Management Flow
+
 1. **Receive Orders** - Real-time order notifications with order details
 2. **Order Processing** - Accept/reject orders, update preparation status
 3. **Menu Management** - Add/edit menu items, categories, and availability
@@ -240,12 +251,14 @@ ANALYTICS_KEY=        # Analytics service key (if configured)
 ## 📈 Performance & Scale
 
 ### Performance Considerations
+
 - **State Management** - Zustand with optimized selectors to prevent unnecessary re-renders
 - **Image Optimization** - Expo Image with caching and lazy loading for restaurant/food images
 - **List Virtualization** - FlatList with performance optimizations for large restaurant/menu lists
 - **Bundle Optimization** - Metro bundler with tree shaking and code splitting
 
 ### Monitoring
+
 - **Error Tracking** - ErrorBoundary components for graceful error handling
 - **Performance Context** - App state monitoring for lifecycle events and performance metrics
 - **Network State** - Connection monitoring with offline support indicators
@@ -255,14 +268,16 @@ ANALYTICS_KEY=        # Analytics service key (if configured)
 ## 🚨 Things to Be Careful About
 
 ### 🔒 Security Considerations
+
 - **Authentication** - JWT tokens stored securely with Expo SecureStore, automatic refresh handling
 - **Data Validation** - Yup schemas for form validation, TypeScript for compile-time safety
 - **API Security** - Request/response interceptors for authentication headers and error handling
 
 ### Development Notes
+
 - **Platform Compatibility** - Code must work across iOS, Android, and Web platforms
 - **Translation Requirements** - All user-facing text must be internationalized with i18next
 - **State Persistence** - Critical state (auth, cart, preferences) persisted with AsyncStorage
 - **Navigation Types** - Maintain type safety across all navigation flows and screen parameters
 
-*Updated at: 2025-01-27 UTC*
+_Updated at: 2025-01-27 UTC_

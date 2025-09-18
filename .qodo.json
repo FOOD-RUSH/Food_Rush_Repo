@@ -78,11 +78,7 @@
     "coverage": {
       "enabled": true,
       "threshold": 80,
-      "exclude": [
-        "src/types/**",
-        "src/constants/**",
-        "**/*.d.ts"
-      ]
+      "exclude": ["src/types/**", "src/constants/**", "**/*.d.ts"]
     }
   },
   "linting": {

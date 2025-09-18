@@ -1,10 +1,10 @@
 import React from 'react';
-import { 
-  Ionicons, 
-  MaterialIcons, 
-  MaterialCommunityIcons, 
-  AntDesign, 
-  FontAwesome5 
+import {
+  Ionicons,
+  MaterialIcons,
+  MaterialCommunityIcons,
+  AntDesign,
+  FontAwesome5,
 } from '@expo/vector-icons';
 
 // Define the icon sets we actually use
@@ -38,19 +38,16 @@ export const Icon: React.FC<IconProps> = ({
   style,
 }) => {
   const IconComponent = ICON_SETS[set];
-  
+
   if (!IconComponent) {
-    console.warn(`Icon set "${set}" not found. Available sets: ${Object.keys(ICON_SETS).join(', ')}`);
+    console.warn(
+      `Icon set "${set}" not found. Available sets: ${Object.keys(ICON_SETS).join(', ')}`,
+    );
     return null;
   }
 
   return (
-    <IconComponent 
-      name={name as any} 
-      size={size} 
-      color={color} 
-      style={style}
-    />
+    <IconComponent name={name as any} size={size} color={color} style={style} />
   );
 };
 
@@ -63,9 +60,9 @@ export const MaterialIcon: React.FC<Omit<IconProps, 'set'>> = (props) => (
   <Icon {...props} set="material" />
 );
 
-export const MaterialCommunityIcon: React.FC<Omit<IconProps, 'set'>> = (props) => (
-  <Icon {...props} set="materialCommunity" />
-);
+export const MaterialCommunityIcon: React.FC<Omit<IconProps, 'set'>> = (
+  props,
+) => <Icon {...props} set="materialCommunity" />;
 
 export const AntDesignIcon: React.FC<Omit<IconProps, 'set'>> = (props) => (
   <Icon {...props} set="antDesign" />
@@ -76,12 +73,12 @@ export const FontAwesome5Icon: React.FC<Omit<IconProps, 'set'>> = (props) => (
 );
 
 // Export the icon sets for backward compatibility
-export { 
-  Ionicons, 
-  MaterialIcons, 
-  MaterialCommunityIcons, 
-  AntDesign, 
-  FontAwesome5 
+export {
+  Ionicons,
+  MaterialIcons,
+  MaterialCommunityIcons,
+  AntDesign,
+  FontAwesome5,
 };
 
 export default Icon;

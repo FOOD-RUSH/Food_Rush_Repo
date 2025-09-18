@@ -9,11 +9,11 @@ export interface AddressManagerResult {
   isLoadingLocation: boolean;
   locationError: string | null;
   hasLocationPermission: boolean;
-  
+
   // Address state
   savedAddresses: SavedAddress[];
   isProcessing: boolean;
-  
+
   // Actions
   getCurrentLocationForAddress: () => Promise<{
     success: boolean;
@@ -28,7 +28,7 @@ export interface AddressManagerResult {
 
 export const useAddressManager = (): AddressManagerResult => {
   const [isProcessing, setIsProcessing] = useState(false);
-  
+
   // Location hooks
   const {
     location: currentLocation,
@@ -62,11 +62,13 @@ export const useAddressManager = (): AddressManagerResult => {
 
       // Get current location
       const success = await getCurrentLocation(true);
-      
+
       if (success && currentLocation) {
         return {
           success: true,
-          address: currentLocation.formattedAddress || `${currentLocation.city}, Cameroon`,
+          address:
+            currentLocation.formattedAddress ||
+            `${currentLocation.city}, Cameroon`,
           coordinates: {
             latitude: currentLocation.latitude,
             longitude: currentLocation.longitude,
@@ -87,7 +89,12 @@ export const useAddressManager = (): AddressManagerResult => {
     } finally {
       setIsProcessing(false);
     }
-  }, [hasLocationPermission, getCurrentLocation, currentLocation, locationError]);
+  }, [
+    hasLocationPermission,
+    getCurrentLocation,
+    currentLocation,
+    locationError,
+  ]);
 
   const requestLocationPermission = useCallback(async (): Promise<boolean> => {
     return new Promise((resolve) => {
@@ -103,47 +110,59 @@ export const useAddressManager = (): AddressManagerResult => {
         },
         () => {
           resolve(false);
-        }
+        },
       );
     });
-  }, [hasLocationPermission, showLocationPermissionDialog, requestPermissionWithLocation]);
+  }, [
+    hasLocationPermission,
+    showLocationPermissionDialog,
+    requestPermissionWithLocation,
+  ]);
 
-  const addAddressFromCurrentLocation = useCallback(async (label: string): Promise<boolean> => {
-    try {
-      setIsProcessing(true);
+  const addAddressFromCurrentLocation = useCallback(
+    async (label: string): Promise<boolean> => {
+      try {
+        setIsProcessing(true);
 
-      // First ensure we have permission
-      const hasPermission = await requestLocationPermission();
-      if (!hasPermission) {
+        // First ensure we have permission
+        const hasPermission = await requestLocationPermission();
+        if (!hasPermission) {
+          return false;
+        }
+
+        // Get current location
+        const locationResult = await getCurrentLocationForAddress();
+        if (!locationResult.success) {
+          return false;
+        }
+
+        // Add the address
+        addSavedAddress({
+          label,
+          street: locationResult.address || '',
+          fullAddress: locationResult.address || '',
+          coordinates: locationResult.coordinates || {
+            latitude: 3.8667,
+            longitude: 11.5167,
+          },
+          isDefault: savedAddresses.length === 0, // Make first address default
+        });
+
+        return true;
+      } catch (error) {
+        console.error('Error adding address from current location:', error);
         return false;
+      } finally {
+        setIsProcessing(false);
       }
-
-      // Get current location
-      const locationResult = await getCurrentLocationForAddress();
-      if (!locationResult.success) {
-        return false;
-      }
-
-      // Add the address
-      addSavedAddress({
-        label,
-        street: locationResult.address || '',
-        fullAddress: locationResult.address || '',
-        coordinates: locationResult.coordinates || {
-          latitude: 3.8667,
-          longitude: 11.5167,
-        },
-        isDefault: savedAddresses.length === 0, // Make first address default
-      });
-
-      return true;
-    } catch (error) {
-      console.error('Error adding address from current location:', error);
-      return false;
-    } finally {
-      setIsProcessing(false);
-    }
-  }, [requestLocationPermission, getCurrentLocationForAddress, addSavedAddress, savedAddresses.length]);
+    },
+    [
+      requestLocationPermission,
+      getCurrentLocationForAddress,
+      addSavedAddress,
+      savedAddresses.length,
+    ],
+  );
 
   const handleRefreshLocation = useCallback(async (): Promise<boolean> => {
     try {
@@ -160,11 +179,11 @@ export const useAddressManager = (): AddressManagerResult => {
     isLoadingLocation,
     locationError,
     hasLocationPermission,
-    
+
     // Address state
     savedAddresses,
     isProcessing,
-    
+
     // Actions
     getCurrentLocationForAddress,
     requestLocationPermission,

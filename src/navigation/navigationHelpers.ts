@@ -89,7 +89,7 @@ export function handleDeepLink(url: string) {
       const stepParam = path.split('/')[2] || searchParams.get('step');
       const step = stepParam ? parseInt(stepParam, 10) : undefined;
       const skipWelcome = searchParams.get('skipWelcome') === 'true';
-      
+
       navigateFromService('Onboarding', {
         step: step && !isNaN(step) ? step : undefined,
         skipWelcome,
@@ -100,7 +100,7 @@ export function handleDeepLink(url: string) {
     if (path === '/user-type-selection') {
       const fromOnboarding = searchParams.get('fromOnboarding') === 'true';
       const returnTo = searchParams.get('returnTo') as keyof RootStackParamList;
-      
+
       navigateFromService('UserTypeSelection', {
         fromOnboarding,
         returnTo: returnTo || undefined,
@@ -116,7 +116,7 @@ export function handleDeepLink(url: string) {
       }
       return;
     }
-    
+
     // Food details deep links
     if (path.startsWith('/food/')) {
       const segments = path.split('/');
@@ -138,7 +138,11 @@ export function handleDeepLink(url: string) {
     }
 
     // Auth deep links
-    if (path.startsWith('/auth/') || path.startsWith('/signin') || path.startsWith('/signup')) {
+    if (
+      path.startsWith('/auth/') ||
+      path.startsWith('/signin') ||
+      path.startsWith('/signup')
+    ) {
       navigateFromService('Auth');
       return;
     }
@@ -158,7 +162,10 @@ export const ServiceNavigation = {
     navigateFromService('Onboarding', { step, skipWelcome });
   },
 
-  showUserTypeSelection: (fromOnboarding?: boolean, returnTo?: keyof RootStackParamList) => {
+  showUserTypeSelection: (
+    fromOnboarding?: boolean,
+    returnTo?: keyof RootStackParamList,
+  ) => {
     navigateFromService('UserTypeSelection', { fromOnboarding, returnTo });
   },
 
@@ -211,8 +218,14 @@ export const createNavigationHelpers = <T extends any>(navigation: T) => ({
     (navigation as any).navigate('Onboarding', { step, skipWelcome });
   },
 
-  goToUserTypeSelection: (fromOnboarding?: boolean, returnTo?: keyof RootStackParamList) => {
-    (navigation as any).navigate('UserTypeSelection', { fromOnboarding, returnTo });
+  goToUserTypeSelection: (
+    fromOnboarding?: boolean,
+    returnTo?: keyof RootStackParamList,
+  ) => {
+    (navigation as any).navigate('UserTypeSelection', {
+      fromOnboarding,
+      returnTo,
+    });
   },
 
   goToAuth: () => {

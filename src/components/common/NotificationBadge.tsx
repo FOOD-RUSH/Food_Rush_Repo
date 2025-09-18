@@ -51,7 +51,8 @@ const NotificationBadge: React.FC<NotificationBadgeProps> = ({
   const sizeStyles = getSizeStyles();
 
   // Format count display
-  const displayCount = unreadCount > maxCount ? `${maxCount}+` : unreadCount.toString();
+  const displayCount =
+    unreadCount > maxCount ? `${maxCount}+` : unreadCount.toString();
 
   return (
     <View

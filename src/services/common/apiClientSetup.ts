@@ -1,5 +1,5 @@
 // Setup file to configure the unified API client with auth store integration
-import { apiClient } from '../apiClient';
+import { apiClient } from '../shared/apiClient';
 
 // This function should be called during app initialization
 export const setupApiClient = () => {

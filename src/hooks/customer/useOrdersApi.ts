@@ -36,10 +36,16 @@ export const useActiveOrders = () => {
     queryFn: async () => {
       // Get all orders and filter on frontend since backend doesn't support comma-separated status
       const allOrders = await OrderApi.getMyOrders({ limit: 50 });
-      
+
       // Filter for active orders (not completed/delivered/cancelled)
-      const activeStatuses = ['pending', 'confirmed', 'preparing', 'ready', 'picked_up'];
-      return allOrders.filter(order => activeStatuses.includes(order.status));
+      const activeStatuses = [
+        'pending',
+        'confirmed',
+        'preparing',
+        'ready',
+        'picked_up',
+      ];
+      return allOrders.filter((order) => activeStatuses.includes(order.status));
     },
     staleTime: 15 * 1000, // 15 seconds for active orders
     gcTime: CACHE_CONFIG.CACHE_TIME,
@@ -56,10 +62,12 @@ export const useCompletedOrders = (limit = 50) => {
     queryFn: async () => {
       // Get all orders and filter on frontend
       const allOrders = await OrderApi.getMyOrders({ limit });
-      
+
       // Filter for completed orders
       const completedStatuses = ['delivered', 'cancelled'];
-      return allOrders.filter(order => completedStatuses.includes(order.status));
+      return allOrders.filter((order) =>
+        completedStatuses.includes(order.status),
+      );
     },
     staleTime: 5 * 60 * 1000, // 5 minutes for completed orders
     gcTime: 10 * 60 * 1000,

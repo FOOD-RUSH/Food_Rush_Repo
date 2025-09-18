@@ -1,11 +1,11 @@
 /**
  * Navigation Type Validation
- * 
+ *
  * This file serves as a type-checking utility to ensure all navigation types
  * are properly integrated and no TypeScript errors occur in navigation setup.
  */
 
-import type { 
+import type {
   RootStackParamList,
   AuthStackParamList,
   CustomerTabParamList,
@@ -26,14 +26,14 @@ type AssertNavigationTypes = {
   // Root stack validation
   rootStackNavigationProp: NavigationProp<RootStackParamList>;
   rootStackRouteProp: RouteProp<RootStackParamList>;
-  
+
   // Screen props validation
   onboardingProps: OnboardingScreenProps;
   userTypeSelectionProps: UserTypeSelectionScreenProps;
   authScreenProps: AuthStackScreenProps<'SignIn'>;
   customerTabProps: CustomerTabScreenProps<'Home'>;
   restaurantTabProps: RestaurantTabScreenProps<'Orders'>;
-  
+
   // Specific screen validations
   onboardingRoute: RouteProp<RootStackParamList, 'Onboarding'>;
   userTypeSelectionRoute: RouteProp<RootStackParamList, 'UserTypeSelection'>;
@@ -76,7 +76,10 @@ type DeepLinkPatterns = {
 // Navigation helper type validation
 type NavigationHelperTypes = {
   navigateToOnboarding: (step?: number, skipWelcome?: boolean) => void;
-  navigateToUserTypeSelection: (fromOnboarding?: boolean, returnTo?: keyof RootStackParamList) => void;
+  navigateToUserTypeSelection: (
+    fromOnboarding?: boolean,
+    returnTo?: keyof RootStackParamList,
+  ) => void;
   navigateToAuth: () => void;
   navigateToCustomerApp: () => void;
   navigateToRestaurantApp: () => void;
@@ -102,15 +105,19 @@ export const isOnboardingParams = (params: any): params is OnboardingParams => {
     params === undefined ||
     (typeof params === 'object' &&
       (params.step === undefined || typeof params.step === 'number') &&
-      (params.skipWelcome === undefined || typeof params.skipWelcome === 'boolean'))
+      (params.skipWelcome === undefined ||
+        typeof params.skipWelcome === 'boolean'))
   );
 };
 
-export const isUserTypeSelectionParams = (params: any): params is UserTypeSelectionParams => {
+export const isUserTypeSelectionParams = (
+  params: any,
+): params is UserTypeSelectionParams => {
   return (
     params === undefined ||
     (typeof params === 'object' &&
-      (params.fromOnboarding === undefined || typeof params.fromOnboarding === 'boolean') &&
+      (params.fromOnboarding === undefined ||
+        typeof params.fromOnboarding === 'boolean') &&
       (params.returnTo === undefined || typeof params.returnTo === 'string'))
   );
 };

@@ -65,14 +65,14 @@ const EmptyState: React.FC<EmptyStateProps> = ({
         color={colors.onSurfaceVariant}
         style={{ marginBottom: 16 }}
       />
-      
+
       <Text
         className={`${sizeStyles.titleSize} font-semibold text-center mb-2`}
         style={{ color: colors.onSurface }}
       >
         {title}
       </Text>
-      
+
       <Text
         className={`${sizeStyles.descriptionSize} text-center mb-4`}
         style={{ color: colors.onSurfaceVariant }}
@@ -87,10 +87,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
           style={{ backgroundColor: colors.primary }}
           activeOpacity={0.8}
         >
-          <Text
-            className="font-semibold"
-            style={{ color: colors.onPrimary }}
-          >
+          <Text className="font-semibold" style={{ color: colors.onPrimary }}>
             {actionText}
           </Text>
         </TouchableOpacity>

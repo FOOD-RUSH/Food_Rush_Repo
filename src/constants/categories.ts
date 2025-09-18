@@ -90,8 +90,10 @@ export const AllCategories: FoodCategoryProps[] = [
 ];
 
 // Helper function to get category by title
-export const getCategoryByTitle = (title: string): FoodCategoryProps | undefined => {
-  return AllCategories.find(category => category.title === title);
+export const getCategoryByTitle = (
+  title: string,
+): FoodCategoryProps | undefined => {
+  return AllCategories.find((category) => category.title === title);
 };
 
 // Helper function to get main categories for home screen
@@ -107,26 +109,28 @@ export const getAllCategories = (): FoodCategoryProps[] => {
 // Icon mapping for API categories
 const categoryIconMap: Record<string, any> = {
   'local-dishes': FoodCategory.bread,
-  'breakfast': FoodCategory.pancakes,
-  'fastfood': FoodCategory.burger,
+  breakfast: FoodCategory.pancakes,
+  fastfood: FoodCategory.burger,
   'fast-food': FoodCategory.burger,
-  'vegetarian': FoodCategory.vegetable,
-  'desserts': FoodCategory.desert,
-  'snacks': FoodCategory.french_fries,
-  'drinks': FoodCategory.drink,
-  'pizza': FoodCategory.pizza,
-  'meat': FoodCategory.meat,
-  'noodles': FoodCategory.noodles,
-  'salad': FoodCategory.salad,
-  'sandwich': FoodCategory.sandwich,
-  'taco': FoodCategory.taco,
+  vegetarian: FoodCategory.vegetable,
+  desserts: FoodCategory.desert,
+  snacks: FoodCategory.french_fries,
+  drinks: FoodCategory.drink,
+  pizza: FoodCategory.pizza,
+  meat: FoodCategory.meat,
+  noodles: FoodCategory.noodles,
+  salad: FoodCategory.salad,
+  sandwich: FoodCategory.sandwich,
+  taco: FoodCategory.taco,
   'ice-cream': FoodCategory.ice_cream,
-  'cheese': FoodCategory.cheese,
-  'croissant': FoodCategory.croissant,
+  cheese: FoodCategory.cheese,
+  croissant: FoodCategory.croissant,
 };
 
 // Function to map API categories to UI categories with icons
-export const mapApiCategoriesToUI = (apiCategories: CategoryItem[]): FoodCategoryProps[] => {
+export const mapApiCategoriesToUI = (
+  apiCategories: CategoryItem[],
+): FoodCategoryProps[] => {
   return apiCategories.map((category, index) => ({
     id: index + 1,
     value: category.value,

@@ -7,7 +7,10 @@ class CustomerNotificationService extends NotificationService {
   }
 
   // Customer-specific order notifications
-  async notifyOrderPlaced(orderId: string, restaurantName: string): Promise<string> {
+  async notifyOrderPlaced(
+    orderId: string,
+    restaurantName: string,
+  ): Promise<string> {
     return this.sendOrderNotification({
       orderId,
       status: 'pending',
@@ -15,7 +18,11 @@ class CustomerNotificationService extends NotificationService {
     });
   }
 
-  async notifyOrderConfirmed(orderId: string, restaurantName: string, estimatedTime?: number): Promise<string> {
+  async notifyOrderConfirmed(
+    orderId: string,
+    restaurantName: string,
+    estimatedTime?: number,
+  ): Promise<string> {
     return this.sendOrderNotification({
       orderId,
       status: 'confirmed',
@@ -23,9 +30,11 @@ class CustomerNotificationService extends NotificationService {
       estimatedTime,
     });
   }
-  
 
-  async notifyOrderPreparing(orderId: string, restaurantName: string): Promise<string> {
+  async notifyOrderPreparing(
+    orderId: string,
+    restaurantName: string,
+  ): Promise<string> {
     return this.sendOrderNotification({
       orderId,
       status: 'preparing',
@@ -33,7 +42,10 @@ class CustomerNotificationService extends NotificationService {
     });
   }
 
-  async notifyOrderReady(orderId: string, restaurantName: string): Promise<string> {
+  async notifyOrderReady(
+    orderId: string,
+    restaurantName: string,
+  ): Promise<string> {
     return this.sendOrderNotification({
       orderId,
       status: 'ready',
@@ -41,7 +53,10 @@ class CustomerNotificationService extends NotificationService {
     });
   }
 
-  async notifyOrderOutForDelivery(orderId: string, restaurantName: string): Promise<string> {
+  async notifyOrderOutForDelivery(
+    orderId: string,
+    restaurantName: string,
+  ): Promise<string> {
     return this.sendOrderNotification({
       orderId,
       status: 'picked_up',
@@ -49,7 +64,10 @@ class CustomerNotificationService extends NotificationService {
     });
   }
 
-  async notifyOrderDelivered(orderId: string, restaurantName: string): Promise<string> {
+  async notifyOrderDelivered(
+    orderId: string,
+    restaurantName: string,
+  ): Promise<string> {
     return this.sendOrderNotification({
       orderId,
       status: 'delivered',
@@ -57,7 +75,10 @@ class CustomerNotificationService extends NotificationService {
     });
   }
 
-  async notifyOrderCancelled(orderId: string, restaurantName: string): Promise<string> {
+  async notifyOrderCancelled(
+    orderId: string,
+    restaurantName: string,
+  ): Promise<string> {
     return this.sendOrderNotification({
       orderId,
       status: 'cancelled',
@@ -66,11 +87,18 @@ class CustomerNotificationService extends NotificationService {
   }
 
   // Customer-specific promotions
-  async notifySpecialOffer(title: string, message: string, promotionId?: string): Promise<string> {
+  async notifySpecialOffer(
+    title: string,
+    message: string,
+    promotionId?: string,
+  ): Promise<string> {
     return this.sendPromotionNotification(title, message, promotionId);
   }
 
-  async notifyDeliveryPromotion(discountPercent: number, validUntil: string): Promise<string> {
+  async notifyDeliveryPromotion(
+    discountPercent: number,
+    validUntil: string,
+  ): Promise<string> {
     return this.sendPromotionNotification(
       'Free Delivery!',
       `Get ${discountPercent}% off delivery fees. Valid until ${validUntil}`,
@@ -83,16 +111,19 @@ class CustomerNotificationService extends NotificationService {
       'Cart Reminder',
       'You have items in your cart. Complete your order now!',
       minutesFromNow,
-      { type: 'cart_reminder' }
+      { type: 'cart_reminder' },
     );
   }
 
-  async remindToReorder(favoriteRestaurant: string, minutesFromNow: number = 60): Promise<string> {
+  async remindToReorder(
+    favoriteRestaurant: string,
+    minutesFromNow: number = 60,
+  ): Promise<string> {
     return this.scheduleReminder(
       'Time to Eat!',
       `Craving something from ${favoriteRestaurant}? Order now!`,
       minutesFromNow,
-      { type: 'reorder_reminder', restaurant: favoriteRestaurant }
+      { type: 'reorder_reminder', restaurant: favoriteRestaurant },
     );
   }
 

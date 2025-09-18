@@ -19,7 +19,7 @@ export const CAMEROON_BOUNDS = {
 
 export const YAOUNDE_NEIGHBORHOODS = [
   'Bastos',
-  'Melen', 
+  'Melen',
   'Emana',
   'Essos',
   'Ngousso',
@@ -53,7 +53,10 @@ export const YAOUNDE_LANDMARKS = [
 ] as const;
 
 // Validation helper
-export const isValidCameroonCoordinate = (coord: { latitude: number; longitude: number }): boolean => {
+export const isValidCameroonCoordinate = (coord: {
+  latitude: number;
+  longitude: number;
+}): boolean => {
   return (
     coord.latitude >= CAMEROON_BOUNDS.MIN_LAT &&
     coord.latitude <= CAMEROON_BOUNDS.MAX_LAT &&

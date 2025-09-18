@@ -26,12 +26,12 @@ const ProfileHomeScreen = ({
   const handleLogout = useCallback(() => {
     try {
       console.log('Logging out user');
-      logout();
+      logoutUser();
     } catch (error) {
       console.error('Logout error:', error);
       Alert.alert(t('error'), t('failed_to_logout'));
     }
-  }, [t]);
+  }, [logoutUser, t]);
 
   const showLogoutModal = useCallback(() => {
     // Prevent multiple presentations

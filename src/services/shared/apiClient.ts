@@ -7,7 +7,6 @@ import axios, {
 import { Platform } from 'react-native';
 import TokenManager from './tokenManager';
 import { User } from '../../types';
-
 // Define error types
 export interface ApiError {
   message: string;
@@ -102,6 +101,7 @@ class ApiClient {
           if (!refreshToken) {
             // No refresh token available, user needs to login again
             await TokenManager.clearAllTokens();
+
             throw {
               message: 'Please log in again.',
               code: 'UNAUTHENTICATED',

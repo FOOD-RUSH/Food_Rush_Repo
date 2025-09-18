@@ -162,12 +162,18 @@ const RestaurantLoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
         { email: data.email, password: data.password },
         {
           onSuccess: (response) => {
+            console.log('🍽️ Restaurant Login Success - Full Response:', JSON.stringify(response, null, 2));
+            
             const responseData = response.data as RestaurantLoginResponse;
+            console.log('🍽️ Restaurant Login - Response Data:', JSON.stringify(responseData, null, 2));
+            
             if (responseData?.data?.user) {
-              const { setUser } = useAuthStore.getState();
+              const { setUser, setIsAuthenticated } = useAuthStore.getState();
 
               // ✅ Ensure all required fields in User are present
               const apiUser = responseData.data.user;
+              console.log('🍽️ Restaurant Login - API User:', JSON.stringify(apiUser, null, 2));
+              
               const user: User = {
                 id: apiUser.id,
                 email: apiUser.email,
@@ -179,9 +185,22 @@ const RestaurantLoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                 phoneNumber: apiUser.phoneNumber || '',
               };
 
+              console.log('🍽️ Restaurant Login - Setting User:', JSON.stringify(user, null, 2));
               setUser(user);
+              setIsAuthenticated(true);
+              
+              // Log auth store state after setting user
+              const authState = useAuthStore.getState();
+              console.log('🍽️ Restaurant Login - Auth Store State:', {
+                isAuthenticated: authState.isAuthenticated,
+                userType: authState.userType,
+                user: authState.user,
+              });
+              
               // User is now authenticated through the setUser call
               navigation.getParent()?.navigate('RestaurantApp');
+            } else {
+              console.error('🍽️ Restaurant Login - No user data in response');
             }
           },
           onError: (error: any) => {

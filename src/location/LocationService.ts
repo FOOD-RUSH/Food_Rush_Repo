@@ -1,6 +1,15 @@
 import * as ExpoLocation from 'expo-location';
-import { LOCATION_CONFIG, YAOUNDE_CENTER, isValidCameroonCoordinate } from './constants';
-import { Coordinates, Location, LocationResult, PermissionStatus } from './types';
+import {
+  LOCATION_CONFIG,
+  YAOUNDE_CENTER,
+  isValidCameroonCoordinate,
+} from './constants';
+import {
+  Coordinates,
+  Location,
+  LocationResult,
+  PermissionStatus,
+} from './types';
 
 class LocationService {
   private static instance: LocationService;
@@ -47,9 +56,12 @@ class LocationService {
     shouldShowRationale?: boolean;
   }> {
     const now = Date.now();
-    
+
     // Prevent spam permission requests
-    if (now - this.lastPermissionRequest < LOCATION_CONFIG.PERMISSION_COOLDOWN) {
+    if (
+      now - this.lastPermissionRequest <
+      LOCATION_CONFIG.PERMISSION_COOLDOWN
+    ) {
       const currentStatus = await this.getPermissionStatus();
       return {
         granted: currentStatus === PermissionStatus.GRANTED,
@@ -60,10 +72,11 @@ class LocationService {
     try {
       this.lastPermissionRequest = now;
       const result = await ExpoLocation.requestForegroundPermissionsAsync();
-      
-      const status = result.status === 'granted' 
-        ? PermissionStatus.GRANTED 
-        : PermissionStatus.DENIED;
+
+      const status =
+        result.status === 'granted'
+          ? PermissionStatus.GRANTED
+          : PermissionStatus.DENIED;
 
       return {
         granted: result.status === 'granted',
@@ -111,8 +124,11 @@ class LocationService {
         ExpoLocation.getCurrentPositionAsync({
           accuracy: ExpoLocation.Accuracy.Balanced,
         }),
-        new Promise<never>((_, reject) => 
-          setTimeout(() => reject(new Error('GPS timeout')), LOCATION_CONFIG.GPS_TIMEOUT)
+        new Promise<never>((_, reject) =>
+          setTimeout(
+            () => reject(new Error('GPS timeout')),
+            LOCATION_CONFIG.GPS_TIMEOUT,
+          ),
         ),
       ]);
 
@@ -148,7 +164,8 @@ class LocationService {
         fromCache: false,
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to get location';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to get location';
       console.warn('Error getting current location:', errorMessage);
       return this.getFallbackLocation(errorMessage);
     }
@@ -170,7 +187,7 @@ class LocationService {
 
       const result = geocodeResult[0];
       let exactLocation = 'Yaoundé';
-      
+
       if (result.street) {
         exactLocation = result.street;
       } else if (result.district) {

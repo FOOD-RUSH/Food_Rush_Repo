@@ -7,6 +7,7 @@ The FoodRush notification system is a complete MVP implementation that handles r
 ## Features
 
 ### ✅ Core Features
+
 - **Paginated Notification List** - Efficient loading with infinite scroll
 - **Real-time Updates** - Instant notification delivery and status updates
 - **Multiple Notification Types** - ORDER, DELIVERY, PROMOTION, SYSTEM
@@ -18,6 +19,7 @@ The FoodRush notification system is a complete MVP implementation that handles r
 - **Error Handling** - Graceful error states and retry mechanisms
 
 ### 🎯 API Integration
+
 - **GET /notifications/my** - Fetch notifications with pagination
 - **PATCH /notifications/:id/read** - Mark specific notification as read
 - **PATCH /notifications/read-all** - Mark all notifications as read
@@ -26,6 +28,7 @@ The FoodRush notification system is a complete MVP implementation that handles r
 ## Architecture
 
 ### Components Structure
+
 ```
 src/
 ├── components/
@@ -103,7 +106,7 @@ const { addNotification } = useNotificationStore();
 const testNotification = createOrderNotification(
   'order_123',
   'confirmed',
-  'Pizza Palace'
+  'Pizza Palace',
 );
 addNotification(testNotification);
 ```
@@ -111,6 +114,7 @@ addNotification(testNotification);
 ## API Response Format
 
 ### Notification List Response
+
 ```json
 {
   "status_code": 200,
@@ -139,6 +143,7 @@ addNotification(testNotification);
 ```
 
 ### Unread Count Response
+
 ```json
 {
   "status_code": 200,
@@ -150,24 +155,28 @@ addNotification(testNotification);
 ## Notification Types
 
 ### ORDER
+
 - Order confirmation
 - Order status updates
 - Order completion
 - Order cancellation
 
 ### DELIVERY
+
 - Driver assigned
 - Order picked up
 - Delivery updates
 - Delivery completion
 
 ### PROMOTION
+
 - Special offers
 - Discounts
 - Restaurant promotions
 - Seasonal deals
 
 ### SYSTEM
+
 - App updates
 - Maintenance notices
 - Account notifications
@@ -183,6 +192,7 @@ The notification system uses Zustand for state management with the following fea
 - **Performance** - Optimized selectors to prevent unnecessary re-renders
 
 ### Store Structure
+
 ```typescript
 interface NotificationState {
   notifications: Notification[];
@@ -202,6 +212,7 @@ interface NotificationState {
 The system supports multiple languages with comprehensive translations:
 
 ### English Keys
+
 - `no_notifications` - "No Notifications"
 - `mark_all_read` - "Mark All Read"
 - `just_now` - "Just now"
@@ -209,6 +220,7 @@ The system supports multiple languages with comprehensive translations:
 - `days_ago` - "{{count}}d ago"
 
 ### French Keys
+
 - `no_notifications` - "Aucune Notification"
 - `mark_all_read` - "Tout Marquer comme Lu"
 - `just_now` - "À l'instant"
@@ -218,21 +230,25 @@ The system supports multiple languages with comprehensive translations:
 ## Performance Optimizations
 
 ### 1. Pagination
+
 - Loads 20 notifications per page by default
 - Infinite scroll for seamless user experience
 - Efficient memory management
 
 ### 2. Memoization
+
 - React.memo for component optimization
 - useMemo for expensive calculations
 - useCallback for event handlers
 
 ### 3. Selective Updates
+
 - Zustand selectors prevent unnecessary re-renders
 - Optimistic updates for immediate feedback
 - Background refresh without blocking UI
 
 ### 4. Error Boundaries
+
 - Graceful error handling
 - Retry mechanisms
 - Fallback UI states
@@ -240,6 +256,7 @@ The system supports multiple languages with comprehensive translations:
 ## Testing
 
 ### Development Testing
+
 Use the `NotificationTestButton` component (only visible in development):
 
 ```typescript
@@ -250,6 +267,7 @@ import NotificationTestButton from '@/src/components/common/NotificationTestButt
 ```
 
 ### Manual Testing Scenarios
+
 1. **Empty State** - No notifications
 2. **Loading State** - Initial load and pagination
 3. **Error State** - Network errors and retry
@@ -260,6 +278,7 @@ import NotificationTestButton from '@/src/components/common/NotificationTestButt
 ## Integration Guide
 
 ### 1. Navigation Setup
+
 The notification screen is already integrated in `RootNavigator.tsx`:
 
 ```typescript
@@ -273,6 +292,7 @@ The notification screen is already integrated in `RootNavigator.tsx`:
 ```
 
 ### 2. Header Integration
+
 The notification badge is integrated in `HomeHeader.tsx`:
 
 ```typescript
@@ -283,6 +303,7 @@ The notification badge is integrated in `HomeHeader.tsx`:
 ```
 
 ### 3. Context Provider
+
 Add to your app's context hierarchy:
 
 ```typescript
@@ -294,16 +315,19 @@ Add to your app's context hierarchy:
 ## Security Considerations
 
 ### 1. Authentication
+
 - All API calls include authentication headers
 - Automatic token refresh handling
 - Secure token storage
 
 ### 2. Data Validation
+
 - TypeScript for compile-time safety
 - Runtime validation for API responses
 - Sanitized notification content
 
 ### 3. Privacy
+
 - User-specific notifications only
 - No sensitive data in notification content
 - Secure data transmission
@@ -311,6 +335,7 @@ Add to your app's context hierarchy:
 ## Future Enhancements
 
 ### Planned Features
+
 - [ ] Push notification integration
 - [ ] Notification categories/filtering
 - [ ] Notification scheduling
@@ -319,6 +344,7 @@ Add to your app's context hierarchy:
 - [ ] Analytics and tracking
 
 ### Possible Improvements
+
 - [ ] Offline notification queue
 - [ ] Notification grouping
 - [ ] Custom notification sounds

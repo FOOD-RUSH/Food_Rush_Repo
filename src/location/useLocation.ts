@@ -94,7 +94,8 @@ export const useLocation = (options: UseLocationOptions = {}) => {
 
         return result.success;
       } catch (error) {
-        const errorMsg = error instanceof Error ? error.message : 'Failed to get location';
+        const errorMsg =
+          error instanceof Error ? error.message : 'Failed to get location';
         setError(errorMsg);
         return false;
       } finally {
@@ -117,41 +118,43 @@ export const useLocation = (options: UseLocationOptions = {}) => {
     }
   }, [setPermission]);
 
-  const requestPermissionWithLocation = useCallback(async (): Promise<boolean> => {
-    setLoading(true);
-    clearError();
+  const requestPermissionWithLocation =
+    useCallback(async (): Promise<boolean> => {
+      setLoading(true);
+      clearError();
 
-    try {
-      const permResult = await LocationService.requestPermission();
-      setPermissionStatus(permResult.status);
-      setPermission(permResult.granted);
+      try {
+        const permResult = await LocationService.requestPermission();
+        setPermissionStatus(permResult.status);
+        setPermission(permResult.granted);
 
-      if (permResult.granted) {
-        const locationResult = await LocationService.getCurrentLocation(true);
-        if (locationResult.location) {
-          setLocation(locationResult.location);
+        if (permResult.granted) {
+          const locationResult = await LocationService.getCurrentLocation(true);
+          if (locationResult.location) {
+            setLocation(locationResult.location);
+          }
+          if (locationResult.error) {
+            setError(locationResult.error);
+          }
+          return locationResult.success;
+        } else {
+          // Permission denied - use fallback
+          const fallback = await LocationService.getCurrentLocation();
+          if (fallback.location) {
+            setLocation(fallback.location);
+          }
+          setError('Location permission denied');
+          return false;
         }
-        if (locationResult.error) {
-          setError(locationResult.error);
-        }
-        return locationResult.success;
-      } else {
-        // Permission denied - use fallback
-        const fallback = await LocationService.getCurrentLocation();
-        if (fallback.location) {
-          setLocation(fallback.location);
-        }
-        setError('Location permission denied');
+      } catch (error) {
+        const errorMsg =
+          error instanceof Error ? error.message : 'Failed to get location';
+        setError(errorMsg);
         return false;
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Failed to get location';
-      setError(errorMsg);
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  }, [setLocation, setLoading, setError, setPermission, clearError]);
+    }, [setLocation, setLoading, setError, setPermission, clearError]);
 
   const showLocationPermissionDialog = useCallback(
     (onEnable: () => void, onCancel?: () => void) => {

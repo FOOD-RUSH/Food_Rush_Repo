@@ -1,6 +1,11 @@
 import React from 'react';
 import { View, ViewStyle } from 'react-native';
-import { useBreakpoint, getContainerMaxWidth, getResponsivePadding, Breakpoint } from '@/src/utils/responsive';
+import {
+  useBreakpoint,
+  getContainerMaxWidth,
+  getResponsivePadding,
+  Breakpoint,
+} from '@/src/utils/responsive';
 
 interface ResponsiveContainerProps {
   children: React.ReactNode;
@@ -22,7 +27,7 @@ export const ResponsiveContainer: React.FC<ResponsiveContainerProps> = ({
   const breakpoint = useBreakpoint();
   const containerMaxWidth = getContainerMaxWidth(maxWidth);
   const containerPadding = getResponsivePadding(padding, breakpoint);
-  
+
   const containerStyle: ViewStyle = {
     maxWidth: containerMaxWidth,
     paddingHorizontal: containerPadding,
@@ -30,7 +35,7 @@ export const ResponsiveContainer: React.FC<ResponsiveContainerProps> = ({
     ...(center && { alignSelf: 'center' }),
     ...style,
   };
-  
+
   return (
     <View style={containerStyle} className={className}>
       {children}
@@ -56,14 +61,14 @@ export const ResponsiveCard: React.FC<ResponsiveCardProps> = ({
   const breakpoint = useBreakpoint();
   const cardPadding = getResponsivePadding(padding, breakpoint);
   const cardMargin = getResponsivePadding(margin, breakpoint);
-  
+
   const cardStyle: ViewStyle = {
     padding: cardPadding,
     margin: cardMargin,
     borderRadius: 12,
     ...style,
   };
-  
+
   return (
     <View style={cardStyle} className={`bg-white shadow-sm ${className}`}>
       {children}
@@ -87,14 +92,14 @@ export const ResponsiveGrid: React.FC<ResponsiveGridProps> = ({
   const breakpoint = useBreakpoint();
   const columnCount = columns[breakpoint] || columns.xs || 1;
   const gridSpacing = getResponsivePadding(spacing, breakpoint);
-  
+
   const childrenArray = React.Children.toArray(children);
-  
+
   return (
-    <View 
+    <View
       className={className}
-      style={{ 
-        flexDirection: 'row', 
+      style={{
+        flexDirection: 'row',
         flexWrap: 'wrap',
         margin: -gridSpacing / 2,
       }}

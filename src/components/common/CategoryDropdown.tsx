@@ -23,19 +23,21 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({
   const { colors } = useTheme();
   const { t } = useTranslation();
   const { data: categories, isLoading, error: apiError } = useCategoryOptions();
-  
+
   if (isLoading) {
     return (
-      <View style={{
-        backgroundColor: colors.surface,
-        borderRadius: 16,
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: 48,
-      }}>
+      <View
+        style={{
+          backgroundColor: colors.surface,
+          borderRadius: 16,
+          paddingHorizontal: 16,
+          paddingVertical: 12,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: 48,
+        }}
+      >
         <ActivityIndicator size="small" color={colors.primary} />
         <Text style={{ color: colors.onSurfaceVariant, marginLeft: 8 }}>
           {t('loading_categories')}
@@ -43,17 +45,19 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({
       </View>
     );
   }
-  
+
   if (apiError) {
     return (
-      <View style={{
-        backgroundColor: colors.errorContainer,
-        borderRadius: 16,
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        minHeight: 48,
-        justifyContent: 'center',
-      }}>
+      <View
+        style={{
+          backgroundColor: colors.errorContainer,
+          borderRadius: 16,
+          paddingHorizontal: 16,
+          paddingVertical: 12,
+          minHeight: 48,
+          justifyContent: 'center',
+        }}
+      >
         <Text style={{ color: colors.onErrorContainer, textAlign: 'center' }}>
           {t('failed_to_load_categories')}
         </Text>

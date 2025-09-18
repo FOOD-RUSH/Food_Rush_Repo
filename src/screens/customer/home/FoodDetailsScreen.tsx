@@ -15,10 +15,10 @@ import { images } from '@/assets/images';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import Seperator from '@/src/components/common/Seperator';
 import InputField from '@/src/components/customer/InputField';
-import { 
-  useCartStore, 
-  useIsItemInCart, 
-  useItemQuantityInCart 
+import {
+  useCartStore,
+  useIsItemInCart,
+  useItemQuantityInCart,
 } from '@/src/stores/customerStores/cartStore';
 import { useTranslation } from 'react-i18next';
 import { useMenuItemById } from '@/src/hooks/customer/useCustomerApi';
@@ -30,11 +30,11 @@ const FoodDetailsScreen = ({
   const { foodId } = route.params;
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
-  
+
   // Cart state
   const isInCart = useIsItemInCart(foodId);
   const cartQuantity = useItemQuantityInCart(foodId);
-  
+
   // Local state - initialize with cart quantity or 1
   const [quantity, setQuantity] = useState(1);
   const [instructions, setInstructions] = useState('');
@@ -56,12 +56,15 @@ const FoodDetailsScreen = ({
     }
   }, [isInCart, cartQuantity]);
 
-  const handleQuantityChange = useCallback((change: number) => {
-    const newQuantity = quantity + change;
-    if (newQuantity >= 1 && newQuantity <= 99) {
-      setQuantity(newQuantity);
-    }
-  }, [quantity]);
+  const handleQuantityChange = useCallback(
+    (change: number) => {
+      const newQuantity = quantity + change;
+      if (newQuantity >= 1 && newQuantity <= 99) {
+        setQuantity(newQuantity);
+      }
+    },
+    [quantity],
+  );
 
   const calculateTotalPrice = useMemo(() => {
     if (!MenuDetails) return 0;
@@ -86,7 +89,7 @@ const FoodDetailsScreen = ({
       Alert.alert(
         t('error') || 'Error',
         t('failed_to_add_to_cart') || 'Failed to add item to cart',
-        [{ text: 'OK' }]
+        [{ text: 'OK' }],
       );
     }
   }, [MenuDetails, quantity, instructions, addItemtoCart, t]);
@@ -122,21 +125,22 @@ const FoodDetailsScreen = ({
           size={80}
           color={colors.onSurfaceVariant}
         />
-        <Text 
+        <Text
           className="text-xl font-semibold mt-4 mb-2 text-center"
           style={{ color: colors.onSurface }}
         >
           {t('failed_to_load_food_details') || 'Failed to load food details'}
         </Text>
-        <Text 
+        <Text
           className="text-base text-center mb-6"
           style={{ color: colors.onSurfaceVariant }}
         >
-          {t('please_check_connection_and_try_again') || 'Please check your connection and try again'}
+          {t('please_check_connection_and_try_again') ||
+            'Please check your connection and try again'}
         </Text>
-        <Button 
-          mode="contained" 
-          onPress={() => refetch()} 
+        <Button
+          mode="contained"
+          onPress={() => refetch()}
           loading={isRefetching}
           style={{ backgroundColor: colors.primary }}
         >
@@ -149,8 +153,8 @@ const FoodDetailsScreen = ({
   return (
     <>
       <StatusBar backgroundColor="transparent" translucent />
-      <ScrollView 
-        className="flex-1" 
+      <ScrollView
+        className="flex-1"
         style={{ backgroundColor: colors.background }}
         showsVerticalScrollIndicator={false}
       >
@@ -159,14 +163,14 @@ const FoodDetailsScreen = ({
           <Image
             className="w-full h-[350px]"
             source={
-              MenuDetails.image 
-                ? { uri: MenuDetails.image } 
+              MenuDetails.image
+                ? { uri: MenuDetails.image }
                 : images.onboarding1
             }
             resizeMode="cover"
             onError={() => console.log('Image load error')}
           />
-          
+
           {/* Back Button */}
           <Pressable
             onPress={handleGoBack}
@@ -218,11 +222,11 @@ const FoodDetailsScreen = ({
             {/* Category Badge */}
             {MenuDetails.category && (
               <View className="mt-2 mb-2">
-                <View 
+                <View
                   className="self-start px-3 py-1 rounded-full"
                   style={{ backgroundColor: colors.primaryContainer }}
                 >
-                  <Text 
+                  <Text
                     className="text-sm font-medium"
                     style={{ color: colors.onPrimaryContainer }}
                   >
@@ -234,9 +238,9 @@ const FoodDetailsScreen = ({
 
             <Seperator />
 
-            <Text 
-              variant="bodyLarge" 
-              style={{ 
+            <Text
+              variant="bodyLarge"
+              style={{
                 color: colors.onSurface,
                 lineHeight: 24,
                 marginBottom: 16,
@@ -249,7 +253,7 @@ const FoodDetailsScreen = ({
             {MenuDetails.category && (
               <Chip
                 mode="outlined"
-                style={{ 
+                style={{
                   alignSelf: 'flex-start',
                   marginBottom: 16,
                 }}
@@ -260,21 +264,21 @@ const FoodDetailsScreen = ({
           </View>
 
           {/* Quantity Selector */}
-          <Card 
-            mode="outlined" 
-            style={{ 
+          <Card
+            mode="outlined"
+            style={{
               marginBottom: 20,
               backgroundColor: colors.surface,
             }}
           >
             <View className="p-4">
-              <Text 
+              <Text
                 className="text-lg font-semibold mb-4"
                 style={{ color: colors.onSurface }}
               >
                 {t('quantity')}
               </Text>
-              
+
               <View className="flex-row items-center justify-center">
                 <Pressable
                   onPress={() => handleQuantityChange(-1)}
@@ -282,7 +286,8 @@ const FoodDetailsScreen = ({
                   className="w-12 h-12 rounded-full items-center justify-center border"
                   style={{
                     borderColor: quantity > 1 ? colors.primary : colors.outline,
-                    backgroundColor: quantity > 1 ? colors.primary : colors.surface,
+                    backgroundColor:
+                      quantity > 1 ? colors.primary : colors.surface,
                   }}
                 >
                   <Ionicons
@@ -291,14 +296,14 @@ const FoodDetailsScreen = ({
                     color={quantity > 1 ? 'white' : colors.onSurfaceVariant}
                   />
                 </Pressable>
-                
-                <Text 
+
+                <Text
                   className="mx-4 text-3xl font-bold text-center min-w-[60px]"
                   style={{ color: colors.onSurface }}
                 >
                   {quantity}
                 </Text>
-                
+
                 <Pressable
                   onPress={() => handleQuantityChange(1)}
                   disabled={quantity >= 99}
@@ -315,21 +320,21 @@ const FoodDetailsScreen = ({
           </Card>
 
           {/* Special Instructions */}
-          <Card 
-            mode="outlined" 
-            style={{ 
+          <Card
+            mode="outlined"
+            style={{
               marginBottom: 20,
               backgroundColor: colors.surface,
             }}
           >
             <View className="p-4">
-              <Text 
+              <Text
                 className="text-lg font-semibold mb-4"
                 style={{ color: colors.onSurface }}
               >
                 {t('special_instructions_optional')}
               </Text>
-              
+
               <InputField
                 multiline
                 numberOfLines={3}
@@ -347,9 +352,9 @@ const FoodDetailsScreen = ({
       </ScrollView>
 
       {/* Add to Cart Button */}
-      <View 
+      <View
         className="px-4 py-4 border-t pb-12"
-        style={{ 
+        style={{
           backgroundColor: colors.surface,
           borderTopColor: colors.outline,
         }}
@@ -369,18 +374,12 @@ const FoodDetailsScreen = ({
               >
                 {isInCart ? t('update_cart') : t('add_to_basket')}
               </Text>
-              <Text
-                className="text-sm opacity-90"
-                style={{ color: 'white' }}
-              >
+              <Text className="text-sm opacity-90" style={{ color: 'white' }}>
                 {quantity} {quantity === 1 ? t('item') : t('items')}
               </Text>
             </View>
-            
-            <Text
-              className="font-bold text-xl"
-              style={{ color: 'white' }}
-            >
+
+            <Text className="font-bold text-xl" style={{ color: 'white' }}>
               {formattedTotalPrice} {t('fcfa_unit')}
             </Text>
           </View>

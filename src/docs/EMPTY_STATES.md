@@ -152,9 +152,9 @@ describe('HomeScreen Empty States', () => {
   it('should show restaurant empty state when no restaurants available', () => {
     // Mock API to return empty array
     mockRestaurantAPI.mockResolvedValue([]);
-    
+
     render(<HomeScreen />);
-    
+
     expect(screen.getByText('No Restaurants Found')).toBeVisible();
     expect(screen.getByText('Explore Restaurants')).toBeVisible();
   });

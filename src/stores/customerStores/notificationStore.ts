@@ -204,15 +204,7 @@ export const useNotificationStore = create<
           unreadCount: state.unreadCount,
         }),
         version: 1,
-<<<<<<< HEAD
-        migrate: (persistedState: any, version: number) => {
-          // No migrations needed yet, but this prevents the warning
-          return persistedState;
-        },
       }
-=======
-      },
->>>>>>> origin/Customer_Setup
     ),
     { name: 'NotificationStore' },
   ),

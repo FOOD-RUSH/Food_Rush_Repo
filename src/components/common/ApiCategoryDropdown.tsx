@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, FlatList, Modal, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  FlatList,
+  Modal,
+  ActivityIndicator,
+} from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -25,38 +32,56 @@ const ApiCategoryDropdown: React.FC<ApiCategoryDropdownProps> = ({
   const { colors } = useTheme();
   const { t } = useTranslation();
   const [isVisible, setIsVisible] = useState(false);
-  
+
   const { data: categories, isLoading, error: apiError } = useCategoryOptions();
 
-  const selectedCategory = categories.find(cat => cat.value === selectedValue);
+  const selectedCategory = categories.find(
+    (cat) => cat.value === selectedValue,
+  );
 
   const handleSelect = (category: { value: string; label: string }) => {
     onValueChange(category.value, category.label);
     setIsVisible(false);
   };
 
-  const renderCategoryItem = ({ item }: { item: { value: string; label: string } }) => (
+  const renderCategoryItem = ({
+    item,
+  }: {
+    item: { value: string; label: string };
+  }) => (
     <TouchableOpacity
       style={{
         padding: 16,
         borderBottomWidth: 1,
         borderBottomColor: colors.outline + '20',
-        backgroundColor: selectedValue === item.value ? colors.primary + '10' : 'transparent',
+        backgroundColor:
+          selectedValue === item.value ? colors.primary + '10' : 'transparent',
       }}
       onPress={() => handleSelect(item)}
     >
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
         <Text
           style={{
             fontSize: 16,
-            color: selectedValue === item.value ? colors.primary : colors.onSurface,
+            color:
+              selectedValue === item.value ? colors.primary : colors.onSurface,
             fontWeight: selectedValue === item.value ? '600' : 'normal',
           }}
         >
           {item.label}
         </Text>
         {selectedValue === item.value && (
-          <MaterialCommunityIcons name="check" size={20} color={colors.primary} />
+          <MaterialCommunityIcons
+            name="check"
+            size={20}
+            color={colors.primary}
+          />
         )}
       </View>
     </TouchableOpacity>
@@ -64,13 +89,18 @@ const ApiCategoryDropdown: React.FC<ApiCategoryDropdownProps> = ({
 
   if (apiError) {
     return (
-      <View style={[{
-        borderWidth: 1,
-        borderColor: colors.error,
-        borderRadius: 8,
-        padding: 16,
-        backgroundColor: colors.errorContainer,
-      }, style]}>
+      <View
+        style={[
+          {
+            borderWidth: 1,
+            borderColor: colors.error,
+            borderRadius: 8,
+            padding: 16,
+            backgroundColor: colors.errorContainer,
+          },
+          style,
+        ]}
+      >
         <Text style={{ color: colors.onErrorContainer, fontSize: 14 }}>
           {t('failed_to_load_categories')}
         </Text>
@@ -97,7 +127,9 @@ const ApiCategoryDropdown: React.FC<ApiCategoryDropdownProps> = ({
         <Text
           style={{
             fontSize: 16,
-            color: selectedCategory ? colors.onSurface : colors.onSurfaceVariant,
+            color: selectedCategory
+              ? colors.onSurface
+              : colors.onSurfaceVariant,
           }}
         >
           {selectedCategory?.label || placeholder || t('select_category')}
@@ -148,11 +180,21 @@ const ApiCategoryDropdown: React.FC<ApiCategoryDropdownProps> = ({
                 alignItems: 'center',
               }}
             >
-              <Text style={{ fontSize: 18, fontWeight: '600', color: colors.onSurface }}>
+              <Text
+                style={{
+                  fontSize: 18,
+                  fontWeight: '600',
+                  color: colors.onSurface,
+                }}
+              >
                 {t('select_category')}
               </Text>
               <TouchableOpacity onPress={() => setIsVisible(false)}>
-                <MaterialCommunityIcons name="close" size={24} color={colors.onSurface} />
+                <MaterialCommunityIcons
+                  name="close"
+                  size={24}
+                  color={colors.onSurface}
+                />
               </TouchableOpacity>
             </View>
 
@@ -176,7 +218,9 @@ const ApiCategoryDropdown: React.FC<ApiCategoryDropdownProps> = ({
                       size={48}
                       color={colors.onSurfaceVariant}
                     />
-                    <Text style={{ marginTop: 8, color: colors.onSurfaceVariant }}>
+                    <Text
+                      style={{ marginTop: 8, color: colors.onSurfaceVariant }}
+                    >
                       {t('no_categories_available')}
                     </Text>
                   </View>

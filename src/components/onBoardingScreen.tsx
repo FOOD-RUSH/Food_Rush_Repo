@@ -335,8 +335,6 @@ const OnboardingSlide = memo(
   },
 );
 
-
-
 // Main Onboarding Screen
 const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
   OnboardingSlides,

@@ -91,7 +91,7 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
           Alert.alert(
             'Location Permission Required',
             'To use your current location, please enable location access in your device settings.',
-            [{ text: 'OK' }]
+            [{ text: 'OK' }],
           );
           return;
         }
@@ -106,8 +106,9 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
       } else {
         Alert.alert(
           'Location Error',
-          result.error || 'Unable to get your current location. Please enter your address manually.',
-          [{ text: 'OK' }]
+          result.error ||
+            'Unable to get your current location. Please enter your address manually.',
+          [{ text: 'OK' }],
         );
       }
     } catch (error) {
@@ -115,7 +116,7 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
       Alert.alert(
         'Error',
         'Failed to get your current location. Please try again or enter your address manually.',
-        [{ text: 'OK' }]
+        [{ text: 'OK' }],
       );
     }
   };

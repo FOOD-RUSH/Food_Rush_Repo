@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // Food categories available in the system
 export type FoodCategory = 
   | 'local-dishes'
@@ -33,8 +32,9 @@ export interface MenuItem {
   name: string;
   description: string;
   price: number;
-  category: FoodCategory;
+  category: FoodCategory | string;
   image?: string;
+  pictureUrl?: string;
   isAvailable: boolean;
   startAt?: string; // ISO 8601 format
   endAt?: string;   // ISO 8601 format
@@ -47,19 +47,9 @@ export interface CreateMenuItemRequest {
   name: string;
   description: string;
   price: number;
-  category: FoodCategory;
+  category: FoodCategory | string;
   isAvailable: boolean;
   picture?: string; // Base64 encoded image or file path
   startAt?: string; // ISO 8601 format
   endAt?: string;   // ISO 8601 format
 }
-=======
-export interface MenuItem {
-  id: string;
-  name: string;
-  price: number;
-  category: string;
-  image: string;
-  isAvailable: boolean;
-}
->>>>>>> origin/Customer_Setup

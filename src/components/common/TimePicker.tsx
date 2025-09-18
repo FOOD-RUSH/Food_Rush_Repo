@@ -53,7 +53,7 @@ const TimePicker: React.FC<TimePickerProps> = ({
           {label}
         </Text>
       )}
-      
+
       <TouchableOpacity
         onPress={showTimePicker}
         disabled={disabled}

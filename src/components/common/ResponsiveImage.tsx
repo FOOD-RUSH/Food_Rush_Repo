@@ -1,7 +1,11 @@
 import React from 'react';
 import { View, ViewStyle, ImageStyle } from 'react-native';
 import { Image } from 'expo-image';
-import { useBreakpoint, useResponsiveDimensions, Breakpoint } from '@/src/utils/responsive';
+import {
+  useBreakpoint,
+  useResponsiveDimensions,
+  Breakpoint,
+} from '@/src/utils/responsive';
 import Avatar from './Avatar';
 
 interface ResponsiveImageProps {
@@ -31,7 +35,7 @@ export const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
 }) => {
   const breakpoint = useBreakpoint();
   const { width: screenWidth } = useResponsiveDimensions();
-  
+
   // Calculate responsive dimensions
   const getImageWidth = () => {
     if (maxWidth && maxWidth[breakpoint]) {
@@ -39,28 +43,28 @@ export const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
     }
     return screenWidth;
   };
-  
+
   const getImageHeight = () => {
     const width = getImageWidth();
     const calculatedHeight = width / aspectRatio;
-    
+
     if (maxHeight && maxHeight[breakpoint]) {
       return Math.min(calculatedHeight, maxHeight[breakpoint]!);
     }
-    
+
     return calculatedHeight;
   };
-  
+
   const imageWidth = getImageWidth();
   const imageHeight = getImageHeight();
-  
+
   const imageStyle: ImageStyle = {
     width: imageWidth,
     height: imageHeight,
     borderRadius,
     ...style,
   };
-  
+
   return (
     <Image
       source={typeof source === 'string' ? { uri: source } : source}
@@ -90,7 +94,7 @@ export const ResponsiveAvatar: React.FC<ResponsiveAvatarProps> = ({
 }) => {
   const breakpoint = useBreakpoint();
   const avatarSize = size[breakpoint] || size.xs || 40;
-  
+
   return (
     <Avatar
       profilePicture={profilePicture}
@@ -116,7 +120,7 @@ export const ResponsiveIcon: React.FC<ResponsiveIconProps> = ({
 }) => {
   const breakpoint = useBreakpoint();
   const iconSize = size[breakpoint] || size.xs || 24;
-  
+
   // This would use your existing Icon component
   // For now, returning a placeholder
   return (
@@ -154,13 +158,13 @@ export const ResponsiveBanner: React.FC<ResponsiveBannerProps> = ({
   const breakpoint = useBreakpoint();
   const { width: screenWidth } = useResponsiveDimensions();
   const bannerHeight = height[breakpoint] || height.xs || 200;
-  
+
   const containerStyle: ViewStyle = {
     width: screenWidth,
     height: bannerHeight,
     position: 'relative',
   };
-  
+
   const overlayStyle: ViewStyle = {
     position: 'absolute',
     top: 0,
@@ -171,7 +175,7 @@ export const ResponsiveBanner: React.FC<ResponsiveBannerProps> = ({
     opacity: overlayOpacity,
     zIndex: 1,
   };
-  
+
   return (
     <View style={containerStyle} className={className}>
       <ResponsiveImage
@@ -182,7 +186,16 @@ export const ResponsiveBanner: React.FC<ResponsiveBannerProps> = ({
       />
       {overlay && <View style={overlayStyle} />}
       {children && (
-        <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 2 }}>
+        <View
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 2,
+          }}
+        >
           {children}
         </View>
       )}
@@ -194,37 +207,43 @@ export const ResponsiveBanner: React.FC<ResponsiveBannerProps> = ({
 export const useResponsiveImage = () => {
   const breakpoint = useBreakpoint();
   const { width: screenWidth } = useResponsiveDimensions();
-  
+
   const getOptimizedImageSize = (
     originalWidth: number,
     originalHeight: number,
-    maxWidth?: number
+    maxWidth?: number,
   ) => {
     const containerWidth = maxWidth || screenWidth;
     const aspectRatio = originalWidth / originalHeight;
-    
+
     if (originalWidth <= containerWidth) {
       return { width: originalWidth, height: originalHeight };
     }
-    
+
     return {
       width: containerWidth,
       height: containerWidth / aspectRatio,
     };
   };
-  
+
   const getImageQuality = () => {
     // Lower quality for smaller screens to save bandwidth
     switch (breakpoint) {
-      case 'xs': return 70;
-      case 'sm': return 80;
-      case 'md': return 85;
-      case 'lg': return 90;
-      case 'xl': return 95;
-      default: return 80;
+      case 'xs':
+        return 70;
+      case 'sm':
+        return 80;
+      case 'md':
+        return 85;
+      case 'lg':
+        return 90;
+      case 'xl':
+        return 95;
+      default:
+        return 80;
     }
   };
-  
+
   return {
     getOptimizedImageSize,
     getImageQuality,

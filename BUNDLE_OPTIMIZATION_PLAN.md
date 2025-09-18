@@ -1,14 +1,17 @@
 # Food Rush - Bundle Size Optimization Plan
 
 ## 🎯 Objective
+
 Reduce the bundle size of the Food Rush customer app while maintaining functionality and implementing responsive design across all screen sizes.
 
 ## 📊 Current Analysis
 
 ### Dependencies Audit
+
 Based on the current `package.json`, here are the optimization opportunities:
 
 #### 🔴 High Impact Removals (Customer App)
+
 1. **Restaurant-specific dependencies**:
    - `react-native-chart-kit` (6.12.0) - Only used in restaurant analytics
    - `react-native-maps` (1.20.1) - If not used in customer app
@@ -21,6 +24,7 @@ Based on the current `package.json`, here are the optimization opportunities:
    - `expo-crypto` - If not doing client-side encryption
 
 #### 🟡 Medium Impact Optimizations
+
 1. **Icon libraries**:
    - `@expo/vector-icons` - Use tree shaking or replace with smaller alternatives
    - Consider using only specific icon sets instead of the entire library
@@ -30,6 +34,7 @@ Based on the current `package.json`, here are the optimization opportunities:
    - `react-native-tab-view` - Use React Navigation tabs instead
 
 #### 🟢 Low Impact but Worth Considering
+
 1. **Development dependencies in production**:
    - Ensure dev dependencies aren't bundled
    - Remove unused TypeScript types
@@ -39,6 +44,7 @@ Based on the current `package.json`, here are the optimization opportunities:
 ### Phase 1: Immediate Removals (Week 1)
 
 #### 1.1 Remove Restaurant-Only Dependencies
+
 ```bash
 # Remove chart library (restaurant analytics only)
 npm uninstall react-native-chart-kit
@@ -51,32 +57,34 @@ npm uninstall expo-blur expo-symbols expo-web-browser expo-crypto
 ```
 
 #### 1.2 Code Splitting by User Type
+
 Create separate entry points for customer and restaurant apps:
 
 ```typescript
 // src/apps/customer/index.tsx
 export { default as CustomerApp } from './CustomerApp';
 
-// src/apps/restaurant/index.tsx  
+// src/apps/restaurant/index.tsx
 export { default as RestaurantApp } from './RestaurantApp';
 ```
 
 ### Phase 2: Responsive Design Implementation (Week 2)
 
 #### 2.1 Screen Size Breakpoints
+
 ```typescript
 // src/utils/responsive.ts
 export const BREAKPOINTS = {
-  xs: 0,     // Small phones
-  sm: 576,   // Large phones
-  md: 768,   // Tablets
-  lg: 992,   // Small laptops
-  xl: 1200,  // Large screens
+  xs: 0, // Small phones
+  sm: 576, // Large phones
+  md: 768, // Tablets
+  lg: 992, // Small laptops
+  xl: 1200, // Large screens
 } as const;
 
 export const useBreakpoint = () => {
   const { width } = useWindowDimensions();
-  
+
   if (width >= BREAKPOINTS.xl) return 'xl';
   if (width >= BREAKPOINTS.lg) return 'lg';
   if (width >= BREAKPOINTS.md) return 'md';
@@ -86,6 +94,7 @@ export const useBreakpoint = () => {
 ```
 
 #### 2.2 Responsive Components
+
 ```typescript
 // src/components/responsive/ResponsiveContainer.tsx
 interface ResponsiveContainerProps {
@@ -101,11 +110,11 @@ export const ResponsiveContainer: React.FC<ResponsiveContainerProps> = ({
 }) => {
   const breakpoint = useBreakpoint();
   const { width } = useWindowDimensions();
-  
+
   const containerWidth = Math.min(width, BREAKPOINTS[maxWidth]);
-  
+
   return (
-    <View 
+    <View
       style={{ width: containerWidth, alignSelf: 'center' }}
       className={className}
     >
@@ -118,6 +127,7 @@ export const ResponsiveContainer: React.FC<ResponsiveContainerProps> = ({
 ### Phase 3: Icon Optimization (Week 3)
 
 #### 3.1 Custom Icon Component
+
 ```typescript
 // src/components/common/Icon.tsx
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
@@ -146,6 +156,7 @@ export const Icon: React.FC<IconProps> = ({
 ```
 
 #### 3.2 Icon Tree Shaking
+
 ```typescript
 // babel.config.js
 module.exports = {
@@ -170,12 +181,13 @@ module.exports = {
 ### Phase 4: Image Optimization (Week 4)
 
 #### 4.1 Image Compression
+
 ```typescript
 // src/utils/imageOptimization.ts
 export const getOptimizedImageUri = (
   uri: string,
   width: number,
-  quality: number = 80
+  quality: number = 80,
 ) => {
   // Use Expo Image with optimization
   return {
@@ -189,6 +201,7 @@ export const getOptimizedImageUri = (
 ```
 
 #### 4.2 Lazy Loading Images
+
 ```typescript
 // src/components/common/LazyImage.tsx
 import { Image } from 'expo-image';
@@ -224,6 +237,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
 ### 1. Layout Components
 
 #### 1.1 Responsive Grid System
+
 ```typescript
 // src/components/responsive/Grid.tsx
 interface GridProps {
@@ -245,7 +259,7 @@ export const Grid: React.FC<GridProps> = ({
 }) => {
   const breakpoint = useBreakpoint();
   const columnCount = columns[breakpoint] || columns.xs || 1;
-  
+
   return (
     <View style={{ flexDirection: 'row', flexWrap: 'wrap', margin: -spacing / 2 }}>
       {React.Children.map(children, (child, index) => (
@@ -264,6 +278,7 @@ export const Grid: React.FC<GridProps> = ({
 ```
 
 #### 1.2 Responsive Typography
+
 ```typescript
 // src/components/responsive/Typography.tsx
 interface ResponsiveTextProps {
@@ -287,7 +302,7 @@ export const ResponsiveText: React.FC<ResponsiveTextProps> = ({
 }) => {
   const breakpoint = useBreakpoint();
   const fontSize = FONT_SIZES[variant][breakpoint];
-  
+
   return (
     <Text style={{ fontSize }} className={className}>
       {children}
@@ -299,11 +314,12 @@ export const ResponsiveText: React.FC<ResponsiveTextProps> = ({
 ### 2. Screen-Specific Responsive Layouts
 
 #### 2.1 Home Screen Responsive Grid
+
 ```typescript
 // Update HomeScreen.tsx
 const HomeScreen = () => {
   const breakpoint = useBreakpoint();
-  
+
   const getColumnsForCategories = () => {
     switch (breakpoint) {
       case 'xs': return 2;
@@ -314,7 +330,7 @@ const HomeScreen = () => {
       default: return 2;
     }
   };
-  
+
   const getColumnsForRestaurants = () => {
     switch (breakpoint) {
       case 'xs': return 1;
@@ -325,7 +341,7 @@ const HomeScreen = () => {
       default: return 1;
     }
   };
-  
+
   // Use in FlatList numColumns prop
   return (
     <ResponsiveContainer>
@@ -341,12 +357,13 @@ const HomeScreen = () => {
 ```
 
 #### 2.2 Restaurant Detail Responsive Layout
+
 ```typescript
 // Update RestaurantDetailScreen.tsx
 const RestaurantDetailScreen = () => {
   const breakpoint = useBreakpoint();
   const isTablet = ['md', 'lg', 'xl'].includes(breakpoint);
-  
+
   if (isTablet) {
     return (
       <ResponsiveContainer maxWidth="lg">
@@ -355,7 +372,7 @@ const RestaurantDetailScreen = () => {
           <View className="flex-1 pr-4">
             <RestaurantInfo />
           </View>
-          
+
           {/* Right column - Menu */}
           <View className="flex-1 pl-4">
             <MenuSection />
@@ -364,7 +381,7 @@ const RestaurantDetailScreen = () => {
       </ResponsiveContainer>
     );
   }
-  
+
   // Mobile layout (existing)
   return <MobileLayout />;
 };
@@ -373,6 +390,7 @@ const RestaurantDetailScreen = () => {
 ## 🧹 Unused Code Removal
 
 ### 1. Automated Detection
+
 ```bash
 # Install dependency analysis tools
 npm install --save-dev depcheck unimported
@@ -385,18 +403,21 @@ npx unimported
 ### 2. Manual Audit Checklist
 
 #### 2.1 Components to Review
+
 - [ ] `src/components/restaurant/` - Remove if customer-only build
 - [ ] `src/screens/restaurant/` - Remove if customer-only build
 - [ ] `src/hooks/restaurant/` - Remove if customer-only build
 - [ ] `src/services/restaurant/` - Remove if customer-only build
 
 #### 2.2 Utilities to Review
+
 - [ ] Chart utilities in `src/utils/`
 - [ ] Restaurant-specific validation schemas
 - [ ] Unused translation keys
 - [ ] Unused image assets
 
 #### 2.3 Dependencies to Remove
+
 ```typescript
 // Remove from package.json if not used in customer app
 const CUSTOMER_UNUSED_DEPS = [
@@ -413,6 +434,7 @@ const CUSTOMER_UNUSED_DEPS = [
 ## 📊 Bundle Analysis Tools
 
 ### 1. Metro Bundle Analyzer
+
 ```javascript
 // metro.config.js
 const { getDefaultConfig } = require('expo/metro-config');
@@ -428,6 +450,7 @@ module.exports = config;
 ```
 
 ### 2. Bundle Size Monitoring
+
 ```bash
 # Add to package.json scripts
 "analyze:bundle": "npx expo export --platform ios --dev false --clear && npx expo-bundle-analyzer dist/bundles/ios-*.js",
@@ -435,6 +458,7 @@ module.exports = config;
 ```
 
 ### 3. Performance Monitoring
+
 ```typescript
 // src/utils/performance.ts
 export const measureBundleSize = () => {
@@ -448,6 +472,7 @@ export const measureBundleSize = () => {
 ## 🎯 Expected Results
 
 ### Bundle Size Reduction Targets
+
 - **Phase 1**: 15-20% reduction (removing unused deps)
 - **Phase 2**: 5-10% reduction (responsive optimizations)
 - **Phase 3**: 10-15% reduction (icon optimization)
@@ -456,12 +481,14 @@ export const measureBundleSize = () => {
 **Total Expected Reduction: 35-55%**
 
 ### Performance Improvements
+
 - Faster app startup time
 - Reduced memory usage
 - Better performance on low-end devices
 - Improved user experience across all screen sizes
 
 ### Responsive Design Benefits
+
 - Consistent UI across all device sizes
 - Better tablet experience
 - Future-proof for new device form factors
@@ -470,21 +497,25 @@ export const measureBundleSize = () => {
 ## 📋 Implementation Timeline
 
 ### Week 1: Dependency Cleanup
+
 - [ ] Remove restaurant-only dependencies
 - [ ] Set up bundle analysis tools
 - [ ] Create customer-only build configuration
 
 ### Week 2: Responsive Foundation
+
 - [ ] Implement breakpoint system
 - [ ] Create responsive container components
 - [ ] Update core layout components
 
 ### Week 3: Icon & Asset Optimization
+
 - [ ] Implement icon tree shaking
 - [ ] Optimize image loading
 - [ ] Remove unused assets
 
 ### Week 4: Testing & Refinement
+
 - [ ] Test on multiple device sizes
 - [ ] Performance testing
 - [ ] Bundle size verification
@@ -493,12 +524,14 @@ export const measureBundleSize = () => {
 ## 🔧 Maintenance
 
 ### Ongoing Monitoring
+
 1. **Bundle Size Alerts**: Set up CI/CD to alert on bundle size increases
 2. **Dependency Audits**: Monthly review of dependencies
 3. **Performance Monitoring**: Track app performance metrics
 4. **Responsive Testing**: Regular testing on various screen sizes
 
 ### Best Practices
+
 1. **Lazy Loading**: Implement for non-critical components
 2. **Code Splitting**: Split by user type and features
 3. **Tree Shaking**: Ensure all imports are tree-shakeable

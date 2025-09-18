@@ -3,20 +3,52 @@ import { ReactNode } from 'react';
 import { TextInputProps } from 'react-native';
 // Basic props
 
+// Restaurant interface for detailed restaurant information
+export interface Restaurant {
+  id: string;
+  name: string;
+  address: string;
+  phone: string | null;
+  isOpen: boolean;
+  latitude: number | null;
+  longitude: number | null;
+  verificationStatus: 'PENDING_VERIFICATION' | 'APPROVED' | 'REJECTED';
+  documentUrl: string | null;
+  rating: number | null;
+  ratingCount: number;
+  ownerId: string;
+  menuMode: 'FIXED' | 'DAILY';
+  timezone: string;
+  deliveryBaseFee: number | null;
+  deliveryPerKmRate: number | null;
+  deliveryMinFee: number | null;
+  deliveryMaxFee: number | null;
+  deliveryFreeThreshold: number | null;
+  deliverySurgeMultiplier: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface User {
-  sub: string;
+  sub?: string;
   id: string;
   email: string;
   fullName: string;
-  phoneNumber: string;
-<<<<<<< HEAD
+  phoneNumber?: string;
   role: 'customer' | 'restaurant';
   isEmailVerified: boolean;
-  profilePicture?: null | any;
+  isPhoneVerified?: boolean;
+  profilePicture?: string | null;
+  status?: 'active' | 'pending_verification' | 'suspended' | 'inactive';
+  
   // Restaurant-specific fields
   restaurantId?: string;
   restaurantName?: string;
-  verificationStatus?: string;
+  verificationStatus?: 'PENDING_VERIFICATION' | 'APPROVED' | 'REJECTED';
+  restaurants?: Restaurant[];
+  defaultRestaurantId?: string;
+  
+  // Legacy restaurant field for backward compatibility
   restaurant?: {
     id: string;
     name: string;
@@ -24,31 +56,16 @@ export interface User {
   };
 }
 
-=======
-  profilePicture: string | null;
-  role: string;
-  status: string;
-  // Remove old fields not in docs: isEmailVerified
-}
->>>>>>> origin/Customer_Setup
-
 export interface FoodProps {
   id: string;
   name: string;
   description: string;
-<<<<<<< HEAD
   price: number;
+  pictureUrl?: string;
   image?: any;
   category?: string; // Added category as optional field
-  isAvailable?: boolean
-
+  isAvailable?: boolean;
   restaurant?: {
-=======
-  price: string; // Always string in API
-  pictureUrl: string;
-  isAvailable: boolean;
-  restaurant: {
->>>>>>> origin/Customer_Setup
     id: string;
     name: string;
     latitude: number | null;
@@ -59,8 +76,6 @@ export interface FoodProps {
   createdAt: string;
   updatedAt: string;
   distanceKm: number | null;
-  category?: string; // Added category field for filtering
-  // Remove old UI fields not in API: image, restaurantId, rating, distance, deliveryPrice
 }
 
 export interface MenuProps {
@@ -85,7 +100,6 @@ export interface RestaurantCard {
   createdAt: string;
   rating: number | null;
   ratingCount: number;
-  // Remove old UI fields: image, deliveryPrice, distance, imageUrl, estimatedDeliveryTime, deliveryFee
 }
 
 // Onboarding slides
@@ -105,7 +119,29 @@ export interface RestaurantProfile {
   rating: number | null;
   ratingCount: number;
   menu: FoodProps[];
-  // Remove old fields not in docs: description, phone, openTime, ratings, reviewCount, distance, deliveryFee, deliveryTime, discounts, specialOffers
+}
+
+// Auth response types for different user types
+export interface BaseAuthResponse {
+  user: User;
+  accessToken: string;
+  refreshToken: string;
+}
+
+export interface CustomerAuthResponse extends BaseAuthResponse {
+  // Customer-specific fields (if any)
+}
+
+export interface RestaurantAuthResponse extends BaseAuthResponse {
+  restaurants: Restaurant[];
+  defaultRestaurantId: string;
+}
+
+export type AuthResponse = CustomerAuthResponse | RestaurantAuthResponse;
+
+// Type guard to check if response is restaurant auth response
+export function isRestaurantAuthResponse(response: AuthResponse): response is RestaurantAuthResponse {
+  return 'restaurants' in response && 'defaultRestaurantId' in response;
 }
 
 //  Auth state
@@ -116,6 +152,9 @@ export interface AuthState {
   error: string | null;
   hasHydrated: boolean;
   authStateChecked: boolean;
+  // Restaurant-specific state
+  restaurants?: Restaurant[];
+  defaultRestaurantId?: string;
 }
 
 // Order Types from backend
@@ -151,6 +190,7 @@ export interface Order {
     };
   };
 }
+
 // Order item
 export interface OrderItem {
   id: string;
@@ -159,6 +199,7 @@ export interface OrderItem {
   imageUrl: string;
   description?: string;
 }
+
 // OrderMenuItem
 export interface OrderMenuItem {
   item: OrderItem;
@@ -166,9 +207,9 @@ export interface OrderMenuItem {
   totalPrice: number;
   specialInstructions?: string;
 }
+
 export declare interface InputFieldProps extends TextInputProps {
   label?: string;
-
   error?: boolean;
   labelStyle?: string;
   inputStyle?: string;

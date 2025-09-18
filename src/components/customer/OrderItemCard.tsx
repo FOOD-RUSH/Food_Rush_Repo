@@ -144,7 +144,11 @@ const OrderItemCard = ({
                 •
               </Text>
               <Text
-                style={{ color: colors.onSurface, fontSize: 16, fontWeight: '600' }}
+                style={{
+                  color: colors.onSurface,
+                  fontSize: 16,
+                  fontWeight: '600',
+                }}
               >
                 {order.total.toLocaleString()} XAF
               </Text>
@@ -155,9 +159,9 @@ const OrderItemCard = ({
               {displayItems.map((item, index) => (
                 <Text
                   key={index}
-                  style={{ 
-                    color: colors.onSurface, 
-                    fontSize: 14, 
+                  style={{
+                    color: colors.onSurface,
+                    fontSize: 14,
                     marginBottom: 2,
                     lineHeight: 18,
                   }}
@@ -173,7 +177,8 @@ const OrderItemCard = ({
                     fontStyle: 'italic',
                   }}
                 >
-                  ...and {remainingItemsCount} more item{remainingItemsCount > 1 ? 's' : ''}
+                  ...and {remainingItemsCount} more item
+                  {remainingItemsCount > 1 ? 's' : ''}
                 </Text>
               )}
             </View>

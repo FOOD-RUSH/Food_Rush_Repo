@@ -1,9 +1,4 @@
-import React, {
-  useEffect,
-  useMemo,
-  useCallback,
-  
-} from 'react';
+import React, { useEffect, useMemo, useCallback } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
@@ -51,7 +46,7 @@ import SearchScreen from '@/src/screens/customer/home/SearchScreen';
 import CategoryMenuScreen from '@/src/screens/customer/home/CategoryMenuScreen';
 import CartScreen from '../screens/customer/home/CartScreen';
 import NotificationsList from '../screens/restaurant/notifications/NotificationsList';
-import NotificationsScreen from '../screens/restaurant/profile/NotificationsScreen';
+import RestaurantNotificationsScreen from '../screens/restaurant/profile/NotificationsScreen';
 import NotificationScreen from '../screens/customer/home/NotificationScreen';
 import FoodDetailsScreen from '../screens/customer/home/FoodDetailsScreen';
 import RestaurantDetailScreen from '../screens/customer/home/RestaurantDetailScreen';
@@ -341,18 +336,9 @@ const RootNavigator: React.FC = () => {
             options={{ headerShown: false }}
           />
 
-          {/* Main App Navigators */}
-          <Stack.Screen
-            name="UserTypeSelection"
-            component={UserTypeSelectionScreen}
-            options={{ headerShown: false }}
-          />
-
           {/* Auth */}
           <Stack.Screen name="Auth" options={{ headerShown: false }}>
-            {(props) => (
-              <AuthNavigator {...props} userType={userType && 'customer'} />
-            )}
+            {(props) => <AuthNavigator {...props} userType={userType} />}
           </Stack.Screen>
 
           {/* Main apps */}
@@ -399,8 +385,8 @@ const RootNavigator: React.FC = () => {
               gestureEnabled: true,
               animation: 'slide_from_bottom',
               contentStyle: {
-                marginTop: -34
-              }
+                marginTop: -34,
+              },
             }}
           />
 

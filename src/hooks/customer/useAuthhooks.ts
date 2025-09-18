@@ -1,9 +1,9 @@
 // useAuthHooks.ts
-import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { useCallback } from "react";
-import { authApi, OTPCredentials } from "@/src/services/customer/authApi";
-import TokenManager from "@/src/services/shared/tokenManager";
-import { useAuthStore } from "@/src/stores/customerStores/AuthStore";
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
+import { useCallback } from 'react';
+import { authApi, OTPCredentials } from '@/src/services/customer/authApi';
+import TokenManager from '@/src/services/shared/tokenManager';
+import { useAuthStore } from '@/src/stores/shared/AuthStore';
 
 const CACHE_CONFIG = {
   STALE_TIME: 5 * 60 * 1000, // 5 minutes
@@ -24,12 +24,6 @@ export const useCurrentUser = () => {
         return response.data;
       } catch (error: any) {
         console.error('Failed to fetch user profile:', error);
-
-        // If unauthorized, clear auth state
-        if (error?.status === 401 || error?.response?.status === 401) {
-          useAuthStore.getState().logoutUser();
-        }
-
         throw error;
       }
     },
@@ -112,7 +106,7 @@ export const useProfileManager = () => {
 
 export const useLogin = () => {
   const queryClient = useQueryClient();
-  const { setUser, setIsAuthenticated, clearError } = useAuthStore();
+  const { setUser, setError, clearError } = useAuthStore();
 
   return useMutation({
     mutationFn: (credentials: { email: string; password: string }) =>
@@ -153,9 +147,15 @@ export const useLogin = () => {
         // Clear any previous errors
         clearError();
 
-        // Update auth state
+        // Update auth state with customer data (no restaurant info)
+        const authData = {
+          user,
+          accessToken,
+          refreshToken,
+        };
+        
+        // Set user and mark as authenticated
         setUser(user);
-        setIsAuthenticated(true);
 
         // Cache user data
         queryClient.setQueryData(['auth', 'me'], user);
@@ -170,8 +170,7 @@ export const useLogin = () => {
         console.error('Error in login success handler:', error);
         // Clean up on error
         await TokenManager.clearAllTokens();
-        setIsAuthenticated(false);
-        setUser(null);
+        setError('Login failed');
         throw error;
       }
     },
@@ -179,14 +178,10 @@ export const useLogin = () => {
       console.error('Login failed:', error);
 
       // Clean up auth state on login failure
-      setIsAuthenticated(false);
-      setUser(null);
+      setError(error.response?.data?.message || 'Login failed');
 
       // Clear any stored tokens
       TokenManager.clearAllTokens().catch(console.error);
-
-      // Don't set error in store here, let the component handle it
-      // The error will be available via the mutation's error state
     },
   });
 };
@@ -200,7 +195,7 @@ export const useRegister = () => {
 
 export const useVerifyOTP = () => {
   const queryClient = useQueryClient();
-  const { setUser, setIsAuthenticated, clearError } = useAuthStore();
+  const { setUser, setError, clearError } = useAuthStore();
 
   return useMutation({
     mutationFn: (otpData: OTPCredentials) => authApi.verifyOTP(otpData),
@@ -227,7 +222,6 @@ export const useVerifyOTP = () => {
 
         clearError();
         setUser(user);
-        setIsAuthenticated(true);
 
         queryClient.setQueryData(['auth', 'me'], user);
         queryClient.invalidateQueries({ queryKey: ['addresses'] });
@@ -236,15 +230,13 @@ export const useVerifyOTP = () => {
       } catch (error) {
         console.error('Error in OTP verification success handler:', error);
         await TokenManager.clearAllTokens();
-        setIsAuthenticated(false);
-        setUser(null);
+        setError('OTP verification failed');
         throw error;
       }
     },
     onError: (error: any) => {
       console.error('OTP verification failed:', error);
-      setIsAuthenticated(false);
-      setUser(null);
+      setError(error.response?.data?.message || 'OTP verification failed');
       TokenManager.clearAllTokens().catch(console.error);
     },
   });
@@ -267,20 +259,24 @@ export const useUpdateProfile = () => {
 
 export const useLogout = () => {
   const queryClient = useQueryClient();
-  const { logoutUser } = useAuthStore();
+  const { logout } = useAuthStore();
 
   return useMutation({
-    mutationFn: () => authApi.logout(),
-    onSuccess: async () => {
-      await logoutUser();
-      queryClient.clear();
+    mutationFn: async () => {
+      // No API call for customer logout - just clear local storage and state
+      console.log('Performing customer logout - clearing storage and state');
+      await logout();
+      return Promise.resolve();
     },
-    onError: async (error) => {
-      console.error(
-        'Logout API call failed, but proceeding with local logout:',
-        error,
-      );
-      await logoutUser();
+    onSuccess: () => {
+      // Clear all cached data
+      queryClient.clear();
+      console.log('Customer logout completed successfully');
+    },
+    onError: (error) => {
+      console.error('Customer logout error:', error);
+      // Force logout even if there's an error
+      logout();
       queryClient.clear();
     },
   });

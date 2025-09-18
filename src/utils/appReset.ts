@@ -6,6 +6,10 @@
  */
 
 import { reset } from '../navigation/navigationHelpers';
+import TokenManager from '../services/shared/tokenManager';
+import { useCartStore } from '../stores/customerStores/cartStore';
+import { useAppStore } from '../stores/customerStores/AppStore';
+import { useAuthStore } from '../stores/customerStores/AuthStore';
 
 /**
  * Performs a complete app reset including all stores and navigation
@@ -24,15 +28,12 @@ export const performCompleteAppReset = async (options?: {
 
   try {
     // Clear tokens from storage
-    const TokenManager = (await import('../services/customer/tokenManager')).default;
     await TokenManager.clearAllTokens();
 
     // Clear cart store
-    const { useCartStore } = await import('../stores/customerStores/cartStore');
     useCartStore.getState().clearCart();
 
     // Reset app store with options
-    const { useAppStore } = await import('../stores/customerStores/AppStore');
     const appStore = useAppStore.getState();
     const isOnboardingComplete = appStore.isOnboardingComplete;
     appStore.resetApp();
@@ -42,7 +43,6 @@ export const performCompleteAppReset = async (options?: {
     }
 
     // Reset auth store
-    const { useAuthStore } = await import('../stores/customerStores/AuthStore');
     const authStore = useAuthStore.getState();
     const selectedUserType = authStore.selectedUserType;
     
@@ -52,9 +52,9 @@ export const performCompleteAppReset = async (options?: {
       authStore.setSelectedUserType(selectedUserType);
     }
 
-    // Navigate to auth screen if requested
+    // Navigate to user type selection screen if requested
     if (navigateToAuth) {
-      reset('Auth');
+      reset('UserTypeSelection');
     }
 
     return { success: true };
@@ -63,14 +63,13 @@ export const performCompleteAppReset = async (options?: {
     
     // Try to at least clear what we can
     try {
-      const { useCartStore } = await import('../stores/customerStores/cartStore');
       useCartStore.getState().clearCart();
     } catch (cartError) {
       console.error('Error clearing cart during fallback reset:', cartError);
     }
 
     if (navigateToAuth) {
-      reset('Auth');
+      reset('UserTypeSelection');
     }
 
     return { success: false, error };
@@ -84,13 +83,9 @@ export const performCompleteAppReset = async (options?: {
 export const switchUserType = async (newUserType: 'customer' | 'restaurant') => {
   try {
     // Clear cart since it's user-type specific
-    const { useCartStore } = await import('../stores/customerStores/cartStore');
     useCartStore.getState().clearCart();
 
     // Update user type in both stores
-    const { useAppStore } = await import('../stores/customerStores/AppStore');
-    const { useAuthStore } = await import('../stores/customerStores/AuthStore');
-    
     useAppStore.getState().setUserType(newUserType);
     useAuthStore.getState().setSelectedUserType(newUserType);
 
@@ -112,15 +107,12 @@ export const switchUserType = async (newUserType: 'customer' | 'restaurant') => 
 export const clearSessionData = async () => {
   try {
     // Clear tokens
-    const TokenManager = (await import('../services/customer/tokenManager')).default;
     await TokenManager.clearAllTokens();
 
     // Clear cart
-    const { useCartStore } = await import('../stores/customerStores/cartStore');
     useCartStore.getState().clearCart();
 
     // Reset only auth state
-    const { useAuthStore } = await import('../stores/customerStores/AuthStore');
     useAuthStore.getState().resetAuth();
 
     return { success: true };

@@ -79,7 +79,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
       key: 'category' as const,
       title: t('food_category'),
       icon: 'restaurant-menu',
-      options: categories.map(cat => ({
+      options: categories.map((cat) => ({
         value: cat.title,
         label: cat.displayName,
         description: cat.description || '',
@@ -206,7 +206,6 @@ const FilterModal: React.FC<FilterModalProps> = ({
       animationType="slide"
       transparent
       onRequestClose={onClose}
-      
     >
       <View style={[styles.overlay, { backgroundColor: colors.backdrop }]}>
         <View style={[styles.modal, { backgroundColor: colors.surface }]}>

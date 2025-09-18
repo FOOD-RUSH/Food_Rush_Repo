@@ -1,4 +1,5 @@
 import React, { memo, useMemo } from 'react';
+import { SimpleNotificationProvider } from '@/src/contexts/SimpleNotificationProvider';
 import { I18nextProvider } from 'react-i18next';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -12,8 +13,7 @@ import { LanguageProvider } from '@/src/contexts/LanguageContext';
 import { BottomSheetProvider } from '@/src/components/common/BottomSheet/BottomSheetContext';
 import { AppStateProvider } from '@/src/contexts/AppStateContext';
 import { PerformanceProvider } from '@/src/contexts/PerformanceContext';
-import { CartReminderProvider } from '@/src/contexts/CartReminderProvider';
-import { NotificationProvider } from '@/src/contexts/NotificationContext';
+
 import i18n from '@/src/locales/i18n';
 
 interface AppContextProviderProps {
@@ -51,9 +51,9 @@ const AppStateProviders = memo<AppContextProviderProps>(({ children }) => {
         <LanguageProvider>
           <ThemeProvider>
             <NetworkProvider>
-              <NotificationProvider>
-                <CartReminderProvider>{children}</CartReminderProvider>
-              </NotificationProvider>
+              <SimpleNotificationProvider>
+                {children}
+              </SimpleNotificationProvider>
             </NetworkProvider>
           </ThemeProvider>
         </LanguageProvider>

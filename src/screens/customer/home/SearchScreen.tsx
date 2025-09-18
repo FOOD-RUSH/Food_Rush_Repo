@@ -58,20 +58,32 @@ const useSearchFood = (query: string, filters: GeneralFilterOptions) => {
       results = results.filter((item) => {
         const itemName = item.name.toLowerCase();
         const itemDescription = item.description?.toLowerCase() || '';
-        
+
         switch (filters.category) {
           case 'local-dishes':
-            return itemName.includes('local') || itemDescription.includes('local');
+            return (
+              itemName.includes('local') || itemDescription.includes('local')
+            );
           case 'snacks':
-            return itemName.includes('snack') || itemDescription.includes('snack');
+            return (
+              itemName.includes('snack') || itemDescription.includes('snack')
+            );
           case 'drinks':
-            return itemName.includes('drink') || itemDescription.includes('drink');
+            return (
+              itemName.includes('drink') || itemDescription.includes('drink')
+            );
           case 'breakfast':
-            return itemName.includes('breakfast') || itemDescription.includes('breakfast');
+            return (
+              itemName.includes('breakfast') ||
+              itemDescription.includes('breakfast')
+            );
           case 'fast-food':
             return itemName.includes('burger') || itemName.includes('fast');
           default:
-            return itemName.includes(filters.category) || itemDescription.includes(filters.category);
+            return (
+              itemName.includes(filters.category) ||
+              itemDescription.includes(filters.category)
+            );
         }
       });
     }

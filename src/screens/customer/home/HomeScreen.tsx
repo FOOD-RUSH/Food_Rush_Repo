@@ -3,7 +3,10 @@ import CommonView from '@/src/components/common/CommonView';
 import { TextInput, useTheme } from 'react-native-paper';
 import { useCategoryOptions } from '@/src/hooks/customer/useCategoriesApi';
 import { images } from '@/assets/images';
-import { getMainCategories, mapApiCategoriesToUI } from '@/src/constants/categories';
+import {
+  getMainCategories,
+  mapApiCategoriesToUI,
+} from '@/src/constants/categories';
 import CategoryItem from '@/src/components/customer/CategoryItem';
 // Removed HomeHeader as per requirement to remove customer headers
 import FoodItemCard from '@/src/components/customer/FoodItemCard';
@@ -136,10 +139,11 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
   const { t } = useTranslation('translation');
   const [refreshing, setRefreshing] = useState(false);
   const [showPermissionModal, setShowPermissionModal] = useState(false);
-  
+
   // Get categories from API
-  const { data: categories, isLoading: isCategoriesLoading } = useCategoryOptions();
-  
+  const { data: categories, isLoading: isCategoriesLoading } =
+    useCategoryOptions();
+
   // Use refs to prevent unnecessary re-renders
   const lastRefreshTime = useRef<number>(0);
   const refreshThrottle = 2000; // 2 seconds throttle
@@ -201,7 +205,12 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await Promise.all([refetchNearby(), refetchAll(), refetchMenu(), refetchCategories()]);
+      await Promise.all([
+        refetchNearby(),
+        refetchAll(),
+        refetchMenu(),
+        refetchCategories(),
+      ]);
     } catch (error) {
       console.error('Refresh error:', error);
     } finally {
@@ -264,7 +273,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
         distanceFromUser={item.distanceKm || 0}
         DeliveryPrice={500} // Default value
         isAvailable={item.isAvailable}
-          RestaurantName={item.restaurant?.name}  
+        RestaurantName={item.restaurant?.name}
       />
     ),
     [],
@@ -272,10 +281,10 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
 
   const renderCategoryItem = useCallback(
     ({ item }: { item: { value: string; label: string } }) => (
-      <CategoryItem 
-        key={item.value} 
+      <CategoryItem
+        key={item.value}
         image={images.onboarding1} // Use default image for now
-        title={item.label} 
+        title={item.label}
       />
     ),
     [],
@@ -321,7 +330,8 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
       data.push({
         type: 'empty',
         emptyType: 'carousel',
-        onActionPress: () => navigation.navigate('SearchScreen', { type: 'search' }),
+        onActionPress: () =>
+          navigation.navigate('SearchScreen', { type: 'search' }),
       });
     } else {
       data.push({ type: 'carousel', data: carouselData });
@@ -346,7 +356,8 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
       data.push({
         type: 'empty',
         emptyType: 'recommended',
-        onActionPress: () => navigation.navigate('SearchScreen', { type: 'search' }),
+        onActionPress: () =>
+          navigation.navigate('SearchScreen', { type: 'search' }),
       });
     } else {
       data.push({ type: 'recommended', data: recommendedFoodData });
@@ -441,8 +452,6 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
               />
             </View>
           );
-
-
 
         case 'category':
           return (

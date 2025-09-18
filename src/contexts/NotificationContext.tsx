@@ -9,13 +9,17 @@ interface NotificationContextType {
   updateUnreadCount: () => Promise<void>;
 }
 
-const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
+const NotificationContext = createContext<NotificationContextType | undefined>(
+  undefined,
+);
 
 interface NotificationProviderProps {
   children: ReactNode;
 }
 
-export const NotificationProvider: React.FC<NotificationProviderProps> = ({ children }) => {
+export const NotificationProvider: React.FC<NotificationProviderProps> = ({
+  children,
+}) => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const { addNotification, updateUnreadCount } = useNotificationStore();
 
@@ -46,7 +50,9 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
 export const useNotificationContext = (): NotificationContextType => {
   const context = useContext(NotificationContext);
   if (context === undefined) {
-    throw new Error('useNotificationContext must be used within a NotificationProvider');
+    throw new Error(
+      'useNotificationContext must be used within a NotificationProvider',
+    );
   }
   return context;
 };

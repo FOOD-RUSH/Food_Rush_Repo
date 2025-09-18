@@ -63,20 +63,29 @@ const RestaurantDetailScreen = ({
   // Extract unique categories from menu items
   const categories = useMemo(() => {
     if (!restaurantDetails?.menu) return ['All'];
-    
+
     const uniqueCategories = new Set<string>();
-    restaurantDetails.menu.forEach(item => {
+    restaurantDetails.menu.forEach((item) => {
       // Try to categorize based on item name/description
       const itemName = item.name.toLowerCase();
       const itemDescription = item.description?.toLowerCase() || '';
-      
+
       if (itemName.includes('local') || itemDescription.includes('local')) {
         uniqueCategories.add('Local Dishes');
-      } else if (itemName.includes('snack') || itemDescription.includes('snack')) {
+      } else if (
+        itemName.includes('snack') ||
+        itemDescription.includes('snack')
+      ) {
         uniqueCategories.add('Snacks');
-      } else if (itemName.includes('drink') || itemDescription.includes('drink')) {
+      } else if (
+        itemName.includes('drink') ||
+        itemDescription.includes('drink')
+      ) {
         uniqueCategories.add('Drinks');
-      } else if (itemName.includes('breakfast') || itemDescription.includes('breakfast')) {
+      } else if (
+        itemName.includes('breakfast') ||
+        itemDescription.includes('breakfast')
+      ) {
         uniqueCategories.add('Breakfast');
       } else if (itemName.includes('burger') || itemName.includes('fast')) {
         uniqueCategories.add('Fast Food');
@@ -84,7 +93,7 @@ const RestaurantDetailScreen = ({
         uniqueCategories.add('Main Dishes');
       }
     });
-    
+
     return ['All', ...Array.from(uniqueCategories)];
   }, [restaurantDetails?.menu]);
 
@@ -93,27 +102,41 @@ const RestaurantDetailScreen = ({
     if (!restaurantDetails?.menu || selectedCategory === 'All') {
       return restaurantDetails?.menu || [];
     }
-    
-    return restaurantDetails.menu.filter(item => {
+
+    return restaurantDetails.menu.filter((item) => {
       const itemName = item.name.toLowerCase();
       const itemDescription = item.description?.toLowerCase() || '';
-      
+
       switch (selectedCategory) {
         case 'Local Dishes':
-          return itemName.includes('local') || itemDescription.includes('local');
+          return (
+            itemName.includes('local') || itemDescription.includes('local')
+          );
         case 'Snacks':
-          return itemName.includes('snack') || itemDescription.includes('snack');
+          return (
+            itemName.includes('snack') || itemDescription.includes('snack')
+          );
         case 'Drinks':
-          return itemName.includes('drink') || itemDescription.includes('drink');
+          return (
+            itemName.includes('drink') || itemDescription.includes('drink')
+          );
         case 'Breakfast':
-          return itemName.includes('breakfast') || itemDescription.includes('breakfast');
+          return (
+            itemName.includes('breakfast') ||
+            itemDescription.includes('breakfast')
+          );
         case 'Fast Food':
           return itemName.includes('burger') || itemName.includes('fast');
         case 'Main Dishes':
         default:
-          return !itemName.includes('local') && !itemName.includes('snack') && 
-                 !itemName.includes('drink') && !itemName.includes('breakfast') &&
-                 !itemName.includes('burger') && !itemName.includes('fast');
+          return (
+            !itemName.includes('local') &&
+            !itemName.includes('snack') &&
+            !itemName.includes('drink') &&
+            !itemName.includes('breakfast') &&
+            !itemName.includes('burger') &&
+            !itemName.includes('fast')
+          );
       }
     });
   }, [restaurantDetails?.menu, selectedCategory]);

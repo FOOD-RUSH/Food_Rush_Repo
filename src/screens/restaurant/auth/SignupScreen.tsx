@@ -33,6 +33,8 @@ import { useTranslation } from 'react-i18next';
 import { useRegisterRestaurant } from '@/src/hooks/restaurant/useAuthhooks';
 import ErrorDisplay from '@/src/components/auth/ErrorDisplay';
 import * as ImagePicker from 'expo-image-picker';
+import LocationPicker from '@/src/components/restaurant/LocationPicker';
+import { Location } from '@/src/location/types';
 
 // Optimized country codes data - moved outside component to prevent recreation
 const COUNTRY_CODES = [
@@ -104,6 +106,7 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [documentUri, setDocumentUri] = useState<string | null>(null);
   const [documentName, setDocumentName] = useState<string>('');
+  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
 
   const {
     control,
@@ -159,6 +162,12 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
           name: data.name.trim(), // Restaurant name
           ...(data.address && { address: data.address.trim() }), // Optional address
           ...(documentUri && { documentUri }), // Optional document
+          ...(selectedLocation && {
+            latitude: selectedLocation.latitude,
+            longitude: selectedLocation.longitude,
+            locationAddress: selectedLocation.formattedAddress,
+            exactLocation: selectedLocation.exactLocation,
+          }), // Location data
         };
 
         registerRestaurantMutation(registrationData, {
@@ -216,6 +225,7 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
       userType,
       navigation,
       documentUri,
+      selectedLocation,
     ],
   );
 
@@ -566,6 +576,13 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                     />
                   </View>
                 )}
+              />
+
+              {/* Location Picker */}
+              <LocationPicker
+                onLocationSelected={setSelectedLocation}
+                selectedLocation={selectedLocation}
+                required={false}
               />
 
               {/* Document Upload */}

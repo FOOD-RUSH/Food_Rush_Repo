@@ -76,19 +76,7 @@ export const authApi = {
   // },
 
   refreshToken: (refreshToken: string) => {
-<<<<<<< HEAD
-    return apiClient.post<{ accessToken: string; refreshToken: string }>('/auth/refresh-token', {
-=======
-    return apiClient.post<{
-      status_code: number;
-      message: string;
-      data: {
-        accessToken: string;
-        refreshToken: string;
-        user: User;
-      };
-    }>('/auth/refresh-token', {
->>>>>>> origin/Customer_Setup
+    return apiClient.post<LoginResponseData>('/auth/refresh-token', {
       refreshToken,
     });
   },

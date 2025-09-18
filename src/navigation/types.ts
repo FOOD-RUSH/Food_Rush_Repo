@@ -10,7 +10,7 @@ import { MaterialTopTabScreenProps } from '@react-navigation/material-top-tabs';
 // Root Stack - Screens that should NOT show tabs (full-screen)
 export type RootStackParamList = {
   // Core app flow screens
-Onboarding: undefined;
+  Onboarding: undefined;
   UserTypeSelection: undefined;
   Auth: NavigatorScreenParams<AuthStackParamList>;
   CustomerApp: NavigatorScreenParams<CustomerTabParamList>;
@@ -45,7 +45,7 @@ Onboarding: undefined;
   LanguageScreen: undefined;
   NearbyRestaurants: undefined;
   OrderReceipt: { orderId: string };
-  
+
   // Restaurant full-screen screens (NO TABS)
   RestaurantOrderDetails: { orderId: string };
   RestaurantOrderActions: { orderId: string };
@@ -237,7 +237,8 @@ export type RestaurantAccountStackScreenProps<
 
 // Core app flow screen props
 export type OnboardingScreenProps = RootStackScreenProps<'Onboarding'>;
-export type UserTypeSelectionScreenProps = RootStackScreenProps<'UserTypeSelection'>;
+export type UserTypeSelectionScreenProps =
+  RootStackScreenProps<'UserTypeSelection'>;
 
 // User type enum
 export type UserType = 'customer' | 'restaurant';
@@ -260,4 +261,3 @@ export interface User {
   website?: string;
   cuisine?: string;
 }
-

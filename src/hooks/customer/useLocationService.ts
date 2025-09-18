@@ -10,12 +10,14 @@ const DEFAULT_COORDINATES = YAOUNDE_CENTER;
  */
 export const useLocationForQueries = () => {
   const location = useLocationData();
-  
+
   // Use current location if available, otherwise fallback to default
-  const coordinates = location ? {
-    latitude: location.latitude,
-    longitude: location.longitude,
-  } : DEFAULT_COORDINATES;
+  const coordinates = location
+    ? {
+        latitude: location.latitude,
+        longitude: location.longitude,
+      }
+    : DEFAULT_COORDINATES;
 
   return {
     nearLat: coordinates.latitude,

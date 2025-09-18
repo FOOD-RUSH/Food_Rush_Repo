@@ -1,7 +1,8 @@
 import React, { useCallback, useState } from 'react';
 import { View, Text, Image, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { RootStackScreenProps } from '@/src/navigation/types';
+import type { NavigationProp } from '@react-navigation/native';
+import { RootStackParamList } from '@/src/navigation/types';
 import { useTheme, ActivityIndicator } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -29,7 +30,7 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
   badgeText,
   itemCount,
 }) => {
-  const navigation = useNavigation<RootStackScreenProps<keyof any>['navigation']>();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
   const [imageError, setImageError] = useState(false);
@@ -169,7 +170,7 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
           numberOfLines={2}
           ellipsizeMode="tail"
         >
-          {t(`category_${title.toLowerCase().replace(/[\s-]/g, '_')}`, title)}
+          {t(`category_${title?.toLowerCase().replace(/[\s-]/g, '_') || 'unknown'}`, title || 'Unknown Category')}
         </Text>
 
         {/* Item Count */}

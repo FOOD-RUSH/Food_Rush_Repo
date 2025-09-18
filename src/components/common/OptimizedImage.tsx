@@ -2,11 +2,11 @@ import React, { useState, useCallback } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import { Image } from 'expo-image';
 import { useTheme } from 'react-native-paper';
-import { 
-  useResponsiveImage, 
-  ImageSizePreset, 
+import {
+  useResponsiveImage,
+  ImageSizePreset,
   generatePlaceholder,
-  IMAGE_CACHE_CONFIG 
+  IMAGE_CACHE_CONFIG,
 } from '@/src/utils/imageOptimization';
 
 interface OptimizedImageProps {
@@ -58,10 +58,16 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   // Optimize image configuration
   const imageUri = typeof source === 'string' ? source : source.uri;
-  const optimizedConfig = optimizeImageForScreen(imageUri, imageWidth, aspectRatio);
+  const optimizedConfig = optimizeImageForScreen(
+    imageUri,
+    imageWidth,
+    aspectRatio,
+  );
 
   // Generate placeholder if not provided
-  const placeholderUri = placeholder || generatePlaceholder(imageWidth, imageHeight, colors.surfaceVariant);
+  const placeholderUri =
+    placeholder ||
+    generatePlaceholder(imageWidth, imageHeight, colors.surfaceVariant);
 
   const handleLoad = useCallback(() => {
     setIsLoading(false);
@@ -83,9 +89,10 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
   };
 
   // Show fallback if there's an error and fallback is provided
-  const finalSource = hasError && fallbackSource 
-    ? { uri: fallbackSource }
-    : { uri: optimizedConfig.uri };
+  const finalSource =
+    hasError && fallbackSource
+      ? { uri: fallbackSource }
+      : { uri: optimizedConfig.uri };
 
   return (
     <View style={imageStyle} className={className}>
@@ -100,7 +107,7 @@ export const OptimizedImage: React.FC<OptimizedImageProps> = ({
         onLoad={handleLoad}
         onError={handleError}
       />
-      
+
       {/* Loading indicator */}
       {isLoading && (
         <View

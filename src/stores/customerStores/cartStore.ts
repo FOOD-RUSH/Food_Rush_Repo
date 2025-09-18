@@ -3,7 +3,6 @@ import { Alert } from 'react-native';
 import { create } from 'zustand';
 import { createJSONStorage, devtools, persist } from 'zustand/middleware';
 import { MenuProps } from '../../types';
-import { cartReminderService } from '../../services/customer/cartReminderService';
 
 export interface CartItem {
   id: string;
@@ -55,18 +54,21 @@ const updateActivity = (set: any, get: any) => {
   const now = Date.now();
   set({ lastActivity: now });
   
-  // Schedule cart reminders when activity is updated
+  // Schedule cart reminders when activity is updated (lazy load service)
   const state = get();
   if (state.reminderEnabled && state.items.length > 0) {
     // Use setTimeout to avoid blocking the UI
-    setTimeout(() => {
-      cartReminderService.scheduleCartReminders(
-        state.items.reduce((sum: number, item: CartItem) => sum + item.quantity, 0),
-        state.restaurantName || undefined,
-        now
-      ).catch(error => {
+    setTimeout(async () => {
+      try {
+        const { cartReminderService } = await import('../../services/customer/cartReminderService');
+        await cartReminderService.scheduleCartReminders(
+          state.items.reduce((sum: number, item: CartItem) => sum + item.quantity, 0),
+          state.restaurantName || undefined,
+          now
+        );
+      } catch (error) {
         console.error('Failed to schedule cart reminders:', error);
-      });
+      }
     }, 100);
   }
 };
@@ -79,10 +81,15 @@ const clearCartState = (set: any) => {
     lastActivity: Date.now(),
   });
   
-  // Cancel cart reminders when cart is cleared
-  cartReminderService.cancelAllCartReminders().catch(error => {
-    console.error('Failed to cancel cart reminders:', error);
-  });
+  // Cancel cart reminders when cart is cleared (lazy load service)
+  setTimeout(async () => {
+    try {
+      const { cartReminderService } = await import('../../services/customer/cartReminderService');
+      await cartReminderService.cancelAllCartReminders();
+    } catch (error) {
+      console.error('Failed to cancel cart reminders:', error);
+    }
+  }, 0);
 };
 
 export const useCartStore = create<CartState & CartActions>()( 
@@ -306,14 +313,17 @@ export const useCartStore = create<CartState & CartActions>()(
           // Schedule reminders for current cart if it has items
           const state = get();
           if (state.items.length > 0) {
-            setTimeout(() => {
-              cartReminderService.scheduleCartReminders(
-                state.items.reduce((sum, item) => sum + item.quantity, 0),
-                state.restaurantName || undefined,
-                state.lastActivity
-              ).catch(error => {
+            setTimeout(async () => {
+              try {
+                const { cartReminderService } = await import('../../services/customer/cartReminderService');
+                await cartReminderService.scheduleCartReminders(
+                  state.items.reduce((sum, item) => sum + item.quantity, 0),
+                  state.restaurantName || undefined,
+                  state.lastActivity
+                );
+              } catch (error) {
                 console.error('Failed to schedule cart reminders:', error);
-              });
+              }
             }, 100);
           }
         },
@@ -321,15 +331,21 @@ export const useCartStore = create<CartState & CartActions>()(
         disableReminders: () => {
           set({ reminderEnabled: false });
           // Cancel all existing reminders
-          cartReminderService.cancelAllCartReminders().catch(error => {
-            console.error('Failed to cancel cart reminders:', error);
-          });
+          setTimeout(async () => {
+            try {
+              const { cartReminderService } = await import('../../services/customer/cartReminderService');
+              await cartReminderService.cancelAllCartReminders();
+            } catch (error) {
+              console.error('Failed to cancel cart reminders:', error);
+            }
+          }, 0);
         },
 
         scheduleCartReminders: async () => {
           const state = get();
           if (state.reminderEnabled && state.items.length > 0) {
             try {
+              const { cartReminderService } = await import('../../services/customer/cartReminderService');
               await cartReminderService.scheduleCartReminders(
                 state.items.reduce((sum, item) => sum + item.quantity, 0),
                 state.restaurantName || undefined,
@@ -344,6 +360,7 @@ export const useCartStore = create<CartState & CartActions>()(
 
         cancelCartReminders: async () => {
           try {
+            const { cartReminderService } = await import('../../services/customer/cartReminderService');
             await cartReminderService.cancelAllCartReminders();
           } catch (error) {
             console.error('Failed to cancel cart reminders:', error);
@@ -354,15 +371,6 @@ export const useCartStore = create<CartState & CartActions>()(
       {
         name: 'cart-store',
         storage: createJSONStorage(() => AsyncStorage),
-<<<<<<< HEAD
-        version: 1,
-        migrate: (persistedState: any, version: number) => {
-          // No migrations needed yet, but this prevents the warning
-          return persistedState;
-        },
-        // Only persist essential data
-=======
->>>>>>> origin/Customer_Setup
         partialize: (state) => ({
           items: state.items,
           restaurantID: state.restaurantID,

@@ -4,7 +4,11 @@ import CommonView from '@/src/components/common/CommonView';
 import CartFoodComponent from '@/src/components/customer/CartFoodComponent';
 import { TouchableRipple, useTheme } from 'react-native-paper';
 import { RootStackScreenProps } from '@/src/navigation/types';
-import { useCartStore, useCartTotal, CartItem } from '@/src/stores/customerStores/cartStore';
+import {
+  useCartStore,
+  useCartTotal,
+  CartItem,
+} from '@/src/stores/customerStores/cartStore';
 import { images } from '@/assets/images';
 import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-toast-message';

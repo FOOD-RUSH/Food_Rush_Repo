@@ -1,19 +1,23 @@
 import { MD3LightTheme, MD3DarkTheme, MD3Theme } from 'react-native-paper';
-import { DefaultTheme, DarkTheme, Theme as NavigationTheme } from '@react-navigation/native';
+import {
+  DefaultTheme,
+  DarkTheme,
+  Theme as NavigationTheme,
+} from '@react-navigation/native';
 
 // Restaurant theme colors - Enhanced color palette centered around #007aff
 const COLORS = {
   // Primary brand colors - All variations of #007aff with better harmony
-  PRIMARY: '#007aff', 
+  PRIMARY: '#007aff',
   PRIMARY_LIGHT: '#3395FF', // More vibrant lighter shade
   PRIMARY_DARK: '#0056CC', // Darker shade for depth
   PRIMARY_VARIANT: '#1A85FF', // Slightly lighter variant for variety
-  
+
   // Secondary colors - Complementary warm tones
   SECONDARY: '#FF6B35', // Vibrant orange that complements blue
   SECONDARY_LIGHT: '#FF8A5B', // Lighter orange
   SECONDARY_DARK: '#E55A2B', // Darker orange
-  
+
   // Accent colors that create beautiful harmony with #007aff
   SUCCESS: '#00D084', // Modern green with blue undertones
   SUCCESS_LIGHT: '#26E69A', // Lighter success green
@@ -22,7 +26,7 @@ const COLORS = {
   ERROR: '#FF3B30', // Apple-style red
   ERROR_LIGHT: '#FF6B6B', // Lighter error
   INFO: '#007aff', // Use primary blue for info
-  
+
   // Neutral colors with blue undertones for cohesion
   BACKGROUND_LIGHT: '#F8FAFF', // Very light blue-tinted white
   BACKGROUND_DARK: '#0A1628', // Deep blue-black
@@ -30,7 +34,7 @@ const COLORS = {
   SURFACE_DARK: '#1A2332', // Dark blue-gray
   SURFACE_VARIANT_LIGHT: '#F1F5FF', // Light blue-tinted surface
   SURFACE_VARIANT_DARK: '#2A3441', // Medium blue-gray
-  
+
   // Text colors with improved contrast
   TEXT_LIGHT: '#1A2332', // Dark blue-gray for light backgrounds
   TEXT_DARK: '#F8FAFF', // Light blue-white for dark backgrounds
@@ -38,13 +42,13 @@ const COLORS = {
   TEXT_SECONDARY_DARK: '#9BA8B7', // Light blue-gray
   TEXT_MUTED_LIGHT: '#8A9BA8', // Muted blue-gray
   TEXT_MUTED_DARK: '#6B7A87', // Darker muted
-  
+
   // Border and divider colors with blue undertones
   BORDER_LIGHT: '#E1E8F0', // Light blue-gray border
   BORDER_DARK: '#3A4A5C', // Dark blue-gray border
   DIVIDER_LIGHT: '#F1F5FF', // Very light divider
   DIVIDER_DARK: '#2A3441', // Dark divider
-  
+
   // Gradient colors - Multiple beautiful combinations
   GRADIENT_PRIMARY_START: '#007aff',
   GRADIENT_PRIMARY_END: '#3395FF',
@@ -52,18 +56,18 @@ const COLORS = {
   GRADIENT_SECONDARY_END: '#FF8A5B',
   GRADIENT_SUCCESS_START: '#00D084',
   GRADIENT_SUCCESS_END: '#26E69A',
-  
+
   // Dark theme gradients
   GRADIENT_DARK_PRIMARY_START: '#0056CC',
   GRADIENT_DARK_PRIMARY_END: '#007aff',
   GRADIENT_DARK_SECONDARY_START: '#E55A2B',
   GRADIENT_DARK_SECONDARY_END: '#FF6B35',
-  
+
   // Special UI colors
   CARD_SHADOW: 'rgba(0, 122, 255, 0.1)', // Blue-tinted shadow
   OVERLAY: 'rgba(0, 122, 255, 0.05)', // Light blue overlay
   OVERLAY_DARK: 'rgba(0, 122, 255, 0.15)', // Darker blue overlay
-  
+
   // Status colors for orders, etc.
   STATUS_PENDING: '#FF9500', // Orange for pending
   STATUS_CONFIRMED: '#007aff', // Primary blue for confirmed
@@ -203,13 +207,13 @@ export const getStatusColor = (status: string): string => {
 };
 
 export const getPrimaryGradient = (isDark: boolean = false) => {
-  return isDark 
+  return isDark
     ? [COLORS.GRADIENT_DARK_PRIMARY_START, COLORS.GRADIENT_DARK_PRIMARY_END]
     : [COLORS.GRADIENT_PRIMARY_START, COLORS.GRADIENT_PRIMARY_END];
 };
 
 export const getSecondaryGradient = (isDark: boolean = false) => {
-  return isDark 
+  return isDark
     ? [COLORS.GRADIENT_DARK_SECONDARY_START, COLORS.GRADIENT_DARK_SECONDARY_END]
     : [COLORS.GRADIENT_SECONDARY_START, COLORS.GRADIENT_SECONDARY_END];
 };

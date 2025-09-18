@@ -1,13 +1,5 @@
-<<<<<<< HEAD
-import { apiClient } from '../apiClient';
-=======
-import { apiClient } from './apiClient';
-import type { 
-  Notification, 
-  NotificationResponse, 
-  UnreadCountResponse 
-} from '@/src/types';
->>>>>>> origin/Customer_Setup
+import { apiClient } from '@/src/services/shared/apiClient';
+import type { Notification, NotificationResponse, UnreadCountResponse } from '@/src/types';
 
 export interface NotificationListParams {
   limit?: number;

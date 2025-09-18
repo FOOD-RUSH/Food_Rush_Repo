@@ -56,15 +56,7 @@ export const usePaymentStore = create<PaymentState & PaymentActions>()(
           selectedPaymentMethod: state.selectedPaymentMethod,
         }),
         version: 1,
-<<<<<<< HEAD
-        migrate: (persistedState: any, version: number) => {
-          // No migrations needed yet, but this prevents the warning
-          return persistedState;
-        },
       }
-=======
-      },
->>>>>>> origin/Customer_Setup
     ),
     { name: 'PaymentStore' },
   ),

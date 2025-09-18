@@ -1,20 +1,17 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import TokenManager from '@/src/services/tokenManager';
-import { apiClient } from '@/src/services/apiClient';
+import TokenManager from '../../services/shared/tokenManager';
+import { apiClient } from '../../services/shared/apiClient';
+import { 
+  User, 
+  Restaurant, 
+  AuthResponse, 
+  isRestaurantAuthResponse 
+} from '../../types';
 
-// Simple User interface
-export interface User {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: 'customer' | 'restaurant';
-  isVerified?: boolean;
-  restaurantId?: string;
-  verificationStatus?: 'PENDING' | 'APPROVED' | 'REJECTED';
-}
+// Re-export User type for backward compatibility
+export type { User } from '../../types';
 
 // Auth Store State
 interface AuthState {
@@ -23,6 +20,9 @@ interface AuthState {
   isLoading: boolean;
   error: string | null;
   isInitialized: boolean;
+  // Restaurant-specific state
+  restaurants?: Restaurant[];
+  defaultRestaurantId?: string;
 }
 
 // Auth Store Actions
@@ -34,6 +34,13 @@ interface AuthActions {
   // State management
   setError: (error: string | null) => void;
   clearError: () => void;
+  setUser: (user: User) => void;
+  setAuthData: (authResponse: AuthResponse) => void;
+  
+  // Restaurant-specific actions
+  setRestaurants: (restaurants: Restaurant[]) => void;
+  setDefaultRestaurantId: (restaurantId: string) => void;
+  getCurrentRestaurant: () => Restaurant | null;
   
   // Initialization
   initialize: () => Promise<void>;
@@ -45,6 +52,8 @@ const initialState: AuthState = {
   isLoading: false,
   error: null,
   isInitialized: false,
+  restaurants: undefined,
+  defaultRestaurantId: undefined,
 };
 
 export const useAuthStore = create<AuthState & AuthActions>()(
@@ -80,7 +89,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             isInitialized: true,
           });
         } catch (error) {
-          await TokenManager.clearTokens();
+          await TokenManager.clearAllTokens();
           set({
             user: null,
             isAuthenticated: false,
@@ -96,30 +105,48 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         try {
           set({ isLoading: true, error: null });
 
-          const response = await apiClient.post('/auth/login', {
+          // Use different endpoints for customer vs restaurant
+          const endpoint = userType === 'restaurant' ? '/restaurants/auth/login' : '/auth/login';
+          
+          const response = await apiClient.post(endpoint, {
             email,
             password,
-            userType,
+            ...(userType === 'customer' && { userType }), // Only add userType for customer endpoint
           });
 
-          const { user, accessToken, refreshToken } = response.data.data || response.data;
+          const authData = response.data.data || response.data;
+          const { user, accessToken, refreshToken } = authData;
 
           if (!user || !accessToken) {
             throw new Error('Invalid login response');
           }
 
-          await TokenManager.setTokens({
+          await TokenManager.setTokens(
             accessToken,
             refreshToken,
-            userType,
-          });
+            // userType,
+          );
           
-          set({
-            user,
-            isAuthenticated: true,
-            isLoading: false,
-            error: null,
-          });
+          // Handle restaurant-specific data
+          if (userType === 'restaurant' && isRestaurantAuthResponse(authData)) {
+            set({
+              user,
+              isAuthenticated: true,
+              isLoading: false,
+              error: null,
+              restaurants: authData.restaurants,
+              defaultRestaurantId: authData.defaultRestaurantId,
+            });
+          } else {
+            set({
+              user,
+              isAuthenticated: true,
+              isLoading: false,
+              error: null,
+              restaurants: undefined,
+              defaultRestaurantId: undefined,
+            });
+          }
 
           return true;
         } catch (error: any) {
@@ -129,6 +156,8 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             user: null,
             isLoading: false,
             error: errorMessage,
+            restaurants: undefined,
+            defaultRestaurantId: undefined,
           });
           return false;
         }
@@ -137,27 +166,45 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       // Logout
       logout: async () => {
         try {
-          set({ isLoading: true });
-          
-          // Try to call logout endpoint
-          try {
-            await apiClient.post('/auth/logout');
-          } catch (error) {
-            console.warn('Logout API call failed');
-          }
-          
-          await TokenManager.clearTokens();
+          await TokenManager.clearAllTokens()
           set({ ...initialState, isInitialized: true });
         } catch (error) {
           console.error('Logout error:', error);
-          await TokenManager.clearTokens();
+          await TokenManager.clearAllTokens();
           set({ ...initialState, isInitialized: true });
         }
       },
 
-      // Error management
+      // State management
       setError: (error) => set({ error }),
       clearError: () => set({ error: null }),
+      setUser: (user) => set({ user }),
+      setAuthData: (authResponse) => {
+        if (isRestaurantAuthResponse(authResponse)) {
+          set({
+            user: authResponse.user,
+            restaurants: authResponse.restaurants,
+            defaultRestaurantId: authResponse.defaultRestaurantId,
+          });
+        } else {
+          set({
+            user: authResponse.user,
+            restaurants: undefined,
+            defaultRestaurantId: undefined,
+          });
+        }
+      },
+      
+      // Restaurant-specific actions
+      setRestaurants: (restaurants) => set({ restaurants }),
+      setDefaultRestaurantId: (restaurantId) => set({ defaultRestaurantId: restaurantId }),
+      getCurrentRestaurant: () => {
+        const state = get();
+        if (!state.restaurants || !state.defaultRestaurantId) {
+          return null;
+        }
+        return state.restaurants.find(r => r.id === state.defaultRestaurantId) || null;
+      },
     }),
     {
       name: 'auth-store',
@@ -175,6 +222,27 @@ export const useAuthLoading = () => useAuthStore((state) => state.isLoading);
 export const useAuthError = () => useAuthStore((state) => state.error);
 export const useAuthInitialized = () => useAuthStore((state) => state.isInitialized);
 
+// Restaurant-specific selector hooks
+export const useRestaurants = () => useAuthStore((state) => state.restaurants);
+export const useDefaultRestaurantId = () => useAuthStore((state) => state.defaultRestaurantId);
+export const useCurrentRestaurant = () => useAuthStore((state) => state.getCurrentRestaurant());
+
 // Utility hooks
 export const useIsCustomer = () => useAuthStore((state) => state.user?.role === 'customer');
 export const useIsRestaurant = () => useAuthStore((state) => state.user?.role === 'restaurant');
+
+// Combined restaurant info hook
+export const useRestaurantInfo = () => {
+  const restaurants = useRestaurants();
+  const defaultRestaurantId = useDefaultRestaurantId();
+  const currentRestaurant = useCurrentRestaurant();
+  const isRestaurant = useIsRestaurant();
+  
+  return {
+    restaurants,
+    defaultRestaurantId,
+    currentRestaurant,
+    isRestaurant,
+    hasRestaurants: !!restaurants && restaurants.length > 0,
+  };
+};

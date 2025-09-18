@@ -20,7 +20,10 @@ import {
   getCurrencySymbol,
   getFoodPlaceholderImage,
 } from '@/src/types/orderReceipt';
-import { useOrderById, useOrderStatus } from '@/src/hooks/customer/useOrdersApi';
+import {
+  useOrderById,
+  useOrderStatus,
+} from '@/src/hooks/customer/useOrdersApi';
 import { Order } from '@/src/types';
 
 const OrderReceiptScreen = ({
@@ -32,12 +35,7 @@ const OrderReceiptScreen = ({
   const { orderId } = route.params;
 
   // Fetch order data using the real API
-  const {
-    data: order,
-    isLoading,
-    error,
-    refetch,
-  } = useOrderById(orderId);
+  const { data: order, isLoading, error, refetch } = useOrderById(orderId);
 
   const orderStatus = useOrderStatus(order?.status || 'pending');
   const currency = getCurrencySymbol();

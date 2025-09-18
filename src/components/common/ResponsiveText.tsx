@@ -7,7 +7,18 @@ interface ResponsiveTextProps {
   children: React.ReactNode;
   variant?: 'h1' | 'h2' | 'h3' | 'h4' | 'body' | 'caption';
   color?: string;
-  weight?: 'normal' | 'bold' | '100' | '200' | '300' | '400' | '500' | '600' | '700' | '800' | '900';
+  weight?:
+    | 'normal'
+    | 'bold'
+    | '100'
+    | '200'
+    | '300'
+    | '400'
+    | '500'
+    | '600'
+    | '700'
+    | '800'
+    | '900';
   align?: 'left' | 'center' | 'right' | 'justify';
   className?: string;
   style?: TextStyle;
@@ -29,7 +40,7 @@ export const ResponsiveText: React.FC<ResponsiveTextProps> = ({
   const { colors } = useTheme();
   const breakpoint = useBreakpoint();
   const fontSize = getResponsiveFontSize(variant, breakpoint);
-  
+
   const textStyle: TextStyle = {
     fontSize,
     fontWeight: weight,
@@ -37,7 +48,7 @@ export const ResponsiveText: React.FC<ResponsiveTextProps> = ({
     color: color || colors.onSurface,
     ...style,
   };
-  
+
   return (
     <Text
       style={textStyle}
@@ -50,36 +61,34 @@ export const ResponsiveText: React.FC<ResponsiveTextProps> = ({
   );
 };
 
-export const ResponsiveHeading: React.FC<Omit<ResponsiveTextProps, 'variant'> & { level?: 1 | 2 | 3 | 4 }> = ({
-  level = 1,
-  weight = 'bold',
-  ...props
-}) => {
+export const ResponsiveHeading: React.FC<
+  Omit<ResponsiveTextProps, 'variant'> & { level?: 1 | 2 | 3 | 4 }
+> = ({ level = 1, weight = 'bold', ...props }) => {
   const variant = `h${level}` as 'h1' | 'h2' | 'h3' | 'h4';
   return <ResponsiveText variant={variant} weight={weight} {...props} />;
 };
 
-export const ResponsiveSubheading: React.FC<Omit<ResponsiveTextProps, 'variant'>> = ({
-  weight = '600',
-  ...props
-}) => {
+export const ResponsiveSubheading: React.FC<
+  Omit<ResponsiveTextProps, 'variant'>
+> = ({ weight = '600', ...props }) => {
   return <ResponsiveText variant="h4" weight={weight} {...props} />;
 };
 
-export const ResponsiveBody: React.FC<Omit<ResponsiveTextProps, 'variant'>> = (props) => {
+export const ResponsiveBody: React.FC<Omit<ResponsiveTextProps, 'variant'>> = (
+  props,
+) => {
   return <ResponsiveText variant="body" {...props} />;
 };
 
-export const ResponsiveCaption: React.FC<Omit<ResponsiveTextProps, 'variant'>> = ({
-  color,
-  ...props
-}) => {
+export const ResponsiveCaption: React.FC<
+  Omit<ResponsiveTextProps, 'variant'>
+> = ({ color, ...props }) => {
   const { colors } = useTheme();
   return (
-    <ResponsiveText 
-      variant="caption" 
-      color={color || colors.onSurfaceVariant} 
-      {...props} 
+    <ResponsiveText
+      variant="caption"
+      color={color || colors.onSurfaceVariant}
+      {...props}
     />
   );
 };
@@ -88,7 +97,7 @@ export const ResponsiveCaption: React.FC<Omit<ResponsiveTextProps, 'variant'>> =
 export const useTypography = () => {
   const { colors } = useTheme();
   const breakpoint = useBreakpoint();
-  
+
   return {
     h1: {
       fontSize: getResponsiveFontSize('h1', breakpoint),

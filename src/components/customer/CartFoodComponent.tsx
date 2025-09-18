@@ -33,13 +33,7 @@ interface CartFoodComponentProps extends CartItem {
 }
 
 const CartFoodComponent: React.FC<CartFoodComponentProps> = React.memo(
-  ({
-    id,
-    menuItem,
-    quantity,
-    specialInstructions,
-    onDelete,
-  }) => {
+  ({ id, menuItem, quantity, specialInstructions, onDelete }) => {
     const { colors } = useTheme();
     const { t } = useTranslation('translation');
     const deleteCart = useCartStore((state) => state.deleteCart);

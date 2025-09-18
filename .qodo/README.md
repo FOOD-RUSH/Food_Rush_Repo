@@ -5,7 +5,9 @@ This directory contains the Qodo AI configuration for the Food Rush React Native
 ## Configuration Files
 
 ### `.qodo.json`
+
 Main configuration file containing:
+
 - Project settings and metadata
 - File paths and ignore patterns
 - Code review rules and preferences
@@ -15,7 +17,9 @@ Main configuration file containing:
 - Mobile-specific and Expo-specific settings
 
 ### `templates.json`
+
 Code generation templates for:
+
 - React Native components
 - Screen components
 - Custom hooks
@@ -23,7 +27,9 @@ Code generation templates for:
 - Test files
 
 ### `rules.json`
+
 Code quality rules including:
+
 - React Native best practices
 - Expo-specific guidelines
 - TypeScript standards
@@ -33,7 +39,9 @@ Code quality rules including:
 - Naming conventions
 
 ### `workflows.json`
+
 Automated workflows for:
+
 - Feature development
 - Bug fixing
 - Release preparation
@@ -82,18 +90,21 @@ qodo run optimize_performance
 ## Project-Specific Features
 
 ### React Native Optimizations
+
 - Performance monitoring and suggestions
 - Bundle size analysis
 - Platform-specific code validation
 - Accessibility compliance checking
 
 ### Expo Integration
+
 - App configuration validation
 - Asset optimization
 - Permission management
 - EAS Build support
 
 ### TypeScript Support
+
 - Strict type checking
 - Interface recommendations
 - Type safety improvements
@@ -110,6 +121,7 @@ You can modify any of the configuration files to match your team's preferences:
 ## Integration with Existing Tools
 
 Qodo integrates with your existing development tools:
+
 - **ESLint**: Uses your `.eslintrc.json` configuration
 - **Prettier**: Respects your `.prettierrc` settings
 - **TypeScript**: Works with your `tsconfig.json`
@@ -127,6 +139,7 @@ Qodo integrates with your existing development tools:
 ## Support
 
 For questions about Qodo configuration or usage:
+
 1. Check the official Qodo documentation
 2. Review the configuration files in this directory
 3. Use `qodo help` for command-specific guidance

@@ -5,7 +5,11 @@ import { FoodProps } from '@/src/types';
 import { images } from '@/assets/images';
 import { useNavigation } from '@react-navigation/native';
 import { RootStackScreenProps } from '@/src/navigation/types';
-import { useCartStore, useIsItemInCart, useItemQuantityInCart } from '@/src/stores/customerStores/cartStore';
+import {
+  useCartStore,
+  useIsItemInCart,
+  useItemQuantityInCart,
+} from '@/src/stores/customerStores/cartStore';
 import { useTranslation } from 'react-i18next';
 import { MaterialIcons } from '@expo/vector-icons';
 
@@ -28,7 +32,11 @@ const MenuItemCard = ({ item }: { item: FoodProps }) => {
   const navigation =
     useNavigation<RootStackScreenProps<'RestaurantDetails'>['navigation']>();
   const { colors } = useTheme();
-  const borderColor = isSelect ? colors.primary : isInCart ? colors.primary : colors.outline;
+  const borderColor = isSelect
+    ? colors.primary
+    : isInCart
+      ? colors.primary
+      : colors.outline;
 
   return (
     <TouchableOpacity activeOpacity={0.8}>

@@ -4,9 +4,8 @@ import {
   Text,
   FlatList,
   RefreshControl,
-  StyleSheet
-  ,
-  TouchableOpacity
+  StyleSheet,
+  TouchableOpacity,
 } from 'react-native';
 import { useTheme, ActivityIndicator } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -22,11 +21,11 @@ import ErrorDisplay from '@/src/components/common/ErrorDisplay';
 import FoodItemCardSkeleton from '@/src/components/customer/FoodItemCardSkeleton';
 import { getCategoryByTitle } from '@/src/constants/categories';
 
-type CategoryMenuScreenProps = RootStackScreenProps<'CategoryMenu'>
+type CategoryMenuScreenProps = RootStackScreenProps<'CategoryMenu'>;
 
-const CategoryMenuScreen: React.FC<CategoryMenuScreenProps> = ({ 
-  navigation, 
-  route 
+const CategoryMenuScreen: React.FC<CategoryMenuScreenProps> = ({
+  navigation,
+  route,
 }) => {
   const { categoryTitle } = route.params;
   const { colors } = useTheme();
@@ -37,54 +36,61 @@ const CategoryMenuScreen: React.FC<CategoryMenuScreenProps> = ({
   const categoryInfo = getCategoryByTitle(categoryTitle);
 
   // Fetch all menu items
-  const {
-    data: allMenuItems,
-    isLoading,
-    error,
-    refetch,
-  } = useGetAllMenuItem();
+  const { data: allMenuItems, isLoading, error, refetch } = useGetAllMenuItem();
 
   // Filter menu items by category
   const categoryMenuItems = useMemo(() => {
     if (!allMenuItems) return [];
-    
+
     // Filter items based on category
     // Since we don't have category field from backend, we'll filter by name/description
     return allMenuItems.filter((item) => {
       const itemName = item.name.toLowerCase();
       const itemDescription = item.description?.toLowerCase() || '';
-      
+
       switch (categoryTitle) {
         case 'local-dishes':
-          return itemName.includes('local') || 
-                 itemName.includes('traditional') ||
-                 itemDescription.includes('local') ||
-                 itemDescription.includes('traditional');
+          return (
+            itemName.includes('local') ||
+            itemName.includes('traditional') ||
+            itemDescription.includes('local') ||
+            itemDescription.includes('traditional')
+          );
         case 'snacks':
-          return itemName.includes('snack') || 
-                 itemName.includes('bite') ||
-                 itemName.includes('chip') ||
-                 itemDescription.includes('snack');
+          return (
+            itemName.includes('snack') ||
+            itemName.includes('bite') ||
+            itemName.includes('chip') ||
+            itemDescription.includes('snack')
+          );
         case 'drinks':
-          return itemName.includes('drink') || 
-                 itemName.includes('juice') ||
-                 itemName.includes('water') ||
-                 itemName.includes('soda') ||
-                 itemDescription.includes('beverage');
+          return (
+            itemName.includes('drink') ||
+            itemName.includes('juice') ||
+            itemName.includes('water') ||
+            itemName.includes('soda') ||
+            itemDescription.includes('beverage')
+          );
         case 'breakfast':
-          return itemName.includes('breakfast') || 
-                 itemName.includes('morning') ||
-                 itemName.includes('pancake') ||
-                 itemName.includes('egg') ||
-                 itemDescription.includes('breakfast');
+          return (
+            itemName.includes('breakfast') ||
+            itemName.includes('morning') ||
+            itemName.includes('pancake') ||
+            itemName.includes('egg') ||
+            itemDescription.includes('breakfast')
+          );
         case 'fast-food':
-          return itemName.includes('burger') || 
-                 itemName.includes('fries') ||
-                 itemName.includes('fast') ||
-                 itemDescription.includes('fast');
+          return (
+            itemName.includes('burger') ||
+            itemName.includes('fries') ||
+            itemName.includes('fast') ||
+            itemDescription.includes('fast')
+          );
         default:
-          return itemName.includes(categoryTitle) || 
-                 itemDescription.includes(categoryTitle);
+          return (
+            itemName.includes(categoryTitle) ||
+            itemDescription.includes(categoryTitle)
+          );
       }
     });
   }, [allMenuItems, categoryTitle]);
@@ -116,8 +122,9 @@ const CategoryMenuScreen: React.FC<CategoryMenuScreenProps> = ({
           FoodImage={item.pictureUrl}
           distanceFromUser={item.distanceKm || 0}
           DeliveryPrice={500} // Default delivery price
-          isAvailable={item.isAvailable} 
-          RestaurantName={item.restaurant?.name}        />
+          isAvailable={item.isAvailable}
+          RestaurantName={item.restaurant?.name}
+        />
       </View>
     ),
     [],
@@ -139,7 +146,12 @@ const CategoryMenuScreen: React.FC<CategoryMenuScreenProps> = ({
           {categoryInfo?.displayName || categoryTitle}
         </Text>
         {categoryInfo?.description && (
-          <Text style={[styles.categoryDescription, { color: colors.onSurfaceVariant }]}>
+          <Text
+            style={[
+              styles.categoryDescription,
+              { color: colors.onSurfaceVariant },
+            ]}
+          >
             {categoryInfo.description}
           </Text>
         )}
@@ -181,40 +193,40 @@ const CategoryMenuScreen: React.FC<CategoryMenuScreenProps> = ({
 
   return (
     <CommonView>
-     
-        
-        {/* Content */}
-        {categoryMenuItems.length > 0 ? (
-          <FlatList
-            data={categoryMenuItems}
-            renderItem={renderFoodItem}
-            keyExtractor={keyExtractor}
-            contentContainerStyle={styles.listContent}
-            showsVerticalScrollIndicator={false}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                colors={[colors.primary]}
-                tintColor={colors.primary}
-              />
-            }
-          />
-        ) : (
-          <View style={styles.emptyState}>
-            <MaterialIcons
-              name="restaurant-menu"
-              size={64}
-              color={colors.onSurfaceVariant}
+      {/* Content */}
+      {categoryMenuItems.length > 0 ? (
+        <FlatList
+          data={categoryMenuItems}
+          renderItem={renderFoodItem}
+          keyExtractor={keyExtractor}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={[colors.primary]}
+              tintColor={colors.primary}
             />
-            <Text style={[styles.emptyTitle, { color: colors.onSurface }]}>
-              {t('no_items_in_category')}
-            </Text>
-            <Text style={[styles.emptySubtitle, { color: colors.onSurfaceVariant }]}>
-              {t('try_browsing_other_categories')}
-            </Text>
-          </View>
-        )}
+          }
+        />
+      ) : (
+        <View style={styles.emptyState}>
+          <MaterialIcons
+            name="restaurant-menu"
+            size={64}
+            color={colors.onSurfaceVariant}
+          />
+          <Text style={[styles.emptyTitle, { color: colors.onSurface }]}>
+            {t('no_items_in_category')}
+          </Text>
+          <Text
+            style={[styles.emptySubtitle, { color: colors.onSurfaceVariant }]}
+          >
+            {t('try_browsing_other_categories')}
+          </Text>
+        </View>
+      )}
     </CommonView>
   );
 };

@@ -14,8 +14,7 @@ interface CommonViewProps {
 const CommonView = ({ children, showStatusBar = true }: CommonViewProps) => {
   const { colors, dark } = useTheme();
   const backgroundColor = colors.background;
-  const statusBarStyle =
-    !dark ? 'dark-content' : 'light-content';
+  const statusBarStyle = !dark ? 'dark-content' : 'light-content';
 
   return (
     <>
@@ -27,8 +26,14 @@ const CommonView = ({ children, showStatusBar = true }: CommonViewProps) => {
         />
       )}
 
-      <SafeAreaView className={`flex-1 ${dark ? 'dark' : ''}`} style={{ backgroundColor }}>
-        <View className={`flex-1 px-4 ${dark ? 'dark' : ''}`} style={{ backgroundColor }}>
+      <SafeAreaView
+        className={`flex-1 ${dark ? 'dark' : ''}`}
+        style={{ backgroundColor }}
+      >
+        <View
+          className={`flex-1 px-4 ${dark ? 'dark' : ''}`}
+          style={{ backgroundColor }}
+        >
           {children}
         </View>
       </SafeAreaView>

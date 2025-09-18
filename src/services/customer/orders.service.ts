@@ -47,101 +47,20 @@ export const OrderApi = {
     }
   },
 
-<<<<<<< HEAD
-  // Get all orders for a customer with filters
-  getAllOrders: (customerId: string, filters?: {
-=======
-  // Get my orders with filters (matches API docs)
-  getMyOrders: async (params?: {
->>>>>>> origin/Customer_Setup
+  // Get user orders with optional filters
+  getUserOrders: async (params?: {
     status?: string;
     limit?: number;
     offset?: number;
   }) => {
-<<<<<<< HEAD
-    return apiClient.get<Order[]>(`/orders/customer/${customerId}`, {
-      params: filters
-    });
-  },
-
-  // Get customer's orders
-  getMyOrders: (filters?: {
-    status?: string;
-    limit?: number;
-    offset?: number;
-  }) => {
-    return apiClient.get<Order[]>(`/orders/my`, {
-      params: filters
-    });
-  },
-
-  // Confirm order received
-  confirmOrderReceived: (orderId: string) => {
-    return apiClient.post<Order>(`/orders/${orderId}/confirm-received`);
-  },
-
-  // Customer confirm order
-  customerConfirm: (orderId: string) => {
-    return apiClient.post<Order>(`/orders/${orderId}/customer-confirm`);
-  },
-
-  // Confirm order
-  confirmOrder: (orderId: string) => {
-    return apiClient.post<Order>(`/orders/${orderId}/confirm`);
-  },
-
-  // Reject order
-  rejectOrder: (orderId: string) => {
-    return apiClient.post<Order>(`/orders/${orderId}/reject`);
-  },
-
-  // Get order history with filters (using my orders endpoint)
-  getOrderHistory: (filters?: {
-    status?: string;
-    limit?: number;
-    offset?: number;
-  }) => {
-    return apiClient.get<Order[]>(`/orders/my`, {
-      params: filters
-    });
-=======
     try {
       const response = await apiClient.get<{
-        status_code: number;
-        message: string;
         data: Order[];
-      }>('/orders/my');
+      }>('/orders', { params });
       return response.data.data;
     } catch (error) {
-      console.error('Error fetching my orders:', error);
+      console.error('Error fetching user orders:', error);
       throw error;
     }
-  },
-
-  // Confirm order received (matches API docs)
-  confirmOrderReceived: async (orderId: string) => {
-    try {
-      const response = await apiClient.post(
-        `/orders/${orderId}/confirm-received`,
-      );
-      return response.data;
-    } catch (error) {
-      console.error(`Error confirming order ${orderId} received:`, error);
-      throw error;
-    }
-  },
-
-  // Customer confirm order (matches API docs)
-  customerConfirmOrder: async (orderId: string) => {
-    try {
-      const response = await apiClient.post(
-        `/orders/${orderId}/customer-confirm`,
-      );
-      return response.data;
-    } catch (error) {
-      console.error(`Error confirming order ${orderId}:`, error);
-      throw error;
-    }
->>>>>>> origin/Customer_Setup
   },
 };

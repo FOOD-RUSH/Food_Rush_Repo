@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { restaurantApi, } from '@/src/services/restaurant/restaurantApi';
+import { restaurantApi } from '@/src/services/restaurant/restaurantApi';
 import { restaurantAuthApi } from '@/src/services/restaurant/authApi';
 import Toast from 'react-native-toast-message';
 
@@ -35,7 +35,6 @@ export const useUpdateRestaurantProfile = () => {
   });
 };
 
-
 // Legacy toggle status (for backward compatibility)
 export const useToggleRestaurantStatus = (isActive: boolean, id: string) => {
   const queryClient = useQueryClient();
@@ -49,7 +48,9 @@ export const useToggleRestaurantStatus = (isActive: boolean, id: string) => {
       Toast.show({
         type: 'error',
         text1: 'Error',
-        text2: error?.response?.data?.message || 'Failed to toggle restaurant status',
+        text2:
+          error?.response?.data?.message ||
+          'Failed to toggle restaurant status',
       });
     },
   });

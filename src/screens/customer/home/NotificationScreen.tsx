@@ -29,7 +29,7 @@ const NotificationScreen = () => {
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
   const insets = useSafeAreaInsets();
-  
+
   // Store hooks
   const notifications = useNotifications();
   const isLoading = useNotificationLoading();
@@ -38,7 +38,7 @@ const NotificationScreen = () => {
   const unreadCount = useUnreadCount();
   const hasNextPage = useNotificationHasNextPage();
   const total = useNotificationTotal();
-  
+
   // Store actions
   const {
     fetchNotifications,
@@ -87,7 +87,10 @@ const NotificationScreen = () => {
           console.log('Navigate to order:', notification.data.orderId);
         } else if (notification.data.restaurantId) {
           // Navigate to restaurant details
-          console.log('Navigate to restaurant:', notification.data.restaurantId);
+          console.log(
+            'Navigate to restaurant:',
+            notification.data.restaurantId,
+          );
         }
       }
     },
@@ -144,8 +147,10 @@ const NotificationScreen = () => {
   const formatNotificationTime = (createdAt: string) => {
     const date = new Date(createdAt);
     const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    
+    const diffInHours = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60),
+    );
+
     if (diffInHours < 1) {
       return t('just_now', 'Just now');
     } else if (diffInHours < 24) {
@@ -163,7 +168,7 @@ const NotificationScreen = () => {
   // Render notification item
   const renderNotificationItem: ListRenderItem<Notification> = ({ item }) => {
     const isUnread = !item.readAt;
-    
+
     return (
       <TouchableOpacity
         onPress={() => handleNotificationPress(item)}
@@ -202,7 +207,7 @@ const NotificationScreen = () => {
               >
                 {item.title}
               </Text>
-              
+
               {/* Time */}
               <Text
                 className="text-xs ml-2"
@@ -211,7 +216,7 @@ const NotificationScreen = () => {
                 {formatNotificationTime(item.createdAt)}
               </Text>
             </View>
-            
+
             <Text
               className="text-sm"
               style={{ color: colors.onSurfaceVariant }}
@@ -236,7 +241,7 @@ const NotificationScreen = () => {
   // Render footer for loading more
   const renderFooter = () => {
     if (!isLoadingMore) return null;
-    
+
     return (
       <View className="py-4 items-center">
         <ActivityIndicator size="small" color={colors.primary} />
@@ -263,7 +268,10 @@ const NotificationScreen = () => {
         className="text-center text-base"
         style={{ color: colors.onSurfaceVariant }}
       >
-        {t('no_notifications_message', "You're all caught up! We'll notify you when something new happens.")}
+        {t(
+          'no_notifications_message',
+          "You're all caught up! We'll notify you when something new happens.",
+        )}
       </Text>
     </View>
   );
@@ -297,10 +305,7 @@ const NotificationScreen = () => {
         className="px-6 py-3 rounded-lg"
         style={{ backgroundColor: colors.primary }}
       >
-        <Text
-          className="font-semibold"
-          style={{ color: colors.onPrimary }}
-        >
+        <Text className="font-semibold" style={{ color: colors.onPrimary }}>
           {t('try_again', 'Try Again')}
         </Text>
       </TouchableOpacity>
@@ -326,11 +331,7 @@ const NotificationScreen = () => {
 
   // Render error state
   if (error && notifications.length === 0) {
-    return (
-      <CommonView>
-        {renderErrorState()}
-      </CommonView>
-    );
+    return <CommonView>{renderErrorState()}</CommonView>;
   }
 
   return (
@@ -338,9 +339,9 @@ const NotificationScreen = () => {
       <View className="flex-1" style={{ backgroundColor: colors.background }}>
         {/* Header with Mark All Read button */}
         {notifications.length > 0 && unreadCount > 0 && (
-          <View 
-            className="px-4 py-3 border-b flex-row justify-between items-center" 
-            style={{ 
+          <View
+            className="px-4 py-3 border-b flex-row justify-between items-center"
+            style={{
               borderBottomColor: colors.outline,
               paddingTop: insets.top + 12,
             }}
@@ -349,13 +350,12 @@ const NotificationScreen = () => {
               className="text-sm"
               style={{ color: colors.onSurfaceVariant }}
             >
-              {t('unread_notifications', '{{count}} unread', { count: unreadCount })}
+              {t('unread_notifications', '{{count}} unread', {
+                count: unreadCount,
+              })}
             </Text>
             <TouchableOpacity onPress={handleMarkAllAsRead}>
-              <Text
-                className="font-semibold"
-                style={{ color: colors.primary }}
-              >
+              <Text className="font-semibold" style={{ color: colors.primary }}>
                 {t('mark_all_read', 'Mark All Read')}
               </Text>
             </TouchableOpacity>

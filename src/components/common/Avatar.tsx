@@ -18,7 +18,7 @@ const Avatar: React.FC<AvatarProps> = ({
   className = '',
 }) => {
   const { colors } = useTheme();
-  
+
   // Get first letter of the name
   const getInitial = (name: string) => {
     return name.charAt(0).toUpperCase();
@@ -40,12 +40,12 @@ const Avatar: React.FC<AvatarProps> = ({
       '#F8C471', // Orange
       '#82E0AA', // Light Green
     ];
-    
+
     let hash = 0;
     for (let i = 0; i < name.length; i++) {
       hash = name.charCodeAt(i) + ((hash << 5) - hash);
     }
-    
+
     return colors[Math.abs(hash) % colors.length];
   };
 

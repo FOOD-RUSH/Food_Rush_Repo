@@ -1,10 +1,5 @@
-<<<<<<< HEAD
-import { RestaurantCard, FoodProps, RestaurantProfile } from '../../types';
 import { apiClient } from '@/src/services/shared/apiClient';
-=======
-import { RestaurantCard, FoodProps, RestaurantProfile, MenuProps, RestaurantReviewsResponse } from '../../types';
-import { apiClient } from './apiClient';
->>>>>>> origin/Customer_Setup
+import type { FoodProps, MenuProps, RestaurantCard, RestaurantProfile, RestaurantReviewsResponse } from '@/src/types';
 
 // Updated query parameters to match API documentation
 export interface RestaurantQuery {

@@ -30,7 +30,8 @@ const AddressScreen = ({
   const [refreshing, setRefreshing] = useState(false);
   const [showSnackbar, setShowSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [showCurrentLocationSuggestion, setShowCurrentLocationSuggestion] = useState(false);
+  const [showCurrentLocationSuggestion, setShowCurrentLocationSuggestion] =
+    useState(false);
 
   // Store hooks
   const addresses = useSavedAddresses();
@@ -57,7 +58,11 @@ const AddressScreen = ({
     // 1. No addresses saved yet
     // 2. We have current location
     // 3. User has location permission or location is available
-    if (addresses.length === 0 && currentLocation && !showCurrentLocationSuggestion) {
+    if (
+      addresses.length === 0 &&
+      currentLocation &&
+      !showCurrentLocationSuggestion
+    ) {
       setShowCurrentLocationSuggestion(true);
     }
   }, [addresses.length, currentLocation, showCurrentLocationSuggestion]);
@@ -289,7 +294,8 @@ const AddressScreen = ({
                   Use Current Location
                 </Text>
                 <Text className="text-sm mt-1 text-blue-600" numberOfLines={2}>
-                  {currentLocation.formattedAddress || `${currentLocation.city}, Cameroon`}
+                  {currentLocation.formattedAddress ||
+                    `${currentLocation.city}, Cameroon`}
                 </Text>
               </View>
             </View>
@@ -298,7 +304,7 @@ const AddressScreen = ({
                 onPress={handleAddCurrentLocation}
                 disabled={isProcessing}
                 className="px-4 py-2 rounded-full mr-2"
-                style={{ 
+                style={{
                   backgroundColor: '#007aff',
                   opacity: isProcessing ? 0.6 : 1,
                 }}
@@ -350,7 +356,7 @@ const AddressScreen = ({
               onPress={handleAddCurrentLocation}
               disabled={isProcessing}
               className="mb-3 px-6 py-3 rounded-xl flex-row items-center justify-center"
-              style={{ 
+              style={{
                 backgroundColor: '#007aff',
                 opacity: isProcessing ? 0.6 : 1,
               }}
@@ -358,15 +364,17 @@ const AddressScreen = ({
             >
               <Ionicons name="location" size={20} color="white" />
               <Text className="text-white font-medium ml-2">
-                {isProcessing ? 'Adding Current Location...' : 'Add Current Location'}
+                {isProcessing
+                  ? 'Adding Current Location...'
+                  : 'Add Current Location'}
               </Text>
             </TouchableOpacity>
           )}
-          
+
           <TouchableOpacity
             onPress={handleAddAddress}
             className="px-6 py-3 rounded-xl flex-row items-center justify-center border"
-            style={{ 
+            style={{
               backgroundColor: 'transparent',
               borderColor: '#007aff',
             }}
@@ -401,7 +409,7 @@ const AddressScreen = ({
           >
             {/* Current location suggestion */}
             <CurrentLocationSuggestion />
-            
+
             {/* Saved addresses */}
             {addresses.map((address) => (
               <AddressCard key={address.id} address={address} />
@@ -449,4 +457,3 @@ const AddressScreen = ({
 };
 
 export default AddressScreen;
- 

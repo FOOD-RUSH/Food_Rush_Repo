@@ -40,9 +40,12 @@ class BundleSizeMonitor {
     try {
       // Export the bundle
       console.log('Building bundle...');
-      execSync('npx expo export --platform ios --dev false --clear --output-dir dist/temp', {
-        stdio: 'pipe',
-      });
+      execSync(
+        'npx expo export --platform ios --dev false --clear --output-dir dist/temp',
+        {
+          stdio: 'pipe',
+        },
+      );
 
       // Measure bundle files
       const distPath = path.join(process.cwd(), 'dist/temp');
@@ -79,10 +82,10 @@ class BundleSizeMonitor {
         } else {
           const size = stat.size;
           const relativePath = path.relative(dirPath, fullPath);
-          
+
           stats.totalSize += size;
           stats.fileCount++;
-          
+
           if (item.endsWith('.js') || item.endsWith('.bundle')) {
             stats.jsSize += size;
           } else {
@@ -99,7 +102,7 @@ class BundleSizeMonitor {
     };
 
     analyzeDir(dirPath);
-    
+
     // Sort files by size (largest first)
     stats.files.sort((a, b) => b.size - a.size);
 
@@ -116,10 +119,10 @@ class BundleSizeMonitor {
 
   calculateReduction(current, previous) {
     if (!previous) return null;
-    
+
     const reduction = previous - current;
     const percentage = ((reduction / previous) * 100).toFixed(1);
-    
+
     return {
       absolute: reduction,
       percentage: parseFloat(percentage),
@@ -130,7 +133,7 @@ class BundleSizeMonitor {
   generateReport(bundleStats) {
     const timestamp = new Date().toISOString();
     const previousEntry = this.history[this.history.length - 1];
-    
+
     const report = {
       timestamp,
       totalSize: bundleStats.totalSize,
@@ -146,9 +149,15 @@ class BundleSizeMonitor {
     // Calculate changes from previous measurement
     if (previousEntry) {
       report.changes = {
-        total: this.calculateReduction(bundleStats.totalSize, previousEntry.totalSize),
+        total: this.calculateReduction(
+          bundleStats.totalSize,
+          previousEntry.totalSize,
+        ),
         js: this.calculateReduction(bundleStats.jsSize, previousEntry.jsSize),
-        assets: this.calculateReduction(bundleStats.assetSize, previousEntry.assetSize),
+        assets: this.calculateReduction(
+          bundleStats.assetSize,
+          previousEntry.assetSize,
+        ),
       };
     }
 
@@ -157,7 +166,7 @@ class BundleSizeMonitor {
 
   displayReport(report) {
     console.log('📊 Bundle Size Report');
-    console.log('=' .repeat(50));
+    console.log('='.repeat(50));
     console.log(`📅 Timestamp: ${report.timestamp}`);
     console.log(`📦 Total Size: ${report.totalSizeFormatted}`);
     console.log(`🔧 JavaScript: ${report.jsSizeFormatted}`);
@@ -166,17 +175,21 @@ class BundleSizeMonitor {
 
     if (report.changes) {
       console.log('\n📈 Changes from Previous Build:');
-      
+
       if (report.changes.total) {
         const { percentage, formatted } = report.changes.total;
         const direction = percentage > 0 ? '📈 Increased' : '📉 Reduced';
-        console.log(`   Total: ${direction} by ${formatted} (${Math.abs(percentage)}%)`);
+        console.log(
+          `   Total: ${direction} by ${formatted} (${Math.abs(percentage)}%)`,
+        );
       }
-      
+
       if (report.changes.js) {
         const { percentage, formatted } = report.changes.js;
         const direction = percentage > 0 ? '📈 Increased' : '📉 Reduced';
-        console.log(`   JavaScript: ${direction} by ${formatted} (${Math.abs(percentage)}%)`);
+        console.log(
+          `   JavaScript: ${direction} by ${formatted} (${Math.abs(percentage)}%)`,
+        );
       }
     }
 
@@ -186,30 +199,32 @@ class BundleSizeMonitor {
     });
 
     console.log('\n💡 Optimization Suggestions:');
-    
-    if (report.jsSize > 5 * 1024 * 1024) { // > 5MB
+
+    if (report.jsSize > 5 * 1024 * 1024) {
+      // > 5MB
       console.log('   ⚠️  JavaScript bundle is large (>5MB)');
       console.log('   💡 Consider implementing code splitting');
     }
-    
-    if (report.assetSize > 10 * 1024 * 1024) { // > 10MB
+
+    if (report.assetSize > 10 * 1024 * 1024) {
+      // > 10MB
       console.log('   ⚠️  Asset bundle is large (>10MB)');
       console.log('   💡 Consider image optimization and compression');
     }
-    
+
     if (report.fileCount > 1000) {
       console.log('   ⚠️  High file count (>1000 files)');
       console.log('   💡 Consider bundling smaller assets');
     }
 
-    console.log('=' .repeat(50));
+    console.log('='.repeat(50));
   }
 
   async run() {
     console.log('🚀 Food Rush Bundle Size Monitor\n');
 
     const bundleStats = await this.measureBundleSize();
-    
+
     if (!bundleStats) {
       console.error('❌ Failed to measure bundle size');
       process.exit(1);
@@ -220,12 +235,12 @@ class BundleSizeMonitor {
 
     // Save to history
     this.history.push(report);
-    
+
     // Keep only last 20 entries
     if (this.history.length > 20) {
       this.history = this.history.slice(-20);
     }
-    
+
     this.saveHistory();
 
     console.log(`\n📄 Full report saved to: ${this.reportPath}`);

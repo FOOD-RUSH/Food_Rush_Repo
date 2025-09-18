@@ -14,7 +14,11 @@ import { RootStackScreenProps } from '@/src/navigation/types';
 import { Card, useTheme } from 'react-native-paper';
 import Seperator from '@/src/components/common/Seperator';
 import CheckOutItem from '@/src/components/customer/CheckOutItem';
-import { useCartStore, useCartTotal, CartItem } from '@/src/stores/customerStores/cartStore';
+import {
+  useCartStore,
+  useCartTotal,
+  CartItem,
+} from '@/src/stores/customerStores/cartStore';
 import { useAuthUser } from '@/src/stores/customerStores';
 import CheckoutContent from '@/src/components/common/BottomSheet/CheckoutContent';
 import { useBottomSheet } from '@/src/components/common/BottomSheet/BottomSheetContext';
@@ -131,32 +135,24 @@ const CheckOutScreen = ({
 
     // Check if required information is available
     if (!defaultAddress) {
-      Alert.alert(
-        t('error'),
-        t('please_add_delivery_address'),
-        [
-          {
-            text: t('add_address'),
-            onPress: () => navigation.navigate('AddressScreen'),
-          },
-          { text: t('cancel'), style: 'cancel' },
-        ]
-      );
+      Alert.alert(t('error'), t('please_add_delivery_address'), [
+        {
+          text: t('add_address'),
+          onPress: () => navigation.navigate('AddressScreen'),
+        },
+        { text: t('cancel'), style: 'cancel' },
+      ]);
       return;
     }
 
     if (!selectedPaymentMethod) {
-      Alert.alert(
-        t('error'),
-        t('please_select_payment_method'),
-        [
-          {
-            text: t('select_payment'),
-            onPress: () => navigation.navigate('PaymentMethods'),
-          },
-          { text: t('cancel'), style: 'cancel' },
-        ]
-      );
+      Alert.alert(t('error'), t('please_select_payment_method'), [
+        {
+          text: t('select_payment'),
+          onPress: () => navigation.navigate('PaymentMethods'),
+        },
+        { text: t('cancel'), style: 'cancel' },
+      ]);
       return;
     }
 
@@ -168,7 +164,16 @@ const CheckOutScreen = ({
       showHandle: true,
       backdropOpacity: 0.5,
     });
-  }, [cartItems.length, defaultAddress, selectedPaymentMethod, present, confirmOrder, dismiss, navigation, t]);
+  }, [
+    cartItems.length,
+    defaultAddress,
+    selectedPaymentMethod,
+    present,
+    confirmOrder,
+    dismiss,
+    navigation,
+    t,
+  ]);
 
   // Optimized render item
   const renderCheckoutItem: ListRenderItem<CartItem> = useCallback(

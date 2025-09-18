@@ -127,8 +127,8 @@ interface ProgressLineProps {
 
 const ProgressLine: React.FC<ProgressLineProps> = ({ isCompleted }) => {
   return (
-    <View 
-      className="flex-1 mx-2" 
+    <View
+      className="flex-1 mx-2"
       style={{
         height: 2,
         marginTop: 23, // Half of circle height (48/2 = 24) - 1 for line thickness

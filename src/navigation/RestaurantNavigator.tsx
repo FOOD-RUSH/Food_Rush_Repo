@@ -20,32 +20,7 @@ import OrdersList from '../screens/restaurant/orders/OrdersList';
 import MenuItemsList from '../screens/restaurant/menu/MenuItemsList';
 import AnalyticsOverview from '../screens/restaurant/analytics/AnalyticsOverview';
 import AccountHome from '../screens/restaurant/account/AccountHome';
-// Import screens
-import ProfileScreen from '../screens/restaurant/profile/ProfileScreen';
-import OrderScreen from '../screens/restaurant/orders/OrderScreen';
-import MenuScreen from '../screens/restaurant/menu/MenuScreen';
-import OrderHistoryScreen from '../screens/restaurant/orders/OrderHistoryScreen';
-import OrderDetailsScreen from '../screens/restaurant/orders/OrderDetailsScreen';
-import ConfirmOrder from '../screens/restaurant/orders/ConfirmOrder';
-import RejectOrder from '../screens/restaurant/orders/RejectOrder';
-import { Platform } from 'react-native';
-
-import { AnalyticsScreen } from '../screens/restaurant/analytics/AnalyticsScreen';
-import { DashboardScreen } from '../screens/restaurant/analytics/DashboardScreen';
-import ProfileEditScreen from '../screens/restaurant/profile/ProfileEditScreen';
-import NotificationScreen from '../screens/restaurant/profile/NotificationScreen';
-import AccountSettingsScreen from '../screens/restaurant/profile/AccountSettingsScreen';
-import SupportScreen from '../screens/restaurant/profile/SupportScreen';
-import AboutScreen from '../screens/restaurant/profile/AboutScreen';
-import RestaurantSettingsScreen from '../screens/restaurant/profile/RestaurantSettingsScreen';
-
-// Import the menu-related screens
-import { AddFoodScreen } from '../screens/restaurant/menu/AddFoodScreen';
-import { EditFoodScreen } from '../screens/restaurant/menu/EditFoodScreen';
-import FoodCategoriesScreen from '../screens/restaurant/menu/FoodCategoriesScreen';
-import MenuListScreen from '../screens/restaurant/menu/MenuListScreen';
-import MenuSettingsScreen from '../screens/restaurant/menu/MenuSettingsScreen';
-import AddCategoryScreen from '../screens/restaurant/menu/AddCategoryScreen';
+// Only import screens that actually exist and are used in the tab navigation
 
 // Create navigators
 const RestaurantTab = createBottomTabNavigator<RestaurantTabParamList>();
@@ -68,7 +43,7 @@ function RestaurantOrdersStackScreen() {
     >
       <RestaurantOrdersStack.Screen
         name="OrdersList"
-        component={OrdersList} 
+        component={OrdersList}
         options={{ title: 'Orders' }}
       />
     </RestaurantOrdersStack.Navigator>
@@ -184,7 +159,9 @@ export default function RestaurantNavigator() {
         component={RestaurantOrdersStackScreen}
         options={{
           tabBarLabel: t('orders'),
-          tabBarBackground: () => <View style={{ backgroundColor: colors.surface }} />,
+          tabBarBackground: () => (
+            <View style={{ backgroundColor: colors.surface }} />
+          ),
         }}
       />
 
@@ -193,7 +170,9 @@ export default function RestaurantNavigator() {
         component={RestaurantMenuStackScreen}
         options={{
           tabBarLabel: t('menu'),
-          tabBarBackground: () => <View style={{ backgroundColor: colors.surface }} />,
+          tabBarBackground: () => (
+            <View style={{ backgroundColor: colors.surface }} />
+          ),
         }}
       />
 
@@ -202,7 +181,9 @@ export default function RestaurantNavigator() {
         component={RestaurantAnalyticsStackScreen}
         options={{
           tabBarLabel: t('analytics'),
-          tabBarBackground: () => <View style={{ backgroundColor: colors.surface }} />,
+          tabBarBackground: () => (
+            <View style={{ backgroundColor: colors.surface }} />
+          ),
         }}
       />
 
@@ -211,7 +192,9 @@ export default function RestaurantNavigator() {
         component={RestaurantAccountStackScreen}
         options={{
           tabBarLabel: t('account'),
-          tabBarBackground: () => <View style={{ backgroundColor: colors.surface }} />,
+          tabBarBackground: () => (
+            <View style={{ backgroundColor: colors.surface }} />
+          ),
         }}
       />
     </RestaurantTab.Navigator>

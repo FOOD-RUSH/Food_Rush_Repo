@@ -45,7 +45,7 @@ const ReviewItem: React.FC<ReviewItemProps> = ({ review }) => {
           name={i <= score ? 'star' : 'star-outline'}
           size={16}
           color={i <= score ? '#FFD700' : colors.onSurfaceVariant}
-        />
+        />,
       );
     }
     return stars;
@@ -84,10 +84,7 @@ const ReviewItem: React.FC<ReviewItemProps> = ({ review }) => {
 
       {/* Review Text */}
       {review.review && (
-        <Text
-          className="text-sm leading-5"
-          style={{ color: colors.onSurface }}
-        >
+        <Text className="text-sm leading-5" style={{ color: colors.onSurface }}>
           {review.review}
         </Text>
       )}
@@ -156,9 +153,15 @@ const RestaurantReviewsScreen: React.FC<
             {[1, 2, 3, 4, 5].map((star) => (
               <Ionicons
                 key={star}
-                name={star <= reviewStats.averageRating ? 'star' : 'star-outline'}
+                name={
+                  star <= reviewStats.averageRating ? 'star' : 'star-outline'
+                }
                 size={24}
-                color={star <= reviewStats.averageRating ? '#FFD700' : colors.onSurfaceVariant}
+                color={
+                  star <= reviewStats.averageRating
+                    ? '#FFD700'
+                    : colors.onSurfaceVariant
+                }
               />
             ))}
           </View>
@@ -174,9 +177,10 @@ const RestaurantReviewsScreen: React.FC<
         <View className="mt-6">
           {[5, 4, 3, 2, 1].map((rating) => {
             const count = reviewStats.ratingDistribution[rating - 1];
-            const percentage = reviewStats.totalReviews > 0 
-              ? (count / reviewStats.totalReviews) * 100 
-              : 0;
+            const percentage =
+              reviewStats.totalReviews > 0
+                ? (count / reviewStats.totalReviews) * 100
+                : 0;
 
             return (
               <View key={rating} className="flex-row items-center mb-2">
@@ -252,11 +256,15 @@ const RestaurantReviewsScreen: React.FC<
     return (
       <CommonView>
         <StatusBar translucent backgroundColor="transparent" />
-        
+
         {/* Header */}
         <View className="flex-row items-center px-4 py-3 border-b border-gray-200">
           <TouchableOpacity onPress={handleGoBack} className="mr-4">
-            <MaterialIcons name="arrow-back" size={24} color={colors.onSurface} />
+            <MaterialIcons
+              name="arrow-back"
+              size={24}
+              color={colors.onSurface}
+            />
           </TouchableOpacity>
           <Text
             className="text-lg font-semibold flex-1"
@@ -269,10 +277,7 @@ const RestaurantReviewsScreen: React.FC<
 
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color={colors.primary} />
-          <Text
-            className="mt-4"
-            style={{ color: colors.onSurfaceVariant }}
-          >
+          <Text className="mt-4" style={{ color: colors.onSurfaceVariant }}>
             {t('loading_reviews')}
           </Text>
         </View>
@@ -284,11 +289,15 @@ const RestaurantReviewsScreen: React.FC<
     return (
       <CommonView>
         <StatusBar translucent backgroundColor="transparent" />
-        
+
         {/* Header */}
         <View className="flex-row items-center px-4 py-3 border-b border-gray-200">
           <TouchableOpacity onPress={handleGoBack} className="mr-4">
-            <MaterialIcons name="arrow-back" size={24} color={colors.onSurface} />
+            <MaterialIcons
+              name="arrow-back"
+              size={24}
+              color={colors.onSurface}
+            />
           </TouchableOpacity>
           <Text
             className="text-lg font-semibold flex-1"
@@ -300,10 +309,7 @@ const RestaurantReviewsScreen: React.FC<
         </View>
 
         <View className="flex-1 px-4 py-6">
-          <ErrorDisplay
-            title={t('failed_to_load_reviews')}
-            onRetry={refetch}
-          />
+          <ErrorDisplay title={t('failed_to_load_reviews')} onRetry={refetch} />
         </View>
       </CommonView>
     );
@@ -312,7 +318,7 @@ const RestaurantReviewsScreen: React.FC<
   return (
     <CommonView>
       <StatusBar translucent backgroundColor="transparent" />
-      
+
       {/* Header */}
       <View className="flex-row items-center px-4 py-3 border-b border-gray-200">
         <TouchableOpacity onPress={handleGoBack} className="mr-4">

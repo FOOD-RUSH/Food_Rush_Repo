@@ -36,7 +36,7 @@ const initialState: LocationState = {
       id: 'default-address',
       label: 'Home',
       fullAddress: 'Time Square NYC, Manhattan',
-      latitude: 40.7580,
+      latitude: 40.758,
       longitude: -73.9855,
       isDefault: true,
       createdAt: Date.now(),
@@ -79,10 +79,12 @@ export const useLocationStore = create<LocationStore>()(
       },
 
       setPermission: (hasPermission) => {
-        set({ 
+        set({
           hasPermission,
           permissionRequested: true,
-          lastPermissionRequest: hasPermission ? Date.now() : get().lastPermissionRequest,
+          lastPermissionRequest: hasPermission
+            ? Date.now()
+            : get().lastPermissionRequest,
         });
       },
 
@@ -244,4 +246,3 @@ export const useLocationActions = () => {
     setDefaultAddress,
   };
 };
-

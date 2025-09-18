@@ -12,7 +12,7 @@ const CONFIG_FILES = [
   '.qodo.json',
   '.qodo/templates.json',
   '.qodo/rules.json',
-  '.qodo/workflows.json'
+  '.qodo/workflows.json',
 ];
 
 const REQUIRED_DIRECTORIES = [
@@ -21,7 +21,7 @@ const REQUIRED_DIRECTORIES = [
   'src/screens',
   'src/services',
   'src/utils',
-  'src/types'
+  'src/types',
 ];
 
 function validateJSON(filePath) {
@@ -39,7 +39,7 @@ function validateJSON(filePath) {
 function validateDirectoryStructure() {
   console.log('\n📁 Validating directory structure...');
   let allValid = true;
-  
+
   for (const dir of REQUIRED_DIRECTORIES) {
     if (fs.existsSync(dir) && fs.statSync(dir).isDirectory()) {
       console.log(`✅ ${dir} - Directory exists`);
@@ -48,7 +48,7 @@ function validateDirectoryStructure() {
       allValid = false;
     }
   }
-  
+
   return allValid;
 }
 
@@ -59,11 +59,11 @@ function validateProjectFiles() {
     'tsconfig.json',
     '.eslintrc.json',
     '.prettierrc',
-    'app.json'
+    'app.json',
   ];
-  
+
   let allValid = true;
-  
+
   for (const file of requiredFiles) {
     if (fs.existsSync(file)) {
       console.log(`✅ ${file} - File exists`);
@@ -72,20 +72,26 @@ function validateProjectFiles() {
       allValid = false;
     }
   }
-  
+
   return allValid;
 }
 
 function validateQodoConfig() {
   console.log('\n⚙️ Validating Qodo configuration...');
-  
+
   try {
     const config = JSON.parse(fs.readFileSync('.qodo.json', 'utf8'));
-    
+
     // Validate required sections
-    const requiredSections = ['project', 'paths', 'review', 'testing', 'linting'];
+    const requiredSections = [
+      'project',
+      'paths',
+      'review',
+      'testing',
+      'linting',
+    ];
     let allValid = true;
-    
+
     for (const section of requiredSections) {
       if (config[section]) {
         console.log(`✅ ${section} - Section configured`);
@@ -94,15 +100,20 @@ function validateQodoConfig() {
         allValid = false;
       }
     }
-    
+
     // Validate project type
-    if (config.project?.type === 'react-native' && config.project?.framework === 'expo') {
+    if (
+      config.project?.type === 'react-native' &&
+      config.project?.framework === 'expo'
+    ) {
       console.log('✅ Project type - React Native with Expo');
     } else {
-      console.error('❌ Project type - Should be react-native with expo framework');
+      console.error(
+        '❌ Project type - Should be react-native with expo framework',
+      );
       allValid = false;
     }
-    
+
     return allValid;
   } catch (error) {
     console.error(`❌ Error reading .qodo.json: ${error.message}`);
@@ -113,9 +124,9 @@ function validateQodoConfig() {
 function main() {
   console.log('🔍 Qodo Configuration Validator');
   console.log('================================\n');
-  
+
   let allValid = true;
-  
+
   // Validate JSON files
   console.log('📋 Validating configuration files...');
   for (const file of CONFIG_FILES) {
@@ -123,24 +134,24 @@ function main() {
       allValid = false;
     }
   }
-  
+
   // Validate directory structure
   if (!validateDirectoryStructure()) {
     allValid = false;
   }
-  
+
   // Validate project files
   if (!validateProjectFiles()) {
     allValid = false;
   }
-  
+
   // Validate Qodo configuration
   if (!validateQodoConfig()) {
     allValid = false;
   }
-  
+
   console.log('\n' + '='.repeat(50));
-  
+
   if (allValid) {
     console.log('🎉 All validations passed! Qodo is properly configured.');
     process.exit(0);
@@ -154,4 +165,9 @@ if (require.main === module) {
   main();
 }
 
-module.exports = { validateJSON, validateDirectoryStructure, validateProjectFiles, validateQodoConfig };
+module.exports = {
+  validateJSON,
+  validateDirectoryStructure,
+  validateProjectFiles,
+  validateQodoConfig,
+};
