@@ -6,7 +6,7 @@ import { AuthStackParamList } from './types';
 import {
   useIsAuthenticated,
   useAuthUser,
-} from '../stores/customerStores/AuthStore';
+} from '../stores/AuthStore';
 
 // Customer auth
 import LoginScreen from '../screens/auth/LoginScreen';

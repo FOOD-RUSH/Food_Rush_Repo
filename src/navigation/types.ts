@@ -53,7 +53,7 @@ export type RootStackParamList = {
   RestaurantRejectOrder: { orderId: string };
   RestaurantMenuItemForm: { itemId?: string };
   // Removed RestaurantAddCategory and RestaurantEditCategory - backend only returns categories
-  RestaurantCategoriesManager: undefined;
+
   RestaurantBestSellers: undefined;
   RestaurantTimeHeatmap: undefined;
   RestaurantNotificationDetails: { notificationId: string };

@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
-  Text,
   Image,
   ScrollView,
   TouchableOpacity,
@@ -16,13 +15,14 @@ import * as Haptics from 'expo-haptics';
 import CommonView from '@/src/components/common/CommonView';
 import ApiCategoryDropdown from '@/src/components/common/ApiCategoryDropdown';
 import TimePicker from '@/src/components/common/TimePicker';
-import { useUser } from '@/src/stores/customerStores/AuthStore';
+import { useCurrentRestaurant } from '@/src/stores/AuthStore';
 import { useCreateMenuItem } from '@/src/hooks/restaurant/useMenuApi';
 import { useNavigation } from '@react-navigation/native';
 import { RestaurantMenuStackScreenProps } from '@/src/navigation/types';
 import { useTranslation } from 'react-i18next';
-import { pickImageWithBase64 } from '@/src/utils/imageUtils';
-import { createDailyScheduleISO } from '@/src/utils/timeUtils';
+import { pickImageForUpload, isValidImageType, getFileExtension } from '@/src/utils/imageUtils';
+import { CreateMenuItemRequest } from '@/src/services/restaurant/menuApi';
+import { Typography, Heading1, Body, Label, Caption } from '@/src/components/common/Typography';
 
 // Form data interface for better type safety
 interface FormData {
@@ -31,10 +31,23 @@ interface FormData {
   description: string;
   category: string;
   imageUri: string | null;
-  imageBase64: string | null;
+  imageFile: { uri: string; type: string; name: string } | null;
   startTime: Date | null;
   endTime: Date | null;
 }
+
+// Helper function to create proper ISO time format for daily scheduling
+const createDailyScheduleISO = (time: Date): string => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+  const day = String(today.getDate()).padStart(2, '0');
+  const hours = String(time.getHours()).padStart(2, '0');
+  const minutes = String(time.getMinutes()).padStart(2, '0');
+  const seconds = String(time.getSeconds()).padStart(2, '0');
+  
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.000Z`;
+};
 
 // Memoized components for better performance
 const FormField = React.memo<{
@@ -46,16 +59,18 @@ const FormField = React.memo<{
   
   return (
     <View className="mb-6">
-      <Text 
-        className="text-base font-semibold mb-3"
-        style={{ color: colors.onSurface }}
+      <Label 
+        color={colors.onSurface}
+        weight="semibold"
+        style={{ marginBottom: 12 }}
       >
-        {label} {required && <Text style={{ color: colors.error }}>*</Text>}
-      </Text>
+        {label} {required && <Typography color={colors.error}>*</Typography>}
+      </Label>
       {children}
     </View>
   );
 });
+FormField.displayName = 'FormField';
 
 const ImageUploadSection = React.memo<{
   imageUri: string | null;
@@ -87,9 +102,9 @@ const ImageUploadSection = React.memo<{
           />
           <View className="absolute inset-0 bg-black/30 items-center justify-center">
             <MaterialCommunityIcons name="camera" size={32} color="white" />
-            <Text className="text-white text-sm font-medium mt-2">
-              {t('change_image')}
-            </Text>
+            <Caption color="white" weight="medium" style={{ marginTop: 8 }}>
+              {t('change_image') || 'Change Image'}
+            </Caption>
           </View>
         </View>
       ) : (
@@ -103,18 +118,20 @@ const ImageUploadSection = React.memo<{
                 size={48} 
                 color={colors.primary} 
               />
-              <Text 
-                className="text-base font-semibold mt-3"
-                style={{ color: colors.primary }}
+              <Label 
+                color={colors.primary}
+                weight="semibold"
+                style={{ marginTop: 12 }}
               >
-                {t('add_food_image')}
-              </Text>
-              <Text 
-                className="text-sm text-center px-4 mt-1"
-                style={{ color: colors.onSurfaceVariant }}
+                {t('add_food_image') || 'Add Food Image'}
+              </Label>
+              <Caption 
+                color={colors.onSurfaceVariant}
+                align="center"
+                style={{ paddingHorizontal: 16, marginTop: 4 }}
               >
-                {t('tap_to_upload_image')}
-              </Text>
+                {t('tap_to_upload_image') || 'Tap to upload image (JPG, PNG)'}
+              </Caption>
             </>
           )}
         </View>
@@ -122,6 +139,7 @@ const ImageUploadSection = React.memo<{
     </TouchableOpacity>
   );
 });
+ImageUploadSection.displayName = 'ImageUploadSection';
 
 const ActionButtons = React.memo<{
   onCancel: () => void;
@@ -137,7 +155,7 @@ const ActionButtons = React.memo<{
   return (
     <View 
       className="flex-row mt-8"
-      style={{ gap: 16 }} // Explicit 16px gap between buttons
+      style={{ gap: 16 }}
     >
       <TouchableOpacity
         className="flex-1 py-4 rounded-xl items-center"
@@ -149,12 +167,12 @@ const ActionButtons = React.memo<{
         disabled={isLoading}
         activeOpacity={0.7}
       >
-        <Text 
-          className="text-base font-semibold"
-          style={{ color: colors.onSurfaceVariant }}
+        <Label 
+          color={colors.onSurfaceVariant}
+          weight="semibold"
         >
-          {t('cancel')}
-        </Text>
+          {t('cancel') || 'Cancel'}
+        </Label>
       </TouchableOpacity>
       
       <TouchableOpacity
@@ -170,32 +188,34 @@ const ActionButtons = React.memo<{
         {isLoading ? (
           <View className="flex-row items-center">
             <ActivityIndicator size="small" color={colors.onSurfaceVariant} />
-            <Text 
-              className="text-base font-semibold ml-2"
-              style={{ color: colors.onSurfaceVariant }}
+            <Label 
+              color={colors.onSurfaceVariant}
+              weight="semibold"
+              style={{ marginLeft: 8 }}
             >
-              {t('saving')}
-            </Text>
+              {t('saving') || 'Saving...'}
+            </Label>
           </View>
         ) : (
-          <Text 
-            className="text-base font-bold"
-            style={{ color: isFormValid ? colors.onPrimary : colors.onSurfaceVariant }}
+          <Label 
+            color={isFormValid ? colors.onPrimary : colors.onSurfaceVariant}
+            weight="bold"
           >
-            {t('save_item')}
-          </Text>
+            {t('save_item') || 'Save Item'}
+          </Label>
         )}
       </TouchableOpacity>
     </View>
   );
 });
+ActionButtons.displayName = 'ActionButtons';
 
 export const AddFoodScreen = () => {
-  const navigation = useNavigation<RestaurantMenuStackScreenProps<'AddMenuItem'>['navigation']>();
+  const navigation = useNavigation<RestaurantMenuStackScreenProps<'MenuItemsList'>['navigation']>();
   const { colors } = useTheme();
   const { t } = useTranslation();
-  const user = useUser();
-  const restaurantId = user?.restaurantId;
+  const currentRestaurant = useCurrentRestaurant();
+  const restaurantId = currentRestaurant?.id;
 
   // Consolidated form state
   const [formData, setFormData] = useState<FormData>({
@@ -204,14 +224,14 @@ export const AddFoodScreen = () => {
     description: '',
     category: '',
     imageUri: null,
-    imageBase64: null,
+    imageFile: null,
     startTime: null,
     endTime: null,
   });
   
   const [isUploading, setIsUploading] = useState(false);
 
-  // API hooks
+  // React Query hook for creating menu item
   const createMenuItemMutation = useCreateMenuItem();
 
   // Memoized form update function
@@ -228,30 +248,31 @@ export const AddFoodScreen = () => {
     
     // Required field validation
     if (!foodName.trim()) {
-      errors.push(t('food_name_required'));
+      errors.push(t('validation.food_name_required') || 'Food name is required');
     } else if (foodName.trim().length < 2) {
-      errors.push(t('food_name_too_short'));
+      errors.push(t('validation.food_name_too_short') || 'Food name is too short');
     }
     
     if (!category) {
-      errors.push(t('category_required'));
+      errors.push(t('validation.category_required') || 'Category is required');
     }
     
     if (!price.trim()) {
-      errors.push(t('price_required'));
+      errors.push(t('validation.price_required') || 'Price is required');
     } else if (isNaN(priceValue) || priceValue <= 0) {
-      errors.push(t('price_must_be_positive'));
+      errors.push(t('validation.price_must_be_positive') || 'Price must be a positive number');
     } else if (priceValue > 1000000) {
-      errors.push(t('price_too_high'));
+      errors.push(t('validation.price_too_high') || 'Price is too high');
     }
     
-    // Time validation
-    if (startTime && endTime) {
-      if (startTime >= endTime) {
-        errors.push(t('start_time_must_be_before_end_time'));
-      }
-    } else if ((startTime && !endTime) || (!startTime && endTime)) {
-      errors.push(t('both_times_required_if_one_selected'));
+    // Time validation - both times must be provided if one is provided
+    if ((startTime && !endTime) || (!startTime && endTime)) {
+      errors.push(t('both_times_required_if_one_selected') || 'Both start and end times are required if scheduling is used');
+    }
+    
+    // Time validation - start time must be before end time
+    if (startTime && endTime && startTime >= endTime) {
+      errors.push(t('start_time_must_be_before_end_time') || 'Start time must be before end time');
     }
     
     return {
@@ -267,18 +288,38 @@ export const AddFoodScreen = () => {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       setIsUploading(true);
 
-      const result = await pickImageWithBase64();
+      const result = await pickImageForUpload();
       
       if (result) {
+        // Validate image type
+        if (!isValidImageType(result.type)) {
+          Alert.alert(
+            t('invalid_image_type') || 'Invalid Image Type',
+            t('please_select_jpg_or_png') || 'Please select a JPG or PNG image.'
+          );
+          return;
+        }
+
+        // Update the correct file extension based on type
+        const extension = getFileExtension(result.type);
+        const fileName = `menu-item-${Date.now()}.${extension}`;
+        
+        const imageFile = {
+          uri: result.uri,
+          type: result.type,
+          name: fileName,
+        };
+
         updateFormData({
           imageUri: result.uri,
-          imageBase64: result.base64 || null,
+          imageFile: imageFile,
         });
+        
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
     } catch (error) {
       console.error('Error picking image:', error);
-      Alert.alert(t('error'), t('failed_to_pick_image'));
+      Alert.alert(t('error') || 'Error', t('failed_to_pick_image') || 'Failed to pick image');
     } finally {
       setIsUploading(false);
     }
@@ -287,17 +328,16 @@ export const AddFoodScreen = () => {
   // Memoized save handler
   const handleSave = useCallback(async () => {
     if (!restaurantId) {
-      Alert.alert(t('error'), t('restaurant_id_not_found'));
+      Alert.alert(t('error') || 'Error', t('restaurant_id_not_found') || 'Restaurant ID not found');
       return;
     }
 
-    // Enhanced validation with detailed error messages
     if (!validation.isValid) {
       const errorMessage = validation.errors.join('\n• ');
       Alert.alert(
-        t('validation_errors'), 
-        `${t('please_fix_following_errors')}:\n\n• ${errorMessage}`,
-        [{ text: t('ok'), style: 'default' }]
+        t('validation_errors') || 'Validation Errors', 
+        `${t('please_fix_following_errors') || 'Please fix the following errors'}:\n\n• ${errorMessage}`,
+        [{ text: t('ok') || 'OK', style: 'default' }]
       );
       return;
     }
@@ -305,31 +345,78 @@ export const AddFoodScreen = () => {
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       
-      const menuItemData = {
+      // Prepare time values - only include if both are provided
+      let startAtISO: string | undefined;
+      let endAtISO: string | undefined;
+      
+      if (formData.startTime && formData.endTime) {
+        startAtISO = createDailyScheduleISO(formData.startTime);
+        endAtISO = createDailyScheduleISO(formData.endTime);
+        
+        console.log('Time scheduling enabled:', {
+          startTime: formData.startTime,
+          endTime: formData.endTime,
+          startAtISO,
+          endAtISO
+        });
+      }
+      
+      // Prepare menu item data according to API interface
+      const menuItemData: CreateMenuItemRequest = {
         name: formData.foodName.trim(),
-        description: formData.description.trim(),
+        description: formData.description.trim() || '',
         price: parseFloat(formData.price),
-        category: formData.category,
+        category: formData.category as any,
         isAvailable: true,
-        picture: formData.imageBase64 || undefined,
-        startAt: startTime ? createDailyScheduleISO(startTime.getHours(), startTime.getMinutes()) : undefined,
-        endAt: endTime ? createDailyScheduleISO(endTime.getHours(), endTime.getMinutes()) : undefined,
+        picture: formData.imageFile || undefined,
+        startAt: startAtISO,
+        endAt: endAtISO,
       };
 
-      await createMenuItemMutation.mutateAsync({
+      console.log('Sending menu item data to backend:', {
+        restaurantId,
+        name: menuItemData.name,
+        price: menuItemData.price,
+        category: menuItemData.category,
+        hasImage: !!menuItemData.picture,
+        hasSchedule: !!(menuItemData.startAt && menuItemData.endAt)
+      });
+
+      // Use the React Query mutation
+      const response = await createMenuItemMutation.mutateAsync({
         restaurantId,
         data: menuItemData,
       });
 
+      console.log('Menu item created successfully:', response);
+
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert(t('success'), t('menu_item_created_successfully'), [
-        { text: t('ok'), onPress: () => navigation.goBack() }
-      ]);
-    } catch (error) {
+      Alert.alert(
+        t('success') || 'Success', 
+        t('menu_item_created_successfully') || 'Menu item created successfully', 
+        [
+          { text: t('ok') || 'OK', onPress: () => navigation.goBack() }
+        ]
+      );
+    } catch (error: any) {
       console.error('Error creating menu item:', error);
-      Alert.alert(t('error'), t('failed_to_create_menu_item'));
+      
+      // Extract meaningful error message
+      let errorMessage = t('failed_to_create_menu_item') || 'Failed to create menu item';
+      
+      if (error?.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
+      Alert.alert(
+        t('error') || 'Error', 
+        errorMessage,
+        [{ text: t('ok') || 'OK', style: 'default' }]
+      );
     }
-  }, [restaurantId, validation.isValid, formData, createMenuItemMutation, navigation, t]);
+  }, [restaurantId, validation, formData, createMenuItemMutation, navigation, t]);
 
   // Memoized cancel handler
   const handleCancel = useCallback(() => {
@@ -350,18 +437,18 @@ export const AddFoodScreen = () => {
         >
           {/* Header */}
           <View className="mb-8">
-            <Text 
-              className="text-3xl font-bold"
-              style={{ color: colors.onBackground }}
+            <Heading1 
+              color={colors.onBackground}
+              weight="bold"
             >
-              {t('add_new_item')}
-            </Text>
-            <Text 
-              className="text-base mt-2"
-              style={{ color: colors.onSurfaceVariant }}
+              {t('add_new_item') || 'Add New Item'}
+            </Heading1>
+            <Body 
+              color={colors.onSurfaceVariant}
+              style={{ marginTop: 8 }}
             >
-              {t('fill_details_to_add_menu_item')}
-            </Text>
+              {t('fill_details_to_add_menu_item') || 'Fill in the details to add a new menu item'}
+            </Body>
           </View>
 
           {/* Image Upload */}
@@ -372,23 +459,23 @@ export const AddFoodScreen = () => {
           />
 
           {/* Form Fields */}
-          <FormField label={t('food_name')} required>
+          <FormField label={t('food_name') || 'Food Name'} required>
             <TextInput
               mode="outlined"
               value={formData.foodName}
               onChangeText={(text) => updateFormData({ foodName: text })}
-              placeholder={t('enter_food_name')}
+              placeholder={t('enter_food_name') || 'Enter food name'}
               style={{ backgroundColor: colors.surface }}
               outlineStyle={{ borderRadius: 12 }}
             />
           </FormField>
 
-          <FormField label={`${t('price')} (XAF)`} required>
+          <FormField label={`${t('price') || 'Price'} (XAF)`} required>
             <TextInput
               mode="outlined"
               value={formData.price}
               onChangeText={(text) => updateFormData({ price: text })}
-              placeholder={t('enter_price')}
+              placeholder={t('enter_price') || 'Enter price'}
               keyboardType="numeric"
               style={{ backgroundColor: colors.surface }}
               outlineStyle={{ borderRadius: 12 }}
@@ -396,21 +483,21 @@ export const AddFoodScreen = () => {
             />
           </FormField>
 
-          <FormField label={t('category')} required>
+          <FormField label={t('category') || 'Category'} required>
             <ApiCategoryDropdown
               selectedValue={formData.category}
               onValueChange={(value) => updateFormData({ category: value })}
-              placeholder={t('select_category')}
+              placeholder={t('select_category') || 'Select category'}
               error={false}
             />
           </FormField>
 
-          <FormField label={t('description')}>
+          <FormField label={t('description') || 'Description'}>
             <TextInput
               mode="outlined"
               value={formData.description}
               onChangeText={(text) => updateFormData({ description: text })}
-              placeholder={t('enter_description')}
+              placeholder={t('enter_description') || 'Enter description (optional)'}
               multiline
               numberOfLines={4}
               style={{ backgroundColor: colors.surface }}
@@ -419,17 +506,17 @@ export const AddFoodScreen = () => {
           </FormField>
 
           {/* Schedule Section */}
-          <FormField label={`${t('daily_schedule')} (${t('optional')})`}>
+          <FormField label={`${t('daily_schedule') || 'Daily Schedule'} (${t('optional') || 'Optional'})`}>
             <View 
               className="flex-row"
-              style={{ gap: 16 }} // Explicit 16px gap between time pickers
+              style={{ gap: 16 }}
             >
               <View className="flex-1">
                 <TimePicker
                   value={formData.startTime}
                   onTimeChange={(time) => updateFormData({ startTime: time })}
-                  label={t('start_time')}
-                  placeholder={t('select_start_time')}
+                  label={t('start_time') || 'Start Time'}
+                  placeholder={t('select_start_time') || 'Select start time'}
                   error={validation.hasErrors && formData.startTime && formData.endTime && formData.startTime >= formData.endTime}
                 />
               </View>
@@ -437,8 +524,8 @@ export const AddFoodScreen = () => {
                 <TimePicker
                   value={formData.endTime}
                   onTimeChange={(time) => updateFormData({ endTime: time })}
-                  label={t('end_time')}
-                  placeholder={t('select_end_time')}
+                  label={t('end_time') || 'End Time'}
+                  placeholder={t('select_end_time') || 'Select end time'}
                   error={validation.hasErrors && formData.startTime && formData.endTime && formData.startTime >= formData.endTime}
                 />
               </View>
@@ -450,27 +537,26 @@ export const AddFoodScreen = () => {
                 {validation.errors
                   .filter(error => 
                     error.includes('time') || 
-                    error.includes(t('both_times_required_if_one_selected'))
+                    error.includes(t('both_times_required_if_one_selected') || 'Both times required')
                   )
                   .map((error, index) => (
-                    <Text 
+                    <Caption 
                       key={index}
-                      className="text-sm"
-                      style={{ color: colors.error }}
+                      color={colors.error}
                     >
                       • {error}
-                    </Text>
+                    </Caption>
                   ))
                 }
               </View>
             )}
             
-            <Text 
-              className="text-sm mt-2"
-              style={{ color: colors.onSurfaceVariant }}
+            <Caption 
+              color={colors.onSurfaceVariant}
+              style={{ marginTop: 8 }}
             >
-              {t('schedule_help_text')}
-            </Text>
+              {t('schedule_help_text') || 'Set specific hours when this item is available during the day'}
+            </Caption>
           </FormField>
 
           {/* Validation Summary */}
@@ -485,21 +571,22 @@ export const AddFoodScreen = () => {
                   size={20} 
                   color={colors.error} 
                 />
-                <Text 
-                  className="text-base font-semibold ml-2"
-                  style={{ color: colors.error }}
+                <Label 
+                  color={colors.error}
+                  weight="semibold"
+                  style={{ marginLeft: 8 }}
                 >
-                  {t('please_fix_errors')}
-                </Text>
+                  {t('please_fix_errors') || 'Please fix the following errors'}
+                </Label>
               </View>
               {validation.errors.map((error, index) => (
-                <Text 
+                <Caption 
                   key={index}
-                  className="text-sm ml-6"
-                  style={{ color: colors.onErrorContainer }}
+                  color={colors.onErrorContainer}
+                  style={{ marginLeft: 24 }}
                 >
                   • {error}
-                </Text>
+                </Caption>
               ))}
             </View>
           )}
@@ -513,12 +600,13 @@ export const AddFoodScreen = () => {
           />
 
           {/* Helper Text */}
-          <Text 
-            className="text-center text-sm mt-4"
-            style={{ color: colors.onSurfaceVariant }}
+          <Caption 
+            color={colors.onSurfaceVariant}
+            align="center"
+            style={{ marginTop: 16 }}
           >
-            * {t('required_fields')}
-          </Text>
+            * {t('required_fields') || 'Required fields'}
+          </Caption>
         </ScrollView>
       </KeyboardAvoidingView>
     </CommonView>

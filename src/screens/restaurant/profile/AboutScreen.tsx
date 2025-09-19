@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next';
 import CommonView from '@/src/components/common/CommonView';
 import { RestaurantProfileStackScreenProps } from '../../../navigation/types';
 import { RESTAURANT_COLORS } from '@/src/config/restaurantTheme';
-import { useAppStore } from '@/src/stores/customerStores/AppStore';
+import { useAppStore } from '@/src/stores/AppStore';
 
 type Props = RestaurantProfileStackScreenProps<'About'>;
 

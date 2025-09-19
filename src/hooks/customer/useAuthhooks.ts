@@ -1,9 +1,9 @@
 // useAuthHooks.ts
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useCallback } from 'react';
-import { authApi, OTPCredentials } from '@/src/services/customer/authApi';
+import { authApi, OTPCredentials, LoginRequest, RegisterRequest, UpdateProfileRequest, ResetPasswordRequest, ChangePasswordRequest } from '@/src/services/customer/authApi';
 import TokenManager from '@/src/services/shared/tokenManager';
-import { useAuthStore } from '@/src/stores/shared/AuthStore';
+import { useAuthStore, useSetAuthData, CustomerProfile } from '@/src/stores/AuthStore';
 
 const CACHE_CONFIG = {
   STALE_TIME: 5 * 60 * 1000, // 5 minutes
@@ -106,80 +106,45 @@ export const useProfileManager = () => {
 
 export const useLogin = () => {
   const queryClient = useQueryClient();
-  const { setUser, setError, clearError } = useAuthStore();
+  const setAuthData = useSetAuthData();
+  const { clearError } = useAuthStore();
 
   return useMutation({
-    mutationFn: (credentials: { email: string; password: string }) =>
-      authApi.login(credentials),
-    onSuccess: async (response) => {
-      console.log('Login successful, processing response...');
+    mutationFn: async (credentials: LoginRequest) => {
+      const response = await authApi.login(credentials);
+      return response.data.data;
+    },
+    onMutate: () => {
+      clearError();
+    },
+    onSuccess: async (data) => {
+      console.log('Customer login successful, processing response...');
 
-      try {
-        console.log(response.data.data.accessToken);
-        const accessToken = response.data.data.accessToken;
-        const refreshToken = response.data.data.refreshToken;
-        const user = response.data.data.user;
+      const { user, accessToken, refreshToken } = data;
 
-        if (!accessToken || !refreshToken) {
-          console.error('Missing tokens in response:', {
-            hasAccessToken: !!accessToken,
-            hasRefreshToken: !!refreshToken,
-          });
-          throw new Error('Invalid response: missing authentication tokens');
-        }
-
-        if (!user) {
-          console.error('Missing user data in response');
-          throw new Error('Invalid response: missing user data');
-        }
-
-        console.log('Storing tokens...');
-        const tokensStored = await TokenManager.setTokens(
-          accessToken,
-          refreshToken,
-        );
-
-        if (!tokensStored) {
-          throw new Error('Failed to store authentication tokens');
-        }
-
-        console.log('Updating auth state...');
-        // Clear any previous errors
-        clearError();
-
-        // Update auth state with customer data (no restaurant info)
-        const authData = {
-          user,
-          accessToken,
-          refreshToken,
-        };
-        
-        // Set user and mark as authenticated
-        setUser(user);
-
-        // Cache user data
-        queryClient.setQueryData(['auth', 'me'], user);
-
-        // Invalidate and refetch user-dependent queries
-        queryClient.invalidateQueries({ queryKey: ['addresses'] });
-        queryClient.invalidateQueries({ queryKey: ['orders'] });
-        queryClient.invalidateQueries({ queryKey: ['notifications'] });
-
-        console.log('Login process completed successfully');
-      } catch (error) {
-        console.error('Error in login success handler:', error);
-        // Clean up on error
-        await TokenManager.clearAllTokens();
-        setError('Login failed');
-        throw error;
+      if (!accessToken || !refreshToken || !user) {
+        throw new Error('Invalid response: missing required data');
       }
+
+      // Set auth data using the simplified store method
+      await setAuthData({
+        user: user as CustomerProfile,
+        accessToken,
+        refreshToken,
+      });
+
+      // Cache user data
+      queryClient.setQueryData(['auth', 'me'], user);
+
+      // Invalidate and refetch user-dependent queries
+      queryClient.invalidateQueries({ queryKey: ['addresses'] });
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+
+      console.log('Customer login process completed successfully');
     },
     onError: (error: any) => {
-      console.error('Login failed:', error);
-
-      // Clean up auth state on login failure
-      setError(error.response?.data?.message || 'Login failed');
-
+      console.error('Customer login failed:', error);
       // Clear any stored tokens
       TokenManager.clearAllTokens().catch(console.error);
     },
@@ -187,56 +152,58 @@ export const useLogin = () => {
 };
 
 export const useRegister = () => {
+  const { clearError } = useAuthStore();
+
   return useMutation({
-    mutationFn: (userData: any) =>
-      authApi.register(userData).then((res) => res.data),
+    mutationFn: async (userData: RegisterRequest) => {
+      const response = await authApi.register(userData);
+      return response.data.data;
+    },
+    onMutate: () => {
+      clearError();
+    },
+    onSuccess: (data) => {
+      console.log('Customer registration successful:', data);
+      // Registration data can be handled locally in components if needed
+    },
   });
 };
 
 export const useVerifyOTP = () => {
   const queryClient = useQueryClient();
-  const { setUser, setError, clearError } = useAuthStore();
+  const setAuthData = useSetAuthData();
+  const { clearError } = useAuthStore();
 
   return useMutation({
-    mutationFn: (otpData: OTPCredentials) => authApi.verifyOTP(otpData),
-    onSuccess: async (response) => {
-      try {
-        const { user, accessToken, refreshToken } = response.data.data;
-        console.log(
-          `checking tokens ..... ${user}, ACCESS_T: ${accessToken}, Refresh_t: ${refreshToken}`,
-        );
+    mutationFn: async (otpData: OTPCredentials) => {
+      const response = await authApi.verifyOTP(otpData);
+      return response.data.data;
+    },
+    onMutate: () => {
+      clearError();
+    },
+    onSuccess: async (data) => {
+      const { user, accessToken, refreshToken } = data;
+      console.log('Customer OTP verification successful');
 
-        if (!accessToken || !refreshToken || !user) {
-          throw new Error(
-            'Invalid verification response: missing required data',
-          );
-        }
-
-        const tokensStored = await TokenManager.setTokens(
-          accessToken,
-          refreshToken,
-        );
-        if (!tokensStored) {
-          throw new Error('Failed to store authentication tokens');
-        }
-
-        clearError();
-        setUser(user);
-
-        queryClient.setQueryData(['auth', 'me'], user);
-        queryClient.invalidateQueries({ queryKey: ['addresses'] });
-        queryClient.invalidateQueries({ queryKey: ['orders'] });
-        queryClient.invalidateQueries({ queryKey: ['notifications'] });
-      } catch (error) {
-        console.error('Error in OTP verification success handler:', error);
-        await TokenManager.clearAllTokens();
-        setError('OTP verification failed');
-        throw error;
+      if (!accessToken || !refreshToken || !user) {
+        throw new Error('Invalid verification response: missing required data');
       }
+
+      // Set auth data using the simplified store method
+      await setAuthData({
+        user: user as CustomerProfile,
+        accessToken,
+        refreshToken,
+      });
+
+      queryClient.setQueryData(['auth', 'me'], user);
+      queryClient.invalidateQueries({ queryKey: ['addresses'] });
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
     onError: (error: any) => {
-      console.error('OTP verification failed:', error);
-      setError(error.response?.data?.message || 'OTP verification failed');
+      console.error('Customer OTP verification failed:', error);
       TokenManager.clearAllTokens().catch(console.error);
     },
   });
@@ -244,81 +211,100 @@ export const useVerifyOTP = () => {
 
 export const useUpdateProfile = () => {
   const queryClient = useQueryClient();
-  const { setUser } = useAuthStore();
+  const { setUser, clearError } = useAuthStore();
 
   return useMutation({
-    mutationFn: (userData: any) => authApi.updateProfile(userData),
-    onSuccess: (response) => {
-      const updatedUser = response.data;
-      console.log(updatedUser);
+    mutationFn: async (userData: UpdateProfileRequest) => {
+      const response = await authApi.updateProfile(userData);
+      return response.data.data;
+    },
+    onMutate: () => {
+      clearError();
+    },
+    onSuccess: (updatedUser: CustomerProfile) => {
+      console.log('Customer profile updated successfully');
+      // Update user in store
       setUser(updatedUser);
+      
+      // Update cached data
       queryClient.setQueryData(['auth', 'me'], updatedUser);
+      queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
     },
   });
 };
 
-export const useLogout = () => {
+export const useCustomerLogout = () => {
   const queryClient = useQueryClient();
-  const { logout } = useAuthStore();
+  const logout = useAuthStore((state) => state.logout);
 
   return useMutation({
     mutationFn: async () => {
-      // No API call for customer logout - just clear local storage and state
-      console.log('Performing customer logout - clearing storage and state');
       await logout();
       return Promise.resolve();
     },
     onSuccess: () => {
+      console.log('Customer logout completed successfully');
       // Clear all cached data
       queryClient.clear();
-      console.log('Customer logout completed successfully');
     },
     onError: (error) => {
       console.error('Customer logout error:', error);
-      // Force logout even if there's an error
-      logout();
+      // Clear cached data even on error
       queryClient.clear();
     },
   });
 };
 
 export const useResendOTP = () => {
+  const { clearError } = useAuthStore();
+
   return useMutation({
-    mutationFn: (email: string) => authApi.resendVerification(email),
+    mutationFn: async (email: string) => {
+      const response = await authApi.resendVerification(email);
+      return response.data;
+    },
+    onMutate: () => {
+      clearError();
+    },
+    onSuccess: () => {
+      console.log('Customer OTP resent successfully');
+    },
   });
 };
 
 export const useResetPassword = () => {
-  const queryClient = useQueryClient();
+  const { clearError } = useAuthStore();
 
   return useMutation({
-    mutationFn: ({
-      otp,
-      email,
-      newPassword,
-    }: {
-      otp: string;
-      email: string;
-      newPassword: string;
-    }) => authApi.resetPassword({ email, otp, newPassword }),
-    onSuccess: (response) => {
-      // Show success toast
-      // Note: We'll need to handle the navigation in the component
-      console.log(
-        'Password reset successful:',
-        response.data?.message || 'Password reset successfully',
-      );
+    mutationFn: async (data: ChangePasswordRequest) => {
+      const response = await authApi.resetPassword(data);
+      return response.data;
     },
-    onError: (error: any) => {
-      console.error('Password reset failed:', error);
-      // Error will be handled by the component
+    onMutate: () => {
+      clearError();
+    },
+    onSuccess: (response) => {
+      console.log(
+        'Customer password reset successful:',
+        response?.message || 'Password reset successfully',
+      );
     },
   });
 };
 
 export const useRequestPasswordReset = () => {
+  const { clearError } = useAuthStore();
+
   return useMutation({
-    mutationFn: (data: any) =>
-      authApi.requestPasswordReset(data).then((response) => response.data),
+    mutationFn: async (data: ResetPasswordRequest) => {
+      const response = await authApi.requestPasswordReset(data);
+      return response.data;
+    },
+    onMutate: () => {
+      clearError();
+    },
+    onSuccess: () => {
+      console.log('Customer password reset request sent successfully');
+    },
   });
 };

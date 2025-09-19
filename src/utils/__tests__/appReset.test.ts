@@ -18,7 +18,7 @@ jest.mock('../../stores/customerStores/cartStore', () => ({
   },
 }));
 
-jest.mock('../../stores/customerStores/AppStore', () => ({
+jest.mock('../../stores/AppStore', () => ({
   useAppStore: {
     getState: () => ({
       isOnboardingComplete: true,
@@ -29,7 +29,7 @@ jest.mock('../../stores/customerStores/AppStore', () => ({
   },
 }));
 
-jest.mock('../../stores/customerStores/AuthStore', () => ({
+jest.mock('../../stores/AuthStore', () => ({
   useAuthStore: {
     getState: () => ({
       selectedUserType: 'customer',

@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
-  Text,
   ScrollView,
   TouchableOpacity,
   Modal,
@@ -24,13 +23,14 @@ import { registerSchema } from '@/src/utils/validation';
 import { Ionicons } from '@expo/vector-icons';
 import CommonView from '@/src/components/common/CommonView';
 import { AuthStackScreenProps } from '@/src/navigation/types';
-import { useAuthStore } from '@/src/stores/customerStores/AuthStore';
+import { useAuthStore } from '@/src/stores/AuthStore';
 import { TextButton } from '@/src/components/common/TextButton';
 import Toast from 'react-native-toast-message';
 import { useNetwork } from '@/src/contexts/NetworkContext';
 import { useTranslation } from 'react-i18next';
 import { useRegister } from '@/src/hooks/customer/useAuthhooks';
 import ErrorDisplay from '@/src/components/auth/ErrorDisplay';
+import { Typography, Heading2, Heading5, Body, Label } from '@/src/components/common/Typography';
 
 // Optimized country codes data - moved outside component to prevent recreation
 const COUNTRY_CODES = [
@@ -84,9 +84,9 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
         onPress={() => onSelect(item)}
         activeOpacity={0.7}
       >
-        <Text style={styles.countryFlag}>{item.flag}</Text>
-        <Text style={styles.countryName}>{item.country}</Text>
-        <Text style={styles.countryCode}>{item.code}</Text>
+        <Typography variant="h5" style={{ marginRight: 16 }}>{item.flag}</Typography>
+        <Label color={colors.onSurface} weight="medium" style={{ flex: 1 }}>{item.country}</Label>
+        <Label color={colors.onSurface} weight="semibold">{item.code}</Label>
       </TouchableOpacity>
     ),
   );
@@ -337,9 +337,9 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
             {/* Logo and Title */}
             <View style={styles.logoContainer}>
               <View style={styles.logo}>
-                <Text style={styles.logoText}>R</Text>
+                <Heading2 color="white" weight="bold">R</Heading2>
               </View>
-              <Text style={styles.title}>{t('create_account')}</Text>
+              <Heading2 color={colors.onSurface} weight="bold" style={{ marginBottom: 8 }}>{t('create_account')}</Heading2>
             </View>
 
             {/* Form */}
@@ -356,12 +356,12 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                         onPress={openCountryModal}
                         activeOpacity={0.7}
                       >
-                        <Text style={styles.selectedCountryFlag}>
+                        <Typography variant="body" style={{ marginRight: 8 }}>
                           {selectedCountryCode.flag}
-                        </Text>
-                        <Text style={styles.selectedCountryCode}>
+                        </Typography>
+                        <Label color={colors.onSurface} weight="medium" style={{ marginRight: 8 }}>
                           {selectedCountryCode.code}
-                        </Text>
+                        </Label>
                         <Ionicons
                           name="chevron-down"
                           size={16}
@@ -558,14 +558,14 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                     color={colors.primary}
                   />
                   <View style={styles.termsTextContainer}>
-                    <Text style={styles.termsText}>
+                    <Body color={colors.onSurface}>
                       {t('terms_agreement')}{' '}
-                    </Text>
+                    </Body>
                     <TextButton
                       onPress={openTerms}
                       text={t('terms_of_service')}
                     />
-                    <Text style={styles.termsText}> {t('and')} </Text>
+                    <Body color={colors.onSurface}> {t('and')} </Body>
                     <TextButton
                       onPress={openPrivacyPolicy}
                       text={t('privacy_policy')}
@@ -597,7 +597,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
               {/* Divider */}
               <View style={styles.dividerContainer}>
                 <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>{t('or_continue_with')}</Text>
+                <Label color={colors.outline} style={{ paddingHorizontal: 16 }}>{t('or_continue_with')}</Label>
                 <View style={styles.dividerLine} />
               </View>
 
@@ -630,9 +630,9 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
 
               {/* Login Link */}
               <View style={styles.loginLinkContainer}>
-                <Text style={styles.loginPrompt}>
+                <Body color={colors.onSurface}>
                   {t('already_have_account')}{' '}
-                </Text>
+                </Body>
                 <TextButton
                   onPress={() => navigation.navigate('SignIn', { userType })}
                   text={t('login')}
@@ -650,12 +650,12 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
           >
             <SafeAreaView style={styles.modalContainer}>
               <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>{t('select_country')}</Text>
+                <Heading5 color={colors.onSurface} weight="semibold">{t('select_country')}</Heading5>
                 <TouchableOpacity
                   onPress={closeCountryModal}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.modalDoneButton}>{t('ok')}</Text>
+                  <Label color={colors.primary} weight="medium">{t('ok')}</Label>
                 </TouchableOpacity>
               </View>
               <FlatList

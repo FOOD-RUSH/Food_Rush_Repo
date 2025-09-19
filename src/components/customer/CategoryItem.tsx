@@ -1,11 +1,12 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, Alert } from 'react-native';
+import { View, Image, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '@/src/navigation/types';
 import { useTheme, ActivityIndicator } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { Typography, Caption, Overline } from '@/src/components/common/Typography';
 
 interface CategoryItemProps {
   title: string;
@@ -17,6 +18,8 @@ interface CategoryItemProps {
   showBadge?: boolean;
   badgeText?: string;
   itemCount?: number;
+  emoji?: string;
+  color?: string;
 }
 
 const CategoryItem: React.FC<CategoryItemProps> = ({
@@ -29,6 +32,8 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
   showBadge = false,
   badgeText,
   itemCount,
+  emoji,
+  color,
 }) => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { colors } = useTheme();
@@ -108,19 +113,16 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
               zIndex: 1,
             }}
           >
-            <Text
-              style={{
-                color: 'white',
-                fontSize: 10,
-                fontWeight: 'bold',
-              }}
+            <Overline
+              color="white"
+              weight="bold"
             >
               {badgeText}
-            </Text>
+            </Overline>
           </View>
         )}
 
-        {/* Image or Loading */}
+        {/* Emoji, Image or Loading */}
         <View
           style={{
             height: 40,
@@ -128,10 +130,14 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
             justifyContent: 'center',
             alignItems: 'center',
             marginBottom: 8,
+            backgroundColor: color ? color + '20' : 'transparent',
+            borderRadius: 20,
           }}
         >
           {isLoading ? (
             <ActivityIndicator size="small" color={colors.primary} />
+          ) : emoji ? (
+            <Typography variant="h3">{emoji}</Typography>
           ) : imageError ? (
             <View
               style={{
@@ -160,31 +166,25 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
         </View>
 
         {/* Category Title */}
-        <Text
-          style={{
-            fontSize: 12,
-            fontWeight: '600',
-            color: colors.onSurface,
-            textAlign: 'center',
-          }}
+        <Caption
+          color={colors.onSurface}
+          weight="semibold"
+          align="center"
           numberOfLines={2}
           ellipsizeMode="tail"
         >
           {t(`category_${title?.toLowerCase().replace(/[\s-]/g, '_') || 'unknown'}`, title || 'Unknown Category')}
-        </Text>
+        </Caption>
 
         {/* Item Count */}
         {itemCount !== undefined && (
-          <Text
-            style={{
-              fontSize: 10,
-              color: colors.onSurfaceVariant,
-              marginTop: 2,
-              textAlign: 'center',
-            }}
+          <Overline
+            color={colors.onSurfaceVariant}
+            align="center"
+            style={{ marginTop: 2 }}
           >
             {itemCount} {t('items')}
-          </Text>
+          </Overline>
         )}
 
         {/* Loading Overlay */}

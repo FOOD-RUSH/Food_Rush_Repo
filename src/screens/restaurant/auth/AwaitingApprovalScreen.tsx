@@ -12,7 +12,7 @@ import { useTheme } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import CommonView from '@/src/components/common/CommonView';
 import { AuthStackScreenProps } from '@/src/navigation/types';
-import { useAuthStore } from '@/src/stores/customerStores/AuthStore';
+import { useAuthStore } from '@/src/stores/AuthStore';
 import Toast from 'react-native-toast-message';
 import { useTranslation } from 'react-i18next';
 import { images } from '@/assets/images';
@@ -25,7 +25,7 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
 }) => {
   const { colors } = useTheme();
   const { t } = useTranslation();
-  const { logoutUser } = useAuthStore();
+  const logout = useAuthStore((state) => state.logout);
 
   const { restaurantId, userId } = route.params || {};
 
@@ -43,7 +43,7 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
           style: 'destructive',
           onPress: async () => {
             try {
-              await logoutUser();
+              await logout();
               navigation.getParent()?.navigate('Onboarding');
             } catch (error) {
               console.error('Logout error:', error);
@@ -58,7 +58,7 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
         },
       ],
     );
-  }, [logoutUser, navigation, t]);
+  }, [logout, navigation, t]);
 
   const handleRefresh = useCallback(async () => {
     Toast.show({

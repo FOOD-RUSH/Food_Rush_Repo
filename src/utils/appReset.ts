@@ -8,8 +8,8 @@
 import { reset } from '../navigation/navigationHelpers';
 import TokenManager from '../services/shared/tokenManager';
 import { useCartStore } from '../stores/customerStores/cartStore';
-import { useAppStore } from '../stores/customerStores/AppStore';
-import { useAuthStore } from '../stores/customerStores/AuthStore';
+import { useAppStore } from '../stores/AppStore';
+import { useAuthStore } from '../stores/AuthStore';
 
 /**
  * Performs a complete app reset including all stores and navigation
@@ -17,12 +17,12 @@ import { useAuthStore } from '../stores/customerStores/AuthStore';
  */
 export const performCompleteAppReset = async (options?: {
   preserveOnboarding?: boolean;
-  preserveUserTypeSelection?: boolean;
+  preserveTheme?: boolean;
   navigateToAuth?: boolean;
 }) => {
   const {
     preserveOnboarding = true,
-    preserveUserTypeSelection = true,
+    preserveTheme = true,
     navigateToAuth = true,
   } = options || {};
 
@@ -44,13 +44,7 @@ export const performCompleteAppReset = async (options?: {
 
     // Reset auth store
     const authStore = useAuthStore.getState();
-    const selectedUserType = authStore.selectedUserType;
-    
     authStore.resetAuth();
-    
-    if (preserveUserTypeSelection && selectedUserType) {
-      authStore.setSelectedUserType(selectedUserType);
-    }
 
     // Navigate to user type selection screen if requested
     if (navigateToAuth) {
@@ -85,9 +79,8 @@ export const switchUserType = async (newUserType: 'customer' | 'restaurant') => 
     // Clear cart since it's user-type specific
     useCartStore.getState().clearCart();
 
-    // Update user type in both stores
+    // Update user type in app store
     useAppStore.getState().setUserType(newUserType);
-    useAuthStore.getState().setSelectedUserType(newUserType);
 
     // Navigate to appropriate app
     const targetRoute = newUserType === 'customer' ? 'CustomerApp' : 'RestaurantApp';
@@ -130,7 +123,7 @@ export const performEmergencyReset = async () => {
   try {
     await performCompleteAppReset({
       preserveOnboarding: false,
-      preserveUserTypeSelection: false,
+      preserveTheme: false,
       navigateToAuth: true,
     });
 

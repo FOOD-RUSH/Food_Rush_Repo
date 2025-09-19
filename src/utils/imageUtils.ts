@@ -1,17 +1,16 @@
 import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system';
 
 export interface ImagePickerResult {
   uri: string;
-  base64?: string;
   type: string;
   name: string;
 }
 
 /**
- * Pick an image from the device gallery and convert to base64
+ * Pick an image from the device gallery
+ * Returns the file URI that can be used directly with FormData
  */
-export const pickImageWithBase64 = async (): Promise<ImagePickerResult | null> => {
+export const pickImageForUpload = async (): Promise<ImagePickerResult | null> => {
   try {
     // Request permissions
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -25,7 +24,7 @@ export const pickImageWithBase64 = async (): Promise<ImagePickerResult | null> =
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.8,
-      base64: true, // Request base64 encoding
+      // Don't request base64 - we'll send the file directly
     });
 
     if (result.canceled || !result.assets || result.assets.length === 0) {
@@ -36,7 +35,6 @@ export const pickImageWithBase64 = async (): Promise<ImagePickerResult | null> =
     
     return {
       uri: asset.uri,
-      base64: asset.base64,
       type: asset.type || 'image/jpeg',
       name: `menu-item-${Date.now()}.jpg`,
     };
@@ -44,28 +42,6 @@ export const pickImageWithBase64 = async (): Promise<ImagePickerResult | null> =
     console.error('Error picking image:', error);
     throw error;
   }
-};
-
-/**
- * Convert image URI to base64 string
- */
-export const convertImageToBase64 = async (uri: string): Promise<string> => {
-  try {
-    const base64 = await FileSystem.readAsStringAsync(uri, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
-    return base64;
-  } catch (error) {
-    console.error('Error converting image to base64:', error);
-    throw error;
-  }
-};
-
-/**
- * Create a data URL from base64 string
- */
-export const createDataURL = (base64: string, mimeType: string = 'image/jpeg'): string => {
-  return `data:${mimeType};base64,${base64}`;
 };
 
 /**
@@ -83,10 +59,10 @@ export const getFileExtension = (mimeType: string): string => {
   switch (mimeType.toLowerCase()) {
     case 'image/jpeg':
     case 'image/jpg':
-      return '.jpg';
+      return 'jpg';
     case 'image/png':
-      return '.png';
+      return 'png';
     default:
-      return '.jpg';
+      return 'jpg';
   }
 };

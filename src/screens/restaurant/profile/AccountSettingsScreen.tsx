@@ -12,7 +12,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { RestaurantProfileStackScreenProps } from '../../../navigation/types';
-import { useAppStore } from '@/src/stores/customerStores/AppStore';
+import { useAppStore } from '@/src/stores/AppStore';
 import { useLanguage } from '@/src/contexts/LanguageContext';
 import { useTranslation } from 'react-i18next';
 import { SupportedLanguage } from '@/src/locales/i18n';

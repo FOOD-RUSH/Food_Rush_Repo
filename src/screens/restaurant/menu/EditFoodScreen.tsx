@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, Image, ScrollView, TouchableOpacity, Animated, StatusBar, Dimensions, KeyboardTypeOptions, Alert } from 'react-native';
+import { View, Image, ScrollView, TouchableOpacity, Animated, StatusBar, Dimensions, KeyboardTypeOptions, Alert } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -9,8 +9,9 @@ import CommonView from '@/src/components/common/CommonView';
 import { saveImageLocally, generateImageId } from '@/src/utils/imageStorage';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RestaurantMenuStackParamList } from '@/src/navigation/types';
-import { useUser } from '@/src/stores/customerStores/AuthStore';
-import { useGetMenuItemById, useUpdateMenuItem } from '@/src/hooks/restaurant/useMenuApi';
+import { useCurrentRestaurant } from '@/src/stores/AuthStore';
+import { useMenuItem, useUpdateMenuItem } from '@/src/hooks/restaurant/useMenuApi';
+import { Typography, Heading3, Body, Label, Caption } from '@/src/components/common/Typography';
 
 const { width, height } = Dimensions.get('window');
 
@@ -30,13 +31,13 @@ type EditFoodScreenProps = NativeStackScreenProps<
 
 export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
   const navigation = useNavigation();
-  const user = useUser();
-  const restaurantId = user?.restaurantId;
+  const currentRestaurant = useCurrentRestaurant();
+  const restaurantId = currentRestaurant?.id;
 
   const { itemId } = route.params;
 
   // API hooks
-  const { data: menuItem, isLoading, error } = useGetMenuItemById(itemId);
+  const { data: menuItem, isLoading, error } = useMenuItem(itemId);
   const updateMenuItemMutation = useUpdateMenuItem();
 
   const [name, setName] = useState('');
@@ -328,14 +329,12 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
               <Ionicons name="arrow-back" size={24} color="#ffffff" />
             </TouchableOpacity>
             <View style={{ flex: 1 }}>
-              <Text
-                style={{ fontSize: 24, fontWeight: 'bold', color: '#ffffff' }}
-              >
+              <Heading3 color="#ffffff" weight="bold">
                 Edit Item
-              </Text>
-              <Text style={{ fontSize: 14, color: 'rgba(255, 255, 255, 0.7)' }}>
+              </Heading3>
+              <Body color="rgba(255, 255, 255, 0.7)">
                 Update your menu item details
-              </Text>
+              </Body>
             </View>
             <TouchableOpacity
               style={{
@@ -429,9 +428,9 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
                         size={40}
                         color="#ffffff"
                       />
-                      <Text style={{ color: '#ffffff', marginTop: 8 }}>
+                      <Body color="#ffffff" style={{ marginTop: 8 }}>
                         No Image
-                      </Text>
+                      </Body>
                     </LinearGradient>
                   )}
 
@@ -469,16 +468,13 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
                       zIndex: 3,
                     }}
                   >
-                    <Text
-                      style={{
-                        color: '#ffffff',
-                        fontSize: 12,
-                        textAlign: 'center',
-                        fontWeight: '500',
-                      }}
+                    <Caption
+                      color="#ffffff"
+                      align="center"
+                      weight="medium"
                     >
                       Tap to change image
-                    </Text>
+                    </Caption>
                   </LinearGradient>
                 </TouchableOpacity>
               </Animated.View>
@@ -618,15 +614,12 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
                         borderColor: 'rgba(255, 255, 255, 0.2)',
                       }}
                     >
-                      <Text
-                        style={{
-                          color: '#ffffff',
-                          fontWeight: '600',
-                          fontSize: 16,
-                        }}
+                      <Label
+                        color="#ffffff"
+                        weight="semibold"
                       >
                         Cancel
-                      </Text>
+                      </Label>
                     </LinearGradient>
                   </TouchableOpacity>
 
@@ -657,15 +650,12 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
                           color="#ffffff"
                           style={{ marginRight: 8 }}
                         />
-                        <Text
-                          style={{
-                            color: '#ffffff',
-                            fontWeight: '700',
-                            fontSize: 16,
-                          }}
+                        <Label
+                          color="#ffffff"
+                          weight="bold"
                         >
                           Save Changes
-                        </Text>
+                        </Label>
                       </View>
                     </LinearGradient>
                   </TouchableOpacity>
@@ -687,15 +677,12 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
                         borderColor: 'rgba(52, 199, 89, 0.3)',
                       }}
                     >
-                      <Text
-                        style={{
-                          color: '#34c759',
-                          fontWeight: '600',
-                          fontSize: 14,
-                        }}
+                      <Body
+                        color="#34c759"
+                        weight="semibold"
                       >
                         Mark Available
-                      </Text>
+                      </Body>
                     </LinearGradient>
                   </TouchableOpacity>
 
@@ -713,15 +700,12 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
                         borderColor: 'rgba(255, 149, 0, 0.3)',
                       }}
                     >
-                      <Text
-                        style={{
-                          color: '#ff9500',
-                          fontWeight: '600',
-                          fontSize: 14,
-                        }}
+                      <Body
+                        color="#ff9500"
+                        weight="semibold"
                       >
                         Mark Popular
-                      </Text>
+                      </Body>
                     </LinearGradient>
                   </TouchableOpacity>
                 </View>

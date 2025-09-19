@@ -2,7 +2,6 @@ import { View, StatusBar, Image, Pressable, Alert } from 'react-native';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ScrollView } from 'react-native-gesture-handler';
 import {
-  Text,
   TouchableRipple,
   Button,
   ActivityIndicator,
@@ -10,6 +9,7 @@ import {
   Card,
   Chip,
 } from 'react-native-paper';
+import { Typography, Heading2, Heading4, Body, BodyLarge, Label, LabelLarge, Caption } from '@/src/components/common/Typography';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { images } from '@/assets/images';
 import { RootStackScreenProps } from '@/src/navigation/types';
@@ -106,9 +106,9 @@ const FoodDetailsScreen = ({
         style={{ backgroundColor: colors.background }}
       >
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text className="mt-4" style={{ color: colors.onSurface }}>
+        <Body color={colors.onSurface} style={{ marginTop: 16 }}>
           {t('loading_food_details') || 'Loading food details...'}
-        </Text>
+        </Body>
       </View>
     );
   }
@@ -125,19 +125,21 @@ const FoodDetailsScreen = ({
           size={80}
           color={colors.onSurfaceVariant}
         />
-        <Text
-          className="text-xl font-semibold mt-4 mb-2 text-center"
-          style={{ color: colors.onSurface }}
+        <Heading4 
+          color={colors.onSurface} 
+          align="center" 
+          style={{ marginTop: 16, marginBottom: 8 }}
         >
           {t('failed_to_load_food_details') || 'Failed to load food details'}
-        </Text>
-        <Text
-          className="text-base text-center mb-6"
-          style={{ color: colors.onSurfaceVariant }}
+        </Heading4>
+        <Body 
+          color={colors.onSurfaceVariant} 
+          align="center" 
+          style={{ marginBottom: 24 }}
         >
           {t('please_check_connection_and_try_again') ||
             'Please check your connection and try again'}
-        </Text>
+        </Body>
         <Button
           mode="contained"
           onPress={() => refetch()}
@@ -187,9 +189,9 @@ const FoodDetailsScreen = ({
               style={{ backgroundColor: colors.primary }}
             >
               <MaterialIcons name="shopping-cart" size={16} color="white" />
-              <Text className="text-white text-sm font-bold ml-1">
+              <Label color="white" weight="bold" style={{ marginLeft: 4 }}>
                 {cartQuantity} in cart
-              </Text>
+              </Label>
             </View>
           )}
 
@@ -198,9 +200,9 @@ const FoodDetailsScreen = ({
             className="absolute bottom-4 right-4 px-4 py-2 rounded-full"
             style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}
           >
-            <Text className="text-white text-lg font-bold">
+            <LabelLarge color="white" weight="bold">
               {MenuDetails.price} {t('fcfa_unit')}
-            </Text>
+            </LabelLarge>
           </View>
         </View>
 
@@ -208,16 +210,13 @@ const FoodDetailsScreen = ({
         <View className="px-4 py-6">
           {/* Title and Basic Info */}
           <View className="mb-6">
-            <Text
-              variant="headlineMedium"
-              style={{
-                fontWeight: 'bold',
-                color: colors.onSurface,
-                marginBottom: 8,
-              }}
+            <Heading2 
+              color={colors.onSurface} 
+              weight="bold" 
+              style={{ marginBottom: 8 }}
             >
               {MenuDetails.name}
-            </Text>
+            </Heading2>
 
             {/* Category Badge */}
             {MenuDetails.category && (
@@ -226,28 +225,24 @@ const FoodDetailsScreen = ({
                   className="self-start px-3 py-1 rounded-full"
                   style={{ backgroundColor: colors.primaryContainer }}
                 >
-                  <Text
-                    className="text-sm font-medium"
-                    style={{ color: colors.onPrimaryContainer }}
+                  <Label 
+                    color={colors.onPrimaryContainer} 
+                    weight="medium"
                   >
                     {MenuDetails.category}
-                  </Text>
+                  </Label>
                 </View>
               </View>
             )}
 
             <Seperator />
 
-            <Text
-              variant="bodyLarge"
-              style={{
-                color: colors.onSurface,
-                lineHeight: 24,
-                marginBottom: 16,
-              }}
+            <BodyLarge 
+              color={colors.onSurface} 
+              style={{ marginBottom: 16 }}
             >
               {MenuDetails.description || t('no_description_available')}
-            </Text>
+            </BodyLarge>
 
             {/* Category Chip */}
             {MenuDetails.category && (
@@ -272,12 +267,13 @@ const FoodDetailsScreen = ({
             }}
           >
             <View className="p-4">
-              <Text
-                className="text-lg font-semibold mb-4"
-                style={{ color: colors.onSurface }}
+              <LabelLarge 
+                color={colors.onSurface} 
+                weight="semibold" 
+                style={{ marginBottom: 16 }}
               >
                 {t('quantity')}
-              </Text>
+              </LabelLarge>
 
               <View className="flex-row items-center justify-center">
                 <Pressable
@@ -297,12 +293,15 @@ const FoodDetailsScreen = ({
                   />
                 </Pressable>
 
-                <Text
-                  className="mx-4 text-3xl font-bold text-center min-w-[60px]"
-                  style={{ color: colors.onSurface }}
+                <Typography 
+                  variant="display2" 
+                  color={colors.onSurface} 
+                  weight="bold" 
+                  align="center" 
+                  style={{ marginHorizontal: 16, minWidth: 60 }}
                 >
                   {quantity}
-                </Text>
+                </Typography>
 
                 <Pressable
                   onPress={() => handleQuantityChange(1)}
@@ -328,12 +327,13 @@ const FoodDetailsScreen = ({
             }}
           >
             <View className="p-4">
-              <Text
-                className="text-lg font-semibold mb-4"
-                style={{ color: colors.onSurface }}
+              <LabelLarge 
+                color={colors.onSurface} 
+                weight="semibold" 
+                style={{ marginBottom: 16 }}
               >
                 {t('special_instructions_optional')}
-              </Text>
+              </LabelLarge>
 
               <InputField
                 multiline
@@ -368,20 +368,20 @@ const FoodDetailsScreen = ({
         >
           <View className="flex-row justify-between items-center">
             <View>
-              <Text
-                className="font-semibold text-lg"
-                style={{ color: 'white' }}
+              <LabelLarge 
+                color="white" 
+                weight="semibold"
               >
                 {isInCart ? t('update_cart') : t('add_to_basket')}
-              </Text>
-              <Text className="text-sm opacity-90" style={{ color: 'white' }}>
+              </LabelLarge>
+              <Label color="white" style={{ opacity: 0.9 }}>
                 {quantity} {quantity === 1 ? t('item') : t('items')}
-              </Text>
+              </Label>
             </View>
 
-            <Text className="font-bold text-xl" style={{ color: 'white' }}>
+            <Heading4 color="white" weight="bold">
               {formattedTotalPrice} {t('fcfa_unit')}
-            </Text>
+            </Heading4>
           </View>
         </TouchableRipple>
       </View>

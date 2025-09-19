@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useRef } from 'react';
-import { useAuthStore } from '@/src/stores/customerStores/AuthStore';
+import { useAuthStore } from '@/src/stores/AuthStore';
 import { 
   initializeNotificationsForUser,
   sendOrderStatusNotification,
@@ -13,7 +13,7 @@ import {
 export const useNotifications = () => {
   const user = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const userType = useAuthStore((state) => state.userType);
+  const userType = useAuthStore((state) => state.user?.role);
   const initializationRef = useRef<string | null>(null);
 
   // Initialize notifications when user is authenticated

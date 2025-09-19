@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, FlatList, Animated, TouchableOpacity, ScrollView, Easing, Dimensions } from 'react-native';
+import { View, FlatList, Animated, TouchableOpacity, ScrollView, Easing, Dimensions } from 'react-native';
 import { Chip, Badge, useTheme, TextInput, FAB } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -11,7 +11,8 @@ import CommonView from '@/src/components/common/CommonView';
 import { RestaurantOrdersStackScreenProps } from '@/src/navigation/types';
 import { useGetOrders, useConfirmOrder, useRejectOrder } from '@/src/hooks/restaurant/useOrderApi';
 import { Order } from '@/src/services/restaurant/orderApi';
-import RestaurantAvailabilityToggle from '@/src/components/restaurant/RestaurantAvailabilityToggle';
+import { Typography, Heading1, Heading4, Body, Label, LabelLarge, Caption } from '@/src/components/common/Typography';
+
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -142,15 +143,12 @@ const OrderCard: React.FC<OrderCardProps> = ({ item, index, onPress, showActions
         {/* Header */}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text
-              style={{
-                fontSize: isSmallScreen ? 16 : 18,
-                fontWeight: 'bold',
-                color: colors.onSurface,
-              }}
+            <LabelLarge
+              color={colors.onSurface}
+              weight="bold"
             >
               {t('order_hash')}{item.id}
-            </Text>
+            </LabelLarge>
             {item.status === 'pending' && (
               <Badge
                 style={{
@@ -169,52 +167,40 @@ const OrderCard: React.FC<OrderCardProps> = ({ item, index, onPress, showActions
               size={16}
               color={isOverdue() ? colors.error : colors.onSurfaceVariant}
             />
-            <Text
-              style={{
-                fontSize: 12,
-                color: isOverdue() ? colors.error : colors.onSurfaceVariant,
-                marginLeft: 4,
-                fontWeight: isOverdue() ? 'bold' : 'normal',
-              }}
+            <Caption
+              color={isOverdue() ? colors.error : colors.onSurfaceVariant}
+              weight={isOverdue() ? 'bold' : 'regular'}
+              style={{ marginLeft: 4 }}
             >
               {getTimeSinceOrder()}
-            </Text>
+            </Caption>
           </View>
         </View>
 
         {/* Customer Info */}
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-          <Text
-            style={{
-              fontSize: 15,
-              fontWeight: '600',
-              color: colors.onSurface,
-            }}
+          <Label
+            color={colors.onSurface}
+            weight="semibold"
           >
             {item.customerName}
-          </Text>
-          <Text
-            style={{
-              fontSize: 16,
-              fontWeight: 'bold',
-              color: colors.primary,
-            }}
+          </Label>
+          <Label
+            color={colors.primary}
+            weight="bold"
           >
             {item.total.toLocaleString()} XAF
-          </Text>
+          </Label>
         </View>
 
         {/* Items */}
-        <Text
-          style={{
-            fontSize: 13,
-            color: colors.onSurfaceVariant,
-            marginBottom: 8,
-          }}
+        <Body
+          color={colors.onSurfaceVariant}
           numberOfLines={2}
+          style={{ marginBottom: 8 }}
         >
           {item.items.map(i => `${i.quantity}x ${i.name}`).join(', ')}
-        </Text>
+        </Body>
 
         {/* Actions for Pending Orders */}
         {showActions && item.status === 'pending' && (
@@ -229,9 +215,9 @@ const OrderCard: React.FC<OrderCardProps> = ({ item, index, onPress, showActions
               }}
               onPress={handleReject}
             >
-              <Text style={{ color: 'white', fontWeight: 'bold', textAlign: 'center' }}>
+              <Label color="white" weight="bold" align="center">
                 {t('reject')}
-              </Text>
+              </Label>
             </TouchableOpacity>
             <TouchableOpacity
               style={{
@@ -243,9 +229,9 @@ const OrderCard: React.FC<OrderCardProps> = ({ item, index, onPress, showActions
               }}
               onPress={handleConfirm}
             >
-              <Text style={{ color: 'white', fontWeight: 'bold', textAlign: 'center' }}>
+              <Label color="white" weight="bold" align="center">
                 {t('accept')}
-              </Text>
+              </Label>
             </TouchableOpacity>
           </View>
         )}
@@ -324,9 +310,9 @@ const OrderTab: React.FC<OrderTabProps> = ({ status, showActions = false }) => {
               size={48}
               color={colors.onSurfaceVariant}
             />
-            <Text style={{ color: colors.onSurfaceVariant, marginTop: 8, fontSize: 16 }}>
+            <Label color={colors.onSurfaceVariant} style={{ marginTop: 8 }}>
               {t('no_orders_found')}
-            </Text>
+            </Label>
           </View>
         }
       />
@@ -353,12 +339,12 @@ const OrdersList: React.FC<RestaurantOrdersStackScreenProps<'OrdersList'>> = () 
         <View style={{ padding: 16, paddingBottom: 0 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 28, fontWeight: 'bold', color: colors.onBackground }}>
+              <Heading1 color={colors.onBackground} weight="bold">
                 {t('orders')}
-              </Text>
-              <Text style={{ fontSize: 14, color: colors.onSurfaceVariant, marginTop: 4 }}>
+              </Heading1>
+              <Body color={colors.onSurfaceVariant} style={{ marginTop: 4 }}>
                 {t('manage_your_orders')}
-              </Text>
+              </Body>
             </View>
             
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
@@ -374,9 +360,9 @@ const OrdersList: React.FC<RestaurantOrdersStackScreenProps<'OrdersList'>> = () 
                   }}
                 >
                   <MaterialCommunityIcons name="bell" size={16} color="white" />
-                  <Text style={{ color: 'white', fontWeight: 'bold', marginLeft: 4 }}>
+                  <Caption color="white" weight="bold" style={{ marginLeft: 4 }}>
                     {pendingOrdersCount} {t('pending')}
-                  </Text>
+                  </Caption>
                 </View>
               )}
               
@@ -405,13 +391,7 @@ const OrdersList: React.FC<RestaurantOrdersStackScreenProps<'OrdersList'>> = () 
           </View>
         </View>
 
-        {/* Restaurant Availability Toggle */}
-        <View style={{ paddingHorizontal: 16, paddingTop: 12 }}>
-          <RestaurantAvailabilityToggle
-            showAsCard={false}
-            compact={true}
-          />
-        </View>
+
 
         {/* Tabs */}
         <Tab.Navigator

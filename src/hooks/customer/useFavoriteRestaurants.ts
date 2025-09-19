@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useAuthUser } from '@/src/stores/customerStores/AuthStore';
+import { useAuthUser } from '@/src/stores/AuthStore';
 import { RestaurantCard as RestaurantCardType } from '@/src/types';
 
 // Mock data for favorite restaurants (replace with actual API call)

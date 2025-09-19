@@ -4,8 +4,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { TouchableOpacity, View } from 'react-native';
-import { useTheme, Card, Text } from 'react-native-paper';
+import { useTheme, Card } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
+import { Typography, Heading4, Body, Label, Caption } from '@/src/components/common/Typography';
 
 interface RestaurantCardProps {
   name: string;
@@ -124,11 +125,9 @@ export const RestaurantCard = ({
                 elevation: 2,
               }}
             >
-              <Text
-                style={{ fontSize: 10, color: 'white', fontWeight: 'bold' }}
-              >
+              <Caption color="white" weight="bold">
                 {isOpen ? 'OPEN' : 'CLOSED'}
-              </Text>
+              </Caption>
             </View>
 
             <View
@@ -142,9 +141,9 @@ export const RestaurantCard = ({
               }}
             >
               <Ionicons name="star" size={12} color="yellow" />
-              <Text style={{ fontSize: 12, color: 'white', marginLeft: 4 }}>
+              <Caption color="white" style={{ marginLeft: 4 }}>
                 {rating} ({ratingCount})
-              </Text>
+              </Caption>
             </View>
           </View>
         </View>
@@ -154,29 +153,23 @@ export const RestaurantCard = ({
             style={{ marginBottom: 12 }}
             className="flex-row justify-between"
           >
-            <Text
-              style={{
-                fontSize: 18,
-                fontWeight: 'bold',
-                color: colors.onSurface,
-              }}
+            <Heading4 
+              color={colors.onSurface} 
+              weight="bold"
             >
               {name}
-            </Text>
+            </Heading4>
           </View>
 
           {/* Address display */}
           {address && (
             <View style={{ marginBottom: 8 }}>
-              <Text
-                style={{
-                  fontSize: 14,
-                  color: colors.onSurfaceVariant,
-                }}
+              <Body 
+                color={colors.onSurfaceVariant}
                 numberOfLines={1}
               >
                 📍 {address}
-              </Text>
+              </Body>
             </View>
           )}
 
@@ -188,27 +181,21 @@ export const RestaurantCard = ({
             }}
           >
             <View style={{ flex: 1 }}>
-              <Text
-                style={{
-                  fontSize: 14,
-                  color: colors.primary,
-                  fontWeight: '600',
-                }}
+              <Label 
+                color={colors.primary} 
+                weight="semibold"
               >
                 {deliveryPrice} XAF delivery
-              </Text>
+              </Label>
             </View>
 
             <View style={{ alignItems: 'flex-end' }}>
-              <Text
-                style={{
-                  fontSize: 14,
-                  fontWeight: '500',
-                  color: colors.onSurface,
-                }}
+              <Label 
+                color={colors.onSurface} 
+                weight="medium"
               >
                 {estimatedTime}-{estimatedTime + 10} min
-              </Text>
+              </Label>
             </View>
           </View>
         </Card.Content>

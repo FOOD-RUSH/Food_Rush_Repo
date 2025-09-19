@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import {
   View,
-  Text,
   ScrollView,
   TouchableOpacity,
   Alert,
@@ -19,6 +18,7 @@ import AddressEditModal from '@/src/components/customer/AddressEditModal';
 import { Card, useTheme, FAB, Snackbar } from 'react-native-paper';
 import { AntDesign, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useAddressManager } from '@/src/hooks/customer/useAddressManager';
+import { Typography, Heading5, Body, Label, Caption } from '@/src/components/common/Typography';
 
 const AddressScreen = ({
   navigation,
@@ -199,32 +199,32 @@ const AddressScreen = ({
 
               <View className="flex-col mx-3 flex-1">
                 <View className="flex-row items-center">
-                  <Text
-                    style={{ color: colors.onSurface }}
-                    className="text-lg font-semibold"
+                  <Heading5
+                    color={colors.onSurface}
+                    weight="semibold"
                   >
                     {address.label || 'Address'}
-                  </Text>
+                  </Heading5>
                   {isDefault && (
                     <View
                       className="ml-2 px-2 py-1 rounded-full"
                       style={{ backgroundColor: '#007aff' }}
                     >
-                      <Text className="text-white text-xs font-medium">
+                      <Caption color="white" weight="medium">
                         {t('default')}
-                      </Text>
+                      </Caption>
                     </View>
                   )}
                 </View>
-                <Text
-                  style={{ color: colors.onSurfaceVariant }}
-                  className="text-sm mt-1"
+                <Caption
+                  color={colors.onSurfaceVariant}
                   numberOfLines={2}
+                  style={{ marginTop: 4 }}
                 >
                   {address.fullAddress ||
                     address.street ||
                     'No address details'}
-                </Text>
+                </Caption>
               </View>
             </View>
 
@@ -290,13 +290,13 @@ const AddressScreen = ({
             <View className="flex-row items-center flex-1">
               <Ionicons name="location" color="#007aff" size={24} />
               <View className="flex-col mx-3 flex-1">
-                <Text className="text-lg font-semibold text-blue-800">
+                <Heading5 color="#1e40af" weight="semibold">
                   Use Current Location
-                </Text>
-                <Text className="text-sm mt-1 text-blue-600" numberOfLines={2}>
+                </Heading5>
+                <Caption color="#2563eb" numberOfLines={2} style={{ marginTop: 4 }}>
                   {currentLocation.formattedAddress ||
                     `${currentLocation.city}, Cameroon`}
-                </Text>
+                </Caption>
               </View>
             </View>
             <View className="flex-row items-center">
@@ -310,9 +310,9 @@ const AddressScreen = ({
                 }}
                 activeOpacity={0.7}
               >
-                <Text className="text-white font-medium">
+                <Label color="white" weight="medium">
                   {isProcessing ? 'Adding...' : 'Add'}
-                </Text>
+                </Label>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleDismissLocationSuggestion}
@@ -336,18 +336,21 @@ const AddressScreen = ({
           size={80}
           color={colors.onSurfaceVariant}
         />
-        <Text
-          style={{ color: colors.onSurface }}
-          className="text-xl font-semibold mt-4 text-center"
+        <Heading5
+          color={colors.onSurface}
+          weight="semibold"
+          align="center"
+          style={{ marginTop: 16 }}
         >
           {t('no_addresses_added')}
-        </Text>
-        <Text
-          style={{ color: colors.onSurfaceVariant }}
-          className="text-base mt-2 text-center leading-6"
+        </Heading5>
+        <Body
+          color={colors.onSurfaceVariant}
+          align="center"
+          style={{ marginTop: 8, lineHeight: 24 }}
         >
           {t('add_your_first_address_to_make_ordering_easier')}
-        </Text>
+        </Body>
 
         {/* Quick actions */}
         <View className="mt-6 w-full">
@@ -363,11 +366,11 @@ const AddressScreen = ({
               activeOpacity={0.7}
             >
               <Ionicons name="location" size={20} color="white" />
-              <Text className="text-white font-medium ml-2">
+              <Label color="white" weight="medium" style={{ marginLeft: 8 }}>
                 {isProcessing
                   ? 'Adding Current Location...'
                   : 'Add Current Location'}
-              </Text>
+              </Label>
             </TouchableOpacity>
           )}
 
@@ -381,9 +384,9 @@ const AddressScreen = ({
             activeOpacity={0.7}
           >
             <Ionicons name="add" size={20} color="#007aff" />
-            <Text className="font-medium ml-2" style={{ color: '#007aff' }}>
+            <Label color="#007aff" weight="medium" style={{ marginLeft: 8 }}>
               {t('add_new_address')}
-            </Text>
+            </Label>
           </TouchableOpacity>
         </View>
       </View>
@@ -447,9 +450,9 @@ const AddressScreen = ({
           duration={3000}
           style={{ backgroundColor: colors.inverseSurface }}
         >
-          <Text style={{ color: colors.inverseOnSurface }}>
+          <Body color={colors.inverseOnSurface}>
             {snackbarMessage}
-          </Text>
+          </Body>
         </Snackbar>
       </View>
     </CommonView>

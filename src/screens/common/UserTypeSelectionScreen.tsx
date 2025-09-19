@@ -14,8 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { images } from '@/assets/images';
 import { useTranslation } from 'react-i18next';
 import { RootStackScreenProps } from '@/src/navigation/types';
-import { useAppStore } from '@/src/stores/customerStores/AppStore';
-import { useAuthStore } from '@/src/stores/customerStores/AuthStore';
+import { useAppStore } from '@/src/stores/AppStore';
 // Types
 interface UserType {
   id: 'customer' | 'restaurant';
@@ -47,8 +46,7 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
   const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = useWindowDimensions();
 
   // Store actions
-  const { setUserType, completeOnboarding } = useAppStore();
-  const { setSelectedUserType } = useAuthStore();
+  const { setSelectedUserType, completeOnboarding } = useAppStore();
 
   // Local state
   const [selectedType, setSelectedType] = useState<
@@ -64,8 +62,7 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
 
   const handleContinue = useCallback(() => {
     if (selectedType) {
-      // Update both stores
-      setUserType(selectedType);
+      // Update app store with selected user type
       setSelectedUserType(selectedType);
       completeOnboarding();
 
@@ -77,7 +74,6 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
     }
   }, [
     selectedType,
-    setUserType,
     setSelectedUserType,
     completeOnboarding,
     navigation,

@@ -1,12 +1,8 @@
 import React, { useCallback, useMemo, useState, useRef } from 'react';
 import CommonView from '@/src/components/common/CommonView';
 import { TextInput, useTheme } from 'react-native-paper';
-import { useCategoriesApi } from '@/src/hooks/shared/useCategoriesApi';
+import { useCategories } from '@/src/hooks/useCategories';
 import { images } from '@/assets/images';
-import {
-  getMainCategories,
-  mapApiCategoriesToUI,
-} from '@/src/constants/categories';
 import CategoryItem from '@/src/components/customer/CategoryItem';
 // Removed HomeHeader as per requirement to remove customer headers
 import FoodItemCard from '@/src/components/customer/FoodItemCard';
@@ -140,9 +136,8 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
   const [refreshing, setRefreshing] = useState(false);
   const [showPermissionModal, setShowPermissionModal] = useState(false);
 
-  // Get categories from API
-  const { data: categories, isLoading: isCategoriesLoading } =
-    useCategoriesApi();
+  // Get categories from local data
+  const { categories, isLoading: isCategoriesLoading } = useCategories();
 
   // Use refs to prevent unnecessary re-renders
   const lastRefreshTime = useRef<number>(0);
@@ -177,8 +172,8 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
   // Using the same categories data from unified hook
   const categoriesData = categories;
   const categoriesLoading = isCategoriesLoading;
-  const categoriesError = null; // Will be handled by the unified hook
-  const refetchCategories = () => {}; // Will be handled by the unified hook
+  const categoriesError = null; // No error for local data
+  const refetchCategories = () => {}; // No refetch needed for local data
 
   // Determine which data to use
   const restaurantData =
@@ -193,11 +188,14 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
 
   // Memoized categories data
   const categoriesForDisplay = useMemo(() => {
-    if (categoriesData && categoriesData.length > 0) {
-      return mapApiCategoriesToUI(categoriesData);
-    }
-    // Fallback to static categories if API fails
-    return getMainCategories();
+    return categoriesData.map(category => ({
+      id: category.value,
+      value: category.value,
+      label: category.label,
+      emoji: category.emoji,
+      color: category.color,
+      image: images.onboarding1, // Default image
+    }));
   }, [categoriesData]);
 
   // Simplified refresh handler
@@ -279,11 +277,13 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
   );
 
   const renderCategoryItem = useCallback(
-    ({ item }: { item: { value: string; label: string } }) => (
+    ({ item }: { item: { id: string; value: string; label: string; emoji: string; color: string; image: any } }) => (
       <CategoryItem
         key={item.value}
-        image={images.onboarding1} // Use default image for now
+        image={item.image}
         title={item.label}
+        emoji={item.emoji}
+        color={item.color}
       />
     ),
     [],

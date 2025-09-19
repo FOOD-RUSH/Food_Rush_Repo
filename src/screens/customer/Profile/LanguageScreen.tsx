@@ -1,11 +1,12 @@
 import React, { useCallback } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, ScrollView, TouchableOpacity } from 'react-native';
 import CommonView from '@/src/components/common/CommonView';
 import { RadioButton, useTheme } from 'react-native-paper';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import { useLanguage } from '@/src/contexts/LanguageContext';
 import { useTranslation } from 'react-i18next';
 import { SupportedLanguage } from '@/src/locales/i18n';
+import { Typography, Heading4, LabelLarge } from '@/src/components/common/Typography';
 
 const LanguageScreen = ({
   navigation,
@@ -35,13 +36,15 @@ const LanguageScreen = ({
             className="flex-row items-center justify-between py-4 px-4"
           >
             <View className="flex-row items-center">
-              <Text className="text-2xl mr-3">{language.flag}</Text>
-              <Text
-                className="text-[18px] font-semibold"
-                style={{ color: colors.onSurface }}
+              <Typography variant="h4" style={{ marginRight: 12 }}>
+                {language.flag}
+              </Typography>
+              <LabelLarge 
+                color={colors.onSurface}
+                weight="semibold"
               >
                 {language.name}
-              </Text>
+              </LabelLarge>
             </View>
             <RadioButton
               value={code}

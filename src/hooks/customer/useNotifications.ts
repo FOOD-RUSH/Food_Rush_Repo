@@ -1,6 +1,6 @@
 import { useEffect, useCallback } from 'react';
 import { useNotificationStore } from '@/src/stores/customerStores/notificationStore';
-import { useAuthStore } from '@/src/stores/shared/AuthStore';
+import { useAuthStore } from '@/src/stores/AuthStore';
 
 /**
  * Custom hook for managing notifications

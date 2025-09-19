@@ -7,19 +7,19 @@ import { MaterialIcons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import { useTranslation } from 'react-i18next';
 import RestaurantReviewScreen from '../screens/customer/RestaurantReviewScreen';
+import { Typography, Heading6 } from '../components/common/Typography';
 
 // Stores
 import {
   useAppStore,
   useHasHydrated,
   useOnboardingComplete,
-  useAppUserType,
-} from '../stores/customerStores/AppStore';
+  useSelectedUserType,
+} from '../stores/AppStore';
 import {
   useIsAuthenticated,
   useUserType,
-  useAuthLoading,
-} from '../stores/customerStores/AuthStore';
+} from '../stores/AuthStore';
 import { useCartStore } from '../stores/customerStores/cartStore';
 
 // Navigation
@@ -60,7 +60,7 @@ import ConfirmOrder from '../screens/restaurant/orders/ConfirmOrder';
 import RejectOrder from '../screens/restaurant/orders/RejectOrder';
 import { AddFoodScreen } from '../screens/restaurant/menu/AddFoodScreen';
 import { EditFoodScreen } from '../screens/restaurant/menu/EditFoodScreen';
-import FoodCategoriesScreen from '../screens/restaurant/menu/FoodCategoriesScreen';
+
 import BestSellers from '../screens/restaurant/analytics/BestSellers';
 import TimeHeatmap from '../screens/restaurant/analytics/TimeHeatmap';
 import ProfileScreen from '../screens/restaurant/profile/ProfileScreen';
@@ -84,6 +84,7 @@ import { OnboardingSlides } from '@/src/utils/onboardingData';
 import { useAppTheme, useAppNavigationTheme } from '../config/theme';
 import OrderHistoryScreen from '../screens/restaurant/orders/OrderHistoryScreen';
 import ProfileDetailsScreen from '../screens/customer/Profile/ProfileDetailsScreen';
+import { State } from 'react-native-gesture-handler';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -100,6 +101,12 @@ const createScreenOptions = (colors: any, t: any) => ({
       shadowOpacity: 0,
     },
     headerTintColor: colors.text,
+    headerTitleStyle: {
+      fontFamily: 'Urbanist-SemiBold',
+      fontSize: 18,
+      fontWeight: '600',
+      color: colors.text,
+    },
   },
   modal: {
     presentation: 'modal' as const,
@@ -113,6 +120,12 @@ const createScreenOptions = (colors: any, t: any) => ({
       shadowOpacity: 0,
     },
     headerTintColor: colors.text,
+    headerTitleStyle: {
+      fontFamily: 'Urbanist-SemiBold',
+      fontSize: 18,
+      fontWeight: '600',
+      color: colors.text,
+    },
   },
   card: {
     presentation: 'card' as const,
@@ -122,6 +135,12 @@ const createScreenOptions = (colors: any, t: any) => ({
     animation: 'slide_from_right' as const,
     contentStyle: { backgroundColor: colors.background },
     headerTintColor: colors.text,
+    headerTitleStyle: {
+      fontFamily: 'Urbanist-SemiBold',
+      fontSize: 18,
+      fontWeight: '600',
+      color: colors.text,
+    },
   },
   profileCard: {
     presentation: 'card' as const,
@@ -136,6 +155,12 @@ const createScreenOptions = (colors: any, t: any) => ({
       shadowOpacity: 0,
     },
     headerTintColor: colors.text,
+    headerTitleStyle: {
+      fontFamily: 'Urbanist-SemiBold',
+      fontSize: 18,
+      fontWeight: '600',
+      color: colors.text,
+    },
   },
   checkout: {
     headerShown: true,
@@ -148,6 +173,12 @@ const createScreenOptions = (colors: any, t: any) => ({
       shadowOpacity: 0,
     },
     headerTintColor: colors.text,
+    headerTitleStyle: {
+      fontFamily: 'Urbanist-SemiBold',
+      fontSize: 18,
+      fontWeight: '600',
+      color: colors.text,
+    },
   },
   fullScreen: {
     presentation: 'fullScreenModal' as const,
@@ -163,8 +194,7 @@ const RootNavigator: React.FC = () => {
   const hasHydrated = useHasHydrated();
   const isOnboardingComplete = useOnboardingComplete();
   const authUserType = useUserType(); // Primary source from AuthStore
-  const appUserType = useAppUserType(); // Secondary source from AppStore
-  const isAuthLoading = useAuthLoading();
+  const appUserType = useSelectedUserType(); // Secondary source from AppStore
   const themeMode = useAppStore((state) => state.theme);
   const { t } = useTranslation('translation');
 
@@ -172,14 +202,14 @@ const RootNavigator: React.FC = () => {
   const userType = authUserType || appUserType;
 
   // App store actions
-  const { completeOnboarding, setUserType } = useAppStore();
+  const { completeOnboarding, setSelectedUserType } = useAppStore();
 
   // Synchronize user type between stores
   React.useEffect(() => {
     if (authUserType && authUserType !== appUserType) {
-      setUserType(authUserType);
+      setSelectedUserType(authUserType);
     }
-  }, [authUserType, appUserType, setUserType]);
+  }, [authUserType, appUserType, setSelectedUserType]);
 
   // Cart store selectors
   const clearCart = useCartStore((state) => state.clearCart);
@@ -222,10 +252,10 @@ const RootNavigator: React.FC = () => {
 
   const handleLogin = useCallback(
     (selectedUserType: 'customer' | 'restaurant') => {
-      setUserType(selectedUserType);
+      setSelectedUserType(selectedUserType);
       completeOnboarding();
     },
-    [completeOnboarding, setUserType],
+    [completeOnboarding, setSelectedUserType],
   );
 
   // Navigation ready handler
@@ -235,7 +265,7 @@ const RootNavigator: React.FC = () => {
     });
 
     return () => subscription?.remove();
-  }, []);
+  }, [handleDeepLink]);
 
   // Memoized screen options
   const screenOptions = useMemo(() => {
@@ -262,11 +292,6 @@ const RootNavigator: React.FC = () => {
 
   // Determine initial route name based on app state
   const getInitialRouteName = useCallback((): keyof RootStackParamList => {
-    // If auth is loading, we'll handle this in the render logic
-    if (isAuthLoading) {
-      return 'Auth'; // Temporary, will show loading screen
-    }
-
     // If onboarding is not complete, show onboarding
     if (!isOnboardingComplete) {
       console.log('Onboarding not complete, showing onboarding');
@@ -274,7 +299,7 @@ const RootNavigator: React.FC = () => {
     }
 
     // If onboarding is complete but no user type selected, show user type selection
-    if (!userType) {
+    if (!userType && !appUserType) {
       console.log('No user type selected, showing user type selection');
       return 'UserTypeSelection';
     }
@@ -294,13 +319,13 @@ const RootNavigator: React.FC = () => {
         console.log('Navigating to RestaurantApp');
         return 'RestaurantApp';
       default:
-        console.log('Unknown user type, navigating to Auth');
-        return 'Auth';
+        console.log('Unknown user type, navigating to UserTypeSelection');
+        return 'UserTypeSelection';
     }
-  }, [isAuthenticated, userType, isAuthLoading, isOnboardingComplete]);
+  }, [isAuthenticated, userType, appUserType, isOnboardingComplete]);
 
-  // Render loading screen while hydrating or auth is loading
-  if (!hasHydrated || isAuthLoading) {
+  // Render loading screen while hydrating
+  if (!hasHydrated) {
     return <LoadingScreen />;
   }
 
@@ -395,7 +420,7 @@ const RootNavigator: React.FC = () => {
             <Stack.Screen
               name="RestaurantOrderHistory"
               component={OrderHistoryScreen}
-              options={{ headerTitle: 'Order History' }}
+              options={{ headerTitle: t('order_history') }}
             />
             <Stack.Screen
               name="FoodDetails"
@@ -434,11 +459,7 @@ const RootNavigator: React.FC = () => {
               component={TimeHeatmap}
               options={{ headerTitle: t('time_heatmap') }}
             />
-            <Stack.Screen
-              name="RestaurantCategoriesManager"
-              component={FoodCategoriesScreen}
-              options={{ headerTitle: t('categories') }}
-            />
+
 
             <Stack.Screen
               name="RestaurantReview"
@@ -589,7 +610,7 @@ const RootNavigator: React.FC = () => {
               name="OrderTracking"
               component={OrderTrackingScreen}
               options={{
-                headerTitle: 'Track Order',
+                headerTitle: t('track_order'),
                 gestureEnabled: false, // Prevent swipe back during tracking
               }}
             />

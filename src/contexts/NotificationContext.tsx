@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, ReactNode } from 'react';
 import { useNotificationStore } from '@/src/stores/customerStores/notificationStore';
-import { useAuthStore } from '@/src/stores/customerStores/AuthStore';
+import { useAuthStore } from '@/src/stores/AuthStore';
 import type { Notification } from '@/src/types';
 
 interface NotificationContextType {

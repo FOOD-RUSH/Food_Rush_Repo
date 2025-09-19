@@ -6,7 +6,7 @@ import React, {
   useRef,
 } from 'react';
 import { AppState, AppStateStatus } from 'react-native';
-import { useAppStore } from '@/src/stores/customerStores/AppStore';
+import { useAppStore } from '@/src/stores/AppStore';
 
 interface AppStateContextType {
   appState: AppStateStatus;

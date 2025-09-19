@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Alert, Image, Dimensions } from 'react-native';
+import { View, FlatList, TouchableOpacity, Alert, Image, Dimensions } from 'react-native';
 import { useTheme, Card, FAB, Switch, Chip, Searchbar } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -7,10 +7,12 @@ import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
 
 import CommonView from '@/src/components/common/CommonView';
+import { Typography, Heading1, Heading2, Heading4, Body, BodySmall, Label, LabelLarge, Caption } from '@/src/components/common/Typography';
 import { RestaurantMenuStackScreenProps } from '@/src/navigation/types';
-import { useCategoriesApi } from '@/src/hooks/shared/useCategoriesApi';
-import { useGetMenuItems, useDeleteMenuItem, useToggleMenuItemAvailability } from '@/src/hooks/restaurant/useMenuApi';
-import { useUser } from '@/src/stores/customerStores/AuthStore';
+import { useCategories } from '@/src/hooks/useCategories';
+import { getCategoryEmoji, getCategoryColor, getCategoryLabel } from '@/src/data/categories';
+import { useMenuItems, useDeleteMenuItem, useToggleMenuItemAvailability } from '@/src/hooks/restaurant/useMenuApi';
+import { useCurrentRestaurant } from '@/src/stores/AuthStore';
 
 const { width: screenWidth } = Dimensions.get('window');
 const isSmallScreen = screenWidth < 375;
@@ -36,10 +38,10 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
   const { colors } = useTheme();
   const { t } = useTranslation();
   const navigation = useNavigation();
-  const user = useUser();
-  const restaurantId = user?.restaurantId;
+  const currentRestaurant = useCurrentRestaurant();
+  const restaurantId = currentRestaurant?.id;
   
-  const { data: apiCategories, isLoading: isCategoriesLoading } = useCategoriesApi();
+  const { categories: apiCategories = [] } = useCategories();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -51,7 +53,7 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
     isLoading, 
     refetch,
     error: apiError 
-  } = useGetMenuItems(
+  } = useMenuItems(
     restaurantId || '', 
     selectedCategory === 'all' ? undefined : selectedCategory
   );
@@ -70,7 +72,7 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
 
   // Combine API categories with 'all' option and existing menu item categories
   const menuCategories = Array.from(new Set(menuItems.map(item => item.category)));
-  const allCategories = apiCategories ? apiCategories.map(cat => cat.label) : [];
+  const allCategories = apiCategories ? apiCategories.map(cat => cat.value) : [];
   const categories = ['all', ...new Set([...allCategories, ...menuCategories])];
 
   const filteredItems = menuItems.filter(item => {
@@ -144,14 +146,7 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
     );
   };
 
-  const handleManageCategories = () => {
-    try {
-      Haptics.selectionAsync();
-      navigation.navigate('RestaurantCategoriesManager');
-    } catch (error) {
-      setError({ hasError: true, message: 'Failed to navigate to categories screen' });
-    }
-  };
+
 
   const onRefresh = async () => {
     try {
@@ -224,16 +219,13 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
                 alignItems: 'center',
               }}
             >
-              <Text 
-                style={{ 
-                  color: 'white', 
-                  fontSize: isSmallScreen ? 11 : 12, 
-                  fontWeight: 'bold',
-                  textAlign: 'center',
-                }}
+              <Caption 
+                color="white" 
+                weight="bold"
+                align="center"
               >
                 {t('sold_out')}
-              </Text>
+              </Caption>
             </View>
           )}
         </View>
@@ -242,19 +234,17 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
         <View className="flex-1 justify-between">
           {/* Top Section: Name and Switch */}
           <View className="flex-row justify-between items-start mb-3">
-            <Text 
-              style={{ 
-                fontSize: isSmallScreen ? 17 : isMediumScreen ? 18 : 19, 
-                fontWeight: '700', 
-                color: colors.onSurface,
+            <LabelLarge 
+              color={colors.onSurface}
+              weight="bold"
+              numberOfLines={2}
+              style={{
                 flex: 1,
                 marginRight: 12,
-                lineHeight: isSmallScreen ? 20 : 22,
-              }} 
-              numberOfLines={2}
+              }}
             >
               {item.name}
-            </Text>
+            </LabelLarge>
             <Switch
               value={item.isAvailable}
               onValueChange={() => handleToggleAvailability(item.id)}
@@ -269,31 +259,22 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
           
           {/* Middle Section: Description only (removed category chip) */}
           <View className="mb-4">
-            <Text 
-              style={{ 
-                fontSize: isSmallScreen ? 14 : 15, 
-                color: colors.onSurfaceVariant, 
-                lineHeight: isSmallScreen ? 18 : 20,
-                fontWeight: '400',
-              }} 
+            <Body 
+              color={colors.onSurfaceVariant}
               numberOfLines={3}
             >
               {item.description}
-            </Text>
+            </Body>
           </View>
           
           {/* Bottom Section: Price and Actions */}
           <View className="flex-row justify-between items-center">
-            <Text 
-              style={{ 
-                fontSize: isSmallScreen ? 18 : isMediumScreen ? 19 : 20, 
-                fontWeight: '800', 
-                color: '#007aff',
-                letterSpacing: 0.5,
-              }}
+            <LabelLarge 
+              color="#007aff"
+              weight="extraBold"
             >
               {item.price.toLocaleString()} XAF
-            </Text>
+            </LabelLarge>
             
             <View className="flex-row">
               <TouchableOpacity
@@ -340,12 +321,12 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
       <CommonView>
         <View className="flex-1 justify-center items-center p-6">
           <MaterialCommunityIcons name="alert-circle" size={56} color="#FF4444" />
-          <Text className="text-xl font-bold text-center mt-4" style={{ color: colors.onSurface }}>
+          <Heading4 color={colors.onSurface} align="center" style={{ marginTop: 16 }}>
             {t('something_went_wrong')}
-          </Text>
-          <Text className="text-base text-center mt-2" style={{ color: colors.onSurfaceVariant }}>
+          </Heading4>
+          <Body color={colors.onSurfaceVariant} align="center" style={{ marginTop: 8 }}>
             {error.message}
-          </Text>
+          </Body>
           <TouchableOpacity
             onPress={() => {
               setError({ hasError: false, message: '' });
@@ -353,7 +334,7 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
             }}
             className="bg-blue-500 px-8 py-4 rounded-xl mt-6"
           >
-            <Text className="text-white font-bold text-base">{t('try_again')}</Text>
+            <Label color="white" weight="bold">{t('try_again')}</Label>
           </TouchableOpacity>
         </View>
       </CommonView>
@@ -364,33 +345,23 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
     <CommonView>
       <View className="flex-1">
         {/* Header - Enhanced typography and spacing */}
-        <View className="pb-2">
+        <View className="pb-2" style={{ paddingTop: 20 }}>
           <View className="flex-row justify-between items-center">
             <View className="flex-1">
-              <Text 
-                className={`${isSmallScreen ? 'text-2xl' : isMediumScreen ? 'text-3xl' : 'text-4xl'} font-bold`}
-                style={{ color: colors.onBackground, letterSpacing: -0.5 }}
+              <Heading1 
+                color={colors.onBackground} 
+                weight="bold"
               >
                 {t('menu_items')}
-              </Text>
-              <Text 
-                className={`${isSmallScreen ? 'text-sm' : 'text-base'} mt-2 font-medium`}
-                style={{ color: colors.onSurfaceVariant }}
+              </Heading1>
+              <Body 
+                color={colors.onSurfaceVariant} 
+                weight="medium"
+                style={{ marginTop: 8 }}
               >
                 {filteredItems.length} {t('items')} • {filteredItems.filter(item => item.isAvailable).length} {t('available')}
-              </Text>
+              </Body>
             </View>
-            <TouchableOpacity
-              onPress={handleManageCategories}
-              className={`${isSmallScreen ? 'p-3' : 'p-4'} rounded-xl`}
-              style={{ backgroundColor: '#007aff15' }}
-            >
-              <MaterialCommunityIcons 
-                name="tag-multiple" 
-                size={isSmallScreen ? 20 : 22} 
-                color="#007aff" 
-              />
-            </TouchableOpacity>
           </View>
         </View>
 
@@ -436,29 +407,39 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
             horizontal
             showsHorizontalScrollIndicator={false}
             data={categories}
-            keyExtractor={item => item}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                onPress={() => {
-                  Haptics.selectionAsync();
-                  setSelectedCategory(item);
-                }}
-                className={`${isSmallScreen ? 'px-4 py-3' : 'px-5 py-3'} rounded-full mr-3`}
-                style={{
-                  backgroundColor: selectedCategory === item ? '#007aff' : colors.surfaceVariant,
-                  elevation: selectedCategory === item ? 2 : 0,
-                }}
-              >
-                <Text
-                  className={`${isSmallScreen ? 'text-sm' : 'text-base'} font-semibold`}
+            keyExtractor={item => item.toString()}
+            renderItem={({ item }) => {
+              const emoji = item === 'all' ? '🍽️' : getCategoryEmoji(item);
+              const label = item === 'all' ? t('all') : getCategoryLabel(item);
+              const categoryColor = item === 'all' ? '#007aff' : getCategoryColor(item);
+              
+              return (
+                <TouchableOpacity
+                  onPress={() => {
+                    Haptics.selectionAsync();
+                    setSelectedCategory(item);
+                  }}
+                  className={`${isSmallScreen ? 'px-4 py-3' : 'px-5 py-3'} rounded-full mr-3 flex-row items-center`}
                   style={{
-                    color: selectedCategory === item ? 'white' : colors.onSurfaceVariant,
+                    backgroundColor: selectedCategory === item ? categoryColor : colors.surfaceVariant,
+                    elevation: selectedCategory === item ? 2 : 0,
                   }}
                 >
-                  {item === 'all' ? t('all') : item}
-                </Text>
-              </TouchableOpacity>
-            )}
+                  <Typography 
+                    variant="body" 
+                    style={{ marginRight: 8 }}
+                  >
+                    {emoji}
+                  </Typography>
+                  <Label
+                    color={selectedCategory === item ? 'white' : colors.onSurfaceVariant}
+                    weight="semibold"
+                  >
+                    {label}
+                  </Label>
+                </TouchableOpacity>
+              );
+            }}
           />
         </View>
 
@@ -481,19 +462,22 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
                 size={64}
                 color={colors.onSurfaceVariant}
               />
-              <Text 
-                className={`${isSmallScreen ? 'text-lg' : 'text-xl'} font-bold text-center mt-4`}
-                style={{ color: colors.onSurfaceVariant }}
+              <Heading4 
+                color={colors.onSurfaceVariant}
+                weight="bold"
+                align="center"
+                style={{ marginTop: 16 }}
               >
                 {searchQuery ? t('no_items_match') : t('no_menu_items_yet')}
-              </Text>
+              </Heading4>
               {!searchQuery && (
-                <Text 
-                  className={`${isSmallScreen ? 'text-sm' : 'text-base'} text-center mt-2 px-8`}
-                  style={{ color: colors.onSurfaceVariant }}
+                <Body 
+                  color={colors.onSurfaceVariant}
+                  align="center"
+                  style={{ marginTop: 8, paddingHorizontal: 32 }}
                 >
                   {t('start_building_menu')}
-                </Text>
+                </Body>
               )}
             </View>
           }

@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, Switch } from 'react-native';
+import { View, ScrollView, Switch } from 'react-native';
 import { useTheme, Card, Divider } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
 
 import CommonView from '@/src/components/common/CommonView';
+import { Typography, Heading5, Body, Label, Caption } from '@/src/components/common/Typography';
 
 interface NotificationSettingProps {
   icon: string;
@@ -46,12 +47,12 @@ const NotificationSetting: React.FC<NotificationSettingProps> = ({
         </View>
         
         <View className="flex-1">
-          <Text className="text-base font-semibold mb-1" style={{ color: colors.onSurface }}>
+          <Label color={colors.onSurface} weight="semibold" style={{ marginBottom: 4 }}>
             {title}
-          </Text>
-          <Text className="text-sm" style={{ color: colors.onSurfaceVariant }}>
+          </Label>
+          <Caption color={colors.onSurfaceVariant}>
             {subtitle}
-          </Text>
+          </Caption>
         </View>
         
         <Switch
@@ -98,9 +99,9 @@ const NotificationsScreen = () => {
           {/* Order Notifications */}
           <Card className="mb-4" style={{ backgroundColor: colors.surface }}>
             <View className="p-4">
-              <Text className="text-lg font-bold mb-4" style={{ color: colors.onSurface }}>
+              <Heading5 color={colors.onSurface} weight="bold" style={{ marginBottom: 16 }}>
                 {t('order_notifications')}
-              </Text>
+              </Heading5>
               
               <NotificationSetting
                 icon="bell-ring"
@@ -133,9 +134,9 @@ const NotificationsScreen = () => {
           {/* Marketing Notifications */}
           <Card className="mb-4" style={{ backgroundColor: colors.surface }}>
             <View className="p-4">
-              <Text className="text-lg font-bold mb-4" style={{ color: colors.onSurface }}>
+              <Heading5 color={colors.onSurface} weight="bold" style={{ marginBottom: 16 }}>
                 {t('marketing_notifications')}
-              </Text>
+              </Heading5>
               
               <NotificationSetting
                 icon="tag"
@@ -159,9 +160,9 @@ const NotificationsScreen = () => {
           {/* Delivery Methods */}
           <Card style={{ backgroundColor: colors.surface }}>
             <View className="p-4">
-              <Text className="text-lg font-bold mb-4" style={{ color: colors.onSurface }}>
+              <Heading5 color={colors.onSurface} weight="bold" style={{ marginBottom: 16 }}>
                 {t('delivery_methods')}
-              </Text>
+              </Heading5>
               
               <NotificationSetting
                 icon="email"

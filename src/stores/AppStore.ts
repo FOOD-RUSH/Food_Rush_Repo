@@ -14,9 +14,11 @@ interface AppState {
   // Onboarding
   isOnboardingComplete: boolean;
 
+  // User type selection
+  selectedUserType: UserType;
+
   // User preferences
   theme: Theme;
-  userType: UserType;
 
   // App state
   isFirstLaunch: boolean;
@@ -30,8 +32,11 @@ interface AppActions {
   // Onboarding
   completeOnboarding: () => void;
 
+  // User type selection
+  setSelectedUserType: (userType: UserType) => void;
+  clearSelectedUserType: () => void;
+
   // User preferences
-  setUserType: (type: Exclude<UserType, null>) => void;
   setTheme: (theme: Theme) => void;
 
   // App lifecycle
@@ -47,8 +52,8 @@ interface AppActions {
 
 const initialState: Omit<AppState, '_hasHydrated'> = {
   isOnboardingComplete: false,
+  selectedUserType: null,
   theme: 'light',
-  userType: null,
   isFirstLaunch: true,
   lastActiveTimestamp: Date.now(),
 };
@@ -69,14 +74,16 @@ export const useAppStore = create<AppState & AppActions>()(
             });
           },
 
-          // User preference actions
-          setUserType: (userType) => {
-            const currentUserType = get().userType;
-            if (currentUserType !== userType) {
-              set({ userType });
-            }
+          // User type selection
+          setSelectedUserType: (selectedUserType) => {
+            set({ selectedUserType });
           },
 
+          clearSelectedUserType: () => {
+            set({ selectedUserType: null });
+          },
+
+          // Theme actions
           setTheme: (theme) => {
             const currentTheme = get().theme;
             if (currentTheme !== theme) {
@@ -111,12 +118,23 @@ export const useAppStore = create<AppState & AppActions>()(
           storage: createJSONStorage(() => AsyncStorage),
           partialize: (state) => ({
             isOnboardingComplete: state.isOnboardingComplete,
+            selectedUserType: state.selectedUserType,
             theme: state.theme,
-            userType: state.userType,
             isFirstLaunch: state.isFirstLaunch,
             lastActiveTimestamp: state.lastActiveTimestamp,
           }),
-          version: 2,
+          version: 3,
+          migrate: (persistedState: any, version: number) => {
+            // Handle migration from older versions
+            if (version < 3) {
+              return {
+                ...persistedState,
+                selectedUserType: persistedState.selectedUserType || null,
+                _hasHydrated: false,
+              };
+            }
+            return persistedState;
+          },
           onRehydrateStorage: () => (state) => {
             state?.setHydrated(true);
           },
@@ -129,7 +147,7 @@ export const useAppStore = create<AppState & AppActions>()(
 
 // Performance-optimized selector hooks
 export const useTheme = () => useAppStore((state) => state.theme);
-export const useAppUserType = () => useAppStore((state) => state.userType);
+export const useSelectedUserType = () => useAppStore((state) => state.selectedUserType);
 export const useOnboardingComplete = () =>
   useAppStore((state) => state.isOnboardingComplete);
 export const useIsFirstLaunch = () =>
@@ -140,7 +158,21 @@ export const useHasHydrated = () => useAppStore((state) => state._hasHydrated);
 export const useIsAppReady = () =>
   useAppStore((state) => state._hasHydrated && state.isOnboardingComplete);
 
+export const useNeedsOnboarding = () =>
+  useAppStore((state) => state._hasHydrated && !state.isOnboardingComplete);
+
+export const useCanProceedToAuth = () =>
+  useAppStore((state) =>
+    state._hasHydrated &&
+    state.isOnboardingComplete &&
+    state.selectedUserType !== null
+  );
+
 // Subscribe to theme changes for system integration
 export const subscribeToThemeChanges = (callback: (theme: Theme) => void) => {
   return useAppStore.subscribe((state) => state.theme, callback);
 };
+
+// Backward compatibility exports
+export const useApp = () => useAppStore();
+export const useIsHydrated = () => useAppStore((state) => state._hasHydrated);

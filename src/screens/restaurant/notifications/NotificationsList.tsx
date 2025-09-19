@@ -1,92 +1,58 @@
-import React, { useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
-import { useTheme, Card, Badge, Chip } from 'react-native-paper';
+import React, { useState, useEffect } from 'react';
+import { View, FlatList, TouchableOpacity, RefreshControl, Alert } from 'react-native';
+import { useTheme, Card, Badge, Chip, FAB } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
+import Toast from 'react-native-toast-message';
 
 import CommonView from '@/src/components/common/CommonView';
 import { RootStackScreenProps } from '@/src/navigation/types';
+import { Typography, Heading5, Body, Label, Caption, Overline } from '@/src/components/common/Typography';
+import { useRestaurantNotifications } from '@/src/hooks/restaurant/useNotifications';
+import type { Notification } from '@/src/types';
 
-interface Notification {
-  id: string;
-  type: 'order' | 'system' | 'promotion' | 'alert';
-  title: string;
-  message: string;
-  timestamp: string;
-  isRead: boolean;
-  orderId?: string;
-  priority: 'low' | 'medium' | 'high';
-}
+// Notification interface is now imported from types
 
 const NotificationsList: React.FC<RootStackScreenProps<'RestaurantNotifications'>> = () => {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const navigation = useNavigation();
   
-  const [selectedFilter, setSelectedFilter] = useState<'all' | 'order' | 'system' | 'unread'>('all');
+  // Use the restaurant notifications hook
+  const {
+    notifications,
+    unreadCount,
+    isLoading,
+    isLoadingMore,
+    error,
+    hasNextPage,
+    selectedFilter,
+    refresh,
+    loadMore,
+    markAsRead,
+    markAllAsRead,
+    deleteNotification,
+    setFilter,
+    clearError,
+    notificationCounts,
+  } = useRestaurantNotifications();
+  
   const [refreshing, setRefreshing] = useState(false);
 
-  // Mock data - replace with actual API call
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: '1',
-      type: 'order',
-      title: t('new_order_received'),
-      message: 'Order #12345 from John Doe - 2x Jollof Rice, 1x Grilled Chicken',
-      timestamp: '2 minutes ago',
-      isRead: false,
-      orderId: '12345',
-      priority: 'high',
-    },
-    {
-      id: '2',
-      type: 'order',
-      title: t('order_cancelled'),
-      message: 'Order #12344 has been cancelled by the customer',
-      timestamp: '15 minutes ago',
-      isRead: false,
-      orderId: '12344',
-      priority: 'medium',
-    },
-    {
-      id: '3',
-      type: 'system',
-      title: t('menu_item_low_stock'),
-      message: 'Grilled Chicken is running low. Only 3 portions left.',
-      timestamp: '1 hour ago',
-      isRead: true,
-      priority: 'medium',
-    },
-    {
-      id: '4',
-      type: 'promotion',
-      title: t('weekend_promotion'),
-      message: 'Weekend special: 20% off on all main courses. Promote to your customers!',
-      timestamp: '3 hours ago',
-      isRead: true,
-      priority: 'low',
-    },
-    {
-      id: '5',
-      type: 'alert',
-      title: t('payment_received'),
-      message: 'Payment of 25,000 XAF received for Order #12340',
-      timestamp: '5 hours ago',
-      isRead: true,
-      priority: 'low',
-    },
-    {
-      id: '6',
-      type: 'system',
-      title: t('app_update_available'),
-      message: 'New app version available with improved order management features',
-      timestamp: '1 day ago',
-      isRead: true,
-      priority: 'low',
-    },
-  ]);
+  // Handle errors
+  useEffect(() => {
+    if (error) {
+      Toast.show({
+        type: 'error',
+        text1: t('error'),
+        text2: error,
+        position: 'top',
+      });
+      clearError();
+    }
+  }, [error, clearError, t]);
 
   const getNotificationIcon = (type: string, priority: string) => {
     const iconMap = {
@@ -98,9 +64,9 @@ const NotificationsList: React.FC<RootStackScreenProps<'RestaurantNotifications'
     return iconMap[type as keyof typeof iconMap] || 'bell';
   };
 
-  const getNotificationColor = (type: string, priority: string) => {
-    if (priority === 'high') return '#FF4444';
-    if (priority === 'medium') return '#FF8800';
+  const getNotificationColor = (notification: Notification) => {
+    if (notification.priority === 'high') return '#FF4444';
+    if (notification.priority === 'medium') return '#FF8800';
     
     const colorMap = {
       order: '#007aff',
@@ -108,93 +74,131 @@ const NotificationsList: React.FC<RootStackScreenProps<'RestaurantNotifications'
       promotion: '#00C851',
       alert: '#FF8800',
     };
-    return colorMap[type as keyof typeof colorMap] || '#6B7280';
+    return colorMap[notification.type as keyof typeof colorMap] || '#6B7280';
   };
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high': return '#FF4444';
-      case 'medium': return '#FF8800';
-      default: return '#6B7280';
+  const formatTimestamp = (timestamp: string) => {
+    try {
+      const date = new Date(timestamp);
+      const now = new Date();
+      const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
+      
+      if (diffInMinutes < 1) return t('just_now');
+      if (diffInMinutes < 60) return `${diffInMinutes} ${t('minutes_ago')}`;
+      if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} ${t('hours_ago')}`;
+      return `${Math.floor(diffInMinutes / 1440)} ${t('days_ago')}`;
+    } catch {
+      return timestamp;
     }
   };
 
-  const filteredNotifications = notifications.filter(notification => {
-    if (selectedFilter === 'all') return true;
-    if (selectedFilter === 'unread') return !notification.isRead;
-    return notification.type === selectedFilter;
-  });
+  // Notifications are already filtered by the hook
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
-
-  const handleNotificationPress = (notification: Notification) => {
+  const handleNotificationPress = async (notification: Notification) => {
     Haptics.selectionAsync();
     
-    // Mark as read
-    setNotifications(prev => 
-      prev.map(n => n.id === notification.id ? { ...n, isRead: true } : n)
-    );
+    // Mark as read if not already read
+    if (!notification.readAt) {
+      await markAsRead(notification.id);
+    }
 
     // Navigate based on notification type
-    if (notification.type === 'order' && notification.orderId) {
+    if (notification.type === 'order' && notification.data?.orderId) {
       // Navigate to order details
-        navigation.navigate('RestaurantOrderDetails', { orderId: notification.orderId! });
+      navigation.navigate('RestaurantOrderDetails', { orderId: notification.data.orderId });
     } else {
-      // Navigate to notification details
-        navigation.navigate('RestaurantNotificationDetails', {
-          notificationId: notification.id,
-        });
+      // Show notification details in alert for now
+      Alert.alert(
+        notification.title,
+        notification.body,
+        [{ text: t('ok'), style: 'default' }]
+      );
     }
   };
 
-  const markAllAsRead = () => {
+  const handleMarkAllAsRead = async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    const success = await markAllAsRead();
+    if (success) {
+      Toast.show({
+        type: 'success',
+        text1: t('success'),
+        text2: t('all_notifications_marked_read'),
+        position: 'top',
+      });
+    }
   };
 
-  const onRefresh = () => {
+  const onRefresh = async () => {
     setRefreshing(true);
-    // Simulate API call
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 1000);
+    await refresh();
+    setRefreshing(false);
+  };
+  
+  const handleLoadMore = () => {
+    if (hasNextPage && !isLoadingMore) {
+      loadMore();
+    }
+  };
+  
+  const handleDeleteNotification = (notification: Notification) => {
+    Alert.alert(
+      t('delete_notification'),
+      t('are_you_sure_delete_notification'),
+      [
+        { text: t('cancel'), style: 'cancel' },
+        {
+          text: t('delete'),
+          style: 'destructive',
+          onPress: async () => {
+            const success = await deleteNotification(notification.id);
+            if (success) {
+              Toast.show({
+                type: 'success',
+                text1: t('success'),
+                text2: t('notification_deleted'),
+                position: 'top',
+              });
+            }
+          },
+        },
+      ]
+    );
   };
 
   const renderNotificationItem = ({ item }: { item: Notification }) => (
     <Card
       style={{
         marginBottom: 8,
-        backgroundColor: item.isRead ? colors.surface : '#007aff10',
+        backgroundColor: item.readAt ? colors.surface : '#007aff10',
         borderLeftWidth: 4,
-        borderLeftColor: getNotificationColor(item.type, item.priority),
+        borderLeftColor: getNotificationColor(item),
       }}
     >
       <TouchableOpacity
         onPress={() => handleNotificationPress(item)}
+        onLongPress={() => handleDeleteNotification(item)}
         style={{ padding: 16 }}
       >
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <View style={{ flexDirection: 'row', flex: 1 }}>
             <MaterialCommunityIcons
-              name={getNotificationIcon(item.type, item.priority) as any}
+              name={getNotificationIcon(item.type, item.priority || 'low') as any}
               size={24}
-              color={getNotificationColor(item.type, item.priority)}
+              color={getNotificationColor(item)}
               style={{ marginRight: 12, marginTop: 2 }}
             />
             <View style={{ flex: 1 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                <Text
-                  style={{
-                    fontSize: 16,
-                    fontWeight: item.isRead ? '500' : 'bold',
-                    color: colors.onSurface,
-                    flex: 1,
-                  }}
+                <Label
+                  color={colors.onSurface}
+                  weight={item.readAt ? 'medium' : 'bold'}
                   numberOfLines={1}
+                  style={{ flex: 1 }}
                 >
                   {item.title}
-                </Text>
-                {!item.isRead && (
+                </Label>
+                {!item.readAt && (
                   <View
                     style={{
                       width: 8,
@@ -206,30 +210,29 @@ const NotificationsList: React.FC<RootStackScreenProps<'RestaurantNotifications'
                   />
                 )}
               </View>
-              <Text
+              <Body
+                color={colors.onSurfaceVariant}
+                numberOfLines={2}
                 style={{
-                  fontSize: 14,
-                  color: colors.onSurfaceVariant,
                   marginBottom: 8,
                   lineHeight: 20,
                 }}
-                numberOfLines={2}
               >
-                {item.message}
-              </Text>
+                {item.body}
+              </Body>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Text style={{ fontSize: 12, color: colors.onSurfaceVariant }}>
-                  {item.timestamp}
-                </Text>
+                <Caption color={colors.onSurfaceVariant}>
+                  {formatTimestamp(item.createdAt)}
+                </Caption>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Chip
                     style={{
-                      backgroundColor: getNotificationColor(item.type, item.priority) + '20',
+                      backgroundColor: getNotificationColor(item) + '20',
                       height: 24,
                     }}
                     textStyle={{
                       fontSize: 10,
-                      color: getNotificationColor(item.type, item.priority),
+                      color: getNotificationColor(item),
                     }}
                     compact
                   >
@@ -253,10 +256,12 @@ const NotificationsList: React.FC<RootStackScreenProps<'RestaurantNotifications'
   );
 
   const filters = [
-    { key: 'all', label: t('all'), count: notifications.length },
-    { key: 'unread', label: t('unread'), count: unreadCount },
-    { key: 'order', label: t('orders'), count: notifications.filter(n => n.type === 'order').length },
-    { key: 'system', label: t('system'), count: notifications.filter(n => n.type === 'system').length },
+    { key: 'all', label: t('all'), count: notificationCounts.all },
+    { key: 'unread', label: t('unread'), count: notificationCounts.unread },
+    { key: 'order', label: t('orders'), count: notificationCounts.order },
+    { key: 'system', label: t('system'), count: notificationCounts.system },
+    { key: 'promotion', label: t('promotions'), count: notificationCounts.promotion },
+    { key: 'alert', label: t('alerts'), count: notificationCounts.alert },
   ];
 
   return (
@@ -267,7 +272,7 @@ const NotificationsList: React.FC<RootStackScreenProps<'RestaurantNotifications'
         {unreadCount > 0 && (
           <View style={{ padding: 16, paddingBottom: 0 }}>
             <TouchableOpacity
-              onPress={markAllAsRead}
+              onPress={handleMarkAllAsRead}
               style={{
                 backgroundColor: '#007aff',
                 paddingHorizontal: 16,
@@ -276,9 +281,9 @@ const NotificationsList: React.FC<RootStackScreenProps<'RestaurantNotifications'
                 alignSelf: 'flex-end',
               }}
             >
-              <Text style={{ color: 'white', fontSize: 14, fontWeight: '600' }}>
+              <Body color="white" weight="semibold">
                 {t('mark_all_read')}
-              </Text>
+              </Body>
             </TouchableOpacity>
           </View>
         )}
@@ -294,7 +299,7 @@ const NotificationsList: React.FC<RootStackScreenProps<'RestaurantNotifications'
               <TouchableOpacity
                 onPress={() => {
                   Haptics.selectionAsync();
-                  setSelectedFilter(item.key as any);
+                  setFilter(item.key as any);
                 }}
                 style={{
                   paddingHorizontal: 16,
@@ -306,14 +311,12 @@ const NotificationsList: React.FC<RootStackScreenProps<'RestaurantNotifications'
                   alignItems: 'center',
                 }}
               >
-                <Text
-                  style={{
-                    fontWeight: '600',
-                    color: selectedFilter === item.key ? 'white' : colors.onSurfaceVariant,
-                  }}
+                <Label
+                  color={selectedFilter === item.key ? 'white' : colors.onSurfaceVariant}
+                  weight="semibold"
                 >
                   {item.label}
-                </Text>
+                </Label>
                 {item.count > 0 && (
                   <Badge
                     style={{
@@ -322,15 +325,12 @@ const NotificationsList: React.FC<RootStackScreenProps<'RestaurantNotifications'
                     }}
                     size={18}
                   >
-                    <Text
-                      style={{
-                        fontSize: 10,
-                        color: selectedFilter === item.key ? '#007aff' : 'white',
-                        fontWeight: 'bold',
-                      }}
+                    <Overline
+                      color={selectedFilter === item.key ? '#007aff' : 'white'}
+                      weight="bold"
                     >
                       {item.count}
-                    </Text>
+                    </Overline>
                   </Badge>
                 )}
               </TouchableOpacity>
@@ -340,17 +340,19 @@ const NotificationsList: React.FC<RootStackScreenProps<'RestaurantNotifications'
 
         {/* Notifications List */}
         <FlatList
-          data={filteredNotifications}
+          data={notifications}
           renderItem={renderNotificationItem}
           keyExtractor={item => item.id}
           contentContainerStyle={{ padding: 16, paddingTop: 0 }}
           refreshControl={
             <RefreshControl
-              refreshing={refreshing}
+              refreshing={refreshing || isLoading}
               onRefresh={onRefresh}
               colors={['#007aff']}
             />
           }
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.1}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 40 }}>
@@ -359,13 +361,42 @@ const NotificationsList: React.FC<RootStackScreenProps<'RestaurantNotifications'
                 size={48}
                 color={colors.onSurfaceVariant}
               />
-              <Text style={{ color: colors.onSurfaceVariant, marginTop: 8, fontSize: 16 }}>
-                {selectedFilter === 'unread' ? t('no_unread_notifications') : t('no_notifications')}
-              </Text>
+              <Label color={colors.onSurfaceVariant} style={{ marginTop: 8 }}>
+                {isLoading ? t('loading_notifications') : 
+                 selectedFilter === 'unread' ? t('no_unread_notifications') : t('no_notifications')}
+              </Label>
             </View>
+          }
+          ListFooterComponent={
+            isLoadingMore ? (
+              <View style={{ padding: 16, alignItems: 'center' }}>
+                <MaterialCommunityIcons
+                  name="loading"
+                  size={24}
+                  color={colors.primary}
+                />
+                <Caption color={colors.onSurfaceVariant} style={{ marginTop: 8 }}>
+                  {t('loading_more')}
+                </Caption>
+              </View>
+            ) : null
           }
         />
       </View>
+      
+      {/* Floating Action Button for refresh */}
+      <FAB
+        icon="refresh"
+        style={{
+          position: 'absolute',
+          margin: 16,
+          right: 0,
+          bottom: 0,
+          backgroundColor: colors.primary,
+        }}
+        onPress={onRefresh}
+        disabled={isLoading || refreshing}
+      />
     </CommonView>
   );
 };

@@ -12,9 +12,12 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from 'react-native-paper';
 import { RestaurantProfileStackScreenProps } from '../../../navigation/types';
 import { RESTAURANT_COLORS } from '@/src/config/restaurantTheme';
 import { useAppStore } from '@/src/stores/customerStores';
+import RowView from '@/src/components/common/RowView';
+import CommonView from '@/src/components/common/CommonView';
 
 // Type for props
 // This screen is registered as 'RestaurantSettings' in RestaurantProfileStackParamList
@@ -23,6 +26,7 @@ type Props = RestaurantProfileStackScreenProps<'RestaurantSettings'>;
 
 const RestaurantSettingsScreen = ({ navigation }: Props) => {
   const { t } = useTranslation();
+  const { colors } = useTheme();
   const themeMode = useAppStore((s) => s.theme);
   const isDarkMode = themeMode === 'dark';
   
@@ -53,8 +57,39 @@ const RestaurantSettingsScreen = ({ navigation }: Props) => {
 
   const styles = getStyles(isDarkMode);
 
+  // Navigation handlers
+  const navigateToRestaurantInfo = () => {
+    // Navigate to restaurant info edit screen
+    console.log('Navigate to restaurant info');
+  };
+
+  const navigateToBusinessHours = () => {
+    // Navigate to business hours screen
+    console.log('Navigate to business hours');
+  };
+
+  const navigateToDeliverySettings = () => {
+    // Navigate to delivery settings screen
+    console.log('Navigate to delivery settings');
+  };
+
+  const navigateToPaymentSettings = () => {
+    // Navigate to payment settings screen
+    console.log('Navigate to payment settings');
+  };
+
+  const navigateToNotificationSettings = () => {
+    // Navigate to notification settings screen
+    console.log('Navigate to notification settings');
+  };
+
+  const navigateToPrivacySettings = () => {
+    // Navigate to privacy settings screen
+    console.log('Navigate to privacy settings');
+  };
+
   return (
-    <View style={styles.container}>
+    <CommonView>
       {/* Animated Gradient Header */}
       <Animated.View
         style={{
@@ -77,82 +112,139 @@ const RestaurantSettingsScreen = ({ navigation }: Props) => {
           <MaterialCommunityIcons name="store-cog-outline" size={32} color="#fff" style={{ marginLeft: 10 }} />
         </LinearGradient>
       </Animated.View>
+      
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 32 }}
+        className="flex-1 py-3 px-1"
       >
         <Animated.View style={{ opacity: contentAnim, marginTop: 24 }}>
-          <Text style={styles.sectionTitle}>{t('restaurant_info')}</Text>
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>{t('name')}</Text>
-            <TextInput
-              style={styles.input}
-              value={restaurantName}
-              onChangeText={setRestaurantName}
-              placeholder={t('enter_restaurant_name')}
-              placeholderTextColor={isDarkMode ? RESTAURANT_COLORS.TEXT_SECONDARY_DARK : RESTAURANT_COLORS.TEXT_SECONDARY_LIGHT}
+          {/* Restaurant Management Section */}
+          <Text style={[styles.sectionTitle, { color: colors.primary }]}>{t('restaurant_management')}</Text>
+          
+          <RowView
+            title={t('restaurant_information')}
+            subtitle={t('update_restaurant_name_address_and_cuisine_type')}
+            onPress={navigateToRestaurantInfo}
+            leftIconName="storefront-outline"
+          />
+          
+          <RowView
+            title={t('business_hours')}
+            subtitle={t('set_opening_and_closing_times_for_each_day')}
+            onPress={navigateToBusinessHours}
+            leftIconName="time-outline"
+          />
+          
+          <RowView
+            title={t('delivery_settings')}
+            subtitle={t('configure_delivery_zones_and_fees')}
+            onPress={navigateToDeliverySettings}
+            leftIconName="bicycle-outline"
+          />
+          
+          {/* Divider */}
+          <View
+            className="h-[1px] mx-1 my-4"
+            style={{ backgroundColor: colors.outline }}
+          />
+          
+          {/* Business Settings Section */}
+          <Text style={[styles.sectionTitle, { color: colors.primary }]}>{t('business_settings')}</Text>
+          
+          <RowView
+            title={t('payment_methods')}
+            subtitle={t('manage_accepted_payment_options')}
+            onPress={navigateToPaymentSettings}
+            leftIconName="card-outline"
+          />
+          
+          <RowView
+            title={t('notifications')}
+            subtitle={t('customize_order_and_business_notifications')}
+            onPress={navigateToNotificationSettings}
+            leftIconName="notifications-outline"
+          />
+          
+          <RowView
+            title={t('privacy_and_security')}
+            subtitle={t('manage_data_privacy_and_account_security')}
+            onPress={navigateToPrivacySettings}
+            leftIconName="shield-checkmark-outline"
+          />
+          
+          {/* Quick Settings Section */}
+          <View
+            className="h-[1px] mx-1 my-4"
+            style={{ backgroundColor: colors.outline }}
+          />
+          
+          <Text style={[styles.sectionTitle, { color: colors.primary }]}>{t('quick_settings')}</Text>
+          
+          {/* Accepting Orders Toggle */}
+          <View className="flex-row justify-between mb-4 items-center px-2 py-2">
+            <MaterialCommunityIcons
+              name="store-check"
+              size={22}
+              color={colors.onSurface}
             />
-          </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>{t('address')}</Text>
-            <TextInput
-              style={styles.input}
-              value={address}
-              onChangeText={setAddress}
-              placeholder={t('enter_restaurant_address')}
-              placeholderTextColor={isDarkMode ? RESTAURANT_COLORS.TEXT_SECONDARY_DARK : RESTAURANT_COLORS.TEXT_SECONDARY_LIGHT}
-            />
-          </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>{t('cuisine')}</Text>
-            <TextInput
-              style={styles.input}
-              value={cuisine}
-              onChangeText={setCuisine}
-              placeholder={t('enter_cuisine_type')}
-              placeholderTextColor={isDarkMode ? RESTAURANT_COLORS.TEXT_SECONDARY_DARK : RESTAURANT_COLORS.TEXT_SECONDARY_LIGHT}
-            />
-          </View>
-          <Text style={styles.sectionTitle}>{t('preferences')}</Text>
-          <View style={styles.switchRow}>
-            <View style={styles.switchLabel}>
-              <Text style={styles.switchLabel}>{t('accepting_orders')}</Text>
-              <Text style={styles.switchSubtitle}>{t('allow_customers_to_place_new_orders')}</Text>
+            <View className="flex-1 ml-3">
+              <Text
+                className="font-semibold text-base"
+                style={{ color: colors.onSurface }}
+              >
+                {t('accepting_orders')}
+              </Text>
+              <Text
+                className="text-sm mt-1"
+                style={{ color: colors.onSurfaceVariant }}
+              >
+                {t('allow_customers_to_place_new_orders')}
+              </Text>
             </View>
             <Switch
               value={acceptingOrders}
               onValueChange={setAcceptingOrders}
-              trackColor={{ false: '#ccc', true: RESTAURANT_COLORS.PRIMARY }}
-              thumbColor={acceptingOrders ? RESTAURANT_COLORS.PRIMARY : '#fff'}
+              thumbColor={acceptingOrders ? colors.primary : '#f4f3f4'}
+              trackColor={{ false: '#767577', true: colors.primary }}
             />
           </View>
-          <View style={styles.switchRow}>
-            <View style={styles.switchLabel}>
-              <Text style={styles.switchLabel}>{t('show_on_map')}</Text>
-              <Text style={styles.switchSubtitle}>{t('make_your_restaurant_visible_to_customers')}</Text>
+          
+          {/* Show on Map Toggle */}
+          <View className="flex-row justify-between mb-4 items-center px-2 py-2">
+            <MaterialCommunityIcons
+              name="map-marker-check"
+              size={22}
+              color={colors.onSurface}
+            />
+            <View className="flex-1 ml-3">
+              <Text
+                className="font-semibold text-base"
+                style={{ color: colors.onSurface }}
+              >
+                {t('show_on_map')}
+              </Text>
+              <Text
+                className="text-sm mt-1"
+                style={{ color: colors.onSurfaceVariant }}
+              >
+                {t('make_your_restaurant_visible_to_customers')}
+              </Text>
             </View>
             <Switch
               value={showOnMap}
               onValueChange={setShowOnMap}
-              trackColor={{ false: '#ccc', true: RESTAURANT_COLORS.PRIMARY }}
-              thumbColor={showOnMap ? RESTAURANT_COLORS.PRIMARY : '#fff'}
+              thumbColor={showOnMap ? colors.primary : '#f4f3f4'}
+              trackColor={{ false: '#767577', true: colors.primary }}
             />
           </View>
-          <TouchableOpacity style={styles.saveBtn} onPress={resetApp}>
-            <Ionicons name="save-outline" size={22} color="#fff" />
-            <Text style={styles.saveBtnText}>{t('save_changes')}</Text>
-          </TouchableOpacity>
         </Animated.View>
       </ScrollView>
-    </View>
+    </CommonView>
   );
 };
 
 const getStyles = (isDarkMode: boolean) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: isDarkMode ? RESTAURANT_COLORS.BACKGROUND_DARK : RESTAURANT_COLORS.BACKGROUND_LIGHT,
-  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -180,72 +272,9 @@ const getStyles = (isDarkMode: boolean) => StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: RESTAURANT_COLORS.PRIMARY,
     marginTop: 28,
     marginBottom: 12,
     marginLeft: 12,
-  },
-  inputGroup: {
-    marginBottom: 18,
-    marginHorizontal: 12,
-  },
-  inputLabel: {
-    fontSize: 15,
-    color: RESTAURANT_COLORS.PRIMARY,
-    marginBottom: 4,
-  },
-  input: {
-    backgroundColor: isDarkMode ? RESTAURANT_COLORS.SURFACE_DARK : RESTAURANT_COLORS.SURFACE_LIGHT,
-    borderRadius: 10,
-    padding: 12,
-    fontSize: 16,
-    borderWidth: 1.2,
-    borderColor: isDarkMode ? RESTAURANT_COLORS.BORDER_DARK : RESTAURANT_COLORS.BORDER_LIGHT,
-    color: isDarkMode ? RESTAURANT_COLORS.TEXT_DARK : RESTAURANT_COLORS.TEXT_LIGHT,
-  },
-  switchRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: isDarkMode ? RESTAURANT_COLORS.SURFACE_DARK : RESTAURANT_COLORS.SURFACE_LIGHT,
-    borderRadius: 10,
-    padding: 14,
-    marginHorizontal: 12,
-    marginBottom: 10,
-    borderWidth: 1.2,
-    borderColor: isDarkMode ? RESTAURANT_COLORS.BORDER_DARK : RESTAURANT_COLORS.BORDER_LIGHT,
-  },
-  switchLabel: {
-    fontSize: 15,
-    color: isDarkMode ? RESTAURANT_COLORS.TEXT_DARK : RESTAURANT_COLORS.TEXT_LIGHT,
-    fontWeight: '500',
-    flex: 1,
-  },
-  switchSubtitle: {
-    fontSize: 13,
-    color: isDarkMode ? RESTAURANT_COLORS.TEXT_SECONDARY_DARK : RESTAURANT_COLORS.TEXT_SECONDARY_LIGHT,
-    marginTop: 2,
-  },
-  saveBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: RESTAURANT_COLORS.PRIMARY,
-    borderRadius: 14,
-    padding: 16,
-    marginTop: 24,
-    marginHorizontal: 12,
-    justifyContent: 'center',
-    elevation: 2,
-    shadowColor: RESTAURANT_COLORS.PRIMARY,
-    shadowOpacity: 0.18,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 8,
-  },
-  saveBtnText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-    marginLeft: 8,
   },
 });
 

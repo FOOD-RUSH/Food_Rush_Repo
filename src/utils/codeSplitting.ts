@@ -45,9 +45,9 @@ export const RestaurantLazyComponents = {
   EditMenuItem: lazy(() => import('@/src/screens/restaurant/menu/EditMenuItem')),
   AddFoodScreen: lazy(() => import('@/src/screens/restaurant/menu/AddFoodScreen')),
   EditFoodScreen: lazy(() => import('@/src/screens/restaurant/menu/EditFoodScreen')),
-  CategoriesScreen: lazy(() => import('@/src/screens/restaurant/menu/CategoriesScreen')),
+
   AddCategoryScreen: lazy(() => import('@/src/screens/restaurant/menu/AddCategoryScreen')),
-  FoodCategoriesScreen: lazy(() => import('@/src/screens/restaurant/menu/FoodCategoriesScreen')),
+
   MenuSettingsScreen: lazy(() => import('@/src/screens/restaurant/menu/MenuSettingsScreen')),
   
   // Analytics

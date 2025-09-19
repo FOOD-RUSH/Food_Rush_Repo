@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { Card, Button, Switch, Divider, useTheme } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
 import CommonView from '@/src/components/common/CommonView';
+import { Typography, Heading4, Heading5, Body, Label, LabelLarge, Caption } from '@/src/components/common/Typography';
 
 interface PaymentMethod {
   id: string;
@@ -113,27 +114,27 @@ const PaymentBillingScreen: React.FC = () => {
         {/* Earnings Overview */}
         <Card style={{ marginBottom: 16, backgroundColor: colors.surface }}>
           <View style={{ padding: 16 }}>
-            <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.onSurface, marginBottom: 16 }}>
+            <Heading5 color={colors.onSurface} weight="bold" style={{ marginBottom: 16 }}>
               {t('earnings_overview')}
-            </Text>
+            </Heading5>
             
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 14, color: colors.onSurfaceVariant }}>
+                <Body color={colors.onSurfaceVariant}>
                   {t('total_earnings')}
-                </Text>
-                <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.primary }}>
+                </Body>
+                <Heading4 color={colors.primary} weight="bold">
                   {billingInfo.totalEarnings.toLocaleString()} XAF
-                </Text>
+                </Heading4>
               </View>
               
               <View style={{ flex: 1, alignItems: 'flex-end' }}>
-                <Text style={{ fontSize: 14, color: colors.onSurfaceVariant }}>
+                <Body color={colors.onSurfaceVariant}>
                   {t('pending_payouts')}
-                </Text>
-                <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.secondary }}>
+                </Body>
+                <Heading4 color={colors.secondary} weight="bold">
                   {billingInfo.pendingPayouts.toLocaleString()} XAF
-                </Text>
+                </Heading4>
               </View>
             </View>
 
@@ -141,21 +142,21 @@ const PaymentBillingScreen: React.FC = () => {
 
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
               <View>
-                <Text style={{ fontSize: 12, color: colors.onSurfaceVariant }}>
+                <Caption color={colors.onSurfaceVariant}>
                   {t('last_payout')}
-                </Text>
-                <Text style={{ fontSize: 14, color: colors.onSurface }}>
+                </Caption>
+                <Body color={colors.onSurface}>
                   {new Date(billingInfo.lastPayout).toLocaleDateString()}
-                </Text>
+                </Body>
               </View>
               
               <View style={{ alignItems: 'flex-end' }}>
-                <Text style={{ fontSize: 12, color: colors.onSurfaceVariant }}>
+                <Caption color={colors.onSurfaceVariant}>
                   {t('next_payout')}
-                </Text>
-                <Text style={{ fontSize: 14, color: colors.onSurface }}>
+                </Caption>
+                <Body color={colors.onSurface}>
                   {new Date(billingInfo.nextPayout).toLocaleDateString()}
-                </Text>
+                </Body>
               </View>
             </View>
 
@@ -176,9 +177,9 @@ const PaymentBillingScreen: React.FC = () => {
         <Card style={{ marginBottom: 16, backgroundColor: colors.surface }}>
           <View style={{ padding: 16 }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.onSurface }}>
+              <Heading5 color={colors.onSurface} weight="bold">
                 {t('payment_methods')}
-              </Text>
+              </Heading5>
               <Button mode="outlined" onPress={handleAddPaymentMethod} compact>
                 {t('add')}
               </Button>
@@ -204,16 +205,16 @@ const PaymentBillingScreen: React.FC = () => {
                   </View>
 
                   <View style={{ flex: 1 }}>
-                    <Text style={{ fontSize: 16, fontWeight: '500', color: colors.onSurface }}>
+                    <Label color={colors.onSurface} weight="medium">
                       {method.name}
-                    </Text>
-                    <Text style={{ fontSize: 14, color: colors.onSurfaceVariant }}>
+                    </Label>
+                    <Body color={colors.onSurfaceVariant}>
                       {method.details}
-                    </Text>
+                    </Body>
                     {method.isDefault && (
-                      <Text style={{ fontSize: 12, color: colors.primary, fontWeight: '500' }}>
+                      <Caption color={colors.primary} weight="medium">
                         {t('default')}
-                      </Text>
+                      </Caption>
                     )}
                   </View>
 
@@ -228,9 +229,9 @@ const PaymentBillingScreen: React.FC = () => {
                         onPress={() => handleSetDefault(method.id)}
                         style={{ marginTop: 4 }}
                       >
-                        <Text style={{ fontSize: 12, color: colors.primary }}>
+                        <Caption color={colors.primary}>
                           {t('set_default')}
-                        </Text>
+                        </Caption>
                       </TouchableOpacity>
                     )}
                   </View>
@@ -244,18 +245,18 @@ const PaymentBillingScreen: React.FC = () => {
         {/* Payout Settings */}
         <Card style={{ marginBottom: 16, backgroundColor: colors.surface }}>
           <View style={{ padding: 16 }}>
-            <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.onSurface, marginBottom: 16 }}>
+            <Heading5 color={colors.onSurface} weight="bold" style={{ marginBottom: 16 }}>
               {t('payout_settings')}
-            </Text>
+            </Heading5>
 
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 16, color: colors.onSurface }}>
+                <Label color={colors.onSurface}>
                   {t('automatic_payouts')}
-                </Text>
-                <Text style={{ fontSize: 14, color: colors.onSurfaceVariant }}>
+                </Label>
+                <Body color={colors.onSurfaceVariant}>
                   {t('automatic_payouts_description')}
-                </Text>
+                </Body>
               </View>
               <Switch
                 value={autoPayouts}
@@ -268,13 +269,13 @@ const PaymentBillingScreen: React.FC = () => {
 
             <TouchableOpacity style={{ paddingVertical: 8 }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Text style={{ fontSize: 16, color: colors.onSurface }}>
+                <Label color={colors.onSurface}>
                   {t('payout_schedule')}
-                </Text>
+                </Label>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Text style={{ fontSize: 14, color: colors.onSurfaceVariant, marginRight: 8 }}>
+                  <Body color={colors.onSurfaceVariant} style={{ marginRight: 8 }}>
                     {t('weekly')}
-                  </Text>
+                  </Body>
                   <MaterialCommunityIcons name="chevron-right" size={20} color={colors.onSurfaceVariant} />
                 </View>
               </View>
@@ -285,15 +286,15 @@ const PaymentBillingScreen: React.FC = () => {
         {/* Transaction History */}
         <Card style={{ backgroundColor: colors.surface }}>
           <View style={{ padding: 16 }}>
-            <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.onSurface, marginBottom: 16 }}>
+            <Heading5 color={colors.onSurface} weight="bold" style={{ marginBottom: 16 }}>
               {t('recent_transactions')}
-            </Text>
+            </Heading5>
 
             <TouchableOpacity style={{ paddingVertical: 12 }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Text style={{ fontSize: 16, color: colors.onSurface }}>
+                <Label color={colors.onSurface}>
                   {t('view_all_transactions')}
-                </Text>
+                </Label>
                 <MaterialCommunityIcons name="chevron-right" size={20} color={colors.onSurfaceVariant} />
               </View>
             </TouchableOpacity>

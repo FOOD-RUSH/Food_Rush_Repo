@@ -34,7 +34,7 @@ export interface User {
   id: string;
   email: string;
   fullName: string;
-  phoneNumber?: string;
+  phoneNumber: string; // Made required since it's always present in API responses
   role: 'customer' | 'restaurant';
   isEmailVerified: boolean;
   isPhoneVerified?: boolean;
@@ -276,7 +276,8 @@ export interface Notification {
   id: string;
   title: string;
   body: string;
-  type: 'SYSTEM' | 'ORDER' | 'PROMOTION' | 'DELIVERY';
+  type: 'order' | 'system' | 'promotion' | 'alert';
+  priority?: 'low' | 'medium' | 'high';
   data?: {
     restaurantId?: string;
     orderId?: string;
@@ -284,6 +285,7 @@ export interface Notification {
   };
   readAt: string | null;
   createdAt: string;
+  updatedAt?: string;
 }
 
 export interface NotificationResponse {

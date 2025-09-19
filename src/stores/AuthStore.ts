@@ -1,0 +1,289 @@
+import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { reset } from '../navigation/navigationHelpers';
+import TokenManager from '../services/shared/tokenManager';
+
+// User profiles for different user types
+export interface CustomerProfile {
+  id: string;
+  email: string;
+  fullName: string;
+  phoneNumber?: string;
+  role: 'customer';
+  status: 'active' | 'inactive' | 'suspended';
+  isEmailVerified: boolean;
+  isPhoneVerified: boolean;
+  // Customer-specific fields
+  address?: string;
+  dateOfBirth?: string;
+  preferences?: {
+    notifications: boolean;
+    marketing: boolean;
+    language: string;
+  };
+}
+
+export interface RestaurantProfile {
+  id: string;
+  email: string;
+  fullName: string;
+  phoneNumber?: string;
+  role: 'restaurant';
+  status: 'active' | 'inactive' | 'pending_verification' | 'suspended';
+  isEmailVerified: boolean;
+  isPhoneVerified: boolean;
+  // Restaurant-specific fields
+  businessName?: string;
+  businessAddress?: string;
+  businessPhone?: string;
+  businessLicense?: string;
+}
+
+export interface Restaurant {
+  id: string;
+  name: string;
+  address: string;
+  phone?: string;
+  isOpen: boolean;
+  latitude?: number;
+  longitude?: number;
+  verificationStatus: 'PENDING' | 'APPROVED' | 'REJECTED';
+  documentUrl?: string;
+  rating?: number;
+  ratingCount: number;
+  ownerId: string;
+  menuMode: 'FIXED' | 'DYNAMIC';
+  timezone: string;
+  deliveryBaseFee?: number;
+  deliveryPerKmRate?: number;
+  deliveryMinFee?: number;
+  deliveryMaxFee?: number;
+  deliveryFreeThreshold?: number;
+  deliverySurgeMultiplier?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type UserProfile = CustomerProfile | RestaurantProfile;
+
+interface AuthState {
+  // Core auth state
+  user: UserProfile | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  error: string | null;
+  
+  // Restaurant-specific state (only for restaurant users)
+  restaurants: Restaurant[];
+  defaultRestaurantId: string | null;
+}
+
+interface AuthActions {
+  // State setters - to be called after successful API responses
+  setAuthData: (data: {
+    user: UserProfile;
+    accessToken: string;
+    refreshToken: string;
+    restaurants?: Restaurant[];
+    defaultRestaurantId?: string;
+  }) => Promise<void>;
+  
+  setUser: (user: UserProfile | null) => void;
+  setIsAuthenticated: (value: boolean) => void;
+  setIsLoading: (value: boolean) => void;
+  setError: (error: string | null) => void;
+  setRestaurants: (restaurants: Restaurant[]) => void;
+  setDefaultRestaurantId: (restaurantId: string) => void;
+  
+  // Utility actions
+  logout: () => Promise<void>;
+  clearError: () => void;
+  resetAuth: () => void;
+  checkAuthStatus: () => Promise<void>;
+}
+
+const initialState: AuthState = {
+  user: null,
+  isAuthenticated: false,
+  isLoading: false,
+  error: null,
+  restaurants: [],
+  defaultRestaurantId: null,
+};
+
+export const useAuthStore = create<AuthState & AuthActions>()(
+  persist(
+    (set, get) => ({
+      ...initialState,
+
+      // Check if user is authenticated based on stored tokens
+      checkAuthStatus: async () => {
+        try {
+          const token = await TokenManager.getToken();
+          const refreshToken = await TokenManager.getRefreshToken();
+          
+          if (token && refreshToken) {
+            set({ isAuthenticated: true });
+          } else {
+            set({ isAuthenticated: false, user: null });
+          }
+        } catch (error) {
+          console.error('Error checking auth status:', error);
+          set({ isAuthenticated: false, user: null });
+        }
+      },
+
+      // Set authentication data after successful login/signup
+      setAuthData: async (data) => {
+        try {
+          // Store tokens
+          await TokenManager.setTokens(data.accessToken, data.refreshToken);
+          
+          // Update state
+          const newState: Partial<AuthState> = {
+            user: data.user,
+            isAuthenticated: true,
+            isLoading: false,
+            error: null,
+          };
+
+          // Handle restaurant-specific data
+          if (data.user.role === 'restaurant' && data.restaurants) {
+            newState.restaurants = data.restaurants;
+            newState.defaultRestaurantId = data.defaultRestaurantId || null;
+          } else {
+            newState.restaurants = [];
+            newState.defaultRestaurantId = null;
+          }
+
+          set(newState);
+        } catch (error) {
+          console.error('Error setting auth data:', error);
+          set({ error: 'Failed to save authentication data' });
+        }
+      },
+
+      // Individual state setters
+      setUser: (user) => set({ user }),
+      setIsAuthenticated: (isAuthenticated) => set({ isAuthenticated }),
+      setIsLoading: (isLoading) => set({ isLoading }),
+      setError: (error) => set({ error }),
+      setRestaurants: (restaurants) => set({ restaurants }),
+      setDefaultRestaurantId: (defaultRestaurantId) => set({ defaultRestaurantId }),
+
+      // Logout - clear all state and navigate
+      logout: async () => {
+        try {
+          set({ isLoading: true });
+          
+          // Clear tokens
+          await TokenManager.clearAllTokens();
+          
+          // Clear other stores
+          try {
+            const [{ useCartStore }, { useAppStore }] = await Promise.all([
+              import('./customerStores/cartStore'),
+              import('./AppStore')
+            ]);
+            
+            useCartStore.getState().clearCart();
+            const appStore = useAppStore.getState();
+            appStore.clearSelectedUserType();
+            appStore.resetApp();
+          } catch (storeError) {
+            console.error('Error clearing stores:', storeError);
+          }
+
+          // Reset auth state
+          set(initialState);
+          
+          // Navigate to user type selection
+          setTimeout(() => reset('UserTypeSelection'), 50);
+        } catch (error) {
+          console.error('Logout error:', error);
+          set({ ...initialState, error: 'Logout failed' });
+          setTimeout(() => reset('UserTypeSelection'), 50);
+        }
+      },
+
+      // Utility actions
+      clearError: () => set({ error: null }),
+      resetAuth: () => set(initialState),
+    }),
+    {
+      name: 'auth-storage',
+      storage: createJSONStorage(() => AsyncStorage),
+      partialize: (state) => ({
+        user: state.user,
+        isAuthenticated: state.isAuthenticated,
+        restaurants: state.restaurants,
+        defaultRestaurantId: state.defaultRestaurantId,
+      }),
+      onRehydrateStorage: () => (state) => {
+        state?.checkAuthStatus();
+      },
+    },
+  ),
+);
+
+// Optimized selector hooks
+export const useUser = () => useAuthStore((state) => state.user);
+export const useIsAuthenticated = () => useAuthStore((state) => state.isAuthenticated);
+export const useAuthLoading = () => useAuthStore((state) => state.isLoading);
+export const useAuthError = () => useAuthStore((state) => state.error);
+
+// User type selectors
+export const useIsCustomer = () => useAuthStore((state) => state.user?.role === 'customer');
+export const useIsRestaurant = () => useAuthStore((state) => state.user?.role === 'restaurant');
+export const useUserType = () => useAuthStore((state) => state.user?.role || null);
+
+// Customer profile selector
+export const useCustomerProfile = () => useAuthStore((state) => 
+  state.user?.role === 'customer' ? state.user as CustomerProfile : null
+);
+
+// Restaurant profile and data selectors
+export const useRestaurantProfile = () => useAuthStore((state) => 
+  state.user?.role === 'restaurant' ? state.user as RestaurantProfile : null
+);
+
+export const useRestaurants = () => useAuthStore((state) => state.restaurants);
+export const useDefaultRestaurantId = () => useAuthStore((state) => state.defaultRestaurantId);
+
+export const useCurrentRestaurant = () => useAuthStore((state) => {
+  if (!state.defaultRestaurantId || state.restaurants.length === 0) return null;
+  return state.restaurants.find(r => r.id === state.defaultRestaurantId) || null;
+});
+
+export const useRestaurantInfo = () => {
+  const restaurants = useRestaurants();
+  const defaultRestaurantId = useDefaultRestaurantId();
+  const currentRestaurant = useCurrentRestaurant();
+  const isRestaurant = useIsRestaurant();
+  
+  return {
+    restaurants,
+    defaultRestaurantId,
+    currentRestaurant,
+    isRestaurant,
+    hasRestaurants: restaurants.length > 0,
+  };
+};
+
+// Action hooks
+export const useSetAuthData = () => useAuthStore((state) => state.setAuthData);
+export const useLogout = () => useAuthStore((state) => state.logout);
+export const useSetUser = () => useAuthStore((state) => state.setUser);
+export const useSetIsAuthenticated = () => useAuthStore((state) => state.setIsAuthenticated);
+export const useSetIsLoading = () => useAuthStore((state) => state.setIsLoading);
+export const useSetError = () => useAuthStore((state) => state.setError);
+export const useClearError = () => useAuthStore((state) => state.clearError);
+export const useResetAuth = () => useAuthStore((state) => state.resetAuth);
+
+// Backward compatibility
+export const useAuth = () => useAuthStore();
+export const useAuthUser = () => useUser();
+
+// Export types for use in other files
+export type { UserProfile, CustomerProfile, RestaurantProfile, Restaurant };

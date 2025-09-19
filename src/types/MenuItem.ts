@@ -5,7 +5,8 @@ export type FoodCategory =
   | 'fastfood'
   | 'desserts'
   | 'snacks'
-  | 'drinks';
+  | 'drinks'
+  | 'vegetarian';
 
 // Category display names for UI
 export const FOOD_CATEGORIES: Record<FoodCategory, string> = {
@@ -14,7 +15,8 @@ export const FOOD_CATEGORIES: Record<FoodCategory, string> = {
   'fastfood': 'Fast Food',
   'desserts': 'Desserts',
   'snacks': 'Snacks',
-  'drinks': 'Drinks'
+  'drinks': 'Drinks',
+  'vegetarian': 'Vegetarian'
 };
 
 // French translations for categories
@@ -24,7 +26,8 @@ export const FOOD_CATEGORIES_FR: Record<FoodCategory, string> = {
   'fastfood': 'Restauration Rapide',
   'desserts': 'Desserts',
   'snacks': 'Collations',
-  'drinks': 'Boissons'
+  'drinks': 'Boissons',
+  'vegetarian': 'Végétarien'
 };
 
 export interface MenuItem {

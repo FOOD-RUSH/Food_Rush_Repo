@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert, Dimensions } from 'react-native';
+import { View, ScrollView, TouchableOpacity, Alert, Dimensions } from 'react-native';
 import { useTheme, Card, TextInput, Button, Chip, Switch } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -7,6 +7,8 @@ import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
 
 import CommonView from '@/src/components/common/CommonView';
+import { Typography, Label, Body, BodySmall, Heading4, Heading5, Caption } from '@/src/components/common/Typography';
+import { ResponsiveContainer } from '@/src/components/common/ResponsiveContainer';
 
 interface LocationData {
   id: string;
@@ -147,9 +149,9 @@ const RestaurantLocationScreen: React.FC = () => {
     <View>
       {/* Restaurant Name */}
       <View style={{ marginBottom: 16 }}>
-        <Text style={{ fontSize: 14, fontWeight: '600', color: colors.onSurface, marginBottom: 8 }}>
+        <Label color={colors.onSurface} style={{ marginBottom: 8 }}>
           {t('restaurant_name')}
-        </Text>
+        </Label>
         <TextInput
           value={editedLocation.name}
           onChangeText={(text) => setEditedLocation({ ...editedLocation, name: text })}
@@ -162,9 +164,9 @@ const RestaurantLocationScreen: React.FC = () => {
 
       {/* Address */}
       <View style={{ marginBottom: 16 }}>
-        <Text style={{ fontSize: 14, fontWeight: '600', color: colors.onSurface, marginBottom: 8 }}>
+        <Label color={colors.onSurface} style={{ marginBottom: 8 }}>
           {t('street_address')} *
-        </Text>
+        </Label>
         <TextInput
           value={editedLocation.address}
           onChangeText={(text) => setEditedLocation({ ...editedLocation, address: text })}
@@ -180,9 +182,9 @@ const RestaurantLocationScreen: React.FC = () => {
       {/* City and Region */}
       <View style={{ flexDirection: 'row', marginBottom: 16 }}>
         <View style={{ flex: 1, marginRight: 8 }}>
-          <Text style={{ fontSize: 14, fontWeight: '600', color: colors.onSurface, marginBottom: 8 }}>
+          <Label color={colors.onSurface} style={{ marginBottom: 8 }}>
             {t('city')} *
-          </Text>
+          </Label>
           <TextInput
             value={editedLocation.city}
             onChangeText={(text) => setEditedLocation({ ...editedLocation, city: text })}
@@ -193,9 +195,9 @@ const RestaurantLocationScreen: React.FC = () => {
           />
         </View>
         <View style={{ flex: 1, marginLeft: 8 }}>
-          <Text style={{ fontSize: 14, fontWeight: '600', color: colors.onSurface, marginBottom: 8 }}>
+          <Label color={colors.onSurface} style={{ marginBottom: 8 }}>
             {t('region')}
-          </Text>
+          </Label>
           <TextInput
             value={editedLocation.region}
             onChangeText={(text) => setEditedLocation({ ...editedLocation, region: text })}
@@ -209,9 +211,9 @@ const RestaurantLocationScreen: React.FC = () => {
       {/* Postal Code and Country */}
       <View style={{ flexDirection: 'row', marginBottom: 16 }}>
         <View style={{ flex: 1, marginRight: 8 }}>
-          <Text style={{ fontSize: 14, fontWeight: '600', color: colors.onSurface, marginBottom: 8 }}>
+          <Label color={colors.onSurface} style={{ marginBottom: 8 }}>
             {t('postal_code')}
-          </Text>
+          </Label>
           <TextInput
             value={editedLocation.postalCode}
             onChangeText={(text) => setEditedLocation({ ...editedLocation, postalCode: text })}
@@ -221,9 +223,9 @@ const RestaurantLocationScreen: React.FC = () => {
           />
         </View>
         <View style={{ flex: 1, marginLeft: 8 }}>
-          <Text style={{ fontSize: 14, fontWeight: '600', color: colors.onSurface, marginBottom: 8 }}>
+          <Label color={colors.onSurface} style={{ marginBottom: 8 }}>
             {t('country')}
-          </Text>
+          </Label>
           <TextInput
             value={editedLocation.country}
             onChangeText={(text) => setEditedLocation({ ...editedLocation, country: text })}
@@ -236,9 +238,9 @@ const RestaurantLocationScreen: React.FC = () => {
 
       {/* Delivery Radius */}
       <View style={{ marginBottom: 16 }}>
-        <Text style={{ fontSize: 14, fontWeight: '600', color: colors.onSurface, marginBottom: 8 }}>
+        <Label color={colors.onSurface} style={{ marginBottom: 8 }}>
           {t('delivery_radius')} ({t('kilometers')})
-        </Text>
+        </Label>
         <TextInput
           value={editedLocation.deliveryRadius.toString()}
           onChangeText={(text) => setEditedLocation({ ...editedLocation, deliveryRadius: parseInt(text) || 0 })}
@@ -251,9 +253,9 @@ const RestaurantLocationScreen: React.FC = () => {
 
       {/* Location Status */}
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <Text style={{ fontSize: 14, fontWeight: '600', color: colors.onSurface }}>
+        <Label color={colors.onSurface}>
           {t('location_active')}
-        </Text>
+        </Label>
         <Switch
           value={editedLocation.isActive}
           onValueChange={(value) => setEditedLocation({ ...editedLocation, isActive: value })}
@@ -284,21 +286,20 @@ const RestaurantLocationScreen: React.FC = () => {
         size={20} 
         color={isEditing ? '#007aff' : colors.onSurfaceVariant} 
       />
-      <Text style={{ 
-        marginLeft: 8, 
-        fontWeight: '600', 
-        color: isEditing ? '#007aff' : colors.onSurfaceVariant 
-      }}>
+      <Label 
+        color={isEditing ? '#007aff' : colors.onSurfaceVariant}
+        style={{ marginLeft: 8 }}
+      >
         {isLoading ? t('getting_location') : t('use_current_location')}
-      </Text>
+      </Label>
     </TouchableOpacity>
   );
 
   const renderNearbySuggestions = () => (
     <View style={{ marginBottom: 16 }}>
-      <Text style={{ fontSize: 16, fontWeight: 'bold', color: colors.onSurface, marginBottom: 12 }}>
+      <Heading5 color={colors.onSurface} style={{ marginBottom: 12 }}>
         {t('nearby_landmarks')}
-      </Text>
+      </Heading5>
       {nearbySuggestions.map((suggestion) => (
         <TouchableOpacity
           key={suggestion.id}
@@ -315,18 +316,18 @@ const RestaurantLocationScreen: React.FC = () => {
         >
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 14, fontWeight: '600', color: colors.onSurface }}>
+              <Label color={colors.onSurface}>
                 {suggestion.name}
-              </Text>
-              <Text style={{ fontSize: 12, color: colors.onSurfaceVariant, marginTop: 2 }}>
+              </Label>
+              <Caption color={colors.onSurfaceVariant} style={{ marginTop: 2 }}>
                 {suggestion.address}
-              </Text>
+              </Caption>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <MaterialCommunityIcons name="map-marker-distance" size={14} color={colors.onSurfaceVariant} />
-              <Text style={{ fontSize: 12, color: colors.onSurfaceVariant, marginLeft: 4 }}>
+              <Caption color={colors.onSurfaceVariant} style={{ marginLeft: 4 }}>
                 {suggestion.distance} km
-              </Text>
+              </Caption>
             </View>
           </View>
         </TouchableOpacity>
@@ -339,12 +340,12 @@ const RestaurantLocationScreen: React.FC = () => {
       <CommonView>
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
           <MaterialCommunityIcons name="alert-circle" size={48} color="#FF4444" />
-          <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.onSurface, marginTop: 16, textAlign: 'center' }}>
+          <Heading4 color={colors.onSurface} align="center" style={{ marginTop: 16 }}>
             {t('something_went_wrong')}
-          </Text>
-          <Text style={{ fontSize: 14, color: colors.onSurfaceVariant, marginTop: 8, textAlign: 'center' }}>
+          </Heading4>
+          <Body color={colors.onSurfaceVariant} align="center" style={{ marginTop: 8 }}>
             {error.message}
-          </Text>
+          </Body>
           <TouchableOpacity
             onPress={() => {
               setError({ hasError: false, message: '' });
@@ -358,7 +359,7 @@ const RestaurantLocationScreen: React.FC = () => {
               marginTop: 16,
             }}
           >
-            <Text style={{ color: 'white', fontWeight: 'bold' }}>{t('go_back')}</Text>
+            <Label color="white" weight="bold">{t('go_back')}</Label>
           </TouchableOpacity>
         </View>
       </CommonView>
@@ -377,18 +378,18 @@ const RestaurantLocationScreen: React.FC = () => {
               <View style={{ padding: 16 }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
                   <View style={{ flex: 1 }}>
-                    <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.onSurface }}>
+                    <Heading4 color={colors.onSurface}>
                       {locationData.name}
-                    </Text>
-                    <Text style={{ fontSize: 14, color: colors.onSurfaceVariant, marginTop: 4 }}>
+                    </Heading4>
+                    <Body color={colors.onSurfaceVariant} style={{ marginTop: 4 }}>
                       {locationData.address}
-                    </Text>
-                    <Text style={{ fontSize: 14, color: colors.onSurfaceVariant }}>
+                    </Body>
+                    <Body color={colors.onSurfaceVariant}>
                       {locationData.city}, {locationData.region} {locationData.postalCode}
-                    </Text>
-                    <Text style={{ fontSize: 14, color: colors.onSurfaceVariant }}>
+                    </Body>
+                    <Body color={colors.onSurfaceVariant}>
                       {locationData.country}
-                    </Text>
+                    </Body>
                   </View>
                   <View style={{ alignItems: 'flex-end' }}>
                     <Chip
@@ -410,15 +411,15 @@ const RestaurantLocationScreen: React.FC = () => {
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <MaterialCommunityIcons name="map-marker-radius" size={16} color={colors.onSurfaceVariant} />
-                    <Text style={{ fontSize: 12, color: colors.onSurfaceVariant, marginLeft: 4 }}>
+                    <Caption color={colors.onSurfaceVariant} style={{ marginLeft: 4 }}>
                       {t('delivery_radius')}: {locationData.deliveryRadius} km
-                    </Text>
+                    </Caption>
                   </View>
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <MaterialCommunityIcons name="map-marker" size={16} color={colors.onSurfaceVariant} />
-                    <Text style={{ fontSize: 12, color: colors.onSurfaceVariant, marginLeft: 4 }}>
+                    <Caption color={colors.onSurfaceVariant} style={{ marginLeft: 4 }}>
                       {locationData.latitude.toFixed(4)}, {locationData.longitude.toFixed(4)}
-                    </Text>
+                    </Caption>
                   </View>
                 </View>
               </View>
@@ -450,9 +451,9 @@ const RestaurantLocationScreen: React.FC = () => {
               alignItems: 'center',
             }}>
               <MaterialCommunityIcons name="alert-circle" size={20} color="#FF4444" />
-              <Text style={{ color: '#FF4444', marginLeft: 8, flex: 1 }}>
+              <Body color="#FF4444" style={{ marginLeft: 8, flex: 1 }}>
                 {error.message}
-              </Text>
+              </Body>
             </View>
           </View>
         )}

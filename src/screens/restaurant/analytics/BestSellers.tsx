@@ -1,11 +1,12 @@
 import React from 'react';
-import { View, Text, FlatList } from 'react-native';
+import { View, FlatList } from 'react-native';
 import { useTheme, Card } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 
 import CommonView from '@/src/components/common/CommonView';
 import {  RootStackScreenProps } from '@/src/navigation/types';
+import { Typography, Heading1, Heading4, Body, Label, Caption } from '@/src/components/common/Typography';
 
 interface BestSellerItem {
   id: string;
@@ -65,27 +66,21 @@ const BestSellers: React.FC<RootStackScreenProps<'RestaurantBestSellers'>> = () 
                   marginRight: 12,
                 }}
               >
-                <Text
-                  style={{
-                    fontSize: 12,
-                    fontWeight: 'bold',
-                    color: index < 3 ? 'white' : colors.onSurfaceVariant,
-                  }}
+                <Caption
+                  color={index < 3 ? 'white' : colors.onSurfaceVariant}
+                  weight="bold"
                 >
                   {index + 1}
-                </Text>
+                </Caption>
               </View>
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: 'bold',
-                  color: colors.onSurface,
-                  flex: 1,
-                }}
+              <Label
+                color={colors.onSurface}
+                weight="bold"
                 numberOfLines={1}
+                style={{ flex: 1 }}
               >
                 {item.name}
-              </Text>
+              </Label>
               <MaterialCommunityIcons
                 name={getTrendIcon(item.trend) as any}
                 size={20}
@@ -93,33 +88,32 @@ const BestSellers: React.FC<RootStackScreenProps<'RestaurantBestSellers'>> = () 
               />
             </View>
             
-            <Text
+            <Caption
+              color={colors.onSurfaceVariant}
               style={{
-                fontSize: 12,
-                color: colors.onSurfaceVariant,
                 marginBottom: 8,
                 marginLeft: 36,
               }}
             >
               {item.category}
-            </Text>
+            </Caption>
 
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft: 36 }}>
               <View>
-                <Text style={{ fontSize: 14, fontWeight: '600', color: colors.onSurface }}>
+                <Label color={colors.onSurface} weight="semibold">
                   {item.totalSold} {t('sold')}
-                </Text>
-                <Text style={{ fontSize: 12, color: colors.onSurfaceVariant }}>
+                </Label>
+                <Caption color={colors.onSurfaceVariant}>
                   {item.percentage}% {t('of_total')}
-                </Text>
+                </Caption>
               </View>
               <View style={{ alignItems: 'flex-end' }}>
-                <Text style={{ fontSize: 14, fontWeight: '600', color: '#007aff' }}>
+                <Label color="#007aff" weight="semibold">
                   {item.revenue.toLocaleString()} XAF
-                </Text>
-                <Text style={{ fontSize: 12, color: colors.onSurfaceVariant }}>
+                </Label>
+                <Caption color={colors.onSurfaceVariant}>
                   {t('revenue')}
-                </Text>
+                </Caption>
               </View>
             </View>
           </View>
@@ -133,12 +127,12 @@ const BestSellers: React.FC<RootStackScreenProps<'RestaurantBestSellers'>> = () 
       <View style={{ flex: 1 }}>
         {/* Header */}
         <View style={{ padding: 16, paddingBottom: 0 }}>
-          <Text style={{ fontSize: 28, fontWeight: 'bold', color: colors.onBackground }}>
+          <Heading1 color={colors.onBackground} weight="bold">
             {t('best_sellers')}
-          </Text>
-          <Text style={{ fontSize: 14, color: colors.onSurfaceVariant, marginTop: 4 }}>
+          </Heading1>
+          <Body color={colors.onSurfaceVariant} style={{ marginTop: 4 }}>
             {t('top_performing_menu_items')}
-          </Text>
+          </Body>
         </View>
 
         {/* Summary Stats */}
@@ -147,28 +141,28 @@ const BestSellers: React.FC<RootStackScreenProps<'RestaurantBestSellers'>> = () 
             <View style={{ padding: 16 }}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <View style={{ alignItems: 'center', flex: 1 }}>
-                  <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#007aff' }}>
+                  <Heading4 color="#007aff" weight="bold">
                     {bestSellers.reduce((sum, item) => sum + item.totalSold, 0)}
-                  </Text>
-                  <Text style={{ fontSize: 12, color: colors.onSurfaceVariant, textAlign: 'center' }}>
+                  </Heading4>
+                  <Caption color={colors.onSurfaceVariant} align="center">
                     {t('total_items_sold')}
-                  </Text>
+                  </Caption>
                 </View>
                 <View style={{ alignItems: 'center', flex: 1 }}>
-                  <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#00C851' }}>
+                  <Heading4 color="#00C851" weight="bold">
                     {bestSellers.reduce((sum, item) => sum + item.revenue, 0).toLocaleString()}
-                  </Text>
-                  <Text style={{ fontSize: 12, color: colors.onSurfaceVariant, textAlign: 'center' }}>
+                  </Heading4>
+                  <Caption color={colors.onSurfaceVariant} align="center">
                     {t('total_revenue')} (XAF)
-                  </Text>
+                  </Caption>
                 </View>
                 <View style={{ alignItems: 'center', flex: 1 }}>
-                  <Text style={{ fontSize: 20, fontWeight: 'bold', color: '#FF8800' }}>
+                  <Heading4 color="#FF8800" weight="bold">
                     {Math.round(bestSellers.reduce((sum, item) => sum + item.revenue, 0) / bestSellers.reduce((sum, item) => sum + item.totalSold, 0)).toLocaleString()}
-                  </Text>
-                  <Text style={{ fontSize: 12, color: colors.onSurfaceVariant, textAlign: 'center' }}>
+                  </Heading4>
+                  <Caption color={colors.onSurfaceVariant} align="center">
                     {t('avg_price')} (XAF)
-                  </Text>
+                  </Caption>
                 </View>
               </View>
             </View>

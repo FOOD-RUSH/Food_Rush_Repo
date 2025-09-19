@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, ScrollView, Animated } from 'react-native';
+import { View, ScrollView, Animated } from 'react-native';
 import { Button, Badge, Divider, ProgressBar, useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -9,6 +9,7 @@ import CommonView from '@/src/components/common/CommonView';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import { useGetOrderById, useConfirmOrder, useRejectOrder } from '@/src/hooks/restaurant/useOrderApi';
 import { OrderItem } from '@/src/services/restaurant/orderApi';
+import { Typography, Heading2, Heading5, Body, Label, Caption } from '@/src/components/common/Typography';
 
 const OrderDetailsScreen: React.FC<RootStackScreenProps<'RestaurantOrderDetails'>> = ({
   route, navigation
@@ -72,12 +73,12 @@ const OrderDetailsScreen: React.FC<RootStackScreenProps<'RestaurantOrderDetails'
       <CommonView>
         <View className="flex-1 justify-center items-center p-6">
           <MaterialCommunityIcons name="alert-circle" size={48} color={colors.error} />
-          <Text className="text-xl font-bold mt-4 text-center" style={{ color: colors.onSurface }}>
+          <Heading5 color={colors.onSurface} weight="bold" align="center" style={{ marginTop: 16 }}>
             {t('order_not_found')}
-          </Text>
-          <Text className="mt-2 text-center" style={{ color: colors.onSurfaceVariant }}>
+          </Heading5>
+          <Body color={colors.onSurfaceVariant} align="center" style={{ marginTop: 8 }}>
             {t('order_could_not_be_found')}
-          </Text>
+          </Body>
           <Button
             mode="contained"
             onPress={() => navigation.goBack()}
@@ -149,31 +150,31 @@ const OrderDetailsScreen: React.FC<RootStackScreenProps<'RestaurantOrderDetails'
           <View className="p-5 rounded-xl mb-4" style={{ backgroundColor: colors.surface }}>
             <View className="flex-row justify-between items-start">
               <View className="flex-1">
-                <Text className="text-2xl font-bold" style={{ color: colors.onSurface }}>
+                <Heading2 color={colors.onSurface} weight="bold">
                   {t('order_prefix')}{orderId}
-                </Text>
+                </Heading2>
                 <View className="flex-row items-center mt-1">
                   <MaterialCommunityIcons name="clock-outline" size={18} color={colors.onSurfaceVariant} />
-                  <Text className="ml-2" style={{ color: colors.onSurfaceVariant }}>
+                  <Body color={colors.onSurfaceVariant} style={{ marginLeft: 8 }}>
                     {orderData.time}
-                  </Text>
+                  </Body>
                 </View>
               </View>
               <Badge
                 size={24}
                 style={{ backgroundColor: getStatusColor() }}
               >
-                <Text className="text-white font-medium">{t(status)}</Text>
+                <Label color="white" weight="medium">{t(status)}</Label>
               </Badge>
             </View>
 
             {status === 'preparing' && (
               <View className="mt-4">
                 <View className="flex-row justify-between mb-1">
-                  <Text style={{ color: colors.onSurfaceVariant }}>{t('preparation_progress')}</Text>
-                  <Text style={{ color: colors.onSurfaceVariant }}>
+                  <Body color={colors.onSurfaceVariant}>{t('preparation_progress')}</Body>
+                  <Body color={colors.onSurfaceVariant}>
                     {getEstimatedTimeLeft()} {t('min_left')}
-                  </Text>
+                  </Body>
                 </View>
                 <ProgressBar
                   progress={prepProgress}
@@ -188,24 +189,24 @@ const OrderDetailsScreen: React.FC<RootStackScreenProps<'RestaurantOrderDetails'
           <View className="p-5 rounded-xl mb-4" style={{ backgroundColor: colors.surface }}>
             <View className="flex-row items-center mb-3">
               <MaterialCommunityIcons name="account-circle" size={24} color={colors.onSurfaceVariant} />
-              <Text className="text-lg font-semibold ml-2" style={{ color: colors.onSurface }}>
+              <Heading5 color={colors.onSurface} weight="semibold" style={{ marginLeft: 8 }}>
                 {t('customer_details')}
-              </Text>
+              </Heading5>
             </View>
 
             <View className="space-y-3">
               <View className="flex-row items-center mb-3">
                 <MaterialCommunityIcons name="account" size={18} color={colors.onSurfaceVariant} />
-                <Text className="ml-3" style={{ color: colors.onSurface }}>
+                <Body color={colors.onSurface} style={{ marginLeft: 12 }}>
                   {orderData.customerName}
-                </Text>
+                </Body>
               </View>
 
               <View className="flex-row items-center mb-3">
                 <MaterialCommunityIcons name="phone" size={18} color={colors.onSurfaceVariant} />
-                <Text className="ml-3" style={{ color: colors.onSurface }}>
+                <Body color={colors.onSurface} style={{ marginLeft: 12 }}>
                   {orderData.customerPhone}
-                </Text>
+                </Body>
               </View>
 
               <View className="flex-row items-start">
@@ -215,9 +216,9 @@ const OrderDetailsScreen: React.FC<RootStackScreenProps<'RestaurantOrderDetails'
                   color={colors.onSurfaceVariant} 
                   style={{ marginTop: 2 }} 
                 />
-                <Text className="ml-3 flex-1" style={{ color: colors.onSurface }}>
+                <Body color={colors.onSurface} style={{ marginLeft: 12, flex: 1 }}>
                   {orderData.customerAddress}
-                </Text>
+                </Body>
               </View>
             </View>
 
@@ -232,13 +233,13 @@ const OrderDetailsScreen: React.FC<RootStackScreenProps<'RestaurantOrderDetails'
                     size={18} 
                     color={colors.warning || '#D97706'} 
                   />
-                  <Text className="font-medium ml-2" style={{ color: colors.onWarningContainer || '#92400E' }}>
+                  <Label color={colors.onWarningContainer || '#92400E'} weight="medium" style={{ marginLeft: 8 }}>
                     {t('special_instructions')}
-                  </Text>
+                  </Label>
                 </View>
-                <Text className="mt-1" style={{ color: colors.onWarningContainer || '#92400E' }}>
+                <Body color={colors.onWarningContainer || '#92400E'} style={{ marginTop: 4 }}>
                   {orderData.specialInstructions}
-                </Text>
+                </Body>
               </View>
             )}
           </View>
@@ -247,9 +248,9 @@ const OrderDetailsScreen: React.FC<RootStackScreenProps<'RestaurantOrderDetails'
           <View className="p-5 rounded-xl mb-4" style={{ backgroundColor: colors.surface }}>
             <View className="flex-row items-center mb-3">
               <MaterialCommunityIcons name="food" size={24} color={colors.onSurfaceVariant} />
-              <Text className="text-lg font-semibold ml-2" style={{ color: colors.onSurface }}>
+              <Heading5 color={colors.onSurface} weight="semibold" style={{ marginLeft: 8 }}>
                 {t('order_items')}
-              </Text>
+              </Heading5>
             </View>
 
             {orderData.items.map((item: OrderItem, index: number) => (
@@ -259,16 +260,16 @@ const OrderDetailsScreen: React.FC<RootStackScreenProps<'RestaurantOrderDetails'
               }}>
                 <View className="flex-row justify-between">
                   <View className="flex-row items-center flex-1">
-                    <Text className="w-8" style={{ color: colors.onSurfaceVariant }}>
+                    <Caption color={colors.onSurfaceVariant} style={{ width: 32 }}>
                       {item.quantity}x
-                    </Text>
-                    <Text className="font-medium flex-1" style={{ color: colors.onSurface }}>
+                    </Caption>
+                    <Label color={colors.onSurface} weight="medium" style={{ flex: 1 }}>
                       {item.name}
-                    </Text>
+                    </Label>
                   </View>
-                  <Text className="font-semibold" style={{ color: colors.primary }}>
+                  <Label color={colors.primary} weight="semibold">
                     {(item.price * item.quantity).toLocaleString()} {t('currency_xaf')}
-                  </Text>
+                  </Label>
                 </View>
 
                 {item.modifications && item.modifications.length > 0 && (
@@ -276,9 +277,9 @@ const OrderDetailsScreen: React.FC<RootStackScreenProps<'RestaurantOrderDetails'
                     {item.modifications.map((mod: string, modIndex: number) => (
                       <View key={modIndex} className="flex-row items-center">
                         <MaterialCommunityIcons name="circle-small" size={20} color={colors.onSurfaceVariant} />
-                        <Text className="text-sm" style={{ color: colors.onSurfaceVariant }}>
+                        <Caption color={colors.onSurfaceVariant}>
                           {mod}
-                        </Text>
+                        </Caption>
                       </View>
                     ))}
                   </View>
@@ -290,25 +291,25 @@ const OrderDetailsScreen: React.FC<RootStackScreenProps<'RestaurantOrderDetails'
 
             <View className="space-y-2">
              <View className="flex-row justify-between mb-2">
-               <Text style={{ color: colors.onSurfaceVariant }}>{t('subtotal')}</Text>
-               <Text style={{ color: colors.onSurface }}>
+               <Body color={colors.onSurfaceVariant}>{t('subtotal')}</Body>
+               <Body color={colors.onSurface}>
                  {orderData.subtotal.toLocaleString()} {t('currency_xaf')}
-               </Text>
+               </Body>
              </View>
 
              <View className="flex-row justify-between mb-2">
-               <Text style={{ color: colors.onSurfaceVariant }}>{t('tax')}</Text>
-               <Text style={{ color: colors.onSurface }}>
+               <Body color={colors.onSurfaceVariant}>{t('tax')}</Body>
+               <Body color={colors.onSurface}>
                  {orderData.tax.toLocaleString()} {t('currency_xaf')}
-               </Text>
+               </Body>
              </View>
 
              {orderData.deliveryFee > 0 && (
                <View className="flex-row justify-between mb-2">
-                 <Text style={{ color: colors.onSurfaceVariant }}>{t('delivery_fee')}</Text>
-                 <Text style={{ color: colors.onSurface }}>
+                 <Body color={colors.onSurfaceVariant}>{t('delivery_fee')}</Body>
+                 <Body color={colors.onSurface}>
                    {orderData.deliveryFee.toLocaleString()} {t('currency_xaf')}
-                 </Text>
+                 </Body>
                </View>
              )}
 
@@ -316,12 +317,12 @@ const OrderDetailsScreen: React.FC<RootStackScreenProps<'RestaurantOrderDetails'
                borderTopWidth: 1,
                borderTopColor: colors.outline
              }}>
-               <Text className="font-bold text-lg" style={{ color: colors.onSurface }}>
+               <Heading5 color={colors.onSurface} weight="bold">
                  {t('total')}
-               </Text>
-               <Text className="font-bold text-lg" style={{ color: colors.primary }}>
+               </Heading5>
+               <Heading5 color={colors.primary} weight="bold">
                  {orderData.total.toLocaleString()} {t('currency_xaf')}
-               </Text>
+               </Heading5>
              </View>
            </View>
 
@@ -334,10 +335,10 @@ const OrderDetailsScreen: React.FC<RootStackScreenProps<'RestaurantOrderDetails'
                 size={20}
                 color={colors.onSurfaceVariant}
               />
-              <Text className="ml-2" style={{ color: colors.onSurface }}>
+              <Body color={colors.onSurface} style={{ marginLeft: 8 }}>
                 {t('paid_with')} {orderData.paymentMethod === 'credit_card' ? t('credit_card') :
                           orderData.paymentMethod === 'cash' ? t('cash') : t('mobile_payment')}
-              </Text>
+              </Body>
             </View>
           </View>
 

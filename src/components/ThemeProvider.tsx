@@ -1,7 +1,7 @@
 import React, { ReactNode } from 'react';
 import { PaperProvider } from 'react-native-paper';
 import { useAppTheme } from '@/src/config/theme';
-import { useAppStore } from '@/src/stores/customerStores/AppStore';
+import { useAppStore } from '@/src/stores/AppStore';
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const themeMode = useAppStore((state) => state.theme);

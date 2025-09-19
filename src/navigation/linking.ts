@@ -111,7 +111,7 @@ export const linking: LinkingOptions<RootStackParamList> = {
       RestaurantBestSellers: 'restaurant/analytics/bestsellers',
       RestaurantTimeHeatmap: 'restaurant/analytics/heatmap',
       RestaurantMenuItemForm: 'restaurant/menu/item',
-      RestaurantCategoriesManager: 'restaurant/menu/categories',
+
       RestaurantProfile: 'restaurant/profile',
       RestaurantSettings: 'restaurant/settings',
       RestaurantSupport: 'restaurant/support',

@@ -13,8 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { images } from '@/assets/images';
 import { useTranslation } from 'react-i18next';
 import { RootStackScreenProps } from '../navigation/types';
-import { useAppStore } from '../stores/customerStores/AppStore';
-import { useAuthStore } from '../stores/customerStores/AuthStore';
+import { useAppStore } from '../stores/AppStore';
 
 // Types
 interface UserType {
@@ -47,8 +46,7 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
   const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = useWindowDimensions();
   
   // Store actions
-  const { setUserType, completeOnboarding } = useAppStore();
-  const { setSelectedUserType } = useAuthStore();
+  const { setSelectedUserType, completeOnboarding } = useAppStore();
   
   // Local state
   const [selectedType, setSelectedType] = useState<'customer' | 'restaurant' | null>(null);
@@ -62,18 +60,22 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
 
   const handleContinue = useCallback(() => {
     if (selectedType) {
-      // Update both stores
-      setUserType(selectedType);
+      // Update app store with selected user type
       setSelectedUserType(selectedType);
       completeOnboarding();
-      
+
       // Navigate to Auth screen with user type
       navigation.replace('Auth', {
         screen: 'SignIn',
         params: { userType: selectedType },
       });
     }
-  }, [selectedType, setUserType, setSelectedUserType, completeOnboarding, navigation]);
+  }, [
+    selectedType,
+    setSelectedUserType,
+    completeOnboarding,
+    navigation,
+  ]);
 
   const getCardStyle = useCallback(
     (isSelected: boolean) => ({

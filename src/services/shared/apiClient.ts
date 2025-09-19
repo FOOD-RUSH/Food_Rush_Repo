@@ -153,7 +153,7 @@ class ApiClient {
 
             // Update user data in auth store (lazy import to avoid circular dependency)
             try {
-              const { useAuthStore } = await import('../../stores/customerStores/AuthStore');
+              const { useAuthStore } = await import('../../stores/AuthStore');
               const authStore = useAuthStore.getState();
               authStore.setUser(user);
               authStore.setIsAuthenticated(true);

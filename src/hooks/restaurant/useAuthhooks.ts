@@ -4,90 +4,72 @@ import {
   RestaurantRegisterRequest,
   RestaurantLoginResponse,
 } from '@/src/services/restaurant/authApi';
-import { useAuthStore } from '@/src/stores/shared/AuthStore';
+import { RestaurantProfile, useAuthStore, useSetAuthData } from '@/src/stores/AuthStore';
 import TokenManager from '@/src/services/shared/tokenManager';
+import { User } from '@/src/types';
 
 export const useRegisterRestaurant = () => {
+  const { clearError } = useAuthStore();
+
   return useMutation({
-    mutationFn: (userData: RestaurantRegisterRequest) =>
-      restaurantAuthApi.register(userData).then((res) => res.data),
+    mutationFn: async (userData: RestaurantRegisterRequest) => {
+      const response = await restaurantAuthApi.register(userData);
+      return response.data.data;
+    },
+    onMutate: () => {
+      clearError();
+    },
+    onSuccess: (data) => {
+      console.log('Restaurant registration successful:', data);
+      // Registration data can be handled locally in components if needed
+    },
   });
 };
 
 export const useLoginRestaurant = () => {
   const queryClient = useQueryClient();
-  const { setUser, setAuthData, setError, clearError } = useAuthStore();
+  const setAuthData = useSetAuthData();
+  const { clearError } = useAuthStore();
 
   return useMutation({
-    mutationFn: (credentials: { email: string; password: string }) =>
-      restaurantAuthApi.login(credentials),
-    onSuccess: async (response) => {
+    mutationFn: async (credentials: { email: string; password: string }) => {
+      const response = await restaurantAuthApi.login(credentials);
+      return response.data.data;
+    },
+    onMutate: () => {
+      clearError();
+    },
+    onSuccess: async (data) => {
       console.log('🍽️ Restaurant Login Success - Processing response...');
       
-      try {
-        const responseData = response.data as RestaurantLoginResponse;
-        const { user, accessToken, refreshToken, restaurants, defaultRestaurantId } = responseData.data;
+      const { user, accessToken, refreshToken, restaurants, defaultRestaurantId } = data;
 
-        if (!accessToken || !refreshToken) {
-          console.error('Missing tokens in restaurant login response:', {
-            hasAccessToken: !!accessToken,
-            hasRefreshToken: !!refreshToken,
-          });
-          throw new Error('Invalid response: missing authentication tokens');
-        }
-
-        if (!user) {
-          console.error('Missing user data in restaurant login response');
-          throw new Error('Invalid response: missing user data');
-        }
-
-        console.log('Storing restaurant tokens...');
-        const tokensStored = await TokenManager.setTokens(
-          accessToken,
-          refreshToken
-        );
-
-        if (!tokensStored) {
-          throw new Error('Failed to store authentication tokens');
-        }
-
-        console.log('Updating restaurant auth state...');
-        // Clear any previous errors
-        clearError();
-
-        // Set auth data with restaurant-specific information
-        setAuthData({
-          user,
-          accessToken,
-          refreshToken,
-          restaurants,
-          defaultRestaurantId,
-        });
-
-        // Cache user data
-        queryClient.setQueryData(['auth', 'me'], user);
-
-        // Invalidate restaurant-specific queries
-        queryClient.invalidateQueries({ queryKey: ['restaurant'] });
-        queryClient.invalidateQueries({ queryKey: ['orders'] });
-        queryClient.invalidateQueries({ queryKey: ['menu'] });
-        queryClient.invalidateQueries({ queryKey: ['notifications'] });
-
-        console.log('🍽️ Restaurant login process completed successfully');
-      } catch (error) {
-        console.error('Error in restaurant login success handler:', error);
-        // Clean up on error
-        await TokenManager.clearAllTokens();
-        setError('Login failed');
-        throw error;
+      if (!accessToken || !refreshToken || !user) {
+        throw new Error('Invalid response: missing required data');
       }
+
+      // Set auth data using the simplified store method
+      await setAuthData({
+        user: user as RestaurantProfile,
+        accessToken,
+        refreshToken,
+        restaurants,
+        defaultRestaurantId,
+      });
+
+      // Cache user data
+      queryClient.setQueryData(['auth', 'me'], user);
+
+      // Invalidate restaurant-specific queries
+      queryClient.invalidateQueries({ queryKey: ['restaurant'] });
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['menu'] });
+      queryClient.invalidateQueries({ queryKey: ['notifications'] });
+
+      console.log('🍽️ Restaurant login process completed successfully');
     },
     onError: (error: any) => {
       console.error('🍽️ Restaurant login failed:', error);
-      
-      // Clean up auth state on login failure
-      setError(error.response?.data?.message || 'Restaurant login failed');
-      
       // Clear any stored tokens
       TokenManager.clearAllTokens().catch(console.error);
     },
@@ -95,61 +77,130 @@ export const useLoginRestaurant = () => {
 };
 
 export const useVerifyRestaurantOTP = () => {
+  const queryClient = useQueryClient();
+  const setAuthData = useSetAuthData();
+  const { clearError } = useAuthStore();
+
   return useMutation({
-    mutationFn: (otpData: { userId: string; otp: string; type: 'email' }) =>
-      restaurantAuthApi.verifyOTP(otpData),
+    mutationFn: async (otpData: { userId: string; otp: string; type: 'email' }) => {
+      const response = await restaurantAuthApi.verifyOTP(otpData);
+      return response.data;
+    },
+    onMutate: () => {
+      clearError();
+    },
+    onSuccess: async (data: any) => {
+      console.log('Restaurant OTP verification successful');
+      
+      // Store tokens if provided
+      if (data.accessToken && data.refreshToken && data.user) {
+        // Set auth data using the simplified store method
+        await setAuthData({
+          user: data.user as RestaurantProfile,
+          accessToken: data.accessToken,
+          refreshToken: data.refreshToken,
+          restaurants: data.restaurants,
+          defaultRestaurantId: data.defaultRestaurantId,
+        });
+        
+        // Cache user data
+        queryClient.setQueryData(['auth', 'me'], data.user);
+        queryClient.invalidateQueries({ queryKey: ['restaurant'] });
+        queryClient.invalidateQueries({ queryKey: ['orders'] });
+        queryClient.invalidateQueries({ queryKey: ['menu'] });
+        queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      }
+    },
+    onError: (error: any) => {
+      console.error('Restaurant OTP verification failed:', error);
+      TokenManager.clearAllTokens().catch(console.error);
+    },
   });
 };
 
-export const useLogoutRestaurant = () => {
+export const useRestaurantLogout = () => {
   const queryClient = useQueryClient();
-  const { logout } = useAuthStore();
+  const logout = useAuthStore((state) => state.logout);
 
   return useMutation({
     mutationFn: async () => {
-      console.log('Performing restaurant logout - clearing storage and state');
       await logout();
       return Promise.resolve();
     },
     onSuccess: () => {
+      console.log('🍽️ Restaurant logout completed successfully');
       // Clear all cached data
       queryClient.clear();
-      console.log('🍽️ Restaurant logout completed successfully');
     },
     onError: (error) => {
       console.error('🍽️ Restaurant logout error:', error);
-      // Force logout even if there's an error
-      logout();
+      // Clear cached data even on error
       queryClient.clear();
     },
   });
 };
 
 export const useUpdateRestaurantProfile = () => {
+  const queryClient = useQueryClient();
+  const { setUser, clearError } = useAuthStore();
+
   return useMutation({
-    mutationFn: (userData: any) => restaurantAuthApi.updateProfile(userData),
+    mutationFn: async (userData: any) => {
+      const response = await restaurantAuthApi.updateProfile(userData);
+      return response.data;
+    },
+    onMutate: () => {
+      clearError();
+    },
+    onSuccess: (updatedUser: User) => {
+      console.log('Restaurant profile updated successfully');
+      // Update user in store
+      setUser(updatedUser);
+      
+      // Update cached data
+      queryClient.setQueryData(['auth', 'me'], updatedUser);
+      queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
+    },
   });
 };
 
 export const useResetRestaurantPassword = () => {
+  const { clearError } = useAuthStore();
+
   return useMutation({
-    mutationFn: ({
-      otp,
-      email,
-      newPassword,
-    }: {
+    mutationFn: async (data: {
       otp: string;
       email: string;
       newPassword: string;
-    }) => restaurantAuthApi.resetPassword({ email, otp, newPassword }),
+    }) => {
+      const response = await restaurantAuthApi.resetPassword(data);
+      return response.data;
+    },
+    onMutate: () => {
+      clearError();
+    },
+    onSuccess: (response) => {
+      console.log(
+        'Restaurant password reset successful:',
+        response?.message || 'Password reset successfully',
+      );
+    },
   });
 };
 
 export const useRequestRestaurantPasswordReset = () => {
+  const { clearError } = useAuthStore();
+
   return useMutation({
-    mutationFn: (data: any) =>
-      restaurantAuthApi
-        .requestPasswordReset(data)
-        .then((response) => response.data),
+    mutationFn: async (data: { email: string }) => {
+      const response = await restaurantAuthApi.requestPasswordReset(data);
+      return response.data;
+    },
+    onMutate: () => {
+      clearError();
+    },
+    onSuccess: () => {
+      console.log('Restaurant password reset request sent successfully');
+    },
   });
 };

@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, ScrollView, TouchableOpacity } from 'react-native';
 import { useTheme, Card, RadioButton, Switch } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
 import CommonView from '@/src/components/common/CommonView';
-import { useAppStore } from '@/src/stores/customerStores/AppStore';
+import { useAppStore } from '@/src/stores/AppStore';
+import { Typography, Heading4, Heading5, Body, Label, Caption } from '@/src/components/common/Typography';
 
 type ThemeMode = 'light' | 'dark' | 'system';
 type Language = 'en' | 'fr';
@@ -127,20 +128,16 @@ const ThemeSettingsScreen: React.FC = () => {
             </View>
             
             <View style={{ flex: 1 }}>
-              <Text style={{
-                fontSize: 16,
-                fontWeight: '600',
-                color: colors.onSurface,
-                marginBottom: 2,
-              }}>
+              <Label 
+                color={colors.onSurface}
+                weight="semibold"
+                style={{ marginBottom: 2 }}
+              >
                 {option.label}
-              </Text>
-              <Text style={{
-                fontSize: 12,
-                color: colors.onSurfaceVariant,
-              }}>
+              </Label>
+              <Caption color={colors.onSurfaceVariant}>
                 {option.description}
-              </Text>
+              </Caption>
             </View>
             
             <RadioButton
@@ -181,26 +178,22 @@ const ThemeSettingsScreen: React.FC = () => {
               justifyContent: 'center',
               marginRight: 12,
             }}>
-              <Text style={{ fontSize: 20 }}>
+              <Typography variant="h5">
                 {option.flag}
-              </Text>
+              </Typography>
             </View>
             
             <View style={{ flex: 1 }}>
-              <Text style={{
-                fontSize: 16,
-                fontWeight: '600',
-                color: colors.onSurface,
-                marginBottom: 2,
-              }}>
+              <Label 
+                color={colors.onSurface}
+                weight="semibold"
+                style={{ marginBottom: 2 }}
+              >
                 {option.label}
-              </Text>
-              <Text style={{
-                fontSize: 12,
-                color: colors.onSurfaceVariant,
-              }}>
+              </Label>
+              <Caption color={colors.onSurfaceVariant}>
                 {option.description}
-              </Text>
+              </Caption>
             </View>
             
             <RadioButton
@@ -223,27 +216,27 @@ const ThemeSettingsScreen: React.FC = () => {
        
         {/* Theme Settings */}
         <View style={{ padding: 16 }}>
-          <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.onSurface, marginBottom: 16 }}>
+          <Heading5 color={colors.onSurface} weight="bold" style={{ marginBottom: 16 }}>
             {t('appearance')}
-          </Text>
+          </Heading5>
           
           {themeOptions.map(renderThemeOption)}
         </View>
 
         {/* Language Settings */}
         <View style={{ padding: 16, paddingTop: 0 }}>
-          <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.onSurface, marginBottom: 16 }}>
+          <Heading5 color={colors.onSurface} weight="bold" style={{ marginBottom: 16 }}>
             {t('language')}
-          </Text>
+          </Heading5>
           
           {languageOptions.map(renderLanguageOption)}
         </View>
 
         {/* Theme Preview */}
         <View style={{ padding: 16, paddingTop: 0 }}>
-          <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.onSurface, marginBottom: 16 }}>
+          <Heading5 color={colors.onSurface} weight="bold" style={{ marginBottom: 16 }}>
             {t('preview')}
-          </Text>
+          </Heading5>
           
           <Card style={{ backgroundColor: colors.surface }}>
             <View style={{ padding: 16 }}>
@@ -260,12 +253,12 @@ const ThemeSettingsScreen: React.FC = () => {
                   <MaterialCommunityIcons name="store" size={16} color="white" />
                 </View>
                 <View>
-                  <Text style={{ fontSize: 16, fontWeight: '600', color: colors.onSurface }}>
+                  <Label color={colors.onSurface} weight="semibold">
                     {t('sample_restaurant')}
-                  </Text>
-                  <Text style={{ fontSize: 12, color: colors.onSurfaceVariant }}>
+                  </Label>
+                  <Caption color={colors.onSurfaceVariant}>
                     {t('theme_preview_description')}
-                  </Text>
+                  </Caption>
                 </View>
               </View>
               
@@ -276,9 +269,9 @@ const ThemeSettingsScreen: React.FC = () => {
                   paddingVertical: 6,
                   borderRadius: 16,
                 }}>
-                  <Text style={{ fontSize: 12, color: '#007aff', fontWeight: '600' }}>
+                  <Caption color="#007aff" weight="semibold">
                     {t('primary_color')}
-                  </Text>
+                  </Caption>
                 </View>
                 <View style={{
                   backgroundColor: '#00C85120',
@@ -286,9 +279,9 @@ const ThemeSettingsScreen: React.FC = () => {
                   paddingVertical: 6,
                   borderRadius: 16,
                 }}>
-                  <Text style={{ fontSize: 12, color: '#00C851', fontWeight: '600' }}>
+                  <Caption color="#00C851" weight="semibold">
                     {t('success_color')}
-                  </Text>
+                  </Caption>
                 </View>
                 <View style={{
                   backgroundColor: '#FF880020',
@@ -296,9 +289,9 @@ const ThemeSettingsScreen: React.FC = () => {
                   paddingVertical: 6,
                   borderRadius: 16,
                 }}>
-                  <Text style={{ fontSize: 12, color: '#FF8800', fontWeight: '600' }}>
+                  <Caption color="#FF8800" weight="semibold">
                     {t('warning_color')}
-                  </Text>
+                  </Caption>
                 </View>
               </View>
             </View>

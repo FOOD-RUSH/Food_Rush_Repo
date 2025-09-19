@@ -1,7 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import {
   View,
-  Text,
   ScrollView,
   RefreshControl,
   TouchableOpacity,
@@ -14,6 +13,7 @@ import { RootStackScreenProps } from '@/src/navigation/types';
 import { Order, OrderStatus } from '@/src/types';
 import Toast from 'react-native-toast-message';
 import { useOrderById } from '@/src/hooks/customer/useOrdersApi';
+import { Typography, Heading5, Body, Label, Caption } from '@/src/components/common/Typography';
 
 // Define order status steps for the timeline
 const ORDER_STATUS_STEPS: {
@@ -153,35 +153,35 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order }) => {
       style={{ backgroundColor: colors.surfaceVariant }}
     >
       <View className="flex-row justify-between items-center mb-3">
-        <Text
-          className="font-semibold text-base"
-          style={{ color: colors.onSurface }}
+        <Label
+          color={colors.onSurface}
+          weight="semibold"
         >
           {t('order_details')}
-        </Text>
-        <Text className="font-medium" style={{ color: colors.primary }}>
+        </Label>
+        <Label color={colors.primary} weight="medium">
           #{order.id.substring(0, 8)}
-        </Text>
+        </Label>
       </View>
 
       <View className="border-t border-gray-200 pt-3">
         <View className="flex-row justify-between mb-2">
-          <Text style={{ color: colors.onSurfaceVariant }}>
+          <Body color={colors.onSurfaceVariant}>
             {t('restaurant')}
-          </Text>
-          <Text style={{ color: colors.onSurface }}>Restaurant Name</Text>
+          </Body>
+          <Body color={colors.onSurface}>Restaurant Name</Body>
         </View>
         <View className="flex-row justify-between mb-2">
-          <Text style={{ color: colors.onSurfaceVariant }}>{t('total')}</Text>
-          <Text style={{ color: colors.onSurface }}>
+          <Body color={colors.onSurfaceVariant}>{t('total')}</Body>
+          <Body color={colors.onSurface}>
             {order.total.toLocaleString()} XAF
-          </Text>
+          </Body>
         </View>
         <View className="flex-row justify-between">
-          <Text style={{ color: colors.onSurfaceVariant }}>{t('status')}</Text>
-          <Text style={{ color: colors.primary }}>
+          <Body color={colors.onSurfaceVariant}>{t('status')}</Body>
+          <Body color={colors.primary}>
             {getStatusDisplayText(order.status)}
-          </Text>
+          </Body>
         </View>
       </View>
     </View>
@@ -216,13 +216,13 @@ const ETAComponent: React.FC<ETAComponentProps> = ({ order }) => {
     >
       <Ionicons name="time-outline" size={24} color="#007aff" />
       <View className="ml-3">
-        <Text
-          className="font-semibold text-base"
-          style={{ color: colors.onSurface }}
+        <Label
+          color={colors.onSurface}
+          weight="semibold"
         >
           {t('estimated_arrival')}
-        </Text>
-        <Text style={{ color: colors.primary }}>{getETA()}</Text>
+        </Label>
+        <Body color={colors.primary}>{getETA()}</Body>
       </View>
     </View>
   );
@@ -260,7 +260,7 @@ const OrderTrackingScreen = ({
           className="flex-1 items-center justify-center"
           style={{ backgroundColor: colors.background }}
         >
-          <Text>{t('loading')}</Text>
+          <Body>{t('loading')}</Body>
         </View>
       </CommonView>
     );
@@ -278,26 +278,28 @@ const OrderTrackingScreen = ({
             size={48}
             color={colors.error}
           />
-          <Text
-            className="text-xl font-semibold mt-4"
-            style={{ color: colors.onSurface }}
+          <Heading5
+            color={colors.onSurface}
+            weight="semibold"
+            style={{ marginTop: 16 }}
           >
             {error ? t('error_loading_order') : t('order_not_found')}
-          </Text>
-          <Text
-            className="mt-2 text-center px-8"
-            style={{ color: colors.onSurfaceVariant }}
+          </Heading5>
+          <Body
+            color={colors.onSurfaceVariant}
+            align="center"
+            style={{ marginTop: 8, paddingHorizontal: 32 }}
           >
             {error
               ? t('failed_to_load_order_details')
               : t('could_not_find_order_details')}
-          </Text>
+          </Body>
           <TouchableOpacity
             className="mt-6 px-6 py-3 rounded-xl"
             style={{ backgroundColor: colors.primary }}
             onPress={() => navigation.goBack()}
           >
-            <Text className="text-white font-medium">{t('go_back')}</Text>
+            <Label color="white" weight="medium">{t('go_back')}</Label>
           </TouchableOpacity>
         </View>
       </CommonView>
@@ -323,12 +325,13 @@ const OrderTrackingScreen = ({
 
           {/* Progress Timeline */}
           <View className="mb-6">
-            <Text
-              className="text-xl font-bold mb-4"
-              style={{ color: colors.onSurface }}
+            <Heading5
+              color={colors.onSurface}
+              weight="bold"
+              style={{ marginBottom: 16 }}
             >
               {t('order_status')}
-            </Text>
+            </Heading5>
 
             {/* Horizontal Status Steps */}
             <View className="flex-row items-center mb-6">
@@ -354,18 +357,18 @@ const OrderTrackingScreen = ({
                 className="p-4 rounded-xl"
                 style={{ backgroundColor: colors.surfaceVariant }}
               >
-                <Text
-                  className="text-base font-semibold mb-2"
-                  style={{ color: colors.onSurface }}
+                <Label
+                  color={colors.onSurface}
+                  weight="semibold"
+                  style={{ marginBottom: 8 }}
                 >
                   {ORDER_STATUS_STEPS[currentStepIndex]?.title}
-                </Text>
-                <Text
-                  className="text-sm"
-                  style={{ color: colors.onSurfaceVariant }}
+                </Label>
+                <Caption
+                  color={colors.onSurfaceVariant}
                 >
                   {ORDER_STATUS_STEPS[currentStepIndex]?.description}
-                </Text>
+                </Caption>
               </View>
             )}
           </View>
@@ -388,12 +391,13 @@ const OrderTrackingScreen = ({
               size={20}
               color={colors.primary}
             />
-            <Text
-              className="font-medium ml-2"
-              style={{ color: colors.primary }}
+            <Label
+              color={colors.primary}
+              weight="medium"
+              style={{ marginLeft: 8 }}
             >
               {t('contact_support')}
-            </Text>
+            </Label>
           </TouchableOpacity>
         </View>
       </ScrollView>

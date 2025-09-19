@@ -5,8 +5,8 @@ import { AntDesign, MaterialIcons } from '@expo/vector-icons';
 import RowView from '@/src/components/common/RowView';
 import { CustomerProfileStackScreenProps } from '@/src/navigation/types';
 import CommonView from '@/src/components/common/CommonView';
-import { useAppStore } from '@/src/stores/customerStores/AppStore';
-import { useAuthStore } from '@/src/stores/customerStores/AuthStore';
+import { useAppStore } from '@/src/stores/AppStore';
+import { useAuthStore, useCustomerProfile } from '@/src/stores/AuthStore';
 import { useBottomSheet } from '@/src/components/common/BottomSheet/BottomSheetContext';
 import LogoutContent from '@/src/components/common/BottomSheet/LogoutContent';
 import { icons } from '@/assets/images';
@@ -18,20 +18,20 @@ const ProfileHomeScreen = ({
   const { colors } = useTheme();
   const theme = useAppStore((state) => state.theme);
   const setTheme = useAppStore((state) => state.setTheme);
-  const logoutUser = useAuthStore((state) => state.logoutUser);
-  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
+  const user = useCustomerProfile();
   const { present, dismiss, isPresented } = useBottomSheet();
   const { t } = useTranslation('translation');
 
   const handleLogout = useCallback(() => {
     try {
       console.log('Logging out user');
-      logoutUser();
+      logout();
     } catch (error) {
       console.error('Logout error:', error);
       Alert.alert(t('error'), t('failed_to_logout'));
     }
-  }, [logoutUser, t]);
+  }, [logout, t]);
 
   const showLogoutModal = useCallback(() => {
     // Prevent multiple presentations
@@ -135,6 +135,35 @@ const ProfileHomeScreen = ({
             >
               {user?.fullName || t('full_name')}
             </Text>
+            {user?.email && (
+              <Text
+                style={{ color: colors.onSurfaceVariant }}
+                className="text-sm mt-1"
+              >
+                {user.email}
+              </Text>
+            )}
+            {user?.phoneNumber && (
+              <Text
+                style={{ color: colors.onSurfaceVariant }}
+                className="text-sm"
+              >
+                {user.phoneNumber}
+              </Text>
+            )}
+            {user?.status && (
+              <Text
+                style={{ 
+                  color: user.status === 'active' ? '#00D084' : colors.onSurfaceVariant,
+                  fontSize: 12,
+                  fontWeight: '500',
+                  marginTop: 4,
+                  textTransform: 'capitalize'
+                }}
+              >
+                {user.status}
+              </Text>
+            )}
           </View>
           <TouchableOpacity activeOpacity={0.7} onPress={navigateToEditProfile}>
             <AntDesign name="edit" color={'#007aff'} size={25} />

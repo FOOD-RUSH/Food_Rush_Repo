@@ -2,7 +2,7 @@ import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { Button, IconButton, useTheme } from 'react-native-paper';
 import { AuthStackScreenProps } from '@/src/navigation/types';
-import { useAuthStore } from '@/src/stores/customerStores/AuthStore';
+import { useAuthStore } from '@/src/stores/AuthStore';
 import CommonView from '@/src/components/common/CommonView';
 import Toast from 'react-native-toast-message';
 import { useNetwork } from '@/src/contexts/NetworkContext';

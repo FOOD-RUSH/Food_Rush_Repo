@@ -5,7 +5,7 @@ import {
   DarkTheme,
   Theme as NavigationTheme,
 } from '@react-navigation/native';
-import { useAppStore } from '../stores/customerStores/AppStore';
+import { useAppStore } from '../stores/AppStore';
 import {
   restaurantDarkNavigationTheme,
   restaurantLightNavigationTheme,

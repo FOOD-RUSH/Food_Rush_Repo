@@ -33,11 +33,44 @@ export function reset<T extends keyof RootStackParamList>(
   name: T,
   params?: RootStackParamList[T],
 ) {
+  console.log('Reset function called with:', { name, params });
   if (navigationRef.isReady()) {
-    navigationRef.reset({
-      index: 0,
-      routes: [{ name, params }],
-    });
+    console.log('Navigation is ready, performing reset...');
+    try {
+      navigationRef.reset({
+        index: 0,
+        routes: [{ name, params }],
+      });
+      console.log('Navigation reset completed successfully');
+    } catch (error) {
+      console.error('Error during navigation reset:', error);
+      // Fallback: try simple navigate
+      try {
+        console.log('Attempting fallback navigation...');
+        navigationRef.navigate(name as any, params);
+      } catch (fallbackError) {
+        console.error('Fallback navigation also failed:', fallbackError);
+      }
+    }
+  } else {
+    console.warn('Navigation is not ready for reset');
+    // Retry after a short delay
+    setTimeout(() => {
+      console.log('Retrying navigation reset...');
+      if (navigationRef.isReady()) {
+        try {
+          navigationRef.reset({
+            index: 0,
+            routes: [{ name, params }],
+          });
+          console.log('Delayed navigation reset completed');
+        } catch (error) {
+          console.error('Delayed navigation reset failed:', error);
+        }
+      } else {
+        console.error('Navigation still not ready after delay');
+      }
+    }, 100);
   }
 }
 

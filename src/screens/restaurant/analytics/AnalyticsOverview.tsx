@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   View,
-  Text,
   ScrollView,
   TouchableOpacity,
   RefreshControl,
@@ -14,6 +13,7 @@ import * as Haptics from 'expo-haptics';
 
 import CommonView from '@/src/components/common/CommonView';
 import { RestaurantAnalyticsStackScreenProps } from '@/src/navigation/types';
+import { Typography, Heading1, Heading5, Heading6, Body, Label, Caption, Overline } from '@/src/components/common/Typography';
 
 interface MetricCardProps {
   title: string;
@@ -109,47 +109,35 @@ const MetricCard: React.FC<MetricCardProps> = ({
               size={16}
               color={getChangeColor()}
             />
-            <Text
-              style={{
-                fontSize: 11,
-                color: getChangeColor(),
-                fontWeight: '600',
-                marginLeft: 4,
-              }}
+            <Overline
+              color={getChangeColor()}
+              weight="semibold"
+              style={{ marginLeft: 4 }}
             >
               {change}
-            </Text>
+            </Overline>
           </View>
         </View>
-        <Text
-          style={{
-            fontSize: 28,
-            fontWeight: 'bold',
-            color: colors.onSurface,
-            marginBottom: 4,
-          }}
+        <Heading1
+          color={colors.onSurface}
+          weight="bold"
+          style={{ marginBottom: 4 }}
         >
           {value}
-        </Text>
-        <Text
-          style={{
-            fontSize: 14,
-            color: colors.onSurfaceVariant,
-            fontWeight: '500',
-          }}
+        </Heading1>
+        <Body
+          color={colors.onSurfaceVariant}
+          weight="medium"
         >
           {title}
-        </Text>
+        </Body>
         {subtitle && (
-          <Text
-            style={{
-              fontSize: 12,
-              color: colors.onSurfaceVariant,
-              marginTop: 2,
-            }}
+          <Caption
+            color={colors.onSurfaceVariant}
+            style={{ marginTop: 2 }}
           >
             {subtitle}
-          </Text>
+          </Caption>
         )}
       </View>
     </Card>
@@ -186,24 +174,18 @@ const SimpleBarChart: React.FC<{ data: ChartData[]; maxHeight?: number }> = ({
                 marginBottom: 4,
               }}
             />
-            <Text
-              style={{
-                fontSize: 10,
-                color: colors.onSurfaceVariant,
-                textAlign: 'center',
-              }}
+            <Overline
+              color={colors.onSurfaceVariant}
+              align="center"
             >
               {item.label}
-            </Text>
-            <Text
-              style={{
-                fontSize: 10,
-                fontWeight: 'bold',
-                color: colors.onSurface,
-              }}
+            </Overline>
+            <Overline
+              color={colors.onSurface}
+              weight="bold"
             >
               {item.value}
-            </Text>
+            </Overline>
           </View>
         );
       })}
@@ -258,11 +240,12 @@ const ProgressRing: React.FC<{
           transform: [{ rotate: `${(percentage / 100) * 360}deg` }],
         }}
       />
-      <Text
-        style={{ fontSize: 12, fontWeight: 'bold', color: colors.onSurface }}
+      <Caption
+        color={colors.onSurface}
+        weight="bold"
       >
         {percentage}%
-      </Text>
+      </Caption>
     </View>
   );
 };
@@ -460,24 +443,18 @@ const AnalyticsOverview: React.FC<
       >
         {/* Header */}
         <View style={{ padding: 16, paddingBottom: 0 }}>
-          <Text
-            style={{
-              fontSize: 28,
-              fontWeight: 'bold',
-              color: colors.onBackground,
-            }}
+          <Heading1
+            color={colors.onBackground}
+            weight="bold"
           >
             {t('analytics')}
-          </Text>
-          <Text
-            style={{
-              fontSize: 14,
-              color: colors.onSurfaceVariant,
-              marginTop: 4,
-            }}
+          </Heading1>
+          <Body
+            color={colors.onSurfaceVariant}
+            style={{ marginTop: 4 }}
           >
             {t('track_your_performance')}
-          </Text>
+          </Body>
         </View>
 
         {/* Period Selector */}
@@ -504,17 +481,16 @@ const AnalyticsOverview: React.FC<
                 marginRight: 8,
               }}
             >
-              <Text
-                style={{
-                  fontWeight: '600',
-                  color:
-                    selectedPeriod === period.key
-                      ? 'white'
-                      : colors.onSurfaceVariant,
-                }}
+              <Label
+                color={
+                  selectedPeriod === period.key
+                    ? 'white'
+                    : colors.onSurfaceVariant
+                }
+                weight="semibold"
               >
                 {period.label}
-              </Text>
+              </Label>
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -575,31 +551,25 @@ const AnalyticsOverview: React.FC<
                   marginBottom: 16,
                 }}
               >
-                <Text
-                  style={{
-                    fontSize: 18,
-                    fontWeight: 'bold',
-                    color: colors.onSurface,
-                  }}
+                <Heading5
+                  color={colors.onSurface}
+                  weight="bold"
                 >
                   {t('weekly_orders')}
-                </Text>
+                </Heading5>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <MaterialCommunityIcons
                     name="trending-up"
                     size={16}
                     color="#00D084"
                   />
-                  <Text
-                    style={{
-                      fontSize: 12,
-                      color: '#00D084',
-                      fontWeight: '600',
-                      marginLeft: 4,
-                    }}
+                  <Caption
+                    color="#00D084"
+                    weight="semibold"
+                    style={{ marginLeft: 4 }}
                   >
                     +18%
-                  </Text>
+                  </Caption>
                 </View>
               </View>
               <SimpleBarChart data={weeklyOrdersData} maxHeight={80} />
@@ -611,16 +581,13 @@ const AnalyticsOverview: React.FC<
         <View style={{ padding: 16, paddingTop: 0 }}>
           <Card style={{ backgroundColor: colors.surface, borderRadius: 16 }}>
             <View style={{ padding: 16 }}>
-              <Text
-                style={{
-                  fontSize: 18,
-                  fontWeight: 'bold',
-                  color: colors.onSurface,
-                  marginBottom: 16,
-                }}
+              <Heading5
+                color={colors.onSurface}
+                weight="bold"
+                style={{ marginBottom: 16 }}
               >
                 {t('performance_metrics')}
-              </Text>
+              </Heading5>
               <View
                 style={{
                   flexDirection: 'row',
@@ -632,64 +599,52 @@ const AnalyticsOverview: React.FC<
                     percentage={performanceMetrics.customerSatisfaction}
                     color="#00D084"
                   />
-                  <Text
-                    style={{
-                      fontSize: 12,
-                      color: colors.onSurfaceVariant,
-                      marginTop: 8,
-                      textAlign: 'center',
-                    }}
+                  <Caption
+                    color={colors.onSurfaceVariant}
+                    align="center"
+                    style={{ marginTop: 8 }}
                   >
                     {t('customer_satisfaction')}
-                  </Text>
+                  </Caption>
                 </View>
                 <View style={{ alignItems: 'center', flex: 1 }}>
                   <ProgressRing
                     percentage={performanceMetrics.orderAccuracy}
                     color="#007aff"
                   />
-                  <Text
-                    style={{
-                      fontSize: 12,
-                      color: colors.onSurfaceVariant,
-                      marginTop: 8,
-                      textAlign: 'center',
-                    }}
+                  <Caption
+                    color={colors.onSurfaceVariant}
+                    align="center"
+                    style={{ marginTop: 8 }}
                   >
                     {t('order_accuracy')}
-                  </Text>
+                  </Caption>
                 </View>
                 <View style={{ alignItems: 'center', flex: 1 }}>
                   <ProgressRing
                     percentage={performanceMetrics.deliveryTime}
                     color="#FF9500"
                   />
-                  <Text
-                    style={{
-                      fontSize: 12,
-                      color: colors.onSurfaceVariant,
-                      marginTop: 8,
-                      textAlign: 'center',
-                    }}
+                  <Caption
+                    color={colors.onSurfaceVariant}
+                    align="center"
+                    style={{ marginTop: 8 }}
                   >
                     {t('delivery_time')}
-                  </Text>
+                  </Caption>
                 </View>
                 <View style={{ alignItems: 'center', flex: 1 }}>
                   <ProgressRing
                     percentage={performanceMetrics.repeatCustomers}
                     color="#8B5CF6"
                   />
-                  <Text
-                    style={{
-                      fontSize: 12,
-                      color: colors.onSurfaceVariant,
-                      marginTop: 8,
-                      textAlign: 'center',
-                    }}
+                  <Caption
+                    color={colors.onSurfaceVariant}
+                    align="center"
+                    style={{ marginTop: 8 }}
                   >
                     {t('repeat_customers')}
-                  </Text>
+                  </Caption>
                 </View>
               </View>
             </View>
@@ -700,16 +655,13 @@ const AnalyticsOverview: React.FC<
         <View style={{ padding: 16, paddingTop: 0 }}>
           <Card style={{ backgroundColor: colors.surface, borderRadius: 16 }}>
             <View style={{ padding: 16 }}>
-              <Text
-                style={{
-                  fontSize: 18,
-                  fontWeight: 'bold',
-                  color: colors.onSurface,
-                  marginBottom: 16,
-                }}
+              <Heading5
+                color={colors.onSurface}
+                weight="bold"
+                style={{ marginBottom: 16 }}
               >
                 {t('top_categories')}
-              </Text>
+              </Heading5>
               {topCategories.map((category, index) => (
                 <View
                   key={index}
@@ -736,22 +688,17 @@ const AnalyticsOverview: React.FC<
                         marginRight: 12,
                       }}
                     />
-                    <Text
-                      style={{ fontSize: 14, color: colors.onSurface, flex: 1 }}
-                    >
+                    <Body color={colors.onSurface}>
                       {category.name}
-                    </Text>
+                    </Body>
                   </View>
                   <View style={{ alignItems: 'flex-end' }}>
-                    <Text
-                      style={{
-                        fontSize: 14,
-                        fontWeight: '600',
-                        color: colors.onSurface,
-                      }}
+                    <Body
+                      color={colors.onSurface}
+                      weight="semibold"
                     >
                       {category.orders} {t('orders')}
-                    </Text>
+                    </Body>
                     <View
                       style={{
                         width: 60,
@@ -779,16 +726,13 @@ const AnalyticsOverview: React.FC<
 
         {/* Quick Actions */}
         <View style={{ padding: 16 }}>
-          <Text
-            style={{
-              fontSize: 18,
-              fontWeight: 'bold',
-              color: colors.onSurface,
-              marginBottom: 12,
-            }}
+          <Heading5
+            color={colors.onSurface}
+            weight="bold"
+            style={{ marginBottom: 12 }}
           >
             {t('detailed_reports')}
-          </Text>
+          </Heading5>
 
           <Card style={{ marginBottom: 12, backgroundColor: colors.surface }}>
             <TouchableOpacity
@@ -809,20 +753,15 @@ const AnalyticsOverview: React.FC<
                     color="#FF9500"
                   />
                   <View style={{ marginLeft: 12 }}>
-                    <Text
-                      style={{
-                        fontSize: 16,
-                        fontWeight: '600',
-                        color: colors.onSurface,
-                      }}
+                    <Label
+                      color={colors.onSurface}
+                      weight="semibold"
                     >
                       {t('best_sellers')}
-                    </Text>
-                    <Text
-                      style={{ fontSize: 12, color: colors.onSurfaceVariant }}
-                    >
+                    </Label>
+                    <Caption color={colors.onSurfaceVariant}>
                       {t('top_performing_items')}
-                    </Text>
+                    </Caption>
                   </View>
                 </View>
                 <MaterialCommunityIcons
@@ -853,20 +792,15 @@ const AnalyticsOverview: React.FC<
                     color="#007aff"
                   />
                   <View style={{ marginLeft: 12 }}>
-                    <Text
-                      style={{
-                        fontSize: 16,
-                        fontWeight: '600',
-                        color: colors.onSurface,
-                      }}
+                    <Label
+                      color={colors.onSurface}
+                      weight="semibold"
                     >
                       {t('time_heatmap')}
-                    </Text>
-                    <Text
-                      style={{ fontSize: 12, color: colors.onSurfaceVariant }}
-                    >
+                    </Label>
+                    <Caption color={colors.onSurfaceVariant}>
                       {t('hourly_order_patterns')}
-                    </Text>
+                    </Caption>
                   </View>
                 </View>
                 <MaterialCommunityIcons
@@ -881,16 +815,13 @@ const AnalyticsOverview: React.FC<
 
         {/* Payment Methods Breakdown */}
         <View style={{ padding: 16, paddingTop: 0 }}>
-          <Text
-            style={{
-              fontSize: 18,
-              fontWeight: 'bold',
-              color: colors.onSurface,
-              marginBottom: 12,
-            }}
+          <Heading5
+            color={colors.onSurface}
+            weight="bold"
+            style={{ marginBottom: 12 }}
           >
             {t('payment_methods')}
-          </Text>
+          </Heading5>
 
           <Card style={{ backgroundColor: colors.surface }}>
             <View style={{ padding: 16 }}>
@@ -924,19 +855,16 @@ const AnalyticsOverview: React.FC<
                         marginRight: 12,
                       }}
                     />
-                    <Text style={{ fontSize: 14, color: colors.onSurface }}>
+                    <Body color={colors.onSurface}>
                       {payment.method}
-                    </Text>
+                    </Body>
                   </View>
-                  <Text
-                    style={{
-                      fontSize: 14,
-                      fontWeight: '600',
-                      color: colors.onSurface,
-                    }}
+                  <Body
+                    color={colors.onSurface}
+                    weight="semibold"
                   >
                     {payment.percentage}%
-                  </Text>
+                  </Body>
                 </View>
               ))}
             </View>

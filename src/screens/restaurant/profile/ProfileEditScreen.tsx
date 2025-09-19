@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import * as ImagePicker from 'expo-image-picker';
 
 import CommonView from '@/src/components/common/CommonView';
-import { useUser } from '@/src/stores/customerStores/AuthStore';
+import { useRestaurantProfile, useCurrentRestaurant } from '@/src/stores/AuthStore';
 
 interface ProfileEditScreenProps {
   navigation: any;
@@ -15,13 +15,14 @@ interface ProfileEditScreenProps {
 const ProfileEditScreen: React.FC<ProfileEditScreenProps> = ({ navigation }) => {
   const { t } = useTranslation();
   const { colors } = useTheme();
-  const user = useUser();
+  const user = useRestaurantProfile();
+  const currentRestaurant = useCurrentRestaurant();
 
   const [formData, setFormData] = useState({
     fullName: user?.fullName || '',
     email: user?.email || '',
     phoneNumber: user?.phoneNumber || '',
-    restaurantName: user?.restaurantName || '',
+    restaurantName: currentRestaurant?.name || user?.businessName || '',
     address: '',
     bio: '',
     website: '',

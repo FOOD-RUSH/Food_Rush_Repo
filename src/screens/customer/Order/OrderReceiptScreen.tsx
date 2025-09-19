@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   View,
-  Text,
   ScrollView,
   TouchableOpacity,
   Image,
@@ -25,6 +24,7 @@ import {
   useOrderStatus,
 } from '@/src/hooks/customer/useOrdersApi';
 import { Order } from '@/src/types';
+import { Typography, Heading2, Heading5, Body, Label, Caption } from '@/src/components/common/Typography';
 
 const OrderReceiptScreen = ({
   navigation,
@@ -47,12 +47,12 @@ const OrderReceiptScreen = ({
       <CommonView>
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color={colors.primary} />
-          <Text
-            className="mt-4 text-base"
-            style={{ color: colors.onSurfaceVariant }}
+          <Body
+            color={colors.onSurfaceVariant}
+            style={{ marginTop: 16 }}
           >
             {t('loading_order_details')}
-          </Text>
+          </Body>
         </View>
       </CommonView>
     );
@@ -68,24 +68,27 @@ const OrderReceiptScreen = ({
             size={64}
             color={colors.error}
           />
-          <Text
-            className="mt-4 text-lg font-semibold text-center"
-            style={{ color: colors.error }}
+          <Heading5
+            color={colors.error}
+            weight="semibold"
+            align="center"
+            style={{ marginTop: 16 }}
           >
             {t('error_loading_order')}
-          </Text>
-          <Text
-            className="mt-2 text-base text-center"
-            style={{ color: colors.onSurfaceVariant }}
+          </Heading5>
+          <Body
+            color={colors.onSurfaceVariant}
+            align="center"
+            style={{ marginTop: 8 }}
           >
             {t('please_try_again')}
-          </Text>
+          </Body>
           <TouchableOpacity
             onPress={() => refetch()}
             className="mt-4 px-6 py-3 rounded-xl"
             style={{ backgroundColor: colors.primary }}
           >
-            <Text className="text-white font-semibold">{t('retry')}</Text>
+            <Label color="white" weight="semibold">{t('retry')}</Label>
           </TouchableOpacity>
         </View>
       </CommonView>
@@ -153,12 +156,12 @@ const OrderReceiptScreen = ({
           style={{ backgroundColor: colors.surface }}
         >
           <View className="flex-row justify-between items-center mb-4">
-            <Text
-              className="text-2xl font-bold"
-              style={{ color: colors.onSurface }}
+            <Heading2
+              color={colors.onSurface}
+              weight="bold"
             >
               {t('order_receipt')}
-            </Text>
+            </Heading2>
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <Ionicons name="close" size={24} color={colors.onSurface} />
             </TouchableOpacity>
@@ -167,18 +170,17 @@ const OrderReceiptScreen = ({
           {/* Order Info */}
           <View className="flex-row justify-between items-center mb-4">
             <View>
-              <Text
-                className="text-lg font-semibold"
-                style={{ color: colors.onSurface }}
+              <Heading5
+                color={colors.onSurface}
+                weight="semibold"
               >
                 {orderNumber}
-              </Text>
-              <Text
-                className="text-sm"
-                style={{ color: colors.onSurfaceVariant }}
+              </Heading5>
+              <Caption
+                color={colors.onSurfaceVariant}
               >
                 {formatDate(order.createdAt)}
-              </Text>
+              </Caption>
             </View>
             <View className="flex-row items-center">
               <Ionicons
@@ -186,12 +188,13 @@ const OrderReceiptScreen = ({
                 size={16}
                 color={getStatusColor(order.status)}
               />
-              <Text
-                className="ml-2 text-sm font-medium capitalize"
-                style={{ color: getStatusColor(order.status) }}
+              <Caption
+                color={getStatusColor(order.status)}
+                weight="medium"
+                style={{ marginLeft: 8, textTransform: 'capitalize' }}
               >
                 {orderStatus.label}
-              </Text>
+              </Caption>
             </View>
           </View>
 
@@ -211,19 +214,19 @@ const OrderReceiptScreen = ({
                   resizeMode="cover"
                 />
                 <View className="flex-1">
-                  <Text
-                    className="text-base font-semibold"
-                    style={{ color: colors.onSurface }}
+                  <Label
+                    color={colors.onSurface}
+                    weight="semibold"
                   >
                     {t('restaurant_details_placeholder')}
-                  </Text>
-                  <Text
-                    className="text-sm mt-1"
-                    style={{ color: colors.onSurfaceVariant }}
+                  </Label>
+                  <Caption
+                    color={colors.onSurfaceVariant}
                     numberOfLines={2}
+                    style={{ marginTop: 4 }}
                   >
                     {t('restaurant_address_placeholder')}
-                  </Text>
+                  </Caption>
                 </View>
                 {order.delivery?.rider?.phoneNumber && (
                   <TouchableOpacity
@@ -243,12 +246,13 @@ const OrderReceiptScreen = ({
 
         {/* Order Items */}
         <View className="p-6" style={{ backgroundColor: colors.surface }}>
-          <Text
-            className="text-lg font-semibold mb-4"
-            style={{ color: colors.onSurface }}
+          <Heading5
+            color={colors.onSurface}
+            weight="semibold"
+            style={{ marginBottom: 16 }}
           >
             {t('order_items')} ({order.items.length})
-          </Text>
+          </Heading5>
 
           {order.items.map((item, index) => (
             <View key={item.foodId} className="mb-4">
@@ -259,34 +263,34 @@ const OrderReceiptScreen = ({
                   resizeMode="cover"
                 />
                 <View className="flex-1">
-                  <Text
-                    className="text-base font-semibold"
-                    style={{ color: colors.onSurface }}
+                  <Label
+                    color={colors.onSurface}
+                    weight="semibold"
                   >
                     {item.name}
-                  </Text>
+                  </Label>
                   {item.specialInstructions && (
-                    <Text
-                      className="text-sm mt-1"
-                      style={{ color: colors.onSurfaceVariant }}
+                    <Caption
+                      color={colors.onSurfaceVariant}
                       numberOfLines={2}
+                      style={{ marginTop: 4 }}
                     >
                       {t('special_instructions')}: {item.specialInstructions}
-                    </Text>
+                    </Caption>
                   )}
-                  <Text
-                    className="text-sm mt-1"
-                    style={{ color: colors.onSurfaceVariant }}
+                  <Caption
+                    color={colors.onSurfaceVariant}
+                    style={{ marginTop: 4 }}
                   >
                     {t('quantity')}: {item.quantity}
-                  </Text>
+                  </Caption>
                 </View>
-                <Text
-                  className="text-base font-semibold"
-                  style={{ color: colors.onSurface }}
+                <Label
+                  color={colors.onSurface}
+                  weight="semibold"
                 >
                   {item.total} {currency}
-                </Text>
+                </Label>
               </View>
               {index < order.items.length - 1 && <Divider className="my-4" />}
             </View>
@@ -297,47 +301,48 @@ const OrderReceiptScreen = ({
 
         {/* Pricing Breakdown */}
         <View className="p-6" style={{ backgroundColor: colors.surface }}>
-          <Text
-            className="text-lg font-semibold mb-4"
-            style={{ color: colors.onSurface }}
+          <Heading5
+            color={colors.onSurface}
+            weight="semibold"
+            style={{ marginBottom: 16 }}
           >
             {t('pricing_breakdown')}
-          </Text>
+          </Heading5>
 
           <View className="space-y-2">
             <View className="flex-row justify-between">
-              <Text style={{ color: colors.onSurfaceVariant }}>
+              <Body color={colors.onSurfaceVariant}>
                 {t('subtotal')}
-              </Text>
-              <Text style={{ color: colors.onSurface }}>
+              </Body>
+              <Body color={colors.onSurface}>
                 {order.subtotal} {currency}
-              </Text>
+              </Body>
             </View>
 
             <View className="flex-row justify-between">
-              <Text style={{ color: colors.onSurfaceVariant }}>
+              <Body color={colors.onSurfaceVariant}>
                 {t('delivery_fee')}
-              </Text>
-              <Text style={{ color: colors.onSurface }}>
+              </Body>
+              <Body color={colors.onSurface}>
                 {order.deliveryPrice} {currency}
-              </Text>
+              </Body>
             </View>
 
             <Divider className="my-3" />
 
             <View className="flex-row justify-between">
-              <Text
-                className="text-lg font-semibold"
-                style={{ color: colors.onSurface }}
+              <Heading5
+                color={colors.onSurface}
+                weight="semibold"
               >
                 {t('total')}
-              </Text>
-              <Text
-                className="text-lg font-semibold"
-                style={{ color: colors.primary }}
+              </Heading5>
+              <Heading5
+                color={colors.primary}
+                weight="semibold"
               >
                 {order.total} {currency}
-              </Text>
+              </Heading5>
             </View>
           </View>
         </View>
@@ -346,58 +351,60 @@ const OrderReceiptScreen = ({
 
         {/* Delivery & Payment Info */}
         <View className="p-6" style={{ backgroundColor: colors.surface }}>
-          <Text
-            className="text-lg font-semibold mb-4"
-            style={{ color: colors.onSurface }}
+          <Heading5
+            color={colors.onSurface}
+            weight="semibold"
+            style={{ marginBottom: 16 }}
           >
             {t('delivery_information')}
-          </Text>
+          </Heading5>
 
           <View className="mb-6">
-            <Text
-              className="text-sm font-medium mb-2"
-              style={{ color: colors.onSurface }}
+            <Caption
+              color={colors.onSurface}
+              weight="medium"
+              style={{ marginBottom: 8 }}
             >
               {t('delivery_address')}
-            </Text>
-            <Text
-              className="text-sm"
-              style={{ color: colors.onSurfaceVariant }}
+            </Caption>
+            <Caption
+              color={colors.onSurfaceVariant}
             >
               {t('delivery_address_placeholder')}
-            </Text>
+            </Caption>
           </View>
 
           <View className="mb-6">
-            <Text
-              className="text-sm font-medium mb-2"
-              style={{ color: colors.onSurface }}
+            <Caption
+              color={colors.onSurface}
+              weight="medium"
+              style={{ marginBottom: 8 }}
             >
               {t('order_status')}
-            </Text>
-            <Text
-              className="text-sm"
-              style={{ color: colors.onSurfaceVariant }}
+            </Caption>
+            <Caption
+              color={colors.onSurfaceVariant}
             >
               {orderStatus.description}
-            </Text>
+            </Caption>
             {order.delivery?.deliveredAt && (
-              <Text
-                className="text-sm mt-1"
-                style={{ color: colors.onSurfaceVariant }}
+              <Caption
+                color={colors.onSurfaceVariant}
+                style={{ marginTop: 4 }}
               >
                 {t('delivered_at')}: {formatDate(order.delivery.deliveredAt)}
-              </Text>
+              </Caption>
             )}
           </View>
 
           <View>
-            <Text
-              className="text-lg font-semibold mb-4"
-              style={{ color: colors.onSurface }}
+            <Heading5
+              color={colors.onSurface}
+              weight="semibold"
+              style={{ marginBottom: 16 }}
             >
               {t('payment_information')}
-            </Text>
+            </Heading5>
             <View className="flex-row items-center">
               <FontAwesome5
                 name={
@@ -412,22 +419,21 @@ const OrderReceiptScreen = ({
                 style={{ marginRight: 12 }}
               />
               <View>
-                <Text
-                  className="text-sm font-medium"
-                  style={{ color: colors.onSurface }}
+                <Caption
+                  color={colors.onSurface}
+                  weight="medium"
                 >
                   {order.paymentMethod === 'mtn_mobile_money'
                     ? 'MTN Mobile Money'
                     : order.paymentMethod === 'orange_money'
                       ? 'Orange Money'
                       : order.paymentMethod}
-                </Text>
-                <Text
-                  className="text-sm"
-                  style={{ color: colors.onSurfaceVariant }}
+                </Caption>
+                <Caption
+                  color={colors.onSurfaceVariant}
                 >
                   {t('payment_completed')}
-                </Text>
+                </Caption>
               </View>
             </View>
           </View>
@@ -447,9 +453,9 @@ const OrderReceiptScreen = ({
                 color={colors.primary}
                 style={{ marginBottom: 4 }}
               />
-              <Text style={{ color: colors.primary, fontWeight: '600' }}>
+              <Label color={colors.primary} weight="semibold">
                 {t('share_receipt')}
-              </Text>
+              </Label>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -463,9 +469,9 @@ const OrderReceiptScreen = ({
                 color="white"
                 style={{ marginBottom: 4 }}
               />
-              <Text style={{ color: 'white', fontWeight: '600' }}>
+              <Label color="white" weight="semibold">
                 {t('order_again')}
-              </Text>
+              </Label>
             </TouchableOpacity>
           </View>
         </View>

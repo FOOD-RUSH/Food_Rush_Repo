@@ -1,0 +1,308 @@
+import { create } from 'zustand';
+import { createJSONStorage, devtools, persist } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  restaurantNotificationApi,
+  type NotificationListParams,
+} from '@/src/services/restaurant/notificationApi';
+import type { Notification } from '@/src/types';
+
+interface RestaurantNotificationState {
+  notifications: Notification[];
+  unreadCount: number;
+  isLoading: boolean;
+  isLoadingMore: boolean;
+  error: string | null;
+  hasNextPage: boolean;
+  currentPage: number;
+  totalPages: number;
+  total: number;
+  selectedFilter: 'all' | 'order' | 'system' | 'promotion' | 'alert' | 'unread';
+}
+
+interface RestaurantNotificationActions {
+  // Fetch notifications with pagination
+  fetchNotifications: (params?: NotificationListParams, append?: boolean) => Promise<void>;
+
+  // Load more notifications (pagination)
+  loadMoreNotifications: () => Promise<void>;
+
+  // Mark notification as read
+  markAsRead: (notificationId: string) => Promise<void>;
+
+  // Mark all notifications as read
+  markAllAsRead: () => Promise<void>;
+
+  // Delete notification
+  deleteNotification: (notificationId: string) => Promise<void>;
+
+  // Update unread count
+  updateUnreadCount: () => Promise<void>;
+
+  // Add new notification (for push notifications)
+  addNotification: (notification: Notification) => void;
+
+  // Set filter
+  setFilter: (filter: RestaurantNotificationState['selectedFilter']) => void;
+
+  // Clear error
+  clearError: () => void;
+
+  // Reset store
+  reset: () => void;
+
+  // Refresh notifications (pull to refresh)
+  refreshNotifications: () => Promise<void>;
+
+  // Register push token
+  registerPushToken: (token: string, deviceInfo?: any) => Promise<void>;
+
+  // Unregister push token
+  unregisterPushToken: (token: string) => Promise<void>;
+}
+
+const initialState: RestaurantNotificationState = {
+  notifications: [],
+  unreadCount: 0,
+  isLoading: false,
+  isLoadingMore: false,
+  error: null,
+  hasNextPage: true,
+  currentPage: 1,
+  totalPages: 1,
+  total: 0,
+  selectedFilter: 'all',
+};
+
+export const useRestaurantNotificationStore = create<
+  RestaurantNotificationState & RestaurantNotificationActions
+>()(
+  devtools(
+    persist(
+      (set, get) => ({
+        ...initialState,
+
+        fetchNotifications: async (params = { limit: 20, page: 1 }, append = false) => {
+          try {
+            const isFirstPage = params.page === 1;
+            set({ 
+              isLoading: isFirstPage && !append, 
+              isLoadingMore: !isFirstPage || append,
+              error: null 
+            });
+
+            const response = await restaurantNotificationApi.getNotifications(params);
+
+            if (response.status_code === 200) {
+              const { items, total, page, pages } = response.data;
+
+              set((state) => ({
+                notifications: append ? [...state.notifications, ...items] : items,
+                total,
+                currentPage: page,
+                totalPages: pages,
+                hasNextPage: page < pages,
+                isLoading: false,
+                isLoadingMore: false,
+              }));
+            } else {
+              throw new Error(response.message || 'Failed to fetch notifications');
+            }
+          } catch (error: any) {
+            set({
+              error: error.message || 'Failed to fetch notifications',
+              isLoading: false,
+              isLoadingMore: false,
+            });
+          }
+        },
+
+        loadMoreNotifications: async () => {
+          const { currentPage, hasNextPage, isLoadingMore } = get();
+          
+          if (!hasNextPage || isLoadingMore) return;
+
+          const nextPage = currentPage + 1;
+          await get().fetchNotifications({ limit: 20, page: nextPage }, true);
+        },
+
+        refreshNotifications: async () => {
+          await get().fetchNotifications({ limit: 20, page: 1 }, false);
+        },
+
+        markAsRead: async (notificationId) => {
+          try {
+            const response = await restaurantNotificationApi.markAsRead(notificationId);
+
+            if (response.status_code === 200) {
+              set((state) => ({
+                notifications: state.notifications.map((notification) =>
+                  notification.id === notificationId
+                    ? { ...notification, readAt: new Date().toISOString() }
+                    : notification,
+                ),
+                unreadCount: Math.max(0, state.unreadCount - 1),
+              }));
+            } else {
+              throw new Error(response.message || 'Failed to mark notification as read');
+            }
+          } catch (error: any) {
+            set({
+              error: error.message || 'Failed to mark notification as read',
+            });
+            throw error;
+          }
+        },
+
+        markAllAsRead: async () => {
+          try {
+            const response = await restaurantNotificationApi.markAllAsRead();
+
+            if (response.status_code === 200) {
+              const now = new Date().toISOString();
+              set((state) => ({
+                notifications: state.notifications.map((notification) => ({
+                  ...notification,
+                  readAt: notification.readAt || now,
+                })),
+                unreadCount: 0,
+              }));
+            } else {
+              throw new Error(response.message || 'Failed to mark all notifications as read');
+            }
+          } catch (error: any) {
+            set({
+              error: error.message || 'Failed to mark all notifications as read',
+            });
+            throw error;
+          }
+        },
+
+        deleteNotification: async (notificationId) => {
+          try {
+            const response = await restaurantNotificationApi.deleteNotification(notificationId);
+
+            if (response.status_code === 200) {
+              set((state) => {
+                const notification = state.notifications.find(n => n.id === notificationId);
+                const wasUnread = notification && !notification.readAt;
+                
+                return {
+                  notifications: state.notifications.filter(n => n.id !== notificationId),
+                  unreadCount: wasUnread ? Math.max(0, state.unreadCount - 1) : state.unreadCount,
+                  total: Math.max(0, state.total - 1),
+                };
+              });
+            } else {
+              throw new Error(response.message || 'Failed to delete notification');
+            }
+          } catch (error: any) {
+            set({
+              error: error.message || 'Failed to delete notification',
+            });
+            throw error;
+          }
+        },
+
+        updateUnreadCount: async () => {
+          try {
+            const response = await restaurantNotificationApi.getUnreadCount();
+
+            if (response.status_code === 200) {
+              set({
+                unreadCount: response.data,
+              });
+            }
+          } catch (error: any) {
+            set({
+              error: error.message || 'Failed to update unread count',
+            });
+          }
+        },
+
+        addNotification: (notification) => {
+          set((state) => ({
+            notifications: [notification, ...state.notifications],
+            unreadCount: state.unreadCount + (notification.readAt ? 0 : 1),
+            total: state.total + 1,
+          }));
+        },
+
+        setFilter: (filter) => {
+          set({ selectedFilter: filter });
+        },
+
+        registerPushToken: async (token, deviceInfo) => {
+          try {
+            const response = await restaurantNotificationApi.registerPushToken(token, deviceInfo);
+            
+            if (response.status_code !== 200) {
+              throw new Error(response.message || 'Failed to register push token');
+            }
+            
+            console.log('Push token registered successfully for restaurant');
+          } catch (error: any) {
+            set({
+              error: error.message || 'Failed to register push token',
+            });
+            throw error;
+          }
+        },
+
+        unregisterPushToken: async (token) => {
+          try {
+            const response = await restaurantNotificationApi.unregisterPushToken(token);
+            
+            if (response.status_code !== 200) {
+              throw new Error(response.message || 'Failed to unregister push token');
+            }
+            
+            console.log('Push token unregistered successfully for restaurant');
+          } catch (error: any) {
+            set({
+              error: error.message || 'Failed to unregister push token',
+            });
+            throw error;
+          }
+        },
+
+        clearError: () => {
+          set({ error: null });
+        },
+
+        reset: () => {
+          set(initialState);
+        },
+      }),
+      {
+        name: 'restaurant-notification-storage',
+        storage: createJSONStorage(() => AsyncStorage),
+        partialize: (state) => ({
+          // Only persist unread count and filter for quick access
+          unreadCount: state.unreadCount,
+          selectedFilter: state.selectedFilter,
+        }),
+        version: 1,
+      }
+    ),
+    { name: 'RestaurantNotificationStore' },
+  ),
+);
+
+// Selector hooks for better performance
+export const useRestaurantNotifications = () =>
+  useRestaurantNotificationStore((state) => state.notifications);
+export const useRestaurantUnreadCount = () =>
+  useRestaurantNotificationStore((state) => state.unreadCount);
+export const useRestaurantNotificationLoading = () =>
+  useRestaurantNotificationStore((state) => state.isLoading);
+export const useRestaurantNotificationLoadingMore = () =>
+  useRestaurantNotificationStore((state) => state.isLoadingMore);
+export const useRestaurantNotificationError = () =>
+  useRestaurantNotificationStore((state) => state.error);
+export const useRestaurantNotificationHasNextPage = () =>
+  useRestaurantNotificationStore((state) => state.hasNextPage);
+export const useRestaurantNotificationTotal = () =>
+  useRestaurantNotificationStore((state) => state.total);
+export const useRestaurantNotificationFilter = () =>
+  useRestaurantNotificationStore((state) => state.selectedFilter);

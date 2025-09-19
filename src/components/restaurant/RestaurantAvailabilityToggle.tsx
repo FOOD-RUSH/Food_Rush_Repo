@@ -13,7 +13,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { useToggleRestaurantStatus } from '@/src/hooks/restaurant/useRestaurantApi';
-import { useUser } from '@/src/stores/customerStores/AuthStore';
+import { useCurrentRestaurant } from '@/src/stores/AuthStore';
 
 const { width: screenWidth } = Dimensions.get('window');
 const isSmallScreen = screenWidth < 375;
@@ -35,8 +35,8 @@ const RestaurantAvailabilityToggle: React.FC<
 }) => {
   const { colors } = useTheme();
   const { t } = useTranslation();
-  const user = useUser();
-  const restaurantId = user?.restaurantId;
+  const currentRestaurant = useCurrentRestaurant();
+  const restaurantId = currentRestaurant?.id;
   const [isOpen, setIsOpen] = useState<boolean>(currentStatus === 'online');
   const toggleStatusMutation = useToggleRestaurantStatus(
     isOpen,

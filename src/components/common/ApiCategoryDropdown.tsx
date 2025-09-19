@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   View,
-  Text,
   TouchableOpacity,
   FlatList,
   Modal,
@@ -10,7 +9,9 @@ import {
 import { useTheme } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { useCategoriesApi } from '@/src/hooks/shared/useCategoriesApi';
+import { useCategories } from '@/src/hooks/useCategories';
+import { getCategoryEmoji, getCategoryColor } from '@/src/data/categories';
+import { Typography, Heading5, Body, Label, LabelLarge } from '@/src/components/common/Typography';
 
 interface ApiCategoryDropdownProps {
   selectedValue?: string;
@@ -33,18 +34,16 @@ const ApiCategoryDropdown: React.FC<ApiCategoryDropdownProps> = ({
   const { t } = useTranslation();
   const [isVisible, setIsVisible] = useState(false);
 
-  const { data: categories, isLoading, error: apiError } = useCategoriesApi();
+  const { categories, isLoading, error: apiError } = useCategories();
 
-  // Ensure categories is always an array to prevent "find is not a function" error
+  // Categories is always an array from the local data
   const categoriesArray = React.useMemo(() => {
-    if (Array.isArray(categories)) {
-      return categories;
-    }
-    // Log warning if categories is not an array for debugging
-    if (categories !== undefined && categories !== null) {
-      console.warn('Categories data is not an array:', categories);
-    }
-    return [];
+    return categories.map(cat => ({
+      value: cat.value,
+      label: cat.label,
+      emoji: cat.emoji,
+      color: cat.color,
+    }));
   }, [categories]);
   
   const selectedCategory = React.useMemo(() => {
@@ -55,6 +54,7 @@ const ApiCategoryDropdown: React.FC<ApiCategoryDropdownProps> = ({
   }, [categoriesArray, selectedValue]);
 
   const handleSelect = (category: { value: string; label: string }) => {
+    console.log('Category selected:', { value: category.value, label: category.label });
     onValueChange(category.value, category.label);
     setIsVisible(false);
   };
@@ -62,7 +62,7 @@ const ApiCategoryDropdown: React.FC<ApiCategoryDropdownProps> = ({
   const renderCategoryItem = ({
     item,
   }: {
-    item: { value: string; label: string };
+    item: { value: string; label: string; emoji: string; color: string };
   }) => (
     <TouchableOpacity
       style={{
@@ -70,7 +70,7 @@ const ApiCategoryDropdown: React.FC<ApiCategoryDropdownProps> = ({
         borderBottomWidth: 1,
         borderBottomColor: colors.outline + '20',
         backgroundColor:
-          selectedValue === item.value ? colors.primary + '10' : 'transparent',
+          selectedValue === item.value ? item.color + '15' : 'transparent',
       }}
       onPress={() => handleSelect(item)}
     >
@@ -81,21 +81,22 @@ const ApiCategoryDropdown: React.FC<ApiCategoryDropdownProps> = ({
           alignItems: 'center',
         }}
       >
-        <Text
-          style={{
-            fontSize: 16,
-            color:
-              selectedValue === item.value ? colors.primary : colors.onSurface,
-            fontWeight: selectedValue === item.value ? '600' : 'normal',
-          }}
-        >
-          {item.label}
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+          <Typography variant="h5" style={{ marginRight: 12 }}>
+            {item.emoji}
+          </Typography>
+          <Label
+            color={selectedValue === item.value ? item.color : colors.onSurface}
+            weight={selectedValue === item.value ? 'semibold' : 'regular'}
+          >
+            {item.label}
+          </Label>
+        </View>
         {selectedValue === item.value && (
           <MaterialCommunityIcons
             name="check"
             size={20}
-            color={colors.primary}
+            color={item.color}
           />
         )}
       </View>
@@ -125,9 +126,9 @@ const ApiCategoryDropdown: React.FC<ApiCategoryDropdownProps> = ({
           color={colors.error}
           style={{ marginRight: 8 }}
         />
-        <Text style={{ color: colors.onErrorContainer, fontSize: 14, flex: 1 }}>
+        <Body color={colors.onErrorContainer} style={{ flex: 1 }}>
           {t('failed_to_load_categories')}
-        </Text>
+        </Body>
       </View>
     );
   }
@@ -150,16 +151,16 @@ const ApiCategoryDropdown: React.FC<ApiCategoryDropdownProps> = ({
         disabled={disabled || isLoading}
         activeOpacity={0.7}
       >
-        <Text
-          style={{
-            fontSize: 16,
-            color: selectedCategory
-              ? colors.onSurface
-              : colors.onSurfaceVariant,
-          }}
-        >
-          {selectedCategory?.label || placeholder || t('select_category')}
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+          {selectedCategory?.emoji && (
+            <LabelLarge style={{ marginRight: 8 }}>{selectedCategory.emoji}</LabelLarge>
+          )}
+          <Label
+            color={selectedCategory ? colors.onSurface : colors.onSurfaceVariant}
+          >
+            {selectedCategory?.label || placeholder || t('select_category')}
+          </Label>
+        </View>
         {isLoading ? (
           <ActivityIndicator size="small" color={colors.primary} />
         ) : (
@@ -206,15 +207,12 @@ const ApiCategoryDropdown: React.FC<ApiCategoryDropdownProps> = ({
                 alignItems: 'center',
               }}
             >
-              <Text
-                style={{
-                  fontSize: 18,
-                  fontWeight: '600',
-                  color: colors.onSurface,
-                }}
+              <Heading5 
+                color={colors.onSurface}
+                weight="semibold"
               >
                 {t('select_category')}
-              </Text>
+              </Heading5>
               <TouchableOpacity onPress={() => setIsVisible(false)}>
                 <MaterialCommunityIcons
                   name="close"
@@ -227,9 +225,9 @@ const ApiCategoryDropdown: React.FC<ApiCategoryDropdownProps> = ({
             {isLoading ? (
               <View style={{ padding: 32, alignItems: 'center' }}>
                 <ActivityIndicator size="large" color={colors.primary} />
-                <Text style={{ marginTop: 8, color: colors.onSurfaceVariant }}>
+                <Body color={colors.onSurfaceVariant} style={{ marginTop: 8 }}>
                   {t('loading_categories')}
-                </Text>
+                </Body>
               </View>
             ) : (
               <FlatList
@@ -244,11 +242,12 @@ const ApiCategoryDropdown: React.FC<ApiCategoryDropdownProps> = ({
                       size={48}
                       color={colors.onSurfaceVariant}
                     />
-                    <Text
-                      style={{ marginTop: 8, color: colors.onSurfaceVariant }}
+                    <Body 
+                      color={colors.onSurfaceVariant}
+                      style={{ marginTop: 8 }}
                     >
                       {t('no_categories_available')}
-                    </Text>
+                    </Body>
                   </View>
                 }
               />

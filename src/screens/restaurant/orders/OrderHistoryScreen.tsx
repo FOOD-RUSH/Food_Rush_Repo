@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, FlatList, Animated, TouchableOpacity, ScrollView } from 'react-native';
+import { View, FlatList, Animated, TouchableOpacity, ScrollView } from 'react-native';
 import { Searchbar, Chip, useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import CommonView from '@/src/components/common/CommonView';
 import { RootStackScreenProps } from '@/src/navigation/types';
+import { Typography, Heading1, Heading4, Heading5, Body, Label, LabelLarge, Caption } from '@/src/components/common/Typography';
 
 interface HistoryOrder {
   id: string;
@@ -58,20 +59,20 @@ const OrderHistoryScreen : React.FC<RootStackScreenProps<'RestaurantOrderHistory
     return (
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         {[1, 2, 3, 4, 5].map((star) => (
-          <Text
+          <Typography
             key={`star-${star}`}
+            variant="label"
             style={{
               color: star <= rating ? '#FFD700' : colors.outline,
-              fontSize: 16,
               marginRight: 2,
             }}
           >
             ★
-          </Text>
+          </Typography>
         ))}
-        <Text style={{ color:  colors.onSurfaceVariant, fontSize: 12, marginLeft: 4 }}>
+        <Caption color={colors.onSurfaceVariant} style={{ marginLeft: 4 }}>
           ({rating}/5)
-        </Text>
+        </Caption>
       </View>
     );
   };
@@ -122,23 +123,22 @@ const OrderHistoryScreen : React.FC<RootStackScreenProps<'RestaurantOrderHistory
             alignItems: 'center', 
             marginBottom: 8 
           }}>
-            <Text style={{ fontSize: 18, fontWeight: '600', color:  colors.onBackground }}>
+            <LabelLarge color={colors.onBackground} weight="semibold">
               {t('order_prefix')}{item.id}
-            </Text>
+            </LabelLarge>
             <View style={{ 
               backgroundColor: getStatusColor(item.status), 
               paddingHorizontal: 12, 
               paddingVertical: 4, 
               borderRadius: 16 
             }}>
-              <Text style={{ 
-                color:  colors.onBackground, 
-                fontSize: 12, 
-                fontWeight: '600',
-                textTransform: 'uppercase'
-              }}>
+              <Caption 
+                color={colors.onBackground}
+                weight="semibold"
+                style={{ textTransform: 'uppercase' }}
+              >
                 {item.status}
-              </Text>
+              </Caption>
             </View>
           </View>
           
@@ -148,22 +148,22 @@ const OrderHistoryScreen : React.FC<RootStackScreenProps<'RestaurantOrderHistory
             alignItems: 'center', 
             marginBottom: 8 
           }}>
-            <Text style={{ color:  colors.onBackground, fontSize: 16 }}>{item.customerName}</Text>
-            <Text style={{ color:  colors.onBackground, fontSize: 14 }}>{item.completedTime}</Text>
+            <Label color={colors.onBackground}>{item.customerName}</Label>
+            <Body color={colors.onBackground}>{item.completedTime}</Body>
           </View>
 
           <View style={{ marginBottom: 8 }}>
-            <Text style={{ color: colors.primary, fontSize: 14, marginBottom: 4 }}>
+            <Body color={colors.primary} style={{ marginBottom: 4 }}>
               📍 {item.restaurant}
-            </Text>
-            <Text style={{ color: colors.onSurfaceVariant, fontSize: 12 }}>
+            </Body>
+            <Caption color={colors.onSurfaceVariant}>
               📅 {new Date(item.orderDate).toLocaleDateString('en-US', {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',
               })}
-            </Text>
+            </Caption>
           </View>
 
           {item.rating && (
@@ -175,21 +175,20 @@ const OrderHistoryScreen : React.FC<RootStackScreenProps<'RestaurantOrderHistory
             borderTopColor: colors.outline, 
             paddingTop: 8 
           }}>
-            <Text style={{ color: colors.onSurfaceVariant, fontSize: 14, marginBottom: 8 }}>
+            <Body color={colors.onSurfaceVariant} style={{ marginBottom: 8 }}>
               {item.items.join(', ')}
-            </Text>
+            </Body>
             <View style={{
               flexDirection: 'row',
               justifyContent: 'space-between',
               alignItems: 'center',
             }}>
-              <Text style={{ 
-                fontSize: 18, 
-                fontWeight: 'bold', 
-                color: colors.primary,
-              }}>
+              <LabelLarge 
+                color={colors.primary}
+                weight="bold"
+              >
                 {item.total.toLocaleString()} {t('currency_xaf')}
-              </Text>
+              </LabelLarge>
               {item.status === 'completed' && (
                 <TouchableOpacity
                   style={{
@@ -202,9 +201,9 @@ const OrderHistoryScreen : React.FC<RootStackScreenProps<'RestaurantOrderHistory
                     /* Reorder functionality */
                   }}
                 >
-                  <Text style={{ color:  colors.onBackground, fontSize: 12, fontWeight: '600' }}>
+                  <Caption color={colors.onBackground} weight="semibold">
                     {t('reorder')}
-                  </Text>
+                  </Caption>
                 </TouchableOpacity>
               )}
             </View>
@@ -234,8 +233,8 @@ const OrderHistoryScreen : React.FC<RootStackScreenProps<'RestaurantOrderHistory
     <CommonView>
       <View style={{ flex: 1 }}>
         <View style={{ marginBottom: 24, marginTop: 8 }}>
-          <Text style={{ fontSize: 28, fontWeight: 'bold', color:  colors.onBackground }}>{t('order_history')}</Text>
-          <Text style={{ color:  colors.onBackground, marginTop: 8 }}>{t('view_past_orders')}</Text>
+          <Heading1 color={colors.onBackground} weight="bold">{t('order_history')}</Heading1>
+          <Body color={colors.onBackground} style={{ marginTop: 8 }}>{t('view_past_orders')}</Body>
         </View>
 
         {/* Stats Summary */}
@@ -253,22 +252,22 @@ const OrderHistoryScreen : React.FC<RootStackScreenProps<'RestaurantOrderHistory
           elevation: 3,
         }}>
           <View style={{ alignItems: 'center' }}>
-            <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.primary }}>
+            <Heading4 color={colors.primary} weight="bold">
               {getTotalOrders()}
-            </Text>
-            <Text style={{ color:  colors.onBackground, fontSize: 12 }}>{t('total_orders')}</Text>
+            </Heading4>
+            <Caption color={colors.onBackground}>{t('total_orders')}</Caption>
           </View>
           <View style={{ alignItems: 'center' }}>
-            <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.success || '#34C759' }}>
+            <Heading4 color={colors.success || '#34C759'} weight="bold">
               {getCompletedOrders()}
-            </Text>
-            <Text style={{ color:  colors.onBackground, fontSize: 12 }}>{t('completed')}</Text>
+            </Heading4>
+            <Caption color={colors.onBackground}>{t('completed')}</Caption>
           </View>
           <View style={{ alignItems: 'center' }}>
-            <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.warning || '#FF9500' }}>
+            <Heading4 color={colors.warning || '#FF9500'} weight="bold">
               {getTotalRevenue().toLocaleString()} {t('currency_xaf')}
-            </Text>
-            <Text style={{ color:  colors.onBackground, fontSize: 12 }}>{t('revenue')}</Text>
+            </Heading4>
+            <Caption color={colors.onBackground}>{t('revenue')}</Caption>
           </View>
         </View>
 
@@ -307,10 +306,10 @@ const OrderHistoryScreen : React.FC<RootStackScreenProps<'RestaurantOrderHistory
           contentContainerStyle={{ paddingBottom: 20 }}
           ListEmptyComponent={() => (
             <View style={{ alignItems: 'center', marginTop: 40 }}>
-              <Text style={{ color:  colors.onBackground, fontSize: 16 }}>{t('no_order_history_found')}</Text>
-              <Text style={{ color: '#999', fontSize: 14, marginTop: 4 }}>
+              <Label color={colors.onBackground}>{t('no_order_history_found')}</Label>
+              <Body color="#999" style={{ marginTop: 4 }}>
                 {t('past_orders_description')}
-              </Text>
+              </Body>
             </View>
           )}
         />

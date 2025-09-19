@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, ScrollView, TouchableOpacity } from 'react-native';
 import { useTheme, Card, Chip } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 
 import CommonView from '@/src/components/common/CommonView';
 import { RestaurantAnalyticsStackScreenProps, RootStackScreenProps } from '@/src/navigation/types';
+import { Typography, Heading1, Heading5, Body, Label, Caption, Overline } from '@/src/components/common/Typography';
 
 interface HeatmapData {
   hour: number;
@@ -107,12 +108,12 @@ const TimeHeatmap: React.FC<RootStackScreenProps<'RestaurantTimeHeatmap'>> = () 
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={{ padding: 16, paddingBottom: 0 }}>
-          <Text style={{ fontSize: 28, fontWeight: 'bold', color: colors.onBackground }}>
+          <Heading1 color={colors.onBackground} weight="bold">
             {t('time_heatmap')}
-          </Text>
-          <Text style={{ fontSize: 14, color: colors.onSurfaceVariant, marginTop: 4 }}>
+          </Heading1>
+          <Body color={colors.onSurfaceVariant} style={{ marginTop: 4 }}>
             {t('hourly_order_patterns')}
-          </Text>
+          </Body>
         </View>
 
         {/* Period Selector */}
@@ -129,15 +130,13 @@ const TimeHeatmap: React.FC<RootStackScreenProps<'RestaurantTimeHeatmap'>> = () 
                 marginRight: 8,
               }}
             >
-              <Text
-                style={{
-                  textAlign: 'center',
-                  fontWeight: '600',
-                  color: selectedPeriod === 'week' ? 'white' : colors.onSurfaceVariant,
-                }}
+              <Label
+                color={selectedPeriod === 'week' ? 'white' : colors.onSurfaceVariant}
+                weight="semibold"
+                align="center"
               >
                 {t('this_week')}
-              </Text>
+              </Label>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => setSelectedPeriod('month')}
@@ -150,15 +149,13 @@ const TimeHeatmap: React.FC<RootStackScreenProps<'RestaurantTimeHeatmap'>> = () 
                 marginLeft: 8,
               }}
             >
-              <Text
-                style={{
-                  textAlign: 'center',
-                  fontWeight: '600',
-                  color: selectedPeriod === 'month' ? 'white' : colors.onSurfaceVariant,
-                }}
+              <Label
+                color={selectedPeriod === 'month' ? 'white' : colors.onSurfaceVariant}
+                weight="semibold"
+                align="center"
               >
                 {t('this_month')}
-              </Text>
+              </Label>
             </TouchableOpacity>
           </View>
         </View>
@@ -167,14 +164,14 @@ const TimeHeatmap: React.FC<RootStackScreenProps<'RestaurantTimeHeatmap'>> = () 
         <View style={{ padding: 16, paddingTop: 0 }}>
           <Card style={{ backgroundColor: colors.surface, marginBottom: 16 }}>
             <View style={{ padding: 16 }}>
-              <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.onSurface, marginBottom: 12 }}>
+              <Heading5 color={colors.onSurface} weight="bold" style={{ marginBottom: 12 }}>
                 {t('key_insights')}
-              </Text>
+              </Heading5>
               
               <View style={{ marginBottom: 12 }}>
-                <Text style={{ fontSize: 14, fontWeight: '600', color: colors.onSurface, marginBottom: 4 }}>
+                <Label color={colors.onSurface} weight="semibold" style={{ marginBottom: 4 }}>
                   {t('peak_hours')}
-                </Text>
+                </Label>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                   {peakHours.map((item, index) => (
                     <Chip
@@ -190,9 +187,9 @@ const TimeHeatmap: React.FC<RootStackScreenProps<'RestaurantTimeHeatmap'>> = () 
               </View>
               
               <View>
-                <Text style={{ fontSize: 14, fontWeight: '600', color: colors.onSurface, marginBottom: 4 }}>
+                <Label color={colors.onSurface} weight="semibold" style={{ marginBottom: 4 }}>
                   {t('busiest_days')}
-                </Text>
+                </Label>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                   {busiestDays.map((item, index) => (
                     <Chip
@@ -214,18 +211,18 @@ const TimeHeatmap: React.FC<RootStackScreenProps<'RestaurantTimeHeatmap'>> = () 
         <View style={{ padding: 16, paddingTop: 0 }}>
           <Card style={{ backgroundColor: colors.surface }}>
             <View style={{ padding: 16 }}>
-              <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.onSurface, marginBottom: 16 }}>
+              <Heading5 color={colors.onSurface} weight="bold" style={{ marginBottom: 16 }}>
                 {t('order_heatmap')}
-              </Text>
+              </Heading5>
               
               {/* Hour labels */}
               <View style={{ flexDirection: 'row', marginBottom: 8 }}>
                 <View style={{ width: 40 }} />
                 {[6, 9, 12, 15, 18, 21].map(hour => (
                   <View key={hour} style={{ flex: 1, alignItems: 'center' }}>
-                    <Text style={{ fontSize: 10, color: colors.onSurfaceVariant }}>
+                    <Overline color={colors.onSurfaceVariant}>
                       {hour}:00
-                    </Text>
+                    </Overline>
                   </View>
                 ))}
               </View>
@@ -234,9 +231,9 @@ const TimeHeatmap: React.FC<RootStackScreenProps<'RestaurantTimeHeatmap'>> = () 
               {daysOfWeek.map(day => (
                 <View key={day} style={{ flexDirection: 'row', marginBottom: 4 }}>
                   <View style={{ width: 40, justifyContent: 'center' }}>
-                    <Text style={{ fontSize: 12, color: colors.onSurfaceVariant, fontWeight: '600' }}>
+                    <Caption color={colors.onSurfaceVariant} weight="semibold">
                       {day}
-                    </Text>
+                    </Caption>
                   </View>
                   {hours.map(hour => {
                     const cellData = getDataForCell(day, hour);
@@ -254,15 +251,14 @@ const TimeHeatmap: React.FC<RootStackScreenProps<'RestaurantTimeHeatmap'>> = () 
                         }}
                       >
                         {cellData && cellData.orders > 0 && (
-                          <Text
-                            style={{
-                              fontSize: 8,
-                              color: cellData.intensity > 0.5 ? 'white' : colors.onSurface,
-                              fontWeight: 'bold',
-                            }}
+                          <Typography
+                            variant="overline"
+                            color={cellData.intensity > 0.5 ? 'white' : colors.onSurface}
+                            weight="bold"
+                            style={{ fontSize: 8 }}
                           >
                             {cellData.orders}
-                          </Text>
+                          </Typography>
                         )}
                       </View>
                     );
@@ -272,13 +268,13 @@ const TimeHeatmap: React.FC<RootStackScreenProps<'RestaurantTimeHeatmap'>> = () 
               
               {/* Legend */}
               <View style={{ marginTop: 16, alignItems: 'center' }}>
-                <Text style={{ fontSize: 12, color: colors.onSurfaceVariant, marginBottom: 8 }}>
+                <Caption color={colors.onSurfaceVariant} style={{ marginBottom: 8 }}>
                   {t('order_volume')}
-                </Text>
+                </Caption>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Text style={{ fontSize: 10, color: colors.onSurfaceVariant, marginRight: 8 }}>
+                  <Overline color={colors.onSurfaceVariant} style={{ marginRight: 8 }}>
                     {t('low')}
-                  </Text>
+                  </Overline>
                   {[0, 0.2, 0.4, 0.6, 0.8, 1].map((intensity, index) => (
                     <View
                       key={index}
@@ -291,9 +287,9 @@ const TimeHeatmap: React.FC<RootStackScreenProps<'RestaurantTimeHeatmap'>> = () 
                       }}
                     />
                   ))}
-                  <Text style={{ fontSize: 10, color: colors.onSurfaceVariant, marginLeft: 8 }}>
+                  <Overline color={colors.onSurfaceVariant} style={{ marginLeft: 8 }}>
                     {t('high')}
-                  </Text>
+                  </Overline>
                 </View>
               </View>
             </View>

@@ -25,7 +25,7 @@ import { restaurantRegisterSchema, registerSchema } from '@/src/utils/validation
 import { Ionicons } from '@expo/vector-icons';
 import CommonView from '@/src/components/common/CommonView';
 import { AuthStackScreenProps } from '@/src/navigation/types';
-import { useAuthStore } from '@/src/stores/customerStores/AuthStore';
+import { useAuthStore } from '@/src/stores/AuthStore';
 import { TextButton } from '@/src/components/common/TextButton';
 import Toast from 'react-native-toast-message';
 import { useNetwork } from '@/src/contexts/NetworkContext';
