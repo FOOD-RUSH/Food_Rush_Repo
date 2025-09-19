@@ -118,11 +118,11 @@ const ProfileHomeScreen = ({
   return (
     <CommonView>
       <ScrollView
-        className="flex-1 h-full py-3"
+        className="flex-1 h-full py-3 px-1"
         showsVerticalScrollIndicator={false}
       >
         {/* Profile section */}
-        <View className="flex-row justify-between items-center mb-3 px-2">
+        <View className="flex-row justify-between items-center mb-3 px-1">
           <Avatar.Image
             source={icons.ProfilePlogo}
             size={100}
@@ -143,71 +143,87 @@ const ProfileHomeScreen = ({
 
         {/* Divider */}
         <View
-          className="h-[1px] mx-3 my-4"
+          className="h-[1px] mx-1 my-4"
           style={{ backgroundColor: colors.outline }}
         />
 
         {/* Menu items */}
         <RowView
           title={t('profile_details')}
+          subtitle={t('view_and_edit_your_personal_information')}
           onPress={navigateToProfileDetails}
           leftIconName="person-outline"
         />
         <RowView
           title={t('my_favorite_restaurants')}
+          subtitle={t('manage_your_saved_restaurants')}
           onPress={navigateToFavoriteRestaurants}
           leftIconName="fast-food-outline"
         />
         <RowView
           title={t('special_offers_and_promo')}
+          subtitle={t('view_available_discounts_and_deals')}
           onPress={handleSpecialOffersPress}
           leftIconName="gift-outline"
         />
         <RowView
           title={t('payment_method')}
+          subtitle={t('manage_your_payment_options')}
           onPress={navigateToPaymentMethods}
           leftIconName="card-outline"
         />
 
         <View
-          className="h-[1px] mx-3 mb-4"
+          className="h-[1px] mx-1 mb-4"
           style={{ backgroundColor: colors.outline }}
         />
 
         <RowView
           title={t('address')}
+          subtitle={t('manage_your_delivery_addresses')}
           onPress={navigateToAddress}
           leftIconName="location-outline"
         />
         <RowView
           title={t('notification')}
+          subtitle={t('customize_your_notification_preferences')}
           onPress={handleNotificationPress}
           leftIconName="notifications-outline"
         />
         <RowView
           title={t('security')}
+          subtitle={t('manage_password_and_security_settings')}
           onPress={handleSecurityPress}
           leftIconName="shield-checkmark-outline"
         />
         <RowView
           title={t('help')}
+          subtitle={t('get_support_and_contact_us')}
           onPress={navigateToHelp}
           leftIconName="help-circle-outline"
         />
 
         {/* Dark Mode Toggle */}
-        <View className="flex-row justify-between mb-4 items-center px-4 py-2">
+        <View className="flex-row justify-between mb-4 items-center px-2 py-2">
           <MaterialIcons
             name={isDarkMode ? 'dark-mode' : 'light-mode'}
             size={25}
             color={colors.onSurface}
           />
-          <Text
-            className="font-semibold text-base flex-1 text-center ml-3"
-            style={{ color: colors.onSurface }}
-          >
-            {t('dark_mode')}
-          </Text>
+          <View className="flex-1 ml-3">
+            <Text
+              className="font-semibold text-base"
+              style={{ color: colors.onSurface }}
+            >
+              {t('dark_mode')}
+            </Text>
+            <Text
+              className="text-sm mt-1"
+              style={{ color: colors.onSurfaceVariant }}
+            >
+              {t('switch_between_light_and_dark_themes')}
+            </Text>
+          </View>
           <Switch
             value={isDarkMode}
             onValueChange={handleThemeToggle}
@@ -218,6 +234,7 @@ const ProfileHomeScreen = ({
 
         <RowView
           title={t('language_screen')}
+          subtitle={t('change_app_language_preferences')}
           onPress={navigateToLanguage}
           leftIconName="language-outline"
         />
@@ -225,6 +242,7 @@ const ProfileHomeScreen = ({
         {/* Logout Row */}
         <RowView
           title={t('logout')}
+          subtitle={t('sign_out_of_your_account')}
           onPress={showLogoutModal}
           leftIconName="log-out-outline"
         />

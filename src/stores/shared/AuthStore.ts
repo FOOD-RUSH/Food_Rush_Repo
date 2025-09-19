@@ -66,9 +66,9 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         try {
           set({ isLoading: true });
           
-          const tokenData = await TokenManager.getTokenData();
+          const accessToken = await TokenManager.getToken();
           
-          if (!tokenData.accessToken) {
+          if (!accessToken) {
             set({ 
               isAuthenticated: false, 
               user: null, 
@@ -123,8 +123,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
           await TokenManager.setTokens(
             accessToken,
-            refreshToken,
-            // userType,
+            refreshToken
           );
           
           // Handle restaurant-specific data
@@ -166,7 +165,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       // Logout
       logout: async () => {
         try {
-          await TokenManager.clearAllTokens()
+          await TokenManager.clearAllTokens();
           set({ ...initialState, isInitialized: true });
         } catch (error) {
           console.error('Logout error:', error);

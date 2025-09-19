@@ -3,13 +3,13 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import CategoryItem from '@/src/components/customer/CategoryItem';
 import { useTheme } from 'react-native-paper';
-import { useCategoryOptions } from '@/src/hooks/customer/useCategoriesApi';
+import { useCategoriesApi } from '@/src/hooks/shared/useCategoriesApi';
 import { images } from '@/assets/images';
 
 const CategoryItems = () => {
   const { colors } = useTheme();
   const { t } = useTranslation();
-  const { data: categories, isLoading, error } = useCategoryOptions();
+  const { data: categories, isLoading, error } = useCategoriesApi();
 
   if (isLoading) {
     return (

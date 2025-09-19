@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
 
 import CommonView from '@/src/components/common/CommonView';
-import { useRestaurantCategoryOptions } from '@/src/hooks/restaurant/useCategoriesApi';
+import { useCategoriesApi } from '@/src/hooks/shared/useCategoriesApi';
 
 const { width: screenWidth } = Dimensions.get('window');
 const isSmallScreen = screenWidth < 375;
@@ -15,7 +15,7 @@ const isMediumScreen = screenWidth >= 375 && screenWidth < 414;
 const FoodCategoriesScreen = () => {
   const { colors } = useTheme();
   const { t } = useTranslation();
-  const { data: categories, isLoading, error } = useRestaurantCategoryOptions();
+  const { data: categories, isLoading, error } = useCategoriesApi();
   
   const slideAnim = useRef(new Animated.Value(50)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;

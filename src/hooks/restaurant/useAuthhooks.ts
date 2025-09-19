@@ -42,11 +42,10 @@ export const useLoginRestaurant = () => {
         }
 
         console.log('Storing restaurant tokens...');
-        const tokensStored = await TokenManager.setTokens({
+        const tokensStored = await TokenManager.setTokens(
           accessToken,
-          refreshToken,
-          userType: 'restaurant',
-        });
+          refreshToken
+        );
 
         if (!tokensStored) {
           throw new Error('Failed to store authentication tokens');
@@ -78,7 +77,7 @@ export const useLoginRestaurant = () => {
       } catch (error) {
         console.error('Error in restaurant login success handler:', error);
         // Clean up on error
-        await TokenManager.clearTokens();
+        await TokenManager.clearAllTokens();
         setError('Login failed');
         throw error;
       }
@@ -90,7 +89,7 @@ export const useLoginRestaurant = () => {
       setError(error.response?.data?.message || 'Restaurant login failed');
       
       // Clear any stored tokens
-      TokenManager.clearTokens().catch(console.error);
+      TokenManager.clearAllTokens().catch(console.error);
     },
   });
 };

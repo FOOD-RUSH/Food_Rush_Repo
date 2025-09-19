@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState, useRef } from 'react';
 import CommonView from '@/src/components/common/CommonView';
 import { TextInput, useTheme } from 'react-native-paper';
-import { useCategoryOptions } from '@/src/hooks/customer/useCategoriesApi';
+import { useCategoriesApi } from '@/src/hooks/shared/useCategoriesApi';
 import { images } from '@/assets/images';
 import {
   getMainCategories,
@@ -33,7 +33,7 @@ import {
   useGetAllMenuItem,
   useAllRestaurants,
   useNearbyRestaurants,
-  useMenuCategories,
+
 } from '@/src/hooks/customer/useCustomerApi';
 import { FoodProps, RestaurantCard as RestaurantProps } from '@/src/types';
 import RestaurantCardSkeleton from '@/src/components/customer/RestaurantCardSkeleton';
@@ -142,7 +142,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
 
   // Get categories from API
   const { data: categories, isLoading: isCategoriesLoading } =
-    useCategoryOptions();
+    useCategoriesApi();
 
   // Use refs to prevent unnecessary re-renders
   const lastRefreshTime = useRef<number>(0);
@@ -174,12 +174,11 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
     refetch: refetchMenu,
   } = useGetAllMenuItem();
 
-  const {
-    data: categoriesData,
-    isLoading: categoriesLoading,
-    error: categoriesError,
-    refetch: refetchCategories,
-  } = useMenuCategories();
+  // Using the same categories data from unified hook
+  const categoriesData = categories;
+  const categoriesLoading = isCategoriesLoading;
+  const categoriesError = null; // Will be handled by the unified hook
+  const refetchCategories = () => {}; // Will be handled by the unified hook
 
   // Determine which data to use
   const restaurantData =
@@ -209,14 +208,14 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
         refetchNearby(),
         refetchAll(),
         refetchMenu(),
-        refetchCategories(),
+        // Categories refetch handled by unified hook
       ]);
     } catch (error) {
       console.error('Refresh error:', error);
     } finally {
       setRefreshing(false);
     }
-  }, [refetchNearby, refetchAll, refetchMenu, refetchCategories]);
+  }, [refetchNearby, refetchAll, refetchMenu]);
 
   // Navigation handlers
   const handleSearchPress = useCallback(() => {

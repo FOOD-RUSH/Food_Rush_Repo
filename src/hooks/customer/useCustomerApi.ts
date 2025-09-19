@@ -12,24 +12,7 @@ const CACHE_CONFIG = {
   MAX_RETRIES: 3,
 };
 
-// Hook for fetching menu categories
-export const useMenuCategories = () => {
-  return useQuery({
-    queryKey: ['menu', 'categories'],
-    queryFn: async () => {
-      try {
-        const result = await restaurantApi.getMenuCategories();
-        return result;
-      } catch (error) {
-        console.error('Error fetching menu categories:', error);
-        throw error;
-      }
-    },
-    staleTime: CACHE_CONFIG.STALE_TIME * 2, // Categories change less frequently
-    gcTime: CACHE_CONFIG.CACHE_TIME * 2,
-    retry: CACHE_CONFIG.MAX_RETRIES,
-  });
-};
+// Note: useMenuCategories has been moved to shared/useCategoriesApi for consistency
 
 // Updated to match your existing naming convention
 export const useGetAllMenu = (options: { enabled?: boolean } = {}) => {

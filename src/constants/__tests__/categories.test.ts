@@ -1,11 +1,11 @@
 import { mapApiCategoriesToUI, getCategoryIcon } from '../categories';
-import { CategoryItem } from '@/src/services/customer/restaurant.service';
+import { CategoryOption } from '@/src/services/shared/categoriesApi';
 import { FoodCategory } from '@/assets/images';
 
 describe('Categories Utils', () => {
   describe('mapApiCategoriesToUI', () => {
     it('should map API categories to UI format with correct icons', () => {
-      const apiCategories: CategoryItem[] = [
+      const apiCategories: CategoryOption[] = [
         { value: 'local-dishes', label: 'Local Dishes' },
         { value: 'breakfast', label: 'Breakfast' },
         { value: 'fastfood', label: 'Fast Food' },
@@ -42,7 +42,7 @@ describe('Categories Utils', () => {
     });
 
     it('should use fallback icon for unknown categories', () => {
-      const apiCategories: CategoryItem[] = [
+      const apiCategories: CategoryOption[] = [
         { value: 'unknown-category', label: 'Unknown Category' },
       ];
 

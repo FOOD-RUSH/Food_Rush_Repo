@@ -836,5 +836,18 @@
   "view_all_food": "Voir Tous les Plats",
   "no_recommendations": "Aucune Recommandation",
   "no_recommendations_description": "Nous travaillons sur des recommandations personnalisées pour vous. Explorez notre menu en attendant !",
-  "explore_menu": "Explorer le Menu"
+  "explore_menu": "Explorer le Menu",
+  "view_and_edit_your_personal_information": "Voir et modifier vos informations personnelles",
+  "manage_your_saved_restaurants": "Gérer vos restaurants sauvegardés",
+  "view_available_discounts_and_deals": "Voir les remises et offres disponibles",
+  "manage_your_payment_options": "Gérer vos options de paiement",
+  "manage_your_delivery_addresses": "Gérer vos adresses de livraison",
+  "customize_your_notification_preferences": "Personnaliser vos préférences de notification",
+  "manage_password_and_security_settings": "Gérer les paramètres de mot de passe et de sécurité",
+  "get_support_and_contact_us": "Obtenir de l'aide et nous contacter",
+  "switch_between_light_and_dark_themes": "Basculer entre les thèmes clair et sombre",
+  "change_app_language_preferences": "Modifier les préférences de langue de l'application",
+  "sign_out_of_your_account": "Se déconnecter de votre compte",
+  "allow_customers_to_place_new_orders": "Permettre aux clients de passer de nouvelles commandes",
+  "make_your_restaurant_visible_to_customers": "Rendre votre restaurant visible aux clients"
 }

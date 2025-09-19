@@ -3,7 +3,7 @@ import { View, Text, ActivityIndicator } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
-import { useCategoryOptions } from '@/src/hooks/customer/useCategoriesApi';
+import { useCategoriesApi } from '@/src/hooks/shared/useCategoriesApi';
 
 interface CategoryDropdownProps {
   value: string;
@@ -22,7 +22,7 @@ const CategoryDropdown: React.FC<CategoryDropdownProps> = ({
 }) => {
   const { colors } = useTheme();
   const { t } = useTranslation();
-  const { data: categories, isLoading, error: apiError } = useCategoryOptions();
+  const { data: categories, isLoading, error: apiError } = useCategoriesApi();
 
   if (isLoading) {
     return (

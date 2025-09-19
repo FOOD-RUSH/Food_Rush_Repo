@@ -92,7 +92,7 @@ const NotificationsScreen = () => {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 40 }}
       >
-        <View className="p-6">
+        <View className="p-3">
     
 
           {/* Order Notifications */}

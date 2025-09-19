@@ -990,5 +990,18 @@
   "view_all_food": "View All Food",
   "no_recommendations": "No Recommendations",
   "no_recommendations_description": "We're working on personalized recommendations for you. Explore our menu in the meantime!",
-  "explore_menu": "Explore Menu"
+  "explore_menu": "Explore Menu",
+  "view_and_edit_your_personal_information": "View and edit your personal information",
+  "manage_your_saved_restaurants": "Manage your saved restaurants",
+  "view_available_discounts_and_deals": "View available discounts and deals",
+  "manage_your_payment_options": "Manage your payment options",
+  "manage_your_delivery_addresses": "Manage your delivery addresses",
+  "customize_your_notification_preferences": "Customize your notification preferences",
+  "manage_password_and_security_settings": "Manage password and security settings",
+  "get_support_and_contact_us": "Get support and contact us",
+  "switch_between_light_and_dark_themes": "Switch between light and dark themes",
+  "change_app_language_preferences": "Change app language preferences",
+  "sign_out_of_your_account": "Sign out of your account",
+  "allow_customers_to_place_new_orders": "Allow customers to place new orders",
+  "make_your_restaurant_visible_to_customers": "Make your restaurant visible to customers"
 }

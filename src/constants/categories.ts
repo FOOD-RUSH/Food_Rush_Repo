@@ -1,5 +1,5 @@
 import { FoodCategory } from '@/assets/images';
-import { CategoryItem } from '@/src/services/customer/restaurant.service';
+import { CategoryOption } from '@/src/services/shared/categoriesApi';
 
 export interface FoodCategoryProps {
   image: any;
@@ -129,7 +129,7 @@ const categoryIconMap: Record<string, any> = {
 
 // Function to map API categories to UI categories with icons
 export const mapApiCategoriesToUI = (
-  apiCategories: CategoryItem[],
+  apiCategories: CategoryOption[],
 ): FoodCategoryProps[] => {
   return apiCategories.map((category, index) => ({
     id: index + 1,

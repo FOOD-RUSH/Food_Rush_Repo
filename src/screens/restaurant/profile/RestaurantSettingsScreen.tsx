@@ -115,7 +115,10 @@ const RestaurantSettingsScreen = ({ navigation }: Props) => {
           </View>
           <Text style={styles.sectionTitle}>{t('preferences')}</Text>
           <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>{t('accepting_orders')}</Text>
+            <View style={styles.switchLabel}>
+              <Text style={styles.switchLabel}>{t('accepting_orders')}</Text>
+              <Text style={styles.switchSubtitle}>{t('allow_customers_to_place_new_orders')}</Text>
+            </View>
             <Switch
               value={acceptingOrders}
               onValueChange={setAcceptingOrders}
@@ -124,7 +127,10 @@ const RestaurantSettingsScreen = ({ navigation }: Props) => {
             />
           </View>
           <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>{t('show_on_map')}</Text>
+            <View style={styles.switchLabel}>
+              <Text style={styles.switchLabel}>{t('show_on_map')}</Text>
+              <Text style={styles.switchSubtitle}>{t('make_your_restaurant_visible_to_customers')}</Text>
+            </View>
             <Switch
               value={showOnMap}
               onValueChange={setShowOnMap}
@@ -177,11 +183,11 @@ const getStyles = (isDarkMode: boolean) => StyleSheet.create({
     color: RESTAURANT_COLORS.PRIMARY,
     marginTop: 28,
     marginBottom: 12,
-    marginLeft: 20,
+    marginLeft: 12,
   },
   inputGroup: {
     marginBottom: 18,
-    marginHorizontal: 20,
+    marginHorizontal: 12,
   },
   inputLabel: {
     fontSize: 15,
@@ -204,7 +210,7 @@ const getStyles = (isDarkMode: boolean) => StyleSheet.create({
     backgroundColor: isDarkMode ? RESTAURANT_COLORS.SURFACE_DARK : RESTAURANT_COLORS.SURFACE_LIGHT,
     borderRadius: 10,
     padding: 14,
-    marginHorizontal: 20,
+    marginHorizontal: 12,
     marginBottom: 10,
     borderWidth: 1.2,
     borderColor: isDarkMode ? RESTAURANT_COLORS.BORDER_DARK : RESTAURANT_COLORS.BORDER_LIGHT,
@@ -213,6 +219,12 @@ const getStyles = (isDarkMode: boolean) => StyleSheet.create({
     fontSize: 15,
     color: isDarkMode ? RESTAURANT_COLORS.TEXT_DARK : RESTAURANT_COLORS.TEXT_LIGHT,
     fontWeight: '500',
+    flex: 1,
+  },
+  switchSubtitle: {
+    fontSize: 13,
+    color: isDarkMode ? RESTAURANT_COLORS.TEXT_SECONDARY_DARK : RESTAURANT_COLORS.TEXT_SECONDARY_LIGHT,
+    marginTop: 2,
   },
   saveBtn: {
     flexDirection: 'row',
@@ -221,7 +233,7 @@ const getStyles = (isDarkMode: boolean) => StyleSheet.create({
     borderRadius: 14,
     padding: 16,
     marginTop: 24,
-    marginHorizontal: 20,
+    marginHorizontal: 12,
     justifyContent: 'center',
     elevation: 2,
     shadowColor: RESTAURANT_COLORS.PRIMARY,

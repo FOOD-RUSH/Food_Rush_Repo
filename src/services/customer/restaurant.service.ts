@@ -32,30 +32,9 @@ interface RestaurantReturn {
   data: RestaurantProfile;
 }
 
-// Category API types
-export interface CategoryItem {
-  value: string;
-  label: string;
-}
-
-interface CategoriesResponse {
-  data: CategoryItem[];
-}
+// Note: Category fetching has been moved to shared/categoriesApi for consistency
 
 export const restaurantApi = {
-  // Get all menu categories
-  getMenuCategories: async () => {
-    try {
-      const response = await apiClient.get<CategoriesResponse>(
-        '/menu/all/categories'
-      );
-      console.log('Menu Categories API Response:', response.data);
-      return response.data.data;
-    } catch (error) {
-      console.error('Error fetching menu categories:', error);
-      throw error;
-    }
-  },
 
   // Get all restaurants with filtering
   getAllRestaurants: async (query: RestaurantQuery) => {

@@ -8,7 +8,7 @@ import * as Haptics from 'expo-haptics';
 
 import CommonView from '@/src/components/common/CommonView';
 import { RestaurantMenuStackScreenProps } from '@/src/navigation/types';
-import { useRestaurantCategoryOptions } from '@/src/hooks/restaurant/useCategoriesApi';
+import { useCategoriesApi } from '@/src/hooks/shared/useCategoriesApi';
 import { useGetMenuItems, useDeleteMenuItem, useToggleMenuItemAvailability } from '@/src/hooks/restaurant/useMenuApi';
 import { useUser } from '@/src/stores/customerStores/AuthStore';
 
@@ -39,7 +39,7 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
   const user = useUser();
   const restaurantId = user?.restaurantId;
   
-  const { data: apiCategories, isLoading: isCategoriesLoading } = useRestaurantCategoryOptions();
+  const { data: apiCategories, isLoading: isCategoriesLoading } = useCategoriesApi();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
