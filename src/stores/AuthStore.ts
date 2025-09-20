@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { reset } from '../navigation/navigationHelpers';
+import { navigate, reset } from '../navigation/navigationHelpers';
 import TokenManager from '../services/shared/tokenManager';
 
 // User profiles for different user types
@@ -152,6 +152,53 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           if (data.user.role === 'restaurant' && data.restaurants) {
             newState.restaurants = data.restaurants;
             newState.defaultRestaurantId = data.defaultRestaurantId || null;
+            
+            // Initialize restaurant profile store for new login session
+            try {
+              const { useRestaurantProfileStore } = await import('./restaurantStores/restaurantProfileStore');
+              const profileStore = useRestaurantProfileStore.getState();
+              
+              // Reset profile loading status for new login
+              profileStore.reset();
+              
+              // If we have restaurant data from login, extract and store basic info
+              if (data.restaurants.length > 0 && data.defaultRestaurantId) {
+                const defaultRestaurant = data.restaurants.find(r => r.id === data.defaultRestaurantId);
+                if (defaultRestaurant) {
+                  // Map the basic restaurant data to detailed profile structure
+                  // This will be updated with full details when account screen is visited
+                  const basicProfile = {
+                    id: defaultRestaurant.id,
+                    name: defaultRestaurant.name,
+                    address: defaultRestaurant.address,
+                    phone: defaultRestaurant.phone,
+                    isOpen: defaultRestaurant.isOpen,
+                    latitude: defaultRestaurant.latitude,
+                    longitude: defaultRestaurant.longitude,
+                    verificationStatus: defaultRestaurant.verificationStatus,
+                    documentUrl: defaultRestaurant.documentUrl,
+                    rating: defaultRestaurant.rating,
+                    ratingCount: defaultRestaurant.ratingCount,
+                    ownerId: defaultRestaurant.ownerId,
+                    menuMode: defaultRestaurant.menuMode,
+                    timezone: defaultRestaurant.timezone,
+                    deliveryBaseFee: defaultRestaurant.deliveryBaseFee,
+                    deliveryPerKmRate: defaultRestaurant.deliveryPerKmRate,
+                    deliveryMinFee: defaultRestaurant.deliveryMinFee,
+                    deliveryMaxFee: defaultRestaurant.deliveryMaxFee,
+                    deliveryFreeThreshold: defaultRestaurant.deliveryFreeThreshold,
+                    deliverySurgeMultiplier: defaultRestaurant.deliverySurgeMultiplier,
+                    createdAt: defaultRestaurant.createdAt,
+                    updatedAt: defaultRestaurant.updatedAt,
+                  };
+                  
+                  // Store basic profile data from login
+                  profileStore.updateRestaurantProfile(basicProfile);
+                }
+              }
+            } catch (profileError) {
+              console.error('Error initializing restaurant profile store:', profileError);
+            }
           } else {
             newState.restaurants = [];
             newState.defaultRestaurantId = null;
@@ -172,38 +219,70 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       setRestaurants: (restaurants) => set({ restaurants }),
       setDefaultRestaurantId: (defaultRestaurantId) => set({ defaultRestaurantId }),
 
-      // Logout - clear all state and navigate
+      // Simple but complete logout - clear all user data while preserving onboarding
       logout: async () => {
         try {
           set({ isLoading: true });
           
-          // Clear tokens
+          // Clear authentication tokens
           await TokenManager.clearAllTokens();
           
-          // Clear other stores
+          // Clear all user stores
           try {
-            const [{ useCartStore }, { useAppStore }] = await Promise.all([
+            const [
+              { useCartStore },
+              { useAddressStore },
+              { usePaymentStore },
+              { useAppStore },
+              { useRestaurantProfileStore },
+              { useNotificationStore }
+            ] = await Promise.all([
               import('./customerStores/cartStore'),
-              import('./AppStore')
+              import('./customerStores/addressStore'),
+              import('./customerStores/paymentStore'),
+              import('./AppStore'),
+              import('./restaurantStores/restaurantProfileStore'),
+              import('./shared/notificationStore')
             ]);
             
+            // Clear all user data
             useCartStore.getState().clearCart();
-            const appStore = useAppStore.getState();
-            appStore.clearSelectedUserType();
-            appStore.resetApp();
+            usePaymentStore.getState().reset();
+            
+            // Clear addresses
+            const addressStore = useAddressStore.getState();
+            addressStore.addresses.forEach(address => {
+              addressStore.deleteAddress(address.id);
+            });
+            
+            // Clear restaurant profile store
+            useRestaurantProfileStore.getState().reset();
+            
+            // Clear shared notification store
+            useNotificationStore.getState().reset();
+            
+            // Clear user type but keep onboarding status
+            useAppStore.getState().clearSelectedUserType();
+            
           } catch (storeError) {
             console.error('Error clearing stores:', storeError);
           }
-
           // Reset auth state
-          set(initialState);
+          set({ ...initialState, isLoading: false });
           
-          // Navigate to user type selection
-          setTimeout(() => reset('UserTypeSelection'), 50);
+          // Navigate to user selection
+          setTimeout(() => {
+            try {
+              reset('UserTypeSelection');
+            } catch (navError) {
+              navigate('UserTypeSelection');
+            }
+          }, 100);
+          
         } catch (error) {
           console.error('Logout error:', error);
-          set({ ...initialState, error: 'Logout failed' });
-          setTimeout(() => reset('UserTypeSelection'), 50);
+          set({ ...initialState, isLoading: false });
+          setTimeout(() => reset('UserTypeSelection'), 100);
         }
       },
 

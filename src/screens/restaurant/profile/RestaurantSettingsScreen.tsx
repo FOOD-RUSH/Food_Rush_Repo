@@ -55,7 +55,7 @@ const RestaurantSettingsScreen = ({ navigation }: Props) => {
     ]).start();
   }, []);
 
-  const styles = getStyles(isDarkMode);
+  const styles = getStyles(isDarkMode, colors);
 
   // Navigation handlers
   const navigateToRestaurantInfo = () => {
@@ -244,7 +244,7 @@ const RestaurantSettingsScreen = ({ navigation }: Props) => {
   );
 };
 
-const getStyles = (isDarkMode: boolean) => StyleSheet.create({
+const getStyles = (isDarkMode: boolean, colors: any) => StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -264,7 +264,7 @@ const getStyles = (isDarkMode: boolean) => StyleSheet.create({
     padding: 4,
   },
   headerTitle: {
-    color: '#fff',
+    color: colors.onPrimary,
     fontSize: 24,
     fontWeight: 'bold',
     flex: 1,

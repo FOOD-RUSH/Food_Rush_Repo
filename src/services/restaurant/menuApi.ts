@@ -70,6 +70,17 @@ export interface CreateMenuItemRequest {
   endAt?: string;   // ISO 8601 format for daily scheduling
 }
 
+// Alternative interface for JSON-only requests (without image)
+export interface CreateMenuItemJsonRequest {
+  name: string;
+  description: string;
+  price: number;
+  category: FoodCategory;
+  isAvailable: boolean;
+  startAt?: string;
+  endAt?: string;
+}
+
 export interface UpdateMenuItemRequest extends Partial<CreateMenuItemRequest> {
   isAvailable?: boolean;
 }
@@ -100,58 +111,83 @@ export const restaurantMenuApi = {
     return apiClient.get<MenuItem>(`/menu-items/${itemId}`);
   },
 
-  createMenuItem: (restaurantId: string, data: CreateMenuItemRequest) => {
-    console.log('API Call - Creating menu item:', {
-      restaurantId,
-      name: data.name,
-      price: data.price,
-      category: data.category,
-      hasImage: !!data.picture
-    });
-    
-    // Prepare form data for multipart/form-data request
-    const formData = new FormData();
-    formData.append('name', data.name);
-    formData.append('description', data.description);
-    formData.append('price', data.price.toString());
-    formData.append('category', data.category);
-    formData.append('isAvailable', data.isAvailable.toString());
-    
-    // Add image if provided
+  createMenuItem: async (restaurantId: string, data: CreateMenuItemRequest) => {
+    // Check if we have an image to upload
     if (data.picture) {
-      console.log('Adding image to form data:', {
+      // Use FormData for multipart/form-data request when image is present
+      const formData = new FormData();
+      formData.append('name', data.name);
+      formData.append('description', data.description);
+      formData.append('price', data.price.toString());
+      formData.append('category', data.category);
+      formData.append('isAvailable', data.isAvailable.toString());
+      
+      // Send image as binary file (JPG/PNG) as required by backend
+      // Create a proper file object for React Native with binary format
+      const imageFile = {
         uri: data.picture.uri,
-        type: data.picture.type,
-        name: data.picture.name
+        type: data.picture.type, // 'image/jpeg' or 'image/png'
+        name: data.picture.name,
+      };
+      
+      // Append the image file as binary data
+      formData.append('picture', imageFile as any);
+      
+      // Add scheduling times if provided
+      if (data.startAt) {
+        formData.append('startAt', data.startAt);
+      }
+      if (data.endAt) {
+        formData.append('endAt', data.endAt);
+      }
+      
+      console.log('Form data being sent to backend:', {
+        name: data.name,
+        description: data.description,
+        price: data.price,
+        category: data.category,
+        isAvailable: data.isAvailable,
+        picture: {
+          name: data.picture.name,
+          type: data.picture.type,
+          uri: data.picture.uri.substring(0, 50) + '...'
+        },
+        startAt: data.startAt || null,
+        endAt: data.endAt || null
       });
       
-      // For React Native, append the file object directly
-      formData.append('picture', {
-        uri: data.picture.uri,
-        type: data.picture.type,
-        name: data.picture.name,
-      } as any);
+      const response = await apiClient.post<ApiResponse<MenuItem>>(`/restaurants/${restaurantId}/menu`, formData, {
+        timeout: 60000, // Increase timeout for file uploads
+        headers: {
+          // Let axios set the Content-Type with proper boundary for multipart/form-data
+        },
+      });
+      
+      console.log('Response from backend:', response.data);
+      return response;
+    } else {
+      // Use JSON for regular requests without image
+      const jsonData = {
+        name: data.name,
+        description: data.description,
+        price: data.price,
+        category: data.category,
+        isAvailable: data.isAvailable,
+        ...(data.startAt && { startAt: data.startAt }),
+        ...(data.endAt && { endAt: data.endAt }),
+      };
+      
+      console.log('Form data being sent to backend:', jsonData);
+      
+      const response = await apiClient.post<ApiResponse<MenuItem>>(`/restaurants/${restaurantId}/menu`, jsonData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      console.log('Response from backend:', response.data);
+      return response;
     }
-    
-    // Add scheduling times if provided
-    if (data.startAt) {
-      formData.append('startAt', data.startAt);
-    }
-    if (data.endAt) {
-      formData.append('endAt', data.endAt);
-    }
-    
-    console.log('Sending FormData to API:', {
-      restaurantId,
-      hasImage: !!data.picture,
-      hasSchedule: !!(data.startAt && data.endAt)
-    });
-    
-    return apiClient.post<ApiResponse<MenuItem>>(`/restaurants/${restaurantId}/menu`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
   },
 
   updateMenuItem: (restaurantId: string, itemId: string, data: UpdateMenuItemRequest) => {

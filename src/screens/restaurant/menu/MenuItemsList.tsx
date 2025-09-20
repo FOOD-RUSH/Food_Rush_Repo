@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
 
 import CommonView from '@/src/components/common/CommonView';
-import { Typography, Heading1, Heading2, Heading4, Body, BodySmall, Label, LabelLarge, Caption } from '@/src/components/common/Typography';
+import { Typography, Heading1,  Heading4, Body, Label, LabelLarge, Caption } from '@/src/components/common/Typography';
 import { RestaurantMenuStackScreenProps } from '@/src/navigation/types';
 import { useCategories } from '@/src/hooks/useCategories';
 import { getCategoryEmoji, getCategoryColor, getCategoryLabel } from '@/src/data/categories';

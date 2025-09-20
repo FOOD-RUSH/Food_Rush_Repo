@@ -1,10 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { 
   restaurantMenuApi, 
-  MenuItem, 
+   
   CreateMenuItemRequest, 
   UpdateMenuItemRequest,
-  MenuItems 
+ 
 } from '@/src/services/restaurant/menuApi';
 
 // Query Keys
@@ -64,7 +64,7 @@ export const useCreateMenuItem = () => {
       
       // Optionally, you can also update the cache optimistically
       // if you want immediate UI updates
-      console.log('Menu item created successfully:', response.data);
+      console.log('✅ Menu item created successfully in hook:', response.data);
     },
     onError: (error) => {
       console.error('Failed to create menu item:', error);

@@ -222,7 +222,7 @@ export const ServiceNavigation = {
 
   // App switching
   logout: () => {
-    reset('Auth');
+    reset('UserTypeSelection');
   },
 
   switchToCustomerApp: () => {

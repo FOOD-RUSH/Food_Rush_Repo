@@ -130,7 +130,7 @@ const ImageUploadSection = React.memo<{
                 align="center"
                 style={{ paddingHorizontal: 16, marginTop: 4 }}
               >
-                {t('tap_to_upload_image') || 'Tap to upload image (JPG, PNG, WebP)'}
+                {t('tap_to_upload_image') || 'Tap to upload image (JPG, PNG)'}
               </Caption>
             </>
           )}
@@ -296,10 +296,10 @@ export const AddFoodScreen = () => {
         const isValidUri = isValidImageUri(result.uri);
         
         if (!isValidType && !isValidUri) {
-          Alert.alert(
-            t('invalid_image_type') || 'Invalid Image Type',
-            t('please_select_jpg_png_webp') || 'Please select a JPG, PNG, or WebP image.'
-          );
+        Alert.alert(
+          t('invalid_image_type') || 'Invalid Image Type',
+          'Please select a JPG or PNG image as required by the backend.'
+        );
           return;
         }
 

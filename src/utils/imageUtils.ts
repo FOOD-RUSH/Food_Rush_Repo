@@ -23,9 +23,12 @@ export const pickImageForUpload = async (): Promise<ImagePickerResult | null> =>
       mediaTypes: ImagePicker.MediaTypeOptions?.Images || 'images',
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 0.8,
+      quality: 0.8, // Good quality for binary upload
       allowsMultipleSelection: false,
-      // Don't request base64 - we'll send the file directly
+      // Ensure we get binary format (JPG/PNG) as required by backend
+      exif: false,
+      base64: false, // Keep as binary file, not base64
+      allowsEditing: true, // Allow cropping to ensure proper format
     });
 
     if (result.canceled || !result.assets || result.assets.length === 0) {
@@ -68,7 +71,7 @@ export const pickImageForUpload = async (): Promise<ImagePickerResult | null> =>
 };
 
 /**
- * Validate image file type
+ * Validate image file type - Backend requires JPG or PNG only
  */
 export const isValidImageType = (type: string): boolean => {
   if (!type) return false;
@@ -76,25 +79,26 @@ export const isValidImageType = (type: string): boolean => {
   const validTypes = [
     'image/jpeg',
     'image/jpg', 
-    'image/png',
-    'image/webp' // Also support WebP
+    'image/png'
+    // Backend only accepts JPG and PNG formats
   ];
   return validTypes.includes(type.toLowerCase());
 };
 
 /**
- * Validate image file by URI extension as fallback
+ * Validate image file by URI extension as fallback - Backend requires JPG or PNG only
  */
 export const isValidImageUri = (uri: string): boolean => {
   if (!uri) return false;
   
   const uriLower = uri.toLowerCase();
-  const validExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
+  const validExtensions = ['.jpg', '.jpeg', '.png'];
+  // Backend only accepts JPG and PNG formats
   return validExtensions.some(ext => uriLower.includes(ext));
 };
 
 /**
- * Get file extension from mime type
+ * Get file extension from mime type - Backend requires JPG or PNG only
  */
 export const getFileExtension = (mimeType: string): string => {
   switch (mimeType.toLowerCase()) {
@@ -103,10 +107,8 @@ export const getFileExtension = (mimeType: string): string => {
       return 'jpg';
     case 'image/png':
       return 'png';
-    case 'image/webp':
-      return 'webp';
     default:
-      return 'jpg';
+      return 'jpg'; // Default to JPG if unknown
   }
 };
 

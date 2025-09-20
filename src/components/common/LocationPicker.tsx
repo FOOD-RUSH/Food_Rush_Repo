@@ -82,7 +82,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
   };
 
   return (
-    <ResponsiveContainer padding="none" style={{ marginBottom: spacing.md }}>
+    <ResponsiveContainer padding="none" style={{ marginBottom: spacing.md, marginHorizontal: 12 }}>
       <Card
         style={{
           backgroundColor: colors.surface,

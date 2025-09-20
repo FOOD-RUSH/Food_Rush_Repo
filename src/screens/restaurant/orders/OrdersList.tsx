@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, FlatList, Animated, TouchableOpacity, ScrollView, Easing, Dimensions } from 'react-native';
-import { Chip, Badge, useTheme, TextInput, FAB } from 'react-native-paper';
+import { View, FlatList, Animated, TouchableOpacity, Dimensions } from 'react-native';
+import {  Badge, useTheme, TextInput } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -11,7 +11,7 @@ import CommonView from '@/src/components/common/CommonView';
 import { RestaurantOrdersStackScreenProps } from '@/src/navigation/types';
 import { useGetOrders, useConfirmOrder, useRejectOrder } from '@/src/hooks/restaurant/useOrderApi';
 import { Order } from '@/src/services/restaurant/orderApi';
-import { Typography, Heading1, Heading4, Body, Label, LabelLarge, Caption } from '@/src/components/common/Typography';
+import { Heading1,  Body, Label, LabelLarge, Caption } from '@/src/components/common/Typography';
 
 
 const Tab = createMaterialTopTabNavigator();
@@ -283,7 +283,7 @@ const OrderTab: React.FC<OrderTabProps> = ({ status, showActions = false }) => {
           onChangeText={setSearchQuery}
           left={<TextInput.Icon icon="magnify" />}
           mode="outlined"
-          style={{ backgroundColor: colors.surface }}
+          style={{ backgroundColor: colors.surface, borderRadius: 16 }}
         />
       </View>
 

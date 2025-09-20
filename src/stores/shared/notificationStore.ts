@@ -2,12 +2,12 @@ import { create } from 'zustand';
 import { createJSONStorage, devtools, persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
-  restaurantNotificationApi,
+  notificationApi,
   type NotificationListParams,
-} from '@/src/services/restaurant/notificationApi';
+} from '@/src/services/shared/notificationApi';
 import type { Notification } from '@/src/types';
 
-interface RestaurantNotificationState {
+interface NotificationState {
   notifications: Notification[];
   unreadCount: number;
   isLoading: boolean;
@@ -20,7 +20,7 @@ interface RestaurantNotificationState {
   selectedFilter: 'all' | 'order' | 'system' | 'promotion' | 'alert' | 'unread';
 }
 
-interface RestaurantNotificationActions {
+interface NotificationActions {
   // Fetch notifications with pagination
   fetchNotifications: (params?: NotificationListParams, append?: boolean) => Promise<void>;
 
@@ -33,7 +33,7 @@ interface RestaurantNotificationActions {
   // Mark all notifications as read
   markAllAsRead: () => Promise<void>;
 
-  // Delete notification
+  // Delete notification (if supported)
   deleteNotification: (notificationId: string) => Promise<void>;
 
   // Update unread count
@@ -43,7 +43,7 @@ interface RestaurantNotificationActions {
   addNotification: (notification: Notification) => void;
 
   // Set filter
-  setFilter: (filter: RestaurantNotificationState['selectedFilter']) => void;
+  setFilter: (filter: NotificationState['selectedFilter']) => void;
 
   // Clear error
   clearError: () => void;
@@ -61,7 +61,7 @@ interface RestaurantNotificationActions {
   unregisterPushToken: (token: string) => Promise<void>;
 }
 
-const initialState: RestaurantNotificationState = {
+const initialState: NotificationState = {
   notifications: [],
   unreadCount: 0,
   isLoading: false,
@@ -74,8 +74,8 @@ const initialState: RestaurantNotificationState = {
   selectedFilter: 'all',
 };
 
-export const useRestaurantNotificationStore = create<
-  RestaurantNotificationState & RestaurantNotificationActions
+export const useNotificationStore = create<
+  NotificationState & NotificationActions
 >()(
   devtools(
     persist(
@@ -91,7 +91,7 @@ export const useRestaurantNotificationStore = create<
               error: null 
             });
 
-            const response = await restaurantNotificationApi.getNotifications(params);
+            const response = await notificationApi.getNotifications(params);
 
             if (response.status_code === 200) {
               const { items, total, page, pages } = response.data;
@@ -132,7 +132,7 @@ export const useRestaurantNotificationStore = create<
 
         markAsRead: async (notificationId) => {
           try {
-            const response = await restaurantNotificationApi.markAsRead(notificationId);
+            const response = await notificationApi.markAsRead(notificationId);
 
             if (response.status_code === 200) {
               set((state) => ({
@@ -156,7 +156,7 @@ export const useRestaurantNotificationStore = create<
 
         markAllAsRead: async () => {
           try {
-            const response = await restaurantNotificationApi.markAllAsRead();
+            const response = await notificationApi.markAllAsRead();
 
             if (response.status_code === 200) {
               const now = new Date().toISOString();
@@ -180,7 +180,7 @@ export const useRestaurantNotificationStore = create<
 
         deleteNotification: async (notificationId) => {
           try {
-            const response = await restaurantNotificationApi.deleteNotification(notificationId);
+            const response = await notificationApi.deleteNotification(notificationId);
 
             if (response.status_code === 200) {
               set((state) => {
@@ -206,7 +206,7 @@ export const useRestaurantNotificationStore = create<
 
         updateUnreadCount: async () => {
           try {
-            const response = await restaurantNotificationApi.getUnreadCount();
+            const response = await notificationApi.getUnreadCount();
 
             if (response.status_code === 200) {
               set({
@@ -234,13 +234,13 @@ export const useRestaurantNotificationStore = create<
 
         registerPushToken: async (token, deviceInfo) => {
           try {
-            const response = await restaurantNotificationApi.registerPushToken(token, deviceInfo);
+            const response = await notificationApi.registerPushToken(token, deviceInfo);
             
             if (response.status_code !== 200) {
               throw new Error(response.message || 'Failed to register push token');
             }
             
-            console.log('Push token registered successfully for restaurant');
+            console.log('Push token registered successfully');
           } catch (error: any) {
             set({
               error: error.message || 'Failed to register push token',
@@ -251,13 +251,13 @@ export const useRestaurantNotificationStore = create<
 
         unregisterPushToken: async (token) => {
           try {
-            const response = await restaurantNotificationApi.unregisterPushToken(token);
+            const response = await notificationApi.unregisterPushToken(token);
             
             if (response.status_code !== 200) {
               throw new Error(response.message || 'Failed to unregister push token');
             }
             
-            console.log('Push token unregistered successfully for restaurant');
+            console.log('Push token unregistered successfully');
           } catch (error: any) {
             set({
               error: error.message || 'Failed to unregister push token',
@@ -275,7 +275,7 @@ export const useRestaurantNotificationStore = create<
         },
       }),
       {
-        name: 'restaurant-notification-storage',
+        name: 'notification-storage',
         storage: createJSONStorage(() => AsyncStorage),
         partialize: (state) => ({
           // Only persist unread count and filter for quick access
@@ -285,24 +285,24 @@ export const useRestaurantNotificationStore = create<
         version: 1,
       }
     ),
-    { name: 'RestaurantNotificationStore' },
+    { name: 'NotificationStore' },
   ),
 );
 
 // Selector hooks for better performance
-export const useRestaurantNotifications = () =>
-  useRestaurantNotificationStore((state) => state.notifications);
-export const useRestaurantUnreadCount = () =>
-  useRestaurantNotificationStore((state) => state.unreadCount);
-export const useRestaurantNotificationLoading = () =>
-  useRestaurantNotificationStore((state) => state.isLoading);
-export const useRestaurantNotificationLoadingMore = () =>
-  useRestaurantNotificationStore((state) => state.isLoadingMore);
-export const useRestaurantNotificationError = () =>
-  useRestaurantNotificationStore((state) => state.error);
-export const useRestaurantNotificationHasNextPage = () =>
-  useRestaurantNotificationStore((state) => state.hasNextPage);
-export const useRestaurantNotificationTotal = () =>
-  useRestaurantNotificationStore((state) => state.total);
-export const useRestaurantNotificationFilter = () =>
-  useRestaurantNotificationStore((state) => state.selectedFilter);
+export const useNotifications = () =>
+  useNotificationStore((state) => state.notifications);
+export const useUnreadCount = () =>
+  useNotificationStore((state) => state.unreadCount);
+export const useNotificationLoading = () =>
+  useNotificationStore((state) => state.isLoading);
+export const useNotificationLoadingMore = () =>
+  useNotificationStore((state) => state.isLoadingMore);
+export const useNotificationError = () =>
+  useNotificationStore((state) => state.error);
+export const useNotificationHasNextPage = () =>
+  useNotificationStore((state) => state.hasNextPage);
+export const useNotificationTotal = () =>
+  useNotificationStore((state) => state.total);
+export const useNotificationFilter = () =>
+  useNotificationStore((state) => state.selectedFilter);

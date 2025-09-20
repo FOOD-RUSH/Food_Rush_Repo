@@ -440,7 +440,7 @@ const RootNavigator: React.FC = () => {
             <Stack.Screen
               name="NearbyRestaurants"
               component={NearbyRestaurantsScreen}
-              options={{ headerTitle: t('restaurants_near_you') }}
+              options={{ headerTitle: t('restaurants_near_you'), contentStyle: {marginTop: -34} }}
             />
 
             {/* Restaurant screens */}
@@ -499,7 +499,7 @@ const RootNavigator: React.FC = () => {
           </Stack.Group>
 
           {/* Profile */}
-          <Stack.Group screenOptions={screenOptions.profileCard}>
+          <Stack.Group screenOptions={{...screenOptions.profileCard,  contentStyle: {marginTop: -34}}}>
             <Stack.Screen
               name="EditProfile"
               component={EditProfileScreen}

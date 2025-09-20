@@ -1,6 +1,6 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { View, TouchableOpacity, Alert, ActivityIndicator, TextInput as RNTextInput } from 'react-native';
-import { Button, useTheme, TextInput } from 'react-native-paper';
+import React, { useState, useCallback } from 'react';
+import { View, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { Button, useTheme,  } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
@@ -36,9 +36,6 @@ const LocationModal: React.FC<LocationModalProps> = ({
     isLoading,
     error,
     hasPermission,
-    requestPermissionWithLocation,
-    getCurrentLocation,
-    showLocationPermissionDialog,
   } = useLocation({ autoRequest: false });
 
   const handleManualEntry = useCallback(() => {
@@ -114,8 +111,8 @@ const LocationModal: React.FC<LocationModalProps> = ({
       // Get current location with improved timeout and accuracy
       const locationResult = await Promise.race([
         ExpoLocation.getCurrentPositionAsync({
-          accuracy: ExpoLocation.Accuracy.Balanced,
-          timeInterval: 1000,
+          accuracy: ExpoLocation.Accuracy.High,
+          timeInterval: 15000,
           distanceInterval: 1,
         }),
         new Promise<never>((_, reject) =>
@@ -224,6 +221,7 @@ const LocationModal: React.FC<LocationModalProps> = ({
           paddingVertical: spacing.md,
           borderBottomWidth: 1,
           borderBottomColor: colors.outline + '20',
+          marginHorizontal: 12,
         }}
       >
         <Typography variant="h5" weight="semibold" color={colors.onSurface}>

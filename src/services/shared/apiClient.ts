@@ -230,6 +230,13 @@ class ApiClient {
 
   async post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
     try {
+      // Handle FormData requests - don't set Content-Type, let axios handle it
+      if (data instanceof FormData && config?.headers?.['Content-Type'] === 'multipart/form-data') {
+        const formDataConfig = { ...config };
+        delete formDataConfig.headers['Content-Type']; // Let axios set the boundary
+        return await this.client.post<T>(url, data, formDataConfig);
+      }
+      
       return await this.client.post<T>(url, data, config);
     } catch (error) {
       if (this.isApiError(error)) {

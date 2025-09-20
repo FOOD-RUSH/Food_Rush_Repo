@@ -11,6 +11,7 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from 'react-native-paper';
 import { RestaurantProfileStackScreenProps } from '../../../navigation/types';
 import { RESTAURANT_COLORS } from '@/src/config/restaurantTheme';
 import { useAppStore } from '@/src/stores/AppStore';
@@ -20,6 +21,7 @@ type Props = RestaurantProfileStackScreenProps<'Support'>;
 
 const SupportScreen = ({ navigation }: Props) => {
   const { t } = useTranslation();
+  const { colors } = useTheme();
   const themeMode = useAppStore((s) => s.theme);
   const isDarkMode = themeMode === 'dark';
   
@@ -58,7 +60,7 @@ const SupportScreen = ({ navigation }: Props) => {
     ]).start();
   }, []);
 
-  const styles = getStyles(isDarkMode);
+  const styles = getStyles(isDarkMode, colors);
 
   return (
     <CommonView >
@@ -95,7 +97,7 @@ const SupportScreen = ({ navigation }: Props) => {
   );
 };
 
-const getStyles = (isDarkMode: boolean) => StyleSheet.create({
+const getStyles = (isDarkMode: boolean, colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: isDarkMode ? RESTAURANT_COLORS.BACKGROUND_DARK : RESTAURANT_COLORS.BACKGROUND_LIGHT,
@@ -119,7 +121,7 @@ const getStyles = (isDarkMode: boolean) => StyleSheet.create({
     padding: 4,
   },
   headerTitle: {
-    color: '#fff',
+    color: colors.onPrimary,
     fontSize: 24,
     fontWeight: 'bold',
     flex: 1,

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert, Dimensions } from 'react-native';
 import { useTheme, Card, Avatar, Button, Switch } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -8,8 +8,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 import CommonView from '@/src/components/common/CommonView';
 import { RestaurantAccountStackScreenProps } from '@/src/navigation/types';
-import { useRestaurantProfile, useRestaurantInfo, useLogout } from '@/src/stores/AuthStore';
-import { useToggleRestaurantStatus } from '@/src/hooks/restaurant/useRestaurantApi';
+import { useRestaurantProfile as useAuthRestaurantProfile, useRestaurantInfo, useLogout } from '@/src/stores/AuthStore';
+import { useRestaurantProfile, useRestaurantStatus } from '@/src/hooks/restaurant/useRestaurantProfile';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -121,23 +121,43 @@ const MenuItem: React.FC<MenuItemProps> = React.memo(({
     </TouchableOpacity>
   );
 });
-
+MenuItem.displayName = 'MenuItem';
 const AccountHome: React.FC<
   RestaurantAccountStackScreenProps<'AccountHome'>
 > = ({ navigation }) => {
   const { colors } = useTheme();
   const { t } = useTranslation();
-  const user = useRestaurantProfile();
+  const user = useAuthRestaurantProfile();
   const { currentRestaurant } = useRestaurantInfo();
   const logout = useLogout();
   
-  // Restaurant status state
-  const [isRestaurantOpen, setIsRestaurantOpen] = useState(currentRestaurant?.isOpen || false);
-  const restaurantId = currentRestaurant?.id;
-  const toggleStatusMutation = useToggleRestaurantStatus(
-    isRestaurantOpen,
-    restaurantId || '',
-  );
+  // Use new restaurant profile hook
+  const {
+    restaurantProfile,
+    isLoading: profileLoading,
+    loadProfileIfNeeded,
+    isOpen,
+    restaurantName,
+  } = useRestaurantProfile();
+  
+  const {
+    isOpen: statusIsOpen,
+    isUpdating,
+    toggleStatus,
+  } = useRestaurantStatus();
+  
+  // Local state for UI responsiveness
+  const [isRestaurantOpen, setIsRestaurantOpen] = useState(statusIsOpen);
+
+  // Load restaurant profile when screen is first visited
+  useEffect(() => {
+    loadProfileIfNeeded();
+  }, [loadProfileIfNeeded]);
+
+  // Sync local state with store state
+  useEffect(() => {
+    setIsRestaurantOpen(statusIsOpen);
+  }, [statusIsOpen]);
 
   const handleLogout = useCallback(() => {
     console.log('Logout button pressed');
@@ -181,12 +201,11 @@ const AccountHome: React.FC<
               try {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                 setIsRestaurantOpen(false);
-                if (restaurantId) {
-                  await toggleStatusMutation.mutateAsync();
-                }
+                await toggleStatus(false);
+                console.log('Restaurant closed successfully');
                 Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
               } catch (error) {
-                console.error('Failed to update status:', error);
+                console.error('Failed to close restaurant:', error);
                 setIsRestaurantOpen(true);
               }
             },
@@ -198,38 +217,38 @@ const AccountHome: React.FC<
       try {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         setIsRestaurantOpen(true);
-        if (restaurantId) {
-          await toggleStatusMutation.mutateAsync();
-        }
+        await toggleStatus(true);
+        console.log('Restaurant opened successfully');
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       } catch (error) {
-        console.error('Failed to update status:', error);
+        console.error('Failed to open restaurant:', error);
         setIsRestaurantOpen(false);
       }
     }
-  }, [isRestaurantOpen, restaurantId, toggleStatusMutation, t]);
+  }, [isRestaurantOpen, toggleStatus, t]);
 
   // Memoize user display data to prevent recalculations
   const userDisplayData = useMemo(() => {
     const displayName = user?.fullName || 'Restaurant Owner';
     const displayEmail = user?.email || 'owner@restaurant.com';
-    const restaurantName = currentRestaurant?.name || user?.businessName || 'My Restaurant';
+    // Use restaurant profile name first, then fallback to current restaurant or user business name
+    const restaurantDisplayName = restaurantProfile?.name || currentRestaurant?.name || user?.businessName || 'My Restaurant';
     const avatarLabel = user?.fullName
       ? user.fullName
           .split(' ')
           .map((n) => n[0])
           .join('')
           .toUpperCase()
-      : restaurantName
-      ? restaurantName
+      : restaurantDisplayName
+      ? restaurantDisplayName
           .split(' ')
           .map((n) => n[0])
           .join('')
           .toUpperCase()
       : 'R';
     
-    return { displayName, displayEmail, restaurantName, avatarLabel };
-  }, [user?.fullName, user?.email, user?.businessName, currentRestaurant?.name]);
+    return { displayName, displayEmail, restaurantName: restaurantDisplayName, avatarLabel };
+  }, [user?.fullName, user?.email, user?.businessName, restaurantProfile?.name, currentRestaurant?.name]);
 
   // Memoize menu items to prevent recreation
   const menuItems = useMemo(() => [
@@ -307,7 +326,7 @@ const AccountHome: React.FC<
         <Card
           style={{
             backgroundColor: colors.surface,
-            marginHorizontal: 16,
+            marginHorizontal: 8,
             marginTop: 16,
             borderRadius: 20,
             overflow: 'hidden',
@@ -315,7 +334,7 @@ const AccountHome: React.FC<
         >
           <LinearGradient
             colors={[colors.primary + '15', colors.primaryContainer + '25']}
-            style={{ padding: 20 }}
+            style={{ padding: 8 }}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Avatar.Text
@@ -406,7 +425,7 @@ const AccountHome: React.FC<
                   <Switch
                     value={isRestaurantOpen}
                     onValueChange={handleStatusToggle}
-                    disabled={toggleStatusMutation.isPending}
+                    disabled={isUpdating || profileLoading}
                     thumbColor={isRestaurantOpen ? '#00D084' : '#FF3B30'}
                     trackColor={{
                       false: '#FF3B3030',
@@ -417,51 +436,7 @@ const AccountHome: React.FC<
               </View>
             </View>
 
-            {/* User Role and Status Badges */}
-            <View style={{ flexDirection: 'row', marginTop: 12, gap: 8 }}>
-              <View
-                style={{
-                  backgroundColor: colors.primary,
-                  paddingHorizontal: 12,
-                  paddingVertical: 6,
-                  borderRadius: 16,
-                }}
-              >
-                <Text
-                  style={{
-                    fontSize: 12,
-                    fontWeight: '600',
-                    color: colors.onPrimary,
-                    textTransform: 'capitalize',
-                  }}
-                >
-                  {user?.role || 'Restaurant Owner'}
-                </Text>
-              </View>
-              
-              {user?.status && (
-                <View
-                  style={{
-                    backgroundColor: user.status === 'active' ? '#00D084' : 
-                                   user.status === 'pending_verification' ? '#FF9500' : '#FF3B30',
-                    paddingHorizontal: 12,
-                    paddingVertical: 6,
-                    borderRadius: 16,
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontSize: 12,
-                      fontWeight: '600',
-                      color: 'white',
-                      textTransform: 'capitalize',
-                    }}
-                  >
-                    {user.status.replace('_', ' ')}
-                  </Text>
-                </View>
-              )}
-            </View>
+            
           </LinearGradient>
         </Card>
 
@@ -482,7 +457,7 @@ const AccountHome: React.FC<
           <Card
             style={{
               backgroundColor: colors.surface,
-              marginHorizontal: 16,
+              marginHorizontal: 8,
               borderRadius: 16,
               overflow: 'hidden',
             }}
@@ -517,7 +492,7 @@ const AccountHome: React.FC<
           <Card
             style={{
               backgroundColor: colors.surface,
-              marginHorizontal: 16,
+              marginHorizontal: 8,
               borderRadius: 16,
               overflow: 'hidden',
             }}
@@ -551,6 +526,7 @@ const AccountHome: React.FC<
               fontSize: 16,
               fontWeight: '600',
               color: 'white',
+              fontFamily: 'Urbanist-Bold',
             }}
             icon="logout"
           >

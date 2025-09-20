@@ -1,17 +1,16 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
   Modal,
-  FlatList,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
-  Alert,
+  Image,
+  Animated,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Button,
   Checkbox,
@@ -33,20 +32,16 @@ import { useTranslation } from 'react-i18next';
 import { useRegisterRestaurant } from '@/src/hooks/restaurant/useAuthhooks';
 import ErrorDisplay from '@/src/components/auth/ErrorDisplay';
 import * as ImagePicker from 'expo-image-picker';
-import LocationPicker from '@/src/components/common/LocationPicker';
+// Removed LocationPicker import - using custom GPS location button instead
 import { Location } from '@/src/location/types';
-import { Heading2, Heading5, Body, Label } from '@/src/components/common/Typography';
-import { ResponsiveContainer } from '@/src/components/common/ResponsiveContainer';
+import { useLocation } from '@/src/location/useLocation';
+import LocationService from '@/src/location/LocationService';
+import { Heading2, Body, Label } from '@/src/components/common/Typography';
 import { useResponsive, useResponsiveSpacing } from '@/src/hooks/useResponsive';
 
-// Optimized country codes data - moved outside component to prevent recreation
+// Only Cameroon country code
 const COUNTRY_CODES = [
   { code: '+237', country: 'Cameroon', flag: '🇨🇲' },
-  { code: '+1', country: 'United States', flag: '🇺🇸' },
-  { code: '+33', country: 'France', flag: '🇫🇷' },
-  { code: '+44', country: 'United Kingdom', flag: '🇬🇧' },
-  { code: '+234', country: 'Nigeria', flag: '🇳🇬' },
-  { code: '+49', country: 'Germany', flag: '🇩🇪' },
 ] as const;
 
 interface RestaurantSignUpFormData {
@@ -56,6 +51,8 @@ interface RestaurantSignUpFormData {
   password: string;
   confirmPassword: string;
   name: string; // Restaurant name
+  address: string; // Restaurant address
+ 
 }
 
 type CountryCode = (typeof COUNTRY_CODES)[number];
@@ -74,43 +71,142 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
   } = useRegisterRestaurant();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { clearError, setError, error: authError } = useAuthStore();
-  const { isSmallScreen, wp, hp } = useResponsive();
-  const spacing = useResponsiveSpacing();
 
   // get usertype gotten from params
   const userType = route.params?.userType || 'restaurant';
 
-  // Memoized components for better performance
-  const CountryItem = React.memo(
-    ({
-      item,
-      onSelect,
-    }: {
-      item: CountryCode;
-      onSelect: (country: CountryCode) => void;
-    }) => (
-      <TouchableOpacity
-        style={styles.countryItem}
-        onPress={() => onSelect(item)}
-        activeOpacity={0.7}
-      >
-        <Body style={{ marginRight: 16 }}>{item.flag}</Body>
-        <Label color={colors.onSurface} weight="medium" style={{ flex: 1 }}>{item.country}</Label>
-        <Label color={colors.onSurface} weight="semibold">{item.code}</Label>
-      </TouchableOpacity>
-    ),
-  );
-  CountryItem.displayName = 'CountryItem';
+  // Removed CountryItem component - only Cameroon supported
 
   const [showPassword, setShowPassword] = useState(false);
   const [selectedCountryCode, setSelectedCountryCode] = useState<CountryCode>(
     COUNTRY_CODES[0],
   );
-  const [showCountryModal, setShowCountryModal] = useState(false);
+  // Removed showCountryModal state - only Cameroon supported
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [documentUri, setDocumentUri] = useState<string | null>(null);
   const [documentName, setDocumentName] = useState<string>('');
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const rotateAnim = useRef(new Animated.Value(0)).current;
+
+  // Animate loading indicator
+  useEffect(() => {
+    if (isGettingLocation) {
+      const rotation = Animated.loop(
+        Animated.timing(rotateAnim, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        })
+      );
+      rotation.start();
+      return () => rotation.stop();
+    } else {
+      rotateAnim.setValue(0);
+    }
+  }, [isGettingLocation, rotateAnim]);
+
+  // Use your existing location service
+  const {
+    hasPermission,
+    requestPermissionWithLocation,
+  } = useLocation({ autoRequest: false, requestOnMount: false });
+
+  // Location handler with console logging
+  const handleLocationSelected = useCallback((location: Location | null) => {
+    console.log('📍 Location Selected:');
+    console.log('Latitude:', location?.latitude);
+    console.log('Longitude:', location?.longitude);
+    console.log('Formatted Address:', location?.formattedAddress);
+    console.log('Full Location Object:', location);
+    setSelectedLocation(location);
+  }, []);
+
+  // Get exact GPS location using your service
+  const getExactLocation = useCallback(async () => {
+    setIsGettingLocation(true);
+    try {
+      console.log('📍 Getting exact GPS location...');
+      
+      // First check if location services are enabled
+      const servicesEnabled = await LocationService.isLocationEnabled();
+      if (!servicesEnabled) {
+        Toast.show({
+          type: 'error',
+          text1: 'Location Services Disabled',
+          text2: 'Please enable location services in your device settings',
+          position: 'top',
+        });
+        return;
+      }
+
+      // Request permission if not granted
+      if (!hasPermission) {
+        const permissionGranted = await requestPermissionWithLocation();
+        if (!permissionGranted) {
+          Toast.show({
+            type: 'error',
+            text1: 'Location Permission Required',
+            text2: 'Please allow location access to get exact coordinates',
+            position: 'top',
+          });
+          return;
+        }
+      }
+
+      // Get current location with force refresh to avoid fallbacks
+      const locationResult = await LocationService.getCurrentLocation(true);
+      
+      if (locationResult.success && locationResult.location && !locationResult.location.isFallback) {
+        console.log('✅ Exact GPS location obtained:');
+        console.log('Latitude:', locationResult.location.latitude);
+        console.log('Longitude:', locationResult.location.longitude);
+        console.log('Address:', locationResult.location.formattedAddress);
+        console.log('Is Fallback:', locationResult.location.isFallback);
+        
+        setSelectedLocation(locationResult.location);
+        Toast.show({
+          type: 'success',
+          text1: 'Location Found',
+          text2: 'Exact GPS coordinates obtained successfully',
+          position: 'top',
+        });
+      } else {
+        console.log('❌ Failed to get exact location, result:', locationResult);
+        Toast.show({
+          type: 'error',
+          text1: 'Location Error',
+          text2: locationResult.error || 'Could not get exact GPS location. Please try again.',
+          position: 'top',
+        });
+      }
+    } catch (error) {
+      console.error('Error getting exact location:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Location Error',
+        text2: 'Failed to get GPS location. Please try again.',
+        position: 'top',
+      });
+    } finally {
+      setIsGettingLocation(false);
+    }
+  }, [hasPermission, requestPermissionWithLocation]);
+
+  // Modal functions
+  const openLocationModal = useCallback(() => {
+    setShowLocationModal(true);
+  }, []);
+
+  const closeLocationModal = useCallback(() => {
+    setShowLocationModal(false);
+  }, []);
+
+  const handleGetLocationFromModal = useCallback(async () => {
+    setShowLocationModal(false);
+    await getExactLocation();
+  }, [getExactLocation]);
 
   const {
     control,
@@ -126,8 +222,11 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
       phoneNumber: '',
       fullName: '',
       name: '',
+      address: '',
     },
-  }); // Added missing closing brace and parenthesis
+  });
+
+  // Removed watchedAddress - using GPS location instead of manual address validation
 
   // Optimized callbacks with useCallback to prevent unnecessary re-renders
   const onSubmit = useCallback(
@@ -152,36 +251,41 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
         return;
       }
 
-      if (!selectedLocation) {
-        Toast.show({
-          type: 'error',
-          text1: t('error'),
-          text2: t('location_required_for_restaurant'),
-          position: 'top',
-        });
-        return;
-      }
-
       clearError();
 
       try {
-        // Prepare registration data
+        // Validate that we have exact GPS coordinates (not fallback)
+        if (!selectedLocation || selectedLocation.isFallback) {
+          Toast.show({
+            type: 'error',
+            text1: 'Exact Location Required',
+            text2: 'Please get your exact GPS location before registering',
+            position: 'top',
+          });
+          return;
+        }
+
+        // Prepare registration data to match backend requirements
         const registrationData = {
-          role: userType,
           fullName: data.fullName.trim(),
-          phoneNumber: `${selectedCountryCode.code}${data.phoneNumber.trim()}`,
           email: data.email.trim(),
+          phoneNumber: data.phoneNumber.trim(), // Just the number without country code
           password: data.password,
           name: data.name.trim(), // Restaurant name
-          ...(documentUri && { documentUri }), // Optional document
-          ...(selectedLocation && {
-            latitude: selectedLocation.latitude,
-            longitude: selectedLocation.longitude,
-            address: selectedLocation.formattedAddress, // Use address from location modal
-            locationAddress: selectedLocation.formattedAddress,
-            exactLocation: selectedLocation.exactLocation,
-          }), // Location data
+          address: selectedLocation.formattedAddress, // Use exact GPS location address
+          phone: `${selectedCountryCode.code}${data.phoneNumber.trim()}`, // Full phone with country code
+          nearLat: selectedLocation.latitude, // Exact GPS latitude
+          nearLng: selectedLocation.longitude, // Exact GPS longitude
+          ...(documentUri && { document: documentUri }), // Optional document
         };
+
+        // Console log the exact coordinates being sent to backend
+        console.log('🚀 Sending EXACT GPS coordinates to backend:');
+        console.log('nearLat:', registrationData.nearLat);
+        console.log('nearLng:', registrationData.nearLng);
+        console.log('address:', registrationData.address);
+        console.log('isFallback:', selectedLocation.isFallback);
+        console.log('timestamp:', selectedLocation.timestamp);
 
         registerRestaurantMutation(registrationData, {
             onSuccess: (response) => {
@@ -191,11 +295,10 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                 text1: 'Registration Successful',
                 text2: 'Your restaurant registration has been submitted and is awaiting approval. You will be notified once approved.',
                 position: 'top',
-                // duration: 5000,
 
-              }, );
-              console.log('Restaurant registration response:', response.data);
+              });
 
+              console.log('Registraction sucessful', response)
               // Navigate to awaiting approval screen instead of RestaurantApp
               navigation.navigate('AwaitingApproval', {
                 // Pass any necessary params if needed
@@ -226,20 +329,7 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
         });
       }
     },
-    [
-      isConnected,
-      isInternetReachable,
-      termsAccepted,
-      registerRestaurantMutation,
-      clearError,
-      setError,
-      t,
-      selectedCountryCode,
-      userType,
-      navigation,
-      documentUri,
-      selectedLocation,
-    ],
+    [isConnected, isInternetReachable, termsAccepted, registerRestaurantMutation, clearError, setError, t, selectedCountryCode, navigation, documentUri, selectedLocation],
   );
 
   const handleGoogleSignUp = useCallback(async () => {
@@ -280,11 +370,6 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
     });
   }, [isConnected, isInternetReachable, t]);
 
-  const selectCountryCode = useCallback((country: CountryCode) => {
-    setSelectedCountryCode(country);
-    setShowCountryModal(false);
-  }, []);
-
   const togglePassword = useCallback(() => {
     setShowPassword((prev) => !prev);
   }, []);
@@ -310,14 +395,6 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
       position: 'top',
     });
   }, [t]);
-
-  const openCountryModal = useCallback(() => {
-    setShowCountryModal(true);
-  }, []);
-
-  const closeCountryModal = useCallback(() => {
-    setShowCountryModal(false);
-  }, []);
 
   const pickDocument = useCallback(async () => {
     try {
@@ -351,20 +428,7 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
     }
   }, []);
 
-  // Optimized phone number placeholder
-  const phoneNumberPlaceholder = useMemo(
-    () => `${selectedCountryCode.code} 690 000 000`,
-    [selectedCountryCode.code],
-  );
-
-  const keyExtractor = useCallback((item: CountryCode) => item.code, []);
-
-  const renderCountryItem = useCallback(
-    ({ item }: { item: CountryCode }) => (
-      <CountryItem item={item} onSelect={selectCountryCode} />
-    ),
-    [CountryItem, selectCountryCode],
-  );
+  // Removed phone number placeholder, keyExtractor, and renderCountryItem - only Cameroon supported
 
   return (
     <CommonView>
@@ -396,56 +460,49 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
 
             {/* Logo and Title */}
             <View style={styles.logoContainer}>
-              <View style={styles.logo}>
-                <Heading2 color="white" weight="bold">R</Heading2>
-              </View>
-              <Heading2 color={colors.onSurface} weight="bold" style={{ marginBottom: 8 }}>{t('create_account')}</Heading2>
+              <Image 
+                source={{ uri: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80' }}
+                style={styles.restaurantImage}
+                resizeMode="cover"
+              />
+              <Heading2 color={colors.onSurface} weight="bold" style={{ marginBottom: 8, fontFamily: 'Urbanist' }}>{t('create_account')}</Heading2>
+              <Body color={colors.onSurfaceVariant} style={{ textAlign: 'center', fontFamily: 'Urbanist' }}>Join our platform and start serving delicious meals</Body>
             </View>
 
             {/* Form */}
             <View style={styles.formContainer}>
-              {/* Country Code + Phone Number */}
+              {/* Phone Number with Cameroon Prefix */}
               <Controller
                 control={control}
                 name="phoneNumber"
                 render={({ field: { onChange, onBlur, value } }) => (
                   <View style={styles.inputContainer}>
-                    <View style={styles.phoneInputRow}>
-                      <TouchableOpacity
-                        style={styles.countrySelector}
-                        onPress={openCountryModal}
-                        activeOpacity={0.7}
-                      >
-                        <Body style={{ marginRight: 8 }}>
-                          {selectedCountryCode.flag}
-                        </Body>
-                        <Label color={colors.onSurface} weight="medium" style={{ marginRight: 8 }}>
-                          {selectedCountryCode.code}
-                        </Label>
-                        <Ionicons
-                          name="chevron-down"
-                          size={16}
-                          color={colors.onSurface}
+                    <TextInput
+                      placeholder="690 000 000"
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      value={value}
+                      mode="outlined"
+                      keyboardType="phone-pad"
+                      autoComplete="tel"
+                      left={
+                        <TextInput.Icon 
+                          icon={() => (
+                            <View style={styles.cameroonPrefix}>
+                              <Text style={{ marginRight: 4, fontSize: 16 }}>🇨🇲</Text>
+                              <Text style={{ fontFamily: 'Urbanist', fontWeight: '500', color: colors.onSurface }}>+237</Text>
+                            </View>
+                          )}
                         />
-                      </TouchableOpacity>
-
-                      <TextInput
-                        placeholder={phoneNumberPlaceholder}
-                        onBlur={onBlur}
-                        onChangeText={onChange}
-                        value={value}
-                        mode="outlined"
-                        keyboardType="phone-pad"
-                        autoComplete="tel"
-                        outlineStyle={[
-                          styles.phoneInput,
-                          errors.phoneNumber && styles.inputError,
-                        ]}
-                        style={[styles.textInput, styles.phoneTextInput]}
-                        contentStyle={styles.inputContent}
-                        error={!!errors.phoneNumber}
-                      />
-                    </View>
+                      }
+                      outlineStyle={[
+                        styles.inputOutline,
+                        errors.phoneNumber && styles.inputError,
+                      ]}
+                      style={[styles.textInput, { fontFamily: 'Urbanist' }]}
+                      contentStyle={[styles.inputContent, { fontFamily: 'Urbanist' }]}
+                      error={!!errors.phoneNumber}
+                    />
                     {errors.phoneNumber && (
                       <HelperText type="error" visible={!!errors.phoneNumber}>
                         {errors.phoneNumber.message}
@@ -477,8 +534,8 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                         styles.inputOutline,
                         errors.email && styles.inputError,
                       ]}
-                      style={styles.textInput}
-                      contentStyle={styles.inputContent}
+                      style={[styles.textInput, { fontFamily: 'Urbanist' }]}
+                      contentStyle={[styles.inputContent, { fontFamily: 'Urbanist' }]}
                       error={!!errors.email}
                     />
                     {errors.email && (
@@ -515,8 +572,8 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                         styles.inputOutline,
                         errors.fullName && styles.inputError,
                       ]}
-                      style={styles.textInput}
-                      contentStyle={styles.inputContent}
+                      style={[styles.textInput, { fontFamily: 'Urbanist' }]}
+                      contentStyle={[styles.inputContent, { fontFamily: 'Urbanist' }]}
                       error={!!errors.fullName}
                     />
                     {errors.fullName && (
@@ -552,8 +609,8 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                         styles.inputOutline,
                         errors.name && styles.inputError,
                       ]}
-                      style={styles.textInput}
-                      contentStyle={styles.inputContent}
+                      style={[styles.textInput, { fontFamily: 'Urbanist' }]}
+                      contentStyle={[styles.inputContent, { fontFamily: 'Urbanist' }]}
                       error={!!errors.name}
                     />
                     {errors.name && (
@@ -565,14 +622,55 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                 )}
               />
 
-              {/* Location Picker - This will instantly pop up when clicked and provide the address */}
-              <LocationPicker
-                onLocationSelected={setSelectedLocation}
-                selectedLocation={selectedLocation}
-                required={true}
-                label={t('restaurant_location')}
-                placeholder={t('tap_to_select_location')}
-              />
+              {/* Restaurant Address Button */}
+              <View style={styles.inputContainer}>
+                <TouchableOpacity
+                  style={[
+                    styles.addressButton,
+                    selectedLocation && styles.addressButtonSelected,
+                  ]}
+                  onPress={openLocationModal}
+                  activeOpacity={0.7}
+                >
+                  <Ionicons
+                    name="location-outline"
+                    size={24}
+                    color={selectedLocation ? colors.primary : colors.onSurface}
+                  />
+                  <View style={styles.addressButtonText}>
+                    <Label 
+                      color={selectedLocation ? colors.primary : colors.onSurface} 
+                      weight="medium"
+                      style={{ fontFamily: 'Urbanist' }}
+                    >
+                      Restaurant Address
+                    </Label>
+                    {selectedLocation ? (
+                      <Body 
+                        color={colors.onSurface} 
+                        style={{ fontFamily: 'Urbanist', marginTop: 4 }}
+                        numberOfLines={2}
+                      >
+                        {selectedLocation.formattedAddress}
+                      </Body>
+                    ) : (
+                      <Body 
+                        color={colors.onSurfaceVariant} 
+                        style={{ fontFamily: 'Urbanist', marginTop: 4 }}
+                      >
+                        Tap to set restaurant location
+                      </Body>
+                    )}
+                  </View>
+                  <Ionicons
+                    name="chevron-forward"
+                    size={20}
+                    color={colors.onSurfaceVariant}
+                  />
+                </TouchableOpacity>
+              </View>
+
+              {/* Manual address removed - using GPS location only */}
 
               {/* Document Upload */}
               <View style={styles.inputContainer}>
@@ -621,8 +719,8 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                         styles.inputOutline,
                         errors.password && styles.inputError,
                       ]}
-                      style={styles.textInput}
-                      contentStyle={styles.inputContent}
+                      style={[styles.textInput, { fontFamily: 'Urbanist' }]}
+                      contentStyle={[styles.inputContent, { fontFamily: 'Urbanist' }]}
                       error={!!errors.password}
                     />
                     {errors.password && (
@@ -656,8 +754,8 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                         styles.inputOutline,
                         errors.confirmPassword && styles.inputError,
                       ]}
-                      style={styles.textInput}
-                      contentStyle={styles.inputContent}
+                      style={[styles.textInput, { fontFamily: 'Urbanist' }]}
+                      contentStyle={[styles.inputContent, { fontFamily: 'Urbanist' }]}
                       error={!!errors.confirmPassword}
                     />
                     {errors.confirmPassword && (
@@ -709,7 +807,7 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                 mode="contained"
                 onPress={handleSubmit((data: RestaurantSignUpFormData) => onSubmit(data))}
                 loading={isPending}
-                disabled={isPending || !termsAccepted || !isValid || !selectedLocation}
+                disabled={isPending || !termsAccepted || !isValid || !selectedLocation || (selectedLocation && selectedLocation.isFallback)}
                 buttonColor={colors.primary}
                 contentStyle={styles.buttonContent}
                 style={styles.signUpButton}
@@ -718,39 +816,7 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                 {isPending ? t('creating_account') : t('signup')}
               </Button>
 
-              {/* Divider */}
-              <View style={styles.dividerContainer}>
-                <View style={styles.dividerLine} />
-                <Label color={colors.outline} style={{ paddingHorizontal: 16 }}>{t('or_continue_with')}</Label>
-                <View style={styles.dividerLine} />
-              </View>
-
-              {/* Social Sign Up Buttons */}
-              <View style={styles.socialButtonsContainer}>
-                <Button
-                  mode="outlined"
-                  onPress={handleGoogleSignUp}
-                  disabled={isPending}
-                  icon="google"
-                  contentStyle={styles.socialButtonContent}
-                  style={styles.socialButton}
-                  labelStyle={styles.socialButtonLabel}
-                >
-                  Google
-                </Button>
-
-                <Button
-                  mode="outlined"
-                  onPress={handleAppleSignUp}
-                  disabled={isPending}
-                  icon="apple"
-                  contentStyle={styles.socialButtonContent}
-                  style={styles.socialButton}
-                  labelStyle={styles.socialButtonLabel}
-                >
-                  Apple
-                </Button>
-              </View>
+              {/* Social login removed for simplicity */}
 
               {/* Login Link */}
               <View style={styles.loginLinkContainer}>
@@ -765,39 +831,84 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
             </View>
           </ScrollView>
 
-          {/* Country Code Modal */}
+          {/* Location Instructions Modal */}
           <Modal
-            visible={showCountryModal}
+            visible={showLocationModal}
             animationType="slide"
-            presentationStyle="pageSheet"
-            onRequestClose={closeCountryModal}
+            presentationStyle="fullScreen"
+            onRequestClose={closeLocationModal}
           >
-            <SafeAreaView style={styles.modalContainer}>
-              <View style={styles.modalHeader}>
-                <Heading5 color={colors.onSurface} weight="semibold">{t('select_country')}</Heading5>
-                <TouchableOpacity
-                  onPress={closeCountryModal}
-                  activeOpacity={0.7}
-                >
-                  <Label color={colors.primary} weight="medium">{t('ok')}</Label>
-                </TouchableOpacity>
-              </View>
-              <FlatList
-                data={COUNTRY_CODES}
-                renderItem={renderCountryItem}
-                keyExtractor={keyExtractor}
-                showsVerticalScrollIndicator={false}
-                initialNumToRender={10}
-                maxToRenderPerBatch={10}
-                windowSize={10}
-                removeClippedSubviews={true}
-                getItemLayout={(data, index) => ({
-                  length: 60,
-                  offset: 60 * index,
-                  index,
-                })}
-              />
-            </SafeAreaView>
+            <View style={styles.modalContainer}>
+                <View style={styles.modalHeader}>
+                  <Heading2 color={colors.onSurface} weight="bold" style={{ fontFamily: 'Urbanist' }}>
+                    Restaurant Location
+                  </Heading2>
+                  <TouchableOpacity onPress={closeLocationModal}>
+                    <Ionicons name="close" size={24} color={colors.onSurface} />
+                  </TouchableOpacity>
+                </View>
+                
+                <ScrollView style={styles.modalContent} showsVerticalScrollIndicator={false}>
+                  <View style={styles.instructionCard}>
+                    <Ionicons name="location" size={48} color={colors.primary} style={{ alignSelf: 'center', marginBottom: 16 }} />
+                    
+                    <Heading2 color={colors.onSurface} weight="bold" style={{ textAlign: 'center', marginBottom: 16, fontFamily: 'Urbanist' }}>
+                      Important Instructions
+                    </Heading2>
+                    
+                    <View style={styles.instructionItem}>
+                      <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
+                      <Body color={colors.onSurface} style={{ flex: 1, marginLeft: 12, fontFamily: 'Urbanist' }}>
+                        You must be physically present at your restaurant location
+                      </Body>
+                    </View>
+                    
+                    <View style={styles.instructionItem}>
+                      <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
+                      <Body color={colors.onSurface} style={{ flex: 1, marginLeft: 12, fontFamily: 'Urbanist' }}>
+                        Make sure your GPS and location services are enabled
+                      </Body>
+                    </View>
+                    
+                    <View style={styles.instructionItem}>
+                      <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
+                      <Body color={colors.onSurface} style={{ flex: 1, marginLeft: 12, fontFamily: 'Urbanist' }}>
+                        This will be your official restaurant address for deliveries
+                      </Body>
+                    </View>
+                    
+                    <View style={styles.warningCard}>
+                      <Ionicons name="warning" size={24} color={colors.error} />
+                      <Body color={colors.error} style={{ flex: 1, marginLeft: 12, fontFamily: 'Urbanist' }}>
+                        Please ensure you are at the correct location before proceeding
+                      </Body>
+                    </View>
+                  </View>
+                </ScrollView>
+                
+                <View style={styles.modalButtons}>
+                  <Button
+                    mode="outlined"
+                    onPress={closeLocationModal}
+                    style={styles.cancelButton}
+                    labelStyle={{ color: '#EF4444', fontFamily: 'Urbanist', fontWeight: '600' }}
+                  >
+                    Cancel
+                  </Button>
+                  
+                  <Button
+                    mode="contained"
+                    onPress={handleGetLocationFromModal}
+                    loading={isGettingLocation}
+                    disabled={isGettingLocation}
+                    buttonColor={colors.primary}
+                    style={styles.getLocationButton}
+                    labelStyle={{ color: '#fff', fontFamily: 'Urbanist', fontWeight: '600' }}
+                  >
+                    {isGettingLocation ? 'Getting Location...' : 'Get My Location'}
+                  </Button>
+                </View>
+            </View>
           </Modal>
         </KeyboardAvoidingView>
       </ScrollView>
@@ -830,13 +941,10 @@ const createStyles = (colors: any) =>
       paddingTop: 16,
       paddingBottom: 32,
     },
-    logo: {
-      width: 64,
-      height: 64,
-      backgroundColor: colors.primary,
-      borderRadius: 16,
-      alignItems: 'center',
-      justifyContent: 'center',
+    restaurantImage: {
+      width: 120,
+      height: 120,
+      borderRadius: 20,
       marginBottom: 24,
     },
     logoText: {
@@ -854,46 +962,17 @@ const createStyles = (colors: any) =>
       paddingHorizontal: 8,
     },
     inputContainer: {
-      marginBottom: 16,
-    },
-    phoneInputRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-    },
-    countrySelector: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: colors.surfaceVariant,
-      paddingHorizontal: 16,
-      paddingVertical: 16,
-      borderRadius: 12,
-      borderTopRightRadius: 0,
-      borderBottomRightRadius: 0,
-      minWidth: 120,
-      borderWidth: 1,
-      borderColor: colors.surfaceVariant,
-    },
-    selectedCountryFlag: {
-      fontSize: 18,
-      marginRight: 8,
-    },
-    selectedCountryCode: {
-      fontSize: 16,
-      color: colors.onSurface,
-      marginRight: 8,
-      fontWeight: '500',
-    },
-    phoneInput: {
-      borderRadius: 12,
-      borderTopLeftRadius: 0,
-      borderBottomLeftRadius: 0,
-      borderColor: colors.surfaceVariant,
-    },
-    phoneTextInput: {
-      flex: 1,
+      marginBottom: 20,
     },
     textInput: {
       backgroundColor: colors.surfaceVariant,
+      height: 64, // Increased height
+      fontFamily: 'Urbanist',
+    },
+    cameroonPrefix: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 8,
     },
     inputOutline: {
       borderRadius: 12,
@@ -904,6 +983,8 @@ const createStyles = (colors: any) =>
     },
     inputContent: {
       paddingHorizontal: 16,
+      fontFamily: 'Urbanist',
+      fontSize: 16,
     },
     documentUploadButton: {
       flexDirection: 'row',
@@ -954,38 +1035,7 @@ const createStyles = (colors: any) =>
       fontWeight: '600',
       color: '#fff',
     },
-    dividerContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginVertical: 24,
-    },
-    dividerLine: {
-      flex: 1,
-      height: 1,
-      backgroundColor: colors.outline,
-    },
-    dividerText: {
-      paddingHorizontal: 16,
-      color: colors.outline,
-      fontSize: 14,
-    },
-    socialButtonsContainer: {
-      flexDirection: 'row',
-      gap: 16,
-    },
-    socialButton: {
-      flex: 1,
-      borderRadius: 25,
-      borderColor: colors.outline,
-      borderWidth: 1,
-    },
-    socialButtonContent: {
-      paddingVertical: 12,
-    },
-    socialButtonLabel: {
-      fontSize: 14,
-      color: colors.onSurface,
-    },
+    // Social button styles removed for simplicity
     loginLinkContainer: {
       flexDirection: 'row',
       justifyContent: 'center',
@@ -997,50 +1047,86 @@ const createStyles = (colors: any) =>
       color: colors.onSurface,
       fontSize: 16,
     },
+    addressButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.surfaceVariant,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.outline,
+      padding: 16,
+      minHeight: 72,
+    },
+    addressButtonSelected: {
+      borderColor: colors.primary,
+      backgroundColor: colors.primary + '10',
+    },
+    addressButtonText: {
+      flex: 1,
+      marginLeft: 12,
+    },
     modalContainer: {
       flex: 1,
       backgroundColor: colors.background,
     },
     modalHeader: {
       flexDirection: 'row',
-      alignItems: 'center',
       justifyContent: 'space-between',
-      padding: 16,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.outline,
-    },
-    modalTitle: {
-      fontSize: 18,
-      fontWeight: '600',
-      color: colors.onSurface,
-    },
-    modalDoneButton: {
-      color: colors.primary,
-      fontSize: 16,
-      fontWeight: '500',
-    },
-    countryItem: {
-      flexDirection: 'row',
       alignItems: 'center',
-      paddingVertical: 16,
-      paddingHorizontal: 24,
+      padding: 20,
       borderBottomWidth: 1,
       borderBottomColor: colors.outline,
+      backgroundColor: colors.surface,
     },
-    countryFlag: {
-      fontSize: 24,
-      marginRight: 16,
-    },
-    countryName: {
+    modalContent: {
       flex: 1,
-      fontSize: 16,
-      color: colors.onSurface,
-      fontWeight: '500',
+      paddingHorizontal: 20,
+      paddingTop: 20,
     },
-    countryCode: {
-      fontSize: 16,
-      color: colors.onSurface,
-      fontWeight: '600',
+    instructionCard: {
+      backgroundColor: colors.surface,
+      borderRadius: 16,
+      padding: 24,
+      marginBottom: 20,
+      elevation: 2,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+    },
+    instructionItem: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      marginBottom: 16,
+    },
+    warningCard: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      backgroundColor: colors.errorContainer || colors.error + '20',
+      borderRadius: 12,
+      padding: 16,
+      marginTop: 16,
+    },
+    modalButtons: {
+      flexDirection: 'row',
+      gap: 12,
+      padding: 20,
+      paddingTop: 16,
+      backgroundColor: colors.background,
+      borderTopWidth: 1,
+      borderTopColor: colors.outline,
+    },
+    cancelButton: {
+      flex: 1,
+      borderRadius: 12,
+      borderColor: '#EF4444',
+      borderWidth: 2,
+      height: 48,
+    },
+    getLocationButton: {
+      flex: 1,
+      borderRadius: 12,
+      height: 48,
     },
   });
 

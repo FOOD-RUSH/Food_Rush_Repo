@@ -1,14 +1,16 @@
 import { apiClient } from '@/src/services/shared/apiClient';
 
 export interface RestaurantRegisterRequest {
-  role: string;
   fullName: string;
-  phoneNumber: string;
+  phone: string;
   email: string;
+  phoneNumber: string; // that of restaurant
   password: string;
+  nearLat: number;
+  nearLng: number; 
   name: string; // Restaurant name
   address?: string; // Optional
-  documentUri?: string; // Optional document
+  document?: string; // Optional document
 }
 
 export interface RestaurantRegisterResponse {

@@ -89,6 +89,10 @@ export interface NotificationItem {
 }
 
 export const restaurantApi = {
+  // Get restaurant details by ID
+  getRestaurantById: (restaurantId: string) => {
+    return apiClient.get(`/restaurants/${restaurantId}`);
+  },
  
   updateLocation: (data: {
     latitude?: number;
@@ -97,8 +101,8 @@ export const restaurantApi = {
     return apiClient.patch('/restaurants/location', {...data});
   },
 
-  toggleStatus: (isActive: boolean, restaurantId: string) => {
-    return apiClient.patch(`/restaurants/${restaurantId}/status`, { isActive });
+  toggleStatus: (isOpen: boolean, restaurantId: string) => {
+    return apiClient.patch(`/restaurants/${restaurantId}/status`, { isOpen: isOpen });
   },
 
   // Analytics

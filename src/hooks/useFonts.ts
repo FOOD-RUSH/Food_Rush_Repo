@@ -4,7 +4,7 @@ import { loadFonts, areFontsLoaded } from '@/src/utils/fontLoader';
 interface UseFontsReturn {
   fontsLoaded: boolean;
   fontError: Error | null;
-  loadFonts: () => Promise<void>;
+  loadFonts: () => Promise<void>
 }
 
 /**
@@ -18,7 +18,7 @@ export const useFonts = (): UseFontsReturn => {
     if (!fontsLoaded) {
       loadFontsAsync();
     }
-  }, []);
+  }, [fontsLoaded]);
 
   const loadFontsAsync = async () => {
     try {

@@ -14,49 +14,54 @@ export interface NotificationApiResponse {
   data?: any;
 }
 
-export const restaurantNotificationApi = {
-  // GET /restaurant/notifications - Get restaurant notifications with pagination
+/**
+ * Unified notification API service for both customer and restaurant users
+ * The backend determines the user type from the authentication token
+ * and returns appropriate notifications for that user type
+ */
+export const notificationApi = {
+  // GET /notifications/my - Get notifications with pagination for authenticated user
   getNotifications: async (params: NotificationListParams = { limit: 20, page: 1 }) => {
-    const response = await apiClient.get<NotificationResponse>('/restaurant/notifications', {
+    const response = await apiClient.get<NotificationResponse>('/notifications/my', {
       params,
     });
     return response.data;
   },
 
-  // PATCH /restaurant/notifications/:id/read - Mark a specific notification as read
+  // PATCH /notifications/:id/read - Mark a specific notification as read
   markAsRead: async (notificationId: string) => {
     const response = await apiClient.patch<NotificationApiResponse>(
-      `/restaurant/notifications/${notificationId}/read`
+      `/notifications/${notificationId}/read`
     );
     return response.data;
   },
 
-  // PATCH /restaurant/notifications/read-all - Mark all notifications as read for restaurant
+  // PATCH /notifications/read-all - Mark all notifications as read for authenticated user
   markAllAsRead: async () => {
     const response = await apiClient.patch<NotificationApiResponse>(
-      '/restaurant/notifications/read-all'
+      '/notifications/read-all'
     );
     return response.data;
   },
 
-  // GET /restaurant/notifications/unread-count - Get number of unread notifications for restaurant
+  // GET /notifications/unread-count - Get number of unread notifications for authenticated user
   getUnreadCount: async () => {
-    const response = await apiClient.get<UnreadCountResponse>('/restaurant/notifications/unread-count');
+    const response = await apiClient.get<UnreadCountResponse>('/notifications/unread-count');
     return response.data;
   },
 
-  // DELETE /restaurant/notifications/:id - Delete a specific notification
+  // DELETE /notifications/:id - Delete a specific notification (if supported by backend)
   deleteNotification: async (notificationId: string) => {
     const response = await apiClient.delete<NotificationApiResponse>(
-      `/restaurant/notifications/${notificationId}`
+      `/notifications/${notificationId}`
     );
     return response.data;
   },
 
-  // POST /restaurant/notifications/register-token - Register push notification token
+  // POST /notifications/register-token - Register push notification token
   registerPushToken: async (token: string, deviceInfo?: any) => {
     const response = await apiClient.post<NotificationApiResponse>(
-      '/restaurant/notifications/register-token',
+      '/notifications/register-token',
       {
         token,
         deviceInfo,
@@ -66,10 +71,10 @@ export const restaurantNotificationApi = {
     return response.data;
   },
 
-  // DELETE /restaurant/notifications/unregister-token - Unregister push notification token
+  // DELETE /notifications/unregister-token - Unregister push notification token
   unregisterPushToken: async (token: string) => {
     const response = await apiClient.delete<NotificationApiResponse>(
-      '/restaurant/notifications/unregister-token',
+      '/notifications/unregister-token',
       {
         data: { token }
       }

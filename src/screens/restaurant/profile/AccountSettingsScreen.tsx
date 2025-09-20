@@ -69,7 +69,7 @@ const AccountSettingsScreen = ({ navigation }: Props) => {
     ]).start();
   }, [headerAnim, contentAnim]);
 
-  const styles = getStyles(isDarkMode);
+  const styles = getStyles(isDarkMode, colors);
 
   return (
     <CommonView>
@@ -157,7 +157,7 @@ const AccountSettingsScreen = ({ navigation }: Props) => {
   );
 };
 
-const getStyles = (isDarkMode: boolean) => StyleSheet.create({
+const getStyles = (isDarkMode: boolean, colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: isDarkMode ? RESTAURANT_COLORS.BACKGROUND_DARK : RESTAURANT_COLORS.BACKGROUND_LIGHT,
@@ -181,7 +181,7 @@ const getStyles = (isDarkMode: boolean) => StyleSheet.create({
     padding: 4,
   },
   headerTitle: {
-    color: '#fff',
+    color: colors.onPrimary,
     fontSize: 24,
     fontWeight: 'bold',
     flex: 1,
