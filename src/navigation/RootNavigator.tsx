@@ -307,7 +307,7 @@ const RootNavigator: React.FC = () => {
     // If not authenticated, go to auth
     if (!isAuthenticated) {
       console.log('User not authenticated, navigating to Auth');
-      return 'Auth';
+      return 'UserTypeSelection';
     }
 
     // Navigate based on user type

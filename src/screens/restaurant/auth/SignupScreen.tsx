@@ -21,7 +21,7 @@ import {
 } from 'react-native-paper';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { restaurantRegisterSchema, registerSchema } from '@/src/utils/validation';
+import { restaurantRegisterSchema } from '@/src/utils/validation';
 import { Ionicons } from '@expo/vector-icons';
 import CommonView from '@/src/components/common/CommonView';
 import { AuthStackScreenProps } from '@/src/navigation/types';
@@ -33,8 +33,11 @@ import { useTranslation } from 'react-i18next';
 import { useRegisterRestaurant } from '@/src/hooks/restaurant/useAuthhooks';
 import ErrorDisplay from '@/src/components/auth/ErrorDisplay';
 import * as ImagePicker from 'expo-image-picker';
-import LocationPicker from '@/src/components/restaurant/LocationPicker';
+import LocationPicker from '@/src/components/common/LocationPicker';
 import { Location } from '@/src/location/types';
+import { Typography } from '@/src/components/common/Typography';
+import { ResponsiveContainer } from '@/src/components/common/ResponsiveContainer';
+import { useResponsive, useResponsiveSpacing } from '@/src/hooks/useResponsive';
 
 // Optimized country codes data - moved outside component to prevent recreation
 const COUNTRY_CODES = [
@@ -53,7 +56,6 @@ interface RestaurantSignUpFormData {
   password: string;
   confirmPassword: string;
   name: string; // Restaurant name
-  address?: string; // Optional
 }
 
 type CountryCode = (typeof COUNTRY_CODES)[number];
@@ -72,6 +74,8 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
   } = useRegisterRestaurant();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { clearError, setError, error: authError } = useAuthStore();
+  const { isSmallScreen, wp, hp } = useResponsive();
+  const spacing = useResponsiveSpacing();
 
   // get usertype gotten from params
   const userType = route.params?.userType || 'restaurant';
@@ -122,9 +126,8 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
       phoneNumber: '',
       fullName: '',
       name: '',
-      address: '',
     },
-  });
+  }); // Added missing closing brace and parenthesis
 
   // Optimized callbacks with useCallback to prevent unnecessary re-renders
   const onSubmit = useCallback(
@@ -149,6 +152,16 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
         return;
       }
 
+      if (!selectedLocation) {
+        Toast.show({
+          type: 'error',
+          text1: t('error'),
+          text2: t('location_required_for_restaurant'),
+          position: 'top',
+        });
+        return;
+      }
+
       clearError();
 
       try {
@@ -160,11 +173,11 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
           email: data.email.trim(),
           password: data.password,
           name: data.name.trim(), // Restaurant name
-          ...(data.address && { address: data.address.trim() }), // Optional address
           ...(documentUri && { documentUri }), // Optional document
           ...(selectedLocation && {
             latitude: selectedLocation.latitude,
             longitude: selectedLocation.longitude,
+            address: selectedLocation.formattedAddress, // Use address from location modal
             locationAddress: selectedLocation.formattedAddress,
             exactLocation: selectedLocation.exactLocation,
           }), // Location data
@@ -550,39 +563,13 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                 )}
               />
 
-              {/* Address Input (Optional) */}
-              <Controller
-                control={control}
-                name="address"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <View style={styles.inputContainer}>
-                    <TextInput
-                      placeholder="Address (Optional)"
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value}
-                      mode="outlined"
-                      keyboardType="default"
-                      autoCapitalize="words"
-                      left={
-                        <TextInput.Icon
-                          icon="map-marker"
-                          color={colors.onSurface}
-                        />
-                      }
-                      outlineStyle={styles.inputOutline}
-                      style={styles.textInput}
-                      contentStyle={styles.inputContent}
-                    />
-                  </View>
-                )}
-              />
-
-              {/* Location Picker */}
+              {/* Location Picker - This will instantly pop up when clicked and provide the address */}
               <LocationPicker
                 onLocationSelected={setSelectedLocation}
                 selectedLocation={selectedLocation}
-                required={false}
+                required={true}
+                label={t('restaurant_location')}
+                placeholder={t('tap_to_select_location')}
               />
 
               {/* Document Upload */}
@@ -720,7 +707,7 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                 mode="contained"
                 onPress={handleSubmit((data: RestaurantSignUpFormData) => onSubmit(data))}
                 loading={isPending}
-                disabled={isPending || !termsAccepted || !isValid}
+                disabled={isPending || !termsAccepted || !isValid || !selectedLocation}
                 buttonColor={colors.primary}
                 contentStyle={styles.buttonContent}
                 style={styles.signUpButton}
