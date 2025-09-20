@@ -30,6 +30,8 @@ interface ResponsiveUtils {
   moderateScale: (size: number, factor?: number) => number;
   responsiveSize: (size: number) => number;
   getResponsiveText: (baseSize: number) => number;
+  getResponsiveSpacing: (size: number) => number;
+  scale: (size: number) => number;
 }
 
 const BREAKPOINTS = {
@@ -110,6 +112,20 @@ export const useResponsive = (): ResponsiveUtils => {
     return Math.round(baseSize * scaleFactor);
   };
 
+  const getResponsiveSpacing = (size: number): number => {
+    if (isSmallScreen) return size * 0.9;
+    if (isMediumScreen) return size;
+    if (isLargeScreen) return size * 1.1;
+    return size;
+  };
+
+  // Scale function for responsive sizing
+  const scale = (size: number): number => {
+    const baseWidth = 375; // iPhone X width as base
+    const scaleFactor = width / baseWidth;
+    return Math.round(size * scaleFactor);
+  };
+
   return {
     screen: screenData,
     breakpoints,
@@ -124,6 +140,8 @@ export const useResponsive = (): ResponsiveUtils => {
     moderateScale,
     responsiveSize,
     getResponsiveText,
+    getResponsiveSpacing,
+    scale,
   };
 };
 

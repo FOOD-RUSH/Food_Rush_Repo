@@ -9,6 +9,7 @@ import { useNetwork } from '@/src/contexts/NetworkContext';
 import { useTranslation } from 'react-i18next';
 import { useVerifyOTP, useResendOTP } from '@/src/hooks/customer/useAuthhooks';
 import ErrorDisplay from '@/src/components/auth/ErrorDisplay';
+import { Heading3, Body, BodySmall, Label } from '@/src/components/common/Typography';
 
 const OTPScreen: React.FC<AuthStackScreenProps<'OTPVerification'>> = ({
   navigation,
@@ -275,23 +276,24 @@ const OTPScreen: React.FC<AuthStackScreenProps<'OTPVerification'>> = ({
             className="-ml-2"
             onPress={goBack}
           />
-          <Text
-            className={`text-lg font-semibold `}
-            style={{ color: colors.onBackground }}
+          <Heading3
+            color={colors.onBackground}
+            weight="semibold"
           >
             {t('otp_verification')}
-          </Text>
+          </Heading3>
           <View className="w-10" />
         </View>
 
         {/* Description */}
         <View className="mb-12">
-          <Text
-            className={`text-sm text-center leading-5 `}
-            style={{ color: colors.onBackground }}
+          <Body
+            align="center"
+            color={colors.onBackground}
+            style={{ lineHeight: 20 }}
           >
             {t('otp_sent')} {data.phone || data.email}
-          </Text>
+          </Body>
         </View>
 
         {/* OTP Input Fields */}
@@ -325,24 +327,24 @@ const OTPScreen: React.FC<AuthStackScreenProps<'OTPVerification'>> = ({
 
         {/* Resend Timer */}
         <View className="mb-8">
-          <Text
-            className={`text-sm text-center`}
-            style={{ color: colors.onSurface }}
+          <Body
+            align="center"
+            color={colors.onSurface}
           >
             {isResendEnabled ? (
-              <Text style={{ color: colors.primary }}>
+              <Body color={colors.primary}>
                 You can now resend the code
-              </Text>
+              </Body>
             ) : (
               <>
                 {t('resend_code')} in{' '}
-                <Text className="font-medium" style={{ color: colors.primary }}>
+                <Label weight="medium" color={colors.primary}>
                   {Math.floor(timer / 60)}:
                   {(timer % 60).toString().padStart(2, '0')} s
-                </Text>
+                </Label>
               </>
             )}
-          </Text>
+          </Body>
         </View>
 
         {/* Error Display */}
@@ -374,32 +376,28 @@ const OTPScreen: React.FC<AuthStackScreenProps<'OTPVerification'>> = ({
           disabled={!isResendEnabled || isResending}
           className="self-center"
         >
-          <Text
-            className={`text-sm font-medium ${
+          <Label
+            weight="medium"
+            color={
               isResendEnabled && !isResending
-                ? `text-[${colors.primary}]`
-                : `text-[${colors.outline}]`
-            }`}
-            style={{
-              color:
-                isResendEnabled && !isResending
-                  ? colors.primary
-                  : colors.outline,
-            }}
+                ? colors.primary
+                : colors.outline
+            }
           >
             {isResending ? t('resending') : t('resend_code')}
-          </Text>
+          </Label>
         </TouchableOpacity>
 
         {/* Additional Info */}
         <View className="mt-8">
-          <Text
-            className="text-xs text-center"
-            style={{ color: colors.onSurface, opacity: 0.7 }}
+          <BodySmall
+            align="center"
+            color={colors.onSurface}
+            style={{ opacity: 0.7 }}
           >
             Didn&apos;t receive the code? Check your spam folder or try
             resending.
-          </Text>
+          </BodySmall>
         </View>
       </View>
     </CommonView>

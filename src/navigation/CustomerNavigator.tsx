@@ -79,6 +79,11 @@ function CustomerOrderStackScreen() {
         tabBarIndicatorStyle: {
           backgroundColor: navigationTheme.colors.primary,
         },
+        tabBarLabelStyle: {
+          fontFamily: 'Urbanist-SemiBold',
+          fontSize: 14,
+          textTransform: 'none',
+        },
         lazy: true,
       }}
     >
@@ -114,6 +119,11 @@ export function CustomerHelpCenterStackScreen() {
         tabBarIndicatorStyle: {
           backgroundColor: navigationTheme.colors.primary,
         },
+        tabBarLabelStyle: {
+          fontFamily: 'Urbanist-SemiBold',
+          fontSize: 14,
+          textTransform: 'none',
+        },
         lazy: true,
       }}
     >
@@ -140,6 +150,8 @@ function CustomerProfileStackScreen() {
         },
 
         headerTitleStyle: {
+          fontFamily: 'Urbanist-SemiBold',
+          fontSize: 18,
           color: navigationTheme.colors.text,
         },
         contentStyle: {
@@ -154,6 +166,8 @@ function CustomerProfileStackScreen() {
         options={({ navigation }) => ({
           headerTitle: t('profile'),
           headerTitleStyle: {
+            fontFamily: 'Urbanist-SemiBold',
+            fontSize: 18,
             color: navigationTheme.colors.text,
           },
           headerShadowVisible: true,
@@ -275,7 +289,7 @@ export default function CustomerNavigator() {
             <Text
               style={{
                 fontSize: 12,
-                fontWeight: '600',
+                fontFamily: 'Urbanist-SemiBold',
                 color: navigationTheme.colors.primary,
                 marginBottom: 4,
               }}
@@ -289,7 +303,8 @@ export default function CustomerNavigator() {
         tabBarStyle,
         headerStyle,
         headerTitleStyle: {
-          fontWeight: 'bold',
+          fontFamily: 'Urbanist-Bold',
+          fontSize: 18,
           color: navigationTheme.colors.text,
         },
         headerTitleAlign: 'left',
@@ -338,7 +353,8 @@ export default function CustomerNavigator() {
           headerTitleAlign: 'left',
           headerTitleStyle: {
             marginLeft: 20,
-            fontWeight: 'normal',
+            fontFamily: 'Urbanist-Medium',
+            fontSize: 18,
             color: navigationTheme.colors.text,
           },
         })}

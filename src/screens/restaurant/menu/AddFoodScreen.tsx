@@ -20,7 +20,7 @@ import { useCreateMenuItem } from '@/src/hooks/restaurant/useMenuApi';
 import { useNavigation } from '@react-navigation/native';
 import { RestaurantMenuStackScreenProps } from '@/src/navigation/types';
 import { useTranslation } from 'react-i18next';
-import { pickImageForUpload, isValidImageType, getFileExtension } from '@/src/utils/imageUtils';
+import { pickImageForUpload, isValidImageType, isValidImageUri, getFileExtension, pickImageWithValidation } from '@/src/utils/imageUtils';
 import { CreateMenuItemRequest } from '@/src/services/restaurant/menuApi';
 import { Typography, Heading1, Body, Label, Caption } from '@/src/components/common/Typography';
 
@@ -130,7 +130,7 @@ const ImageUploadSection = React.memo<{
                 align="center"
                 style={{ paddingHorizontal: 16, marginTop: 4 }}
               >
-                {t('tap_to_upload_image') || 'Tap to upload image (JPG, PNG)'}
+                {t('tap_to_upload_image') || 'Tap to upload image (JPG, PNG, WebP)'}
               </Caption>
             </>
           )}
@@ -282,32 +282,32 @@ export const AddFoodScreen = () => {
     };
   }, [formData, t]);
 
-  // Memoized image picker
+  // Memoized image picker with enhanced validation
   const handleImagePick = useCallback(async () => {
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       setIsUploading(true);
 
-      const result = await pickImageForUpload();
+      const result = await pickImageWithValidation();
       
       if (result) {
-        // Validate image type
-        if (!isValidImageType(result.type)) {
+        // Double validation - check both type and URI as fallback
+        const isValidType = isValidImageType(result.type);
+        const isValidUri = isValidImageUri(result.uri);
+        
+        if (!isValidType && !isValidUri) {
           Alert.alert(
             t('invalid_image_type') || 'Invalid Image Type',
-            t('please_select_jpg_or_png') || 'Please select a JPG or PNG image.'
+            t('please_select_jpg_png_webp') || 'Please select a JPG, PNG, or WebP image.'
           );
           return;
         }
 
-        // Update the correct file extension based on type
-        const extension = getFileExtension(result.type);
-        const fileName = `menu-item-${Date.now()}.${extension}`;
-        
+        // The result already has the correct file extension from pickImageWithValidation
         const imageFile = {
           uri: result.uri,
           type: result.type,
-          name: fileName,
+          name: result.name, // Already has correct extension
         };
 
         updateFormData({
@@ -316,10 +316,22 @@ export const AddFoodScreen = () => {
         });
         
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        
+        console.log('Image selected successfully:', {
+          type: result.type,
+          name: result.name,
+          uri: result.uri.substring(0, 50) + '...'
+        });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error picking image:', error);
-      Alert.alert(t('error') || 'Error', t('failed_to_pick_image') || 'Failed to pick image');
+      
+      // Show specific error message if available
+      const errorMessage = error?.message || t('failed_to_pick_image') || 'Failed to pick image';
+      Alert.alert(
+        t('error') || 'Error', 
+        errorMessage
+      );
     } finally {
       setIsUploading(false);
     }

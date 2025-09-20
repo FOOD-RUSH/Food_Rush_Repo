@@ -6,7 +6,8 @@ import {
   Dimensions,
 } from 'react-native';
 import React, { useCallback } from 'react';
-import { Avatar, useTheme, Card, Divider, Surface } from 'react-native-paper';
+import { useTheme, Card, Divider, Surface } from 'react-native-paper';
+import Avatar from '@/src/components/common/Avatar';
 import {
   AntDesign,
   MaterialIcons,
@@ -87,18 +88,10 @@ const ProfileDetailsScreen = ({
           >
             <View style={{ alignItems: 'center', position: 'relative' }}>
               <View style={{ position: 'relative' }}>
-                <Avatar.Image
-                  source={
-                    user?.profilePicture
-                      ? { uri: user.profilePicture }
-                      : icons.ProfilePlogo
-                  }
+                <Avatar
+                  profilePicture={user?.profilePicture}
+                  fullName={user?.fullName || 'User'}
                   size={120}
-                  style={{
-                    backgroundColor: colors.surfaceVariant,
-                    borderWidth: 4,
-                    borderColor: colors.primary + '20',
-                  }}
                 />
                 <TouchableOpacity
                   style={{

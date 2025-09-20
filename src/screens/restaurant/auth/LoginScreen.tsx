@@ -24,6 +24,7 @@ import { useTranslation } from 'react-i18next';
 import { useLoginRestaurant } from '@/src/hooks/restaurant/useAuthhooks';
 import ErrorDisplay from '@/src/components/auth/ErrorDisplay';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Heading1, Heading2, Body, Label } from '@/src/components/common/Typography';
 
 // ✅ Add logo assets
 const googleLogo = require('@/assets/images/google.png');
@@ -187,8 +188,8 @@ const RestaurantLoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                 </LinearGradient>
               </Animated.View>
               <Animated.View style={{ opacity: fadeAnim }}>
-                <Text style={styles.title}>{t('welcome_back')}</Text>
-                <Text style={styles.subtitle}>Sign in to your restaurant dashboard</Text>
+                <Heading1 color={colors.onBackground} weight="bold" align="center" style={{ marginBottom: 8 }}>{t('welcome_back')}</Heading1>
+                <Body color={colors.onSurfaceVariant} align="center">Sign in to your restaurant dashboard</Body>
               </Animated.View>
             </Animated.View>
 
@@ -268,10 +269,10 @@ const RestaurantLoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                     uncheckedColor={colors.outline}
                     color={colors.primary}
                   />
-                  <Text style={styles.rememberMeText}>{t('remember_me')}</Text>
+                  <Label color={colors.onSurfaceVariant} weight="medium" style={{ marginLeft: 8 }}>{t('remember_me')}</Label>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
-                  <Text style={styles.forgotPasswordText}>{t('forgot_password')}</Text>
+                  <Label color={colors.primary} weight="semibold">{t('forgot_password')}</Label>
                 </TouchableOpacity>
               </View>
 
@@ -292,16 +293,16 @@ const RestaurantLoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                   }
                   style={styles.loginButtonGradient}
                 >
-                  <Text style={styles.loginButtonText}>
+                  <Heading2 color={colors.onPrimary} weight="bold">
                     {loginMutation.isPending ? t('logging_in') : t('login')}
-                  </Text>
+                  </Heading2>
                 </LinearGradient>
               </TouchableOpacity>
 
               {/* Divider */}
               <View style={styles.dividerContainer}>
                 <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>{t('or_signin_with')}</Text>
+                <Label color={colors.onSurfaceVariant} weight="medium" style={{ paddingHorizontal: 16 }}>{t('or_signin_with')}</Label>
                 <View style={styles.dividerLine} />
               </View>
 
@@ -318,21 +319,21 @@ const RestaurantLoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                 {/* Google */}
                 <TouchableOpacity style={styles.socialButton} onPress={handleGoogleSignIn} disabled={loginMutation.isPending}>
                   <Image source={googleLogo} style={styles.socialIcon} />
-                  <Text style={styles.socialButtonText}>Continue with Google</Text>
+                  <Body color={colors.onSurfaceVariant} weight="semibold">Continue with Google</Body>
                 </TouchableOpacity>
 
                 {/* Apple */}
                 <TouchableOpacity style={styles.socialButton} onPress={handleAppleSignIn} disabled={loginMutation.isPending}>
                   <Image source={appleLogo} style={styles.socialIcon} />
-                  <Text style={styles.socialButtonText}>Continue with Apple</Text>
+                  <Body color={colors.onSurfaceVariant} weight="semibold">Continue with Apple</Body>
                 </TouchableOpacity>
               </Animated.View>
 
               {/* Signup */}
               <Animated.View style={[styles.signupContainer, { opacity: socialButtonsAnim }]}>
-                <Text style={styles.signupPrompt}>{t('dont_have_account')} </Text>
+                <Body color={colors.onSurfaceVariant}>{t('dont_have_account')} </Body>
                 <TouchableOpacity onPress={() => navigation.navigate('SignUp', { userType: route.params?.userType || 'restaurant' })}>
-                  <Text style={styles.signupLink}>{t('signup')}</Text>
+                  <Label color={colors.primary} weight="bold">{t('signup')}</Label>
                 </TouchableOpacity>
               </Animated.View>
             </Animated.View>

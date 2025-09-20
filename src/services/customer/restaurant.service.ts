@@ -1,4 +1,5 @@
 import { apiClient } from '@/src/services/shared/apiClient';
+import { logError } from '@/src/utils/errorHandler';
 import type { FoodProps, MenuProps, RestaurantCard, RestaurantProfile, RestaurantReviewsResponse } from '@/src/types';
 
 // Updated query parameters to match API documentation
@@ -41,12 +42,11 @@ export const restaurantApi = {
     try {
       const response = await apiClient.get<RestaurantItems>(
         '/restaurants/browse',
-        { params: query },
+        { params: query }
       );
-      console.log('Restaurants API Response:', response.data);
       return response.data.data;
     } catch (error) {
-      console.error('Error fetching restaurants:', error);
+      logError(error, 'getAllRestaurants');
       throw error;
     }
   },
@@ -56,35 +56,34 @@ export const restaurantApi = {
     try {
       const response = await apiClient.get<RestaurantItems>(
         '/restaurants/nearby',
-        { params: query },
+        { params: query }
       );
-      console.log('Nearby Restaurants API Response:', response.data);
       return response.data.data;
     } catch (error) {
-      console.error('Error fetching nearby restaurants:', error);
+      logError(error, 'getNearbyRestaurants');
       throw error;
     }
   },
 
-  // Get all nearby menu items (consolidates getAllMenu and getMenuBrowseAll)
+  // Get all nearby menu items
   getAllMenuItems: async (query: FoodQuery) => {
     try {
       const response = await apiClient.get<FoodItems>('/menu/all/nearby', {
-        params: query,
+        params: query
       });
-      console.log('All Menu Items API Response:', response.data);
       return response.data.data;
     } catch (error) {
-      console.error('Error fetching menu items:', error);
+      logError(error, 'getAllMenuItems');
       throw error;
     }
   },
+  
   getAllMenu2: async () => {
     try {
       const response = await apiClient.get<FoodItems>('/menu/all');
       return response.data.data;
     } catch (error) {
-      console.error('Error fetching menu items:', error);
+      logError(error, 'getAllMenu2');
       throw error;
     }
   },
@@ -190,6 +189,18 @@ export const restaurantApi = {
       return response.data.data;
     } catch (error) {
       console.error(`Error fetching reviews for restaurant ${id}:`, error);
+      throw error;
+    }
+  },
+
+  // Create restaurant review
+  createRestaurantReview: async (id: string, reviewData: { score: number; review: string }) => {
+    try {
+      const response = await apiClient.post(`/restaurants/${id}/reviews`, reviewData);
+      console.log('Create Review API Response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error(`Error creating review for restaurant ${id}:`, error);
       throw error;
     }
   },

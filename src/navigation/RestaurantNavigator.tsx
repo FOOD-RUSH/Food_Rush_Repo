@@ -150,7 +150,7 @@ export default function RestaurantNavigator() {
         },
         tabBarLabelStyle: {
           fontSize: 12,
-          fontWeight: '500',
+          fontFamily: 'Urbanist-Medium',
         },
       })}
     >

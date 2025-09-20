@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { Heading5, Heading4, Heading3, Body, BodyLarge, Label } from './Typography';
 
 interface EmptyStateProps {
   icon?: keyof typeof Ionicons.glyphMap;
@@ -31,28 +32,29 @@ const EmptyState: React.FC<EmptyStateProps> = ({
       case 'small':
         return {
           iconSize: 48,
-          titleSize: 'text-lg',
-          descriptionSize: 'text-sm',
+          TitleComponent: Heading5,
+          DescriptionComponent: Body,
           padding: 'py-6 px-4',
         };
       case 'large':
         return {
           iconSize: 96,
-          titleSize: 'text-2xl',
-          descriptionSize: 'text-lg',
+          TitleComponent: Heading3,
+          DescriptionComponent: BodyLarge,
           padding: 'py-12 px-6',
         };
       default: // medium
         return {
           iconSize: 64,
-          titleSize: 'text-xl',
-          descriptionSize: 'text-base',
+          TitleComponent: Heading4,
+          DescriptionComponent: Body,
           padding: 'py-8 px-6',
         };
     }
   };
 
   const sizeStyles = getSizeStyles();
+  const { TitleComponent, DescriptionComponent } = sizeStyles;
 
   return (
     <View
@@ -66,19 +68,22 @@ const EmptyState: React.FC<EmptyStateProps> = ({
         style={{ marginBottom: 16 }}
       />
 
-      <Text
-        className={`${sizeStyles.titleSize} font-semibold text-center mb-2`}
-        style={{ color: colors.onSurface }}
+      <TitleComponent
+        color={colors.onSurface}
+        weight="semibold"
+        align="center"
+        style={{ marginBottom: 8 }}
       >
         {title}
-      </Text>
+      </TitleComponent>
 
-      <Text
-        className={`${sizeStyles.descriptionSize} text-center mb-4`}
-        style={{ color: colors.onSurfaceVariant }}
+      <DescriptionComponent
+        color={colors.onSurfaceVariant}
+        align="center"
+        style={{ marginBottom: 16 }}
       >
         {description}
-      </Text>
+      </DescriptionComponent>
 
       {actionText && onActionPress && (
         <TouchableOpacity
@@ -87,9 +92,9 @@ const EmptyState: React.FC<EmptyStateProps> = ({
           style={{ backgroundColor: colors.primary }}
           activeOpacity={0.8}
         >
-          <Text className="font-semibold" style={{ color: colors.onPrimary }}>
+          <Label color={colors.onPrimary} weight="semibold">
             {actionText}
-          </Text>
+          </Label>
         </TouchableOpacity>
       )}
     </View>

@@ -9,7 +9,15 @@
     "test": "jest --watchAll",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "format": "prettier --write .",
-    "validate:translations": "node src/locales/validate-translations.js validate"
+    "validate:translations": "node src/locales/validate-translations.js validate",
+    "analyze:bundle": "node scripts/analyze-bundle.js",
+    "monitor:bundle": "node scripts/monitor-bundle-size.js",
+    "bundle:quick": "node scripts/quick-bundle-check.js",
+    "bundle:size": "npm run analyze:bundle && npm run monitor:bundle",
+    "bundle:export": "expo export --platform all --dev false --clear",
+    "bundle:web-analyze": "npx expo export --platform web --dev false && npx webpack-bundle-analyzer dist/_expo/static/js/*.js",
+    "deps:analyze": "npx depcheck",
+    "deps:unused": "npx depcheck --json | jq '.dependencies'"
   },
   "jest": {
     "preset": "jest-expo"

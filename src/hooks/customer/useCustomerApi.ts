@@ -1,5 +1,5 @@
 // hooks/customer/index.ts - Updated to match your existing pattern
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import {
   restaurantApi,
   RestaurantQuery,
@@ -137,8 +137,27 @@ export const useRestaurantReviews = (restaurantId: string) => {
     queryKey: ['restaurant-reviews', restaurantId],
     queryFn: () => restaurantApi.getRestaurantReviews(restaurantId),
     enabled: !!restaurantId,
-    staleTime: CACHE_CONFIG.STALE_TIME,
-    gcTime: CACHE_CONFIG.CACHE_TIME,
-    retry: CACHE_CONFIG.MAX_RETRIES,
+  });
+};
+
+// Hook for creating restaurant review
+export const useCreateRestaurantReview = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ restaurantId, reviewData }: { 
+      restaurantId: string; 
+      reviewData: { score: number; review: string } 
+    }) => restaurantApi.createRestaurantReview(restaurantId, reviewData),
+    onSuccess: (data, variables) => {
+      // Invalidate and refetch restaurant reviews
+      queryClient.invalidateQueries({ 
+        queryKey: ['restaurant-reviews', variables.restaurantId] 
+      });
+      // Also invalidate restaurant details to update rating
+      queryClient.invalidateQueries({ 
+        queryKey: ['restaurant-details', variables.restaurantId] 
+      });
+    },
   });
 };

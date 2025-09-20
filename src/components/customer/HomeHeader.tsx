@@ -1,13 +1,15 @@
 // HomeHeader.tsx - Updated with production UX
-import React, { useCallback } from 'react';
-import { TouchableOpacity, View, Text } from 'react-native';
-import { Avatar, useTheme, Badge } from 'react-native-paper';
+import React, { useCallback, useState } from 'react';
+import { TouchableOpacity, View, Text, ActivityIndicator } from 'react-native';
+import { useTheme, Badge } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
-import { icons } from '@/assets/images';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from '@/src/location/useLocation';
 import { useCartItemCount } from '@/src/stores/customerStores/cartStore';
 import { useUnreadCount } from '@/src/stores/customerStores/notificationStore';
+import { useUser } from '@/src/stores/AuthStore';
+import Avatar from '@/src/components/common/Avatar';
+import Toast from 'react-native-toast-message';
 
 interface HomeHeaderProps {
   navigation: any;
@@ -18,6 +20,8 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
   const { t } = useTranslation('translation');
   const cartItemCount = useCartItemCount();
   const unreadNotificationCount = useUnreadCount();
+  const user = useUser();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const {
     location,
@@ -70,28 +74,67 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
           console.log('User cancelled location permission');
         },
       );
-    } else if (locationError || isUsingFallback) {
-      // Try to refresh location
-      await refreshLocation();
     } else {
-      // Navigate to location picker/search
-      navigation.navigate('LocationPicker');
+      // Always refresh location when user taps the header
+      // This provides immediate feedback and ensures fresh location data
+      await refreshLocation();
     }
   }, [
     hasPermission,
-    locationError,
-    isUsingFallback,
     showLocationPermissionDialog,
     requestPermissionWithLocation,
     refreshLocation,
-    navigation,
   ]);
 
+  // Handler for the entire header area to refresh location
+  const handleHeaderPress = useCallback(async () => {
+    // Prevent multiple simultaneous refresh attempts
+    if (isRefreshing || locationLoading) {
+      return;
+    }
+
+    setIsRefreshing(true);
+    
+    try {
+      // Refresh location when any part of the header is tapped
+      if (hasPermission) {
+        const success = await refreshLocation();
+        if (success) {
+          Toast.show({
+            type: 'success',
+            text1: t('location_updated', 'Location updated'),
+            text2: t('location_refreshed_successfully', 'Your location has been refreshed'),
+            visibilityTime: 2000,
+          });
+        } else {
+          Toast.show({
+            type: 'error',
+            text1: t('location_update_failed', 'Location update failed'),
+            text2: t('please_try_again', 'Please try again'),
+            visibilityTime: 3000,
+          });
+        }
+      } else {
+        // If no permission, trigger the location permission flow
+        handleLocationPress();
+      }
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: t('location_error', 'Location error'),
+        text2: t('unable_to_refresh_location', 'Unable to refresh location'),
+        visibilityTime: 3000,
+      });
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [hasPermission, refreshLocation, handleLocationPress, isRefreshing, locationLoading, t]);
+
   const getLocationIcon = () => {
-    if (locationLoading) return 'time-outline';
+    if (locationLoading || isRefreshing) return 'time-outline';
     if (locationError && !hasPermission) return 'location-outline';
     if (isUsingFallback) return 'location-outline';
-    return 'chevron-down';
+    return 'refresh-outline';
   };
 
   const getLocationIconColor = () => {
@@ -101,16 +144,18 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
   };
 
   return (
-    <View
+    <TouchableOpacity
       className="flex-row items-center justify-between px-4 py-4"
       style={{ backgroundColor: colors.background }}
+      onPress={handleHeaderPress}
+      activeOpacity={0.8}
     >
       {/* Left Section - Avatar and Location */}
       <View className="flex-row items-center flex-1">
-        <Avatar.Image
-          source={icons.appleIcon}
+        <Avatar
+          profilePicture={user?.profilePicture}
+          fullName={user?.fullName || 'User'}
           size={70}
-          style={{ backgroundColor: colors.surfaceVariant }}
         />
 
         <View className="ml-3 flex-1">
@@ -153,12 +198,20 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
               )}
             </View>
 
-            <Ionicons
-              name={getLocationIcon()}
-              size={16}
-              color={getLocationIconColor()}
-              style={{ marginLeft: 4 }}
-            />
+            {(locationLoading || isRefreshing) ? (
+              <ActivityIndicator
+                size={16}
+                color={getLocationIconColor()}
+                style={{ marginLeft: 4 }}
+              />
+            ) : (
+              <Ionicons
+                name={getLocationIcon()}
+                size={16}
+                color={getLocationIconColor()}
+                style={{ marginLeft: 4 }}
+              />
+            )}
           </TouchableOpacity>
         </View>
       </View>
@@ -231,7 +284,7 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
           )}
         </TouchableOpacity>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 

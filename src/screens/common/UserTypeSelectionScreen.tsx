@@ -15,6 +15,7 @@ import { images } from '@/assets/images';
 import { useTranslation } from 'react-i18next';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import { useAppStore } from '@/src/stores/AppStore';
+import { Heading1, Heading4, Body, BodyLarge, Label } from '@/src/components/common/Typography';
 // Types
 interface UserType {
   id: 'customer' | 'restaurant';
@@ -107,27 +108,20 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
       >
         {/* Header */}
         <View style={{ marginBottom: 32 }}>
-          <Text
-            style={{
-              fontSize: 28,
-              fontWeight: 'bold',
-              marginBottom: 8,
-              color: colors.onBackground,
-              textAlign: 'center',
-            }}
+          <Heading1
+            align="center"
+            color={colors.onBackground}
+            style={{ marginBottom: 8 }}
           >
             {t('what_are_your_needs')}
-          </Text>
-          <Text
-            style={{
-              fontSize: 16,
-              color: colors.onBackground,
-              textAlign: 'center',
-              opacity: 0.7,
-            }}
+          </Heading1>
+          <Body
+            align="center"
+            color={colors.onBackground}
+            style={{ opacity: 0.7 }}
           >
             {t('choose_your_role')}
-          </Text>
+          </Body>
         </View>
 
         {/* User Type Cards */}
@@ -207,19 +201,16 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
                   borderBottomRightRadius: 17,
                 }}
               >
-                <Text
-                  style={{
-                    fontSize: 22,
-                    fontWeight: 'bold',
-                    textAlign: 'center',
-                    color:
-                      selectedType === type.id
-                        ? colors.primary
-                        : colors.onSurface,
-                  }}
+                <Heading4
+                  align="center"
+                  color={
+                    selectedType === type.id
+                      ? colors.primary
+                      : colors.onSurface
+                  }
                 >
                   {t(type.title)}
-                </Text>
+                </Heading4>
               </View>
             </TouchableOpacity>
           ))}
@@ -251,18 +242,15 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
           </Button>
 
           {selectedType && (
-            <Text
-              style={{
-                textAlign: 'center',
-                marginTop: 16,
-                fontSize: 16,
-                color: colors.primary,
-                fontWeight: '500',
-              }}
+            <Body
+              align="center"
+              color={colors.primary}
+              weight="medium"
+              style={{ marginTop: 16 }}
             >
               {t('you_selected')}{' '}
               {selectedType === 'customer' ? t('customer') : t('restaurant')}
-            </Text>
+            </Body>
           )}
         </View>
       </ScrollView>

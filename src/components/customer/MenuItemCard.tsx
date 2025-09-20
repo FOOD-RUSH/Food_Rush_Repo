@@ -42,15 +42,10 @@ const MenuItemCard = ({ item }: { item: FoodProps }) => {
     <TouchableOpacity activeOpacity={0.8}>
       <Card
         mode="outlined"
+        className="m-2.5 my-3 rounded-2xl overflow-hidden shadow-sm"
         style={{
-          margin: 10,
-          borderRadius: 16,
-          overflow: 'hidden',
           backgroundColor: colors.surface,
-          marginVertical: 12,
           borderColor: borderColor,
-          elevation: 2,
-          boxShadow: '1px 0px 10px rgba(0, 0, 0, 0.15)',
         }}
         key={item.id}
         onPress={() => {
@@ -60,7 +55,7 @@ const MenuItemCard = ({ item }: { item: FoodProps }) => {
         }}
         onLongPress={longPress}
       >
-        <View className="flex-row py-3 px-3 items-center justify-between ">
+        <View className="flex-row py-3 px-3 items-center justify-between">
           <View className="relative">
             <Card.Cover
               source={
@@ -83,7 +78,7 @@ const MenuItemCard = ({ item }: { item: FoodProps }) => {
           <View className="flex-1 ml-3">
             <View className="flex-row items-center justify-between">
               <Text
-                className={`font-semibold text-xl flex-1`}
+                className="font-semibold text-xl flex-1"
                 style={{ color: colors.onSurface }}
                 numberOfLines={1}
               >

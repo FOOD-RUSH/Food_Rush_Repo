@@ -16,6 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { images } from '@/assets/images';
 import { useTranslation } from 'react-i18next';
 import { LanguageSelector } from './common/LanguageSelector';
+import { Heading1, Heading4, Body, BodyLarge, Label } from './common/Typography';
 
 interface OnboardingInfo {
   image: ImageSourcePropType;
@@ -125,28 +126,23 @@ const OnboardingWelcome = memo(({ onComplete }: { onComplete: () => void }) => {
 
           {/* Welcome text */}
           <View style={{ alignItems: 'center', marginBottom: 40 }}>
-            <Text
-              style={{
-                fontSize: 24,
-                fontWeight: 'bold',
-                marginBottom: 16,
-                textAlign: 'center',
-                color: colors.onSurface,
-              }}
+            <Heading1
+              align="center"
+              color={colors.onSurface}
+              style={{ marginBottom: 16 }}
             >
               {t('welcome_to_foodrush')}
-            </Text>
-            <Text
+            </Heading1>
+            <BodyLarge
+              align="center"
+              color={colors.onSurface}
               style={{
-                fontSize: 18,
-                textAlign: 'center',
                 lineHeight: 28,
                 paddingHorizontal: 16,
-                color: colors.onSurface,
               }}
             >
               {t('onboarding_welcome')}
-            </Text>
+            </BodyLarge>
             <LanguageSelector showLabel={false} />
           </View>
         </View>
@@ -229,29 +225,24 @@ const OnboardingSlide = memo(
                 }}
               >
                 {/* Title and description */}
-                <Text
-                  style={{
-                    fontSize: 20,
-                    fontWeight: 'bold',
-                    marginBottom: 16,
-                    textAlign: 'center',
-                    color: 'white',
-                  }}
+                <Heading4
+                  align="center"
+                  color="white"
+                  style={{ marginBottom: 16 }}
                 >
                   {slide.title}
-                </Text>
+                </Heading4>
 
-                <Text
+                <Body
+                  align="center"
+                  color="white"
                   style={{
-                    fontSize: 16,
-                    textAlign: 'center',
                     lineHeight: 24,
                     marginBottom: 32,
-                    color: 'white',
                   }}
                 >
                   {slide.description}
-                </Text>
+                </Body>
 
                 {/* Navigation buttons */}
                 <View
@@ -267,15 +258,12 @@ const OnboardingSlide = memo(
                     style={{ paddingVertical: 12, paddingHorizontal: 16 }}
                     activeOpacity={0.7}
                   >
-                    <Text
-                      style={{
-                        fontSize: 16,
-                        fontWeight: '500',
-                        color: 'white',
-                      }}
+                    <Label
+                      weight="medium"
+                      color="white"
                     >
                       {t('skip')}
-                    </Text>
+                    </Label>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -292,16 +280,13 @@ const OnboardingSlide = memo(
                     }}
                     activeOpacity={0.8}
                   >
-                    <Text
-                      style={{
-                        fontSize: 16,
-                        fontWeight: '600',
-                        marginRight: 8,
-                        color: 'white',
-                      }}
+                    <Label
+                      weight="semibold"
+                      color="white"
+                      style={{ marginRight: 8 }}
                     >
                       {isLastSlide ? t('next') : t('next')}
-                    </Text>
+                    </Label>
                     <Ionicons name="arrow-forward" size={16} color="white" />
                   </TouchableOpacity>
                 </View>

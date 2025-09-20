@@ -1,6 +1,6 @@
 import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import React, { useCallback } from 'react';
-import { Avatar, Switch, useTheme } from 'react-native-paper';
+import { Switch, useTheme } from 'react-native-paper';
 import { AntDesign, MaterialIcons } from '@expo/vector-icons';
 import RowView from '@/src/components/common/RowView';
 import { CustomerProfileStackScreenProps } from '@/src/navigation/types';
@@ -9,7 +9,7 @@ import { useAppStore } from '@/src/stores/AppStore';
 import { useAuthStore, useCustomerProfile } from '@/src/stores/AuthStore';
 import { useBottomSheet } from '@/src/components/common/BottomSheet/BottomSheetContext';
 import LogoutContent from '@/src/components/common/BottomSheet/LogoutContent';
-import { icons } from '@/assets/images';
+import Avatar from '@/src/components/common/Avatar';
 import { useTranslation } from 'react-i18next';
 
 const ProfileHomeScreen = ({
@@ -123,10 +123,10 @@ const ProfileHomeScreen = ({
       >
         {/* Profile section */}
         <View className="flex-row justify-between items-center mb-3 px-1">
-          <Avatar.Image
-            source={icons.ProfilePlogo}
+          <Avatar
+            profilePicture={user?.profilePicture}
+            fullName={user?.fullName || 'User'}
             size={100}
-            className="bg-gray-500"
           />
           <View className="flex-col items-center justify-center flex-1 mx-2">
             <Text

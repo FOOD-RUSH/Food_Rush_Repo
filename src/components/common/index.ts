@@ -1,3 +1,24 @@
+// Typography Components
+export {
+  Typography,
+  Display1,
+  Display2,
+  Heading1,
+  Heading2,
+  Heading3,
+  Heading4,
+  Heading5,
+  Heading6,
+  BodyLarge,
+  Body,
+  BodySmall,
+  LabelLarge,
+  Label,
+  LabelSmall,
+  Caption,
+  Overline,
+} from './Typography';
+
 // Responsive Components
 export {
   ResponsiveContainer,

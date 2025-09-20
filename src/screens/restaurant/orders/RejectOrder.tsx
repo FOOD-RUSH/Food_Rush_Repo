@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, Alert } from 'react-native';
+import { View, Alert } from 'react-native';
 import { Button, TextInput, useTheme } from 'react-native-paper';
 import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { useRejectOrder } from '@/src/hooks/restaurant/useOrderApi';
 import { RootStackParamList } from '@/src/navigation/types';
 import CommonView from '@/src/components/common/CommonView';
+import { Heading3, Body, Label } from '@/src/components/common/Typography';
 
 const RejectOrder: React.FC = () => {
   const route = useRoute<RouteProp<RootStackParamList, 'RestaurantRejectOrder'>>();
@@ -33,17 +34,17 @@ const RejectOrder: React.FC = () => {
   return (
     <CommonView>
       <View className="flex-1 p-6">
-        <Text className="text-2xl font-bold mb-2" style={{ color: colors.onSurface }}>
+        <Heading3 color={colors.onSurface} style={{ marginBottom: 8 }}>
           {t('reject_order')}
-        </Text>
-        <Text className="text-base mb-6" style={{ color: colors.onSurfaceVariant }}>
+        </Heading3>
+        <Body color={colors.onSurfaceVariant} style={{ marginBottom: 24 }}>
           {t('order_id')}: {orderId}
-        </Text>
+        </Body>
         
         <View className="mb-6">
-          <Text className="text-sm font-medium mb-2" style={{ color: colors.onSurface }}>
+          <Label color={colors.onSurface} style={{ marginBottom: 8 }}>
             {t('reason_for_rejection')} ({t('optional')})
-          </Text>
+          </Label>
           <TextInput
             mode="outlined"
             placeholder={t('enter_reason')}

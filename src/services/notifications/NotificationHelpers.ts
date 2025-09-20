@@ -139,8 +139,8 @@ export const initializeNotificationsForUser = async (
   const initialized = await notificationService.initialize();
   
   if (initialized) {
-    // Register token with backend for push notifications
-    await notificationService.registerTokenWithBackend(userId, userType);
+    // Register token with backend for push notifications (for authenticated user)
+    await notificationService.registerTokenWithBackend(userType);
     initializedUsers.add(userKey);
   }
   

@@ -2,6 +2,7 @@ import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
+import { apiClient } from '../shared/apiClient';
 
 // Configure notification behavior
 Notifications.setNotificationHandler({
@@ -194,33 +195,21 @@ class NotificationService {
     return this.isInitialized;
   }
 
-  // Register token with backend
-  async registerTokenWithBackend(userId: string, userType: 'customer' | 'restaurant'): Promise<void> {
+  // Register token with backend for authenticated user
+  async registerTokenWithBackend(role: 'customer' | 'restaurant'): Promise<void> {
     if (!this.expoPushToken) {
       console.warn('No push token available for backend registration');
       return;
     }
 
     try {
-      // TODO: Replace with your actual API endpoint
-      const response = await fetch('/api/notifications/register-token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          token: this.expoPushToken,
-          userId,
-          userType,
-          platform: Platform.OS,
-        }),
+      const response = await apiClient.post('/notifications/device', {
+        expoToken: this.expoPushToken,
+        platform: Platform.OS,
+        role: role,
       });
 
-      if (response.ok) {
-        console.log('Push token registered with backend successfully');
-      } else {
-        console.error('Failed to register push token with backend');
-      }
+      console.log('Push token registered with backend successfully:', response.data);
     } catch (error) {
       console.error('Error registering push token with backend:', error);
     }

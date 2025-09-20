@@ -16,6 +16,7 @@ import { useRequestPasswordReset } from '@/src/hooks/customer/useAuthhooks';
 import Toast from 'react-native-toast-message';
 import { AuthStackScreenProps } from '@/src/navigation/types';
 import ErrorDisplay from '@/src/components/auth/ErrorDisplay';
+import { Heading1, Body, BodySmall } from '@/src/components/common/Typography';
 
 // Validation schema
 const schema = yup.object({
@@ -104,19 +105,22 @@ const ForgotPasswordScreen = ({
 
         {/* Header Section */}
         <View className="mb-10">
-          <Text
-            className={`text-3xl font-bold text-center mb-2 `}
-            style={{ color: colors.onBackground }}
+          <Heading1
+            align="center"
+            color={colors.onBackground}
+            weight="bold"
+            style={{ marginBottom: 8 }}
           >
             Reset Password
-          </Text>
-          <Text
-            className={`text-sm text-center leading-5 `}
-            style={{ color: colors.onBackground }}
+          </Heading1>
+          <Body
+            align="center"
+            color={colors.onBackground}
+            style={{ lineHeight: 20 }}
           >
-            Enter your email address and we will send you a{}code to reset your
+            Enter your email address and we will send you a code to reset your
             password
-          </Text>
+          </Body>
         </View>
 
         {/* Email Input */}
@@ -169,12 +173,12 @@ const ForgotPasswordScreen = ({
               >
                 {errors.email?.message}
               </HelperText>
-              <Text
-                className={`text-xs mt-1 `}
-                style={{ color: colors.onBackground }}
+              <BodySmall
+                color={colors.onBackground}
+                style={{ marginTop: 4 }}
               >
                 Must have at least 8 characters
-              </Text>
+              </BodySmall>
             </View>
           )}
         />

@@ -17,6 +17,7 @@ import { useBottomSheet } from '@/src/components/common/BottomSheet/BottomSheetC
 import ResettingPassword from '@/src/components/auth/ResettingPassword';
 import OTPInput from '@/src/components/auth/OTPInput';
 import { AuthStackScreenProps } from '@/src/navigation/types';
+import { Heading1, Body, BodySmall, Label } from '@/src/components/common/Typography';
 
 // Validation schema
 const validationSchema = yup.object({
@@ -156,19 +157,22 @@ const ResetPasswordScreen = ({
 
           {/* Header Section */}
           <View className="mb-10">
-            <Text
-              className={`text-3xl font-bold text-center mb-2`}
-              style={{ color: colors.background }}
+            <Heading1
+              align="center"
+              color={colors.onBackground}
+              weight="bold"
+              style={{ marginBottom: 8 }}
             >
               Reset Password
-            </Text>
-            <Text
-              className={`text-base text-center leading-5 `}
-              style={{ color: colors.background }}
+            </Heading1>
+            <Body
+              align="center"
+              color={colors.onBackground}
+              style={{ lineHeight: 20 }}
             >
               Enter your email address and we will send you code to reset your
               password
-            </Text>
+            </Body>
           </View>
 
           {/* OTP Input */}
@@ -177,12 +181,13 @@ const ResetPasswordScreen = ({
             name="otp"
             render={({ field: { onChange, value } }) => (
               <View className="mb-6">
-                <Text
-                  className="text-base font-medium mb-3"
-                  style={{ color: colors.onSurface }}
+                <Label
+                  color={colors.onSurface}
+                  weight="medium"
+                  style={{ marginBottom: 12 }}
                 >
                   Enter OTP Code
-                </Text>
+                </Label>
                 <OTPInput
                   value={value}
                   onChange={onChange}
@@ -250,12 +255,12 @@ const ResetPasswordScreen = ({
                 >
                   {errors.password?.message}
                 </HelperText>
-                <Text
-                  className={`text-xs mt-1`}
-                  style={{ color: colors.background }}
+                <BodySmall
+                  color={colors.onBackground}
+                  style={{ marginTop: 4 }}
                 >
                   Must have at least 8 characters
-                </Text>
+                </BodySmall>
               </View>
             )}
           />
@@ -310,12 +315,12 @@ const ResetPasswordScreen = ({
                 >
                   {errors.confirmPassword?.message}
                 </HelperText>
-                <Text
-                  className={`text-xs mt-1`}
-                  style={{ color: colors.background }}
+                <BodySmall
+                  color={colors.onBackground}
+                  style={{ marginTop: 4 }}
                 >
                   Both passwords must match
-                </Text>
+                </BodySmall>
               </View>
             )}
           />

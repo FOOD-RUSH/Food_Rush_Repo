@@ -2,11 +2,11 @@ import { CustomerHomeStackScreenProps } from '@/src/navigation/types';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import React from 'react';
-import { View, TouchableOpacity } from 'react-native';
+import { View, TouchableOpacity, Image } from 'react-native';
 import { Card, Text, useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { useResponsive } from '@/src/hooks/useResponsive';
-import { ResponsiveImage, ResponsiveText } from '@/src/components/common';
+import { images } from '@/assets/images';
 
 export interface FoodItemCardProps {
   foodId: string;
@@ -56,22 +56,14 @@ const FoodItemCard = ({
         });
       }}
       activeOpacity={0.8}
+      className="m-2"
     >
       <Card
         mode="outlined"
+        className="rounded-2xl overflow-hidden shadow-md"
         style={{
-          margin: getResponsiveSpacing(8),
-          borderRadius: 16,
-          overflow: 'hidden',
           backgroundColor: colors.surface,
-          marginVertical: getResponsiveSpacing(12),
-          borderColor: colors.surface,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 1 },
-          shadowOpacity: 0.15,
-          shadowRadius: 3,
-          elevation: 3,
-          boxShadow: '1px 0px 10px rgba(0, 0, 0, 0.15)',
+          borderColor: colors.outline,
           minWidth: isSmallDevice ? scale(280) : scale(320),
           maxWidth: isSmallDevice ? scale(360) : scale(520),
           minHeight: scale(120),
@@ -79,65 +71,35 @@ const FoodItemCard = ({
         }}
       >
         {/* Card content with horizontal layout */}
-        <View
-          style={{
-            flexDirection: 'row',
-            padding: getResponsiveSpacing(16),
-            alignItems: 'center',
-            position: 'relative',
-          }}
-        >
+        <View className="flex-row p-4 items-center relative">
           {/* Left side - Food Image with PROMO badge */}
-          <View
-            style={{
-              position: 'relative',
-              marginRight: getResponsiveSpacing(16),
-            }}
-          >
-            <ResponsiveImage
-              source={FoodImage}
-              size={isSmallDevice ? 'md' : 'lg'}
-              aspectRatio={1}
+          <View className="relative mr-4">
+            <Image
+              source={FoodImage || images.onboarding2}
+              className="rounded-2xl"
               style={{
-                borderRadius: 16,
+                width: isSmallDevice ? 80 : 100,
+                height: isSmallDevice ? 80 : 100,
               }}
+              resizeMode="cover"
             />
             {/* PROMO Badge - Only show if hasPromo is true */}
             {hasPromo && (
-              <View
-                style={{
-                  position: 'absolute',
-                  top: 6,
-                  left: 6,
-                  backgroundColor: colors.primary,
-                  borderRadius: 6,
-                  paddingHorizontal: 8,
-                  paddingVertical: 2,
-                }}
+              <View 
+                className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md"
+                style={{ backgroundColor: colors.primary }}
               >
-                <Text
-                  style={{
-                    color: 'white',
-                    fontSize: 10,
-                    fontWeight: 'bold',
-                  }}
-                >
+                <Text className="text-white text-xs font-bold">
                   PROMO
                 </Text>
               </View>
             )}
           </View>
+          
           <TouchableOpacity
             onPress={onLike}
-            style={{
-              position: 'absolute',
-              top: 10,
-              right: 10,
-              backgroundColor: colors.surface,
-              borderRadius: 20,
-              padding: 8,
-              elevation: 2,
-            }}
+            className="absolute top-2.5 right-2.5 p-2 rounded-full shadow-sm"
+            style={{ backgroundColor: colors.surface }}
             activeOpacity={0.7}
           >
             <Ionicons
@@ -148,49 +110,28 @@ const FoodItemCard = ({
           </TouchableOpacity>
 
           {/* Right side - Food Details */}
-          <View style={{ flex: 1 }}>
+          <View className="flex-1">
             {/* Food Name */}
-            <ResponsiveText
-              size={isSmallDevice ? 'base' : 'lg'}
-              weight="bold"
-              style={{
-                marginBottom: getResponsiveSpacing(8),
-                padding: 4,
-                color: colors.onSurface,
-              }}
+            <Text 
+              className={`${isSmallDevice ? 'text-base' : 'text-lg'} font-bold mb-2 p-1`}
+              style={{ color: colors.onSurface }}
+              numberOfLines={2}
             >
               {FoodName}
-            </ResponsiveText>
+            </Text>
 
             {/* Distance */}
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginBottom: 8,
-              }}
-            >
-              <Text className={`text-[12px] ${colors.onSurface}`}>
+            <View className="flex-row items-center mb-2">
+              <Text 
+                className="text-xs"
+                style={{ color: colors.onSurface }}
+              >
                 {(distanceKm || distanceFromUser).toFixed(1)} km
               </Text>
               {!isAvailable && (
                 <>
-                  <Text
-                    style={{
-                      color: colors.onSurface,
-                      fontSize: 12,
-                      marginHorizontal: 4,
-                    }}
-                  >
-                    |
-                  </Text>
-                  <Text
-                    style={{
-                      color: '#F44336',
-                      fontSize: 12,
-                      fontWeight: 'bold',
-                    }}
-                  >
+                  <Text className="text-xs mx-1" style={{ color: colors.onSurface }}>|</Text>
+                  <Text className="text-xs font-bold text-red-500">
                     UNAVAILABLE
                   </Text>
                 </>
@@ -198,50 +139,25 @@ const FoodItemCard = ({
             </View>
 
             {/* Price and Delivery */}
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-              }}
-            >
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <ResponsiveText
-                  size={isSmallDevice ? 'base' : 'lg'}
-                  weight="bold"
-                  style={{
-                    color: colors.primary,
-                  }}
+            <View className="flex-row items-center justify-between">
+              <View className="flex-row items-center">
+                <Text
+                  className={`${isSmallDevice ? 'text-base' : 'text-lg'} font-bold`}
+                  style={{ color: colors.primary }}
                 >
                   {FoodPrice} XAF
-                </ResponsiveText>
-                <Text
-                  style={{
-                    color: colors.onSurface,
-                    fontSize: 12,
-                    marginLeft: 5,
-                  }}
-                >
-                  |
                 </Text>
+                <Text className="text-xs ml-1" style={{ color: colors.onSurface }}>|</Text>
                 <Ionicons
                   name="car-sharp"
                   size={12}
                   color={primaryColor}
-                  style={{ marginLeft: 5 }}
+                  className="ml-1"
                 />
-                <Text
-                  style={{
-                    color: colors.onSurface,
-                    fontSize: 12,
-                    marginLeft: 5,
-                  }}
-                >
+                <Text className="text-xs ml-1" style={{ color: colors.onSurface }}>
                   {DeliveryPrice.toFixed(0)} F
                 </Text>
               </View>
-
-              {/* Heart Icon */}
             </View>
           </View>
         </View>

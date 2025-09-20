@@ -1,5 +1,5 @@
 import React, { useMemo, useCallback } from 'react';
-import { View, Text, Image, FlatList, ListRenderItem } from 'react-native';
+import { View, Image, FlatList, ListRenderItem } from 'react-native';
 import CommonView from '@/src/components/common/CommonView';
 import CartFoodComponent from '@/src/components/customer/CartFoodComponent';
 import { TouchableRipple, useTheme } from 'react-native-paper';
@@ -12,6 +12,7 @@ import {
 import { images } from '@/assets/images';
 import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-toast-message';
+import { Heading5, Body, BodySmall, LabelLarge } from '@/src/components/common/Typography';
 
 const CartScreen = ({ navigation }: RootStackScreenProps<'Cart'>) => {
   const { colors } = useTheme();
@@ -84,18 +85,19 @@ const CartScreen = ({ navigation }: RootStackScreenProps<'Cart'>) => {
           className="w-48 h-48 mb-6"
           resizeMode="contain"
         />
-        <Text
-          className="text-xl font-semibold text-center mb-2"
-          style={{ color: colors.onSurfaceVariant }}
+        <Heading5
+          color={colors.onSurfaceVariant}
+          align="center"
+          style={{ marginBottom: 8 }}
         >
           {t('cart_empty')}
-        </Text>
-        <Text
-          className="text-sm text-center leading-5"
-          style={{ color: colors.onSurfaceVariant }}
+        </Heading5>
+        <Body
+          color={colors.onSurfaceVariant}
+          align="center"
         >
           {t('cart_empty_description')}
-        </Text>
+        </Body>
       </View>
     ),
     [colors.onSurfaceVariant, t],
@@ -150,27 +152,27 @@ const CartScreen = ({ navigation }: RootStackScreenProps<'Cart'>) => {
         >
           <View className="flex-row justify-between items-center">
             <View>
-              <Text
-                className="font-semibold text-base"
-                style={{ color: colors.onPrimary }}
+              <LabelLarge
+                color={colors.onPrimary}
+                weight="semibold"
               >
                 {t('checkout')}
-              </Text>
-              <Text
-                className="text-sm opacity-90"
-                style={{ color: colors.onPrimary }}
+              </LabelLarge>
+              <BodySmall
+                color={colors.onPrimary}
+                style={{ opacity: 0.9 }}
               >
                 {totalItems} {t('item')}
                 {totalItems !== 1 ? t('items_suffix') : ''}
-              </Text>
+              </BodySmall>
             </View>
 
-            <Text
-              className="font-bold text-lg"
-              style={{ color: colors.onPrimary }}
+            <Heading5
+              color={colors.onPrimary}
+              weight="bold"
             >
               {formattedTotalPrice} {t('fcfa_unit')}
-            </Text>
+            </Heading5>
           </View>
         </TouchableRipple>
       </View>

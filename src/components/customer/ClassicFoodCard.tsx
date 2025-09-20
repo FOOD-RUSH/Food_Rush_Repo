@@ -49,19 +49,11 @@ const ClassicFoodCard = ({
     >
       <Card
         mode="outlined"
-        className="overflow-hidden"
+        className="overflow-hidden rounded-2xl shadow-lg my-3"
         style={{
           width: 190,
-          borderRadius: 16,
           backgroundColor: colors.surface,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.15,
-          shadowRadius: 8,
-          borderWidth: 1,
-          marginVertical: 12,
-          borderColor: colors.surface,
-          boxShadow: '1px 0px 10px rgba(0, 0, 0, 0.15)',
+          borderColor: colors.outline,
         }}
       >
         <View className="p-3">
@@ -76,29 +68,13 @@ const ClassicFoodCard = ({
                 alignSelf: 'center',
               }}
             />
-            <TouchableOpacity
-              className="absolute top-2 right-2 bg-white rounded-full p-1.5"
-              style={{
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 3,
-                elevation: 3,
-              }}
-            >
+            <TouchableOpacity className="absolute top-2 right-2 bg-white rounded-full p-1.5 shadow-sm">
               <Ionicons name="heart-outline" color={'#ff6b6b'} size={20} />
             </TouchableOpacity>
 
             {/* Status badge */}
             <View className="absolute top-2 left-2 bg-blue-500 rounded-md px-2 py-1">
-              <Text
-                style={{
-                  color: 'white',
-                  fontSize: 11,
-                  fontWeight: 'bold',
-                  textAlign: 'center',
-                }}
-              >
+              <Text className="text-white text-xs font-bold text-center">
                 {status}
               </Text>
             </View>
@@ -107,14 +83,14 @@ const ClassicFoodCard = ({
           {/* Food info */}
           <View className="mb-2 self-center">
             <Text
-              className={`font-semibold mb-1 text-center text-lg }`}
+              className="font-semibold mb-1 text-center text-lg"
               style={{ color: colors.onSurface }}
               numberOfLines={1}
             >
               {foodName}
             </Text>
             <Text
-              className={`mb-2 text-center text-base `}
+              className="mb-2 text-center text-base"
               style={{ color: colors.onSurface }}
               numberOfLines={1}
             >
@@ -127,7 +103,7 @@ const ClassicFoodCard = ({
             <View className="flex-row items-center">
               <Ionicons name="star" size={16} color={'#ffbb00'} />
               <Text
-                className={`text-sm ml-1 `}
+                className="text-sm ml-1"
                 style={{ color: colors.onSurface }}
               >
                 {rating}
@@ -140,7 +116,7 @@ const ClassicFoodCard = ({
                 color={colors.primary}
               />
               <Text
-                className={`text-sm ml-1 `}
+                className="text-sm ml-1"
                 style={{ color: colors.onSurface }}
               >
                 {distance}
@@ -165,11 +141,10 @@ const ClassicFoodCard = ({
                 size={18}
               />
               <Text
-                className={`ml-1 text-xs `}
+                className="ml-1 text-xs"
                 style={{ color: colors.onSurface }}
               >
                 500 XAF
-                {/* TO BE PRICE */}
               </Text>
             </View>
           </View>

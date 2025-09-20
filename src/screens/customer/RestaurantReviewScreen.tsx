@@ -11,6 +11,9 @@ import {
   ResponsiveText,
 } from '@/src/components/common';
 import { useResponsive } from '@/src/hooks/useResponsive';
+import { useCreateRestaurantReview } from '@/src/hooks/customer/useCustomerApi';
+import { getUserFriendlyErrorMessage } from '@/src/utils/errorHandler';
+import Toast from 'react-native-toast-message';
 
 interface RestaurantReviewScreenProps
   extends RootStackScreenProps<'RestaurantReview'> {}
@@ -26,26 +29,51 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
   // Get restaurant data from route params
   const { restaurantId, restaurantName, restaurantImage } = route.params || {};
 
-  const [rating, setRating] = useState(0);
-  const [reviewText, setReviewText] = useState('');
+  const [score, setScore] = useState(0);
+  const [review, setReview] = useState('');
+
+  // Use the create review mutation
+  const createReviewMutation = useCreateRestaurantReview();
 
   const handleStarPress = (starRating: number) => {
-    setRating(starRating);
+    setScore(starRating);
   };
 
-  const handleSubmit = () => {
-    if (rating === 0) {
+  const handleSubmit = async () => {
+    if (score === 0) {
       Alert.alert(t('error'), t('please_select_rating'));
       return;
     }
 
-    // Here you would typically submit the review to your backend
-    Alert.alert(t('success'), t('review_submitted_successfully'), [
-      {
-        text: 'OK',
-        onPress: () => navigation.goBack(),
-      },
-    ]);
+    if (!restaurantId) {
+      Alert.alert(t('error'), 'Restaurant ID is missing');
+      return;
+    }
+
+    try {
+      await createReviewMutation.mutateAsync({
+        restaurantId,
+        reviewData: {
+          score,
+          review: review.trim(),
+        },
+      });
+
+      Toast.show({
+        type: 'success',
+        text1: t('success'),
+        text2: t('review_submitted_successfully'),
+      });
+
+      navigation.goBack();
+    } catch (error) {
+      const errorMessage = getUserFriendlyErrorMessage(error);
+      Toast.show({
+        type: 'error',
+        text1: t('error'),
+        text2: errorMessage,
+      });
+    }
   };
 
   const handleCancel = () => {
@@ -72,9 +100,9 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
             activeOpacity={0.7}
           >
             <Ionicons
-              name={star <= rating ? 'star' : 'star-outline'}
+              name={star <= score ? 'star' : 'star-outline'}
               size={isSmallDevice ? 32 : 40}
-              color={star <= rating ? '#FFD700' : colors.onSurfaceVariant}
+              color={star <= score ? '#FFD700' : colors.onSurfaceVariant}
             />
           </TouchableOpacity>
         ))}
@@ -192,7 +220,7 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
           {renderStars()}
 
           {/* Rating Display */}
-          {rating > 0 && (
+          {score > 0 && (
             <View
               style={{
                 alignItems: 'center',
@@ -206,7 +234,7 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
                   color: colors.primary,
                 }}
               >
-                {rating} {rating === 1 ? t('star') : t('stars')}
+                {score} {score === 1 ? t('star') : t('stars')}
               </ResponsiveText>
             </View>
           )}
@@ -215,8 +243,8 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
           <View style={{ marginBottom: getResponsiveSpacing(32) }}>
             <TextInput
               placeholder={t('add_optional_description')}
-              value={reviewText}
-              onChangeText={setReviewText}
+              value={review}
+              onChangeText={setReview}
               mode="outlined"
               multiline
               numberOfLines={4}
@@ -265,22 +293,22 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
             <Button
               mode="contained"
               onPress={handleSubmit}
-              disabled={rating === 0}
+              disabled={score === 0 || createReviewMutation.isPending}
               style={{
                 flex: 1,
                 borderRadius: 25,
                 backgroundColor:
-                  rating === 0 ? colors.surfaceVariant : colors.primary,
+                  score === 0 ? colors.surfaceVariant : colors.primary,
               }}
               contentStyle={{ paddingVertical: getResponsiveSpacing(12) }}
               labelStyle={{
                 fontSize: 16,
                 fontWeight: '600',
                 color:
-                  rating === 0 ? colors.onSurfaceVariant : colors.onPrimary,
+                  score === 0 ? colors.onSurfaceVariant : colors.onPrimary,
               }}
             >
-              {t('submit')}
+              {createReviewMutation.isPending ? t('submitting') : t('submit')}
             </Button>
           </View>
         </ResponsiveContainer>

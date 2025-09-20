@@ -35,7 +35,7 @@ import ErrorDisplay from '@/src/components/auth/ErrorDisplay';
 import * as ImagePicker from 'expo-image-picker';
 import LocationPicker from '@/src/components/common/LocationPicker';
 import { Location } from '@/src/location/types';
-import { Typography } from '@/src/components/common/Typography';
+import { Heading2, Heading5, Body, Label } from '@/src/components/common/Typography';
 import { ResponsiveContainer } from '@/src/components/common/ResponsiveContainer';
 import { useResponsive, useResponsiveSpacing } from '@/src/hooks/useResponsive';
 
@@ -94,9 +94,9 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
         onPress={() => onSelect(item)}
         activeOpacity={0.7}
       >
-        <Text style={styles.countryFlag}>{item.flag}</Text>
-        <Text style={styles.countryName}>{item.country}</Text>
-        <Text style={styles.countryCode}>{item.code}</Text>
+        <Body style={{ marginRight: 16 }}>{item.flag}</Body>
+        <Label color={colors.onSurface} weight="medium" style={{ flex: 1 }}>{item.country}</Label>
+        <Label color={colors.onSurface} weight="semibold">{item.code}</Label>
       </TouchableOpacity>
     ),
   );
@@ -322,9 +322,11 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
   const pickDocument = useCallback(async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
-        allowsEditing: false,
-        quality: 1,
+        mediaTypes: ImagePicker.MediaTypeOptions?.Images || 'images',
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+        allowsMultipleSelection: false,
       });
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
@@ -395,9 +397,9 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
             {/* Logo and Title */}
             <View style={styles.logoContainer}>
               <View style={styles.logo}>
-                <Text style={styles.logoText}>R</Text>
+                <Heading2 color="white" weight="bold">R</Heading2>
               </View>
-              <Text style={styles.title}>{t('create_account')}</Text>
+              <Heading2 color={colors.onSurface} weight="bold" style={{ marginBottom: 8 }}>{t('create_account')}</Heading2>
             </View>
 
             {/* Form */}
@@ -414,12 +416,12 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                         onPress={openCountryModal}
                         activeOpacity={0.7}
                       >
-                        <Text style={styles.selectedCountryFlag}>
+                        <Body style={{ marginRight: 8 }}>
                           {selectedCountryCode.flag}
-                        </Text>
-                        <Text style={styles.selectedCountryCode}>
+                        </Body>
+                        <Label color={colors.onSurface} weight="medium" style={{ marginRight: 8 }}>
                           {selectedCountryCode.code}
-                        </Text>
+                        </Label>
                         <Ionicons
                           name="chevron-down"
                           size={16}
@@ -584,9 +586,9 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                     size={24}
                     color={colors.primary}
                   />
-                  <Text style={styles.documentUploadText}>
+                  <Body color={colors.onSurface} style={{ marginLeft: 12 }}>
                     {documentName || 'Upload Document (Optional)'}
-                  </Text>
+                  </Body>
                 </TouchableOpacity>
               </View>
 
@@ -680,14 +682,14 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                     color={colors.primary}
                   />
                   <View style={styles.termsTextContainer}>
-                    <Text style={styles.termsText}>
+                    <Body color={colors.onSurface}>
                       {t('terms_agreement')}{' '}
-                    </Text>
+                    </Body>
                     <TextButton
                       onPress={openTerms}
                       text={t('terms_of_service')}
                     />
-                    <Text style={styles.termsText}> {t('and')} </Text>
+                    <Body color={colors.onSurface}> {t('and')} </Body>
                     <TextButton
                       onPress={openPrivacyPolicy}
                       text={t('privacy_policy')}
@@ -719,7 +721,7 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
               {/* Divider */}
               <View style={styles.dividerContainer}>
                 <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>{t('or_continue_with')}</Text>
+                <Label color={colors.outline} style={{ paddingHorizontal: 16 }}>{t('or_continue_with')}</Label>
                 <View style={styles.dividerLine} />
               </View>
 
@@ -752,9 +754,9 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
 
               {/* Login Link */}
               <View style={styles.loginLinkContainer}>
-                <Text style={styles.loginPrompt}>
+                <Body color={colors.onSurface}>
                   {t('already_have_account')}{' '}
-                </Text>
+                </Body>
                 <TextButton
                   onPress={() => navigation.navigate('SignIn', { userType })}
                   text={t('login')}
@@ -772,12 +774,12 @@ const RestaurantSignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
           >
             <SafeAreaView style={styles.modalContainer}>
               <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>{t('select_country')}</Text>
+                <Heading5 color={colors.onSurface} weight="semibold">{t('select_country')}</Heading5>
                 <TouchableOpacity
                   onPress={closeCountryModal}
                   activeOpacity={0.7}
                 >
-                  <Text style={styles.modalDoneButton}>{t('ok')}</Text>
+                  <Label color={colors.primary} weight="medium">{t('ok')}</Label>
                 </TouchableOpacity>
               </View>
               <FlatList

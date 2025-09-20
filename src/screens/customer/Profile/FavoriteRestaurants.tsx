@@ -22,8 +22,8 @@ import ErrorDisplay from '@/src/components/common/ErrorDisplay';
 import {
   getResponsiveSpacing,
   isSmallDevice,
-  scale,
 } from '@/src/utils/responsive';
+import { useResponsive } from '@/src/hooks/useResponsive';
 
 // Loading skeleton component
 const RestaurantSkeleton = () => {
@@ -121,6 +121,7 @@ const FavoriteRestaurantItem = ({
   onPress: (restaurant: RestaurantCardType) => void;
 }) => {
   const { colors } = useTheme();
+  const { scale } = useResponsive();
 
   const handleToggleFavorite = useCallback(
     (e: any) => {
