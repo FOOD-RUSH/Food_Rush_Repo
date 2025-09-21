@@ -1,5 +1,6 @@
 import { Order } from '@/src/types/index';
 import { apiClient } from '@/src/services/shared/apiClient';
+import { logError } from '@/src/utils/errorHandler';
 
 // Order creation request (matches API docs)
 export interface CreateOrderRequest {
@@ -60,6 +61,39 @@ export const OrderApi = {
       return response.data.data;
     } catch (error) {
       console.error('Error fetching user orders:', error);
+      throw error;
+    }
+  },
+
+  // Get my orders (alias for getUserOrders for consistency)
+  getMyOrders: async (params?: {
+    status?: string;
+    limit?: number;
+    offset?: number;
+  }) => {
+    return OrderApi.getUserOrders(params);
+  },
+
+  // Customer confirms order (if needed)
+  customerConfirmOrder: async (orderId: string) => {
+    try {
+      const response = await apiClient.post(`/orders/${orderId}/confirm`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error confirming order ${orderId}:`, error);
+      throw error;
+    }
+  },
+
+  // Customer confirms they have received the delivery
+  confirmOrderReceived: async (orderId: string) => {
+    try {
+      console.log('🚀 Confirming delivery received for order:', orderId);
+      const response = await apiClient.post(`/api/v1/orders/${orderId}/confirm-received`);
+      console.log('✅ Delivery confirmation response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error(`❌ Error confirming delivery received for order ${orderId}:`, error);
       throw error;
     }
   },

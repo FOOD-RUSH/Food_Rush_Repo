@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, Image } from 'react-native';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useTheme, Card, Chip } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
@@ -11,6 +11,7 @@ import {
   useConfirmOrderReceived,
 } from '@/src/hooks/customer/useOrdersApi';
 import { getFoodPlaceholderImage } from '@/src/types/orderReceipt';
+import { OrderDeliveryConfirmationModal } from '@/src/components/customer/OrderConfirmation';
 
 export interface OrderItemCardProps {
   order: Order;
@@ -29,6 +30,9 @@ const OrderItemCard = ({
   const statusInfo = useOrderStatus(order.status);
   const { mutate: confirmReceived, isPending: isConfirming } =
     useConfirmOrderReceived();
+  
+  // State for confirmation modal
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
 
   // Calculate total items in order
   const totalItems = order.items.reduce((sum, item) => sum + item.quantity, 0);
@@ -55,8 +59,25 @@ const OrderItemCard = ({
     }
   }, [order, onReorder]);
 
+  const handleShowConfirmationModal = useCallback(() => {
+    setShowConfirmationModal(true);
+  }, []);
+
+  const handleCloseConfirmationModal = useCallback(() => {
+    setShowConfirmationModal(false);
+  }, []);
+
   const handleConfirmReceived = useCallback(() => {
-    confirmReceived(order.id);
+    confirmReceived(order.id, {
+      onSuccess: () => {
+        // Modal will auto-close after celebration
+        setShowConfirmationModal(false);
+      },
+      onError: (error) => {
+        console.error('Failed to confirm order:', error);
+        setShowConfirmationModal(false);
+      },
+    });
   }, [confirmReceived, order.id]);
 
   const handleReviews = useCallback(
@@ -264,11 +285,11 @@ const OrderItemCard = ({
                 <TouchableOpacity
                   className="flex-1 rounded-full py-2 ml-2"
                   style={{ backgroundColor: colors.primary }}
-                  onPress={handleConfirmReceived}
+                  onPress={handleShowConfirmationModal}
                   disabled={isConfirming}
                 >
                   <Text className="text-white font-medium text-center text-lg">
-                    {t('confirm_your_order')}
+                    {t('confirm_delivery', 'Confirm Delivery')}
                   </Text>
                 </TouchableOpacity>
               )}
@@ -301,6 +322,15 @@ const OrderItemCard = ({
           )}
         </View>
       </View>
+      
+      {/* Delivery Confirmation Modal */}
+      <OrderDeliveryConfirmationModal
+        visible={showConfirmationModal}
+        onClose={handleCloseConfirmationModal}
+        onConfirm={handleConfirmReceived}
+        orderNumber={`#${order.id.substring(0, 8).toUpperCase()}`}
+        restaurantName={order.restaurant?.name || 'Restaurant'}
+      />
     </Card>
   );
 };

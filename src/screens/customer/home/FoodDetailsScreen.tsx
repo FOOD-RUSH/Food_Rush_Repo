@@ -260,13 +260,14 @@ const FoodDetailsScreen = ({
 
           {/* Quantity Selector */}
           <Card
-            mode="outlined"
             style={{
               marginBottom: 20,
               backgroundColor: colors.surface,
+              elevation: 0,
+              borderWidth: 0,
             }}
           >
-            <View className="p-4">
+            <View className="p-6">
               <LabelLarge 
                 color={colors.onSurface} 
                 weight="semibold" 
@@ -320,13 +321,14 @@ const FoodDetailsScreen = ({
 
           {/* Special Instructions */}
           <Card
-            mode="outlined"
             style={{
               marginBottom: 20,
               backgroundColor: colors.surface,
+              elevation: 0,
+              borderWidth: 0,
             }}
           >
-            <View className="p-4">
+            <View className="p-6">
               <LabelLarge 
                 color={colors.onSurface} 
                 weight="semibold" 
@@ -337,10 +339,10 @@ const FoodDetailsScreen = ({
 
               <InputField
                 multiline
-                numberOfLines={3}
+                numberOfLines={4}
                 style={{
                   backgroundColor: colors.surface,
-                  minHeight: 80,
+                  minHeight: 120,
                 }}
                 placeholder={t('special_instruction')}
                 value={instructions}

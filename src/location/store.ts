@@ -35,9 +35,9 @@ const initialState: LocationState = {
     {
       id: 'default-address',
       label: 'Home',
-      fullAddress: 'Time Square NYC, Manhattan',
-      latitude: 40.758,
-      longitude: -73.9855,
+      fullAddress: 'Djoungolo II, Yaoundé, Cameroun',
+      latitude: 3.8667,
+      longitude: 11.5167,
       isDefault: true,
       createdAt: Date.now(),
       updatedAt: Date.now(),

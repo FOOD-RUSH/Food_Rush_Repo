@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { restaurantAuthApi } from '@/src/services/restaurant/authApi';
 import {
-  restaurantAuthApi,
   RestaurantRegisterRequest,
   RestaurantLoginResponse,
-} from '@/src/services/restaurant/authApi';
+} from '@/src/services/shared/authTypes';
 import { RestaurantProfile, useAuthStore, useSetAuthData } from '@/src/stores/AuthStore';
 import TokenManager from '@/src/services/shared/tokenManager';
 import { User } from '@/src/types';

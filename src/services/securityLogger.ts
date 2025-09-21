@@ -319,5 +319,4 @@ class SecurityLogger {
 // Export singleton instance
 export const securityLogger = SecurityLogger.getInstance();
 
-// Export types for external use
-export { SecurityEventType, SecurityEvent };
+// Types are already exported above

@@ -39,14 +39,15 @@ const NearbyRestaurantsScreen = ({
       id={item.id}
       name={item.name}
       address={item.address}
-      isOpen={item.isOpen}
-      verificationStatus={item.verificationStatus}
       rating={item.rating}
       ratingCount={item.ratingCount}
-      image={item.image}
-      distance={item.distance}
-      deliveryPrice={item.deliveryPrice}
-      estimatedTime={30}
+      distance={item.distanceKm || item.distance} // Use distanceKm from API
+      deliveryPrice={item.deliveryPrice} // Optional
+      estimatedDeliveryTime={item.estimatedDeliveryTime} // Optional
+      image={item.image} // Will use default if null/undefined
+      menu={item.menu || []}
+      isOpen={item.isOpen}
+      phone={item.phone}
     />
   );
 

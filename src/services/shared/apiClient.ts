@@ -150,6 +150,8 @@ class ApiClient {
       
       if (!refreshToken) {
         await TokenManager.clearAllTokens();
+        // Trigger full logout when no refresh token
+        this.triggerLogout();
         const error = new Error('Please log in again.') as ApiError;
         error.code = 'UNAUTHENTICATED';
         error.status = 401;
@@ -199,6 +201,9 @@ class ApiClient {
     } catch (refreshError) {
       await TokenManager.clearAllTokens();
       this.refreshSubscribers = [];
+      
+      // Trigger full logout when refresh fails
+      this.triggerLogout();
       
       const error = new Error('Session expired. Please log in again.') as ApiError;
       error.code = 'SESSION_EXPIRED';
@@ -288,6 +293,24 @@ class ApiClient {
   // Method to update base URL if needed
   public updateBaseURL(newBaseURL: string): void {
     this.client.defaults.baseURL = newBaseURL;
+  }
+
+  // Trigger full logout across the app
+  private async triggerLogout(): Promise<void> {
+    try {
+      // Dynamically import the auth store to avoid circular dependencies
+      const { useAuthStore } = await import('@/src/stores/AuthStore');
+      if (useAuthStore) {
+        const logout = useAuthStore.getState().logout;
+        if (logout) {
+          await logout();
+        }
+      }
+    } catch (error) {
+      console.error('Error triggering logout:', error);
+      // Fallback: at least clear tokens
+      await TokenManager.clearAllTokens();
+    }
   }
 }
 

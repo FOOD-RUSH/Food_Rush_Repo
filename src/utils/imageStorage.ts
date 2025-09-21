@@ -20,7 +20,7 @@ export interface StoredImage {
 export const saveImageLocally = async (imageUri: string, imageId: string): Promise<string> => {
   try {
     // Create directory if it doesn't exist
-    const directory = `${FileSystem.documentDirectory}images/`;
+    const directory = `${FileSystem.documentDirectory || ''}images/`;
     const dirInfo = await FileSystem.getInfoAsync(directory);
 
     if (!dirInfo.exists) {
@@ -148,7 +148,9 @@ export const generateImageId = (): string => {
  * @returns boolean
  */
 export const isLocalUri = (uri: string): boolean => {
-  return uri.startsWith(FileSystem.documentDirectory || '') ||
-         uri.startsWith(FileSystem.cacheDirectory || '') ||
+  const docDir = FileSystem.documentDirectory || '';
+  const cacheDir = FileSystem.cacheDirectory || '';
+  return uri.startsWith(docDir) ||
+         uri.startsWith(cacheDir) ||
          (Platform.OS === 'android' && uri.startsWith('file://'));
 };

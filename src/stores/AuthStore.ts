@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { DeviceEventEmitter } from 'react-native';
 import { navigate, reset } from '../navigation/navigationHelpers';
 import TokenManager from '../services/shared/tokenManager';
 
@@ -219,70 +220,50 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       setRestaurants: (restaurants) => set({ restaurants }),
       setDefaultRestaurantId: (defaultRestaurantId) => set({ defaultRestaurantId }),
 
-      // Simple but complete logout - clear all user data while preserving onboarding
+      // Optimized logout - prevent multiple calls and simplify store clearing
       logout: async () => {
+        const currentState = get();
+        
+        // Prevent multiple logout calls
+        if (!currentState.isAuthenticated && !currentState.user) {
+          console.log('Already logged out, skipping logout process');
+          return;
+        }
+        
         try {
+          console.log('Starting logout process...');
           set({ isLoading: true });
           
           // Clear authentication tokens
           await TokenManager.clearAllTokens();
           
-          // Clear all user stores
+          // Clear stores efficiently - only clear what's necessary
           try {
-            const [
-              { useCartStore },
-              { useAddressStore },
-              { usePaymentStore },
-              { useAppStore },
-              { useRestaurantProfileStore },
-              { useNotificationStore }
-            ] = await Promise.all([
-              import('./customerStores/cartStore'),
-              import('./customerStores/addressStore'),
-              import('./customerStores/paymentStore'),
-              import('./AppStore'),
-              import('./restaurantStores/restaurantProfileStore'),
-              import('./shared/notificationStore')
+            // Import stores dynamically to avoid circular dependencies
+            const [cartStore, appStore] = await Promise.all([
+              import('./customerStores/cartStore').then(m => m.useCartStore.getState()),
+              import('./AppStore').then(m => m.useAppStore.getState())
             ]);
             
-            // Clear all user data
-            useCartStore.getState().clearCart();
-            usePaymentStore.getState().reset();
+            // Clear cart and user type only
+            cartStore.clearCart();
+            appStore.clearSelectedUserType();
             
-            // Clear addresses
-            const addressStore = useAddressStore.getState();
-            addressStore.addresses.forEach(address => {
-              addressStore.deleteAddress(address.id);
-            });
-            
-            // Clear restaurant profile store
-            useRestaurantProfileStore.getState().reset();
-            
-            // Clear shared notification store
-            useNotificationStore.getState().reset();
-            
-            // Clear user type but keep onboarding status
-            useAppStore.getState().clearSelectedUserType();
-            
+            console.log('Stores cleared successfully');
           } catch (storeError) {
             console.error('Error clearing stores:', storeError);
           }
+          
           // Reset auth state
           set({ ...initialState, isLoading: false });
           
-          // Navigate to user selection
-          setTimeout(() => {
-            try {
-              reset('UserTypeSelection');
-            } catch (navError) {
-              navigate('UserTypeSelection');
-            }
-          }, 100);
+          // Emit logout event only once
+          console.log('Emitting logout event');
+          DeviceEventEmitter.emit('user-logout');
           
         } catch (error) {
           console.error('Logout error:', error);
           set({ ...initialState, isLoading: false });
-          setTimeout(() => reset('UserTypeSelection'), 100);
         }
       },
 

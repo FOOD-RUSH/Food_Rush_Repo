@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, ScrollView, TouchableOpacity } from 'react-native';
-import { useTheme, Card, RadioButton, Switch } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { View, ScrollView, TouchableOpacity, Modal, FlatList } from 'react-native';
+import { useTheme, Card, RadioButton, Switch, Divider } from 'react-native-paper';
+import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
 import CommonView from '@/src/components/common/CommonView';
@@ -19,6 +19,7 @@ const ThemeSettingsScreen: React.FC = () => {
   const [selectedTheme, setSelectedTheme] = useState<ThemeMode>(theme);
   const [selectedLanguage, setSelectedLanguage] = useState<Language>(i18n.language as Language);
   const [isLoading, setIsLoading] = useState(false);
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
 
   const themeOptions = [
     {
@@ -84,6 +85,7 @@ const ThemeSettingsScreen: React.FC = () => {
       
       setSelectedLanguage(newLanguage);
       await i18n.changeLanguage(newLanguage);
+      setShowLanguageModal(false);
       
       // Simulate API call to save preference
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -105,7 +107,7 @@ const ThemeSettingsScreen: React.FC = () => {
       }}
     >
       <Card style={{
-        backgroundColor: selectedTheme === option.value ? '#007aff10' : colors.surface,
+        backgroundColor: selectedTheme === option.value ? '#007aff10' : '#ffffff',
         borderWidth: selectedTheme === option.value ? 2 : 1,
         borderColor: selectedTheme === option.value ? '#007aff' : colors.outline,
       }}>
@@ -153,60 +155,143 @@ const ThemeSettingsScreen: React.FC = () => {
     </TouchableOpacity>
   );
 
-  const renderLanguageOption = (option: typeof languageOptions[0]) => (
-    <TouchableOpacity
-      key={option.value}
-      onPress={() => handleLanguageChange(option.value)}
-      disabled={isLoading}
-      style={{
-        marginBottom: 12,
-      }}
-    >
-      <Card style={{
-        backgroundColor: selectedLanguage === option.value ? '#007aff10' : colors.surface,
-        borderWidth: selectedLanguage === option.value ? 2 : 1,
-        borderColor: selectedLanguage === option.value ? '#007aff' : colors.outline,
-      }}>
-        <View style={{ padding: 16 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <View style={{
-              width: 40,
-              height: 40,
-              borderRadius: 20,
-              backgroundColor: '#007aff20',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginRight: 12,
-            }}>
-              <Typography variant="h5">
-                {option.flag}
-              </Typography>
-            </View>
-            
-            <View style={{ flex: 1 }}>
-              <Label 
-                color={colors.onSurface}
-                weight="semibold"
-                style={{ marginBottom: 2 }}
-              >
-                {option.label}
-              </Label>
-              <Caption color={colors.onSurfaceVariant}>
-                {option.description}
-              </Caption>
-            </View>
-            
-            <RadioButton
-              value={option.value}
-              status={selectedLanguage === option.value ? 'checked' : 'unchecked'}
-              onPress={() => handleLanguageChange(option.value)}
-              color="#007aff"
-              disabled={isLoading}
-            />
+  const renderLanguageDropdown = () => {
+    const selectedOption = languageOptions.find(option => option.value === selectedLanguage);
+    
+    return (
+      <TouchableOpacity
+        onPress={() => setShowLanguageModal(true)}
+        disabled={isLoading}
+        style={{
+          backgroundColor: '#ffffff',
+          borderWidth: 1,
+          borderColor: colors.outline,
+          borderRadius: 12,
+          padding: 16,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+          <View style={{
+            width: 40,
+            height: 40,
+            borderRadius: 20,
+            backgroundColor: '#007aff20',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginRight: 12,
+          }}>
+            <Typography variant="h5">
+              {selectedOption?.flag}
+            </Typography>
+          </View>
+          
+          <View style={{ flex: 1 }}>
+            <Label 
+              color={colors.onSurface}
+              weight="semibold"
+              style={{ marginBottom: 2 }}
+            >
+              {selectedOption?.label}
+            </Label>
+            <Caption color={colors.onSurfaceVariant}>
+              {selectedOption?.description}
+            </Caption>
           </View>
         </View>
-      </Card>
-    </TouchableOpacity>
+        
+        <Ionicons
+          name="chevron-down"
+          size={20}
+          color={colors.onSurfaceVariant}
+        />
+      </TouchableOpacity>
+    );
+  };
+
+  const renderLanguageModal = () => (
+    <Modal
+      visible={showLanguageModal}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={() => setShowLanguageModal(false)}
+    >
+      <View style={{ flex: 1, backgroundColor: colors.background }}>
+        <View style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: 20,
+          borderBottomWidth: 1,
+          borderBottomColor: colors.outline,
+          backgroundColor: '#ffffff',
+        }}>
+          <Heading5 color={colors.onSurface} weight="bold">
+            {t('select_language')}
+          </Heading5>
+          <TouchableOpacity onPress={() => setShowLanguageModal(false)}>
+            <Ionicons name="close" size={24} color={colors.onSurface} />
+          </TouchableOpacity>
+        </View>
+        
+        <FlatList
+          data={languageOptions}
+          keyExtractor={(item) => item.value}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() => handleLanguageChange(item.value)}
+              disabled={isLoading}
+              style={{
+                padding: 16,
+                backgroundColor: '#ffffff',
+                borderBottomWidth: 1,
+                borderBottomColor: colors.outline + '30',
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  backgroundColor: '#007aff20',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginRight: 12,
+                }}>
+                  <Typography variant="h5">
+                    {item.flag}
+                  </Typography>
+                </View>
+                
+                <View style={{ flex: 1 }}>
+                  <Label 
+                    color={colors.onSurface}
+                    weight="semibold"
+                    style={{ marginBottom: 2 }}
+                  >
+                    {item.label}
+                  </Label>
+                  <Caption color={colors.onSurfaceVariant}>
+                    {item.description}
+                  </Caption>
+                </View>
+                
+                {selectedLanguage === item.value && (
+                  <Ionicons
+                    name="checkmark"
+                    size={24}
+                    color="#007aff"
+                  />
+                )}
+              </View>
+            </TouchableOpacity>
+          )}
+          style={{ backgroundColor: '#ffffff' }}
+        />
+      </View>
+    </Modal>
   );
 
   return (
@@ -229,7 +314,7 @@ const ThemeSettingsScreen: React.FC = () => {
             {t('language')}
           </Heading5>
           
-          {languageOptions.map(renderLanguageOption)}
+          {renderLanguageDropdown()}
         </View>
 
         {/* Theme Preview */}
@@ -301,6 +386,9 @@ const ThemeSettingsScreen: React.FC = () => {
         {/* Bottom Spacing */}
         <View style={{ height: 20 }} />
       </ScrollView>
+      
+      {/* Language Selection Modal */}
+      {renderLanguageModal()}
     </CommonView>
   );
 };

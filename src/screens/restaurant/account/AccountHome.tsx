@@ -268,9 +268,9 @@ const AccountHome: React.FC<
     },
     {
       icon: 'credit-card-outline',
-      title: t('payment_billing'),
-      subtitle: t('manage_payment_methods_and_billing'),
-      onPress: () => navigation.navigate('RestaurantPaymentBilling'),
+      title: t('payments'),
+      subtitle: t('view_payment_information'),
+      onPress: () => navigation.navigate('RestaurantPayments'),
       color: '#FF6B35',
     },
     {
@@ -287,13 +287,7 @@ const AccountHome: React.FC<
       onPress: () => navigation.navigate('RestaurantThemeSettings'),
       color: '#FF9500',
     },
-    {
-      icon: 'cog-outline',
-      title: t('settings'),
-      subtitle: t('restaurant_management_and_preferences'),
-      onPress: () => navigation.navigate('RestaurantSettings'),
-      color: colors.onSurfaceVariant,
-    },
+
     {
       icon: 'help-circle-outline',
       title: t('help_support'),
@@ -386,10 +380,8 @@ const AccountHome: React.FC<
                   flexDirection: 'row', 
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  backgroundColor: colors.surface,
                   paddingHorizontal: 12,
                   paddingVertical: 8,
-                  borderRadius: 12,
                 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
                     <View

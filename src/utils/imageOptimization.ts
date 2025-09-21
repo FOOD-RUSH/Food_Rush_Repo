@@ -31,16 +31,16 @@ interface OptimizedImageConfig {
 
 /**
  * Generate optimized image URI with responsive sizing and quality
+ * Note: This is a utility function that doesn't use hooks
  */
 export const getOptimizedImageUri = (
   originalUri: string,
   preset?: ImageSizePreset,
   customWidth?: number,
-  customHeight?: number
+  customHeight?: number,
+  breakpoint: keyof typeof IMAGE_QUALITY = 'md',
+  screenWidth: number = 375
 ): OptimizedImageConfig => {
-  const breakpoint = useBreakpoint();
-  const { width: screenWidth } = useWindowDimensions();
-  
   // Determine image dimensions
   let targetWidth: number;
   let targetHeight: number | undefined;

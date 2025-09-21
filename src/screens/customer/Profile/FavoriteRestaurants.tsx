@@ -16,6 +16,7 @@ import CommonView from '@/src/components/common/CommonView';
 import {
   useFavoriteRestaurants,
   useToggleFavorite,
+  useIsRestaurantLiked,
 } from '@/src/hooks/customer/useFavoriteRestaurants';
 import { RestaurantCard as RestaurantCardType } from '@/src/types';
 import ErrorDisplay from '@/src/components/common/ErrorDisplay';
@@ -24,6 +25,7 @@ import {
   isSmallDevice,
 } from '@/src/utils/responsive';
 import { useResponsive } from '@/src/hooks/useResponsive';
+import { Typography } from '@/src/components/common/Typography';
 
 // Loading skeleton component
 const RestaurantSkeleton = () => {
@@ -62,49 +64,45 @@ const RestaurantSkeleton = () => {
 const EmptyState = ({ onRefresh }: { onRefresh: () => void }) => {
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
+  const { scale } = useResponsive();
 
   return (
     <View className="flex-1 items-center justify-center px-8">
       <View
-        className="w-24 h-24 rounded-full items-center justify-center mb-6"
-        style={{ backgroundColor: colors.surfaceVariant }}
+        className="rounded-full items-center justify-center mb-6"
+        style={{ 
+          width: scale(120), 
+          height: scale(120),
+          backgroundColor: colors.primaryContainer || colors.primary + '20'
+        }}
       >
         <Ionicons
           name="heart-outline"
-          size={40}
-          color={colors.onSurfaceVariant}
+          size={scale(48)}
+          color={colors.primary}
         />
       </View>
 
-      <Text
-        className="text-xl font-semibold text-center mb-2"
-        style={{ color: colors.onSurface }}
-      >
+      <Typography variant="h4" style={{ color: colors.onSurface, textAlign: 'center', marginBottom: 8, fontWeight: 'bold' }}>
         {t('no_favorite_restaurants', 'No Favorite Restaurants')}
-      </Text>
+      </Typography>
 
-      <Text
-        className="text-base text-center mb-8 leading-6"
-        style={{ color: colors.onSurfaceVariant }}
-      >
+      <Typography variant="body1" style={{ color: colors.onSurfaceVariant, textAlign: 'center', marginBottom: 32, lineHeight: 24 }}>
         {t(
           'no_favorites_description',
           "You haven't added any restaurants to your favorites yet. Start exploring and save your favorite spots!",
         )}
-      </Text>
+      </Typography>
 
       <TouchableOpacity
-        className="px-6 py-3 rounded-full"
+        className="px-8 py-4 rounded-full"
         style={{ backgroundColor: colors.primary }}
         onPress={onRefresh}
         activeOpacity={0.8}
       >
-        <Text
-          className="text-base font-medium"
-          style={{ color: colors.onPrimary }}
-        >
+        <Typography variant="button" style={{ color: 'white', fontWeight: '600' }}>
           {t('explore_restaurants', 'Explore Restaurants')}
-        </Text>
+        </Typography>
       </TouchableOpacity>
     </View>
   );
@@ -122,24 +120,25 @@ const FavoriteRestaurantItem = ({
 }) => {
   const { colors } = useTheme();
   const { scale } = useResponsive();
+  const { t } = useTranslation();
 
   const handleToggleFavorite = useCallback(
     (e: any) => {
       e.stopPropagation();
       Alert.alert(
-        'Remove from Favorites',
-        `Remove ${item.name} from your favorites?`,
+        t('remove_from_favorites', 'Remove from Favorites'),
+        t('remove_restaurant_confirmation', `Remove ${item.name} from your favorites?`),
         [
-          { text: 'Cancel', style: 'cancel' },
+          { text: t('cancel', 'Cancel'), style: 'cancel' },
           {
-            text: 'Remove',
+            text: t('remove', 'Remove'),
             style: 'destructive',
-            onPress: () => onToggleFavorite(item.id),
+            onPress: () => onToggleFavorite(item.id || item.restaurantId),
           },
         ],
       );
     },
-    [item, onToggleFavorite],
+    [item, onToggleFavorite, t],
   );
 
   return (
@@ -148,119 +147,161 @@ const FavoriteRestaurantItem = ({
         style={{
           margin: getResponsiveSpacing(8),
           borderRadius: 16,
-          overflow: 'hidden',
           backgroundColor: colors.surface,
-          marginVertical: getResponsiveSpacing(12),
-          borderColor: colors.surface,
+          marginVertical: getResponsiveSpacing(8),
           shadowColor: '#000',
           shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.2,
-          shadowRadius: 4,
-          elevation: 4,
-          boxShadow: '0px 2px 12px rgba(0, 0, 0, 0.2)',
-          minWidth: isSmallDevice ? scale(280) : scale(320),
-          maxWidth: isSmallDevice ? scale(360) : scale(520),
-          minHeight: scale(140),
-          maxHeight: scale(200),
-          padding: 12,
+          shadowOpacity: 0.1,
+          shadowRadius: 8,
+          elevation: 3,
         }}
-        className="rounded-xl relative"
       >
-        {/* Favorite button */}
-        <TouchableOpacity
-          className="absolute top-4 right-4 z-10 p-2 rounded-full"
-          style={{ backgroundColor: colors.surface }}
-          onPress={handleToggleFavorite}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="heart" size={20} color={colors.error} />
-        </TouchableOpacity>
-
-        <View className="flex-row">
-          {/* Restaurant Image */}
-          <View
-            className="w-24 h-24 rounded-lg mr-4 items-center justify-center overflow-hidden"
-            style={{ backgroundColor: colors.surfaceVariant }}
+        <View style={{ padding: 16, position: 'relative' }}>
+          {/* Favorite button */}
+          <TouchableOpacity
+            style={{
+              position: 'absolute',
+              top: 12,
+              right: 12,
+              zIndex: 10,
+              padding: 8,
+              borderRadius: 20,
+              backgroundColor: colors.surface,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.2,
+              shadowRadius: 2,
+              elevation: 2,
+            }}
+            onPress={handleToggleFavorite}
+            activeOpacity={0.7}
           >
-            {item.imageUrl ? (
-              <Image
-                source={{ uri: item.imageUrl }}
-                style={{ width: '100%', height: '100%', borderRadius: 8 }}
-                resizeMode="cover"
-              />
-            ) : (
-              <Ionicons
-                name="restaurant-outline"
-                size={40}
-                color={colors.onSurfaceVariant}
-              />
-            )}
-          </View>
+            <Ionicons name="heart" size={scale(20)} color={colors.error} />
+          </TouchableOpacity>
 
-          {/* Restaurant Info */}
-          <View className="flex-1 justify-center">
-            <View className="flex-row items-center mb-2">
-              <Text
-                className="text-xl font-bold flex-1 mr-2"
-                style={{ color: colors.onSurface }}
-                numberOfLines={1}
-              >
-                {item.name}
-              </Text>
-              {!item.isOpen && (
-                <View
-                  className="px-3 py-1 rounded-full"
-                  style={{ backgroundColor: colors.errorContainer }}
-                >
-                  <Text
-                    className="text-xs font-medium"
-                    style={{ color: colors.onErrorContainer }}
-                  >
-                    Closed
-                  </Text>
-                </View>
+          <View className="flex-row">
+            {/* Restaurant Image */}
+            <View
+              style={{
+                width: scale(80),
+                height: scale(80),
+                borderRadius: 12,
+                marginRight: 16,
+                backgroundColor: colors.surfaceVariant,
+                overflow: 'hidden',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {item.imageUrl ? (
+                <Image
+                  source={{ uri: item.imageUrl }}
+                  style={{ width: '100%', height: '100%' }}
+                  resizeMode="cover"
+                />
+              ) : (
+                <Ionicons
+                  name="restaurant-outline"
+                  size={scale(32)}
+                  color={colors.onSurfaceVariant}
+                />
               )}
             </View>
 
-            <Text
-              className="text-base mb-3"
-              style={{ color: colors.onSurfaceVariant }}
-              numberOfLines={2}
-            >
-              {item.address}
-            </Text>
+            {/* Restaurant Info */}
+            <View style={{ flex: 1, justifyContent: 'space-between' }}>
+              <View>
+                <View className="flex-row items-center mb-2">
+                  <Typography 
+                    variant="h6" 
+                    style={{ 
+                      color: colors.onSurface, 
+                      flex: 1, 
+                      marginRight: 8,
+                      fontWeight: 'bold'
+                    }}
+                    numberOfLines={1}
+                  >
+                    {item.name}
+                  </Typography>
+                  {!item.isOpen && (
+                    <View
+                      style={{
+                        paddingHorizontal: 8,
+                        paddingVertical: 4,
+                        borderRadius: 12,
+                        backgroundColor: colors.errorContainer || colors.error + '20',
+                      }}
+                    >
+                      <Typography
+                        variant="caption"
+                        style={{
+                          color: colors.onErrorContainer || colors.error,
+                          fontWeight: '600',
+                          fontSize: scale(10)
+                        }}
+                      >
+                        {t('closed', 'Closed')}
+                      </Typography>
+                    </View>
+                  )}
+                </View>
 
-            <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center">
-                <Ionicons name="star" size={16} color="#fbbf24" />
-                <Text
-                  className="text-base ml-1 mr-4"
-                  style={{ color: colors.onSurfaceVariant }}
+                <Typography
+                  variant="body2"
+                  style={{ 
+                    color: colors.onSurfaceVariant, 
+                    marginBottom: 12,
+                    lineHeight: 18
+                  }}
+                  numberOfLines={2}
                 >
-                  {item.rating?.toFixed(1) || 'N/A'}
-                </Text>
-
-                <Ionicons
-                  name="time-outline"
-                  size={16}
-                  color={colors.onSurfaceVariant}
-                />
-                <Text
-                  className="text-base ml-1"
-                  style={{ color: colors.onSurfaceVariant }}
-                >
-                  {item.estimatedDeliveryTime || 'N/A'}
-                </Text>
+                  {item.address}
+                </Typography>
               </View>
 
-              {item.deliveryFee && (
-                <Text
-                  className="text-base font-semibold"
-                  style={{ color: colors.primary }}
-                >
-                  {item.deliveryFee} FCFA
-                </Text>
-              )}
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center">
+                  <Ionicons name="star" size={scale(14)} color="#fbbf24" />
+                  <Typography
+                    variant="caption"
+                    style={{ 
+                      color: colors.onSurfaceVariant, 
+                      marginLeft: 4, 
+                      marginRight: 12
+                    }}
+                  >
+                    {item.rating?.toFixed(1) || 'N/A'}
+                  </Typography>
+
+                  <Ionicons
+                    name="time-outline"
+                    size={scale(14)}
+                    color={colors.onSurfaceVariant}
+                  />
+                  <Typography
+                    variant="caption"
+                    style={{ 
+                      color: colors.onSurfaceVariant, 
+                      marginLeft: 4
+                    }}
+                  >
+                    {item.estimatedDeliveryTime || 'N/A'}
+                  </Typography>
+                </View>
+
+                {(item.deliveryFee || item.deliveryPrice) && (
+                  <Typography
+                    variant="body2"
+                    style={{ 
+                      color: colors.primary, 
+                      fontWeight: '600'
+                    }}
+                  >
+                    {item.deliveryFee || `${item.deliveryPrice} XAF`}
+                  </Typography>
+                )}
+              </View>
             </View>
           </View>
         </View>
@@ -274,6 +315,7 @@ const FavoriteRestaurants = ({
 }: RootStackScreenProps<'FavoriteRestaurantScreen'>) => {
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
+  const { scale } = useResponsive();
 
   const {
     data: favoriteRestaurants,
@@ -283,7 +325,7 @@ const FavoriteRestaurants = ({
     isRefetching,
   } = useFavoriteRestaurants();
 
-  const { toggleFavorite } = useToggleFavorite();
+  const { toggleFavorite, isLoading: isToggling } = useToggleFavorite();
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -310,18 +352,17 @@ const FavoriteRestaurants = ({
   // Handle toggle favorite
   const handleToggleFavorite = useCallback(
     async (restaurantId: string) => {
+      if (isToggling) return; // Prevent multiple calls
+      
       try {
         await toggleFavorite(restaurantId);
-        // Refetch to update the list
-        refetch();
+        // The hook automatically refetches, so no need to manually refetch
       } catch (error) {
-        Alert.alert(
-          t('error', 'Error'),
-          t('failed_to_remove_favorite', 'Failed to remove from favorites'),
-        );
+        console.error('Error toggling favorite:', error);
+        // Error is already handled by the hook with Toast
       }
     },
-    [toggleFavorite, refetch, t],
+    [toggleFavorite, isToggling],
   );
 
   // Handle explore restaurants
@@ -375,12 +416,25 @@ const FavoriteRestaurants = ({
 
   return (
     <CommonView>
-      <View className="flex-1 pt-4">
+      <View className="flex-1">
+        {/* Header */}
+        <View className="px-4 py-6 border-b" style={{ borderBottomColor: colors.outline + '30' }}>
+          <Typography variant="h4" style={{ color: colors.onSurface, fontWeight: 'bold', marginBottom: 8 }}>
+            {t('favorite_restaurants', 'Favorite Restaurants')}
+          </Typography>
+          <Typography variant="body2" style={{ color: colors.onSurfaceVariant }}>
+            {favoriteRestaurants?.length 
+              ? t('favorite_count', `${favoriteRestaurants.length} restaurant${favoriteRestaurants.length !== 1 ? 's' : ''} saved`)
+              : t('no_favorites_yet', 'No favorites saved yet')
+            }
+          </Typography>
+        </View>
+
         {/* Content */}
         {favoriteRestaurants && favoriteRestaurants.length > 0 ? (
           <FlatList
             data={favoriteRestaurants}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item) => item.id || item.restaurantId}
             renderItem={({ item }) => (
               <FavoriteRestaurantItem
                 item={item}
@@ -396,8 +450,9 @@ const FavoriteRestaurants = ({
                 tintColor={colors.primary}
               />
             }
-            contentContainerStyle={{ paddingBottom: 20 }}
+            contentContainerStyle={{ paddingBottom: scale(20) }}
             showsVerticalScrollIndicator={false}
+            ItemSeparatorComponent={() => <View style={{ height: 4 }} />}
           />
         ) : (
           <EmptyState onRefresh={handleExploreRestaurants} />

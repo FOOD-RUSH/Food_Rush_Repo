@@ -54,19 +54,18 @@ export type RootStackParamList = {
   RestaurantMenuItemForm: { itemId?: string };
   // Removed RestaurantAddCategory and RestaurantEditCategory - backend only returns categories
 
-  RestaurantBestSellers: undefined;
+
   RestaurantTimeHeatmap: undefined;
   RestaurantNotificationDetails: { notificationId: string };
   RestaurantNotifications: undefined;
   RestaurantProfile: undefined;
   RestaurantLocation: undefined;
   RestaurantThemeSettings: undefined;
-  RestaurantSettings: undefined;
   RestaurantSupport: undefined;
   RestaurantAbout: undefined;
   RestaurantEditProfile: undefined;
   RestaurantOrderHistory: undefined;
-  RestaurantPaymentBilling: undefined;
+  RestaurantPayments: undefined;
 
   RestaurantReview: {
     restaurantId?: string;
@@ -77,12 +76,26 @@ export type RootStackParamList = {
     restaurantId: string;
     restaurantName: string;
   };
+  RestaurantCustomerReviews: {
+    restaurantId: string;
+    restaurantName: string;
+  };
 };
 
 // Auth Stack (unchanged)
 export type AuthStackParamList = {
   SignIn: { userType?: 'customer' | 'restaurant' } | undefined;
   SignUp: { userType?: 'customer' | 'restaurant' } | undefined;
+  RestaurantSignupStep1: undefined;
+  RestaurantSignupStep2: {
+    step1Data: {
+      email: string;
+      fullName: string;
+      phoneNumber: string;
+      password: string;
+      confirmPassword: string;
+    };
+  };
   ForgotPassword: undefined;
   OTPVerification: {
     email: string;

@@ -10,9 +10,8 @@ export * from './shared';
 
 // Customer-specific stores
 export * from './customerStores/cartStore';
-export * from './customerStores/notificationStore'; // Re-exports shared notification store
-export * from './customerStores/paymentStore';
 export * from './customerStores/addressStore';
+export * from './customerStores/paymentStore';
 
-// Restaurant-specific stores
-export * from './restaurantStores';
+// Restaurant-specific stores (excluding notification store to avoid duplicates)
+export { useRestaurantProfileStore } from './restaurantStores/restaurantProfileStore';

@@ -1,4 +1,5 @@
 import { createNavigationContainerRef } from '@react-navigation/native';
+import { DeviceEventEmitter } from 'react-native';
 import { RootStackParamList } from './types';
 
 export const navigationRef = createNavigationContainerRef<RootStackParamList>();
@@ -42,14 +43,18 @@ export function reset<T extends keyof RootStackParamList>(
         routes: [{ name, params }],
       });
       console.log('Navigation reset completed successfully');
+      return true;
     } catch (error) {
       console.error('Error during navigation reset:', error);
       // Fallback: try simple navigate
       try {
         console.log('Attempting fallback navigation...');
         navigationRef.navigate(name as any, params);
+        console.log('Fallback navigation completed');
+        return true;
       } catch (fallbackError) {
         console.error('Fallback navigation also failed:', fallbackError);
+        return false;
       }
     }
   } else {
@@ -71,6 +76,7 @@ export function reset<T extends keyof RootStackParamList>(
         console.error('Navigation still not ready after delay');
       }
     }, 100);
+    return false;
   }
 }
 
@@ -222,7 +228,9 @@ export const ServiceNavigation = {
 
   // App switching
   logout: () => {
-    reset('UserTypeSelection');
+    console.log('ServiceNavigation.logout called');
+    // Dispatch a custom event that RootNavigator can listen to
+    DeviceEventEmitter.emit('user-logout');
   },
 
   switchToCustomerApp: () => {
@@ -239,7 +247,9 @@ export const ServiceNavigation = {
   },
 
   resetToUserTypeSelection: () => {
-    reset('UserTypeSelection');
+    console.log('ServiceNavigation.resetToUserTypeSelection called');
+    // Dispatch a custom event that RootNavigator can listen to
+    DeviceEventEmitter.emit('user-logout');
   },
 };
 

@@ -9,35 +9,64 @@ import { useTranslation } from 'react-i18next';
 import { Typography, Heading4, Body, Label, Caption } from '@/src/components/common/Typography';
 
 interface RestaurantCardProps {
+  id: string;
   name: string;
   address: string;
-  isOpen: boolean;
-  verificationStatus: 'PENDING_VERIFICATION' | 'APPROVED';
   rating: number | null;
   ratingCount: number;
-  id: string;
-  deliveryPrice?: number;
-  estimatedTime?: number;
-  image?: any; // Default image since not in API
-  distance?: number;
+  distance?: number; // This will be distanceKm from API
+  deliveryPrice?: number; // Optional since API doesn't provide it
+  image?: string | null; // Optional since API might not provide it
+  estimatedDeliveryTime?: string; // Optional since API doesn't provide it
+  menu?: any[]; // Optional
+  isOpen?: boolean; // From API
+  phone?: string; // From API
 }
 
 export const RestaurantCard = ({
+  id,
   name,
   address,
-  isOpen = true,
-  verificationStatus,
-  rating = null,
-  ratingCount = 0,
-  id,
+  rating,
+  ratingCount,
+  distance,
+  deliveryPrice,
   image,
-  deliveryPrice = 500,
-  estimatedTime = 20,
+  estimatedDeliveryTime,
+  menu,
+  isOpen,
+  phone,
 }: RestaurantCardProps) => {
   const navigation =
     useNavigation<CustomerHomeStackScreenProps<'HomeScreen'>['navigation']>();
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
+
+  // Calculate estimated delivery time based on distance
+  const getEstimatedDeliveryTime = () => {
+    if (estimatedDeliveryTime) return estimatedDeliveryTime;
+    if (!distance) return '30-40 mins';
+    
+    // Rough calculation: 2-3 km per 10 minutes + 15 min prep time
+    const baseTime = 15; // Base preparation time
+    const travelTime = Math.ceil(distance * 4); // ~4 minutes per km
+    const totalTime = baseTime + travelTime;
+    const minTime = totalTime;
+    const maxTime = totalTime + 10;
+    
+    return `${minTime}-${maxTime} mins`;
+  };
+
+  // Calculate delivery price based on distance
+  const getDeliveryPrice = () => {
+    if (deliveryPrice !== undefined) return deliveryPrice;
+    if (!distance) return 500; // Default delivery price
+    
+    // Rough calculation: 300 base + 200 per km
+    const basePrice = 300;
+    const pricePerKm = 200;
+    return Math.round(basePrice + (distance * pricePerKm));
+  };
 
   return (
     <TouchableOpacity
@@ -71,7 +100,7 @@ export const RestaurantCard = ({
       >
         <View style={{ position: 'relative' }}>
           <Card.Cover
-            source={image || images.onboarding2}
+            source={image ? { uri: image } : images.onboarding2}
             style={{
               height: 150,
               width: '100%',
@@ -113,23 +142,6 @@ export const RestaurantCard = ({
               gap: 8,
             }}
           >
-            {/* Status badge */}
-
-            {/* Open/Closed status */}
-            <View
-              style={{
-                backgroundColor: isOpen ? '#4CAF50' : '#F44336',
-                borderRadius: 16,
-                paddingHorizontal: 8,
-                paddingVertical: 4,
-                elevation: 2,
-              }}
-            >
-              <Caption color="white" weight="bold">
-                {isOpen ? 'OPEN' : 'CLOSED'}
-              </Caption>
-            </View>
-
             <View
               style={{
                 backgroundColor: 'rgba(0, 0, 0, 0.7)',
@@ -142,7 +154,7 @@ export const RestaurantCard = ({
             >
               <Ionicons name="star" size={12} color="yellow" />
               <Caption color="white" style={{ marginLeft: 4 }}>
-                {rating} ({ratingCount})
+                {rating?.toString() || 'N/A'} ({ratingCount?.toString() || '0'})
               </Caption>
             </View>
           </View>
@@ -151,14 +163,35 @@ export const RestaurantCard = ({
         <Card.Content style={{ padding: 16 }}>
           <View
             style={{ marginBottom: 12 }}
-            className="flex-row justify-between"
+            className="flex-row justify-between items-center"
           >
             <Heading4 
               color={colors.onSurface} 
               weight="bold"
+              style={{ flex: 1 }}
             >
               {name}
             </Heading4>
+            
+            {/* Open/Closed Status */}
+            {isOpen !== undefined && (
+              <View
+                style={{
+                  backgroundColor: isOpen ? colors.primaryContainer : colors.errorContainer,
+                  paddingHorizontal: 8,
+                  paddingVertical: 4,
+                  borderRadius: 12,
+                  marginLeft: 8,
+                }}
+              >
+                <Caption
+                  color={isOpen ? colors.onPrimaryContainer : colors.onErrorContainer}
+                  weight="medium"
+                >
+                  {isOpen ? t('open') : t('closed')}
+                </Caption>
+              </View>
+            )}
           </View>
 
           {/* Address display */}
@@ -185,7 +218,7 @@ export const RestaurantCard = ({
                 color={colors.primary} 
                 weight="semibold"
               >
-                {deliveryPrice} XAF delivery
+                {getDeliveryPrice()} XAF delivery
               </Label>
             </View>
 
@@ -194,8 +227,16 @@ export const RestaurantCard = ({
                 color={colors.onSurface} 
                 weight="medium"
               >
-                {estimatedTime}-{estimatedTime + 10} min
+                {getEstimatedDeliveryTime()}
               </Label>
+              {distance !== undefined && (
+                <Caption 
+                  color={colors.onSurfaceVariant}
+                  style={{ marginTop: 2 }}
+                >
+                  {distance ? (Math.round((distance) * 10) / 10).toFixed(1) : '0.0'} km
+                </Caption>
+              )}
             </View>
           </View>
         </Card.Content>

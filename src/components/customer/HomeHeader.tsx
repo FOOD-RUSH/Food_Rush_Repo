@@ -10,6 +10,7 @@ import { useUnreadCount } from '@/src/stores/customerStores/notificationStore';
 import { useUser } from '@/src/stores/AuthStore';
 import Avatar from '@/src/components/common/Avatar';
 import Toast from 'react-native-toast-message';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface HomeHeaderProps {
   navigation: any;
@@ -22,6 +23,7 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
   const unreadNotificationCount = useUnreadCount();
   const user = useUser();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const queryClient = useQueryClient();
 
   const {
     location,
@@ -67,7 +69,21 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
       // Show contextual permission dialog
       showLocationPermissionDialog(
         async () => {
-          await requestPermissionWithLocation();
+          const success = await requestPermissionWithLocation();
+          if (success) {
+            // Permission granted and location obtained - refresh nearby data
+            console.log('📍 Permission granted, refreshing location-based data');
+            queryClient.invalidateQueries({ queryKey: ['nearby-restaurants'] });
+            queryClient.invalidateQueries({ queryKey: ['restaurants'] });
+            queryClient.invalidateQueries({ queryKey: ['menu'] });
+            
+            Toast.show({
+              type: 'success',
+              text1: t('location_enabled', 'Location enabled'),
+              text2: t('showing_nearby_results', 'Now showing nearby restaurants and food'),
+              visibilityTime: 3000,
+            });
+          }
         },
         () => {
           // User cancelled - they can still use the app with fallback location
@@ -84,6 +100,8 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
     showLocationPermissionDialog,
     requestPermissionWithLocation,
     refreshLocation,
+    queryClient,
+    t,
   ]);
 
   // Handler for the entire header area to refresh location
@@ -100,6 +118,12 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
       if (hasPermission) {
         const success = await refreshLocation();
         if (success) {
+          // Manually trigger query invalidation to ensure fresh data
+          console.log('🔄 Location refreshed successfully, invalidating queries');
+          queryClient.invalidateQueries({ queryKey: ['nearby-restaurants'] });
+          queryClient.invalidateQueries({ queryKey: ['restaurants'] });
+          queryClient.invalidateQueries({ queryKey: ['menu'] });
+          
           Toast.show({
             type: 'success',
             text1: t('location_updated', 'Location updated'),
@@ -128,7 +152,7 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
     } finally {
       setIsRefreshing(false);
     }
-  }, [hasPermission, refreshLocation, handleLocationPress, isRefreshing, locationLoading, t]);
+  }, [hasPermission, refreshLocation, handleLocationPress, isRefreshing, locationLoading, t, queryClient]);
 
   const getLocationIcon = () => {
     if (locationLoading || isRefreshing) return 'time-outline';

@@ -1,16 +1,16 @@
 import * as ImagePicker from 'expo-image-picker';
 
-export interface ImagePickerResult {
+export interface SimpleImageResult {
   uri: string;
   type: string;
   name: string;
 }
 
 /**
- * Pick an image from the device gallery
- * Returns the file URI that can be used directly with FormData
+ * Simple image picker for menu items - only JPG or PNG
+ * Returns just the image object for backend upload
  */
-export const pickImageForUpload = async (): Promise<ImagePickerResult | null> => {
+export const pickImageForUpload = async (): Promise<SimpleImageResult | null> => {
   try {
     // Request permissions
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -18,17 +18,15 @@ export const pickImageForUpload = async (): Promise<ImagePickerResult | null> =>
       throw new Error('Permission to access media library was denied');
     }
 
-    // Launch image picker
+    // Launch image picker with simple configuration
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions?.Images || 'images',
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [4, 3],
-      quality: 0.8, // Good quality for binary upload
+      aspect: [1, 1], // Square aspect ratio for menu items
+      quality: 0.8,
       allowsMultipleSelection: false,
-      // Ensure we get binary format (JPG/PNG) as required by backend
       exif: false,
-      base64: false, // Keep as binary file, not base64
-      allowsEditing: true, // Allow cropping to ensure proper format
+      base64: false,
     });
 
     if (result.canceled || !result.assets || result.assets.length === 0) {
@@ -37,26 +35,19 @@ export const pickImageForUpload = async (): Promise<ImagePickerResult | null> =>
 
     const asset = result.assets[0];
     
-    // Determine the actual file type from the URI or use a default
-    let mimeType = asset.type || 'image/jpeg';
+    // Determine file type - only allow JPG or PNG
+    let mimeType = 'image/jpeg'; // Default to JPEG
     let fileExtension = 'jpg';
     
-    // Try to determine type from URI if not provided
-    if (!asset.type && asset.uri) {
+    if (asset.uri) {
       const uriLower = asset.uri.toLowerCase();
       if (uriLower.includes('.png')) {
         mimeType = 'image/png';
         fileExtension = 'png';
-      } else if (uriLower.includes('.jpg') || uriLower.includes('.jpeg')) {
-        mimeType = 'image/jpeg';
-        fileExtension = 'jpg';
       }
-    } else if (asset.type) {
-      // Use the provided type
-      fileExtension = getFileExtension(asset.type);
     }
     
-    // Generate filename with correct extension
+    // Simple filename
     const fileName = `menu-item-${Date.now()}.${fileExtension}`;
     
     return {
@@ -71,34 +62,16 @@ export const pickImageForUpload = async (): Promise<ImagePickerResult | null> =>
 };
 
 /**
- * Validate image file type - Backend requires JPG or PNG only
+ * Simple validation for JPG or PNG images
  */
 export const isValidImageType = (type: string): boolean => {
   if (!type) return false;
-  
-  const validTypes = [
-    'image/jpeg',
-    'image/jpg', 
-    'image/png'
-    // Backend only accepts JPG and PNG formats
-  ];
+  const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
   return validTypes.includes(type.toLowerCase());
 };
 
 /**
- * Validate image file by URI extension as fallback - Backend requires JPG or PNG only
- */
-export const isValidImageUri = (uri: string): boolean => {
-  if (!uri) return false;
-  
-  const uriLower = uri.toLowerCase();
-  const validExtensions = ['.jpg', '.jpeg', '.png'];
-  // Backend only accepts JPG and PNG formats
-  return validExtensions.some(ext => uriLower.includes(ext));
-};
-
-/**
- * Get file extension from mime type - Backend requires JPG or PNG only
+ * Get file extension from mime type
  */
 export const getFileExtension = (mimeType: string): string => {
   switch (mimeType.toLowerCase()) {
@@ -108,32 +81,6 @@ export const getFileExtension = (mimeType: string): string => {
     case 'image/png':
       return 'png';
     default:
-      return 'jpg'; // Default to JPG if unknown
-  }
-};
-
-/**
- * Enhanced image picker with better type detection
- */
-export const pickImageWithValidation = async (): Promise<ImagePickerResult | null> => {
-  try {
-    const result = await pickImageForUpload();
-    
-    if (!result) {
-      return null;
-    }
-    
-    // Double validation - check both type and URI
-    const isValidType = isValidImageType(result.type);
-    const isValidUri = isValidImageUri(result.uri);
-    
-    if (!isValidType && !isValidUri) {
-      throw new Error('Invalid image format. Please select a JPG, PNG, or WebP image.');
-    }
-    
-    return result;
-  } catch (error) {
-    console.error('Error in pickImageWithValidation:', error);
-    throw error;
+      return 'jpg';
   }
 };

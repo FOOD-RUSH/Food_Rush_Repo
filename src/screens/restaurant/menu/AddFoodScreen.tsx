@@ -20,7 +20,7 @@ import { useCreateMenuItem } from '@/src/hooks/restaurant/useMenuApi';
 import { useNavigation } from '@react-navigation/native';
 import { RestaurantMenuStackScreenProps } from '@/src/navigation/types';
 import { useTranslation } from 'react-i18next';
-import { pickImageForUpload, isValidImageType, isValidImageUri, getFileExtension, pickImageWithValidation } from '@/src/utils/imageUtils';
+import { pickImageForUpload, isValidImageType, getFileExtension } from '@/src/utils/imageUtils';
 import { CreateMenuItemRequest } from '@/src/services/restaurant/menuApi';
 import { Typography, Heading1, Body, Label, Caption } from '@/src/components/common/Typography';
 
@@ -282,42 +282,33 @@ export const AddFoodScreen = () => {
     };
   }, [formData, t]);
 
-  // Memoized image picker with enhanced validation
+  // Simple image picker for menu items - only JPG or PNG
   const handleImagePick = useCallback(async () => {
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       setIsUploading(true);
 
-      const result = await pickImageWithValidation();
+      const result = await pickImageForUpload();
       
       if (result) {
-        // Double validation - check both type and URI as fallback
-        const isValidType = isValidImageType(result.type);
-        const isValidUri = isValidImageUri(result.uri);
-        
-        if (!isValidType && !isValidUri) {
-        Alert.alert(
-          t('invalid_image_type') || 'Invalid Image Type',
-          'Please select a JPG or PNG image as required by the backend.'
-        );
+        // Validate image type
+        if (!isValidImageType(result.type)) {
+          Alert.alert(
+            t('invalid_image_type') || 'Invalid Image Type',
+            'Please select a JPG or PNG image only.'
+          );
           return;
         }
 
-        // The result already has the correct file extension from pickImageWithValidation
-        const imageFile = {
-          uri: result.uri,
-          type: result.type,
-          name: result.name, // Already has correct extension
-        };
-
+        // Use the image as-is for backend upload
         updateFormData({
           imageUri: result.uri,
-          imageFile: imageFile,
+          imageFile: result, // Send the complete image object
         });
         
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         
-        console.log('Image selected successfully:', {
+        console.log('Image selected for menu item:', {
           type: result.type,
           name: result.name,
           uri: result.uri.substring(0, 50) + '...'
@@ -326,7 +317,6 @@ export const AddFoodScreen = () => {
     } catch (error: any) {
       console.error('Error picking image:', error);
       
-      // Show specific error message if available
       const errorMessage = error?.message || t('failed_to_pick_image') || 'Failed to pick image';
       Alert.alert(
         t('error') || 'Error', 

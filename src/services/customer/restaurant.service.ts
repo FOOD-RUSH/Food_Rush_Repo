@@ -54,12 +54,26 @@ export const restaurantApi = {
   // Get nearby restaurants
   getNearbyRestaurants: async (query: RestaurantQuery) => {
     try {
+      console.log('🍽️ Nearby Restaurants API Call:', {
+        endpoint: '/restaurants/nearby',
+        params: query,
+        coordinates: { lat: query.nearLat, lng: query.nearLng }
+      });
+      
       const response = await apiClient.get<RestaurantItems>(
         '/restaurants/nearby',
         { params: query }
       );
+      
+      console.log('🍽️ Nearby Restaurants API Response:', {
+        status: response.status,
+        dataCount: response.data.data?.length || 0,
+        firstItem: response.data.data?.[0] || null
+      });
+      
       return response.data.data;
     } catch (error) {
+      console.error('❌ Nearby Restaurants API Error:', error);
       logError(error, 'getNearbyRestaurants');
       throw error;
     }
@@ -148,10 +162,13 @@ export const restaurantApi = {
   // Like restaurant (new endpoint from API docs)
   likeRestaurant: async (id: string) => {
     try {
-      const response = await apiClient.post(`/restaurants/${id}/like`);
+      console.log('💖 Liking restaurant:', id);
+      const response = await apiClient.post(`/api/v1/restaurants/${id}/like`);
+      console.log('✅ Like restaurant response:', response.data);
       return response.data;
     } catch (error) {
-      console.error(`Error liking restaurant ${id}:`, error);
+      console.error(`❌ Error liking restaurant ${id}:`, error);
+      logError(error, 'likeRestaurant');
       throw error;
     }
   },
@@ -159,10 +176,13 @@ export const restaurantApi = {
   // Unlike restaurant (new endpoint from API docs)
   unlikeRestaurant: async (id: string) => {
     try {
-      const response = await apiClient.delete(`/restaurants/${id}/like`);
+      console.log('💔 Unliking restaurant:', id);
+      const response = await apiClient.delete(`/api/v1/restaurants/${id}/like`);
+      console.log('✅ Unlike restaurant response:', response.data);
       return response.data;
     } catch (error) {
-      console.error(`Error unliking restaurant ${id}:`, error);
+      console.error(`❌ Error unliking restaurant ${id}:`, error);
+      logError(error, 'unlikeRestaurant');
       throw error;
     }
   },
@@ -170,11 +190,17 @@ export const restaurantApi = {
   // Get liked restaurants (new endpoint from API docs)
   getLikedRestaurants: async () => {
     try {
-      const response =
-        await apiClient.get<RestaurantItems>('/restaurants/liked');
+      console.log('📜 Fetching liked restaurants...');
+      const response = await apiClient.get<RestaurantItems>('/api/v1/restaurants/me/liked');
+      console.log('✅ Liked restaurants response:', {
+        status: response.status,
+        dataCount: response.data.data?.length || 0,
+        firstItem: response.data.data?.[0] || null
+      });
       return response.data.data || [];
     } catch (error) {
-      console.error('Error fetching liked restaurants:', error);
+      console.error('❌ Error fetching liked restaurants:', error);
+      logError(error, 'getLikedRestaurants');
       throw error;
     }
   },
@@ -183,7 +209,7 @@ export const restaurantApi = {
   getRestaurantReviews: async (id: string) => {
     try {
       const response = await apiClient.get<RestaurantReviewsResponse>(
-        `/restaurants/${id}/reviews`
+        `/api/v1/restaurants/${id}/reviews`
       );
       console.log('Restaurant Reviews API Response:', response.data);
       return response.data.data;
@@ -196,7 +222,7 @@ export const restaurantApi = {
   // Create restaurant review
   createRestaurantReview: async (id: string, reviewData: { score: number; review: string }) => {
     try {
-      const response = await apiClient.post(`/restaurants/${id}/reviews`, reviewData);
+      const response = await apiClient.post(`/api/v1/restaurants/${id}/reviews`, reviewData);
       console.log('Create Review API Response:', response.data);
       return response.data;
     } catch (error) {

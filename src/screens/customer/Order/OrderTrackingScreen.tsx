@@ -12,8 +12,10 @@ import CommonView from '@/src/components/common/CommonView';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import { Order, OrderStatus } from '@/src/types';
 import Toast from 'react-native-toast-message';
-import { useOrderById } from '@/src/hooks/customer/useOrdersApi';
+import { useOrderById, useConfirmOrderReceived } from '@/src/hooks/customer/useOrdersApi';
 import { Typography, Heading5, Body, Label, Caption } from '@/src/components/common/Typography';
+import DeliveryConfirmationModal from '@/src/components/customer/OrderConfirmation/DeliveryConfirmationModal';
+import { useDeliveryConfirmation } from '@/src/hooks/customer/useDeliveryConfirmation';
 
 // Define order status steps for the timeline
 const ORDER_STATUS_STEPS: {
@@ -246,6 +248,15 @@ const OrderTrackingScreen = ({
     isRefetching,
   } = useOrderById(orderId);
 
+  // Delivery confirmation hook
+  const {
+    isModalVisible,
+    showConfirmationModal,
+    hideConfirmationModal,
+    confirmDelivery,
+    isConfirming,
+  } = useDeliveryConfirmation();
+
   // Refresh handler
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -373,6 +384,35 @@ const OrderTrackingScreen = ({
             )}
           </View>
 
+          {/* Delivery Confirmation Button - Only show when order is delivered */}
+          {order.status === 'delivered' && (
+            <TouchableOpacity
+              className="flex-row items-center justify-center py-4 rounded-xl mb-4"
+              style={{ backgroundColor: colors.primary }}
+              onPress={() => {
+                showConfirmationModal(orderId, {
+                  orderNumber: order.id.substring(0, 8),
+                  restaurantName: order.restaurantName || 'Restaurant',
+                  deliveryAddress: order.deliveryAddress,
+                });
+              }}
+              disabled={isConfirming}
+            >
+              <Ionicons
+                name="checkmark-circle-outline"
+                size={20}
+                color="white"
+              />
+              <Label
+                color="white"
+                weight="medium"
+                style={{ marginLeft: 8 }}
+              >
+                {isConfirming ? t('confirming_delivery') : t('confirm_delivery_received')}
+              </Label>
+            </TouchableOpacity>
+          )}
+
           {/* Support Button */}
           <TouchableOpacity
             className="flex-row items-center justify-center py-4 rounded-xl mb-4"
@@ -401,6 +441,20 @@ const OrderTrackingScreen = ({
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Delivery Confirmation Modal */}
+      <DeliveryConfirmationModal
+        visible={isModalVisible}
+        onClose={hideConfirmationModal}
+        orderId={orderId}
+        orderNumber={order?.id.substring(0, 8)}
+        restaurantName={order?.restaurantName || 'Restaurant'}
+        deliveryAddress={order?.deliveryAddress}
+        onConfirmSuccess={() => {
+          // Refresh order data after confirmation
+          refetch();
+        }}
+      />
     </CommonView>
   );
 };

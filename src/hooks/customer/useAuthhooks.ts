@@ -1,7 +1,15 @@
 // useAuthHooks.ts
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { useCallback } from 'react';
-import { authApi, OTPCredentials, LoginRequest, RegisterRequest, UpdateProfileRequest, ResetPasswordRequest, ChangePasswordRequest } from '@/src/services/customer/authApi';
+import { authApi } from '@/src/services/customer/authApi';
+import {
+  OTPCredentials,
+  LoginRequest,
+  RegisterRequest,
+  UpdateProfileRequest,
+  ResetPasswordRequest,
+  ChangePasswordRequest,
+} from '@/src/services/shared/authTypes';
 import TokenManager from '@/src/services/shared/tokenManager';
 import { useAuthStore, useSetAuthData, CustomerProfile } from '@/src/stores/AuthStore';
 

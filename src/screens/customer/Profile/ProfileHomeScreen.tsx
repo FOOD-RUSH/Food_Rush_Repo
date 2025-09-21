@@ -182,24 +182,32 @@ const ProfileHomeScreen = ({
           subtitle={t('view_and_edit_your_personal_information')}
           onPress={navigateToProfileDetails}
           leftIconName="person-outline"
+          iconColor={colors.primary}
+          showIconBackground={true}
         />
         <RowView
           title={t('my_favorite_restaurants')}
           subtitle={t('manage_your_saved_restaurants')}
           onPress={navigateToFavoriteRestaurants}
           leftIconName="fast-food-outline"
+          iconColor="#FF6B35"
+          showIconBackground={true}
         />
         <RowView
           title={t('special_offers_and_promo')}
           subtitle={t('view_available_discounts_and_deals')}
           onPress={handleSpecialOffersPress}
           leftIconName="gift-outline"
+          iconColor="#00D084"
+          showIconBackground={true}
         />
         <RowView
           title={t('payment_method')}
           subtitle={t('manage_your_payment_options')}
           onPress={navigateToPaymentMethods}
           leftIconName="card-outline"
+          iconColor="#8B5CF6"
+          showIconBackground={true}
         />
 
         <View
@@ -212,24 +220,32 @@ const ProfileHomeScreen = ({
           subtitle={t('manage_your_delivery_addresses')}
           onPress={navigateToAddress}
           leftIconName="location-outline"
+          iconColor="#FF9500"
+          showIconBackground={true}
         />
         <RowView
           title={t('notification')}
           subtitle={t('customize_your_notification_preferences')}
           onPress={handleNotificationPress}
           leftIconName="notifications-outline"
+          iconColor="#007AFF"
+          showIconBackground={true}
         />
         <RowView
           title={t('security')}
           subtitle={t('manage_password_and_security_settings')}
           onPress={handleSecurityPress}
           leftIconName="shield-checkmark-outline"
+          iconColor="#34C759"
+          showIconBackground={true}
         />
         <RowView
           title={t('help')}
           subtitle={t('get_support_and_contact_us')}
           onPress={navigateToHelp}
           leftIconName="help-circle-outline"
+          iconColor={colors.primary}
+          showIconBackground={true}
         />
 
         {/* Dark Mode Toggle */}
@@ -266,6 +282,8 @@ const ProfileHomeScreen = ({
           subtitle={t('change_app_language_preferences')}
           onPress={navigateToLanguage}
           leftIconName="language-outline"
+          iconColor="#5856D6"
+          showIconBackground={true}
         />
 
         {/* Logout Row */}
@@ -274,6 +292,8 @@ const ProfileHomeScreen = ({
           subtitle={t('sign_out_of_your_account')}
           onPress={showLogoutModal}
           leftIconName="log-out-outline"
+          iconColor="#FF3B30"
+          showIconBackground={true}
         />
       </ScrollView>
     </CommonView>

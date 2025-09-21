@@ -17,7 +17,8 @@ import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
 
 // Restaurant auth
 import RestaurantLoginScreen from '../screens/restaurant/auth/LoginScreen';
-import RestaurantSignupScreen from '../screens/restaurant/auth/SignupScreen';
+import RestaurantSignupStep1 from '../screens/restaurant/auth/RestaurantSignupStep1';
+import RestaurantSignupStep2 from '../screens/restaurant/auth/RestaurantSignupStep2';
 import AwaitingApprovalScreen from '../screens/restaurant/auth/AwaitingApprovalScreen';
 
 const AuthStack = createNativeStackNavigator<AuthStackParamList>();
@@ -48,7 +49,7 @@ const AuthNavigator: React.FC<AuthNavigatorProps> = ({
   const LoginComponent =
     userType === 'restaurant' ? RestaurantLoginScreen : LoginScreen;
   const SignupComponent =
-    userType === 'restaurant' ? RestaurantSignupScreen : SignupScreen;
+    userType === 'restaurant' ? RestaurantSignupStep1 : SignupScreen;
 
   // Determine initial route
   const initialRouteName = isPendingRestaurant ? 'AwaitingApproval' : 'SignIn';
@@ -96,6 +97,20 @@ const AuthNavigator: React.FC<AuthNavigatorProps> = ({
         options={{
           gestureEnabled: false,
           headerShown: false, // Let screens handle their own headers
+        }}
+      />
+      <AuthStack.Screen
+        name="RestaurantSignupStep1"
+        component={RestaurantSignupStep1}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <AuthStack.Screen
+        name="RestaurantSignupStep2"
+        component={RestaurantSignupStep2}
+        options={{
+          headerShown: false,
         }}
       />
       <AuthStack.Screen

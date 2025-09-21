@@ -196,17 +196,34 @@ class CartReminderService {
     }
   }
 
-  // Cancel all cart reminders
+  // Cancel all cart reminders - optimized to prevent multiple calls
+  private isCancelling = false;
+  
   async cancelAllCartReminders(): Promise<void> {
+    // Prevent multiple simultaneous cancellation calls
+    if (this.isCancelling) {
+      console.log('Cart reminder cancellation already in progress');
+      return;
+    }
+    
+    // If no active reminders, skip cancellation
+    if (this.activeReminders.size === 0) {
+      return;
+    }
+    
+    this.isCancelling = true;
+    
     try {
       // Cancel all scheduled notifications
-      for (const reminder of Array.from(this.activeReminders.values())) {
+      const cancelPromises = Array.from(this.activeReminders.values()).map(async (reminder) => {
         try {
           await customerNotifications.cancelNotification(reminder.notificationId);
         } catch (error) {
           console.warn('Failed to cancel notification:', error);
         }
-      }
+      });
+      
+      await Promise.all(cancelPromises);
 
       // Clear the reminders map
       this.activeReminders.clear();
@@ -215,6 +232,8 @@ class CartReminderService {
       console.log('All cart reminders cancelled');
     } catch (error) {
       console.error('Failed to cancel cart reminders:', error);
+    } finally {
+      this.isCancelling = false;
     }
   }
 

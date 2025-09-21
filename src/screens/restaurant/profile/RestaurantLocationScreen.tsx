@@ -1,366 +1,233 @@
-import React, { useState, useEffect } from 'react';
-import { View, ScrollView, TouchableOpacity, Alert, Dimensions } from 'react-native';
-import { useTheme, Card, TextInput, Button, Chip, Switch } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
+import {
+  View,
+  ScrollView,
+  TouchableOpacity,
+  Modal,
+  RefreshControl,
+  StyleSheet,
+  Animated,
+} from 'react-native';
+import { useTheme, Card, Button } from 'react-native-paper';
+import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
 
 import CommonView from '@/src/components/common/CommonView';
-import { Typography, Label, Body, BodySmall, Heading4, Heading5, Caption } from '@/src/components/common/Typography';
-import { ResponsiveContainer } from '@/src/components/common/ResponsiveContainer';
-
-interface LocationData {
-  id: string;
-  name: string;
-  address: string;
-  city: string;
-  region: string;
-  postalCode: string;
-  country: string;
-  latitude: number;
-  longitude: number;
-  isDefault: boolean;
-  deliveryRadius: number; // in kilometers
-  isActive: boolean;
-}
-
-interface ErrorState {
-  hasError: boolean;
-  message: string;
-  field?: string;
-}
+import { Heading4, Heading5, Body, Label, Caption } from '@/src/components/common/Typography';
+import { useRestaurantProfile, useUpdateRestaurantLocation } from '@/src/hooks/restaurant/useRestaurantApi';
+import { useLocation } from '@/src/location/useLocation';
+import LocationService from '@/src/location/LocationService';
+import Toast from 'react-native-toast-message';
+import { Location } from '@/src/location/types';
 
 const RestaurantLocationScreen: React.FC = () => {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const navigation = useNavigation();
-  const { width: screenWidth } = Dimensions.get('window');
-
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<ErrorState>({ hasError: false, message: '' });
-  const [isEditing, setIsEditing] = useState(false);
-
-  // Dummy location data - replace with actual API call
-  const [locationData, setLocationData] = useState<LocationData>({
-    id: '1',
-    name: 'Chez Marie Restaurant',
-    address: 'Rue de la Paix, Quartier Bonanjo',
-    city: 'Douala',
-    region: 'Littoral',
-    postalCode: '1234',
-    country: 'Cameroon',
-    latitude: 4.0511,
-    longitude: 9.7679,
-    isDefault: true,
-    deliveryRadius: 5,
-    isActive: true,
+  
+  // API hooks
+  const { data: restaurantData, isLoading, refetch, isError } = useRestaurantProfile();
+  const updateLocationMutation = useUpdateRestaurantLocation();
+  
+  // Location service
+  const { hasPermission, requestPermissionWithLocation } = useLocation({ 
+    autoRequest: false, 
+    requestOnMount: false 
   });
+  
+  // State
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const rotateAnim = useRef(new Animated.Value(0)).current;
 
-  const [editedLocation, setEditedLocation] = useState<LocationData>(locationData);
+  // Animation for loading indicator
+  useEffect(() => {
+    if (isGettingLocation) {
+      const rotation = Animated.loop(
+        Animated.timing(rotateAnim, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        })
+      );
+      rotation.start();
+      return () => rotation.stop();
+    } else {
+      rotateAnim.setValue(0);
+    }
+  }, [isGettingLocation, rotateAnim]);
 
-  // Dummy nearby suggestions - replace with actual location service
-  const [nearbySuggestions] = useState([
-    { id: '1', name: 'Akwa Palace Hotel', address: 'Boulevard de la Liberté, Akwa', distance: 0.8 },
-    { id: '2', name: 'Douala Grand Mall', address: 'Rue Joss, Akwa', distance: 1.2 },
-    { id: '3', name: 'Port Autonome de Douala', address: 'Boulevard du Port, Bonaberi', distance: 2.1 },
-  ]);
+  // Get restaurant data
+  const restaurant = restaurantData?.data;
 
-  const handleSaveLocation = async () => {
+  // Refresh handler
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
     try {
-      setIsLoading(true);
-      setError({ hasError: false, message: '' });
+      await refetch();
+    } catch (error) {
+      console.error('Error refreshing restaurant data:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refetch]);
 
-      // Validate required fields
-      if (!editedLocation.address.trim()) {
-        setError({ hasError: true, message: t('address_required'), field: 'address' });
+  // Get exact GPS location
+  const getExactLocation = useCallback(async () => {
+    setIsGettingLocation(true);
+    try {
+      console.log('📍 Getting exact GPS location for restaurant...');
+      
+      const servicesEnabled = await LocationService.isLocationEnabled();
+      if (!servicesEnabled) {
+        Toast.show({
+          type: 'error',
+          text1: 'Location Services Disabled',
+          text2: 'Please enable location services in your device settings',
+          position: 'top',
+        });
         return;
       }
 
-      if (!editedLocation.city.trim()) {
-        setError({ hasError: true, message: t('city_required'), field: 'city' });
-        return;
+      if (!hasPermission) {
+        const permissionGranted = await requestPermissionWithLocation();
+        if (!permissionGranted) {
+          Toast.show({
+            type: 'error',
+            text1: 'Location Permission Required',
+            text2: 'Please allow location access to update restaurant location',
+            position: 'top',
+          });
+          return;
+        }
       }
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const locationResult = await LocationService.getCurrentLocation(true);
+      
+      if (locationResult.success && locationResult.location && !locationResult.location.isFallback) {
+        console.log('✅ Exact GPS location obtained:');
+        console.log('Latitude:', locationResult.location.latitude);
+        console.log('Longitude:', locationResult.location.longitude);
+        console.log('Address:', locationResult.location.formattedAddress);
+        
+        setSelectedLocation(locationResult.location);
+        Toast.show({
+          type: 'success',
+          text1: 'Location Found',
+          text2: 'Exact GPS coordinates obtained successfully',
+          position: 'top',
+        });
+      } else {
+        console.log('❌ Failed to get exact location, result:', locationResult);
+        Toast.show({
+          type: 'error',
+          text1: 'Location Error',
+          text2: locationResult.error || 'Could not get exact GPS location. Please try again.',
+          position: 'top',
+        });
+      }
+    } catch (error) {
+      console.error('Error getting exact location:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Location Error',
+        text2: 'Failed to get GPS location. Please try again.',
+        position: 'top',
+      });
+    } finally {
+      setIsGettingLocation(false);
+    }
+  }, [hasPermission, requestPermissionWithLocation]);
 
-      setLocationData(editedLocation);
-      setIsEditing(false);
+  // Update restaurant location
+  const updateRestaurantLocation = useCallback(async () => {
+    if (!selectedLocation) {
+      Toast.show({
+        type: 'error',
+        text1: 'No Location Selected',
+        text2: 'Please get your GPS location first',
+        position: 'top',
+      });
+      return;
+    }
+
+    try {
+      console.log('🚀 Updating restaurant location via API...');
+      
+      await updateLocationMutation.mutateAsync({
+        latitude: selectedLocation.latitude,
+        longitude: selectedLocation.longitude,
+      });
+
+      // Success is handled by the mutation's onSuccess callback
+      setShowUpdateModal(false);
+      setSelectedLocation(null);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       
-      Alert.alert(
-        t('success'),
-        t('location_updated_successfully'),
-        [{ text: t('ok'), style: 'default' }]
-      );
-
-    } catch (error) {
-      setError({ hasError: true, message: t('failed_to_update_location') });
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleUseCurrentLocation = async () => {
-    try {
-      setIsLoading(true);
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-
-      // Simulate getting current location
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Dummy current location data
-      const currentLocation = {
-        ...editedLocation,
-        address: 'Avenue Charles de Gaulle, Bonanjo',
-        city: 'Douala',
-        region: 'Littoral',
-        latitude: 4.0483,
-        longitude: 9.7671,
-      };
-
-      setEditedLocation(currentLocation);
+      // Refresh restaurant data to get updated location
+      await refetch();
       
-      Alert.alert(
-        t('location_detected'),
-        t('current_location_updated'),
-        [{ text: t('ok'), style: 'default' }]
-      );
-
-    } catch (error) {
-      setError({ hasError: true, message: t('failed_to_get_location') });
-    } finally {
-      setIsLoading(false);
+    } catch (error: any) {
+      console.error('Error updating restaurant location:', error);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
-  };
+  }, [selectedLocation, updateLocationMutation, refetch]);
 
-  const handleSelectSuggestion = (suggestion: any) => {
+  // Show update modal
+  const showLocationUpdateModal = useCallback(() => {
+    setShowUpdateModal(true);
     Haptics.selectionAsync();
-    setEditedLocation({
-      ...editedLocation,
-      address: suggestion.address,
-      name: editedLocation.name, // Keep restaurant name
-    });
-  };
+  }, []);
 
-  const renderLocationForm = () => (
-    <View>
-      {/* Restaurant Name */}
-      <View style={{ marginBottom: 16 }}>
-        <Label color={colors.onSurface} style={{ marginBottom: 8 }}>
-          {t('restaurant_name')}
-        </Label>
-        <TextInput
-          value={editedLocation.name}
-          onChangeText={(text) => setEditedLocation({ ...editedLocation, name: text })}
-          mode="outlined"
-          style={{ backgroundColor: colors.surface }}
-          error={error.field === 'name'}
-          disabled={!isEditing}
-        />
-      </View>
+  // Close update modal
+  const closeUpdateModal = useCallback(() => {
+    setShowUpdateModal(false);
+    setSelectedLocation(null);
+  }, []);
 
-      {/* Address */}
-      <View style={{ marginBottom: 16 }}>
-        <Label color={colors.onSurface} style={{ marginBottom: 8 }}>
-          {t('street_address')} *
-        </Label>
-        <TextInput
-          value={editedLocation.address}
-          onChangeText={(text) => setEditedLocation({ ...editedLocation, address: text })}
-          mode="outlined"
-          style={{ backgroundColor: colors.surface }}
-          error={error.field === 'address'}
-          disabled={!isEditing}
-          multiline
-          numberOfLines={2}
-        />
-      </View>
+  // Handle get location from modal
+  const handleGetLocationFromModal = useCallback(async () => {
+    await getExactLocation();
+  }, [getExactLocation]);
 
-      {/* City and Region */}
-      <View style={{ flexDirection: 'row', marginBottom: 16 }}>
-        <View style={{ flex: 1, marginRight: 8 }}>
-          <Label color={colors.onSurface} style={{ marginBottom: 8 }}>
-            {t('city')} *
-          </Label>
-          <TextInput
-            value={editedLocation.city}
-            onChangeText={(text) => setEditedLocation({ ...editedLocation, city: text })}
-            mode="outlined"
-            style={{ backgroundColor: colors.surface }}
-            error={error.field === 'city'}
-            disabled={!isEditing}
-          />
-        </View>
-        <View style={{ flex: 1, marginLeft: 8 }}>
-          <Label color={colors.onSurface} style={{ marginBottom: 8 }}>
-            {t('region')}
-          </Label>
-          <TextInput
-            value={editedLocation.region}
-            onChangeText={(text) => setEditedLocation({ ...editedLocation, region: text })}
-            mode="outlined"
-            style={{ backgroundColor: colors.surface }}
-            disabled={!isEditing}
-          />
-        </View>
-      </View>
-
-      {/* Postal Code and Country */}
-      <View style={{ flexDirection: 'row', marginBottom: 16 }}>
-        <View style={{ flex: 1, marginRight: 8 }}>
-          <Label color={colors.onSurface} style={{ marginBottom: 8 }}>
-            {t('postal_code')}
-          </Label>
-          <TextInput
-            value={editedLocation.postalCode}
-            onChangeText={(text) => setEditedLocation({ ...editedLocation, postalCode: text })}
-            mode="outlined"
-            style={{ backgroundColor: colors.surface }}
-            disabled={!isEditing}
-          />
-        </View>
-        <View style={{ flex: 1, marginLeft: 8 }}>
-          <Label color={colors.onSurface} style={{ marginBottom: 8 }}>
-            {t('country')}
-          </Label>
-          <TextInput
-            value={editedLocation.country}
-            onChangeText={(text) => setEditedLocation({ ...editedLocation, country: text })}
-            mode="outlined"
-            style={{ backgroundColor: colors.surface }}
-            disabled={!isEditing}
-          />
-        </View>
-      </View>
-
-      {/* Delivery Radius */}
-      <View style={{ marginBottom: 16 }}>
-        <Label color={colors.onSurface} style={{ marginBottom: 8 }}>
-          {t('delivery_radius')} ({t('kilometers')})
-        </Label>
-        <TextInput
-          value={editedLocation.deliveryRadius.toString()}
-          onChangeText={(text) => setEditedLocation({ ...editedLocation, deliveryRadius: parseInt(text) || 0 })}
-          mode="outlined"
-          style={{ backgroundColor: colors.surface }}
-          disabled={!isEditing}
-          keyboardType="numeric"
-        />
-      </View>
-
-      {/* Location Status */}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <Label color={colors.onSurface}>
-          {t('location_active')}
-        </Label>
-        <Switch
-          value={editedLocation.isActive}
-          onValueChange={(value) => setEditedLocation({ ...editedLocation, isActive: value })}
-          trackColor={{ false: '#767577', true: '#007aff' }}
-          thumbColor={editedLocation.isActive ? '#ffffff' : '#f4f3f4'}
-          disabled={!isEditing}
-        />
-      </View>
-    </View>
-  );
-
-  const renderCurrentLocationButton = () => (
-    <TouchableOpacity
-      onPress={handleUseCurrentLocation}
-      disabled={!isEditing || isLoading}
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: isEditing ? '#007aff20' : colors.surfaceVariant,
-        padding: 12,
-        borderRadius: 8,
-        marginBottom: 16,
-      }}
-    >
-      <MaterialCommunityIcons 
-        name="crosshairs-gps" 
-        size={20} 
-        color={isEditing ? '#007aff' : colors.onSurfaceVariant} 
-      />
-      <Label 
-        color={isEditing ? '#007aff' : colors.onSurfaceVariant}
-        style={{ marginLeft: 8 }}
-      >
-        {isLoading ? t('getting_location') : t('use_current_location')}
-      </Label>
-    </TouchableOpacity>
-  );
-
-  const renderNearbySuggestions = () => (
-    <View style={{ marginBottom: 16 }}>
-      <Heading5 color={colors.onSurface} style={{ marginBottom: 12 }}>
-        {t('nearby_landmarks')}
-      </Heading5>
-      {nearbySuggestions.map((suggestion) => (
-        <TouchableOpacity
-          key={suggestion.id}
-          onPress={() => handleSelectSuggestion(suggestion)}
-          disabled={!isEditing}
-          style={{
-            backgroundColor: isEditing ? colors.surface : colors.surfaceVariant,
-            padding: 12,
-            borderRadius: 8,
-            marginBottom: 8,
-            borderWidth: 1,
-            borderColor: colors.outline,
-          }}
-        >
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-            <View style={{ flex: 1 }}>
-              <Label color={colors.onSurface}>
-                {suggestion.name}
-              </Label>
-              <Caption color={colors.onSurfaceVariant} style={{ marginTop: 2 }}>
-                {suggestion.address}
-              </Caption>
-            </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <MaterialCommunityIcons name="map-marker-distance" size={14} color={colors.onSurfaceVariant} />
-              <Caption color={colors.onSurfaceVariant} style={{ marginLeft: 4 }}>
-                {suggestion.distance} km
-              </Caption>
-            </View>
-          </View>
-        </TouchableOpacity>
-      ))}
-    </View>
-  );
-
-  if (error.hasError && !error.field) {
+  // Loading state
+  if (isLoading) {
     return (
       <CommonView>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-          <MaterialCommunityIcons name="alert-circle" size={48} color="#FF4444" />
-          <Heading4 color={colors.onSurface} align="center" style={{ marginTop: 16 }}>
-            {t('something_went_wrong')}
-          </Heading4>
-          <Body color={colors.onSurfaceVariant} align="center" style={{ marginTop: 8 }}>
-            {error.message}
+        <View style={styles.centerContainer}>
+          <MaterialCommunityIcons name="loading" size={48} color={colors.primary} />
+          <Body color={colors.onSurfaceVariant} style={{ marginTop: 16 }}>
+            Loading restaurant location...
           </Body>
-          <TouchableOpacity
-            onPress={() => {
-              setError({ hasError: false, message: '' });
-              navigation.goBack();
-            }}
-            style={{
-              backgroundColor: '#007aff',
-              paddingHorizontal: 24,
-              paddingVertical: 12,
-              borderRadius: 8,
-              marginTop: 16,
-            }}
+        </View>
+      </CommonView>
+    );
+  }
+
+  // Error state
+  if (isError || !restaurant) {
+    return (
+      <CommonView>
+        <View style={styles.centerContainer}>
+          <MaterialCommunityIcons name="alert-circle" size={48} color={colors.error} />
+          <Heading4 color={colors.onSurface} style={{ marginTop: 16, textAlign: 'center' }}>
+            Failed to Load Location
+          </Heading4>
+          <Body color={colors.onSurfaceVariant} style={{ marginTop: 8, textAlign: 'center' }}>
+            Unable to fetch restaurant location data
+          </Body>
+          <Button
+            mode="contained"
+            onPress={onRefresh}
+            style={{ marginTop: 16 }}
+            buttonColor={colors.primary}
           >
-            <Label color="white" weight="bold">{t('go_back')}</Label>
-          </TouchableOpacity>
+            Try Again
+          </Button>
         </View>
       </CommonView>
     );
@@ -368,146 +235,331 @@ const RestaurantLocationScreen: React.FC = () => {
 
   return (
     <CommonView>
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Removed custom header - using navigator header instead */}
-
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[colors.primary]}
+            tintColor={colors.primary}
+          />
+        }
+      >
         {/* Current Location Display */}
-        {!isEditing && (
-          <View style={{ padding: 16 }}>
-            <Card style={{ backgroundColor: colors.surface, borderRadius: 16 }}>
-              <View style={{ padding: 16 }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-                  <View style={{ flex: 1 }}>
-                    <Heading4 color={colors.onSurface}>
-                      {locationData.name}
-                    </Heading4>
-                    <Body color={colors.onSurfaceVariant} style={{ marginTop: 4 }}>
-                      {locationData.address}
-                    </Body>
-                    <Body color={colors.onSurfaceVariant}>
-                      {locationData.city}, {locationData.region} {locationData.postalCode}
-                    </Body>
-                    <Body color={colors.onSurfaceVariant}>
-                      {locationData.country}
-                    </Body>
-                  </View>
-                  <View style={{ alignItems: 'flex-end' }}>
-                    <Chip
-                      style={{ 
-                        backgroundColor: locationData.isActive ? '#00C85120' : '#FF444420',
-                        marginBottom: 8,
-                      }}
-                      textStyle={{ 
-                        color: locationData.isActive ? '#00C851' : '#FF4444',
-                        fontSize: 10,
-                      }}
-                      compact
-                    >
-                      {locationData.isActive ? t('active') : t('inactive')}
-                    </Chip>
-                  </View>
+        <View style={{ padding: 16 }}>
+          <Card style={[styles.locationCard, { backgroundColor: colors.surface }]}>
+            <View style={{ padding: 20 }}>
+              {/* Header */}
+              <View style={styles.cardHeader}>
+                <View style={[styles.iconContainer, { backgroundColor: colors.primary + '20' }]}>
+                  <MaterialCommunityIcons name="store-marker" size={24} color={colors.primary} />
                 </View>
+                <View style={{ flex: 1, marginLeft: 16 }}>
+                  <Heading4 color={colors.onSurface} weight="bold">
+                    Restaurant Location
+                  </Heading4>
+                  <Caption color={colors.onSurfaceVariant}>
+                    Your registered business address
+                  </Caption>
+                </View>
+              </View>
+              
+              {/* Restaurant Info */}
+              <View style={{ marginTop: 20 }}>
+                <Label color={colors.onSurface} weight="semibold" style={{ marginBottom: 4 }}>
+                  {restaurant.name}
+                </Label>
+                <Body color={colors.onSurfaceVariant} style={{ lineHeight: 20, marginBottom: 12 }}>
+                  {restaurant.address}
+                </Body>
                 
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <MaterialCommunityIcons name="map-marker-radius" size={16} color={colors.onSurfaceVariant} />
-                    <Caption color={colors.onSurfaceVariant} style={{ marginLeft: 4 }}>
-                      {t('delivery_radius')}: {locationData.deliveryRadius} km
-                    </Caption>
-                  </View>
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                {/* Coordinates */}
+                {restaurant.latitude && restaurant.longitude && (
+                  <View style={styles.coordinatesContainer}>
                     <MaterialCommunityIcons name="map-marker" size={16} color={colors.onSurfaceVariant} />
                     <Caption color={colors.onSurfaceVariant} style={{ marginLeft: 4 }}>
-                      {locationData.latitude.toFixed(4)}, {locationData.longitude.toFixed(4)}
+                      {restaurant.latitude.toFixed(6)}, {restaurant.longitude.toFixed(6)}
                     </Caption>
                   </View>
-                </View>
+                )}
+                
+                {/* Delivery Radius */}
+                {restaurant.deliveryRadius && (
+                  <View style={[styles.coordinatesContainer, { marginTop: 4 }]}>
+                    <MaterialCommunityIcons name="map-marker-radius" size={16} color={colors.onSurfaceVariant} />
+                    <Caption color={colors.onSurfaceVariant} style={{ marginLeft: 4 }}>
+                      Delivery radius: {restaurant.deliveryRadius} km
+                    </Caption>
+                  </View>
+                )}
               </View>
-            </Card>
-          </View>
-        )}
-
-        {/* Edit Form */}
-        {isEditing && (
-          <View style={{ padding: 16 }}>
-            <Card style={{ backgroundColor: colors.surface, borderRadius: 16 }}>
-              <View style={{ padding: 16 }}>
-                {renderCurrentLocationButton()}
-                {renderLocationForm()}
-                {renderNearbySuggestions()}
-              </View>
-            </Card>
-          </View>
-        )}
-
-        {/* Error Message */}
-        {error.hasError && error.field && (
-          <View style={{ padding: 16, paddingTop: 0 }}>
-            <View style={{
-              backgroundColor: '#FF444420',
-              padding: 12,
-              borderRadius: 8,
-              flexDirection: 'row',
-              alignItems: 'center',
-            }}>
-              <MaterialCommunityIcons name="alert-circle" size={20} color="#FF4444" />
-              <Body color="#FF4444" style={{ marginLeft: 8, flex: 1 }}>
-                {error.message}
-              </Body>
             </View>
-          </View>
-        )}
-
-        {/* Action Buttons */}
-        <View style={{ padding: 16, paddingTop: 8 }}>
-          {!isEditing ? (
-            <Button
-              mode="contained"
-              onPress={() => {
-                setIsEditing(true);
-                setEditedLocation(locationData);
-                Haptics.selectionAsync();
-              }}
-              style={{ backgroundColor: '#007aff', borderRadius: 8 }}
-              labelStyle={{ color: 'white', fontWeight: 'bold' }}
-            >
-              {t('edit_location')}
-            </Button>
-          ) : (
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              <Button
-                mode="outlined"
-                onPress={() => {
-                  setIsEditing(false);
-                  setEditedLocation(locationData);
-                  setError({ hasError: false, message: '' });
-                  Haptics.selectionAsync();
-                }}
-                style={{ flex: 1, marginRight: 8, borderColor: colors.outline }}
-                labelStyle={{ color: colors.onSurface }}
-                disabled={isLoading}
-              >
-                {t('cancel')}
-              </Button>
-              <Button
-                mode="contained"
-                onPress={handleSaveLocation}
-                style={{ flex: 1, marginLeft: 8, backgroundColor: '#007aff', borderRadius: 8 }}
-                labelStyle={{ color: 'white', fontWeight: 'bold' }}
-                loading={isLoading}
-                disabled={isLoading}
-              >
-                {t('save_location')}
-              </Button>
-            </View>
-          )}
+          </Card>
         </View>
 
-        {/* Bottom Spacing */}
-        <View style={{ height: 20 }} />
+        {/* Update Location Button */}
+        <View style={{ padding: 16, paddingTop: 0 }}>
+          <Button
+            mode="contained"
+            onPress={showLocationUpdateModal}
+            buttonColor={colors.primary}
+            contentStyle={{ paddingVertical: 12 }}
+            style={{ borderRadius: 12 }}
+            labelStyle={{ fontSize: 16, fontWeight: '600' }}
+            icon={() => (
+              <MaterialCommunityIcons name="crosshairs-gps" size={20} color="white" />
+            )}
+          >
+            Update Location
+          </Button>
+        </View>
+
+        {/* Info Card */}
+        <View style={{ padding: 16, paddingTop: 0 }}>
+          <Card style={[styles.infoCard, { backgroundColor: colors.surfaceVariant }]}>
+            <View style={{ padding: 16 }}>
+              <View style={styles.infoHeader}>
+                <MaterialCommunityIcons name="information" size={20} color={colors.primary} />
+                <Label color={colors.primary} weight="semibold" style={{ marginLeft: 8 }}>
+                  Location Information
+                </Label>
+              </View>
+              <Body color={colors.onSurfaceVariant} style={{ marginTop: 8, lineHeight: 20 }}>
+                Your restaurant location is used for customer discovery, delivery calculations, and order routing. 
+                Make sure it's accurate for the best service experience.
+              </Body>
+            </View>
+          </Card>
+        </View>
       </ScrollView>
+
+      {/* Update Location Modal */}
+      <Modal
+        visible={showUpdateModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={closeUpdateModal}
+      >
+        <View style={[styles.modalContainer, { backgroundColor: colors.background }]}>
+          {/* Modal Header */}
+          <View style={[styles.modalHeader, { backgroundColor: colors.surface, borderBottomColor: colors.outline }]}>
+            <Heading4 color={colors.onSurface} weight="bold">
+              Update Restaurant Location
+            </Heading4>
+            <TouchableOpacity onPress={closeUpdateModal}>
+              <Ionicons name="close" size={24} color={colors.onSurface} />
+            </TouchableOpacity>
+          </View>
+          
+          {/* Modal Content */}
+          <ScrollView style={{ flex: 1, padding: 20 }}>
+            {/* Warning Card */}
+            <Card style={[styles.warningCard, { backgroundColor: colors.errorContainer || colors.error + '20' }]}>
+              <View style={{ padding: 16 }}>
+                <View style={styles.warningHeader}>
+                  <Ionicons name="warning" size={24} color={colors.error} />
+                  <Label color={colors.error} weight="semibold" style={{ marginLeft: 8 }}>
+                    Important Notice
+                  </Label>
+                </View>
+                <Body color={colors.onErrorContainer || colors.error} style={{ marginTop: 8, lineHeight: 20 }}>
+                  Updating your location will affect customer discovery and delivery zones. 
+                  Please ensure you are physically at your restaurant before proceeding.
+                </Body>
+              </View>
+            </Card>
+
+            {/* Current Location Display */}
+            {selectedLocation && (
+              <Card style={[styles.selectedLocationCard, { backgroundColor: colors.primaryContainer || colors.primary + '20' }]}>
+                <View style={{ padding: 16 }}>
+                  <View style={styles.selectedLocationHeader}>
+                    <MaterialCommunityIcons name="map-marker-check" size={24} color={colors.primary} />
+                    <Label color={colors.primary} weight="semibold" style={{ marginLeft: 8 }}>
+                      New Location Selected
+                    </Label>
+                  </View>
+                  <Body color={colors.onPrimaryContainer || colors.primary} style={{ marginTop: 8, lineHeight: 20 }}>
+                    {selectedLocation.formattedAddress}
+                  </Body>
+                  <Caption color={colors.onPrimaryContainer || colors.primary} style={{ marginTop: 4 }}>
+                    {selectedLocation.latitude.toFixed(6)}, {selectedLocation.longitude.toFixed(6)}
+                  </Caption>
+                </View>
+              </Card>
+            )}
+
+            {/* Instructions */}
+            <View style={{ marginTop: 20 }}>
+              <Label color={colors.onSurface} weight="semibold" style={{ marginBottom: 12 }}>
+                Before You Continue:
+              </Label>
+              
+              <View style={styles.instructionItem}>
+                <Ionicons name="checkmark-circle" size={20} color={colors.primary} />
+                <Body color={colors.onSurface} style={{ flex: 1, marginLeft: 12 }}>
+                  Be physically present at your restaurant location
+                </Body>
+              </View>
+              
+              <View style={styles.instructionItem}>
+                <Ionicons name="checkmark-circle" size={20} color={colors.primary} />
+                <Body color={colors.onSurface} style={{ flex: 1, marginLeft: 12 }}>
+                  Ensure GPS and location services are enabled
+                </Body>
+              </View>
+              
+              <View style={styles.instructionItem}>
+                <Ionicons name="checkmark-circle" size={20} color={colors.primary} />
+                <Body color={colors.onSurface} style={{ flex: 1, marginLeft: 12 }}>
+                  Verify this will be your official delivery address
+                </Body>
+              </View>
+            </View>
+          </ScrollView>
+          
+          {/* Modal Actions */}
+          <View style={[styles.modalActions, { backgroundColor: colors.surface, borderTopColor: colors.outline }]}>
+            {!selectedLocation ? (
+              <>
+                <Button
+                  mode="outlined"
+                  onPress={closeUpdateModal}
+                  style={styles.modalButton}
+                  labelStyle={{ color: colors.onSurface }}
+                >
+                  Cancel
+                </Button>
+                
+                <Button
+                  mode="contained"
+                  onPress={handleGetLocationFromModal}
+                  loading={isGettingLocation}
+                  disabled={isGettingLocation}
+                  buttonColor={colors.primary}
+                  style={styles.modalButton}
+                  icon={() => (
+                    <Animated.View style={{ transform: [{ rotate: rotateAnim.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] }) }] }}>
+                      <MaterialCommunityIcons 
+                        name={isGettingLocation ? "loading" : "crosshairs-gps"} 
+                        size={20} 
+                        color="white" 
+                      />
+                    </Animated.View>
+                  )}
+                >
+                  {isGettingLocation ? 'Getting Location...' : 'Get My Location'}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  mode="outlined"
+                  onPress={() => setSelectedLocation(null)}
+                  style={styles.modalButton}
+                  labelStyle={{ color: colors.onSurface }}
+                >
+                  Get Different Location
+                </Button>
+                
+                <Button
+                  mode="contained"
+                  onPress={updateRestaurantLocation}
+                  loading={updateLocationMutation.isPending}
+                  disabled={updateLocationMutation.isPending}
+                  buttonColor={colors.primary}
+                  style={styles.modalButton}
+                >
+                  {updateLocationMutation.isPending ? 'Updating...' : 'Update Location'}
+                </Button>
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
     </CommonView>
   );
 };
+
+const styles = StyleSheet.create({
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  locationCard: {
+    borderRadius: 16,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  coordinatesContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  infoCard: {
+    borderRadius: 12,
+  },
+  infoHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    flex: 1,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+  },
+  warningCard: {
+    borderRadius: 12,
+    marginBottom: 20,
+  },
+  warningHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  selectedLocationCard: {
+    borderRadius: 12,
+    marginBottom: 20,
+  },
+  selectedLocationHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  instructionItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    gap: 12,
+    padding: 20,
+    borderTopWidth: 1,
+  },
+  modalButton: {
+    flex: 1,
+    borderRadius: 12,
+  },
+});
 
 export default RestaurantLocationScreen;

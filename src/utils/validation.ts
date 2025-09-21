@@ -34,34 +34,7 @@ export const registerSchema = yup.object().shape({
     .required('Confirmation required'),
 });
 
-export const restaurantRegisterSchema = yup.object().shape({
-  fullName: yup
-    .string()
-    .min(5, 'Name must contain atleast 5 characters')
-    .required('Name required'),
-  email: emailValidation,
-  phoneNumber: yup
-    .string()
-    .matches(/^[0-9]{9}$/, 'Invalid Phone number (9 numbers required)')
-    .required('Phone number required'),
-  password: yup
-    .string()
-    .min(8, 'Password must contain atleast 8 characters')
-    .required('Password required'),
-  confirmPassword: yup
-    .string()
-    .oneOf([yup.ref('password')], 'Passwords do not match')
-    .required('Confirmation required'),
-  name: yup
-    .string()
-    .min(2, 'Restaurant name must contain atleast 2 characters')
-    .required('Restaurant name required'),
-  address: yup
-    .string()
-    .optional()
-    .nullable()
-    .transform((value) => (value === '' ? undefined : value)),
-});
+
 
 // Address validation schema
 export const addressSchema = yup.object().shape({

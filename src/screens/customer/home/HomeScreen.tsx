@@ -26,6 +26,7 @@ import ClassicFoodCard from '@/src/components/customer/ClassicFoodCard';
 
 import { useTranslation } from 'react-i18next';
 import {
+  useGetAllMenu,
   useGetAllMenuItem,
   useAllRestaurants,
   useNearbyRestaurants,
@@ -38,6 +39,7 @@ import ClassicFoodCardSkeleton from '@/src/components/customer/ClassicFoodCardSk
 import ErrorDisplay from '@/src/components/common/ErrorDisplay';
 import EmptyState from '@/src/components/common/EmptyState';
 import HomeHeader from '@/src/components/customer/HomeHeader';
+import { useLocationForQueries } from '@/src/hooks/customer/useLocationService';
 
 const { width } = Dimensions.get('window');
 
@@ -136,6 +138,17 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
   const [refreshing, setRefreshing] = useState(false);
   const [showPermissionModal, setShowPermissionModal] = useState(false);
 
+  // Get location info for debugging
+  const { nearLat, nearLng, locationSource, hasLocation } = useLocationForQueries();
+  
+  // Log location data for debugging
+  console.log('🏠 HomeScreen Location Data:', {
+    coordinates: { lat: nearLat, lng: nearLng },
+    locationSource,
+    hasLocation,
+    timestamp: new Date().toISOString()
+  });
+
   // Get categories from local data
   const { categories, isLoading: isCategoriesLoading } = useCategories();
 
@@ -162,11 +175,20 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
     limit: 20,
   });
 
+  // Use location-aware menu hook for better nearby food recommendations
   const {
-    data: menuData,
-    isLoading: menuLoading,
-    error: menuError,
-    refetch: refetchMenu,
+    data: nearbyMenuData,
+    isLoading: nearbyMenuLoading,
+    error: nearbyMenuError,
+    refetch: refetchNearbyMenu,
+  } = useGetAllMenu({ enabled: true });
+
+  // Fallback to all menu items if nearby menu is empty
+  const {
+    data: allMenuData,
+    isLoading: allMenuLoading,
+    error: allMenuError,
+    refetch: refetchAllMenu,
   } = useGetAllMenuItem();
 
   // Using the same categories data from unified hook
@@ -175,16 +197,21 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
   const categoriesError = null; // No error for local data
   const refetchCategories = () => {}; // No refetch needed for local data
 
-  // Determine which data to use
+  // Determine which data to use - prioritize nearby data when available
   const restaurantData =
     nearbyRestaurants && nearbyRestaurants.length > 0
       ? nearbyRestaurants
       : allRestaurants;
-  const foodData = menuData;
+  
+  // Use nearby menu data if available, otherwise fallback to all menu data
+  const foodData = 
+    nearbyMenuData && nearbyMenuData.length > 0
+      ? nearbyMenuData
+      : allMenuData;
 
   // Simplified loading state
-  const isLoading = nearbyLoading || allLoading || menuLoading;
-  const hasError = (nearbyError && allError) || menuError;
+  const isLoading = nearbyLoading || allLoading || nearbyMenuLoading || allMenuLoading;
+  const hasError = (nearbyError && allError) || (nearbyMenuError && allMenuError);
 
   // Memoized categories data
   const categoriesForDisplay = useMemo(() => {
@@ -198,14 +225,15 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
     }));
   }, [categoriesData]);
 
-  // Simplified refresh handler
+  // Simplified refresh handler - now includes both menu hooks
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
       await Promise.all([
         refetchNearby(),
         refetchAll(),
-        refetchMenu(),
+        refetchNearbyMenu(),
+        refetchAllMenu(),
         // Categories refetch handled by unified hook
       ]);
     } catch (error) {
@@ -213,7 +241,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
     } finally {
       setRefreshing(false);
     }
-  }, [refetchNearby, refetchAll, refetchMenu]);
+  }, [refetchNearby, refetchAll, refetchNearbyMenu, refetchAllMenu]);
 
   // Navigation handlers
   const handleSearchPress = useCallback(() => {
@@ -243,17 +271,20 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
     ({ item }: { item: RestaurantProps }) => (
       <RestaurantCard
         key={item.id}
+        id={item.id}
         name={item.name}
         address={item.address}
-        isOpen={item.isOpen}
-        verificationStatus={item.verificationStatus}
         rating={item.rating}
         ratingCount={item.ratingCount}
-        id={item.id}
-        deliveryPrice={500} // Default value
-        estimatedTime={30} // Default value
-        distance={0} // Default value
+        distance={item.distanceKm || item.distance} // Use distanceKm from API
+        deliveryPrice={item.deliveryPrice} // Optional
+        estimatedDeliveryTime={item.estimatedDeliveryTime} // Optional
+        image={item.image} // Will use default if null/undefined
+        menu={item.menu || []}
+        isOpen={item.isOpen}
+        phone={item.phone}
       />
+      
     ),
     [],
   );
@@ -324,7 +355,10 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
         count: SKELETON_COUNTS.carousel,
       });
     } else if (hasError) {
-      data.push({ type: 'error', errorType: 'food', onRetry: refetchMenu });
+      data.push({ type: 'error', errorType: 'food', onRetry: () => {
+        refetchNearbyMenu();
+        refetchAllMenu();
+      }});
     } else if (carouselData.length === 0) {
       data.push({
         type: 'empty',
@@ -349,8 +383,11 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
         skeletonType: 'foods',
         count: SKELETON_COUNTS.foods,
       });
-    } else if (menuError) {
-      data.push({ type: 'error', errorType: 'food', onRetry: refetchMenu });
+    } else if (nearbyMenuError && allMenuError) {
+      data.push({ type: 'error', errorType: 'food', onRetry: () => {
+        refetchNearbyMenu();
+        refetchAllMenu();
+      }});
     } else if (recommendedFoodData.length === 0) {
       data.push({
         type: 'empty',
@@ -396,14 +433,16 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
     t,
     isLoading,
     hasError,
-    menuError,
+    nearbyMenuError,
+    allMenuError,
     nearbyError,
     allError,
     carouselData,
     recommendedFoodData,
     restaurantData,
     categoriesForDisplay,
-    refetchMenu,
+    refetchNearbyMenu,
+    refetchAllMenu,
     refetchNearby,
     handleNearbyRestaurantsPress,
     navigation,

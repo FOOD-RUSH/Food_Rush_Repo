@@ -92,14 +92,31 @@ export interface RestaurantCard {
   id: string;
   name: string;
   address: string;
-  latitude: number | null;
-  longitude: number | null;
-  isOpen: boolean;
-  verificationStatus: 'PENDING_VERIFICATION' | 'APPROVED';
-  menuMode: 'FIXED' | 'DAILY';
-  createdAt: string;
+  phone?: string;
+  isOpen?: boolean;
+  latitude?: string | number;
+  longitude?: string | number;
+  verificationStatus?: 'PENDING_VERIFICATION' | 'APPROVED' | 'REJECTED';
+  documentUrl?: string | null;
   rating: number | null;
   ratingCount: number;
+  ownerId?: string;
+  menuMode?: 'FIXED' | 'DAILY';
+  timezone?: string;
+  deliveryBaseFee?: number | null;
+  deliveryPerKmRate?: number | null;
+  deliveryMinFee?: number | null;
+  deliveryMaxFee?: number | null;
+  deliveryFreeThreshold?: number | null;
+  deliverySurgeMultiplier?: number | null;
+  createdAt?: string;
+  updatedAt?: string;
+  distanceKm?: number; // From API response
+  distance?: number; // Legacy field
+  deliveryPrice?: number; // Optional since API doesn't provide it
+  image?: string | null; // Optional since API might not provide it
+  estimatedDeliveryTime?: string; // Optional since API doesn't provide it
+  menu?: any[]; // Optional
 }
 
 // Onboarding slides
@@ -305,3 +322,6 @@ export interface UnreadCountResponse {
   message: string;
   data: number;
 }
+
+// Re-export analytics types
+export * from './analytics';

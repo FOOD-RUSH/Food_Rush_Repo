@@ -90,10 +90,9 @@ const EditCartItemContent: React.FC<CartItemProps> = ({
         style={{
           backgroundColor: colors.surface,
           borderRadius: 12,
-          padding: 16,
+          padding: 20,
           marginBottom: 16,
-          borderWidth: 1,
-          borderColor: colors.outline + '20',
+          borderWidth: 0,
         }}
       >
         <Text
@@ -174,10 +173,9 @@ const EditCartItemContent: React.FC<CartItemProps> = ({
         style={{
           backgroundColor: colors.surface,
           borderRadius: 12,
-          padding: 16,
+          padding: 20,
           marginBottom: 16,
-          borderWidth: 1,
-          borderColor: colors.outline + '20',
+          borderWidth: 0,
         }}
       >
         <Text
@@ -196,17 +194,16 @@ const EditCartItemContent: React.FC<CartItemProps> = ({
           onChangeText={setInstructions}
           placeholder={t('special_instructions_placeholder')}
           multiline
-          numberOfLines={2}
+          numberOfLines={4}
           style={{
-            borderWidth: 1,
-            borderColor: colors.outline,
+            borderWidth: 0,
             borderRadius: 8,
             padding: 12,
             backgroundColor: colors.surface,
             color: colors.onSurface,
             fontSize: 14,
             textAlignVertical: 'top',
-            minHeight: 80,
+            minHeight: 120,
           }}
           placeholderTextColor={colors.onSurfaceVariant}
         />

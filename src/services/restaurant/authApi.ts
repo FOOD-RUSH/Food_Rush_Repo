@@ -1,130 +1,30 @@
 import { apiClient } from '@/src/services/shared/apiClient';
+import {
+  LoginRequest,
+  RestaurantRegisterRequest,
+  RestaurantRegisterResponse,
+  RestaurantLoginResponse,
+  OTPCredentials,
+  ResetPasswordRequest,
+  ChangePasswordRequest,
+  ChangePasswordResponse,
+  UpdateProfileRequest,
+} from '@/src/services/shared/authTypes';
 
-export interface RestaurantRegisterRequest {
-  fullName: string;
-  phone: string;
-  email: string;
-  phoneNumber: string; // that of restaurant
-  password: string;
-  nearLat: number;
-  nearLng: number; 
-  name: string; // Restaurant name
-  address?: string; // Optional
-  document?: string; // Optional document
-}
+// Re-export shared types for backward compatibility
+export type {
+  RestaurantRegisterRequest,
+  RestaurantRegisterResponse,
+  RestaurantLoginResponse,
+  LoginRequest,
+  OTPCredentials,
+  ResetPasswordRequest,
+  ChangePasswordRequest,
+  ChangePasswordResponse,
+  UpdateProfileRequest,
+};
 
-export interface RestaurantRegisterResponse {
-  status_code: number;
-  message: string;
-  data: {
-    accessToken: string;
-    refreshToken: string;
-    user: {
-      id: string;
-      fullName: string;
-      email: string;
-      phoneNumber: string;
-      role: string;
-    };
-    restaurantOwnerId: string;
-    restaurant: {
-      id: string;
-      name: string;
-      address: string;
-      phone: string;
-      isOpen: boolean;
-      latitude: number | null;
-      longitude: number | null;
-      verificationStatus: string;
-      documentUrl: string | null;
-      owner: {
-        id: string;
-        email: string;
-        phoneNumber: string;
-        password: string;
-        fullName: string;
-        role: string;
-        status: string;
-        authProvider: string;
-        providerId: string | null;
-        profilePicture: string | null;
-        isEmailVerified: boolean;
-        isPhoneVerified: boolean;
-        emailVerificationToken: string | null;
-        phoneVerificationToken: string | null;
-        passwordResetToken: string | null;
-        passwordResetExpires: string | null;
-        lastLoginAt: string | null;
-        refreshToken: string | null;
-        emailVerificationExpires: string | null;
-        phoneVerificationExpires: string | null;
-        riderStatus: string;
-        vehicleType: string | null;
-        isAvailable: boolean;
-        licenseNumber: string | null;
-        vehiclePlate: string | null;
-        idDocumentUrl: string | null;
-        createdAt: string;
-        updatedAt: string;
-        deletedAt: string | null;
-      };
-      ownerId: string;
-      menuMode: string;
-      timezone: string;
-      deliveryBaseFee: number | null;
-      deliveryPerKmRate: number | null;
-      deliveryMinFee: number | null;
-      deliveryMaxFee: number | null;
-      deliveryFreeThreshold: number | null;
-      deliverySurgeMultiplier: number | null;
-      createdAt: string;
-      updatedAt: string;
-    };
-    nextAction: string;
-  };
-}
-
-export interface RestaurantLoginResponse {
-  status_code: number;
-  message: string;
-  data: {
-    accessToken: string;
-    refreshToken: string;
-    user: {
-      phoneNumber: string;
-      id: string;
-      email: string;
-      fullName: string;
-      role: string;
-      status: string;
-      isEmailVerified: boolean;
-      isPhoneVerified: boolean;
-    };
-    restaurants: {
-      id: string;
-      name: string;
-      address: string;
-      phone: string;
-      isOpen: boolean;
-      latitude: number | null;
-      longitude: number | null;
-      verificationStatus: string;
-      documentUrl: string | null;
-      ownerId: string;
-      menuMode: string;
-      timezone: string;
-      deliveryBaseFee: number | null;
-      deliveryPerKmRate: number | null;
-      deliveryMinFee: number | null;
-      deliveryMaxFee: number | null;
-      deliveryFreeThreshold: number | null;
-      deliverySurgeMultiplier: number | null;
-      createdAt: string;
-      updatedAt: string;
-    }[];
-    defaultRestaurantId: string;
-  };
-}
+// Removed duplicate type definitions - now using shared types
 
 export const restaurantAuthApi = {
   register: (data: RestaurantRegisterRequest) => {

@@ -71,18 +71,20 @@ export const useRestaurantDetails = (id: string) => {
   });
 };
 // Hook for nearby restaurants with automatic location
-export const useNearbyRestaurants = () => {
+export const useNearbyRestaurants = (options: Partial<RestaurantQuery> = {}) => {
   const { nearLat, nearLng, locationQueryKey } = useLocationForQueries();
 
+  const queryParams = {
+    nearLat,
+    nearLng,
+    verificationStatus: 'APPROVED' as const,
+    isOpen: true,
+    ...options, // Allow overriding default options
+  };
+
   return useQuery({
-    queryKey: ['nearby-restaurants', ...locationQueryKey, { nearLat, nearLng }],
-    queryFn: () =>
-      restaurantApi.getNearbyRestaurants({
-        nearLat,
-        nearLng,
-        verificationStatus: 'APPROVED',
-        isOpen: true,
-      }),
+    queryKey: ['nearby-restaurants', ...locationQueryKey, queryParams],
+    queryFn: () => restaurantApi.getNearbyRestaurants(queryParams),
     enabled: !!(nearLat && nearLng),
     staleTime: CACHE_CONFIG.STALE_TIME,
     gcTime: CACHE_CONFIG.CACHE_TIME,

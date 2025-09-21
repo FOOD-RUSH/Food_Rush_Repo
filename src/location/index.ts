@@ -18,6 +18,7 @@ export {
   useLocationPermission,
   useSavedAddresses,
   useDefaultAddressId,
+  useDefaultAddress,
   useLocationActions,
   type LocationStore,
 } from './store';

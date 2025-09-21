@@ -1,8 +1,8 @@
-import React, { useEffect, useMemo, useCallback } from 'react';
+import React, { useEffect, useMemo, useCallback, useRef } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
-import { TouchableOpacity, Linking } from 'react-native';
+import { TouchableOpacity, Linking, DeviceEventEmitter } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import Toast from 'react-native-toast-message';
 import { useTranslation } from 'react-i18next';
@@ -61,7 +61,7 @@ import RejectOrder from '../screens/restaurant/orders/RejectOrder';
 import { AddFoodScreen } from '../screens/restaurant/menu/AddFoodScreen';
 import { EditFoodScreen } from '../screens/restaurant/menu/EditFoodScreen';
 
-import BestSellers from '../screens/restaurant/analytics/BestSellers';
+import RestaurantAnalyticsReviewsScreen from '../screens/restaurant/analytics/RestaurantReviewsScreen';
 import TimeHeatmap from '../screens/restaurant/analytics/TimeHeatmap';
 import ProfileScreen from '../screens/restaurant/profile/ProfileScreen';
 import PaymentBillingScreen from '../screens/restaurant/profile/PaymentBillingScreen';
@@ -89,7 +89,7 @@ import { State } from 'react-native-gesture-handler';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 // Screen option presets - moved outside component to prevent recreation
-const createScreenOptions = (colors: any, t: any) => ({
+const createScreenOptions = (colors: any, navigationColors: any, t: any) => ({
   default: {
     headerShown: false,
     gestureEnabled: true,
@@ -100,12 +100,12 @@ const createScreenOptions = (colors: any, t: any) => ({
       elevation: 0,
       shadowOpacity: 0,
     },
-    headerTintColor: colors.text,
+    headerTintColor: navigationColors.text,
     headerTitleStyle: {
       fontFamily: 'Urbanist-SemiBold',
       fontSize: 18,
       fontWeight: '600',
-      color: colors.text,
+      color: navigationColors.text,
     },
   },
   modal: {
@@ -119,27 +119,31 @@ const createScreenOptions = (colors: any, t: any) => ({
       elevation: 0,
       shadowOpacity: 0,
     },
-    headerTintColor: colors.text,
+    headerTintColor: navigationColors.text,
     headerTitleStyle: {
       fontFamily: 'Urbanist-SemiBold',
       fontSize: 18,
       fontWeight: '600',
-      color: colors.text,
+      color: navigationColors.text,
     },
   },
   card: {
     presentation: 'card' as const,
     headerShown: true,
-    headerTransparent: true,
     headerBackTitleVisible: false,
     animation: 'slide_from_right' as const,
-    contentStyle: { backgroundColor: colors.background },
-    headerTintColor: colors.text,
+    contentStyle: { backgroundColor: colors.background, marginTop: -34 },
+    headerStyle: {
+      backgroundColor: colors.card,
+      elevation: 0,
+      shadowOpacity: 0,
+    },
+    headerTintColor: navigationColors.text,
     headerTitleStyle: {
       fontFamily: 'Urbanist-SemiBold',
       fontSize: 18,
       fontWeight: '600',
-      color: colors.text,
+      color: navigationColors.text,
     },
   },
   profileCard: {
@@ -154,12 +158,12 @@ const createScreenOptions = (colors: any, t: any) => ({
       elevation: 0,
       shadowOpacity: 0,
     },
-    headerTintColor: colors.text,
+    headerTintColor: navigationColors.text,
     headerTitleStyle: {
       fontFamily: 'Urbanist-SemiBold',
       fontSize: 18,
       fontWeight: '600',
-      color: colors.text,
+      color: navigationColors.text,
     },
   },
   checkout: {
@@ -172,12 +176,12 @@ const createScreenOptions = (colors: any, t: any) => ({
       elevation: 0,
       shadowOpacity: 0,
     },
-    headerTintColor: colors.text,
+    headerTintColor: navigationColors.text,
     headerTitleStyle: {
       fontFamily: 'Urbanist-SemiBold',
       fontSize: 18,
       fontWeight: '600',
-      color: colors.text,
+      color: navigationColors.text,
     },
   },
   fullScreen: {
@@ -258,19 +262,48 @@ const RootNavigator: React.FC = () => {
     [completeOnboarding, setSelectedUserType],
   );
 
+  // Logout event listener with ref to prevent multiple listeners
+  const logoutListenerRef = useRef<any>(null);
+  
   // Navigation ready handler
   const handleNavigationReady = useCallback(() => {
     const subscription = Linking.addEventListener('url', ({ url }) => {
       handleDeepLink(url);
     });
 
-    return () => subscription?.remove();
+    // Remove existing logout listener if any
+    if (logoutListenerRef.current) {
+      logoutListenerRef.current.remove();
+    }
+
+    // Add single logout event listener
+    const logoutListener = () => {
+      console.log('Logout event received, navigating to UserTypeSelection');
+      // Navigate to user type selection when logout event is received
+      if (navigationRef.isReady()) {
+        navigationRef.reset({
+          index: 0,
+          routes: [{ name: 'UserTypeSelection' }],
+        });
+      }
+    };
+
+    // Store the listener reference
+    logoutListenerRef.current = DeviceEventEmitter.addListener('user-logout', logoutListener);
+
+    return () => {
+      subscription?.remove();
+      if (logoutListenerRef.current) {
+        logoutListenerRef.current.remove();
+        logoutListenerRef.current = null;
+      }
+    };
   }, [handleDeepLink]);
 
   // Memoized screen options
   const screenOptions = useMemo(() => {
-    return createScreenOptions(theme.colors, t);
-  }, [theme.colors, t]);
+    return createScreenOptions(theme.colors, navigationTheme.colors, t);
+  }, [theme.colors, navigationTheme.colors, t]);
 
   // Memoized cart screen options
   const cartScreenOptions = useMemo(
@@ -390,6 +423,7 @@ const RootNavigator: React.FC = () => {
               component={NotificationScreen}
               options={{
                 headerTitle: t('notifications'),
+                contentStyle: { backgroundColor: theme.colors.background, marginTop: -34 },
               }}
             />
           </Stack.Group>
@@ -410,6 +444,7 @@ const RootNavigator: React.FC = () => {
               gestureEnabled: true,
               animation: 'slide_from_bottom',
               contentStyle: {
+                backgroundColor: theme.colors.background,
                 marginTop: -34,
               },
             }}
@@ -425,12 +460,20 @@ const RootNavigator: React.FC = () => {
             <Stack.Screen
               name="FoodDetails"
               component={FoodDetailsScreen}
-              options={{ headerTitle: '', headerTransparent: true }}
+              options={{ 
+                headerTitle: '', 
+                headerTransparent: true,
+                contentStyle: { backgroundColor: theme.colors.background }
+              }}
             />
             <Stack.Screen
               name="RestaurantDetails"
               component={RestaurantDetailScreen}
-              options={{ headerTitle: '', headerTransparent: true }}
+              options={{ 
+                headerTitle: '', 
+                headerTransparent: true,
+                contentStyle: { backgroundColor: theme.colors.background }
+              }}
             />
             <Stack.Screen
               name="AddressScreen"
@@ -440,7 +483,7 @@ const RootNavigator: React.FC = () => {
             <Stack.Screen
               name="NearbyRestaurants"
               component={NearbyRestaurantsScreen}
-              options={{ headerTitle: t('restaurants_near_you'), contentStyle: {marginTop: -34} }}
+              options={{ headerTitle: t('restaurants_near_you') }}
             />
 
             {/* Restaurant screens */}
@@ -450,9 +493,9 @@ const RootNavigator: React.FC = () => {
               options={{ headerTitle: t('order_details') }}
             />
             <Stack.Screen
-              name="RestaurantBestSellers"
-              component={BestSellers}
-              options={{ headerTitle: t('best_sellers') }}
+              name="RestaurantCustomerReviews"
+              component={RestaurantAnalyticsReviewsScreen}
+              options={{ headerTitle: t('customer_reviews') }}
             />
             <Stack.Screen
               name="RestaurantTimeHeatmap"
@@ -499,7 +542,7 @@ const RootNavigator: React.FC = () => {
           </Stack.Group>
 
           {/* Profile */}
-          <Stack.Group screenOptions={{...screenOptions.profileCard,  contentStyle: {marginTop: -34}}}>
+          <Stack.Group screenOptions={{...screenOptions.profileCard,  contentStyle: {backgroundColor: theme.colors.background, marginTop: -34}}}>
             <Stack.Screen
               name="EditProfile"
               component={EditProfileScreen}
@@ -532,7 +575,7 @@ const RootNavigator: React.FC = () => {
               component={ProfileEditScreen}
               options={{
                 headerTitle: t('edit_profile'),
-                contentStyle: { marginTop: -34 },
+                contentStyle: { backgroundColor: theme.colors.background, marginTop: -34 },
               }}
             />
             <Stack.Screen
@@ -540,7 +583,7 @@ const RootNavigator: React.FC = () => {
               component={ProfileScreen}
               options={{
                 headerTitle: t('restaurant_profile'),
-                contentStyle: { marginTop: -34 },
+                contentStyle: { backgroundColor: theme.colors.background, marginTop: -34 },
               }}
             />
             <Stack.Screen
@@ -548,7 +591,7 @@ const RootNavigator: React.FC = () => {
               component={RestaurantLocationScreen}
               options={{
                 headerTitle: t('restaurant_location'),
-                contentStyle: { marginTop: -34 },
+                contentStyle: { backgroundColor: theme.colors.background, marginTop: -34 },
               }}
             />
             <Stack.Screen
@@ -556,7 +599,7 @@ const RootNavigator: React.FC = () => {
               component={ThemeSettingsScreen}
               options={{
                 headerTitle: t('theme_language_settings'),
-                contentStyle: { marginTop: -34 },
+                contentStyle: { backgroundColor: theme.colors.background, marginTop: -34 },
               }}
             />
             <Stack.Screen
@@ -564,7 +607,7 @@ const RootNavigator: React.FC = () => {
               component={AccountSettingsScreen}
               options={{
                 headerTitle: t('settings'),
-                contentStyle: { marginTop: -34 },
+                contentStyle: { backgroundColor: theme.colors.background, marginTop: -34 },
               }}
             />
             <Stack.Screen
@@ -572,7 +615,7 @@ const RootNavigator: React.FC = () => {
               component={SupportScreen}
               options={{
                 headerTitle: t('support'),
-                contentStyle: { marginTop: -34 },
+                contentStyle: { backgroundColor: theme.colors.background, marginTop: -34 },
               }}
             />
             <Stack.Screen
@@ -580,7 +623,7 @@ const RootNavigator: React.FC = () => {
               component={AboutScreen}
               options={{
                 headerTitle: t('about'),
-                contentStyle: { marginTop: -34 },
+                contentStyle: { backgroundColor: theme.colors.background, marginTop: -34 },
               }}
             />
             <Stack.Screen
@@ -588,7 +631,7 @@ const RootNavigator: React.FC = () => {
               component={PaymentBillingScreen}
               options={{
                 headerTitle: t('payment_billing'),
-                contentStyle: { marginTop: -34 },
+                contentStyle: { backgroundColor: theme.colors.background, marginTop: -34 },
               }}
             />
             <Stack.Screen
@@ -596,7 +639,7 @@ const RootNavigator: React.FC = () => {
               component={NotificationsList}
               options={{
                 headerTitle: t('notifications'),
-                contentStyle: { marginTop: -34 },
+                contentStyle: { backgroundColor: theme.colors.background, marginTop: -34 },
               }}
             />
             <Stack.Screen
@@ -623,7 +666,7 @@ const RootNavigator: React.FC = () => {
             options={{
               ...screenOptions.checkout,
               headerTitle: t('checkout_order'),
-              contentStyle: { marginTop: -34 },
+              contentStyle: { backgroundColor: theme.colors.background, marginTop: -34 },
             }}
           />
 

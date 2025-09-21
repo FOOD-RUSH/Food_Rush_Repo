@@ -248,8 +248,7 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
               weight="medium"
               style={{ marginTop: 16 }}
             >
-              {t('you_selected')}{' '}
-              {selectedType === 'customer' ? t('customer') : t('restaurant')}
+              <Text>{t('you_selected')} {selectedType === 'customer' ? t('customer') : t('restaurant')}</Text>
             </Body>
           )}
         </View>

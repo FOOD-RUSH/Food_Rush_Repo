@@ -9,6 +9,8 @@ interface rowView {
   rightIconName?: keyof typeof MaterialIcons.glyphMap;
   title: string;
   subtitle?: string;
+  iconColor?: string;
+  showIconBackground?: boolean;
 }
 const RowView = ({
   leftIconName,
@@ -16,12 +18,31 @@ const RowView = ({
   rightIconName = 'arrow-forward-ios',
   title,
   subtitle,
+  iconColor,
+  showIconBackground = false,
 }: rowView) => {
   const { colors } = useTheme();
+  const finalIconColor = iconColor || colors.onSurface;
+  
   return (
     <TouchableOpacity onPress={onPress}>
       <View className="flex-row justify-between mb-4 items-center px-2 py-2">
-        <Ionicons name={leftIconName} size={22} color={colors.onSurface} />
+        {showIconBackground ? (
+          <View
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: 22,
+              backgroundColor: finalIconColor + '15',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Ionicons name={leftIconName} size={22} color={finalIconColor} />
+          </View>
+        ) : (
+          <Ionicons name={leftIconName} size={22} color={finalIconColor} />
+        )}
 
         <View className="flex-1 ml-3">
           <Text

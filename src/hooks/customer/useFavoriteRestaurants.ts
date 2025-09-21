@@ -1,86 +1,34 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthUser } from '@/src/stores/AuthStore';
 import { RestaurantCard as RestaurantCardType } from '@/src/types';
+import { restaurantApi } from '@/src/services/customer/restaurant.service';
+import Toast from 'react-native-toast-message';
+import { useTranslation } from 'react-i18next';
 
-// Mock data for favorite restaurants (replace with actual API call)
-const mockFavoriteRestaurants: RestaurantCardType[] = [
-  {
-    id: '1',
-    restaurantId: '1',
-    name: 'Le Jardin',
-    address: 'Centre-ville, Yaoundé',
-    isOpen: true,
-    imageUrl: 'https://example.com/restaurant1.jpg',
-    rating: 4.5,
-    deliveryFee: '500',
-    deliveryPrice: 500,
-    estimatedDeliveryTime: '25-35 min',
-    distance: 2.3,
-    distanceFromUser: 2.3,
-  },
-  {
-    id: '2',
-    restaurantId: '2',
-    name: 'Chez Marie',
-    address: 'Bastos, Yaoundé',
-    isOpen: true,
-    imageUrl: 'https://example.com/restaurant2.jpg',
-    rating: 4.2,
-    deliveryFee: '300',
-    deliveryPrice: 300,
-    estimatedDeliveryTime: '20-30 min',
-    distance: 1.8,
-    distanceFromUser: 1.8,
-  },
-  {
-    id: '3',
-    restaurantId: '3',
-    name: 'La Belle Époque',
-    address: 'Bonapriso, Douala',
-    isOpen: false,
-    imageUrl: 'https://example.com/restaurant3.jpg',
-    rating: 4.7,
-    deliveryFee: '700',
-    deliveryPrice: 700,
-    estimatedDeliveryTime: '30-40 min',
-    distance: 3.1,
-    distanceFromUser: 3.1,
-  },
-];
-
-// Simulate API delay
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
+// Hook to get user's favorite/liked restaurants
 export const useFavoriteRestaurants = () => {
   const user = useAuthUser();
+  const { t } = useTranslation();
 
   return useQuery({
     queryKey: ['favorite-restaurants', user?.id],
     queryFn: async (): Promise<RestaurantCardType[]> => {
-      // Simulate API call delay
-      await delay(1500);
-
       // Check if user is authenticated
       if (!user?.id) {
         throw new Error('User not authenticated');
       }
 
-      // Simulate occasional API errors (10% chance)
-      if (Math.random() < 0.1) {
-        throw new Error('Failed to fetch favorite restaurants');
-      }
-
-      // Return mock data (replace with actual API call)
-      return mockFavoriteRestaurants;
+      // Call the real API
+      return await restaurantApi.getLikedRestaurants();
     },
     enabled: !!user?.id, // Only fetch if user is authenticated
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
     retry: (failureCount, error) => {
       // Don't retry on authentication errors
       if (
         error instanceof Error &&
-        error.message === 'User not authenticated'
+        (error.message === 'User not authenticated' || error.message.includes('401'))
       ) {
         return false;
       }
@@ -91,26 +39,116 @@ export const useFavoriteRestaurants = () => {
   });
 };
 
-// Hook for toggling favorite status
-export const useToggleFavorite = () => {
-  const user = useAuthUser();
+// Note: Individual hooks are exported below
 
-  return {
-    toggleFavorite: async (restaurantId: string) => {
+// Hook for liking a restaurant
+export const useLikeRestaurant = () => {
+  const queryClient = useQueryClient();
+  const user = useAuthUser();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async (restaurantId: string) => {
       if (!user?.id) {
         throw new Error('User not authenticated');
       }
-
-      // Simulate API call
-      await delay(500);
-
-      // Simulate occasional errors
-      if (Math.random() < 0.05) {
-        throw new Error('Failed to update favorite status');
-      }
-
-      // Return success (in real app, this would update the backend)
-      return { success: true, restaurantId };
+      return await restaurantApi.likeRestaurant(restaurantId);
     },
+    onSuccess: (data, restaurantId) => {
+      // Invalidate and refetch favorite restaurants
+      queryClient.invalidateQueries({ queryKey: ['favorite-restaurants'] });
+      
+      // Optionally update other restaurant-related queries
+      queryClient.invalidateQueries({ queryKey: ['restaurants'] });
+      queryClient.invalidateQueries({ queryKey: ['restaurant', restaurantId] });
+
+      Toast.show({
+        type: 'success',
+        text1: t('restaurant_liked', 'Restaurant Liked'),
+        text2: t('added_to_favorites', 'Added to your favorites'),
+        position: 'top',
+      });
+    },
+    onError: (error: any) => {
+      console.error('Error liking restaurant:', error);
+      Toast.show({
+        type: 'error',
+        text1: t('error', 'Error'),
+        text2: error?.message || t('failed_to_like_restaurant', 'Failed to like restaurant'),
+        position: 'top',
+      });
+    },
+  });
+};
+
+// Hook for unliking a restaurant
+export const useUnlikeRestaurant = () => {
+  const queryClient = useQueryClient();
+  const user = useAuthUser();
+  const { t } = useTranslation();
+
+  return useMutation({
+    mutationFn: async (restaurantId: string) => {
+      if (!user?.id) {
+        throw new Error('User not authenticated');
+      }
+      return await restaurantApi.unlikeRestaurant(restaurantId);
+    },
+    onSuccess: (data, restaurantId) => {
+      // Invalidate and refetch favorite restaurants
+      queryClient.invalidateQueries({ queryKey: ['favorite-restaurants'] });
+      
+      // Optionally update other restaurant-related queries
+      queryClient.invalidateQueries({ queryKey: ['restaurants'] });
+      queryClient.invalidateQueries({ queryKey: ['restaurant', restaurantId] });
+
+      Toast.show({
+        type: 'success',
+        text1: t('restaurant_unliked', 'Restaurant Removed'),
+        text2: t('removed_from_favorites', 'Removed from your favorites'),
+        position: 'top',
+      });
+    },
+    onError: (error: any) => {
+      console.error('Error unliking restaurant:', error);
+      Toast.show({
+        type: 'error',
+        text1: t('error', 'Error'),
+        text2: error?.message || t('failed_to_unlike_restaurant', 'Failed to remove from favorites'),
+        position: 'top',
+      });
+    },
+  });
+};
+
+// Hook for toggling favorite status (combines like/unlike)
+export const useToggleFavorite = () => {
+  const likeRestaurant = useLikeRestaurant();
+  const unlikeRestaurant = useUnlikeRestaurant();
+  const { data: favoriteRestaurants } = useFavoriteRestaurants();
+
+  return {
+    toggleFavorite: async (restaurantId: string) => {
+      // Check if restaurant is currently liked
+      const isCurrentlyLiked = favoriteRestaurants?.some(
+        (restaurant) => restaurant.id === restaurantId || restaurant.restaurantId === restaurantId
+      );
+
+      if (isCurrentlyLiked) {
+        return await unlikeRestaurant.mutateAsync(restaurantId);
+      } else {
+        return await likeRestaurant.mutateAsync(restaurantId);
+      }
+    },
+    isLoading: likeRestaurant.isPending || unlikeRestaurant.isPending,
   };
+};
+
+// Hook to check if a restaurant is liked
+export const useIsRestaurantLiked = (restaurantId: string) => {
+  const { data: favoriteRestaurants } = useFavoriteRestaurants();
+  
+  return favoriteRestaurants?.some(
+    (restaurant) => restaurant.id === restaurantId || restaurant.restaurantId === restaurantId
+  ) || false;
 };
