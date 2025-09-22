@@ -20,48 +20,46 @@ export interface NotificationApiResponse {
  * and returns appropriate notifications for that user type
  */
 export const notificationApi = {
-  // GET /notifications/my - Get notifications with pagination for authenticated user
+  // GET /api/v1/notifications/my - Get notifications with pagination for authenticated user
   getNotifications: async (params: NotificationListParams = { limit: 20, page: 1 }) => {
-    const response = await apiClient.get<NotificationResponse>('/notifications/my', {
+    const response = await apiClient.get<NotificationResponse>('/api/v1/notifications/my', {
       params,
     });
     return response.data;
   },
 
-  // PATCH /notifications/:id/read - Mark a specific notification as read
+  // PATCH /api/v1/notifications/{id}/read - Mark a specific notification as read
   markAsRead: async (notificationId: string) => {
     const response = await apiClient.patch<NotificationApiResponse>(
-      `/notifications/${notificationId}/read`
+      `/api/v1/notifications/${notificationId}/read`
     );
     return response.data;
   },
 
-  // PATCH /notifications/read-all - Mark all notifications as read for authenticated user
+  // PATCH /api/v1/notifications/read-all - Mark all notifications as read for authenticated user
   markAllAsRead: async () => {
     const response = await apiClient.patch<NotificationApiResponse>(
-      '/notifications/read-all'
+      '/api/v1/notifications/read-all'
     );
     return response.data;
   },
 
-  // GET /notifications/unread-count - Get number of unread notifications for authenticated user
+  // GET /api/v1/notifications/unread-count - Get number of unread notifications for authenticated user
   getUnreadCount: async () => {
-    const response = await apiClient.get<UnreadCountResponse>('/notifications/unread-count');
+    const response = await apiClient.get<UnreadCountResponse>('/api/v1/notifications/unread-count');
     return response.data;
   },
 
-  // DELETE /notifications/:id - Delete a specific notification (if supported by backend)
-  deleteNotification: async (notificationId: string) => {
-    const response = await apiClient.delete<NotificationApiResponse>(
-      `/notifications/${notificationId}`
-    );
+  // GET /api/v1/notifications/devices - List registered Expo devices for the authenticated user
+  getDevices: async () => {
+    const response = await apiClient.get<NotificationApiResponse>('/api/v1/notifications/devices');
     return response.data;
   },
 
-  // POST /notifications/register-token - Register push notification token
-  registerPushToken: async (token: string, deviceInfo?: any) => {
+  // POST /api/v1/notifications/device - Register or update Expo push token for the authenticated user
+  registerDevice: async (token: string, deviceInfo?: any) => {
     const response = await apiClient.post<NotificationApiResponse>(
-      '/notifications/register-token',
+      '/api/v1/notifications/device',
       {
         token,
         deviceInfo,
@@ -71,13 +69,21 @@ export const notificationApi = {
     return response.data;
   },
 
-  // DELETE /notifications/unregister-token - Unregister push notification token
-  unregisterPushToken: async (token: string) => {
+  // DELETE /api/v1/notifications/device - Unregister Expo push token for the authenticated user
+  unregisterDevice: async (token?: string) => {
     const response = await apiClient.delete<NotificationApiResponse>(
-      '/notifications/unregister-token',
+      '/api/v1/notifications/device',
       {
-        data: { token }
+        data: token ? { token } : undefined
       }
+    );
+    return response.data;
+  },
+
+  // DELETE /notifications/:id - Delete a specific notification (if supported by backend)
+  deleteNotification: async (notificationId: string) => {
+    const response = await apiClient.delete<NotificationApiResponse>(
+      `/api/v1/notifications/${notificationId}`
     );
     return response.data;
   },

@@ -11,6 +11,7 @@ export interface DetailedRestaurantProfile {
   isOpen: boolean;
   latitude: number | null;
   longitude: number | null;
+  deliveryRadius: number | null;
   verificationStatus: 'PENDING' | 'APPROVED' | 'REJECTED';
   documentUrl: string | null;
   rating: number | null;

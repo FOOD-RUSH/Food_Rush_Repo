@@ -16,7 +16,8 @@ import * as Haptics from 'expo-haptics';
 
 import CommonView from '@/src/components/common/CommonView';
 import { Heading4, Heading5, Body, Label, Caption } from '@/src/components/common/Typography';
-import { useRestaurantProfile, useUpdateRestaurantLocation } from '@/src/hooks/restaurant/useRestaurantApi';
+import { useRestaurantProfile } from '@/src/hooks/restaurant/useRestaurantProfile';
+import { useUpdateRestaurantLocation } from '@/src/hooks/restaurant/useRestaurantApi';
 import { useLocation } from '@/src/location/useLocation';
 import LocationService from '@/src/location/LocationService';
 import Toast from 'react-native-toast-message';
@@ -28,7 +29,12 @@ const RestaurantLocationScreen: React.FC = () => {
   const navigation = useNavigation();
   
   // API hooks
-  const { data: restaurantData, isLoading, refetch, isError } = useRestaurantProfile();
+  const { 
+    restaurantProfile, 
+    isLoading, 
+    error, 
+    loadProfileIfNeeded 
+  } = useRestaurantProfile();
   const updateLocationMutation = useUpdateRestaurantLocation();
   
   // Location service
@@ -43,6 +49,33 @@ const RestaurantLocationScreen: React.FC = () => {
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const rotateAnim = useRef(new Animated.Value(0)).current;
+
+  // Load profile on mount
+  useEffect(() => {
+    console.log('🏪 RestaurantLocationScreen: Loading profile on mount');
+    loadProfileIfNeeded();
+  }, [loadProfileIfNeeded]);
+
+  // Debug restaurant data
+  useEffect(() => {
+    if (restaurant) {
+      console.log('🏪 Restaurant data loaded:', {
+        id: restaurant.id,
+        name: restaurant.name,
+        address: restaurant.address,
+        latitude: restaurant.latitude,
+        longitude: restaurant.longitude,
+        deliveryRadius: restaurant.deliveryRadius,
+      });
+    } else {
+      console.log('🏪 No restaurant data available');
+    }
+  }, [restaurant]);
+
+  // Debug loading and error states
+  useEffect(() => {
+    console.log('🏪 Location screen state:', { isLoading, error: error || 'none' });
+  }, [isLoading, error]);
 
   // Animation for loading indicator
   useEffect(() => {
@@ -62,19 +95,19 @@ const RestaurantLocationScreen: React.FC = () => {
   }, [isGettingLocation, rotateAnim]);
 
   // Get restaurant data
-  const restaurant = restaurantData?.data;
+  const restaurant = restaurantProfile;
 
   // Refresh handler
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await refetch();
+      await loadProfileIfNeeded();
     } catch (error) {
       console.error('Error refreshing restaurant data:', error);
     } finally {
       setRefreshing(false);
     }
-  }, [refetch]);
+  }, [loadProfileIfNeeded]);
 
   // Get exact GPS location
   const getExactLocation = useCallback(async () => {
@@ -169,13 +202,13 @@ const RestaurantLocationScreen: React.FC = () => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       
       // Refresh restaurant data to get updated location
-      await refetch();
+      await loadProfileIfNeeded();
       
     } catch (error: any) {
       console.error('Error updating restaurant location:', error);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
-  }, [selectedLocation, updateLocationMutation, refetch]);
+  }, [selectedLocation, updateLocationMutation, loadProfileIfNeeded]);
 
   // Show update modal
   const showLocationUpdateModal = useCallback(() => {
@@ -195,7 +228,7 @@ const RestaurantLocationScreen: React.FC = () => {
   }, [getExactLocation]);
 
   // Loading state
-  if (isLoading) {
+  if (isLoading && !restaurant) {
     return (
       <CommonView>
         <View style={styles.centerContainer}>
@@ -209,7 +242,7 @@ const RestaurantLocationScreen: React.FC = () => {
   }
 
   // Error state
-  if (isError || !restaurant) {
+  if (error && !restaurant) {
     return (
       <CommonView>
         <View style={styles.centerContainer}>
@@ -218,7 +251,7 @@ const RestaurantLocationScreen: React.FC = () => {
             Failed to Load Location
           </Heading4>
           <Body color={colors.onSurfaceVariant} style={{ marginTop: 8, textAlign: 'center' }}>
-            Unable to fetch restaurant location data
+            {error || 'Unable to fetch restaurant location data'}
           </Body>
           <Button
             mode="contained"
@@ -227,6 +260,31 @@ const RestaurantLocationScreen: React.FC = () => {
             buttonColor={colors.primary}
           >
             Try Again
+          </Button>
+        </View>
+      </CommonView>
+    );
+  }
+
+  // No restaurant data but not loading or error (shouldn't happen)
+  if (!restaurant && !isLoading && !error) {
+    return (
+      <CommonView>
+        <View style={styles.centerContainer}>
+          <MaterialCommunityIcons name="store-off" size={48} color={colors.onSurfaceVariant} />
+          <Heading4 color={colors.onSurface} style={{ marginTop: 16, textAlign: 'center' }}>
+            No Restaurant Data
+          </Heading4>
+          <Body color={colors.onSurfaceVariant} style={{ marginTop: 8, textAlign: 'center' }}>
+            Restaurant information is not available
+          </Body>
+          <Button
+            mode="contained"
+            onPress={onRefresh}
+            style={{ marginTop: 16 }}
+            buttonColor={colors.primary}
+          >
+            Reload
           </Button>
         </View>
       </CommonView>
@@ -249,6 +307,23 @@ const RestaurantLocationScreen: React.FC = () => {
         {/* Current Location Display */}
         <View style={{ padding: 16 }}>
           <Card style={[styles.locationCard, { backgroundColor: colors.surface }]}>
+            {/* Loading overlay when refreshing */}
+            {isLoading && restaurant && (
+              <View style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: colors.surface + '80',
+                justifyContent: 'center',
+                alignItems: 'center',
+                borderRadius: 16,
+                zIndex: 1,
+              }}>
+                <MaterialCommunityIcons name="loading" size={24} color={colors.primary} />
+              </View>
+            )}
             <View style={{ padding: 20 }}>
               {/* Header */}
               <View style={styles.cardHeader}>

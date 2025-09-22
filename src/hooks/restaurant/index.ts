@@ -7,6 +7,7 @@ export { useToggleRestaurantStatus, useUpdateRestaurantLocation } from './useRes
 export { useRestaurantProfile, useRestaurantStatus } from './useRestaurantProfile';
 export * from './useRestaurantReviews';
 export * from './useAnalytics';
+export * from './useRestaurantNotifications';
 
-// Notification hooks now use shared implementation
-// Import from: @/src/hooks/shared/useNotifications
+// Shared notification hooks available at:
+// @/src/hooks/shared/useNotifications

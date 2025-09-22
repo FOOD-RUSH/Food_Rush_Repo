@@ -81,3 +81,58 @@ export interface OperatorBreakdown {
   mtn: number;
   orange: number;
 }
+
+// Restaurant Balance Types
+export interface RestaurantBalance {
+  balance: number;
+  credits: number;
+  debits: number;
+  currency: string;
+}
+
+export interface RestaurantBalanceResponse {
+  status_code: number;
+  message: string;
+  data: RestaurantBalance;
+}
+
+// Updated API Response Types for new endpoints
+export interface RestaurantAnalyticsSummary {
+  revenueCollected: number;
+  gmv: number;
+  aov: number;
+  counts: {
+    total: number;
+    pending: number;
+    confirmed: number;
+    outForDelivery: number;
+    completed: number;
+    cancelled: number;
+  };
+  paymentMethod: {
+    mobile_money: number;
+    cash_on_delivery: number;
+  };
+  operator: {
+    mtn: number;
+    orange: number;
+  };
+  acceptanceRate: number;
+}
+
+export interface RevenueBucket {
+  day: string; // ISO date-time
+  revenue: number;
+  count: number;
+}
+
+// Standardized response types
+export interface StandardApiResponse<T> {
+  data: T;
+  success: boolean;
+  message?: string;
+}
+
+export type RestaurantAnalyticsSummaryResponse = StandardApiResponse<RestaurantAnalyticsSummary>;
+export type RestaurantRevenueBucketsResponse = StandardApiResponse<RevenueBucket[]>;
+export type RestaurantBalanceApiResponse = StandardApiResponse<RestaurantBalance>;

@@ -4,63 +4,9 @@ import {
   RevenueBucketsResponse, 
   AnalyticsPeriod, 
   AnalyticsDateRange,
-  RestaurantBalanceResponse 
+  RestaurantBalanceResponse,
+  RestaurantBalanceApiResponse
 } from '@/src/types/analytics';
-
-// New types for updated API responses
-export interface RestaurantAnalyticsSummary {
-  revenueCollected: number;
-  gmv: number;
-  aov: number;
-  counts: {
-    total: number;
-    pending: number;
-    confirmed: number;
-    outForDelivery: number;
-    completed: number;
-    cancelled: number;
-  };
-  paymentMethod: {
-    mobile_money: number;
-    cash_on_delivery: number;
-  };
-  operator: {
-    mtn: number;
-    orange: number;
-  };
-  acceptanceRate: number;
-}
-
-export interface RestaurantBalance {
-  balance: number;
-  credits: number;
-  debits: number;
-  currency: string;
-}
-
-export interface RevenueBucket {
-  day: string; // ISO date-time
-  revenue: number;
-  count: number;
-}
-
-export type RestaurantBalanceResponse = {
-  data: RestaurantBalance;
-  success: boolean;
-  message?: string;
-};
-
-export type RestaurantAnalyticsSummaryResponse = {
-  data: RestaurantAnalyticsSummary;
-  success: boolean;
-  message?: string;
-};
-
-export type RestaurantRevenueBucketsResponse = {
-  data: RevenueBucket[];
-  success: boolean;
-  message?: string;
-};
 
 export const analyticsApi = {
   /**
@@ -81,7 +27,7 @@ export const analyticsApi = {
    * Get restaurant balance (ledger credits - debits) in XAF
    * @returns Restaurant balance data
    */
-  getBalance: (): Promise<RestaurantBalanceResponse> => {
+  getBalance: (): Promise<RestaurantBalanceApiResponse> => {
     return apiClient.get('/api/v1/analytics/restaurants/my/balance');
   },
 

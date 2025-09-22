@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, FlatList, TouchableOpacity, Alert, Image, Dimensions } from 'react-native';
-import { useTheme, Card, FAB, Switch, Chip, Searchbar } from 'react-native-paper';
+import { useTheme, Card, FAB, Switch, Chip } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -43,7 +43,6 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
   
   const { categories: apiCategories = [] } = useCategories();
   
-  const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [error, setError] = useState<ErrorState>({ hasError: false, message: '' });
 
@@ -76,10 +75,8 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
   const categories = ['all', ...new Set([...allCategories, ...menuCategories])];
 
   const filteredItems = menuItems.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          item.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    return matchesCategory;
   });
 
   const handleAddItem = () => {
@@ -365,41 +362,7 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
           </View>
         </View>
 
-        {/* Enhanced Search Bar - Centralized placeholder and icon */}
-        <View className="pt-4 pb-2">
-          <View 
-            style={{
-              backgroundColor: colors.surface,
-              borderRadius: 16,
-              elevation: 2,
-              shadowColor: '#000',
-              shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.1,
-              shadowRadius: 3,
-            }}
-          >
-            <Searchbar
-              placeholder={t('search_menu_items')}
-              onChangeText={setSearchQuery}
-              value={searchQuery}
-              style={{ 
-                backgroundColor: 'transparent',
-                elevation: 0,
-                height: isSmallScreen ? 48 : 52,
-                borderRadius: 16,
-              }}
-              inputStyle={{ 
-                fontSize: isSmallScreen ? 16 : 17,
-                textAlign: searchQuery ? 'left' : 'center',
-                fontWeight: '500',
-                color: colors.onSurface,
-              }}
-              placeholderTextColor={colors.onSurfaceVariant}
-              iconColor={colors.onSurfaceVariant}
-              traileringIconColor={colors.onSurfaceVariant}
-            />
-          </View>
-        </View>
+      
 
         {/* Category Filter - Enhanced spacing and typography */}
         <View className="pt-3 pb-2">
@@ -468,17 +431,15 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
                 align="center"
                 style={{ marginTop: 16 }}
               >
-                {searchQuery ? t('no_items_match') : t('no_menu_items_yet')}
+                {t('no_menu_items_yet')}
               </Heading4>
-              {!searchQuery && (
-                <Body 
-                  color={colors.onSurfaceVariant}
-                  align="center"
-                  style={{ marginTop: 8, paddingHorizontal: 32 }}
-                >
-                  {t('start_building_menu')}
-                </Body>
-              )}
+              <Body 
+                color={colors.onSurfaceVariant}
+                align="center"
+                style={{ marginTop: 8, paddingHorizontal: 32 }}
+              >
+                {t('start_building_menu')}
+              </Body>
             </View>
           }
         />

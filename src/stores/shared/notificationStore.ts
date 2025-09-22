@@ -234,7 +234,7 @@ export const useNotificationStore = create<
 
         registerPushToken: async (token, deviceInfo) => {
           try {
-            const response = await notificationApi.registerPushToken(token, deviceInfo);
+            const response = await notificationApi.registerDevice(token, deviceInfo);
             
             if (response.status_code !== 200) {
               throw new Error(response.message || 'Failed to register push token');
@@ -251,7 +251,7 @@ export const useNotificationStore = create<
 
         unregisterPushToken: async (token) => {
           try {
-            const response = await notificationApi.unregisterPushToken(token);
+            const response = await notificationApi.unregisterDevice(token);
             
             if (response.status_code !== 200) {
               throw new Error(response.message || 'Failed to unregister push token');

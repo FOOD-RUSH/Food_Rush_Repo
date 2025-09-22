@@ -10,7 +10,7 @@ import Toast from 'react-native-toast-message';
 import CommonView from '@/src/components/common/CommonView';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import { Typography, Heading5, Body, Label, Caption, Overline } from '@/src/components/common/Typography';
-import { useNotifications } from '@/src/hooks/shared/useNotifications';
+import { useRestaurantNotifications } from '@/src/hooks/restaurant/useRestaurantNotifications';
 import type { Notification } from '@/src/types';
 
 // Notification interface is now imported from types
@@ -20,7 +20,7 @@ const NotificationsList: React.FC<RootStackScreenProps<'RestaurantNotifications'
   const { t } = useTranslation();
   const navigation = useNavigation();
   
-  // Use the shared notifications hook (works for both customer and restaurant)
+  // Use the restaurant notifications hook (includes both server and local notifications)
   const {
     notifications,
     unreadCount,
@@ -37,7 +37,9 @@ const NotificationsList: React.FC<RootStackScreenProps<'RestaurantNotifications'
     setFilter,
     clearError,
     notificationCounts,
-  } = useNotifications();
+    updateBadgeCount,
+    clearBadge,
+  } = useRestaurantNotifications();
   
   const [refreshing, setRefreshing] = useState(false);
 

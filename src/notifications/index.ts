@@ -1,13 +1,15 @@
-// Export all notification services
+// Export the unified notification service
 export { default as NotificationService } from './NotficationService';
 export {
   default as CustomerNotificationService,
   customerNotifications,
 } from './CustomerNotificationService';
-export {
-  default as RestaurantNotificationService,
-  restaurantNotifications,
-} from './RestaurantNotificationService';
+
+// Export restaurant notification service from new location
+export { 
+  restaurantNotificationService,
+  default as RestaurantNotificationService 
+} from '@/src/services/restaurant/restaurantNotificationService';
 
 // Export types
 export type {
@@ -15,6 +17,11 @@ export type {
   OrderNotification,
   NotificationConfig,
 } from './NotficationService';
+
+export type {
+  RestaurantNotificationData,
+  LocalNotificationPayload,
+} from '@/src/services/restaurant/restaurantNotificationService';
 
 // Convenience function to get the appropriate notification service
 export const getNotificationService = (
@@ -26,9 +33,10 @@ export const getNotificationService = (
       require('@/src/notifications/CustomerNotificationService').default;
     return new CustomerNotificationService(userId);
   } else {
-    const RestaurantNotificationService =
-      require('./RestaurantNotificationService').default;
-    return new RestaurantNotificationService(userId);
+    // Return the singleton restaurant notification service
+    const { restaurantNotificationService } = 
+      require('@/src/services/restaurant/restaurantNotificationService');
+    return restaurantNotificationService;
   }
 };
 
