@@ -581,7 +581,7 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                   alignItems: 'center',
                 }}
               >
-                <TextInput.Icon icon="google" size={20} color={colors.onSurfaceVariant} />
+                <TextInput.Icon icon="google" size={50} color={colors.onSurfaceVariant } opacity={0.2} />
                 <Body style={{ marginLeft: 8, color: colors.onSurfaceVariant, fontWeight: '600' }}>
                   Google
                 </Body>
@@ -602,7 +602,7 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                   alignItems: 'center',
                 }}
               >
-                <TextInput.Icon icon="apple" size={20} color={colors.onSurfaceVariant} />
+                <TextInput.Icon icon="apple" size={50} color={colors.onSurfaceVariant} opacity={0.2} />
                 <Body style={{ marginLeft: 8, color: colors.onSurfaceVariant, fontWeight: '600' }}>
                   Apple
                 </Body>
