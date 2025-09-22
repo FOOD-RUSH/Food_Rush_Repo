@@ -4,7 +4,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Image,
   Animated,
   Dimensions,
   StatusBar,
@@ -12,7 +11,6 @@ import {
   ImageBackground,
 } from 'react-native';
 import {
-  Button,
   TextInput,
   HelperText,
   Checkbox,
@@ -21,23 +19,21 @@ import {
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { loginSchema } from '@/src/utils/validation';
-import { TextButton } from '@/src/components/common/TextButton';
 import { AuthStackScreenProps } from '@/src/navigation/types';
-import CommonView from '@/src/components/common/CommonView';
 import { useAuthStore } from '@/src/stores/AuthStore';
 import { useLogin } from '@/src/hooks/customer/useAuthhooks';
 import Toast from 'react-native-toast-message';
 import { useNetwork } from '@/src/contexts/NetworkContext';
 import { useTranslation } from 'react-i18next';
 import ErrorDisplay from '@/src/components/auth/ErrorDisplay';
-import { Typography, Heading1, Body, Label } from '@/src/components/common/Typography';
+import { Heading1, Body, Label } from '@/src/components/common/Typography';
 
 interface LoginFormData {
   email: string;
   password: string;
 }
 
-const { width, height } = Dimensions.get('window');
+const { height } = Dimensions.get('window');
 
 const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
   navigation,
@@ -97,7 +93,7 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
         }),
       ]),
     ]).start();
-  }, []);
+  }, [titleAnim, overlayAnim, formAnim]);
 
   const onSubmit = useCallback(
     async (data: LoginFormData) => {
@@ -581,7 +577,12 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                   alignItems: 'center',
                 }}
               >
-                <TextInput.Icon icon="google" size={50} color={colors.onSurfaceVariant } opacity={0.2} />
+                <TextInput.Icon 
+                  icon="google" 
+                  size={50} 
+                  color={colors.onSurfaceVariant}
+                  style={{ opacity: 0.2 }}
+                />
                 <Body style={{ marginLeft: 8, color: colors.onSurfaceVariant, fontWeight: '600' }}>
                   Google
                 </Body>
@@ -602,7 +603,12 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                   alignItems: 'center',
                 }}
               >
-                <TextInput.Icon icon="apple" size={50} color={colors.onSurfaceVariant} opacity={0.2} />
+                <TextInput.Icon 
+                  icon="apple" 
+                  size={50} 
+                  color={colors.onSurfaceVariant}
+                  style={{ opacity: 0.2 }}
+                />
                 <Body style={{ marginLeft: 8, color: colors.onSurfaceVariant, fontWeight: '600' }}>
                   Apple
                 </Body>
@@ -617,7 +623,7 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
               paddingBottom: 20,
             }}>
               <Body style={{ color: colors.onSurfaceVariant }}>
-                Don't have an account?{' '}
+                Don&apos;t have an account?{' '}
               </Body>
               <TouchableOpacity onPress={handleSignUp}>
                 <Body style={{ color: colors.primary, fontWeight: '700' }}>
