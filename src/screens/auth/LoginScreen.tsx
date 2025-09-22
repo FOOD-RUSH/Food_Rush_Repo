@@ -1,13 +1,16 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import {
   View,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Image,
+  Animated,
+  Dimensions,
+  StatusBar,
+  TouchableOpacity,
+  ImageBackground,
 } from 'react-native';
 import {
-  Button,
   TextInput,
   HelperText,
   Checkbox,
@@ -16,21 +19,21 @@ import {
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { loginSchema } from '@/src/utils/validation';
-import { TextButton } from '@/src/components/common/TextButton';
 import { AuthStackScreenProps } from '@/src/navigation/types';
-import CommonView from '@/src/components/common/CommonView';
 import { useAuthStore } from '@/src/stores/AuthStore';
 import { useLogin } from '@/src/hooks/customer/useAuthhooks';
 import Toast from 'react-native-toast-message';
 import { useNetwork } from '@/src/contexts/NetworkContext';
 import { useTranslation } from 'react-i18next';
 import ErrorDisplay from '@/src/components/auth/ErrorDisplay';
-import { Typography, Heading1, Body, Label } from '@/src/components/common/Typography';
+import { Heading1, Body, Label } from '@/src/components/common/Typography';
 
 interface LoginFormData {
   email: string;
   password: string;
 }
+
+const { height } = Dimensions.get('window');
 
 const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
   navigation,
@@ -42,6 +45,13 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
 
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
+
+  // Animation values
+  const overlayAnim = useRef(new Animated.Value(1)).current;
+  const formAnim = useRef(new Animated.Value(height)).current;
+  const titleAnim = useRef(new Animated.Value(0)).current;
 
   const {
     control,
@@ -55,19 +65,38 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
     },
   });
 
-  // get usertype gotten from params
   const userType = route.params?.userType;
-
   const WelcomeImage = require('@/assets/images/Welcome.png');
   const { clearError } = useAuthStore();
 
-  // Using the refactored React Query hooks
   const loginMutation = useLogin();
   const { error: authError } = useAuthStore();
 
+  // Staggered entrance animations
+  useEffect(() => {
+    Animated.sequence([
+      Animated.timing(titleAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.parallel([
+        Animated.timing(overlayAnim, {
+          toValue: 0.7,
+          duration: 600,
+          useNativeDriver: false,
+        }),
+        Animated.timing(formAnim, {
+          toValue: height * 0.35,
+          duration: 800,
+          useNativeDriver: false,
+        }),
+      ]),
+    ]).start();
+  }, [titleAnim, overlayAnim, formAnim]);
+
   const onSubmit = useCallback(
     async (data: LoginFormData) => {
-      // Check network connectivity
       if (!isConnected || !isInternetReachable) {
         Toast.show({
           type: 'error',
@@ -78,9 +107,7 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
         return;
       }
 
-      // Clear any previous errors
       clearError();
-
       console.log('Attempting login with email:', data.email);
 
       try {
@@ -98,12 +125,10 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
           position: 'top',
         });
 
-        // Navigate to main app - the RootNavigator will handle routing based on auth state
         navigation.getParent()?.navigate('CustomerApp');
       } catch (error: any) {
         console.error('Customer login failed:', error);
         
-        // Determine error message
         let errorMessage = 'Login failed. Please try again.';
 
         if (error?.message) {
@@ -174,245 +199,442 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
   };
 
   return (
-    <CommonView>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        className="flex-1"
+    <View style={{ flex: 1 }}>
+      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+      
+      {/* Background Image with Overlay */}
+      <ImageBackground
+        source={WelcomeImage}
+        style={{ 
+          position: 'absolute',
+          top: -10,
+          left: 15,
+          right: 0,
+          bottom: 10,
+          width: 400,
+          height: 400,
+        }}
+        resizeMode="cover"
       >
-        <ScrollView
-          className="flex-1"
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ flexGrow: 1 }}
-        >
-          {/* Welcome illustration */}
-          <View className="items-center px-6 py-8">
-            <View className="w-48 h-48 bg-blue-50 rounded-lg items-center justify-center mb-8">
-              <Image className="w-32 h-32" source={WelcomeImage} />
-            </View>
-            <Heading1
-              color={colors.onSurface}
-              weight="bold"
-              style={{ marginBottom: 8 }}
-            >
-              {t('welcome_back')}
-            </Heading1>
-          </View>
+        <Animated.View
+          style={{
+            flex: 1,
+            backgroundColor: `rgba(0, 0, 0, ${overlayAnim})`,
+          }}
+        />
+      </ImageBackground>
 
-          {/* Form */}
-          <View className="flex-1 px-2">
-            <View className="space-y-4 mb-2">
-              {/* Email Input */}
+      {/* Welcome Title Overlay */}
+      <Animated.View
+        style={{
+          position: 'absolute',
+          top: height * 0.12,
+          left: 0,
+          right: 0,
+          alignItems: 'center',
+          opacity: titleAnim,
+          transform: [{
+            translateY: titleAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [20, 0],
+            })
+          }],
+        }}
+      >
+        <Heading1
+          style={{
+            fontSize: 32,
+            fontWeight: '800',
+            color: 'white',
+            textAlign: 'center',
+            textShadowColor: 'rgba(0, 0, 0, 0.5)',
+            textShadowOffset: { width: 0, height: 2 },
+            textShadowRadius: 8,
+          }}
+        >
+          {t('welcome_back')}
+        </Heading1>
+        
+        <Body
+          style={{
+            fontSize: 18,
+            color: 'rgba(255, 255, 255, 0.9)',
+            textAlign: 'center',
+            marginTop: 8,
+            textShadowColor: 'rgba(0, 0, 0, 0.3)',
+            textShadowOffset: { width: 0, height: 1 },
+            textShadowRadius: 4,
+          }}
+        >
+          Sign in to continue
+        </Body>
+      </Animated.View>
+
+      {/* Sliding Form Container */}
+      <Animated.View
+        style={{
+          position: 'absolute',
+          top: formAnim,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: colors.surface,
+          borderTopLeftRadius: 28,
+          borderTopRightRadius: 28,
+          paddingHorizontal: 24,
+          paddingTop: 24,
+        }}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={{ flex: 1 }}
+        >
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 40 }}
+          >
+            {/* Drag Handle */}
+            <View
+              style={{
+                width: 40,
+                height: 4,
+                backgroundColor: colors.outline,
+                borderRadius: 2,
+                alignSelf: 'center',
+                marginBottom: 32,
+              }}
+            />
+
+            {/* Email Input */}
+            <View style={{ marginBottom: 16 }}>
+              <Label style={{ 
+                color: colors.onSurfaceVariant, 
+                fontSize: 14,
+                fontWeight: '600',
+                marginBottom: 8,
+                marginLeft: 4,
+              }}>
+                Email Address
+              </Label>
               <Controller
                 control={control}
                 name="email"
                 render={({ field: { onChange, onBlur, value } }) => (
-                  <View className="mb-4">
-                    <TextInput
-                      placeholder={t('email')}
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value}
-                      mode="outlined"
-                      keyboardType="email-address"
-                      autoCapitalize="none"
-                      autoComplete="email"
-                      autoCorrect={false}
-                      left={
-                        <TextInput.Icon icon="email" color={colors.onSurface} />
-                      }
-                      outlineStyle={{
-                        borderRadius: 16,
-                        borderColor: errors.email
-                          ? colors.error
-                          : colors.surfaceVariant,
-                      }}
-                      style={{ backgroundColor: colors.surfaceVariant }}
-                      contentStyle={{
+                  <>
+                    <View
+                      style={{
+                        backgroundColor: colors.surfaceVariant,
+                        borderRadius: 14,
+                        borderWidth: 1.5,
+                        borderColor: errors.email 
+                          ? colors.error 
+                          : emailFocused 
+                            ? colors.primary 
+                            : colors.outline,
                         paddingHorizontal: 16,
-                        color: colors.onSurfaceVariant,
+                        paddingVertical: 16,
+                        flexDirection: 'row',
+                        alignItems: 'center',
                       }}
-                      error={!!errors.email}
-                    />
+                    >
+                      <TextInput.Icon 
+                        icon="email-outline" 
+                        color={emailFocused ? colors.primary : colors.onSurfaceVariant}
+                        size={20}
+                        style={{ marginRight: 8 }}
+                      />
+                      <TextInput
+                        placeholder="Enter your email"
+                        onBlur={() => {
+                          onBlur();
+                          setEmailFocused(false);
+                        }}
+                        onFocus={() => setEmailFocused(true)}
+                        onChangeText={onChange}
+                        value={value}
+                        mode="flat"
+                        keyboardType="email-address"
+                        autoCapitalize="none"
+                        autoComplete="email"
+                        autoCorrect={false}
+                        style={{
+                          flex: 1,
+                          backgroundColor: 'transparent',
+                          fontSize: 16,
+                        }}
+                        contentStyle={{
+                          backgroundColor: 'transparent',
+                          paddingHorizontal: 0,
+                          paddingVertical: 0,
+                        }}
+                        underlineStyle={{ display: 'none' }}
+                        placeholderTextColor={colors.onSurfaceVariant}
+                      />
+                    </View>
                     {errors.email && (
-                      <HelperText type="error" visible={!!errors.email}>
+                      <HelperText 
+                        type="error" 
+                        visible={!!errors.email}
+                        style={{ marginLeft: 4, marginTop: 4 }}
+                      >
                         {errors.email.message}
                       </HelperText>
                     )}
-                  </View>
+                  </>
                 )}
               />
+            </View>
 
-              {/* Password Input */}
+            {/* Password Input */}
+            <View style={{ marginBottom: 20 }}>
+              <Label style={{ 
+                color: colors.onSurfaceVariant, 
+                fontSize: 14,
+                fontWeight: '600',
+                marginBottom: 8,
+                marginLeft: 4,
+              }}>
+                Password
+              </Label>
               <Controller
                 control={control}
                 name="password"
                 render={({ field: { onChange, onBlur, value } }) => (
-                  <View className="mb-2">
-                    <TextInput
-                      placeholder={t('password')}
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value}
-                      mode="outlined"
-                      secureTextEntry={!showPassword}
-                      autoCapitalize="none"
-                      autoComplete="password"
-                      autoCorrect={false}
-                      left={
-                        <TextInput.Icon icon="lock" color={colors.onSurface} />
-                      }
-                      right={
-                        <TextInput.Icon
-                          icon={showPassword ? 'eye-off' : 'eye'}
-                          onPress={() => setShowPassword(!showPassword)}
-                          color={colors.onSurface}
-                        />
-                      }
-                      outlineStyle={{
-                        borderRadius: 16,
-                        borderColor: errors.password
-                          ? colors.error
-                          : colors.surfaceVariant,
+                  <>
+                    <View
+                      style={{
+                        backgroundColor: colors.surfaceVariant,
+                        borderRadius: 14,
+                        borderWidth: 1.5,
+                        borderColor: errors.password 
+                          ? colors.error 
+                          : passwordFocused 
+                            ? colors.primary 
+                            : colors.outline,
+                        paddingHorizontal: 16,
+                        paddingVertical: 16,
+                        flexDirection: 'row',
+                        alignItems: 'center',
                       }}
-                      style={{ backgroundColor: colors.surfaceVariant }}
-                      contentStyle={{ paddingHorizontal: 16 }}
-                      error={!!errors.password}
-                    />
+                    >
+                      <TextInput.Icon 
+                        icon="lock-outline" 
+                        color={passwordFocused ? colors.primary : colors.onSurfaceVariant}
+                        size={20}
+                        style={{ marginRight: 8 }}
+                      />
+                      <TextInput
+                        placeholder="Enter your password"
+                        onBlur={() => {
+                          onBlur();
+                          setPasswordFocused(false);
+                        }}
+                        onFocus={() => setPasswordFocused(true)}
+                        onChangeText={onChange}
+                        value={value}
+                        mode="flat"
+                        secureTextEntry={!showPassword}
+                        autoCapitalize="none"
+                        autoComplete="password"
+                        autoCorrect={false}
+                        style={{
+                          flex: 1,
+                          backgroundColor: 'transparent',
+                          fontSize: 16,
+                        }}
+                        contentStyle={{
+                          backgroundColor: 'transparent',
+                          paddingHorizontal: 0,
+                          paddingVertical: 0,
+                        }}
+                        underlineStyle={{ display: 'none' }}
+                        placeholderTextColor={colors.onSurfaceVariant}
+                      />
+                      <TouchableOpacity
+                        onPress={() => setShowPassword(!showPassword)}
+                        style={{ paddingLeft: 8 }}
+                      >
+                        <TextInput.Icon
+                          icon={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                          color={colors.primary}
+                          size={20}
+                        />
+                      </TouchableOpacity>
+                    </View>
                     {errors.password && (
-                      <HelperText type="error" visible={!!errors.password}>
+                      <HelperText 
+                        type="error" 
+                        visible={!!errors.password}
+                        style={{ marginLeft: 4, marginTop: 4 }}
+                      >
                         {errors.password.message}
                       </HelperText>
                     )}
-                  </View>
+                  </>
                 )}
               />
+            </View>
 
-              {/* Remember me and Forgot password */}
-              <View className="flex-row items-center justify-between">
-                <View className="flex-row items-center">
-                  <Checkbox
-                    status={rememberMe ? 'checked' : 'unchecked'}
-                    onPress={() => setRememberMe(!rememberMe)}
-                    color={colors.primary}
-                  />
-                  <Body
-                    color={colors.onSurface}
-                    style={{ marginLeft: 8 }}
-                  >
-                    {t('remember_me')}
-                  </Body>
-                </View>
-
-                <TextButton
-                  text={t('forgot_password')}
-                  onPress={handleForgotPassword}
+            {/* Remember Me & Forgot Password */}
+            <View 
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: 20,
+              }}
+            >
+              <TouchableOpacity
+                onPress={() => setRememberMe(!rememberMe)}
+                style={{ flexDirection: 'row', alignItems: 'center' }}
+              >
+                <Checkbox
+                  status={rememberMe ? 'checked' : 'unchecked'}
+                  onPress={() => setRememberMe(!rememberMe)}
+                  color={colors.primary}
                 />
-              </View>
+                <Body style={{ marginLeft: 4, color: colors.onSurface }}>
+                  Remember me
+                </Body>
+              </TouchableOpacity>
 
-              {/* Error Display */}
-              <ErrorDisplay
-                error={loginMutation.error?.message || authError || null}
-                visible={!!(loginMutation.error?.message || authError)}
-              />
+              <TouchableOpacity onPress={handleForgotPassword}>
+                <Body style={{ color: colors.primary, fontWeight: '600' }}>
+                  Forgot Password?
+                </Body>
+              </TouchableOpacity>
+            </View>
 
-              {/* Login Button */}
-              <Button
-                mode="contained"
-                onPress={handleSubmit(onSubmit)}
-                loading={loginMutation.isPending}
-                disabled={loginMutation.isPending}
-                buttonColor={colors.primary}
-                contentStyle={{ paddingVertical: 12 }}
-                style={{ borderRadius: 25, marginTop: 16 }}
-                labelStyle={{
-                  fontSize: 16,
-                  fontWeight: '600',
+            {/* Error Display */}
+            <ErrorDisplay
+              error={loginMutation.error?.message || authError || null}
+              visible={!!(loginMutation.error?.message || authError)}
+            />
+
+            {/* Login Button */}
+            <TouchableOpacity
+              onPress={handleSubmit(onSubmit)}
+              disabled={loginMutation.isPending}
+              style={{
+                backgroundColor: colors.primary,
+                borderRadius: 14,
+                paddingVertical: 18,
+                marginBottom: 24,
+                opacity: loginMutation.isPending ? 0.7 : 1,
+                shadowColor: colors.primary,
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 8,
+                elevation: 6,
+              }}
+            >
+              <Body
+                style={{
+                  textAlign: 'center',
                   color: 'white',
+                  fontSize: 17,
+                  fontWeight: '700',
                 }}
               >
-                {loginMutation.isPending ? t('logging_in') : t('login')}
-              </Button>
+                {loginMutation.isPending ? 'Signing In...' : 'Sign In'}
+              </Body>
+            </TouchableOpacity>
 
-              {/* Divider */}
-              <View className="flex-row items-center my-6">
-                <View
-                  className={`flex-1 h-px`}
-                  style={{ backgroundColor: colors.outline }}
-                />
-                <Label
-                  color={colors.onBackground}
-                  style={{ paddingHorizontal: 16 }}
-                >
-                  {' '}
-                  or Sign in{' '}
-                </Label>
-                <View
-                  className={`flex-1 h-px`}
-                  style={{ backgroundColor: colors.outline }}
-                />
-              </View>
-
-              {/* Social Login Buttons */}
-              <View className="flex-row justify-between">
-                {/* Google */}
-                <Button
-                  mode="outlined"
-                  onPress={handleGoogleSignIn}
-                  disabled={loginMutation.isPending}
-                  icon="google"
-                  contentStyle={{ paddingVertical: 12 }}
-                  style={{
-                    flex: 1,
-                    borderRadius: 25,
-                    borderColor: colors.outline,
-                    borderWidth: 1,
-                    marginHorizontal: 2,
-                  }}
-                  labelStyle={{
-                    fontSize: 14,
-                    color: colors.onSurface,
-                  }}
-                >
-                  Google
-                </Button>
-
-                {/* Apple */}
-                <Button
-                  mode="outlined"
-                  onPress={handleAppleSignIn}
-                  disabled={loginMutation.isPending}
-                  icon="apple"
-                  contentStyle={{ paddingVertical: 12 }}
-                  style={{
-                    flex: 1,
-                    borderRadius: 25,
-                    borderColor: colors.outline,
-                    borderWidth: 1,
-                    marginHorizontal: 2,
-                  }}
-                  labelStyle={{
-                    fontSize: 14,
-                    color: colors.onSurface,
-                  }}
-                >
-                  Apple
-                </Button>
-              </View>
-
-              {/* Sign Up Link */}
-              <View className="flex-row justify-center items-center mt-8 mb-4">
-                <Body
-                  color={colors.onBackground}
-                >
-                  {t('dont_have_account')}{' '}
-                </Body>
-                <TextButton text={t('signup')} onPress={handleSignUp} />
-              </View>
+            {/* Divider */}
+            <View style={{ 
+              flexDirection: 'row', 
+              alignItems: 'center', 
+              marginVertical: 24,
+            }}>
+              <View style={{ flex: 1, height: 1, backgroundColor: colors.outline }} />
+              <Body 
+                style={{ 
+                  marginHorizontal: 16, 
+                  color: colors.onSurfaceVariant,
+                  fontSize: 14,
+                  fontWeight: '500',
+                }}
+              >
+                or sign in with
+              </Body>
+              <View style={{ flex: 1, height: 1, backgroundColor: colors.outline }} />
             </View>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </CommonView>
+
+            {/* Social Login Buttons */}
+            <View style={{ flexDirection: 'row', gap: 12, marginBottom: 32 }}>
+              <TouchableOpacity
+                onPress={handleGoogleSignIn}
+                disabled={loginMutation.isPending}
+                style={{
+                  flex: 1,
+                  backgroundColor: colors.surfaceVariant,
+                  borderRadius: 14,
+                  paddingVertical: 14,
+                  borderWidth: 1,
+                  borderColor: colors.outline,
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <TextInput.Icon 
+                  icon="google" 
+                  size={50} 
+                  color={colors.onSurfaceVariant}
+                  style={{ opacity: 0.2 }}
+                />
+                <Body style={{ marginLeft: 8, color: colors.onSurfaceVariant, fontWeight: '600' }}>
+                  Google
+                </Body>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleAppleSignIn}
+                disabled={loginMutation.isPending}
+                style={{
+                  flex: 1,
+                  backgroundColor: colors.surfaceVariant,
+                  borderRadius: 14,
+                  paddingVertical: 14,
+                  borderWidth: 1,
+                  borderColor: colors.outline,
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <TextInput.Icon 
+                  icon="apple" 
+                  size={50} 
+                  color={colors.onSurfaceVariant}
+                  style={{ opacity: 0.2 }}
+                />
+                <Body style={{ marginLeft: 8, color: colors.onSurfaceVariant, fontWeight: '600' }}>
+                  Apple
+                </Body>
+              </TouchableOpacity>
+            </View>
+
+            {/* Sign Up Link */}
+            <View style={{ 
+              flexDirection: 'row', 
+              justifyContent: 'center', 
+              alignItems: 'center',
+              paddingBottom: 20,
+            }}>
+              <Body style={{ color: colors.onSurfaceVariant }}>
+                Don&apos;t have an account?{' '}
+              </Body>
+              <TouchableOpacity onPress={handleSignUp}>
+                <Body style={{ color: colors.primary, fontWeight: '700' }}>
+                  Sign Up
+                </Body>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </Animated.View>
+    </View>
   );
 };
 
