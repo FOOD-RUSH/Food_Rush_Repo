@@ -1,5 +1,5 @@
 // Cart Reminder Service - Manages cart abandonment notifications
-import { customerNotifications } from '../../notifications/CustomerNotificationService';
+import { customerNotificationService } from '../../notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface CartReminderConfig {
@@ -75,7 +75,7 @@ class CartReminderService {
       if (now - reminder.scheduledAt > 2 * 60 * 60 * 1000) {
         expiredKeys.push(key);
         try {
-          await customerNotifications.cancelNotification(reminder.notificationId);
+          await customerNotificationService.cancelNotification(reminder.notificationId);
         } catch (error) {
           console.warn('Failed to cancel expired notification:', error);
         }
@@ -146,7 +146,7 @@ class CartReminderService {
     const reminderMessages = this.getReminderMessages(type, cartItemCount, restaurantName);
     
     try {
-      const notificationId = await customerNotifications.scheduleReminder(
+      const notificationId = await customerNotificationService.scheduleReminder(
         reminderMessages.title,
         reminderMessages.body,
         minutesFromNow,
@@ -217,7 +217,7 @@ class CartReminderService {
       // Cancel all scheduled notifications
       const cancelPromises = Array.from(this.activeReminders.values()).map(async (reminder) => {
         try {
-          await customerNotifications.cancelNotification(reminder.notificationId);
+          await customerNotificationService.cancelNotification(reminder.notificationId);
         } catch (error) {
           console.warn('Failed to cancel notification:', error);
         }
@@ -245,7 +245,7 @@ class CartReminderService {
       for (const [key, reminder] of Array.from(this.activeReminders.entries())) {
         if (reminder.reminderType === type) {
           try {
-            await customerNotifications.cancelNotification(reminder.notificationId);
+            await customerNotificationService.cancelNotification(reminder.notificationId);
             toRemove.push(key);
           } catch (error) {
             console.warn('Failed to cancel notification:', error);
@@ -280,7 +280,7 @@ class CartReminderService {
   // Initialize the service (call this when app starts)
   async initialize(): Promise<void> {
     try {
-      await customerNotifications.initialize();
+      await customerNotificationService.initialize();
       await this.loadActiveReminders();
       console.log('Cart reminder service initialized');
     } catch (error) {

@@ -1,46 +1,24 @@
-// Export the unified notification service
-export { default as NotificationService } from './NotficationService';
-export {
-  default as CustomerNotificationService,
-  customerNotifications,
-} from './CustomerNotificationService';
+// src/services/notifications/index.ts
+import NotificationService from './NotificationService';
 
-// Export restaurant notification service from new location
-export { 
-  restaurantNotificationService,
-  default as RestaurantNotificationService 
-} from '@/src/services/restaurant/restaurantNotificationService';
+// Create singleton instances for each user type
+export const customerNotificationService = new NotificationService({
+  userType: 'customer',
+});
 
-// Export types
-export type {
-  LocalNotificationData,
-  OrderNotification,
-  NotificationConfig,
-} from './NotficationService';
+export const restaurantNotificationService = new NotificationService({
+  userType: 'restaurant',
+});
 
-export type {
-  RestaurantNotificationData,
-  LocalNotificationPayload,
-} from '@/src/services/restaurant/restaurantNotificationService';
-
-// Convenience function to get the appropriate notification service
-export const getNotificationService = (
-  userType: 'customer' | 'restaurant',
-  userId?: string,
-) => {
+// Get the appropriate service based on user type
+export const getNotificationService = (userType: 'customer' | 'restaurant', userId?: string) => {
   if (userType === 'customer') {
-    const CustomerNotificationService =
-      require('@/src/notifications/CustomerNotificationService').default;
-    return new CustomerNotificationService(userId);
-  } else {
-    // Return the singleton restaurant notification service
-    const { restaurantNotificationService } = 
-      require('@/src/services/restaurant/restaurantNotificationService');
-    return restaurantNotificationService;
+    return customerNotificationService;
   }
+  return restaurantNotificationService;
 };
 
-// Initialize notification service based on user type
+// Initialize notifications for a user
 export const initializeNotifications = async (
   userType: 'customer' | 'restaurant',
   userId?: string,
@@ -48,3 +26,67 @@ export const initializeNotifications = async (
   const service = getNotificationService(userType, userId);
   return await service.initialize();
 };
+
+// Helper functions for common notification operations
+export const sendOrderNotification = async (
+  userType: 'customer' | 'restaurant',
+  orderId: string,
+  status: string,
+  details?: any,
+): Promise<void> => {
+  const service = getNotificationService(userType);
+  await service.sendOrderNotification(orderId, status, details);
+};
+
+export const sendPromotionNotification = async (
+  userType: 'customer' | 'restaurant',
+  title: string,
+  message: string,
+  data?: any,
+): Promise<void> => {
+  const service = getNotificationService(userType);
+  await service.sendPromotionNotification(title, message, data);
+};
+
+export const scheduleReminder = async (
+  userType: 'customer' | 'restaurant',
+  title: string,
+  message: string,
+  minutesFromNow: number,
+  data?: any,
+): Promise<string | null> => {
+  const service = getNotificationService(userType);
+  return await service.scheduleReminder(title, message, minutesFromNow, data);
+};
+
+// Quick actions for specific use cases
+export const sendNewOrderNotification = async (
+  orderId: string,
+  customerName: string,
+  restaurantName?: string,
+): Promise<void> => {
+  // Send to restaurant
+  await sendOrderNotification('restaurant', orderId, 'pending', { customerName });
+  
+  // Send to customer
+  await sendOrderNotification('customer', orderId, 'pending', { restaurantName });
+};
+
+export const sendOrderStatusUpdate = async (
+  orderId: string,
+  status: string,
+  customerName?: string,
+  restaurantName?: string,
+): Promise<void> => {
+  // Send to customer
+  await sendOrderNotification('customer', orderId, status, { restaurantName });
+  
+  // Send to restaurant (if needed)
+  if (['confirmed', 'preparing', 'ready', 'out_for_delivery', 'delivered'].includes(status)) {
+    await sendOrderNotification('restaurant', orderId, status, { customerName });
+  }
+};
+
+// Export the service class and types
+export { default as NotificationService } from './NotificationService';
+export type { LocalNotificationData, NotificationConfig } from './NotificationService';

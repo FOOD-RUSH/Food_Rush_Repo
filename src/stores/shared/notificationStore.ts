@@ -1,10 +1,8 @@
+// src/stores/notificationStore.ts
 import { create } from 'zustand';
 import { createJSONStorage, devtools, persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-  notificationApi,
-  type NotificationListParams,
-} from '@/src/services/shared/notificationApi';
+import { notificationApi } from '@/src/services/shared/notificationApi';
 import type { Notification } from '@/src/types';
 
 interface NotificationState {
@@ -21,44 +19,32 @@ interface NotificationState {
 }
 
 interface NotificationActions {
-  // Fetch notifications with pagination
-  fetchNotifications: (params?: NotificationListParams, append?: boolean) => Promise<void>;
-
-  // Load more notifications (pagination)
+  // Fetch notifications
+  fetchNotifications: (params?: { limit?: number; page?: number }, append?: boolean) => Promise<void>;
   loadMoreNotifications: () => Promise<void>;
+  refreshNotifications: () => Promise<void>;
 
-  // Mark notification as read
+  // Mark notifications as read
   markAsRead: (notificationId: string) => Promise<void>;
-
-  // Mark all notifications as read
   markAllAsRead: () => Promise<void>;
-
-  // Delete notification (if supported)
-  deleteNotification: (notificationId: string) => Promise<void>;
 
   // Update unread count
   updateUnreadCount: () => Promise<void>;
 
-  // Add new notification (for push notifications)
+  // Add notification (for push notifications)
   addNotification: (notification: Notification) => void;
 
-  // Set filter
+  // Filter notifications
   setFilter: (filter: NotificationState['selectedFilter']) => void;
+  getFilteredNotifications: () => Notification[];
 
-  // Clear error
+  // Utility actions
   clearError: () => void;
-
-  // Reset store
   reset: () => void;
 
-  // Refresh notifications (pull to refresh)
-  refreshNotifications: () => Promise<void>;
-
-  // Register push token
+  // Push token management
   registerPushToken: (token: string, deviceInfo?: any) => Promise<void>;
-
-  // Unregister push token
-  unregisterPushToken: (token: string) => Promise<void>;
+  unregisterPushToken: (token?: string) => Promise<void>;
 }
 
 const initialState: NotificationState = {
@@ -74,9 +60,7 @@ const initialState: NotificationState = {
   selectedFilter: 'all',
 };
 
-export const useNotificationStore = create<
-  NotificationState & NotificationActions
->()(
+export const useNotificationStore = create<NotificationState & NotificationActions>()(
   devtools(
     persist(
       (set, get) => ({
@@ -122,8 +106,7 @@ export const useNotificationStore = create<
           
           if (!hasNextPage || isLoadingMore) return;
 
-          const nextPage = currentPage + 1;
-          await get().fetchNotifications({ limit: 20, page: nextPage }, true);
+          await get().fetchNotifications({ limit: 20, page: currentPage + 1 }, true);
         },
 
         refreshNotifications: async () => {
@@ -144,12 +127,10 @@ export const useNotificationStore = create<
                 unreadCount: Math.max(0, state.unreadCount - 1),
               }));
             } else {
-              throw new Error(response.message || 'Failed to mark notification as read');
+              throw new Error(response.message || 'Failed to mark as read');
             }
           } catch (error: any) {
-            set({
-              error: error.message || 'Failed to mark notification as read',
-            });
+            set({ error: error.message || 'Failed to mark as read' });
             throw error;
           }
         },
@@ -168,38 +149,10 @@ export const useNotificationStore = create<
                 unreadCount: 0,
               }));
             } else {
-              throw new Error(response.message || 'Failed to mark all notifications as read');
+              throw new Error(response.message || 'Failed to mark all as read');
             }
           } catch (error: any) {
-            set({
-              error: error.message || 'Failed to mark all notifications as read',
-            });
-            throw error;
-          }
-        },
-
-        deleteNotification: async (notificationId) => {
-          try {
-            const response = await notificationApi.deleteNotification(notificationId);
-
-            if (response.status_code === 200) {
-              set((state) => {
-                const notification = state.notifications.find(n => n.id === notificationId);
-                const wasUnread = notification && !notification.readAt;
-                
-                return {
-                  notifications: state.notifications.filter(n => n.id !== notificationId),
-                  unreadCount: wasUnread ? Math.max(0, state.unreadCount - 1) : state.unreadCount,
-                  total: Math.max(0, state.total - 1),
-                };
-              });
-            } else {
-              throw new Error(response.message || 'Failed to delete notification');
-            }
-          } catch (error: any) {
-            set({
-              error: error.message || 'Failed to delete notification',
-            });
+            set({ error: error.message || 'Failed to mark all as read' });
             throw error;
           }
         },
@@ -207,16 +160,11 @@ export const useNotificationStore = create<
         updateUnreadCount: async () => {
           try {
             const response = await notificationApi.getUnreadCount();
-
             if (response.status_code === 200) {
-              set({
-                unreadCount: response.data,
-              });
+              set({ unreadCount: response.data });
             }
           } catch (error: any) {
-            set({
-              error: error.message || 'Failed to update unread count',
-            });
+            console.warn('Failed to update unread count:', error);
           }
         },
 
@@ -232,19 +180,30 @@ export const useNotificationStore = create<
           set({ selectedFilter: filter });
         },
 
+        getFilteredNotifications: () => {
+          const { notifications, selectedFilter } = get();
+          
+          switch (selectedFilter) {
+            case 'unread':
+              return notifications.filter(n => !n.readAt);
+            case 'order':
+            case 'system':
+            case 'promotion':
+            case 'alert':
+              return notifications.filter(n => n.type === selectedFilter);
+            default:
+              return notifications;
+          }
+        },
+
         registerPushToken: async (token, deviceInfo) => {
           try {
             const response = await notificationApi.registerDevice(token, deviceInfo);
-            
             if (response.status_code !== 200) {
               throw new Error(response.message || 'Failed to register push token');
             }
-            
-            console.log('Push token registered successfully');
           } catch (error: any) {
-            set({
-              error: error.message || 'Failed to register push token',
-            });
+            set({ error: error.message || 'Failed to register push token' });
             throw error;
           }
         },
@@ -252,33 +211,22 @@ export const useNotificationStore = create<
         unregisterPushToken: async (token) => {
           try {
             const response = await notificationApi.unregisterDevice(token);
-            
             if (response.status_code !== 200) {
               throw new Error(response.message || 'Failed to unregister push token');
             }
-            
-            console.log('Push token unregistered successfully');
           } catch (error: any) {
-            set({
-              error: error.message || 'Failed to unregister push token',
-            });
+            set({ error: error.message || 'Failed to unregister push token' });
             throw error;
           }
         },
 
-        clearError: () => {
-          set({ error: null });
-        },
-
-        reset: () => {
-          set(initialState);
-        },
+        clearError: () => set({ error: null }),
+        reset: () => set(initialState),
       }),
       {
         name: 'notification-storage',
         storage: createJSONStorage(() => AsyncStorage),
         partialize: (state) => ({
-          // Only persist unread count and filter for quick access
           unreadCount: state.unreadCount,
           selectedFilter: state.selectedFilter,
         }),
@@ -289,20 +237,9 @@ export const useNotificationStore = create<
   ),
 );
 
-// Selector hooks for better performance
-export const useNotifications = () =>
-  useNotificationStore((state) => state.notifications);
-export const useUnreadCount = () =>
-  useNotificationStore((state) => state.unreadCount);
-export const useNotificationLoading = () =>
-  useNotificationStore((state) => state.isLoading);
-export const useNotificationLoadingMore = () =>
-  useNotificationStore((state) => state.isLoadingMore);
-export const useNotificationError = () =>
-  useNotificationStore((state) => state.error);
-export const useNotificationHasNextPage = () =>
-  useNotificationStore((state) => state.hasNextPage);
-export const useNotificationTotal = () =>
-  useNotificationStore((state) => state.total);
-export const useNotificationFilter = () =>
-  useNotificationStore((state) => state.selectedFilter);
+// Selector hooks for performance
+export const useNotifications = () => useNotificationStore((state) => state.getFilteredNotifications());
+export const useAllNotifications = () => useNotificationStore((state) => state.notifications);
+export const useUnreadCount = () => useNotificationStore((state) => state.unreadCount);
+export const useNotificationLoading = () => useNotificationStore((state) => state.isLoading);
+export const useNotificationError = () => useNotificationStore((state) => state.error);

@@ -1,26 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { View, FlatList, TouchableOpacity, RefreshControl, Alert } from 'react-native';
-import { useTheme, Card, Badge, Chip, FAB } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+// src/screens/restaurant/RestaurantNotificationScreen.tsx
+import React, { useCallback } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  RefreshControl,
+  Alert,
+  ListRenderItem,
+} from 'react-native';
+import { useTheme, ActivityIndicator, Chip, FAB } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 import * as Haptics from 'expo-haptics';
-import Toast from 'react-native-toast-message';
 
 import CommonView from '@/src/components/common/CommonView';
-import { RootStackScreenProps } from '@/src/navigation/types';
-import { Typography, Heading5, Body, Label, Caption, Overline } from '@/src/components/common/Typography';
-import { useRestaurantNotifications } from '@/src/hooks/restaurant/useRestaurantNotifications';
+import { useNotifications } from '@/src/hooks/useNotifications';
 import type { Notification } from '@/src/types';
 
-// Notification interface is now imported from types
-
-const NotificationsList: React.FC<RootStackScreenProps<'RestaurantNotifications'>> = () => {
+const RestaurantNotificationScreen = () => {
   const { colors } = useTheme();
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation();
-  
-  // Use the restaurant notifications hook (includes both server and local notifications)
+
   const {
     notifications,
     unreadCount,
@@ -29,56 +34,124 @@ const NotificationsList: React.FC<RootStackScreenProps<'RestaurantNotifications'
     error,
     hasNextPage,
     selectedFilter,
+    notificationCounts,
     refresh,
     loadMore,
     markAsRead,
     markAllAsRead,
-    deleteNotification,
     setFilter,
     clearError,
-    notificationCounts,
-    updateBadgeCount,
-    clearBadge,
-  } = useRestaurantNotifications();
-  
-  const [refreshing, setRefreshing] = useState(false);
+    hasNotifications,
+    sendLocalNotification,
+  } = useNotifications();
 
-  // Handle errors
-  useEffect(() => {
-    if (error) {
-      Toast.show({
-        type: 'error',
-        text1: t('error'),
-        text2: error,
-        position: 'top',
-      });
-      clearError();
+  // Restaurant-specific notification handling
+  const handleNotificationPress = useCallback(
+    async (notification: Notification) => {
+      Haptics.selectionAsync();
+      
+      // Mark as read if not already read
+      if (!notification.readAt) {
+        await markAsRead(notification.id);
+      }
+
+      // Navigate based on notification type
+      switch (notification.type) {
+        case 'order':
+          if (notification.data?.orderId) {
+            navigation.navigate('RestaurantOrderDetails' as never, { 
+              orderId: notification.data.orderId 
+            } as never);
+          }
+          break;
+          
+        case 'system':
+          // Show system notification details
+          Alert.alert(notification.title, notification.body);
+          break;
+          
+        case 'promotion':
+          // Navigate to promotions or show details
+          Alert.alert(notification.title, notification.body);
+          break;
+          
+        case 'alert':
+          // Show alert details
+          Alert.alert(notification.title, notification.body, [
+            { text: t('ok'), style: 'default' }
+          ]);
+          break;
+          
+        default:
+          Alert.alert(notification.title, notification.body);
+      }
+    },
+    [markAsRead, navigation, t],
+  );
+
+  // Mark all as read with haptic feedback
+  const handleMarkAllAsRead = useCallback(async () => {
+    if (unreadCount > 0) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      const success = await markAllAsRead();
+      if (success) {
+        // Success feedback handled by the hook
+      } else {
+        Alert.alert(t('error'), t('mark_all_read_error'));
+      }
     }
-  }, [error, clearError, t]);
+  }, [unreadCount, markAllAsRead, t]);
 
-  const getNotificationIcon = (type: string, priority: string) => {
-    const iconMap = {
+  // Filter change with haptic feedback
+  const handleFilterChange = useCallback((filter: string) => {
+    Haptics.selectionAsync();
+    setFilter(filter as any);
+  }, [setFilter]);
+
+  // Send test notification (for development)
+  const handleSendTestNotification = useCallback(async () => {
+    await sendLocalNotification(
+      'Test Notification',
+      'This is a test notification for the restaurant app',
+      { type: 'test' }
+    );
+  }, [sendLocalNotification]);
+
+  // Get restaurant-specific notification icon
+  const getNotificationIcon = (type: string, priority?: string) => {
+    const iconMap: Record<string, string> = {
       order: 'receipt',
       system: 'cog',
-      promotion: 'tag',
+      promotion: 'tag-outline',
       alert: 'alert-circle',
+      business: 'chart-line',
+      inventory: 'package-variant',
+      reminder: 'clock-outline',
     };
-    return iconMap[type as keyof typeof iconMap] || 'bell';
-  };
-
-  const getNotificationColor = (notification: Notification) => {
-    if (notification.priority === 'high') return '#FF4444';
-    if (notification.priority === 'medium') return '#FF8800';
     
-    const colorMap = {
-      order: '#007aff',
-      system: '#6B7280',
-      promotion: '#00C851',
-      alert: '#FF8800',
-    };
-    return colorMap[notification.type as keyof typeof colorMap] || '#6B7280';
+    if (priority === 'high') return 'alert-circle';
+    return iconMap[type] || 'bell';
   };
 
+  // Get notification color based on type and priority
+  const getNotificationColor = (type: string, priority?: string) => {
+    if (priority === 'high') return '#FF4444';
+    if (priority === 'medium') return '#FF8800';
+    
+    const colorMap: Record<string, string> = {
+      order: colors.primary,
+      system: '#6B7280',
+      promotion: '#10B981',
+      alert: '#F59E0B',
+      business: '#8B5CF6',
+      inventory: '#EF4444',
+      reminder: '#06B6D4',
+    };
+    
+    return colorMap[type] || colors.onSurfaceVariant;
+  };
+
+  // Format timestamp for restaurant context
   const formatTimestamp = (timestamp: string) => {
     try {
       const date = new Date(timestamp);
@@ -86,321 +159,388 @@ const NotificationsList: React.FC<RootStackScreenProps<'RestaurantNotifications'
       const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
       
       if (diffInMinutes < 1) return t('just_now');
-      if (diffInMinutes < 60) return `${diffInMinutes} ${t('minutes_ago')}`;
-      if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)} ${t('hours_ago')}`;
-      return `${Math.floor(diffInMinutes / 1440)} ${t('days_ago')}`;
+      if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+      if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
+      return `${Math.floor(diffInMinutes / 1440)}d ago`;
     } catch {
       return timestamp;
     }
   };
 
-  // Notifications are already filtered by the hook
+  // Render notification item with restaurant-specific styling
+  const renderNotificationItem: ListRenderItem<Notification> = ({ item }) => {
+    const isUnread = !item.readAt;
+    const iconName = getNotificationIcon(item.type, item.priority);
+    const iconColor = getNotificationColor(item.type, item.priority);
 
-  const handleNotificationPress = async (notification: Notification) => {
-    Haptics.selectionAsync();
-    
-    // Mark as read if not already read
-    if (!notification.readAt) {
-      await markAsRead(notification.id);
-    }
-
-    // Navigate based on notification type
-    if (notification.type === 'order' && notification.data?.orderId) {
-      // Navigate to order details
-      navigation.navigate('RestaurantOrderDetails', { orderId: notification.data.orderId });
-    } else {
-      // Show notification details in alert for now
-      Alert.alert(
-        notification.title,
-        notification.body,
-        [{ text: t('ok'), style: 'default' }]
-      );
-    }
-  };
-
-  const handleMarkAllAsRead = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const success = await markAllAsRead();
-    if (success) {
-      Toast.show({
-        type: 'success',
-        text1: t('success'),
-        text2: t('all_notifications_marked_read'),
-        position: 'top',
-      });
-    }
-  };
-
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await refresh();
-    setRefreshing(false);
-  };
-  
-  const handleLoadMore = () => {
-    if (hasNextPage && !isLoadingMore) {
-      loadMore();
-    }
-  };
-  
-  const handleDeleteNotification = (notification: Notification) => {
-    Alert.alert(
-      t('delete_notification'),
-      t('are_you_sure_delete_notification'),
-      [
-        { text: t('cancel'), style: 'cancel' },
-        {
-          text: t('delete'),
-          style: 'destructive',
-          onPress: async () => {
-            const success = await deleteNotification(notification.id);
-            if (success) {
-              Toast.show({
-                type: 'success',
-                text1: t('success'),
-                text2: t('notification_deleted'),
-                position: 'top',
-              });
-            }
-          },
-        },
-      ]
-    );
-  };
-
-  const renderNotificationItem = ({ item }: { item: Notification }) => (
-    <Card
-      style={{
-        marginBottom: 8,
-        backgroundColor: item.readAt ? colors.surface : '#007aff10',
-        borderLeftWidth: 4,
-        borderLeftColor: getNotificationColor(item),
-      }}
-    >
+    return (
       <TouchableOpacity
         onPress={() => handleNotificationPress(item)}
-        onLongPress={() => handleDeleteNotification(item)}
-        style={{ padding: 16 }}
+        onLongPress={() => {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+          Alert.alert(
+            t('notification_options'),
+            t('what_would_you_like_to_do'),
+            [
+              { text: t('cancel'), style: 'cancel' },
+              { 
+                text: t('mark_as_read'), 
+                onPress: () => markAsRead(item.id) 
+              },
+            ]
+          );
+        }}
+        style={{
+          backgroundColor: isUnread ? iconColor + '10' : colors.surface,
+          marginBottom: 8,
+          borderRadius: 12,
+          borderLeftWidth: 4,
+          borderLeftColor: iconColor,
+          padding: 16,
+        }}
       >
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <View style={{ flexDirection: 'row', flex: 1 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
+          <View
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              backgroundColor: iconColor + '20',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginRight: 12,
+            }}
+          >
             <MaterialCommunityIcons
-              name={getNotificationIcon(item.type, item.priority || 'low') as any}
-              size={24}
-              color={getNotificationColor(item)}
-              style={{ marginRight: 12, marginTop: 2 }}
+              name={iconName as any}
+              size={20}
+              color={iconColor}
             />
-            <View style={{ flex: 1 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                <Label
-                  color={colors.onSurface}
-                  weight={item.readAt ? 'medium' : 'bold'}
-                  numberOfLines={1}
-                  style={{ flex: 1 }}
+          </View>
+
+          <View style={{ flex: 1 }}>
+            <View style={{ 
+              flexDirection: 'row', 
+              justifyContent: 'space-between', 
+              alignItems: 'flex-start',
+              marginBottom: 4 
+            }}>
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: isUnread ? '600' : '500',
+                  color: colors.onSurface,
+                  flex: 1,
+                }}
+                numberOfLines={1}
+              >
+                {item.title}
+              </Text>
+              
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text
+                  style={{
+                    fontSize: 12,
+                    color: colors.onSurfaceVariant,
+                    marginRight: 8,
+                  }}
                 >
-                  {item.title}
-                </Label>
-                {!item.readAt && (
+                  {formatTimestamp(item.createdAt)}
+                </Text>
+                {isUnread && (
                   <View
                     style={{
                       width: 8,
                       height: 8,
                       borderRadius: 4,
-                      backgroundColor: '#007aff',
-                      marginLeft: 8,
+                      backgroundColor: colors.primary,
                     }}
                   />
                 )}
               </View>
-              <Body
-                color={colors.onSurfaceVariant}
-                numberOfLines={2}
+            </View>
+
+            <Text
+              style={{
+                fontSize: 14,
+                color: colors.onSurfaceVariant,
+                lineHeight: 20,
+                marginBottom: 8,
+              }}
+              numberOfLines={2}
+            >
+              {item.body}
+            </Text>
+
+            <View style={{ 
+              flexDirection: 'row', 
+              justifyContent: 'space-between', 
+              alignItems: 'center' 
+            }}>
+              <Chip
+                compact
                 style={{
-                  marginBottom: 8,
-                  lineHeight: 20,
+                  backgroundColor: iconColor + '20',
+                  height: 28,
+                }}
+                textStyle={{
+                  fontSize: 11,
+                  color: iconColor,
+                  textTransform: 'capitalize',
                 }}
               >
-                {item.body}
-              </Body>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Caption color={colors.onSurfaceVariant}>
-                  {formatTimestamp(item.createdAt)}
-                </Caption>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Chip
-                    style={{
-                      backgroundColor: getNotificationColor(item) + '20',
-                      height: 24,
-                    }}
-                    textStyle={{
-                      fontSize: 10,
-                      color: getNotificationColor(item),
-                    }}
-                    compact
-                  >
-                    {t(item.type)}
-                  </Chip>
-                  {item.priority === 'high' && (
-                    <MaterialCommunityIcons
-                      name="exclamation"
-                      size={16}
-                      color="#FF4444"
-                      style={{ marginLeft: 4 }}
-                    />
-                  )}
+                {t(item.type)}
+              </Chip>
+              
+              {item.priority === 'high' && (
+                <View style={{
+                  backgroundColor: '#FF4444',
+                  paddingHorizontal: 8,
+                  paddingVertical: 2,
+                  borderRadius: 12,
+                }}>
+                  <Text style={{ 
+                    color: 'white', 
+                    fontSize: 10, 
+                    fontWeight: '600' 
+                  }}>
+                    HIGH
+                  </Text>
                 </View>
-              </View>
+              )}
             </View>
           </View>
         </View>
       </TouchableOpacity>
-    </Card>
-  );
+    );
+  };
 
-  const filters = [
+  // Restaurant-specific filters
+  const restaurantFilters = [
     { key: 'all', label: t('all'), count: notificationCounts.all },
     { key: 'unread', label: t('unread'), count: notificationCounts.unread },
     { key: 'order', label: t('orders'), count: notificationCounts.order },
-    { key: 'system', label: t('system'), count: notificationCounts.system },
-    { key: 'promotion', label: t('promotions'), count: notificationCounts.promotion },
     { key: 'alert', label: t('alerts'), count: notificationCounts.alert },
+    { key: 'system', label: t('system'), count: notificationCounts.system },
+    { key: 'promotion', label: t('promos'), count: notificationCounts.promotion },
   ];
+
+  // Render filter chip
+  const renderFilterChip = ({ item }: { item: typeof restaurantFilters[0] }) => (
+    <TouchableOpacity
+      onPress={() => handleFilterChange(item.key)}
+      style={{
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        backgroundColor: selectedFilter === item.key ? colors.primary : colors.surfaceVariant,
+        borderRadius: 20,
+        marginRight: 8,
+        flexDirection: 'row',
+        alignItems: 'center',
+      }}
+    >
+      <Text
+        style={{
+          fontSize: 14,
+          fontWeight: '600',
+          color: selectedFilter === item.key ? colors.onPrimary : colors.onSurfaceVariant,
+        }}
+      >
+        {item.label}
+      </Text>
+      {item.count > 0 && (
+        <View
+          style={{
+            backgroundColor: selectedFilter === item.key ? colors.onPrimary : colors.primary,
+            borderRadius: 10,
+            minWidth: 20,
+            height: 20,
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginLeft: 6,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 11,
+              fontWeight: 'bold',
+              color: selectedFilter === item.key ? colors.primary : colors.onPrimary,
+            }}
+          >
+            {item.count}
+          </Text>
+        </View>
+      )}
+    </TouchableOpacity>
+  );
+
+  // Empty state for restaurant
+  const renderEmptyState = () => (
+    <View style={{ 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      paddingVertical: 60,
+      paddingHorizontal: 24,
+    }}>
+      <MaterialCommunityIcons
+        name="bell-outline"
+        size={64}
+        color={colors.onSurfaceVariant}
+        style={{ marginBottom: 16 }}
+      />
+      <Text
+        style={{
+          fontSize: 20,
+          fontWeight: '600',
+          color: colors.onSurface,
+          textAlign: 'center',
+          marginBottom: 8,
+        }}
+      >
+        {selectedFilter === 'unread' ? 'All Caught Up!' : 'No Notifications'}
+      </Text>
+      <Text
+        style={{
+          fontSize: 16,
+          color: colors.onSurfaceVariant,
+          textAlign: 'center',
+        }}
+      >
+        {selectedFilter === 'unread' 
+          ? "You've read all your notifications"
+          : "New orders and updates will appear here"
+        }
+      </Text>
+    </View>
+  );
+
+  // Loading state
+  if (isLoading && !hasNotifications) {
+    return (
+      <CommonView>
+        <View style={{ 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          flex: 1 
+        }}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text
+            style={{
+              marginTop: 16,
+              fontSize: 16,
+              color: colors.onSurfaceVariant,
+            }}
+          >
+            Loading notifications...
+          </Text>
+        </View>
+      </CommonView>
+    );
+  }
 
   return (
     <CommonView>
-      <View style={{ flex: 1 }}>
-        {/* Removed custom header - using navigator header instead */}
-        {/* Mark all as read button moved to header right */}
-        {unreadCount > 0 && (
-          <View style={{ padding: 16, paddingBottom: 0 }}>
+      <View style={{ flex: 1, backgroundColor: colors.background }}>
+        {/* Mark all read button */}
+        {hasNotifications && unreadCount > 0 && (
+          <View style={{ 
+            paddingHorizontal: 16, 
+            paddingVertical: 12,
+            borderBottomWidth: 1,
+            borderBottomColor: colors.outline + '30',
+          }}>
             <TouchableOpacity
               onPress={handleMarkAllAsRead}
               style={{
-                backgroundColor: '#007aff',
+                backgroundColor: colors.primary,
                 paddingHorizontal: 16,
                 paddingVertical: 8,
                 borderRadius: 20,
                 alignSelf: 'flex-end',
               }}
             >
-              <Body color="white" weight="semibold">
-                {t('mark_all_read')}
-              </Body>
+              <Text style={{ 
+                color: colors.onPrimary, 
+                fontWeight: '600',
+                fontSize: 14,
+              }}>
+                Mark All Read ({unreadCount})
+              </Text>
             </TouchableOpacity>
           </View>
         )}
 
-        {/* Filters */}
-        <View style={{ padding: 16, paddingTop: 12 }}>
+        {/* Filter chips */}
+        <View style={{ paddingVertical: 12 }}>
           <FlatList
             horizontal
             showsHorizontalScrollIndicator={false}
-            data={filters}
-            keyExtractor={item => item.key}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                onPress={() => {
-                  Haptics.selectionAsync();
-                  setFilter(item.key as any);
-                }}
-                style={{
-                  paddingHorizontal: 16,
-                  paddingVertical: 8,
-                  backgroundColor: selectedFilter === item.key ? '#007aff' : colors.surfaceVariant,
-                  borderRadius: 20,
-                  marginRight: 8,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                }}
-              >
-                <Label
-                  color={selectedFilter === item.key ? 'white' : colors.onSurfaceVariant}
-                  weight="semibold"
-                >
-                  {item.label}
-                </Label>
-                {item.count > 0 && (
-                  <Badge
-                    style={{
-                      backgroundColor: selectedFilter === item.key ? 'white' : '#007aff',
-                      marginLeft: 6,
-                    }}
-                    size={18}
-                  >
-                    <Overline
-                      color={selectedFilter === item.key ? '#007aff' : 'white'}
-                      weight="bold"
-                    >
-                      {item.count}
-                    </Overline>
-                  </Badge>
-                )}
-              </TouchableOpacity>
-            )}
+            data={restaurantFilters.filter(f => f.count > 0 || f.key === 'all')}
+            renderItem={renderFilterChip}
+            keyExtractor={(item) => item.key}
+            contentContainerStyle={{ paddingHorizontal: 16 }}
           />
         </View>
 
-        {/* Notifications List */}
+        {/* Notifications list */}
         <FlatList
           data={notifications}
           renderItem={renderNotificationItem}
-          keyExtractor={item => item.id}
-          contentContainerStyle={{ padding: 16, paddingTop: 0 }}
+          keyExtractor={(item) => item.id}
+          ListEmptyComponent={renderEmptyState}
           refreshControl={
             <RefreshControl
-              refreshing={refreshing || isLoading}
-              onRefresh={onRefresh}
-              colors={['#007aff']}
+              refreshing={isLoading}
+              onRefresh={refresh}
+              colors={[colors.primary]}
+              tintColor={colors.primary}
             />
           }
-          onEndReached={handleLoadMore}
+          onEndReached={loadMore}
           onEndReachedThreshold={0.1}
           showsVerticalScrollIndicator={false}
-          ListEmptyComponent={
-            <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 40 }}>
-              <MaterialCommunityIcons
-                name="bell-outline"
-                size={48}
-                color={colors.onSurfaceVariant}
-              />
-              <Label color={colors.onSurfaceVariant} style={{ marginTop: 8 }}>
-                {isLoading ? t('loading_notifications') : 
-                 selectedFilter === 'unread' ? t('no_unread_notifications') : t('no_notifications')}
-              </Label>
-            </View>
-          }
+          contentContainerStyle={{
+            flexGrow: 1,
+            padding: 16,
+            paddingBottom: insets.bottom + 80, // Space for FAB
+          }}
           ListFooterComponent={
             isLoadingMore ? (
-              <View style={{ padding: 16, alignItems: 'center' }}>
-                <MaterialCommunityIcons
-                  name="loading"
-                  size={24}
-                  color={colors.primary}
-                />
-                <Caption color={colors.onSurfaceVariant} style={{ marginTop: 8 }}>
-                  {t('loading_more')}
-                </Caption>
+              <View style={{ 
+                paddingVertical: 16, 
+                alignItems: 'center' 
+              }}>
+                <ActivityIndicator size="small" color={colors.primary} />
+                <Text
+                  style={{
+                    marginTop: 8,
+                    fontSize: 14,
+                    color: colors.onSurfaceVariant,
+                  }}
+                >
+                  Loading more...
+                </Text>
               </View>
             ) : null
           }
         />
+
+        {/* Floating refresh button */}
+        <FAB
+          icon="refresh"
+          style={{
+            position: 'absolute',
+            margin: 16,
+            right: 0,
+            bottom: 0,
+            backgroundColor: colors.primary,
+          }}
+          onPress={refresh}
+          disabled={isLoading}
+        />
       </View>
-      
-      {/* Floating Action Button for refresh */}
-      <FAB
-        icon="refresh"
-        style={{
-          position: 'absolute',
-          margin: 16,
-          right: 0,
-          bottom: 0,
-          backgroundColor: colors.primary,
-        }}
-        onPress={onRefresh}
-        disabled={isLoading || refreshing}
-      />
     </CommonView>
   );
 };
 
-export default NotificationsList;
+export default RestaurantNotificationScreen;

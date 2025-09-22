@@ -1,4 +1,5 @@
-import React, { useEffect, useCallback } from 'react';
+// src/screens/NotificationScreen.tsx
+import React, { useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,253 +9,262 @@ import {
   Alert,
   ListRenderItem,
 } from 'react-native';
-import { useTheme, ActivityIndicator, Divider } from 'react-native-paper';
+import { useTheme, ActivityIndicator, Chip } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+
 import CommonView from '@/src/components/common/CommonView';
-import {
-  useNotificationStore,
-  useNotifications,
-  useNotificationLoading,
-  useNotificationLoadingMore,
-  useNotificationError,
-  useUnreadCount,
-  useNotificationHasNextPage,
-  useNotificationTotal,
-} from '@/src/stores/customerStores/notificationStore';
+import { useNotifications } from '@/src/hooks/useNotifications';
 import type { Notification } from '@/src/types';
 
 const NotificationScreen = () => {
   const { colors } = useTheme();
-  const { t } = useTranslation('translation');
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
 
-  // Store hooks
-  const notifications = useNotifications();
-  const isLoading = useNotificationLoading();
-  const isLoadingMore = useNotificationLoadingMore();
-  const error = useNotificationError();
-  const unreadCount = useUnreadCount();
-  const hasNextPage = useNotificationHasNextPage();
-  const total = useNotificationTotal();
-
-  // Store actions
   const {
-    fetchNotifications,
-    loadMoreNotifications,
-    refreshNotifications,
+    notifications,
+    unreadCount,
+    isLoading,
+    isLoadingMore,
+    error,
+    hasNextPage,
+    selectedFilter,
+    notificationCounts,
+    refresh,
+    loadMore,
     markAsRead,
     markAllAsRead,
-    updateUnreadCount,
+    setFilter,
     clearError,
-  } = useNotificationStore();
-
-  // Fetch notifications on mount
-  useEffect(() => {
-    fetchNotifications();
-    updateUnreadCount();
-  }, []);
-
-  // Handle refresh
-  const handleRefresh = useCallback(async () => {
-    await refreshNotifications();
-    await updateUnreadCount();
-  }, [refreshNotifications, updateUnreadCount]);
-
-  // Handle load more
-  const handleLoadMore = useCallback(() => {
-    if (hasNextPage && !isLoadingMore) {
-      loadMoreNotifications();
-    }
-  }, [hasNextPage, isLoadingMore, loadMoreNotifications]);
+    hasNotifications,
+    userType,
+  } = useNotifications();
 
   // Handle notification press
   const handleNotificationPress = useCallback(
     async (notification: Notification) => {
+      // Mark as read if not already read
       if (!notification.readAt) {
-        try {
-          await markAsRead(notification.id);
-        } catch (error) {
-          console.error('Failed to mark notification as read:', error);
-        }
+        await markAsRead(notification.id);
       }
 
       // Handle navigation based on notification type and data
-      if (notification.data) {
-        if (notification.data.orderId) {
-          // Navigate to order details
-          console.log('Navigate to order:', notification.data.orderId);
-        } else if (notification.data.restaurantId) {
-          // Navigate to restaurant details
-          console.log(
-            'Navigate to restaurant:',
-            notification.data.restaurantId,
-          );
-        }
+      if (notification.data?.orderId) {
+        const screenName = userType === 'restaurant' ? 'RestaurantOrderDetails' : 'OrderDetails';
+        navigation.navigate(screenName as never, { orderId: notification.data.orderId } as never);
+      } else if (notification.data?.restaurantId) {
+        navigation.navigate('RestaurantDetails' as never, { 
+          restaurantId: notification.data.restaurantId 
+        } as never);
+      } else {
+        // Show notification details
+        Alert.alert(notification.title, notification.body);
       }
     },
-    [markAsRead],
+    [markAsRead, navigation, userType],
   );
 
   // Handle mark all as read
   const handleMarkAllAsRead = useCallback(async () => {
     if (unreadCount > 0) {
-      try {
-        await markAllAsRead();
-      } catch (error) {
-        Alert.alert(
-          t('error', 'Error'),
-          t('mark_all_read_error', 'Failed to mark all notifications as read'),
-        );
+      const success = await markAllAsRead();
+      if (!success) {
+        Alert.alert(t('error'), t('mark_all_read_error'));
       }
     }
   }, [unreadCount, markAllAsRead, t]);
 
-  // Get notification icon based on type
-  const getNotificationIcon = (type: Notification['type']) => {
-    switch (type) {
-      case 'ORDER':
-        return 'receipt-outline';
-      case 'DELIVERY':
-        return 'bicycle-outline';
-      case 'PROMOTION':
-        return 'pricetag-outline';
-      case 'SYSTEM':
-        return 'information-circle-outline';
-      default:
-        return 'notifications-outline';
-    }
+  // Get notification icon
+  const getNotificationIcon = (type: Notification['type'], priority?: string) => {
+    const icons = {
+      order: 'receipt-outline',
+      system: 'settings-outline',
+      promotion: 'gift-outline',
+      alert: 'warning-outline',
+    };
+    
+    if (priority === 'high') return 'alert-circle';
+    return icons[type] || 'notifications-outline';
   };
 
-  // Get notification icon color based on type
-  const getNotificationIconColor = (type: Notification['type']) => {
-    switch (type) {
-      case 'ORDER':
-        return colors.primary;
-      case 'DELIVERY':
-        return '#10B981'; // Green
-      case 'PROMOTION':
-        return '#F59E0B'; // Amber
-      case 'SYSTEM':
-        return colors.onSurfaceVariant;
-      default:
-        return colors.onSurfaceVariant;
-    }
+  // Get notification color
+  const getNotificationColor = (type: Notification['type'], priority?: string) => {
+    if (priority === 'high') return '#FF4444';
+    
+    const typeColors = {
+      order: colors.primary,
+      system: colors.onSurfaceVariant,
+      promotion: '#10B981',
+      alert: '#F59E0B',
+    };
+    
+    return typeColors[type] || colors.onSurfaceVariant;
   };
 
-  // Format notification time
-  const formatNotificationTime = (createdAt: string) => {
+  // Format timestamp
+  const formatTime = (createdAt: string) => {
     const date = new Date(createdAt);
     const now = new Date();
-    const diffInHours = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60 * 60),
-    );
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
 
-    if (diffInHours < 1) {
-      return t('just_now', 'Just now');
-    } else if (diffInHours < 24) {
-      return t('hours_ago', '{{count}}h ago', { count: diffInHours });
-    } else {
-      const diffInDays = Math.floor(diffInHours / 24);
-      if (diffInDays < 7) {
-        return t('days_ago', '{{count}}d ago', { count: diffInDays });
-      } else {
-        return date.toLocaleDateString();
-      }
-    }
+    if (diffInHours < 1) return t('just_now');
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) return `${diffInDays}d ago`;
+    return date.toLocaleDateString();
   };
 
   // Render notification item
-  const renderNotificationItem: ListRenderItem<Notification> = ({ item }) => {
+  const renderNotification: ListRenderItem<Notification> = ({ item }) => {
     const isUnread = !item.readAt;
+    const iconName = getNotificationIcon(item.type, item.priority);
+    const iconColor = getNotificationColor(item.type, item.priority);
 
     return (
       <TouchableOpacity
         onPress={() => handleNotificationPress(item)}
-        className="px-4 py-4"
+        className="px-4 py-4 border-b"
         style={{
-          backgroundColor: isUnread ? colors.surfaceVariant : colors.background,
+          backgroundColor: isUnread ? colors.surfaceVariant + '40' : 'transparent',
+          borderBottomColor: colors.outline + '30',
         }}
         activeOpacity={0.7}
       >
         <View className="flex-row items-start space-x-3">
-          {/* Notification Icon */}
+          {/* Icon */}
           <View
             className="w-10 h-10 rounded-full items-center justify-center"
-            style={{
-              backgroundColor: isUnread
-                ? getNotificationIconColor(item.type) + '20'
-                : colors.surfaceVariant,
-            }}
+            style={{ backgroundColor: iconColor + '20' }}
           >
-            <Ionicons
-              name={getNotificationIcon(item.type)}
-              size={20}
-              color={getNotificationIconColor(item.type)}
-            />
+            <Ionicons name={iconName as any} size={20} color={iconColor} />
           </View>
 
-          {/* Notification Content */}
+          {/* Content */}
           <View className="flex-1">
             <View className="flex-row items-start justify-between mb-1">
               <Text
-                className="font-semibold text-base flex-1"
-                style={{
-                  color: isUnread ? colors.onSurface : colors.onSurfaceVariant,
-                }}
+                className={`text-base flex-1 ${isUnread ? 'font-semibold' : 'font-medium'}`}
+                style={{ color: colors.onSurface }}
                 numberOfLines={2}
               >
                 {item.title}
               </Text>
-
-              {/* Time */}
-              <Text
-                className="text-xs ml-2"
-                style={{ color: colors.onSurfaceVariant }}
-              >
-                {formatNotificationTime(item.createdAt)}
-              </Text>
+              
+              <View className="flex-row items-center ml-2">
+                <Text
+                  className="text-xs"
+                  style={{ color: colors.onSurfaceVariant }}
+                >
+                  {formatTime(item.createdAt)}
+                </Text>
+                {isUnread && (
+                  <View
+                    className="w-2 h-2 rounded-full ml-2"
+                    style={{ backgroundColor: colors.primary }}
+                  />
+                )}
+              </View>
             </View>
 
             <Text
-              className="text-sm"
+              className="text-sm mb-2"
               style={{ color: colors.onSurfaceVariant }}
               numberOfLines={3}
             >
               {item.body}
             </Text>
-          </View>
 
-          {/* Unread indicator */}
-          {isUnread && (
-            <View
-              className="w-2 h-2 rounded-full mt-2"
-              style={{ backgroundColor: colors.primary }}
-            />
-          )}
+            <View className="flex-row items-center justify-between">
+              <Chip
+                compact
+                style={{
+                  backgroundColor: iconColor + '20',
+                  height: 24,
+                }}
+                textStyle={{
+                  fontSize: 10,
+                  color: iconColor,
+                  textTransform: 'capitalize',
+                }}
+              >
+                {item.type}
+              </Chip>
+              
+              {item.priority === 'high' && (
+                <Text
+                  className="text-xs px-2 py-1 rounded-full"
+                  style={{
+                    backgroundColor: '#FF4444',
+                    color: 'white',
+                  }}
+                >
+                  High Priority
+                </Text>
+              )}
+            </View>
+          </View>
         </View>
       </TouchableOpacity>
     );
   };
 
-  // Render footer for loading more
-  const renderFooter = () => {
-    if (!isLoadingMore) return null;
+  // Filter options
+  const filters = [
+    { key: 'all', label: 'All', count: notificationCounts.all },
+    { key: 'unread', label: 'Unread', count: notificationCounts.unread },
+    { key: 'order', label: 'Orders', count: notificationCounts.order },
+    { key: 'system', label: 'System', count: notificationCounts.system },
+    { key: 'promotion', label: 'Promos', count: notificationCounts.promotion },
+    { key: 'alert', label: 'Alerts', count: notificationCounts.alert },
+  ];
 
-    return (
-      <View className="py-4 items-center">
-        <ActivityIndicator size="small" color={colors.primary} />
-      </View>
-    );
-  };
+  // Render filter item
+  const renderFilter = ({ item }: { item: typeof filters[0] }) => (
+    <TouchableOpacity
+      onPress={() => setFilter(item.key as any)}
+      className="px-3 py-2 mr-2 rounded-full flex-row items-center"
+      style={{
+        backgroundColor: selectedFilter === item.key ? colors.primary : colors.surfaceVariant,
+      }}
+    >
+      <Text
+        className="text-sm font-medium"
+        style={{
+          color: selectedFilter === item.key ? colors.onPrimary : colors.onSurfaceVariant,
+        }}
+      >
+        {item.label}
+      </Text>
+      {item.count > 0 && (
+        <View
+          className="ml-2 px-2 py-0.5 rounded-full min-w-[20px] items-center"
+          style={{
+            backgroundColor: selectedFilter === item.key ? colors.onPrimary : colors.primary,
+          }}
+        >
+          <Text
+            className="text-xs font-bold"
+            style={{
+              color: selectedFilter === item.key ? colors.primary : colors.onPrimary,
+            }}
+          >
+            {item.count}
+          </Text>
+        </View>
+      )}
+    </TouchableOpacity>
+  );
 
   // Render empty state
   const renderEmptyState = () => (
-    <View className="justify-center items-center flex-1 px-6">
+    <View className="justify-center items-center flex-1 px-6 py-12">
       <Ionicons
         name="notifications-outline"
-        size={80}
+        size={64}
         color={colors.onSurfaceVariant}
         style={{ marginBottom: 16 }}
       />
@@ -262,58 +272,22 @@ const NotificationScreen = () => {
         className="text-xl font-semibold text-center mb-2"
         style={{ color: colors.onSurface }}
       >
-        {t('no_notifications', 'No Notifications')}
+        {selectedFilter === 'unread' ? 'No Unread Notifications' : 'No Notifications'}
       </Text>
       <Text
         className="text-center text-base"
         style={{ color: colors.onSurfaceVariant }}
       >
-        {t(
-          'no_notifications_message',
-          "You're all caught up! We'll notify you when something new happens.",
-        )}
+        {selectedFilter === 'unread' 
+          ? "You're all caught up!"
+          : "We'll notify you when something new happens."
+        }
       </Text>
     </View>
   );
 
-  // Render error state
-  const renderErrorState = () => (
-    <View className="justify-center items-center flex-1 px-6">
-      <Ionicons
-        name="alert-circle-outline"
-        size={80}
-        color={colors.error}
-        style={{ marginBottom: 16 }}
-      />
-      <Text
-        className="text-xl font-semibold text-center mb-2"
-        style={{ color: colors.onSurface }}
-      >
-        {t('error_loading_notifications', 'Error Loading Notifications')}
-      </Text>
-      <Text
-        className="text-center text-base mb-4"
-        style={{ color: colors.onSurfaceVariant }}
-      >
-        {error || t('generic_error', 'Something went wrong. Please try again.')}
-      </Text>
-      <TouchableOpacity
-        onPress={() => {
-          clearError();
-          handleRefresh();
-        }}
-        className="px-6 py-3 rounded-lg"
-        style={{ backgroundColor: colors.primary }}
-      >
-        <Text className="font-semibold" style={{ color: colors.onPrimary }}>
-          {t('try_again', 'Try Again')}
-        </Text>
-      </TouchableOpacity>
-    </View>
-  );
-
-  // Render loading state
-  if (isLoading && notifications.length === 0) {
+  // Loading state
+  if (isLoading && !hasNotifications) {
     return (
       <CommonView>
         <View className="justify-center items-center flex-1">
@@ -322,71 +296,76 @@ const NotificationScreen = () => {
             className="mt-4 text-base"
             style={{ color: colors.onSurfaceVariant }}
           >
-            {t('loading_notifications', 'Loading notifications...')}
+            Loading notifications...
           </Text>
         </View>
       </CommonView>
     );
   }
 
-  // Render error state
-  if (error && notifications.length === 0) {
-    return <CommonView>{renderErrorState()}</CommonView>;
-  }
-
   return (
     <CommonView>
       <View className="flex-1" style={{ backgroundColor: colors.background }}>
-        {/* Header with Mark All Read button */}
-        {notifications.length > 0 && unreadCount > 0 && (
+        {/* Header with mark all read */}
+        {hasNotifications && unreadCount > 0 && (
           <View
             className="px-4 py-3 border-b flex-row justify-between items-center"
-            style={{
-              borderBottomColor: colors.outline,
-              paddingTop: insets.top + 12,
-            }}
+            style={{ borderBottomColor: colors.outline }}
           >
-            <Text
-              className="text-sm"
-              style={{ color: colors.onSurfaceVariant }}
-            >
-              {t('unread_notifications', '{{count}} unread', {
-                count: unreadCount,
-              })}
+            <Text style={{ color: colors.onSurfaceVariant }}>
+              {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
             </Text>
             <TouchableOpacity onPress={handleMarkAllAsRead}>
-              <Text className="font-semibold" style={{ color: colors.primary }}>
-                {t('mark_all_read', 'Mark All Read')}
+              <Text
+                className="font-semibold"
+                style={{ color: colors.primary }}
+              >
+                Mark All Read
               </Text>
             </TouchableOpacity>
           </View>
         )}
 
-        {/* Notifications List */}
+        {/* Filters */}
+        <View className="py-3">
+          <FlatList
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            data={filters.filter(f => f.count > 0 || f.key === 'all')}
+            renderItem={renderFilter}
+            keyExtractor={(item) => item.key}
+            contentContainerStyle={{ paddingHorizontal: 16 }}
+          />
+        </View>
+
+        {/* Notifications list */}
         <FlatList
           data={notifications}
-          renderItem={renderNotificationItem}
+          renderItem={renderNotification}
           keyExtractor={(item) => item.id}
-          ItemSeparatorComponent={() => (
-            <Divider style={{ backgroundColor: colors.outline }} />
-          )}
           ListEmptyComponent={renderEmptyState}
-          ListFooterComponent={renderFooter}
           refreshControl={
             <RefreshControl
               refreshing={isLoading}
-              onRefresh={handleRefresh}
+              onRefresh={refresh}
               colors={[colors.primary]}
               tintColor={colors.primary}
             />
           }
-          onEndReached={handleLoadMore}
+          onEndReached={loadMore}
           onEndReachedThreshold={0.1}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{
             flexGrow: 1,
             paddingBottom: insets.bottom,
           }}
+          ListFooterComponent={
+            isLoadingMore ? (
+              <View className="py-4 items-center">
+                <ActivityIndicator size="small" color={colors.primary} />
+              </View>
+            ) : null
+          }
         />
       </View>
     </CommonView>
