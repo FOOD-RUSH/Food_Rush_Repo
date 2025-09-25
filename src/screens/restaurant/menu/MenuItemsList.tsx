@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { View, FlatList, TouchableOpacity, Alert, Image, Dimensions } from 'react-native';
+import {
+  View,
+  FlatList,
+  TouchableOpacity,
+  Alert,
+  Image,
+  Dimensions,
+} from 'react-native';
 import { useTheme, Card, FAB, Switch, Chip } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -7,11 +14,27 @@ import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
 
 import CommonView from '@/src/components/common/CommonView';
-import { Typography, Heading1,  Heading4, Body, Label, LabelLarge, Caption } from '@/src/components/common/Typography';
+import {
+  Typography,
+  Heading1,
+  Heading4,
+  Body,
+  Label,
+  LabelLarge,
+  Caption,
+} from '@/src/components/common/Typography';
 import { RestaurantMenuStackScreenProps } from '@/src/navigation/types';
 import { useCategories } from '@/src/hooks/useCategories';
-import { getCategoryEmoji, getCategoryColor, getCategoryLabel } from '@/src/data/categories';
-import { useMenuItems, useDeleteMenuItem, useToggleMenuItemAvailability } from '@/src/hooks/restaurant/useMenuApi';
+import {
+  getCategoryEmoji,
+  getCategoryColor,
+  getCategoryLabel,
+} from '@/src/data/categories';
+import {
+  useMenuItems,
+  useDeleteMenuItem,
+  useToggleMenuItemAvailability,
+} from '@/src/hooks/restaurant/useMenuApi';
 import { useCurrentRestaurant } from '@/src/stores/AuthStore';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -34,29 +57,34 @@ interface ErrorState {
   message: string;
 }
 
-const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> = () => {
+const MenuItemsList: React.FC<
+  RestaurantMenuStackScreenProps<'MenuItemsList'>
+> = () => {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const navigation = useNavigation();
   const currentRestaurant = useCurrentRestaurant();
   const restaurantId = currentRestaurant?.id;
-  
+
   const { categories: apiCategories = [] } = useCategories();
-  
+
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [error, setError] = useState<ErrorState>({ hasError: false, message: '' });
+  const [error, setError] = useState<ErrorState>({
+    hasError: false,
+    message: '',
+  });
 
   // API hooks
-  const { 
-    data: menuItems = [], 
-    isLoading, 
+  const {
+    data: menuItems = [],
+    isLoading,
     refetch,
-    error: apiError 
+    error: apiError,
   } = useMenuItems(
-    restaurantId || '', 
-    selectedCategory === 'all' ? undefined : selectedCategory
+    restaurantId || '',
+    selectedCategory === 'all' ? undefined : selectedCategory,
   );
-  
+
   const deleteMenuItemMutation = useDeleteMenuItem();
   const toggleAvailabilityMutation = useToggleMenuItemAvailability();
 
@@ -70,12 +98,17 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
   }, [apiError]);
 
   // Combine API categories with 'all' option and existing menu item categories
-  const menuCategories = Array.from(new Set(menuItems.map(item => item.category)));
-  const allCategories = apiCategories ? apiCategories.map(cat => cat.value) : [];
+  const menuCategories = Array.from(
+    new Set(menuItems.map((item) => item.category)),
+  );
+  const allCategories = apiCategories
+    ? apiCategories.map((cat) => cat.value)
+    : [];
   const categories = ['all', ...new Set([...allCategories, ...menuCategories])];
 
-  const filteredItems = menuItems.filter(item => {
-    const matchesCategory = selectedCategory === 'all' || item.category === selectedCategory;
+  const filteredItems = menuItems.filter((item) => {
+    const matchesCategory =
+      selectedCategory === 'all' || item.category === selectedCategory;
     return matchesCategory;
   });
 
@@ -84,7 +117,10 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
       Haptics.selectionAsync();
       navigation.navigate('RestaurantMenuItemForm', {});
     } catch (error) {
-      setError({ hasError: true, message: 'Failed to navigate to add item screen' });
+      setError({
+        hasError: true,
+        message: 'Failed to navigate to add item screen',
+      });
     }
   };
 
@@ -93,32 +129,38 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
       Haptics.selectionAsync();
       navigation.navigate('RestaurantMenuItemForm', { itemId });
     } catch (error) {
-      setError({ hasError: true, message: 'Failed to navigate to edit item screen' });
+      setError({
+        hasError: true,
+        message: 'Failed to navigate to edit item screen',
+      });
     }
   };
 
   const handleToggleAvailability = async (itemId: string) => {
     if (!restaurantId) return;
-    
+
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      
-      const currentItem = menuItems.find(item => item.id === itemId);
+
+      const currentItem = menuItems.find((item) => item.id === itemId);
       if (!currentItem) return;
-      
+
       await toggleAvailabilityMutation.mutateAsync({
         restaurantId,
         itemId,
-        isAvailable: !currentItem.isAvailable
+        isAvailable: !currentItem.isAvailable,
       });
     } catch (error) {
-      setError({ hasError: true, message: 'Failed to update item availability' });
+      setError({
+        hasError: true,
+        message: 'Failed to update item availability',
+      });
     }
   };
 
   const handleDeleteItem = (itemId: string, itemName: string) => {
     if (!restaurantId) return;
-    
+
     Alert.alert(
       t('delete_item'),
       `${t('are_you_sure_delete')} "${itemName}"?`,
@@ -131,19 +173,19 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
             try {
               await deleteMenuItemMutation.mutateAsync({
                 restaurantId,
-                itemId
+                itemId,
               });
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              Haptics.notificationAsync(
+                Haptics.NotificationFeedbackType.Success,
+              );
             } catch (error) {
               setError({ hasError: true, message: 'Failed to delete item' });
             }
           },
         },
-      ]
+      ],
     );
   };
-
-
 
   const onRefresh = async () => {
     try {
@@ -155,9 +197,9 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
   };
 
   const renderMenuItem = ({ item }: { item: MenuItem }) => (
-    <Card 
-      style={{ 
-        marginBottom: isSmallScreen ? 10 : 12, 
+    <Card
+      style={{
+        marginBottom: isSmallScreen ? 10 : 12,
         backgroundColor: colors.surface,
         borderRadius: 20,
         elevation: 4,
@@ -183,7 +225,7 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
               resizeMode="cover"
             />
           ) : (
-            <View 
+            <View
               style={{
                 width: '100%',
                 height: '100%',
@@ -193,17 +235,17 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
                 alignItems: 'center',
               }}
             >
-              <MaterialCommunityIcons 
-                name="food" 
-                size={isSmallScreen ? 36 : 40} 
-                color={colors.onSurfaceVariant} 
+              <MaterialCommunityIcons
+                name="food"
+                size={isSmallScreen ? 36 : 40}
+                color={colors.onSurfaceVariant}
               />
             </View>
           )}
-          
+
           {/* Availability overlay */}
           {!item.isAvailable && (
-            <View 
+            <View
               style={{
                 position: 'absolute',
                 top: 0,
@@ -216,11 +258,7 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
                 alignItems: 'center',
               }}
             >
-              <Caption 
-                color="white" 
-                weight="bold"
-                align="center"
-              >
+              <Caption color="white" weight="bold" align="center">
                 {t('sold_out')}
               </Caption>
             </View>
@@ -231,7 +269,7 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
         <View className="flex-1 justify-between">
           {/* Top Section: Name and Switch */}
           <View className="flex-row justify-between items-start mb-3">
-            <LabelLarge 
+            <LabelLarge
               color={colors.onSurface}
               weight="bold"
               numberOfLines={2}
@@ -248,31 +286,28 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
               trackColor={{ false: '#E5E7EB', true: '#007aff' }}
               thumbColor={item.isAvailable ? '#ffffff' : '#f4f3f4'}
               disabled={toggleAvailabilityMutation.isPending}
-              style={{ 
-                transform: [{ scaleX: isSmallScreen ? 0.9 : 1 }, { scaleY: isSmallScreen ? 0.9 : 1 }] 
+              style={{
+                transform: [
+                  { scaleX: isSmallScreen ? 0.9 : 1 },
+                  { scaleY: isSmallScreen ? 0.9 : 1 },
+                ],
               }}
             />
           </View>
-          
+
           {/* Middle Section: Description only (removed category chip) */}
           <View className="mb-4">
-            <Body 
-              color={colors.onSurfaceVariant}
-              numberOfLines={3}
-            >
+            <Body color={colors.onSurfaceVariant} numberOfLines={3}>
               {item.description}
             </Body>
           </View>
-          
+
           {/* Bottom Section: Price and Actions */}
           <View className="flex-row justify-between items-center">
-            <LabelLarge 
-              color="#007aff"
-              weight="extraBold"
-            >
+            <LabelLarge color="#007aff" weight="extraBold">
               {item.price.toLocaleString()} XAF
             </LabelLarge>
-            
+
             <View className="flex-row">
               <TouchableOpacity
                 onPress={() => handleEditItem(item.id)}
@@ -284,13 +319,13 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
                 }}
                 className="items-center justify-center"
               >
-                <MaterialCommunityIcons 
-                  name="pencil" 
-                  size={isSmallScreen ? 16 : 18} 
-                  color="#007aff" 
+                <MaterialCommunityIcons
+                  name="pencil"
+                  size={isSmallScreen ? 16 : 18}
+                  color="#007aff"
                 />
               </TouchableOpacity>
-              
+
               <TouchableOpacity
                 onPress={() => handleDeleteItem(item.id, item.name)}
                 style={{
@@ -300,10 +335,10 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
                 }}
                 className="items-center justify-center"
               >
-                <MaterialCommunityIcons 
-                  name="delete" 
-                  size={isSmallScreen ? 16 : 18} 
-                  color="#FF4444" 
+                <MaterialCommunityIcons
+                  name="delete"
+                  size={isSmallScreen ? 16 : 18}
+                  color="#FF4444"
                 />
               </TouchableOpacity>
             </View>
@@ -317,11 +352,35 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
     return (
       <CommonView>
         <View className="flex-1 justify-center items-center p-6">
-          <MaterialCommunityIcons name="alert-circle" size={56} color="#FF4444" />
-          <Heading4 color={colors.onSurface} align="center" style={{ marginTop: 16 }}>
+          <View
+            style={{
+              width: 100,
+              height: 100,
+              borderRadius: 50,
+              backgroundColor: '#FF444415',
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginBottom: 24,
+            }}
+          >
+            <MaterialCommunityIcons
+              name="alert-circle"
+              size={48}
+              color="#FF4444"
+            />
+          </View>
+          <Heading4
+            color={colors.onSurface}
+            align="center"
+            style={{ marginBottom: 8 }}
+          >
             {t('something_went_wrong')}
           </Heading4>
-          <Body color={colors.onSurfaceVariant} align="center" style={{ marginTop: 8 }}>
+          <Body
+            color={colors.onSurfaceVariant}
+            align="center"
+            style={{ marginBottom: 24, paddingHorizontal: 32 }}
+          >
             {error.message}
           </Body>
           <TouchableOpacity
@@ -329,9 +388,24 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
               setError({ hasError: false, message: '' });
               onRefresh();
             }}
-            className="bg-blue-500 px-8 py-4 rounded-xl mt-6"
+            style={{
+              backgroundColor: colors.primary,
+              paddingHorizontal: 24,
+              paddingVertical: 12,
+              borderRadius: 25,
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}
           >
-            <Label color="white" weight="bold">{t('try_again')}</Label>
+            <MaterialCommunityIcons
+              name="refresh"
+              size={20}
+              color="white"
+              style={{ marginRight: 8 }}
+            />
+            <Label color="white" weight="bold">
+              {t('try_again')}
+            </Label>
           </TouchableOpacity>
         </View>
       </CommonView>
@@ -345,24 +419,21 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
         <View className="pb-2" style={{ paddingTop: 20 }}>
           <View className="flex-row justify-between items-center">
             <View className="flex-1">
-              <Heading1 
-                color={colors.onBackground} 
-                weight="bold"
-              >
+              <Heading1 color={colors.onBackground} weight="bold">
                 {t('menu_items')}
               </Heading1>
-              <Body 
-                color={colors.onSurfaceVariant} 
+              <Body
+                color={colors.onSurfaceVariant}
                 weight="medium"
                 style={{ marginTop: 8 }}
               >
-                {filteredItems.length} {t('items')} • {filteredItems.filter(item => item.isAvailable).length} {t('available')}
+                {filteredItems.length} {t('items')} •{' '}
+                {filteredItems.filter((item) => item.isAvailable).length}{' '}
+                {t('available')}
               </Body>
             </View>
           </View>
         </View>
-
-      
 
         {/* Category Filter - Enhanced spacing and typography */}
         <View className="pt-3 pb-2">
@@ -370,12 +441,13 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
             horizontal
             showsHorizontalScrollIndicator={false}
             data={categories}
-            keyExtractor={item => item.toString()}
+            keyExtractor={(item) => item.toString()}
             renderItem={({ item }) => {
               const emoji = item === 'all' ? '🍽️' : getCategoryEmoji(item);
               const label = item === 'all' ? t('all') : getCategoryLabel(item);
-              const categoryColor = item === 'all' ? '#007aff' : getCategoryColor(item);
-              
+              const categoryColor =
+                item === 'all' ? '#007aff' : getCategoryColor(item);
+
               return (
                 <TouchableOpacity
                   onPress={() => {
@@ -384,18 +456,22 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
                   }}
                   className={`${isSmallScreen ? 'px-4 py-3' : 'px-5 py-3'} rounded-full mr-3 flex-row items-center`}
                   style={{
-                    backgroundColor: selectedCategory === item ? categoryColor : colors.surfaceVariant,
+                    backgroundColor:
+                      selectedCategory === item
+                        ? categoryColor
+                        : colors.surfaceVariant,
                     elevation: selectedCategory === item ? 2 : 0,
                   }}
                 >
-                  <Typography 
-                    variant="body" 
-                    style={{ marginRight: 8 }}
-                  >
+                  <Typography variant="body" style={{ marginRight: 8 }}>
                     {emoji}
                   </Typography>
                   <Label
-                    color={selectedCategory === item ? 'white' : colors.onSurfaceVariant}
+                    color={
+                      selectedCategory === item
+                        ? 'white'
+                        : colors.onSurfaceVariant
+                    }
                     weight="semibold"
                   >
                     {label}
@@ -410,8 +486,8 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
         <FlatList
           data={filteredItems}
           renderItem={renderMenuItem}
-          keyExtractor={item => item.id}
-          contentContainerStyle={{ 
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={{
             paddingTop: isSmallScreen ? 8 : 12,
             paddingBottom: 100, // Space for FAB
           }}
@@ -420,26 +496,60 @@ const MenuItemsList: React.FC<RestaurantMenuStackScreenProps<'MenuItemsList'>> =
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View className="items-center justify-center py-16">
-              <MaterialCommunityIcons
-                name="food-off"
-                size={64}
-                color={colors.onSurfaceVariant}
-              />
-              <Heading4 
-                color={colors.onSurfaceVariant}
+              <View
+                style={{
+                  width: 120,
+                  height: 120,
+                  borderRadius: 60,
+                  backgroundColor: colors.surfaceVariant,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginBottom: 24,
+                }}
+              >
+                <MaterialCommunityIcons
+                  name="food-off"
+                  size={48}
+                  color={colors.onSurfaceVariant}
+                />
+              </View>
+              <Heading4
+                color={colors.onSurface}
                 weight="bold"
                 align="center"
-                style={{ marginTop: 16 }}
+                style={{ marginBottom: 8 }}
               >
                 {t('no_menu_items_yet')}
               </Heading4>
-              <Body 
+              <Body
                 color={colors.onSurfaceVariant}
                 align="center"
-                style={{ marginTop: 8, paddingHorizontal: 32 }}
+                style={{ paddingHorizontal: 32, lineHeight: 22 }}
               >
                 {t('start_building_menu')}
               </Body>
+              <TouchableOpacity
+                onPress={handleAddItem}
+                style={{
+                  backgroundColor: colors.primary,
+                  paddingHorizontal: 24,
+                  paddingVertical: 12,
+                  borderRadius: 25,
+                  marginTop: 24,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}
+              >
+                <MaterialCommunityIcons
+                  name="plus"
+                  size={20}
+                  color="white"
+                  style={{ marginRight: 8 }}
+                />
+                <Label color="white" weight="bold">
+                  {t('add_new_item')}
+                </Label>
+              </TouchableOpacity>
             </View>
           }
         />

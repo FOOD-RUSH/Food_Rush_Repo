@@ -34,8 +34,6 @@ export const registerSchema = yup.object().shape({
     .required('Confirmation required'),
 });
 
-
-
 // Address validation schema
 export const addressSchema = yup.object().shape({
   label: yup

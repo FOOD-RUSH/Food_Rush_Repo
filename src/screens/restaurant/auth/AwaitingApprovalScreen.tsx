@@ -16,9 +16,16 @@ import { useAuthStore } from '@/src/stores/AuthStore';
 import Toast from 'react-native-toast-message';
 import { useTranslation } from 'react-i18next';
 import { images } from '@/assets/images';
-import { Heading1, Heading2, Body, BodySmall, Label } from '@/src/components/common/Typography';
+import {
+  Heading1,
+  Heading2,
+  Body,
+  BodySmall,
+  Label,
+} from '@/src/components/common/Typography';
 
-interface AwaitingApprovalScreenProps extends AuthStackScreenProps<'AwaitingApproval'> {}
+interface AwaitingApprovalScreenProps
+  extends AuthStackScreenProps<'AwaitingApproval'> {}
 
 const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
   navigation,
@@ -31,34 +38,30 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
   const { restaurantId, userId } = route.params || {};
 
   const handleLogout = useCallback(async () => {
-    Alert.alert(
-      t('logout'),
-      t('are_you_sure_logout'),
-      [
-        {
-          text: t('cancel'),
-          style: 'cancel',
+    Alert.alert(t('logout'), t('are_you_sure_logout'), [
+      {
+        text: t('cancel'),
+        style: 'cancel',
+      },
+      {
+        text: t('logout'),
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await logout();
+            navigation.getParent()?.navigate('Onboarding');
+          } catch (error) {
+            console.error('Logout error:', error);
+            Toast.show({
+              type: 'error',
+              text1: t('error'),
+              text2: t('failed_to_logout'),
+              position: 'top',
+            });
+          }
         },
-        {
-          text: t('logout'),
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await logout();
-              navigation.getParent()?.navigate('Onboarding');
-            } catch (error) {
-              console.error('Logout error:', error);
-              Toast.show({
-                type: 'error',
-                text1: t('error'),
-                text2: t('failed_to_logout'),
-                position: 'top',
-              });
-            }
-          },
-        },
-      ],
-    );
+      },
+    ]);
   }, [logout, navigation, t]);
 
   const handleRefresh = useCallback(async () => {
@@ -94,8 +97,8 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
 
   return (
     <CommonView>
-      <ScrollView 
-        style={styles.container} 
+      <ScrollView
+        style={styles.container}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
       >
@@ -108,13 +111,17 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
           >
             <Ionicons name="arrow-back" size={24} color={colors.onSurface} />
           </TouchableOpacity>
-          
+
           <TouchableOpacity
             onPress={handleLogout}
             style={styles.headerButton}
             activeOpacity={0.7}
           >
-            <Ionicons name="log-out-outline" size={24} color={colors.onSurface} />
+            <Ionicons
+              name="log-out-outline"
+              size={24}
+              color={colors.onSurface}
+            />
           </TouchableOpacity>
         </View>
 
@@ -130,8 +137,19 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
 
           {/* Title Section */}
           <View style={styles.titleSection}>
-            <Heading1 color={colors.onSurface} weight="bold" align="center" style={{ marginBottom: 12 }}>{t('application_under_review')}</Heading1>
-            <Body color={colors.onSurfaceVariant} align="center" style={{ lineHeight: 24 }}>
+            <Heading1
+              color={colors.onSurface}
+              weight="bold"
+              align="center"
+              style={{ marginBottom: 12 }}
+            >
+              {t('application_under_review')}
+            </Heading1>
+            <Body
+              color={colors.onSurfaceVariant}
+              align="center"
+              style={{ lineHeight: 24 }}
+            >
               {t('review_process_description')}
             </Body>
           </View>
@@ -143,8 +161,17 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
                 <Ionicons name="checkmark" size={20} color="white" />
               </View>
               <View style={styles.stepContent}>
-                <Label color={colors.onSurface} weight="semibold" style={{ marginBottom: 4 }}>{t('application_submitted')}</Label>
-                <BodySmall color={colors.onSurfaceVariant} style={{ lineHeight: 20 }}>
+                <Label
+                  color={colors.onSurface}
+                  weight="semibold"
+                  style={{ marginBottom: 4 }}
+                >
+                  {t('application_submitted')}
+                </Label>
+                <BodySmall
+                  color={colors.onSurfaceVariant}
+                  style={{ lineHeight: 20 }}
+                >
                   {t('application_submitted_description')}
                 </BodySmall>
               </View>
@@ -157,8 +184,17 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
                 <Ionicons name="time" size={20} color="white" />
               </View>
               <View style={styles.stepContent}>
-                <Label color={colors.onSurface} weight="semibold" style={{ marginBottom: 4 }}>{t('under_review')}</Label>
-                <BodySmall color={colors.onSurfaceVariant} style={{ lineHeight: 20 }}>
+                <Label
+                  color={colors.onSurface}
+                  weight="semibold"
+                  style={{ marginBottom: 4 }}
+                >
+                  {t('under_review')}
+                </Label>
+                <BodySmall
+                  color={colors.onSurfaceVariant}
+                  style={{ lineHeight: 20 }}
+                >
                   {t('under_review_description')}
                 </BodySmall>
               </View>
@@ -168,11 +204,24 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
 
             <View style={styles.step}>
               <View style={[styles.stepIcon, styles.stepPending]}>
-                <Ionicons name="mail" size={20} color={colors.onSurfaceVariant} />
+                <Ionicons
+                  name="mail"
+                  size={20}
+                  color={colors.onSurfaceVariant}
+                />
               </View>
               <View style={styles.stepContent}>
-                <Label color={colors.onSurface} weight="semibold" style={{ marginBottom: 4 }}>{t('approval_notification')}</Label>
-                <BodySmall color={colors.onSurfaceVariant} style={{ lineHeight: 20 }}>
+                <Label
+                  color={colors.onSurface}
+                  weight="semibold"
+                  style={{ marginBottom: 4 }}
+                >
+                  {t('approval_notification')}
+                </Label>
+                <BodySmall
+                  color={colors.onSurfaceVariant}
+                  style={{ lineHeight: 20 }}
+                >
                   {t('approval_notification_description')}
                 </BodySmall>
               </View>
@@ -182,19 +231,50 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
           {/* Info Card */}
           {(restaurantId || userId) && (
             <View style={styles.infoCard}>
-              <Heading2 color={colors.onSurface} weight="semibold" align="center" style={{ marginBottom: 16 }}>{t('application_details')}</Heading2>
+              <Heading2
+                color={colors.onSurface}
+                weight="semibold"
+                align="center"
+                style={{ marginBottom: 16 }}
+              >
+                {t('application_details')}
+              </Heading2>
               {restaurantId && (
                 <View style={styles.infoRow}>
                   <Ionicons name="business" size={18} color={colors.primary} />
-                  <Label color={colors.onSurfaceVariant} weight="medium" style={{ flex: 1, marginLeft: 12 }}>{t('restaurant_id')}</Label>
-                  <BodySmall color={colors.onSurface} weight="medium" style={{ fontFamily: 'monospace' }}>{restaurantId}</BodySmall>
+                  <Label
+                    color={colors.onSurfaceVariant}
+                    weight="medium"
+                    style={{ flex: 1, marginLeft: 12 }}
+                  >
+                    {t('restaurant_id')}
+                  </Label>
+                  <BodySmall
+                    color={colors.onSurface}
+                    weight="medium"
+                    style={{ fontFamily: 'monospace' }}
+                  >
+                    {restaurantId}
+                  </BodySmall>
                 </View>
               )}
               {userId && (
                 <View style={styles.infoRow}>
                   <Ionicons name="person" size={18} color={colors.primary} />
-                  <Label color={colors.onSurfaceVariant} weight="medium" style={{ flex: 1, marginLeft: 12 }}>{t('user_id')}</Label>
-                  <BodySmall color={colors.onSurface} weight="medium" style={{ fontFamily: 'monospace' }}>{userId}</BodySmall>
+                  <Label
+                    color={colors.onSurfaceVariant}
+                    weight="medium"
+                    style={{ flex: 1, marginLeft: 12 }}
+                  >
+                    {t('user_id')}
+                  </Label>
+                  <BodySmall
+                    color={colors.onSurface}
+                    weight="medium"
+                    style={{ fontFamily: 'monospace' }}
+                  >
+                    {userId}
+                  </BodySmall>
                 </View>
               )}
             </View>
@@ -204,9 +284,18 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
           <View style={styles.timelineCard}>
             <View style={styles.timelineHeader}>
               <Ionicons name="time-outline" size={24} color={colors.primary} />
-              <Label color={colors.onPrimaryContainer} weight="semibold" style={{ marginLeft: 12 }}>{t('expected_timeline')}</Label>
+              <Label
+                color={colors.onPrimaryContainer}
+                weight="semibold"
+                style={{ marginLeft: 12 }}
+              >
+                {t('expected_timeline')}
+              </Label>
             </View>
-            <BodySmall color={colors.onPrimaryContainer} style={{ lineHeight: 20, opacity: 0.8 }}>
+            <BodySmall
+              color={colors.onPrimaryContainer}
+              style={{ lineHeight: 20, opacity: 0.8 }}
+            >
               {t('review_timeline_description')}
             </BodySmall>
           </View>
@@ -219,16 +308,24 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
               activeOpacity={0.8}
             >
               <Ionicons name="refresh" size={20} color="white" />
-              <Label color="white" weight="semibold">{t('check_status')}</Label>
+              <Label color="white" weight="semibold">
+                {t('check_status')}
+              </Label>
             </TouchableOpacity>
 
-            <TouchableOpacity 
-              style={[styles.button, styles.secondaryButton]} 
+            <TouchableOpacity
+              style={[styles.button, styles.secondaryButton]}
               onPress={handleContactSupport}
               activeOpacity={0.8}
             >
-              <Ionicons name="chatbubble-outline" size={20} color={colors.primary} />
-              <Label color={colors.primary} weight="semibold">{t('contact_support')}</Label>
+              <Ionicons
+                name="chatbubble-outline"
+                size={20}
+                color={colors.primary}
+              />
+              <Label color={colors.primary} weight="semibold">
+                {t('contact_support')}
+              </Label>
             </TouchableOpacity>
           </View>
         </View>

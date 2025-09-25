@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useLayoutEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -105,6 +105,10 @@ const RestaurantReviewsScreen: React.FC<
     error,
     refetch,
   } = useRestaurantReviews(restaurantId);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({ headerTitle: `${restaurantName} ${t('reviews')}` });
+  }, [navigation, restaurantName, t]);
 
   const reviewStats = useMemo(() => {
     if (!reviews || reviews.length === 0) {
@@ -309,7 +313,7 @@ const RestaurantReviewsScreen: React.FC<
         </View>
 
         <View className="flex-1 px-4 py-6">
-          <ErrorDisplay title={t('failed_to_load_reviews')} onRetry={refetch} />
+          <ErrorDisplay error={t('failed_to_load_reviews')} onRetry={refetch} />
         </View>
       </CommonView>
     );
@@ -318,20 +322,6 @@ const RestaurantReviewsScreen: React.FC<
   return (
     <CommonView>
       <StatusBar translucent backgroundColor="transparent" />
-
-      {/* Header */}
-      <View className="flex-row items-center px-4 py-3 border-b border-gray-200">
-        <TouchableOpacity onPress={handleGoBack} className="mr-4">
-          <MaterialIcons name="arrow-back" size={24} color={colors.onSurface} />
-        </TouchableOpacity>
-        <Text
-          className="text-lg font-semibold flex-1"
-          style={{ color: colors.onSurface }}
-          numberOfLines={1}
-        >
-          {restaurantName} {t('reviews')}
-        </Text>
-      </View>
 
       {/* Content */}
       <FlatList

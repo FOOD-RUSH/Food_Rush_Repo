@@ -11,7 +11,14 @@ import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
 
-import { Typography, Heading4, Heading5, Body, Label, Caption } from '@/src/components/common/Typography';
+import {
+  Typography,
+  Heading4,
+  Heading5,
+  Body,
+  Label,
+  Caption,
+} from '@/src/components/common/Typography';
 import Toast from 'react-native-toast-message';
 import { apiClient } from '@/src/services/shared/apiClient';
 
@@ -48,7 +55,9 @@ const DeliveryConfirmationModal: React.FC<DeliveryConfirmationModalProps> = ({
       console.log('🚀 Confirming delivery for order:', orderId);
 
       // API call to confirm delivery received
-      const response = await apiClient.post(`/api/v1/orders/${orderId}/confirm-received`);
+      const response = await apiClient.post(
+        `/api/v1/orders/${orderId}/confirm-received`,
+      );
 
       if (response.status === 200) {
         Toast.show({
@@ -59,10 +68,10 @@ const DeliveryConfirmationModal: React.FC<DeliveryConfirmationModalProps> = ({
         });
 
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        
+
         // Call success callback
         onConfirmSuccess?.();
-        
+
         // Close modal
         onClose();
       } else {
@@ -70,7 +79,7 @@ const DeliveryConfirmationModal: React.FC<DeliveryConfirmationModalProps> = ({
       }
     } catch (error: any) {
       console.error('Error confirming delivery:', error);
-      
+
       Toast.show({
         type: 'error',
         text1: 'Confirmation Failed',
@@ -100,7 +109,15 @@ const DeliveryConfirmationModal: React.FC<DeliveryConfirmationModalProps> = ({
     >
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         {/* Header */}
-        <View style={[styles.header, { backgroundColor: colors.surface, borderBottomColor: colors.outline }]}>
+        <View
+          style={[
+            styles.header,
+            {
+              backgroundColor: colors.surface,
+              borderBottomColor: colors.outline,
+            },
+          ]}
+        >
           <View style={{ flex: 1 }}>
             <Heading4 color={colors.onSurface} weight="bold">
               Confirm Delivery
@@ -109,7 +126,7 @@ const DeliveryConfirmationModal: React.FC<DeliveryConfirmationModalProps> = ({
               Order #{orderNumber || orderId.slice(-6)}
             </Caption>
           </View>
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={handleClose}
             disabled={isConfirming}
             style={styles.closeButton}
@@ -121,21 +138,39 @@ const DeliveryConfirmationModal: React.FC<DeliveryConfirmationModalProps> = ({
         {/* Content */}
         <View style={styles.content}>
           {/* Success Icon */}
-          <View style={[styles.iconContainer, { backgroundColor: colors.primaryContainer || colors.primary + '20' }]}>
-            <MaterialCommunityIcons 
-              name="package-variant-closed" 
-              size={64} 
-              color={colors.primary} 
+          <View
+            style={[
+              styles.iconContainer,
+              {
+                backgroundColor:
+                  colors.primaryContainer || colors.primary + '20',
+              },
+            ]}
+          >
+            <MaterialCommunityIcons
+              name="package-variant-closed"
+              size={64}
+              color={colors.primary}
             />
           </View>
 
           {/* Main Message */}
           <View style={styles.messageContainer}>
-            <Heading4 color={colors.onSurface} weight="bold" align="center" style={{ marginBottom: 8 }}>
+            <Heading4
+              color={colors.onSurface}
+              weight="bold"
+              align="center"
+              style={{ marginBottom: 8 }}
+            >
               Did you receive your order?
             </Heading4>
-            <Body color={colors.onSurfaceVariant} align="center" style={{ lineHeight: 22 }}>
-              Please confirm that you have received your delivery from {restaurantName || 'the restaurant'}.
+            <Body
+              color={colors.onSurfaceVariant}
+              align="center"
+              style={{ lineHeight: 22 }}
+            >
+              Please confirm that you have received your delivery from{' '}
+              {restaurantName || 'the restaurant'}.
             </Body>
           </View>
 
@@ -143,7 +178,11 @@ const DeliveryConfirmationModal: React.FC<DeliveryConfirmationModalProps> = ({
           <Card style={[styles.orderCard, { backgroundColor: colors.surface }]}>
             <View style={styles.orderCardContent}>
               <View style={styles.orderDetailRow}>
-                <MaterialCommunityIcons name="store" size={20} color={colors.onSurfaceVariant} />
+                <MaterialCommunityIcons
+                  name="store"
+                  size={20}
+                  color={colors.onSurfaceVariant}
+                />
                 <View style={{ flex: 1, marginLeft: 12 }}>
                   <Label color={colors.onSurface} weight="semibold">
                     Restaurant
@@ -156,7 +195,11 @@ const DeliveryConfirmationModal: React.FC<DeliveryConfirmationModalProps> = ({
 
               {deliveryAddress && (
                 <View style={styles.orderDetailRow}>
-                  <MaterialCommunityIcons name="map-marker" size={20} color={colors.onSurfaceVariant} />
+                  <MaterialCommunityIcons
+                    name="map-marker"
+                    size={20}
+                    color={colors.onSurfaceVariant}
+                  />
                   <View style={{ flex: 1, marginLeft: 12 }}>
                     <Label color={colors.onSurface} weight="semibold">
                       Delivery Address
@@ -169,13 +212,20 @@ const DeliveryConfirmationModal: React.FC<DeliveryConfirmationModalProps> = ({
               )}
 
               <View style={styles.orderDetailRow}>
-                <MaterialCommunityIcons name="clock-outline" size={20} color={colors.onSurfaceVariant} />
+                <MaterialCommunityIcons
+                  name="clock-outline"
+                  size={20}
+                  color={colors.onSurfaceVariant}
+                />
                 <View style={{ flex: 1, marginLeft: 12 }}>
                   <Label color={colors.onSurface} weight="semibold">
                     Delivery Time
                   </Label>
                   <Body color={colors.onSurfaceVariant}>
-                    {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {new Date().toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
                   </Body>
                 </View>
               </View>
@@ -183,18 +233,36 @@ const DeliveryConfirmationModal: React.FC<DeliveryConfirmationModalProps> = ({
           </Card>
 
           {/* Information Note */}
-          <Card style={[styles.infoCard, { backgroundColor: colors.surfaceVariant }]}>
+          <Card
+            style={[
+              styles.infoCard,
+              { backgroundColor: colors.surfaceVariant },
+            ]}
+          >
             <View style={styles.infoCardContent}>
-              <MaterialCommunityIcons name="information" size={20} color={colors.primary} />
-              <Body color={colors.onSurfaceVariant} style={{ flex: 1, marginLeft: 12, lineHeight: 20 }}>
-                Confirming delivery helps us improve our service and ensures accurate order tracking.
+              <MaterialCommunityIcons
+                name="information"
+                size={20}
+                color={colors.primary}
+              />
+              <Body
+                color={colors.onSurfaceVariant}
+                style={{ flex: 1, marginLeft: 12, lineHeight: 20 }}
+              >
+                Confirming delivery helps us improve our service and ensures
+                accurate order tracking.
               </Body>
             </View>
           </Card>
         </View>
 
         {/* Action Buttons */}
-        <View style={[styles.buttonContainer, { backgroundColor: colors.surface, borderTopColor: colors.outline }]}>
+        <View
+          style={[
+            styles.buttonContainer,
+            { backgroundColor: colors.surface, borderTopColor: colors.outline },
+          ]}
+        >
           <Button
             mode="outlined"
             onPress={handleClose}
@@ -204,7 +272,7 @@ const DeliveryConfirmationModal: React.FC<DeliveryConfirmationModalProps> = ({
           >
             Not Yet
           </Button>
-          
+
           <Button
             mode="contained"
             onPress={handleConfirmDelivery}

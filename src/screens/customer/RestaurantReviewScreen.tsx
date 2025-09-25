@@ -304,8 +304,7 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
               labelStyle={{
                 fontSize: 16,
                 fontWeight: '600',
-                color:
-                  score === 0 ? colors.onSurfaceVariant : colors.onPrimary,
+                color: score === 0 ? colors.onSurfaceVariant : colors.onPrimary,
               }}
             >
               {createReviewMutation.isPending ? t('submitting') : t('submit')}

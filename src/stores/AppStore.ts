@@ -147,7 +147,8 @@ export const useAppStore = create<AppState & AppActions>()(
 
 // Performance-optimized selector hooks
 export const useTheme = () => useAppStore((state) => state.theme);
-export const useSelectedUserType = () => useAppStore((state) => state.selectedUserType);
+export const useSelectedUserType = () =>
+  useAppStore((state) => state.selectedUserType);
 export const useOnboardingComplete = () =>
   useAppStore((state) => state.isOnboardingComplete);
 export const useIsFirstLaunch = () =>
@@ -162,10 +163,11 @@ export const useNeedsOnboarding = () =>
   useAppStore((state) => state._hasHydrated && !state.isOnboardingComplete);
 
 export const useCanProceedToAuth = () =>
-  useAppStore((state) =>
-    state._hasHydrated &&
-    state.isOnboardingComplete &&
-    state.selectedUserType !== null
+  useAppStore(
+    (state) =>
+      state._hasHydrated &&
+      state.isOnboardingComplete &&
+      state.selectedUserType !== null,
   );
 
 // Subscribe to theme changes for system integration

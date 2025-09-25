@@ -3,7 +3,14 @@ import { View, TouchableOpacity } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { Heading5, Heading4, Heading3, Body, BodyLarge, Label } from './Typography';
+import {
+  Heading5,
+  Heading4,
+  Heading3,
+  Body,
+  BodyLarge,
+  Label,
+} from './Typography';
 
 interface EmptyStateProps {
   icon?: keyof typeof Ionicons.glyphMap;

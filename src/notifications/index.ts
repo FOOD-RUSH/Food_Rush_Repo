@@ -11,7 +11,10 @@ export const restaurantNotificationService = new NotificationService({
 });
 
 // Get the appropriate service based on user type
-export const getNotificationService = (userType: 'customer' | 'restaurant', userId?: string) => {
+export const getNotificationService = (
+  userType: 'customer' | 'restaurant',
+  userId?: string,
+) => {
   if (userType === 'customer') {
     return customerNotificationService;
   }
@@ -66,10 +69,14 @@ export const sendNewOrderNotification = async (
   restaurantName?: string,
 ): Promise<void> => {
   // Send to restaurant
-  await sendOrderNotification('restaurant', orderId, 'pending', { customerName });
-  
+  await sendOrderNotification('restaurant', orderId, 'pending', {
+    customerName,
+  });
+
   // Send to customer
-  await sendOrderNotification('customer', orderId, 'pending', { restaurantName });
+  await sendOrderNotification('customer', orderId, 'pending', {
+    restaurantName,
+  });
 };
 
 export const sendOrderStatusUpdate = async (
@@ -80,13 +87,26 @@ export const sendOrderStatusUpdate = async (
 ): Promise<void> => {
   // Send to customer
   await sendOrderNotification('customer', orderId, status, { restaurantName });
-  
+
   // Send to restaurant (if needed)
-  if (['confirmed', 'preparing', 'ready', 'out_for_delivery', 'delivered'].includes(status)) {
-    await sendOrderNotification('restaurant', orderId, status, { customerName });
+  if (
+    [
+      'confirmed',
+      'preparing',
+      'ready',
+      'out_for_delivery',
+      'delivered',
+    ].includes(status)
+  ) {
+    await sendOrderNotification('restaurant', orderId, status, {
+      customerName,
+    });
   }
 };
 
 // Export the service class and types
 export { default as NotificationService } from './NotificationService';
-export type { LocalNotificationData, NotificationConfig } from './NotificationService';
+export type {
+  LocalNotificationData,
+  NotificationConfig,
+} from './NotificationService';

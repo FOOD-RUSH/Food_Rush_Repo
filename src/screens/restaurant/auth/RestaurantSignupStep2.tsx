@@ -1,15 +1,22 @@
-import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import React, {
+  useState,
+  useCallback,
+  useMemo,
+  useRef,
+  useEffect,
+} from 'react';
 import {
   View,
-  Text,
   ScrollView,
   TouchableOpacity,
   Modal,
   KeyboardAvoidingView,
   Platform,
-  StyleSheet,
   Image,
   Animated,
+  Dimensions,
+  ImageBackground,
+  StatusBar,
 } from 'react-native';
 import {
   Button,
@@ -21,7 +28,6 @@ import {
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { Ionicons } from '@expo/vector-icons';
-import CommonView from '@/src/components/common/CommonView';
 import { AuthStackScreenProps } from '@/src/navigation/types';
 import { useAuthStore } from '@/src/stores/AuthStore';
 import { TextButton } from '@/src/components/common/TextButton';
@@ -34,13 +40,16 @@ import * as ImagePicker from 'expo-image-picker';
 import { Location } from '@/src/location/types';
 import { useLocation } from '@/src/location/useLocation';
 import LocationService from '@/src/location/LocationService';
-import { Heading2, Body, Label } from '@/src/components/common/Typography';
+import {
+  Heading1,
+  Heading2,
+  Body,
+  Label,
+} from '@/src/components/common/Typography';
 import * as yup from 'yup';
 
 interface Step2FormData {
   restaurantName: string;
-  address: string;
-  documents?: string;
 }
 
 interface Step1Data {
@@ -51,23 +60,20 @@ interface Step1Data {
   confirmPassword: string;
 }
 
-// Validation schema for step 2
 const step2Schema = yup.object().shape({
   restaurantName: yup
     .string()
     .required('Restaurant name is required')
     .min(2, 'Restaurant name must be at least 2 characters')
     .max(100, 'Restaurant name must be less than 100 characters'),
-  address: yup
-    .string()
-    .required('Address is required')
-    .min(10, 'Address must be at least 10 characters'),
 });
 
-const RestaurantSignupStep2: React.FC<AuthStackScreenProps<'RestaurantSignupStep2'>> = ({
-  navigation,
-  route,
-}) => {
+const { height } = Dimensions.get('window');
+const RestaurantBgImage = require('@/assets/images/vendor_background.jpg');
+
+const RestaurantSignupStep2: React.FC<
+  AuthStackScreenProps<'RestaurantSignupStep2'>
+> = ({ navigation, route }) => {
   const { colors } = useTheme();
   const { t } = useTranslation('auth');
   const { isConnected, isInternetReachable } = useNetwork();
@@ -76,7 +82,6 @@ const RestaurantSignupStep2: React.FC<AuthStackScreenProps<'RestaurantSignupStep
     isPending,
     error: registerError,
   } = useRegisterRestaurant();
-  const styles = useMemo(() => createStyles(colors), [colors]);
   const { clearError, setError, error: authError } = useAuthStore();
 
   // Get step 1 data from route params
@@ -85,11 +90,86 @@ const RestaurantSignupStep2: React.FC<AuthStackScreenProps<'RestaurantSignupStep
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [documentUri, setDocumentUri] = useState<string | null>(null);
   const [documentName, setDocumentName] = useState<string>('');
-  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<Location | null>(
+    null,
+  );
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [profileImageUri, setProfileImageUri] = useState<string | null>(null);
+
+  // Animations
+  const overlayAnim = useRef(new Animated.Value(1)).current;
+  const formAnim = useRef(new Animated.Value(height)).current;
+  const titleAnim = useRef(new Animated.Value(0)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
+
+  // Use location service
+  const { hasPermission, requestPermissionWithLocation } = useLocation({
+    autoRequest: false,
+    requestOnMount: false,
+  });
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isValid },
+  } = useForm<Step2FormData>({
+    resolver: yupResolver(step2Schema) as any,
+    mode: 'onChange',
+    defaultValues: { restaurantName: '' },
+  });
+
+  // Memoized styles
+  const containerStyle = useMemo(
+    () => ({
+      backgroundColor: colors.surface,
+      borderTopLeftRadius: 28,
+      borderTopRightRadius: 28,
+      paddingHorizontal: 24,
+      paddingTop: 24,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: -4 },
+      shadowOpacity: 0.15,
+      shadowRadius: 12,
+      elevation: 15,
+    }),
+    [colors.surface],
+  );
+
+  const buttonStyle = useMemo(
+    () => ({
+      borderRadius: 14,
+      marginTop: 8,
+    }),
+    [],
+  );
+
+  // Entrance animations
+  useEffect(() => {
+    const animateEntrance = () => {
+      Animated.sequence([
+        Animated.timing(titleAnim, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+        Animated.parallel([
+          Animated.timing(overlayAnim, {
+            toValue: 0.5,
+            duration: 400,
+            useNativeDriver: false,
+          }),
+          Animated.timing(formAnim, {
+            toValue: height * 0.35,
+            duration: 500,
+            useNativeDriver: false,
+          }),
+        ]),
+      ]).start();
+    };
+
+    animateEntrance();
+  }, []);
 
   // Animate loading indicator
   useEffect(() => {
@@ -99,7 +179,7 @@ const RestaurantSignupStep2: React.FC<AuthStackScreenProps<'RestaurantSignupStep
           toValue: 1,
           duration: 1000,
           useNativeDriver: true,
-        })
+        }),
       );
       rotation.start();
       return () => rotation.stop();
@@ -108,40 +188,23 @@ const RestaurantSignupStep2: React.FC<AuthStackScreenProps<'RestaurantSignupStep
     }
   }, [isGettingLocation, rotateAnim]);
 
-  // Use your existing location service
-  const {
-    hasPermission,
-    requestPermissionWithLocation,
-  } = useLocation({ autoRequest: false, requestOnMount: false });
-
-  const {
-    control,
-    handleSubmit,
-    formState: { errors, isValid },
-  } = useForm<Step2FormData>({
-    resolver: yupResolver(step2Schema) as any,
-    mode: 'onChange',
-    defaultValues: {
-      restaurantName: '',
-      address: '',
-    },
-  });
-
-  // Location handler
-  const handleLocationSelected = useCallback((location: Location | null) => {
-    console.log('📍 Location Selected:');
-    console.log('Latitude:', location?.latitude);
-    console.log('Longitude:', location?.longitude);
-    console.log('Formatted Address:', location?.formattedAddress);
-    setSelectedLocation(location);
-  }, []);
+  const checkNetwork = useCallback(() => {
+    if (!isConnected || !isInternetReachable) {
+      Toast.show({
+        type: 'error',
+        text1: t('error'),
+        text2: 'No internet connection. Please check your network settings.',
+        position: 'top',
+      });
+      return false;
+    }
+    return true;
+  }, [isConnected, isInternetReachable, t]);
 
   // Get exact GPS location
   const getExactLocation = useCallback(async () => {
     setIsGettingLocation(true);
     try {
-      console.log('📍 Getting exact GPS location...');
-      
       const servicesEnabled = await LocationService.isLocationEnabled();
       if (!servicesEnabled) {
         Toast.show({
@@ -167,13 +230,12 @@ const RestaurantSignupStep2: React.FC<AuthStackScreenProps<'RestaurantSignupStep
       }
 
       const locationResult = await LocationService.getCurrentLocation(true);
-      
-      if (locationResult.success && locationResult.location && !locationResult.location.isFallback) {
-        console.log('✅ Exact GPS location obtained:');
-        console.log('Latitude:', locationResult.location.latitude);
-        console.log('Longitude:', locationResult.location.longitude);
-        console.log('Address:', locationResult.location.formattedAddress);
-        
+
+      if (
+        locationResult.success &&
+        locationResult.location &&
+        !locationResult.location.isFallback
+      ) {
         setSelectedLocation(locationResult.location);
         Toast.show({
           type: 'success',
@@ -182,16 +244,16 @@ const RestaurantSignupStep2: React.FC<AuthStackScreenProps<'RestaurantSignupStep
           position: 'top',
         });
       } else {
-        console.log('❌ Failed to get exact location, result:', locationResult);
         Toast.show({
           type: 'error',
           text1: 'Location Error',
-          text2: locationResult.error || 'Could not get exact GPS location. Please try again.',
+          text2:
+            locationResult.error ||
+            'Could not get exact GPS location. Please try again.',
           position: 'top',
         });
       }
     } catch (error) {
-      console.error('Error getting exact location:', error);
       Toast.show({
         type: 'error',
         text1: 'Location Error',
@@ -203,36 +265,25 @@ const RestaurantSignupStep2: React.FC<AuthStackScreenProps<'RestaurantSignupStep
     }
   }, [hasPermission, requestPermissionWithLocation]);
 
-  const openLocationModal = useCallback(() => {
-    setShowLocationModal(true);
-  }, []);
-
-  const closeLocationModal = useCallback(() => {
-    setShowLocationModal(false);
-  }, []);
-
-  const handleGetLocationFromModal = useCallback(async () => {
-    setShowLocationModal(false);
-    await getExactLocation();
-  }, [getExactLocation]);
-
   const onSubmit = useCallback(
     async (data: Step2FormData) => {
-      if (!isConnected || !isInternetReachable) {
-        Toast.show({
-          type: 'error',
-          text1: t('error'),
-          text2: t('no_internet_connection'),
-          position: 'top',
-        });
-        return;
-      }
+      if (!checkNetwork()) return;
 
       if (!termsAccepted) {
         Toast.show({
           type: 'error',
           text1: t('error'),
-          text2: t('accept_terms'),
+          text2: 'Please accept the terms and conditions',
+          position: 'top',
+        });
+        return;
+      }
+
+      if (!selectedLocation || selectedLocation.isFallback) {
+        Toast.show({
+          type: 'error',
+          text1: 'Exact Location Required',
+          text2: 'Please get your exact GPS location before registering',
           position: 'top',
         });
         return;
@@ -241,52 +292,34 @@ const RestaurantSignupStep2: React.FC<AuthStackScreenProps<'RestaurantSignupStep
       clearError();
 
       try {
-        // Validate that we have exact GPS coordinates
-        if (!selectedLocation || selectedLocation.isFallback) {
-          Toast.show({
-            type: 'error',
-            text1: 'Exact Location Required',
-            text2: 'Please get your exact GPS location before registering',
-            position: 'top',
-          });
-          return;
-        }
-
-        // Combine step 1 and step 2 data - ALL fields from both steps
         const registrationData = {
           fullName: step1Data.fullName.trim(),
-          email: step1Data.email.trim(), // From step 1
-          phoneNumber: step1Data.phoneNumber.replace('+237', ''), // Just the number without country code
-          password: step1Data.password, // From step 1
-          name: data.restaurantName.trim(), // Restaurant name from step 2
-          address: selectedLocation.formattedAddress, // Use exact GPS location address from step 2
-          phone: step1Data.phoneNumber, // Full phone with country code from step 1
-          nearLat: selectedLocation.latitude, // Exact GPS latitude from step 2
-          nearLng: selectedLocation.longitude, // Exact GPS longitude from step 2
-          ...(documentUri && { document: documentUri }), // Optional document from step 2
+          email: step1Data.email.trim(),
+          phoneNumber: step1Data.phoneNumber.replace('+237', ''),
+          password: step1Data.password,
+          name: data.restaurantName.trim(),
+          address: selectedLocation.formattedAddress,
+          phone: step1Data.phoneNumber,
+          nearLat: selectedLocation.latitude,
+          nearLng: selectedLocation.longitude,
+          ...(documentUri && { document: documentUri }),
         };
 
-        console.log('🚀 Sending registration data to backend:');
-        console.log('nearLat:', registrationData.nearLat);
-        console.log('nearLng:', registrationData.nearLng);
-        console.log('address:', registrationData.address);
-
         registerRestaurantMutation(registrationData, {
-          onSuccess: (response) => {
+          onSuccess: () => {
             Toast.show({
               type: 'success',
               text1: 'Registration Successful',
-              text2: 'Your restaurant registration has been submitted and is awaiting approval.',
+              text2:
+                'Your restaurant registration has been submitted and is awaiting approval.',
               position: 'top',
             });
-
-            console.log('Registration successful', response);
             navigation.navigate('AwaitingApproval');
           },
           onError: (error: any) => {
-            const errorMessage = error?.message || t('failed_to_create_account');
+            const errorMessage =
+              error?.message || t('failed_to_create_account');
             setError(errorMessage);
-
             Toast.show({
               type: 'error',
               text1: t('error'),
@@ -298,7 +331,6 @@ const RestaurantSignupStep2: React.FC<AuthStackScreenProps<'RestaurantSignupStep
       } catch (error: any) {
         const errorMessage = error?.message || t('failed_to_create_account');
         setError(errorMessage);
-
         Toast.show({
           type: 'error',
           text1: t('error'),
@@ -307,18 +339,27 @@ const RestaurantSignupStep2: React.FC<AuthStackScreenProps<'RestaurantSignupStep
         });
       }
     },
-    [isConnected, isInternetReachable, termsAccepted, registerRestaurantMutation, clearError, setError, t, navigation, documentUri, profileImageUri, selectedLocation, step1Data]
+    [
+      checkNetwork,
+      termsAccepted,
+      selectedLocation,
+      clearError,
+      setError,
+      registerRestaurantMutation,
+      navigation,
+      step1Data,
+      documentUri,
+      t,
+    ],
   );
 
-  const toggleTerms = useCallback(() => {
-    setTermsAccepted((prev) => !prev);
-  }, []);
+  const toggleTerms = useCallback(() => setTermsAccepted((prev) => !prev), []);
 
   const openTerms = useCallback(() => {
     Toast.show({
       type: 'info',
       text1: t('info'),
-      text2: t('terms_not_implemented'),
+      text2: 'Terms of service will be implemented',
       position: 'top',
     });
   }, [t]);
@@ -327,7 +368,7 @@ const RestaurantSignupStep2: React.FC<AuthStackScreenProps<'RestaurantSignupStep
     Toast.show({
       type: 'info',
       text1: t('info'),
-      text2: t('privacy_policy_not_implemented'),
+      text2: 'Privacy policy will be implemented',
       position: 'top',
     });
   }, [t]);
@@ -354,7 +395,6 @@ const RestaurantSignupStep2: React.FC<AuthStackScreenProps<'RestaurantSignupStep
         });
       }
     } catch (error) {
-      console.error('Document picker error:', error);
       Toast.show({
         type: 'error',
         text1: 'Error',
@@ -385,7 +425,6 @@ const RestaurantSignupStep2: React.FC<AuthStackScreenProps<'RestaurantSignupStep
         });
       }
     } catch (error) {
-      console.error('Image picker error:', error);
       Toast.show({
         type: 'error',
         text1: 'Error',
@@ -402,493 +441,573 @@ const RestaurantSignupStep2: React.FC<AuthStackScreenProps<'RestaurantSignupStep
   }
 
   return (
-    <CommonView>
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+    <View style={{ flex: 1 }}>
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor="transparent"
+        translucent
+      />
+
+      {/* Background Image with Overlay */}
+      <ImageBackground
+        source={RestaurantBgImage}
+        style={{ flex: 1 }}
+        resizeMode="cover"
+      >
+        <Animated.View
+          style={{
+            flex: 1,
+            backgroundColor: `rgba(0, 0, 0, ${overlayAnim})`,
+          }}
+        />
+      </ImageBackground>
+
+      {/* Header */}
+      <Animated.View
+        style={{
+          position: 'absolute',
+          top: 50,
+          left: 16,
+          opacity: titleAnim,
+        }}
+      >
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.15)',
+            borderRadius: 20,
+            padding: 12,
+            backdropFilter: 'blur(10px)',
+          }}
+        >
+          <Ionicons name="arrow-back" size={24} color="white" />
+        </TouchableOpacity>
+      </Animated.View>
+
+      {/* Title Section */}
+      <Animated.View
+        style={{
+          position: 'absolute',
+          top: height * 0.12,
+          left: 0,
+          right: 0,
+          alignItems: 'center',
+          opacity: titleAnim,
+          transform: [
+            {
+              translateY: titleAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [30, 0],
+              }),
+            },
+          ],
+        }}
+      >
+        {/* Profile Image Section */}
+        <TouchableOpacity
+          onPress={pickProfileImage}
+          style={{
+            position: 'relative',
+            marginBottom: 20,
+          }}
+        >
+          {profileImageUri ? (
+            <Image
+              source={{ uri: profileImageUri }}
+              style={{
+                width: 100,
+                height: 100,
+                borderRadius: 50,
+                borderWidth: 3,
+                borderColor: 'rgba(255, 255, 255, 0.8)',
+              }}
+              resizeMode="cover"
+            />
+          ) : (
+            <View
+              style={{
+                width: 100,
+                height: 100,
+                borderRadius: 50,
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderWidth: 2,
+                borderColor: 'rgba(255, 255, 255, 0.3)',
+                borderStyle: 'dashed',
+                backdropFilter: 'blur(10px)',
+              }}
+            >
+              <Ionicons
+                name="camera-outline"
+                size={36}
+                color="rgba(255, 255, 255, 0.8)"
+              />
+            </View>
+          )}
+          <View
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              right: 0,
+              backgroundColor: colors.primary,
+              borderRadius: 16,
+              width: 32,
+              height: 32,
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderWidth: 2,
+              borderColor: 'white',
+            }}
+          >
+            <Ionicons name="camera" size={16} color="white" />
+          </View>
+        </TouchableOpacity>
+
+        <Heading1
+          style={{
+            fontSize: 28,
+            fontWeight: '700',
+            color: 'white',
+            textAlign: 'center',
+            marginBottom: 8,
+            textShadowColor: 'rgba(0, 0, 0, 0.7)',
+            textShadowOffset: { width: 0, height: 2 },
+            textShadowRadius: 8,
+            fontFamily: 'Urbanist-Bold',
+          }}
+        >
+          Restaurant Details
+        </Heading1>
+
+        <Body
+          style={{
+            fontSize: 16,
+            color: 'rgba(255, 255, 255, 0.9)',
+            textAlign: 'center',
+            fontFamily: 'Urbanist-Medium',
+            textShadowColor: 'rgba(0, 0, 0, 0.5)',
+            textShadowOffset: { width: 0, height: 1 },
+            textShadowRadius: 4,
+          }}
+        >
+          Step 2 of 2 - Almost done!
+        </Body>
+      </Animated.View>
+
+      {/* Form Container */}
+      <Animated.View
+        style={{
+          position: 'absolute',
+          top: formAnim,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          ...containerStyle,
+        }}
+      >
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={styles.container}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+          style={{ flex: 1 }}
         >
           <ScrollView
-            style={styles.scrollView}
             showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 40 }}
             keyboardShouldPersistTaps="handled"
           >
-            {/* Header */}
-            <View style={styles.header}>
+            {/* Drag Handle */}
+            <View
+              style={{
+                width: 40,
+                height: 4,
+                backgroundColor: colors.outline,
+                borderRadius: 2,
+                alignSelf: 'center',
+                marginBottom: 24,
+              }}
+            />
+
+            {/* Restaurant Name Input */}
+            <Controller
+              control={control}
+              name="restaurantName"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <View style={{ marginBottom: 24 }}>
+                  <TextInput
+                    label="Restaurant Name"
+                    placeholder="Enter your restaurant name"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    autoCapitalize="words"
+                    mode="outlined"
+                    left={<TextInput.Icon icon="storefront-outline" />}
+                    error={!!errors.restaurantName}
+                    style={{
+                      backgroundColor: colors.surfaceVariant,
+                      fontFamily: 'Urbanist-Regular',
+                    }}
+                    contentStyle={{
+                      fontFamily: 'Urbanist-Regular',
+                      fontSize: 16,
+                    }}
+                    outlineStyle={{
+                      borderRadius: 14,
+                    }}
+                  />
+                  <HelperText type="error" visible={!!errors.restaurantName}>
+                    {errors.restaurantName?.message}
+                  </HelperText>
+                </View>
+              )}
+            />
+
+            {/* Location Button */}
+            <View style={{ marginBottom: 24 }}>
               <TouchableOpacity
-                onPress={() => {
-                  navigation.goBack();
+                style={{
+                  backgroundColor: selectedLocation
+                    ? colors.primary + '15'
+                    : colors.surfaceVariant,
+                  borderRadius: 14,
+                  borderWidth: 1.5,
+                  borderColor: selectedLocation
+                    ? colors.primary
+                    : colors.outline,
+                  padding: 16,
+                  flexDirection: 'row',
+                  alignItems: 'center',
                 }}
+                onPress={() => setShowLocationModal(true)}
+                activeOpacity={0.7}
               >
                 <Ionicons
-                  name="arrow-back"
+                  name="location-outline"
                   size={24}
-                  color={colors.onSurface}
+                  color={
+                    selectedLocation ? colors.primary : colors.onSurfaceVariant
+                  }
                 />
-              </TouchableOpacity>
-            </View>
-
-            {/* Logo and Title */}
-            <View style={styles.logoContainer}>
-              <TouchableOpacity onPress={pickProfileImage} style={styles.profileImageContainer}>
-                {profileImageUri ? (
-                  <Image 
-                    source={{ uri: profileImageUri }}
-                    style={styles.profileImage}
-                    resizeMode="cover"
-                  />
-                ) : (
-                  <View style={styles.profileImagePlaceholder}>
-                    <Ionicons name="camera" size={40} color={colors.onSurfaceVariant} />
-                  </View>
-                )}
-                <View style={styles.cameraIconOverlay}>
-                  <Ionicons name="camera" size={16} color="white" />
-                </View>
-              </TouchableOpacity>
-              <Heading2 color={colors.onSurface} weight="bold" style={{ marginBottom: 8, fontFamily: 'Urbanist' }}>
-                {t('create_account')} - Step 2
-              </Heading2>
-              <Body color={colors.onSurfaceVariant} style={{ textAlign: 'center', fontFamily: 'Urbanist' }}>
-                Restaurant Information
-              </Body>
-            </View>
-
-            {/* Form */}
-            <View style={styles.formContainer}>
-              {/* Restaurant Name Input */}
-              <Controller
-                control={control}
-                name="restaurantName"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <View style={styles.inputContainer}>
-                    <TextInput
-                      placeholder="Restaurant Name"
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value}
-                      mode="outlined"
-                      keyboardType="default"
-                      autoCapitalize="words"
-                      left={
-                        <TextInput.Icon
-                          icon="storefront"
-                          color={colors.onSurface}
-                        />
-                      }
-                      outlineStyle={[
-                        styles.inputOutline,
-                        errors.restaurantName && styles.inputError,
-                      ]}
-                      style={[styles.textInput, { fontFamily: 'Urbanist' }]}
-                      contentStyle={[styles.inputContent, { fontFamily: 'Urbanist' }]}
-                      error={!!errors.restaurantName}
-                    />
-                    {errors.restaurantName && (
-                      <HelperText type="error" visible={!!errors.restaurantName}>
-                        {errors.restaurantName.message}
-                      </HelperText>
-                    )}
-                  </View>
-                )}
-              />
-
-              {/* Restaurant Address Button */}
-              <View style={styles.inputContainer}>
-                <TouchableOpacity
-                  style={[
-                    styles.addressButton,
-                    selectedLocation && styles.addressButtonSelected,
-                  ]}
-                  onPress={openLocationModal}
-                  activeOpacity={0.7}
-                >
-                  <Ionicons
-                    name="location-outline"
-                    size={24}
-                    color={selectedLocation ? colors.primary : colors.onSurface}
-                  />
-                  <View style={styles.addressButtonText}>
-                    <Label 
-                      color={selectedLocation ? colors.primary : colors.onSurface} 
-                      weight="medium"
-                      style={{ fontFamily: 'Urbanist' }}
+                <View style={{ flex: 1, marginLeft: 12 }}>
+                  <Label
+                    style={{
+                      color: selectedLocation
+                        ? colors.primary
+                        : colors.onSurface,
+                      fontFamily: 'Urbanist-SemiBold',
+                      fontSize: 14,
+                      marginBottom: 4,
+                    }}
+                  >
+                    Restaurant Location
+                  </Label>
+                  {selectedLocation ? (
+                    <Body
+                      style={{
+                        color: colors.onSurface,
+                        fontFamily: 'Urbanist-Regular',
+                        fontSize: 14,
+                      }}
+                      numberOfLines={2}
                     >
-                      Restaurant Address
-                    </Label>
-                    {selectedLocation ? (
-                      <Body 
-                        color={colors.onSurface} 
-                        style={{ fontFamily: 'Urbanist', marginTop: 4 }}
-                        numberOfLines={2}
-                      >
-                        {selectedLocation.formattedAddress}
-                      </Body>
-                    ) : (
-                      <Body 
-                        color={colors.onSurfaceVariant} 
-                        style={{ fontFamily: 'Urbanist', marginTop: 4 }}
-                      >
-                        Tap to set restaurant location
-                      </Body>
-                    )}
-                  </View>
+                      {selectedLocation.formattedAddress}
+                    </Body>
+                  ) : (
+                    <Body
+                      style={{
+                        color: colors.onSurfaceVariant,
+                        fontFamily: 'Urbanist-Regular',
+                        fontSize: 14,
+                      }}
+                    >
+                      Tap to set your exact location
+                    </Body>
+                  )}
+                </View>
+                {isGettingLocation ? (
+                  <Animated.View
+                    style={{
+                      transform: [
+                        {
+                          rotate: rotateAnim.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: ['0deg', '360deg'],
+                          }),
+                        },
+                      ],
+                    }}
+                  >
+                    <Ionicons name="refresh" size={20} color={colors.primary} />
+                  </Animated.View>
+                ) : (
                   <Ionicons
                     name="chevron-forward"
                     size={20}
                     color={colors.onSurfaceVariant}
                   />
-                </TouchableOpacity>
-              </View>
+                )}
+              </TouchableOpacity>
+            </View>
 
-              {/* Document Upload */}
-              <View style={styles.inputContainer}>
-                <TouchableOpacity
-                  style={styles.documentUploadButton}
-                  onPress={pickDocument}
-                  activeOpacity={0.7}
+            {/* Document Upload */}
+            <TouchableOpacity
+              style={{
+                backgroundColor: colors.surfaceVariant,
+                borderRadius: 14,
+                borderWidth: 1,
+                borderColor: colors.outline,
+                padding: 16,
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 24,
+              }}
+              onPress={pickDocument}
+              activeOpacity={0.7}
+            >
+              <Ionicons
+                name="document-attach-outline"
+                size={24}
+                color={colors.primary}
+              />
+              <Body
+                style={{
+                  marginLeft: 12,
+                  color: colors.onSurface,
+                  fontFamily: 'Urbanist-Regular',
+                  flex: 1,
+                }}
+              >
+                {documentName || 'Upload Document (Optional)'}
+              </Body>
+              <Ionicons
+                name="cloud-upload-outline"
+                size={20}
+                color={colors.onSurfaceVariant}
+              />
+            </TouchableOpacity>
+
+            {/* Terms and Conditions */}
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'flex-start',
+                marginBottom: 24,
+              }}
+            >
+              <Checkbox
+                status={termsAccepted ? 'checked' : 'unchecked'}
+                onPress={toggleTerms}
+                color={colors.primary}
+              />
+              <View style={{ flex: 1, marginLeft: 8 }}>
+                <Body
+                  style={{
+                    color: colors.onSurface,
+                    fontFamily: 'Urbanist-Regular',
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
+                  }}
                 >
-                  <Ionicons
-                    name="document-attach"
-                    size={24}
-                    color={colors.primary}
+                  I agree to the{' '}
+                  <TextButton onPress={openTerms} text="Terms of Service" /> and{' '}
+                  <TextButton
+                    onPress={openPrivacyPolicy}
+                    text="Privacy Policy"
                   />
-                  <Body color={colors.onSurface} style={{ marginLeft: 12 }}>
-                    {documentName || 'Upload Document (Optional)'}
-                  </Body>
-                </TouchableOpacity>
+                </Body>
               </View>
+            </View>
 
-              {/* Terms and Privacy */}
-              <View style={styles.termsContainer}>
-                <View style={styles.termsRow}>
-                  <Checkbox
-                    status={termsAccepted ? 'checked' : 'unchecked'}
-                    onPress={toggleTerms}
-                    uncheckedColor={colors.onSurface}
-                    color={colors.primary}
-                  />
-                  <View style={styles.termsTextContainer}>
-                    <Body color={colors.onSurface}>
-                      {t('terms_agreement')}{' '}
-                    </Body>
-                    <TextButton
-                      onPress={openTerms}
-                      text={t('terms_of_service')}
-                    />
-                    <Body color={colors.onSurface}> {t('and')} </Body>
-                    <TextButton
-                      onPress={openPrivacyPolicy}
-                      text={t('privacy_policy')}
-                    />
-                  </View>
-                </View>
-              </View>
+            {/* Error Display */}
+            <ErrorDisplay
+              error={registerError?.message || authError}
+              visible={!!(registerError?.message || authError)}
+            />
 
-              {/* Error Display */}
-              <ErrorDisplay
-                error={registerError?.message || authError}
-                visible={!!(registerError?.message || authError)}
+            {/* Complete Registration Button */}
+            <Button
+              mode="contained"
+              onPress={handleSubmit(onSubmit)}
+              loading={isPending}
+              disabled={
+                isPending ||
+                !termsAccepted ||
+                !isValid ||
+                !selectedLocation ||
+                (selectedLocation && selectedLocation.isFallback)
+              }
+              style={buttonStyle}
+              contentStyle={{ paddingVertical: 10 }}
+              labelStyle={{
+                fontSize: 16,
+                fontWeight: '600',
+                fontFamily: 'Urbanist-Bold',
+              }}
+            >
+              {isPending ? 'Creating Account...' : 'Complete Registration'}
+            </Button>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </Animated.View>
+
+      {/* Location Modal */}
+      <Modal
+        visible={showLocationModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowLocationModal(false)}
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: colors.background,
+          }}
+        >
+          {/* Modal Header */}
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: 20,
+              borderBottomWidth: 1,
+              borderBottomColor: colors.outline,
+              backgroundColor: colors.surface,
+            }}
+          >
+            <Heading2
+              style={{
+                fontFamily: 'Urbanist-Bold',
+                color: colors.onSurface,
+              }}
+            >
+              Restaurant Location
+            </Heading2>
+            <TouchableOpacity onPress={() => setShowLocationModal(false)}>
+              <Ionicons name="close" size={24} color={colors.onSurface} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Modal Content */}
+          <ScrollView style={{ flex: 1, padding: 20 }}>
+            <View
+              style={{
+                backgroundColor: colors.surface,
+                borderRadius: 16,
+                padding: 24,
+                alignItems: 'center',
+              }}
+            >
+              <Ionicons
+                name="location"
+                size={64}
+                color={colors.primary}
+                style={{ marginBottom: 20 }}
               />
 
-              {/* Complete Registration Button */}
-              <Button
-                mode="contained"
-                onPress={handleSubmit(onSubmit)}
-                loading={isPending}
-                disabled={isPending || !termsAccepted || !isValid || !selectedLocation || (selectedLocation && selectedLocation.isFallback)}
-                buttonColor={colors.primary}
-                contentStyle={styles.buttonContent}
-                style={styles.signUpButton}
-                labelStyle={styles.signUpButtonLabel}
+              <Heading2
+                style={{
+                  textAlign: 'center',
+                  marginBottom: 16,
+                  fontFamily: 'Urbanist-Bold',
+                  color: colors.onSurface,
+                }}
               >
-                {isPending ? t('creating_account') : 'Complete Registration'}
-              </Button>
+                Location Instructions
+              </Heading2>
+
+              <View style={{ width: '100%', gap: 16, marginBottom: 20 }}>
+                {[
+                  'You must be physically present at your restaurant location',
+                  'Ensure GPS and location services are enabled',
+                  'This will be your official address for deliveries',
+                ].map((instruction, index) => (
+                  <View
+                    key={index}
+                    style={{ flexDirection: 'row', alignItems: 'flex-start' }}
+                  >
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={24}
+                      color={colors.primary}
+                    />
+                    <Body
+                      style={{
+                        flex: 1,
+                        marginLeft: 12,
+                        fontFamily: 'Urbanist-Regular',
+                        color: colors.onSurface,
+                      }}
+                    >
+                      {instruction}
+                    </Body>
+                  </View>
+                ))}
+              </View>
+
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'flex-start',
+                  backgroundColor: colors.errorContainer || colors.error + '20',
+                  borderRadius: 12,
+                  padding: 16,
+                  width: '100%',
+                }}
+              >
+                <Ionicons name="warning" size={24} color={colors.error} />
+                <Body
+                  style={{
+                    flex: 1,
+                    marginLeft: 12,
+                    fontFamily: 'Urbanist-Regular',
+                    color: colors.error,
+                  }}
+                >
+                  Ensure you are at the correct location before proceeding
+                </Body>
+              </View>
             </View>
           </ScrollView>
 
-          {/* Location Instructions Modal */}
-          <Modal
-            visible={showLocationModal}
-            animationType="slide"
-            presentationStyle="fullScreen"
-            onRequestClose={closeLocationModal}
+          {/* Modal Buttons */}
+          <View
+            style={{
+              flexDirection: 'row',
+              gap: 12,
+              padding: 20,
+              backgroundColor: colors.surface,
+              borderTopWidth: 1,
+              borderTopColor: colors.outline,
+            }}
           >
-            <View style={styles.modalContainer}>
-                <View style={styles.modalHeader}>
-                  <Heading2 color={colors.onSurface} weight="bold" style={{ fontFamily: 'Urbanist' }}>
-                    Restaurant Location
-                  </Heading2>
-                  <TouchableOpacity onPress={closeLocationModal}>
-                    <Ionicons name="close" size={24} color={colors.onSurface} />
-                  </TouchableOpacity>
-                </View>
-                
-                <ScrollView style={styles.modalContent} showsVerticalScrollIndicator={false}>
-                  <View style={styles.instructionCard}>
-                    <Ionicons name="location" size={48} color={colors.primary} style={{ alignSelf: 'center', marginBottom: 16 }} />
-                    
-                    <Heading2 color={colors.onSurface} weight="bold" style={{ textAlign: 'center', marginBottom: 16, fontFamily: 'Urbanist' }}>
-                      Important Instructions
-                    </Heading2>
-                    
-                    <View style={styles.instructionItem}>
-                      <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
-                      <Body color={colors.onSurface} style={{ flex: 1, marginLeft: 12, fontFamily: 'Urbanist' }}>
-                        You must be physically present at your restaurant location
-                      </Body>
-                    </View>
-                    
-                    <View style={styles.instructionItem}>
-                      <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
-                      <Body color={colors.onSurface} style={{ flex: 1, marginLeft: 12, fontFamily: 'Urbanist' }}>
-                        Make sure your GPS and location services are enabled
-                      </Body>
-                    </View>
-                    
-                    <View style={styles.instructionItem}>
-                      <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
-                      <Body color={colors.onSurface} style={{ flex: 1, marginLeft: 12, fontFamily: 'Urbanist' }}>
-                        This will be your official restaurant address for deliveries
-                      </Body>
-                    </View>
-                    
-                    <View style={styles.warningCard}>
-                      <Ionicons name="warning" size={24} color={colors.error} />
-                      <Body color={colors.error} style={{ flex: 1, marginLeft: 12, fontFamily: 'Urbanist' }}>
-                        Please ensure you are at the correct location before proceeding
-                      </Body>
-                    </View>
-                  </View>
-                </ScrollView>
-                
-                <View style={styles.modalButtons}>
-                  <Button
-                    mode="outlined"
-                    onPress={closeLocationModal}
-                    style={styles.cancelButton}
-                    labelStyle={{ color: '#EF4444', fontFamily: 'Urbanist', fontWeight: '600' }}
-                  >
-                    Cancel
-                  </Button>
-                  
-                  <Button
-                    mode="contained"
-                    onPress={handleGetLocationFromModal}
-                    loading={isGettingLocation}
-                    disabled={isGettingLocation}
-                    buttonColor={colors.primary}
-                    style={styles.getLocationButton}
-                    labelStyle={{ color: '#fff', fontFamily: 'Urbanist', fontWeight: '600' }}
-                  >
-                    {isGettingLocation ? 'Getting Location...' : 'Get My Location'}
-                  </Button>
-                </View>
-            </View>
-          </Modal>
-        </KeyboardAvoidingView>
-      </ScrollView>
-    </CommonView>
+            <Button
+              mode="outlined"
+              onPress={() => setShowLocationModal(false)}
+              style={{ flex: 1, borderRadius: 12 }}
+              labelStyle={{ fontFamily: 'Urbanist-SemiBold' }}
+            >
+              Cancel
+            </Button>
+
+            <Button
+              mode="contained"
+              onPress={async () => {
+                setShowLocationModal(false);
+                await getExactLocation();
+              }}
+              loading={isGettingLocation}
+              disabled={isGettingLocation}
+              style={{ flex: 1, borderRadius: 12 }}
+              labelStyle={{ fontFamily: 'Urbanist-Bold' }}
+            >
+              {isGettingLocation ? 'Getting Location...' : 'Get Location'}
+            </Button>
+          </View>
+        </View>
+      </Modal>
+    </View>
   );
 };
-
-const createStyles = (colors: any) =>
-  StyleSheet.create({
-    container: {
-      flex: 1,
-    },
-    scrollView: {
-      flex: 1,
-    },
-    header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: 16,
-      paddingVertical: 8,
-    },
-    logoContainer: {
-      alignItems: 'center',
-      paddingHorizontal: 24,
-      paddingTop: 16,
-      paddingBottom: 32,
-    },
-    profileImageContainer: {
-      position: 'relative',
-      marginBottom: 24,
-    },
-    profileImage: {
-      width: 120,
-      height: 120,
-      borderRadius: 60,
-    },
-    profileImagePlaceholder: {
-      width: 120,
-      height: 120,
-      borderRadius: 60,
-      backgroundColor: '#f0f0f0',
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: 2,
-      borderColor: '#e0e0e0',
-      borderStyle: 'dashed',
-    },
-    cameraIconOverlay: {
-      position: 'absolute',
-      bottom: 0,
-      right: 0,
-      backgroundColor: '#007aff',
-      borderRadius: 16,
-      width: 32,
-      height: 32,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: 2,
-      borderColor: 'white',
-    },
-    formContainer: {
-      paddingHorizontal: 8,
-    },
-    inputContainer: {
-      marginBottom: 20,
-    },
-    textInput: {
-      backgroundColor: colors.surfaceVariant,
-      height: 64,
-      fontFamily: 'Urbanist',
-    },
-    inputOutline: {
-      borderRadius: 12,
-      borderColor: colors.surfaceVariant,
-    },
-    inputError: {
-      borderColor: '#EF4444',
-    },
-    inputContent: {
-      paddingHorizontal: 16,
-      fontFamily: 'Urbanist',
-      fontSize: 16,
-    },
-    documentUploadButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: colors.surfaceVariant,
-      paddingHorizontal: 16,
-      paddingVertical: 16,
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: colors.surfaceVariant,
-    },
-    termsContainer: {
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginTop: 16,
-      marginBottom: 16,
-    },
-    termsRow: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-    },
-    termsTextContainer: {
-      flex: 1,
-      marginLeft: 8,
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      alignItems: 'center',
-    },
-    signUpButton: {
-      borderRadius: 25,
-      marginTop: 8,
-    },
-    buttonContent: {
-      paddingVertical: 12,
-    },
-    signUpButtonLabel: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: '#fff',
-    },
-    addressButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: colors.surfaceVariant,
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: colors.outline,
-      padding: 16,
-      minHeight: 72,
-    },
-    addressButtonSelected: {
-      borderColor: colors.primary,
-      backgroundColor: colors.primary + '10',
-    },
-    addressButtonText: {
-      flex: 1,
-      marginLeft: 12,
-    },
-    modalContainer: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-    modalHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: 20,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.outline,
-      backgroundColor: colors.surface,
-    },
-    modalContent: {
-      flex: 1,
-      paddingHorizontal: 20,
-      paddingTop: 20,
-    },
-    instructionCard: {
-      backgroundColor: colors.surface,
-      borderRadius: 16,
-      padding: 24,
-      marginBottom: 20,
-      elevation: 2,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-    },
-    instructionItem: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      marginBottom: 16,
-    },
-    warningCard: {
-      flexDirection: 'row',
-      alignItems: 'flex-start',
-      backgroundColor: colors.errorContainer || colors.error + '20',
-      borderRadius: 12,
-      padding: 16,
-      marginTop: 16,
-    },
-    modalButtons: {
-      flexDirection: 'row',
-      gap: 12,
-      padding: 20,
-      paddingTop: 16,
-      backgroundColor: colors.background,
-      borderTopWidth: 1,
-      borderTopColor: colors.outline,
-    },
-    cancelButton: {
-      flex: 1,
-      borderRadius: 12,
-      borderColor: '#EF4444',
-      borderWidth: 2,
-      height: 48,
-    },
-    getLocationButton: {
-      flex: 1,
-      borderRadius: 12,
-      height: 48,
-    },
-  });
 
 export default RestaurantSignupStep2;

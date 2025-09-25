@@ -64,7 +64,7 @@ class SecurityLogger {
         // Clean up old events
         this.cleanupOldEvents();
       }
-      
+
       this.isInitialized = true;
     } catch (error) {
       console.error('Failed to initialize security logger:', error);
@@ -77,7 +77,7 @@ class SecurityLogger {
     severity: SecurityEvent['severity'],
     details?: any,
     userId?: string,
-    userType?: 'customer' | 'restaurant'
+    userType?: 'customer' | 'restaurant',
   ): Promise<void> {
     try {
       const event: SecurityEvent = {
@@ -120,14 +120,14 @@ class SecurityLogger {
   public async logLoginSuccess(
     userId: string,
     userType: 'customer' | 'restaurant',
-    details?: any
+    details?: any,
   ): Promise<void> {
     await this.logEvent(
       SecurityEventType.LOGIN_SUCCESS,
       'LOW',
       details,
       userId,
-      userType
+      userType,
     );
   }
 
@@ -135,14 +135,14 @@ class SecurityLogger {
   public async logLoginFailure(
     email: string,
     reason: string,
-    userType?: 'customer' | 'restaurant'
+    userType?: 'customer' | 'restaurant',
   ): Promise<void> {
     await this.logEvent(
       SecurityEventType.LOGIN_FAILURE,
       'MEDIUM',
       { email, reason },
       undefined,
-      userType
+      userType,
     );
   }
 
@@ -150,14 +150,14 @@ class SecurityLogger {
   public async logLogout(
     userId: string,
     userType: 'customer' | 'restaurant',
-    reason?: string
+    reason?: string,
   ): Promise<void> {
     await this.logEvent(
       SecurityEventType.LOGOUT,
       'LOW',
       { reason },
       userId,
-      userType
+      userType,
     );
   }
 
@@ -166,21 +166,15 @@ class SecurityLogger {
     userId: string,
     userType: 'customer' | 'restaurant',
     success: boolean,
-    details?: any
+    details?: any,
   ): Promise<void> {
-    const eventType = success 
-      ? SecurityEventType.TOKEN_REFRESH 
+    const eventType = success
+      ? SecurityEventType.TOKEN_REFRESH
       : SecurityEventType.TOKEN_REFRESH_FAILURE;
-    
+
     const severity = success ? 'LOW' : 'HIGH';
-    
-    await this.logEvent(
-      eventType,
-      severity,
-      details,
-      userId,
-      userType
-    );
+
+    await this.logEvent(eventType, severity, details, userId, userType);
   }
 
   // Log unauthorized access attempt
@@ -188,14 +182,14 @@ class SecurityLogger {
     userId: string,
     userType: 'customer' | 'restaurant',
     resource: string,
-    details?: any
+    details?: any,
   ): Promise<void> {
     await this.logEvent(
       SecurityEventType.UNAUTHORIZED_ACCESS,
       'HIGH',
       { resource, ...details },
       userId,
-      userType
+      userType,
     );
   }
 
@@ -204,24 +198,24 @@ class SecurityLogger {
     userId: string,
     userType: 'customer' | 'restaurant',
     activity: string,
-    details?: any
+    details?: any,
   ): Promise<void> {
     await this.logEvent(
       SecurityEventType.SUSPICIOUS_ACTIVITY,
       'CRITICAL',
       { activity, ...details },
       userId,
-      userType
+      userType,
     );
   }
 
   // Get events for a specific user
   public async getUserEvents(
     userId: string,
-    limit: number = 100
+    limit: number = 100,
   ): Promise<SecurityEvent[]> {
     return this.events
-      .filter(event => event.userId === userId)
+      .filter((event) => event.userId === userId)
       .sort((a, b) => b.timestamp - a.timestamp)
       .slice(0, limit);
   }
@@ -229,10 +223,10 @@ class SecurityLogger {
   // Get events by type
   public async getEventsByType(
     type: SecurityEventType,
-    limit: number = 100
+    limit: number = 100,
   ): Promise<SecurityEvent[]> {
     return this.events
-      .filter(event => event.type === type)
+      .filter((event) => event.type === type)
       .sort((a, b) => b.timestamp - a.timestamp)
       .slice(0, limit);
   }
@@ -240,10 +234,10 @@ class SecurityLogger {
   // Get events by severity
   public async getEventsBySeverity(
     severity: SecurityEvent['severity'],
-    limit: number = 100
+    limit: number = 100,
   ): Promise<SecurityEvent[]> {
     return this.events
-      .filter(event => event.severity === severity)
+      .filter((event) => event.severity === severity)
       .sort((a, b) => b.timestamp - a.timestamp)
       .slice(0, limit);
   }
@@ -251,12 +245,12 @@ class SecurityLogger {
   // Get recent events
   public async getRecentEvents(
     hours: number = 24,
-    limit: number = 100
+    limit: number = 100,
   ): Promise<SecurityEvent[]> {
-    const cutoffTime = Date.now() - (hours * 60 * 60 * 1000);
-    
+    const cutoffTime = Date.now() - hours * 60 * 60 * 1000;
+
     return this.events
-      .filter(event => event.timestamp >= cutoffTime)
+      .filter((event) => event.timestamp >= cutoffTime)
       .sort((a, b) => b.timestamp - a.timestamp)
       .slice(0, limit);
   }
@@ -292,15 +286,19 @@ class SecurityLogger {
 
   private async saveEvents(): Promise<void> {
     try {
-      await AsyncStorage.setItem('security_events', JSON.stringify(this.events));
+      await AsyncStorage.setItem(
+        'security_events',
+        JSON.stringify(this.events),
+      );
     } catch (error) {
       console.error('Failed to save security events:', error);
     }
   }
 
   private cleanupOldEvents(): void {
-    const cutoffTime = Date.now() - (SECURITY_LOGGER_CONFIG.RETENTION_DAYS * 24 * 60 * 60 * 1000);
-    this.events = this.events.filter(event => event.timestamp >= cutoffTime);
+    const cutoffTime =
+      Date.now() - SECURITY_LOGGER_CONFIG.RETENTION_DAYS * 24 * 60 * 60 * 1000;
+    this.events = this.events.filter((event) => event.timestamp >= cutoffTime);
   }
 
   private shouldSyncWithServer(): boolean {

@@ -32,7 +32,9 @@ class CartReminderService {
     this.loadActiveReminders();
   }
 
-  static getInstance(config?: Partial<CartReminderConfig>): CartReminderService {
+  static getInstance(
+    config?: Partial<CartReminderConfig>,
+  ): CartReminderService {
     if (!CartReminderService.instance) {
       CartReminderService.instance = new CartReminderService(config);
     }
@@ -46,7 +48,7 @@ class CartReminderService {
       if (stored) {
         const reminders = JSON.parse(stored);
         this.activeReminders = new Map(Object.entries(reminders));
-        
+
         // Clean up expired reminders
         await this.cleanupExpiredReminders();
       }
@@ -75,15 +77,17 @@ class CartReminderService {
       if (now - reminder.scheduledAt > 2 * 60 * 60 * 1000) {
         expiredKeys.push(key);
         try {
-          await customerNotificationService.cancelNotification(reminder.notificationId);
+          await customerNotificationService.cancelNotification(
+            reminder.notificationId,
+          );
         } catch (error) {
           console.warn('Failed to cancel expired notification:', error);
         }
       }
     }
 
-    expiredKeys.forEach(key => this.activeReminders.delete(key));
-    
+    expiredKeys.forEach((key) => this.activeReminders.delete(key));
+
     if (expiredKeys.length > 0) {
       await this.saveActiveReminders();
     }
@@ -93,7 +97,7 @@ class CartReminderService {
   async scheduleCartReminders(
     cartItemCount: number,
     restaurantName?: string,
-    lastActivity?: number
+    lastActivity?: number,
   ): Promise<void> {
     if (cartItemCount === 0) {
       await this.cancelAllCartReminders();
@@ -106,18 +110,20 @@ class CartReminderService {
 
       const now = Date.now();
       const activityTime = lastActivity || now;
-      
+
       // Calculate when to send reminders based on last activity
-      const firstReminderTime = activityTime + (this.config.firstReminderMinutes * 60 * 1000);
-      const secondReminderTime = activityTime + (this.config.secondReminderMinutes * 60 * 1000);
-      
+      const firstReminderTime =
+        activityTime + this.config.firstReminderMinutes * 60 * 1000;
+      const secondReminderTime =
+        activityTime + this.config.secondReminderMinutes * 60 * 1000;
+
       // Only schedule if the reminder time is in the future
       if (firstReminderTime > now) {
         await this.scheduleReminder(
           'first',
           cartItemCount,
           Math.ceil((firstReminderTime - now) / (60 * 1000)), // minutes from now
-          restaurantName
+          restaurantName,
         );
       }
 
@@ -126,7 +132,7 @@ class CartReminderService {
           'second',
           cartItemCount,
           Math.ceil((secondReminderTime - now) / (60 * 1000)), // minutes from now
-          restaurantName
+          restaurantName,
         );
       }
 
@@ -141,10 +147,14 @@ class CartReminderService {
     type: 'first' | 'second',
     cartItemCount: number,
     minutesFromNow: number,
-    restaurantName?: string
+    restaurantName?: string,
   ): Promise<void> {
-    const reminderMessages = this.getReminderMessages(type, cartItemCount, restaurantName);
-    
+    const reminderMessages = this.getReminderMessages(
+      type,
+      cartItemCount,
+      restaurantName,
+    );
+
     try {
       const notificationId = await customerNotificationService.scheduleReminder(
         reminderMessages.title,
@@ -156,7 +166,7 @@ class CartReminderService {
           cartItemCount,
           restaurantName,
           deepLink: 'foodrush://cart',
-        }
+        },
       );
 
       const reminderKey = `cart_${type}_${Date.now()}`;
@@ -168,7 +178,9 @@ class CartReminderService {
         restaurantName,
       });
 
-      console.log(`Scheduled ${type} cart reminder for ${minutesFromNow} minutes from now`);
+      console.log(
+        `Scheduled ${type} cart reminder for ${minutesFromNow} minutes from now`,
+      );
     } catch (error) {
       console.error(`Failed to schedule ${type} cart reminder:`, error);
     }
@@ -178,7 +190,7 @@ class CartReminderService {
   private getReminderMessages(
     type: 'first' | 'second',
     cartItemCount: number,
-    restaurantName?: string
+    restaurantName?: string,
   ): { title: string; body: string } {
     const itemText = cartItemCount === 1 ? 'item' : 'items';
     const restaurantText = restaurantName ? ` from ${restaurantName}` : '';
@@ -198,37 +210,41 @@ class CartReminderService {
 
   // Cancel all cart reminders - optimized to prevent multiple calls
   private isCancelling = false;
-  
+
   async cancelAllCartReminders(): Promise<void> {
     // Prevent multiple simultaneous cancellation calls
     if (this.isCancelling) {
       console.log('Cart reminder cancellation already in progress');
       return;
     }
-    
+
     // If no active reminders, skip cancellation
     if (this.activeReminders.size === 0) {
       return;
     }
-    
+
     this.isCancelling = true;
-    
+
     try {
       // Cancel all scheduled notifications
-      const cancelPromises = Array.from(this.activeReminders.values()).map(async (reminder) => {
-        try {
-          await customerNotificationService.cancelNotification(reminder.notificationId);
-        } catch (error) {
-          console.warn('Failed to cancel notification:', error);
-        }
-      });
-      
+      const cancelPromises = Array.from(this.activeReminders.values()).map(
+        async (reminder) => {
+          try {
+            await customerNotificationService.cancelNotification(
+              reminder.notificationId,
+            );
+          } catch (error) {
+            console.warn('Failed to cancel notification:', error);
+          }
+        },
+      );
+
       await Promise.all(cancelPromises);
 
       // Clear the reminders map
       this.activeReminders.clear();
       await this.saveActiveReminders();
-      
+
       console.log('All cart reminders cancelled');
     } catch (error) {
       console.error('Failed to cancel cart reminders:', error);
@@ -241,11 +257,15 @@ class CartReminderService {
   async cancelRemindersByType(type: 'first' | 'second'): Promise<void> {
     try {
       const toRemove: string[] = [];
-      
-      for (const [key, reminder] of Array.from(this.activeReminders.entries())) {
+
+      for (const [key, reminder] of Array.from(
+        this.activeReminders.entries(),
+      )) {
         if (reminder.reminderType === type) {
           try {
-            await customerNotificationService.cancelNotification(reminder.notificationId);
+            await customerNotificationService.cancelNotification(
+              reminder.notificationId,
+            );
             toRemove.push(key);
           } catch (error) {
             console.warn('Failed to cancel notification:', error);
@@ -253,9 +273,9 @@ class CartReminderService {
         }
       }
 
-      toRemove.forEach(key => this.activeReminders.delete(key));
+      toRemove.forEach((key) => this.activeReminders.delete(key));
       await this.saveActiveReminders();
-      
+
       console.log(`Cancelled ${type} cart reminders`);
     } catch (error) {
       console.error(`Failed to cancel ${type} cart reminders:`, error);

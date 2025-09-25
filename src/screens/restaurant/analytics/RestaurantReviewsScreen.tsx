@@ -13,7 +13,16 @@ import * as Haptics from 'expo-haptics';
 
 import CommonView from '@/src/components/common/CommonView';
 import { RootStackScreenProps } from '@/src/navigation/types';
-import { Typography, Heading1, Heading4, Heading5, Body, Label, Caption, Overline } from '@/src/components/common/Typography';
+import {
+  Typography,
+  Heading1,
+  Heading4,
+  Heading5,
+  Body,
+  Label,
+  Caption,
+  Overline,
+} from '@/src/components/common/Typography';
 import Avatar from '@/src/components/common/Avatar';
 import ErrorDisplay from '@/src/components/common/ErrorDisplay';
 import { useRestaurantReviews } from '@/src/hooks/restaurant/useRestaurantReviews';
@@ -63,24 +72,45 @@ const ReviewItem: React.FC<ReviewItemProps> = ({ review }) => {
     <Card style={{ marginBottom: 12, backgroundColor: colors.surface }}>
       <View style={{ padding: 16 }}>
         {/* User Info and Rating */}
-        <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 12 }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'flex-start',
+            marginBottom: 12,
+          }}
+        >
           <Avatar
             profilePicture={review.user.profilePicture}
             fullName={review.user.fullName}
             size={48}
           />
           <View style={{ flex: 1, marginLeft: 12 }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+              }}
+            >
               <View style={{ flex: 1 }}>
                 <Label color={colors.onSurface} weight="bold">
                   {review.user.fullName}
                 </Label>
-                <Caption color={colors.onSurfaceVariant} style={{ marginTop: 2 }}>
+                <Caption
+                  color={colors.onSurfaceVariant}
+                  style={{ marginTop: 2 }}
+                >
                   {formatDate(review.createdAt)}
                 </Caption>
               </View>
               <View style={{ alignItems: 'flex-end' }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginBottom: 4,
+                  }}
+                >
                   <View
                     style={{
                       backgroundColor: getScoreColor(review.score) + '20',
@@ -118,7 +148,9 @@ const ReviewItem: React.FC<ReviewItemProps> = ({ review }) => {
   );
 };
 
-const RestaurantReviewsScreen: React.FC<RootStackScreenProps<'RestaurantReviews'>> = ({ navigation, route }) => {
+const RestaurantReviewsScreen: React.FC<
+  RootStackScreenProps<'RestaurantCustomerReviews'>
+> = ({ navigation, route }) => {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const { restaurantId } = route.params;
@@ -144,8 +176,10 @@ const RestaurantReviewsScreen: React.FC<RootStackScreenProps<'RestaurantReviews'
     if (searchQuery.trim()) {
       filtered = filtered.filter(
         (review) =>
-          review.user.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          review.review?.toLowerCase().includes(searchQuery.toLowerCase())
+          review.user.fullName
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          review.review?.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     }
 
@@ -179,12 +213,16 @@ const RestaurantReviewsScreen: React.FC<RootStackScreenProps<'RestaurantReviews'
     // Calculate recent trend (last 10 reviews vs previous 10)
     const recentReviews = reviews.slice(0, Math.min(10, reviews.length));
     const previousReviews = reviews.slice(10, Math.min(20, reviews.length));
-    
+
     let recentTrend: 'up' | 'down' | 'neutral' = 'neutral';
     if (recentReviews.length > 0 && previousReviews.length > 0) {
-      const recentAvg = recentReviews.reduce((sum, r) => sum + r.score, 0) / recentReviews.length;
-      const previousAvg = previousReviews.reduce((sum, r) => sum + r.score, 0) / previousReviews.length;
-      
+      const recentAvg =
+        recentReviews.reduce((sum, r) => sum + r.score, 0) /
+        recentReviews.length;
+      const previousAvg =
+        previousReviews.reduce((sum, r) => sum + r.score, 0) /
+        previousReviews.length;
+
       if (recentAvg > previousAvg + 0.2) recentTrend = 'up';
       else if (recentAvg < previousAvg - 0.2) recentTrend = 'down';
     }
@@ -213,18 +251,35 @@ const RestaurantReviewsScreen: React.FC<RootStackScreenProps<'RestaurantReviews'
       {/* Overall Rating Summary */}
       <Card style={{ backgroundColor: colors.surface, marginBottom: 16 }}>
         <View style={{ padding: 20 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: 16,
+            }}
+          >
             <View>
               <Heading1 color={colors.primary} weight="bold">
                 {reviewStats.averageRating.toFixed(1)}
               </Heading1>
-              <View style={{ flexDirection: 'row', marginTop: 4, marginBottom: 8 }}>
+              <View
+                style={{ flexDirection: 'row', marginTop: 4, marginBottom: 8 }}
+              >
                 {[1, 2, 3, 4, 5].map((star) => (
                   <Ionicons
                     key={star}
-                    name={star <= reviewStats.averageRating ? 'star' : 'star-outline'}
+                    name={
+                      star <= reviewStats.averageRating
+                        ? 'star'
+                        : 'star-outline'
+                    }
                     size={20}
-                    color={star <= reviewStats.averageRating ? '#FFD700' : colors.onSurfaceVariant}
+                    color={
+                      star <= reviewStats.averageRating
+                        ? '#FFD700'
+                        : colors.onSurfaceVariant
+                    }
                   />
                 ))}
               </View>
@@ -232,7 +287,7 @@ const RestaurantReviewsScreen: React.FC<RootStackScreenProps<'RestaurantReviews'
                 {t('based_on_reviews', { count: reviewStats.totalReviews })}
               </Caption>
             </View>
-            
+
             {/* Trend Indicator */}
             <View style={{ alignItems: 'center' }}>
               <MaterialCommunityIcons
@@ -240,16 +295,16 @@ const RestaurantReviewsScreen: React.FC<RootStackScreenProps<'RestaurantReviews'
                   reviewStats.recentTrend === 'up'
                     ? 'trending-up'
                     : reviewStats.recentTrend === 'down'
-                    ? 'trending-down'
-                    : 'trending-neutral'
+                      ? 'trending-down'
+                      : 'trending-neutral'
                 }
                 size={32}
                 color={
                   reviewStats.recentTrend === 'up'
                     ? '#00D084'
                     : reviewStats.recentTrend === 'down'
-                    ? '#FF3B30'
-                    : colors.onSurfaceVariant
+                      ? '#FF3B30'
+                      : colors.onSurfaceVariant
                 }
               />
               <Caption
@@ -257,8 +312,8 @@ const RestaurantReviewsScreen: React.FC<RootStackScreenProps<'RestaurantReviews'
                   reviewStats.recentTrend === 'up'
                     ? '#00D084'
                     : reviewStats.recentTrend === 'down'
-                    ? '#FF3B30'
-                    : colors.onSurfaceVariant
+                      ? '#FF3B30'
+                      : colors.onSurfaceVariant
                 }
                 weight="semibold"
                 style={{ marginTop: 4 }}
@@ -270,12 +325,19 @@ const RestaurantReviewsScreen: React.FC<RootStackScreenProps<'RestaurantReviews'
 
           {/* Rating Distribution */}
           <View>
-            <Label color={colors.onSurface} weight="semibold" style={{ marginBottom: 12 }}>
+            <Label
+              color={colors.onSurface}
+              weight="semibold"
+              style={{ marginBottom: 12 }}
+            >
               {t('rating_breakdown')}
             </Label>
             {[5, 4, 3, 2, 1].map((rating) => {
               const count = reviewStats.ratingDistribution[rating - 1];
-              const percentage = reviewStats.totalReviews > 0 ? (count / reviewStats.totalReviews) * 100 : 0;
+              const percentage =
+                reviewStats.totalReviews > 0
+                  ? (count / reviewStats.totalReviews) * 100
+                  : 0;
 
               return (
                 <TouchableOpacity
@@ -287,7 +349,10 @@ const RestaurantReviewsScreen: React.FC<RootStackScreenProps<'RestaurantReviews'
                     marginBottom: 8,
                     padding: 8,
                     borderRadius: 8,
-                    backgroundColor: selectedRating === rating ? colors.primaryContainer : 'transparent',
+                    backgroundColor:
+                      selectedRating === rating
+                        ? colors.primaryContainer
+                        : 'transparent',
                   }}
                 >
                   <Caption color={colors.onSurface} style={{ width: 12 }}>
@@ -317,7 +382,10 @@ const RestaurantReviewsScreen: React.FC<RootStackScreenProps<'RestaurantReviews'
                       }}
                     />
                   </View>
-                  <Caption color={colors.onSurfaceVariant} style={{ width: 24, textAlign: 'right' }}>
+                  <Caption
+                    color={colors.onSurfaceVariant}
+                    style={{ width: 24, textAlign: 'right' }}
+                  >
                     {count}
                   </Caption>
                 </TouchableOpacity>
@@ -335,7 +403,7 @@ const RestaurantReviewsScreen: React.FC<RootStackScreenProps<'RestaurantReviews'
           value={searchQuery}
           style={{ backgroundColor: colors.surface, marginBottom: 12 }}
         />
-        
+
         {/* Rating Filter Chips */}
         <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
           {[5, 4, 3, 2, 1].map((rating) => (
@@ -348,7 +416,11 @@ const RestaurantReviewsScreen: React.FC<RootStackScreenProps<'RestaurantReviews'
                 <Ionicons
                   name="star"
                   size={14}
-                  color={selectedRating === rating ? colors.onPrimaryContainer : colors.onSurfaceVariant}
+                  color={
+                    selectedRating === rating
+                      ? colors.onPrimaryContainer
+                      : colors.onSurfaceVariant
+                  }
                 />
               )}
             >
@@ -371,31 +443,46 @@ const RestaurantReviewsScreen: React.FC<RootStackScreenProps<'RestaurantReviews'
         <Label color={colors.onSurface} weight="semibold">
           {filteredReviews.length === reviews?.length
             ? t('all_reviews_count', { count: filteredReviews.length })
-            : t('filtered_reviews_count', { 
-                filtered: filteredReviews.length, 
-                total: reviews?.length || 0 
-              })
-          }
+            : t('filtered_reviews_count', {
+                filtered: filteredReviews.length,
+                total: reviews?.length || 0,
+              })}
         </Label>
       </View>
     </View>
   );
 
   const renderEmptyState = () => (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingVertical: 48 }}>
+    <View
+      style={{
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: 48,
+      }}
+    >
       <MaterialCommunityIcons
         name="star-outline"
         size={64}
         color={colors.onSurfaceVariant}
       />
-      <Heading5 color={colors.onSurface} weight="bold" style={{ marginTop: 16, marginBottom: 8 }}>
-        {searchQuery || selectedRating ? t('no_matching_reviews') : t('no_reviews_yet')}
+      <Heading5
+        color={colors.onSurface}
+        weight="bold"
+        style={{ marginTop: 16, marginBottom: 8 }}
+      >
+        {searchQuery || selectedRating
+          ? t('no_matching_reviews')
+          : t('no_reviews_yet')}
       </Heading5>
-      <Body color={colors.onSurfaceVariant} align="center" style={{ paddingHorizontal: 32 }}>
+      <Body
+        color={colors.onSurfaceVariant}
+        align="center"
+        style={{ paddingHorizontal: 32 }}
+      >
         {searchQuery || selectedRating
           ? t('try_different_search_or_filter')
-          : t('reviews_will_appear_here')
-        }
+          : t('reviews_will_appear_here')}
       </Body>
     </View>
   );
@@ -404,10 +491,7 @@ const RestaurantReviewsScreen: React.FC<RootStackScreenProps<'RestaurantReviews'
     return (
       <CommonView>
         <View style={{ flex: 1, padding: 16 }}>
-          <ErrorDisplay
-            title={t('failed_to_load_reviews')}
-            onRetry={refetch}
-          />
+          <ErrorDisplay title={t('failed_to_load_reviews')} onRetry={refetch} />
         </View>
       </CommonView>
     );

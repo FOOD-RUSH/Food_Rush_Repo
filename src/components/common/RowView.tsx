@@ -23,7 +23,7 @@ const RowView = ({
 }: rowView) => {
   const { colors } = useTheme();
   const finalIconColor = iconColor || colors.onSurface;
-  
+
   return (
     <TouchableOpacity onPress={onPress}>
       <View className="flex-row justify-between mb-4 items-center px-2 py-2">
@@ -60,7 +60,7 @@ const RowView = ({
             </Text>
           )}
         </View>
-        
+
         <MaterialIcons
           name={rightIconName}
           size={18}

@@ -6,66 +6,81 @@ import React from 'react';
 import { TouchableOpacity, View } from 'react-native';
 import { useTheme, Card } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
-import { Typography, Heading4, Body, Label, Caption } from '@/src/components/common/Typography';
+import {
+  Typography,
+  Heading4,
+  Body,
+  Label,
+  Caption,
+} from '@/src/components/common/Typography';
+import { useLocationStatus } from '@/src/hooks/customer/useLocationService';
 
 interface RestaurantCardProps {
   id: string;
   name: string;
   address: string;
+  latitude: string;
+  longitude: string;
+  isOpen: boolean;
+  verificationStatus: string;
+  menuMode: string;
+  createdAt: string;
+  distanceKm: number;
+  deliveryPrice: number;
+  estimatedDeliveryTime: string;
   rating: number | null;
   ratingCount: number;
-  distance?: number; // This will be distanceKm from API
-  deliveryPrice?: number; // Optional since API doesn't provide it
-  image?: string | null; // Optional since API might not provide it
-  estimatedDeliveryTime?: string; // Optional since API doesn't provide it
-  menu?: any[]; // Optional
-  isOpen?: boolean; // From API
-  phone?: string; // From API
+  // Optional fields for UI enhancement
+  image?: string | null;
+  phone?: string;
+  menu?: any[];
 }
 
 export const RestaurantCard = ({
   id,
   name,
   address,
+  latitude,
+  longitude,
+  isOpen,
+  verificationStatus,
+  menuMode,
+  createdAt,
+  distanceKm,
+  deliveryPrice,
+  estimatedDeliveryTime,
   rating,
   ratingCount,
-  distance,
-  deliveryPrice,
   image,
-  estimatedDeliveryTime,
-  menu,
-  isOpen,
   phone,
+  menu,
 }: RestaurantCardProps) => {
   const navigation =
     useNavigation<CustomerHomeStackScreenProps<'HomeScreen'>['navigation']>();
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
 
-  // Calculate estimated delivery time based on distance
-  const getEstimatedDeliveryTime = () => {
-    if (estimatedDeliveryTime) return estimatedDeliveryTime;
-    if (!distance) return '30-40 mins';
-    
-    // Rough calculation: 2-3 km per 10 minutes + 15 min prep time
-    const baseTime = 15; // Base preparation time
-    const travelTime = Math.ceil(distance * 4); // ~4 minutes per km
-    const totalTime = baseTime + travelTime;
-    const minTime = totalTime;
-    const maxTime = totalTime + 10;
-    
-    return `${minTime}-${maxTime} mins`;
+  const { hasRealLocation, isUsingFallback, locationSource } =
+    useLocationStatus();
+
+  // Use backend-provided data directly (no calculations needed)
+  const displayEstimatedDeliveryTime = estimatedDeliveryTime;
+  const displayDeliveryPrice = deliveryPrice;
+
+  // Format distance display with location context
+  const getDistanceDisplay = () => {
+    const formattedDistance = (Math.round(distanceKm * 10) / 10).toFixed(1);
+    const locationContext = isUsingFallback ? ' (approx.)' : '';
+
+    return `${formattedDistance} km${locationContext}`;
   };
 
-  // Calculate delivery price based on distance
-  const getDeliveryPrice = () => {
-    if (deliveryPrice !== undefined) return deliveryPrice;
-    if (!distance) return 500; // Default delivery price
-    
-    // Rough calculation: 300 base + 200 per km
-    const basePrice = 300;
-    const pricePerKm = 200;
-    return Math.round(basePrice + (distance * pricePerKm));
+  // Format rating display
+  const getRatingDisplay = () => {
+    if (rating === null || rating === undefined) {
+      return ratingCount > 0 ? 'New' : 'N/A';
+    }
+    return rating.toFixed(1);
   };
 
   return (
@@ -94,8 +109,10 @@ export const RestaurantCard = ({
           boxShadow: '1px 0px 10px rgba(0, 0, 0, 0.15)',
           minWidth: 320,
           maxWidth: 520,
-          minHeight: 220, // Added min card length
-          maxHeight: 340, // Added max card length
+          minHeight: 220,
+          maxHeight: 340,
+          // Add opacity for closed restaurants
+          opacity: isOpen ? 1 : 0.7,
         }}
       >
         <View style={{ position: 'relative' }}>
@@ -107,6 +124,28 @@ export const RestaurantCard = ({
             }}
             resizeMode="cover"
           />
+
+          {/* Verification badge */}
+          {verificationStatus === 'APPROVED' && (
+            <View
+              style={{
+                position: 'absolute',
+                top: 12,
+                left: 12,
+                backgroundColor: colors.primary,
+                borderRadius: 12,
+                paddingHorizontal: 8,
+                paddingVertical: 4,
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}
+            >
+              <Ionicons name="checkmark-circle" size={12} color="white" />
+              <Caption color="white" style={{ marginLeft: 4, fontSize: 10 }}>
+                Verified
+              </Caption>
+            </View>
+          )}
 
           {/* Heart Icon */}
           <TouchableOpacity
@@ -132,7 +171,7 @@ export const RestaurantCard = ({
             <Ionicons name="heart-outline" size={20} color={colors.onSurface} />
           </TouchableOpacity>
 
-          {/* Bottom badges */}
+          {/* Rating badge */}
           <View
             style={{
               position: 'absolute',
@@ -152,12 +191,45 @@ export const RestaurantCard = ({
                 alignItems: 'center',
               }}
             >
-              <Ionicons name="star" size={12} color="yellow" />
+              <Ionicons
+                name="star"
+                size={12}
+                color={rating !== null ? 'yellow' : colors.onSurfaceVariant}
+              />
               <Caption color="white" style={{ marginLeft: 4 }}>
-                {rating?.toString() || 'N/A'} ({ratingCount?.toString() || '0'})
+                {getRatingDisplay()} ({ratingCount})
               </Caption>
             </View>
           </View>
+
+          {/* Closed overlay */}
+          {!isOpen && (
+            <View
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <View
+                style={{
+                  backgroundColor: colors.errorContainer,
+                  paddingHorizontal: 16,
+                  paddingVertical: 8,
+                  borderRadius: 20,
+                }}
+              >
+                <Label color={colors.onErrorContainer} weight="bold">
+                  {t('closed')}
+                </Label>
+              </View>
+            </View>
+          )}
         </View>
 
         <Card.Content style={{ padding: 16 }}>
@@ -165,46 +237,43 @@ export const RestaurantCard = ({
             style={{ marginBottom: 12 }}
             className="flex-row justify-between items-center"
           >
-            <Heading4 
-              color={colors.onSurface} 
+            <Heading4
+              color={colors.onSurface}
               weight="bold"
               style={{ flex: 1 }}
             >
               {name}
             </Heading4>
-            
+
             {/* Open/Closed Status */}
-            {isOpen !== undefined && (
-              <View
-                style={{
-                  backgroundColor: isOpen ? colors.primaryContainer : colors.errorContainer,
-                  paddingHorizontal: 8,
-                  paddingVertical: 4,
-                  borderRadius: 12,
-                  marginLeft: 8,
-                }}
+            <View
+              style={{
+                backgroundColor: isOpen
+                  ? colors.primaryContainer
+                  : colors.errorContainer,
+                paddingHorizontal: 8,
+                paddingVertical: 4,
+                borderRadius: 12,
+                marginLeft: 8,
+              }}
+            >
+              <Caption
+                color={
+                  isOpen ? colors.onPrimaryContainer : colors.onErrorContainer
+                }
+                weight="medium"
               >
-                <Caption
-                  color={isOpen ? colors.onPrimaryContainer : colors.onErrorContainer}
-                  weight="medium"
-                >
-                  {isOpen ? t('open') : t('closed')}
-                </Caption>
-              </View>
-            )}
+                {isOpen ? t('open') : t('closed')}
+              </Caption>
+            </View>
           </View>
 
           {/* Address display */}
-          {address && (
-            <View style={{ marginBottom: 8 }}>
-              <Body 
-                color={colors.onSurfaceVariant}
-                numberOfLines={1}
-              >
-                📍 {address}
-              </Body>
-            </View>
-          )}
+          <View style={{ marginBottom: 8 }}>
+            <Body color={colors.onSurfaceVariant} numberOfLines={1}>
+              📍 {address}
+            </Body>
+          </View>
 
           <View
             style={{
@@ -214,29 +283,36 @@ export const RestaurantCard = ({
             }}
           >
             <View style={{ flex: 1 }}>
-              <Label 
-                color={colors.primary} 
-                weight="semibold"
-              >
-                {getDeliveryPrice()} XAF delivery
+              <Label color={colors.primary} weight="semibold">
+                {displayDeliveryPrice} XAF delivery
               </Label>
+
+              {/* Menu mode indicator */}
+              <Caption color={colors.onSurfaceVariant} style={{ marginTop: 2 }}>
+                {menuMode === 'FIXED' ? 'Fixed menu' : 'Custom menu'}
+              </Caption>
             </View>
 
             <View style={{ alignItems: 'flex-end' }}>
-              <Label 
-                color={colors.onSurface} 
-                weight="medium"
-              >
-                {getEstimatedDeliveryTime()}
+              <Label color={colors.onSurface} weight="medium">
+                {displayEstimatedDeliveryTime}
               </Label>
-              {distance !== undefined && (
-                <Caption 
+              <View style={{ alignItems: 'flex-end' }}>
+                <Caption
                   color={colors.onSurfaceVariant}
                   style={{ marginTop: 2 }}
                 >
-                  {distance ? (Math.round((distance) * 10) / 10).toFixed(1) : '0.0'} km
+                  {getDistanceDisplay()}
                 </Caption>
-              )}
+                {isUsingFallback && (
+                  <Caption
+                    color={colors.primary}
+                    style={{ marginTop: 1, fontSize: 10 }}
+                  >
+                    📍 Enable location for accuracy
+                  </Caption>
+                )}
+              </View>
             </View>
           </View>
         </Card.Content>

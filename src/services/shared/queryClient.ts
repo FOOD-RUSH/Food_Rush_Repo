@@ -5,7 +5,10 @@ export const queryClient = new QueryClient({
     mutations: {
       onError: (error: any) => {
         // Handle session expired errors globally
-        if (error?.code === 'SESSION_EXPIRED' || error?.message?.includes('session has expired')) {
+        if (
+          error?.code === 'SESSION_EXPIRED' ||
+          error?.message?.includes('session has expired')
+        ) {
           console.log('Session expired - handled globally');
           // Don't show error to user, let the app handle logout
           return;
@@ -16,7 +19,10 @@ export const queryClient = new QueryClient({
     queries: {
       retry: (failureCount, error: any) => {
         // Don't retry on session expired errors
-        if (error?.code === 'SESSION_EXPIRED' || error?.message?.includes('session has expired')) {
+        if (
+          error?.code === 'SESSION_EXPIRED' ||
+          error?.message?.includes('session has expired')
+        ) {
           return false;
         }
         // Retry other errors up to 3 times

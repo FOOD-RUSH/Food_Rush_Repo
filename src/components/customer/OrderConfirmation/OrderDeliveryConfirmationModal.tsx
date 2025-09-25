@@ -25,7 +25,9 @@ interface OrderDeliveryConfirmationModalProps {
   restaurantName?: string;
 }
 
-const OrderDeliveryConfirmationModal: React.FC<OrderDeliveryConfirmationModalProps> = ({
+const OrderDeliveryConfirmationModal: React.FC<
+  OrderDeliveryConfirmationModalProps
+> = ({
   visible,
   onClose,
   onConfirm,
@@ -107,7 +109,7 @@ const OrderDeliveryConfirmationModal: React.FC<OrderDeliveryConfirmationModalPro
           easing: Easing.inOut(Easing.sin),
           useNativeDriver: true,
         }),
-      ])
+      ]),
     ).start();
 
     // Food box floating animation
@@ -125,7 +127,7 @@ const OrderDeliveryConfirmationModal: React.FC<OrderDeliveryConfirmationModalPro
           easing: Easing.inOut(Easing.sin),
           useNativeDriver: true,
         }),
-      ])
+      ]),
     ).start();
 
     // Sparkle animation
@@ -135,7 +137,7 @@ const OrderDeliveryConfirmationModal: React.FC<OrderDeliveryConfirmationModalPro
         duration: 2000,
         easing: Easing.linear,
         useNativeDriver: true,
-      })
+      }),
     ).start();
   };
 
@@ -145,7 +147,7 @@ const OrderDeliveryConfirmationModal: React.FC<OrderDeliveryConfirmationModalPro
 
     // Start celebration animation
     setShowCelebration(true);
-    
+
     Animated.parallel([
       Animated.timing(celebrationScale, {
         toValue: 1,
@@ -225,15 +227,16 @@ const OrderDeliveryConfirmationModal: React.FC<OrderDeliveryConfirmationModalPro
       onRequestClose={handleClose}
     >
       <StatusBar backgroundColor="rgba(0,0,0,0.5)" barStyle="light-content" />
-      
+
       {/* Backdrop */}
-      <View style={{
-        flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}>
-        
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
         {/* Main Modal */}
         <Animated.View
           style={{
@@ -317,11 +320,7 @@ const OrderDeliveryConfirmationModal: React.FC<OrderDeliveryConfirmationModalPro
                       left: 15,
                     }}
                   >
-                    <Ionicons
-                      name="person"
-                      size={20}
-                      color={colors.primary}
-                    />
+                    <Ionicons name="person" size={20} color={colors.primary} />
                   </View>
                 </Animated.View>
 
@@ -372,7 +371,7 @@ const OrderDeliveryConfirmationModal: React.FC<OrderDeliveryConfirmationModalPro
               >
                 {t('delivery_arrived', 'Delivery Arrived! 🎉')}
               </Text>
-              
+
               <Text
                 style={{
                   fontSize: 16,
@@ -396,9 +395,12 @@ const OrderDeliveryConfirmationModal: React.FC<OrderDeliveryConfirmationModalPro
                 marginBottom: 12,
               }}
             >
-              {t('confirm_delivery_question', 'Did you receive your order from the delivery driver?')}
+              {t(
+                'confirm_delivery_question',
+                'Did you receive your order from the delivery driver?',
+              )}
             </Text>
-            
+
             <Text
               style={{
                 fontSize: 14,
@@ -408,7 +410,11 @@ const OrderDeliveryConfirmationModal: React.FC<OrderDeliveryConfirmationModalPro
                 lineHeight: 20,
               }}
             >
-              {t('confirm_delivery_subtitle', 'Please confirm that you have received your food order from')} {restaurantName}
+              {t(
+                'confirm_delivery_subtitle',
+                'Please confirm that you have received your food order from',
+              )}{' '}
+              {restaurantName}
             </Text>
 
             {/* Action Buttons */}
@@ -430,7 +436,9 @@ const OrderDeliveryConfirmationModal: React.FC<OrderDeliveryConfirmationModalPro
                   opacity: isConfirming ? 0.7 : 1,
                 }}
               >
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <View
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
+                >
                   <Ionicons name="checkmark-circle" size={24} color="white" />
                   <Text
                     style={{
@@ -439,7 +447,9 @@ const OrderDeliveryConfirmationModal: React.FC<OrderDeliveryConfirmationModalPro
                       color: 'white',
                     }}
                   >
-                    {isConfirming ? t('confirming', 'Confirming...') : t('yes_received', 'Yes, I received it!')}
+                    {isConfirming
+                      ? t('confirming', 'Confirming...')
+                      : t('yes_received', 'Yes, I received it!')}
                   </Text>
                 </View>
               </TouchableOpacity>
@@ -456,8 +466,14 @@ const OrderDeliveryConfirmationModal: React.FC<OrderDeliveryConfirmationModalPro
                   opacity: isConfirming ? 0.5 : 1,
                 }}
               >
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                  <Ionicons name="time-outline" size={24} color={colors.onSurfaceVariant} />
+                <View
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
+                >
+                  <Ionicons
+                    name="time-outline"
+                    size={24}
+                    color={colors.onSurfaceVariant}
+                  />
                   <Text
                     style={{
                       fontSize: 16,
@@ -501,7 +517,13 @@ const OrderDeliveryConfirmationModal: React.FC<OrderDeliveryConfirmationModalPro
                   style={{
                     width: 8,
                     height: 8,
-                    backgroundColor: ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7'][index % 5],
+                    backgroundColor: [
+                      '#FF6B6B',
+                      '#4ECDC4',
+                      '#45B7D1',
+                      '#96CEB4',
+                      '#FFEAA7',
+                    ][index % 5],
                     borderRadius: 4,
                   }}
                 />

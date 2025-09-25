@@ -93,36 +93,37 @@ export const restaurantApi = {
   getRestaurantById: (restaurantId: string) => {
     return apiClient.get(`/restaurants/${restaurantId}`);
   },
- 
-  updateLocation: (data: {
-    latitude?: number;
-    longitude?: number;
-  }) => {
-    return apiClient.patch('/restaurants/location', {...data});
+
+  updateLocation: (data: { latitude?: number; longitude?: number }) => {
+    return apiClient.patch('/restaurants/location', { ...data });
   },
 
   toggleStatus: (isOpen: boolean, restaurantId: string) => {
-    return apiClient.patch(`/restaurants/${restaurantId}/status`, { isOpen: isOpen });
+    return apiClient.patch(`/restaurants/${restaurantId}/status`, {
+      isOpen: isOpen,
+    });
   },
 
   // Analytics
   getStats: (period?: 'today' | 'yesterday' | '7days' | '30days') => {
-    return apiClient.get<{ status_code: number; message: string; data: RestaurantStats }>('/restaurants/analytics/stats', {
-      params: { period }
+    return apiClient.get<{
+      status_code: number;
+      message: string;
+      data: RestaurantStats;
+    }>('/restaurants/analytics/stats', {
+      params: { period },
     });
   },
 
   getBestSellers: (period?: string) => {
     return apiClient.get('/restaurants/analytics/bestsellers', {
-      params: { period }
+      params: { period },
     });
   },
 
   getTimeHeatmap: (period?: string) => {
     return apiClient.get('/restaurants/analytics/heatmap', {
-      params: { period }
+      params: { period },
     });
   },
-
-  
 };

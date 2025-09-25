@@ -30,9 +30,18 @@ export interface ChangePasswordRequest {
   newPassword: string;
 }
 
+// Legacy interface - use UpdateProfileRequest from profileApi instead
 export interface UpdateProfileRequest {
   fullName?: string;
   phoneNumber?: string;
+  email?: string;
+}
+
+// New unified profile update interface
+export interface UnifiedUpdateProfileRequest {
+  fullName?: string;
+  phoneNumber?: string;
+  profilePicture?: string;
   email?: string;
 }
 

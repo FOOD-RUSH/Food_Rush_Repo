@@ -7,22 +7,39 @@ import {
 } from 'react-native';
 import { useTheme, Card } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
 
 import CommonView from '@/src/components/common/CommonView';
-import { RestaurantAnalyticsStackScreenProps } from '@/src/navigation/types';
+import {
+  RestaurantAnalyticsStackScreenProps,
+  RootStackParamList,
+} from '@/src/navigation/types';
 import { useRestaurantReviewStats } from '@/src/hooks/restaurant/useRestaurantReviews';
 import { useRestaurantProfile } from '@/src/hooks/restaurant/useRestaurantApi';
-import { useAnalyticsSummary, useRevenueBuckets, useRestaurantBalance, useAnalyticsData, useDoualaDateRange } from '@/src/hooks/restaurant/useAnalytics';
-import { Typography, Heading1, Heading5, Body, Label, Caption } from '@/src/components/common/Typography';
+import {
+  useAnalyticsSummary,
+  useRevenueBuckets,
+  useRestaurantBalance,
+  useAnalyticsData,
+  useDoualaDateRange,
+} from '@/src/hooks/restaurant/useAnalytics';
+import {
+  Typography,
+  Heading1,
+  Heading5,
+  Body,
+  Label,
+  Caption,
+} from '@/src/components/common/Typography';
 
 // Analytics components
 import MetricCard from '@/src/components/restaurant/analytics/MetricCard';
 import SimpleBarChart from '@/src/components/restaurant/analytics/SimpleBarChart';
 import BreakdownCard from '@/src/components/restaurant/analytics/BreakdownCard';
-import PeriodSelector, { AnalyticsPeriodOption } from '@/src/components/restaurant/analytics/PeriodSelector';
+import PeriodSelector, {
+  AnalyticsPeriodOption,
+} from '@/src/components/restaurant/analytics/PeriodSelector';
 
 // Analytics utilities
 import {
@@ -44,12 +61,12 @@ interface BreakdownItem {
 
 const AnalyticsOverview: React.FC<
   RestaurantAnalyticsStackScreenProps<'AnalyticsOverview'>
-> = () => {
+> = ({ navigation, route }) => {
   const { colors } = useTheme();
   const { t } = useTranslation();
-  const navigation = useNavigation();
 
-  const [selectedPeriod, setSelectedPeriod] = useState<AnalyticsPeriodOption>('7days');
+  const [selectedPeriod, setSelectedPeriod] =
+    useState<AnalyticsPeriodOption>('7days');
   const [refreshing, setRefreshing] = useState(false);
 
   // Get restaurant profile and review stats
@@ -57,23 +74,29 @@ const AnalyticsOverview: React.FC<
   const restaurantId = restaurantProfile?.data?.id;
   const { data: reviewStats } = useRestaurantReviewStats(restaurantId || '');
 
-  // Generate date range for selected period using Africa/Douala timezone
-  const dateRange = useMemo(() => {
-    const days = selectedPeriod === 'today' ? 1 : 
-                 selectedPeriod === 'yesterday' ? 1 : 
-                 selectedPeriod === '7days' ? 7 : 30;
-    return useDoualaDateRange(days);
+  // Calculate days for selected period
+  const days = useMemo(() => {
+    return selectedPeriod === 'today'
+      ? 1
+      : selectedPeriod === 'yesterday'
+        ? 1
+        : selectedPeriod === '7days'
+          ? 7
+          : 30;
   }, [selectedPeriod]);
 
+  // Generate date range for selected period using Africa/Douala timezone
+  const dateRange = useDoualaDateRange(days);
+
   // Fetch analytics data using new API endpoints
-  const { 
-    summary: analyticsData, 
+  const {
+    summary: analyticsData,
     balance: balanceData,
     revenue: revenueData,
     isLoading,
     isError: hasError,
     error: combinedError,
-    refetch: refetchAll
+    refetch: refetchAll,
   } = useAnalyticsData('daily', dateRange);
 
   // Process analytics data with proper error handling
@@ -100,7 +123,7 @@ const AnalyticsOverview: React.FC<
   const orderStatusBreakdown = useMemo((): BreakdownItem[] => {
     try {
       if (!analyticsData?.data?.counts) return [];
-      return getOrderStatusBreakdown(analyticsData.data.counts).map(item => ({
+      return getOrderStatusBreakdown(analyticsData.data.counts).map((item) => ({
         label: item.status || 'Unknown',
         count: item.count || 0,
         percentage: item.percentage || 0,
@@ -115,12 +138,14 @@ const AnalyticsOverview: React.FC<
   const paymentMethodBreakdown = useMemo((): BreakdownItem[] => {
     try {
       if (!analyticsData?.data?.paymentMethod) return [];
-      return getPaymentMethodBreakdown(analyticsData.data.paymentMethod).map(item => ({
-        label: item.method || 'Unknown',
-        count: item.count || 0,
-        percentage: item.percentage || 0,
-        color: item.color || colors.primary,
-      }));
+      return getPaymentMethodBreakdown(analyticsData.data.paymentMethod).map(
+        (item) => ({
+          label: item.method || 'Unknown',
+          count: item.count || 0,
+          percentage: item.percentage || 0,
+          color: item.color || colors.primary,
+        }),
+      );
     } catch (error) {
       console.error('Error processing payment method breakdown:', error);
       return [];
@@ -130,7 +155,7 @@ const AnalyticsOverview: React.FC<
   const operatorBreakdown = useMemo((): BreakdownItem[] => {
     try {
       if (!analyticsData?.data?.operator) return [];
-      return getOperatorBreakdown(analyticsData.data.operator).map(item => ({
+      return getOperatorBreakdown(analyticsData.data.operator).map((item) => ({
         label: item.operator || 'Unknown',
         count: item.count || 0,
         percentage: item.percentage || 0,
@@ -142,25 +167,44 @@ const AnalyticsOverview: React.FC<
     }
   }, [analyticsData, colors.primary]);
 
-  const periods = useMemo(() => [
-    { key: 'today' as const, label: t('today') },
-    { key: 'yesterday' as const, label: t('yesterday') },
-    { key: '7days' as const, label: t('7_days') },
-    { key: '30days' as const, label: t('30_days') },
-  ], [t]);
+  const periods = useMemo(
+    () => [
+      { key: 'today' as const, label: t('today') },
+      { key: 'yesterday' as const, label: t('yesterday') },
+      { key: '7days' as const, label: t('7_days') },
+      { key: '30days' as const, label: t('30_days') },
+    ],
+    [t],
+  );
 
   const handleViewReviews = useCallback(() => {
     try {
       Haptics.selectionAsync();
-      // Type-safe navigation with proper error handling
-      if (navigation && restaurantProfile?.data?.id) {
-        (navigation as any).navigate('RestaurantCustomerReviews', {
-          restaurantId: restaurantProfile.data.id,
-          restaurantName: restaurantProfile.data.name || 'Restaurant',
-        });
+
+      Validate required data before navigation
+      if (!restaurantProfile?.data?.id) {
+        console.warn('Cannot navigate to reviews: Restaurant ID not available');
+        return;
       }
+
+      if (!navigation) {
+        console.warn('Cannot navigate to reviews: Navigation not available');
+        return;
+      }
+
+      // Type-safe navigation with proper error handling
+      console.log(
+        'Navigating to customer reviews for restaurant:',
+        restaurantProfile.data.id,
+      );
+
+      navigation.navigate('RestaurantCustomerReviews', {
+        restaurantId: restaurantProfile.data.id || '12345',
+        restaurantName: restaurantProfile.data.name || 'Restaurant',
+      });
     } catch (error) {
-      console.error('Navigation error:', error);
+      console.error('Navigation error when trying to view reviews:', error);
+      // Could show a toast or alert here if needed
     }
   }, [navigation, restaurantProfile]);
 
@@ -168,7 +212,7 @@ const AnalyticsOverview: React.FC<
     try {
       Haptics.selectionAsync();
       if (navigation) {
-        (navigation as any).navigate('RestaurantTimeHeatmap');
+        navigation.navigate('RestaurantTimeHeatmap');
       }
     } catch (error) {
       console.error('Navigation error:', error);
@@ -187,10 +231,16 @@ const AnalyticsOverview: React.FC<
   }, [refetchAll]);
 
   // Helper function to render metric cards safely
-  const renderMetricCards = (cards: any[], startIndex: number, count: number) => {
-    return cards.slice(startIndex, startIndex + count).map((card, index) => (
-      <MetricCard key={`${startIndex}-${index}`} {...card} />
-    ));
+  const renderMetricCards = (
+    cards: any[],
+    startIndex: number,
+    count: number,
+  ) => {
+    return cards
+      .slice(startIndex, startIndex + count)
+      .map((card, index) => (
+        <MetricCard key={`${startIndex}-${index}`} {...card} />
+      ));
   };
 
   return (
@@ -208,16 +258,10 @@ const AnalyticsOverview: React.FC<
       >
         {/* Header */}
         <View style={{ padding: 16, paddingBottom: 0 }}>
-          <Heading1
-            color={colors.onBackground}
-            weight="bold"
-          >
+          <Heading1 color={colors.onBackground} weight="bold">
             {t('analytics')}
           </Heading1>
-          <Body
-            color={colors.onSurfaceVariant}
-            style={{ marginTop: 4 }}
-          >
+          <Body color={colors.onSurfaceVariant} style={{ marginTop: 4 }}>
             {t('track_your_performance')}
           </Body>
         </View>
@@ -232,7 +276,12 @@ const AnalyticsOverview: React.FC<
         {/* Error State */}
         {hasError && (
           <View style={{ padding: 16 }}>
-            <Card style={{ backgroundColor: colors.errorContainer, borderRadius: 16 }}>
+            <Card
+              style={{
+                backgroundColor: colors.errorContainer,
+                borderRadius: 16,
+              }}
+            >
               <View style={{ padding: 16, alignItems: 'center' }}>
                 <MaterialCommunityIcons
                   name="alert-circle"
@@ -246,10 +295,7 @@ const AnalyticsOverview: React.FC<
                 >
                   {t('error_loading_analytics')}
                 </Heading5>
-                <Body
-                  color={colors.onErrorContainer}
-                  align="center"
-                >
+                <Body color={colors.onErrorContainer} align="center">
                   {t('please_try_again_later')}
                 </Body>
                 <TouchableOpacity
@@ -281,10 +327,7 @@ const AnalyticsOverview: React.FC<
                   size={48}
                   color={colors.onSurfaceVariant}
                 />
-                <Body
-                  color={colors.onSurfaceVariant}
-                  style={{ marginTop: 8 }}
-                >
+                <Body color={colors.onSurfaceVariant} style={{ marginTop: 8 }}>
                   {t('loading_analytics')}
                 </Body>
               </View>
@@ -298,9 +341,18 @@ const AnalyticsOverview: React.FC<
             {/* Restaurant Balance */}
             {balanceData?.data && (
               <View style={{ padding: 16 }}>
-                <Card style={{ backgroundColor: colors.surface, borderRadius: 16 }}>
+                <Card
+                  style={{ backgroundColor: colors.surface, borderRadius: 16 }}
+                >
                   <View style={{ padding: 16 }}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: 12,
+                      }}
+                    >
                       <Heading5 color={colors.onSurface} weight="bold">
                         {t('account_balance')}
                       </Heading5>
@@ -310,27 +362,50 @@ const AnalyticsOverview: React.FC<
                         color={colors.primary}
                       />
                     </View>
-                    
-                    <View style={{ flexDirection: 'row', alignItems: 'baseline', marginBottom: 8 }}>
-                      <Typography variant="h3" style={{ color: colors.primary, fontWeight: 'bold' }}>
-                        {balanceData.data.balance.toLocaleString()}
+
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'baseline',
+                        marginBottom: 8,
+                      }}
+                    >
+                      <Typography
+                        variant="h3"
+                        style={{ color: colors.primary, fontWeight: 'bold' }}
+                      >
+                        {(balanceData.data?.balance || 0).toLocaleString()}
                       </Typography>
-                      <Caption color={colors.onSurfaceVariant} style={{ marginLeft: 4 }}>
-                        {balanceData.data.currency}
+                      <Caption
+                        color={colors.onSurfaceVariant}
+                        style={{ marginLeft: 4 }}
+                      >
+                        {balanceData.data?.currency || 'XAF'}
                       </Caption>
                     </View>
-                    
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                      }}
+                    >
                       <View>
-                        <Caption color={colors.onSurfaceVariant}>{t('credits')}</Caption>
+                        <Caption color={colors.onSurfaceVariant}>
+                          {t('credits')}
+                        </Caption>
                         <Label color={colors.onSurface} weight="semibold">
-                          +{balanceData.data.credits.toLocaleString()} {balanceData.data.currency}
+                          +{(balanceData.data?.credits || 0).toLocaleString()}{' '}
+                          {balanceData.data?.currency || 'XAF'}
                         </Label>
                       </View>
                       <View>
-                        <Caption color={colors.onSurfaceVariant}>{t('debits')}</Caption>
+                        <Caption color={colors.onSurfaceVariant}>
+                          {t('debits')}
+                        </Caption>
                         <Label color={colors.onSurface} weight="semibold">
-                          -{balanceData.data.debits.toLocaleString()} {balanceData.data.currency}
+                          -{(balanceData.data?.debits || 0).toLocaleString()}{' '}
+                          {balanceData.data?.currency || 'XAF'}
                         </Label>
                       </View>
                     </View>
@@ -356,7 +431,9 @@ const AnalyticsOverview: React.FC<
             {/* Revenue Chart */}
             {chartData.length > 0 && (
               <View style={{ padding: 16 }}>
-                <Card style={{ backgroundColor: colors.surface, borderRadius: 16 }}>
+                <Card
+                  style={{ backgroundColor: colors.surface, borderRadius: 16 }}
+                >
                   <View style={{ padding: 16 }}>
                     <View
                       style={{
@@ -366,13 +443,12 @@ const AnalyticsOverview: React.FC<
                         marginBottom: 16,
                       }}
                     >
-                      <Heading5
-                        color={colors.onSurface}
-                        weight="bold"
-                      >
+                      <Heading5 color={colors.onSurface} weight="bold">
                         {t('revenue_trend')}
                       </Heading5>
-                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <View
+                        style={{ flexDirection: 'row', alignItems: 'center' }}
+                      >
                         <MaterialCommunityIcons
                           name="chart-line"
                           size={16}
@@ -382,7 +458,9 @@ const AnalyticsOverview: React.FC<
                           color={colors.onSurfaceVariant}
                           style={{ marginLeft: 4 }}
                         >
-                          {selectedPeriod === 'today' ? t('hourly') : t('daily')}
+                          {selectedPeriod === 'today'
+                            ? t('hourly')
+                            : t('daily')}
                         </Caption>
                       </View>
                     </View>
@@ -434,11 +512,26 @@ const AnalyticsOverview: React.FC<
             {t('detailed_reports')}
           </Heading5>
 
-          <Card style={{ marginBottom: 12, backgroundColor: colors.surface }}>
+          <Card
+            style={{
+              marginBottom: 12,
+              backgroundColor: colors.surface,
+              borderWidth: reviewStats && reviewStats.totalReviews > 0 ? 1 : 0,
+              borderColor:
+                reviewStats && reviewStats.averageRating >= 4
+                  ? '#00D084'
+                  : reviewStats && reviewStats.averageRating >= 3
+                    ? '#FF9500'
+                    : colors.outline,
+            }}
+          >
             <TouchableOpacity
               onPress={handleViewReviews}
-              style={{ padding: 16 }}
-              disabled={!restaurantProfile?.data?.id}
+              style={{
+                padding: 16,
+              
+              }}
+              activeOpacity={0.7}
             >
               <View
                 style={{
@@ -447,32 +540,105 @@ const AnalyticsOverview: React.FC<
                   alignItems: 'center',
                 }}
               >
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <MaterialCommunityIcons
-                    name="star-circle"
-                    size={24}
-                    color="#FF9500"
-                  />
-                  <View style={{ marginLeft: 12 }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    flex: 1,
+                  }}
+                >
+                  <View
+                    style={{
+                      backgroundColor: '#FF9500' + '20',
+                      borderRadius: 12,
+                      padding: 8,
+                      marginRight: 12,
+                    }}
+                  >
+                    <MaterialCommunityIcons
+                      name="star-circle"
+                      size={24}
+                      color="#FF9500"
+                    />
+                  </View>
+
+                  <View style={{ flex: 1 }}>
                     <Label
                       color={colors.onSurface}
-                      weight="semibold"
+                      weight="bold"
+                      style={{ marginBottom: 4 }}
                     >
                       {t('customer_reviews')}
                     </Label>
-                    <Caption color={colors.onSurfaceVariant}>
-                      {reviewStats && reviewStats.totalReviews > 0 ? 
-                        `${reviewStats.averageRating.toFixed(1)} ★ (${reviewStats.totalReviews} ${t('reviews')})` :
-                        t('view_customer_feedback')
-                      }
-                    </Caption>
+
+                    {reviewStats && reviewStats.totalReviews > 0 ? (
+                      <View>
+                        <View
+                          style={{
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            marginBottom: 2,
+                          }}
+                        >
+                          <Caption
+                            color={
+                              reviewStats.averageRating >= 4
+                                ? '#00D084'
+                                : reviewStats.averageRating >= 3
+                                  ? '#FF9500'
+                                  : '#FF3B30'
+                            }
+                            weight="bold"
+                            style={{ marginRight: 4 }}
+                          >
+                            {reviewStats.averageRating.toFixed(1)} ★
+                          </Caption>
+                          <Caption color={colors.onSurfaceVariant}>
+                            ({reviewStats.totalReviews}{' '}
+                            {reviewStats.totalReviews === 1
+                              ? t('review')
+                              : t('reviews')}
+                            )
+                          </Caption>
+                        </View>
+                        <Caption color={colors.onSurfaceVariant}>
+                          {t('tap_to_view_and_manage_reviews')}
+                        </Caption>
+                      </View>
+                    ) : (
+                      <Caption color={colors.onSurfaceVariant}>
+                        {t('no_reviews_yet_tap_to_learn_more')}
+                      </Caption>
+                    )}
                   </View>
                 </View>
-                <MaterialCommunityIcons
-                  name="chevron-right"
-                  size={24}
-                  color={colors.onSurfaceVariant}
-                />
+
+                <View style={{ alignItems: 'center' }}>
+                  <MaterialCommunityIcons
+                    name="chevron-right"
+                    size={24}
+                    color={colors.primary}
+                  />
+                  {reviewStats && reviewStats.totalReviews > 0 && (
+                    <View
+                      style={{
+                        backgroundColor: colors.primary,
+                        borderRadius: 8,
+                        paddingHorizontal: 6,
+                        paddingVertical: 2,
+                        marginTop: 4,
+                      }}
+                    >
+                      <Caption
+                        color={colors.onPrimary}
+                        weight="bold"
+                        style={{ fontSize: 10 }}
+                      >
+                        {reviewStats.totalReviews}
+                      </Caption>
+                    </View>
+                  )}
+                </View>
               </View>
             </TouchableOpacity>
           </Card>
@@ -496,10 +662,7 @@ const AnalyticsOverview: React.FC<
                     color="#007aff"
                   />
                   <View style={{ marginLeft: 12 }}>
-                    <Label
-                      color={colors.onSurface}
-                      weight="semibold"
-                    >
+                    <Label color={colors.onSurface} weight="semibold">
                       {t('time_heatmap')}
                     </Label>
                     <Caption color={colors.onSurfaceVariant}>

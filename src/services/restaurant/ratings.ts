@@ -17,5 +17,7 @@ interface ReviewApiResponse {
 }
 
 export const restaurantRatingsApi = (restaurantId: string) => {
-  return apiClient.get<ReviewApiResponse>(`/api/v1/restaurants/${restaurantId}/reviews`);
+  return apiClient.get<ReviewApiResponse>(
+    `/restaurants/${restaurantId}/reviews`,
+  );
 };

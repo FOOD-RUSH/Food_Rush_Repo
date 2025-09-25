@@ -1,8 +1,22 @@
 import React, { useState, useMemo } from 'react';
 import { Pressable, ScrollView, FlatList } from 'react-native-gesture-handler';
-import { View, StatusBar, Dimensions, Image, Alert, RefreshControl } from 'react-native';
+import {
+  View,
+  StatusBar,
+  Dimensions,
+  Image,
+  Alert,
+  RefreshControl,
+} from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import { TouchableRipple, Chip, Button, useTheme, Card, Divider } from 'react-native-paper';
+import {
+  TouchableRipple,
+  Chip,
+  Button,
+  useTheme,
+  Card,
+  Divider,
+} from 'react-native-paper';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import MenuItemCard from '@/src/components/customer/MenuItemCard';
 import ClassicFoodCard from '@/src/components/customer/ClassicFoodCard';
@@ -10,16 +24,12 @@ import { useRestaurantDetails } from '@/src/hooks/customer/useCustomerApi';
 import { useTranslation } from 'react-i18next';
 import { images } from '@/assets/images';
 import { LoadingScreen } from '@/src/components/common';
-import { 
-  Typography, 
-  Heading1, 
-  Heading2, 
-  Heading3, 
-  Body, 
-  BodyLarge, 
-  Label, 
-  Caption, 
-  Overline 
+import {
+  Heading2,
+  Heading3,
+  Body,
+  Label,
+  Caption,
 } from '@/src/components/common/Typography';
 import { useResponsive, useResponsiveSpacing } from '@/src/hooks/useResponsive';
 
@@ -35,18 +45,33 @@ const RestaurantDetailScreen = ({
   const [isFavorite, setIsFavorite] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const restaurantId = route.params.restaurantId;
-  
+
   // Responsive hooks
-  const { wp, hp, isSmallScreen, isTablet, scale } = useResponsive();
+  const { hp, isSmallScreen, scale } = useResponsive();
   const spacing = useResponsiveSpacing();
 
   // fetching restaurant Details with new hook
   const {
     data: restaurantDetails,
     isLoading,
-    error,
     refetch,
   } = useRestaurantDetails(restaurantId); // uses location from hook
+
+  // Debug: Log restaurant details when they change
+  React.useEffect(() => {
+    if (restaurantDetails) {
+      console.log('🍽️ Restaurant Details Received:', {
+        id: restaurantDetails.id,
+        name: restaurantDetails.name,
+        distance: restaurantDetails.distance,
+        deliveryPrice: restaurantDetails.deliveryPrice,
+        estimatedDeliveryTime: restaurantDetails.estimatedDeliveryTime,
+        hasDistance: !!restaurantDetails.distance,
+        hasDeliveryPrice: !!restaurantDetails.deliveryPrice,
+        hasEstimatedTime: !!restaurantDetails.estimatedDeliveryTime,
+      });
+    }
+  }, [restaurantDetails]);
 
   const handleGoBack = () => {
     navigation.goBack();
@@ -73,12 +98,20 @@ const RestaurantDetailScreen = ({
     });
   };
 
+  const handleWriteReview = () => {
+    navigation.navigate('RestaurantReview', {
+      restaurantId,
+      restaurantName: restaurantDetails?.name || 'Restaurant',
+      restaurantImage: restaurantDetails?.image,
+    });
+  };
+
   const handleViewLocation = () => {
-    Alert.alert(t('location'), t('view_restaurant_location'));
+    Alert.alert(t('current_location'), t('view_restaurant_location'));
   };
 
   const handleViewOffers = () => {
-    Alert.alert(t('offers'), t('view_special_offers'));
+    Alert.alert(t('special_offers'), t('view_special_offers'));
   };
 
   const onRefresh = async () => {
@@ -89,7 +122,8 @@ const RestaurantDetailScreen = ({
 
   // Extract unique categories from menu items
   const categories = useMemo(() => {
-    if (!restaurantDetails?.menu || restaurantDetails.menu.length === 0) return ['All'];
+    if (!restaurantDetails?.menu || restaurantDetails.menu.length === 0)
+      return ['All'];
 
     const uniqueCategories = new Set<string>();
     restaurantDetails.menu.forEach((item) => {
@@ -126,7 +160,11 @@ const RestaurantDetailScreen = ({
 
   // Filter menu items based on selected category
   const filteredMenuItems = useMemo(() => {
-    if (!restaurantDetails?.menu || restaurantDetails.menu.length === 0 || selectedCategory === 'All') {
+    if (
+      !restaurantDetails?.menu ||
+      restaurantDetails.menu.length === 0 ||
+      selectedCategory === 'All'
+    ) {
       return restaurantDetails?.menu || [];
     }
 
@@ -183,22 +221,22 @@ const RestaurantDetailScreen = ({
           padding: spacing.lg,
         }}
       >
-        <Ionicons 
-          name="restaurant-outline" 
-          size={scale(64)} 
-          color={colors.onSurfaceVariant} 
+        <Ionicons
+          name="restaurant-outline"
+          size={scale(64)}
+          color={colors.onSurfaceVariant}
           style={{ marginBottom: spacing.md }}
         />
-        <Heading3 
-          color={colors.onSurface} 
-          align="center" 
+        <Heading3
+          color={colors.onSurface}
+          align="center"
           style={{ marginBottom: spacing.sm }}
         >
           {t('failed_to_load_restaurant_details')}
         </Heading3>
-        <Body 
-          color={colors.onSurfaceVariant} 
-          align="center" 
+        <Body
+          color={colors.onSurfaceVariant}
+          align="center"
           style={{ marginBottom: spacing.lg }}
         >
           {t('please_check_connection_and_try_again')}
@@ -218,9 +256,9 @@ const RestaurantDetailScreen = ({
   const seperator = () => {
     return <View style={{ width: spacing.sm }} />;
   };
-  
+
   return (
-    <ScrollView 
+    <ScrollView
       style={{ flex: 1, backgroundColor: colors.background }}
       refreshControl={
         <RefreshControl
@@ -249,16 +287,18 @@ const RestaurantDetailScreen = ({
           }}
         />
         {/* Navigation Header */}
-        <View style={{
-          position: 'absolute',
-          top: scale(48),
-          left: 0,
-          right: 0,
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          paddingHorizontal: spacing.md,
-        }}>
+        <View
+          style={{
+            position: 'absolute',
+            top: scale(48),
+            left: 0,
+            right: 0,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingHorizontal: spacing.md,
+          }}
+        >
           <Pressable
             onPress={handleGoBack}
             style={{
@@ -297,142 +337,131 @@ const RestaurantDetailScreen = ({
             </Pressable>
           </View>
         </View>
-        
-        {/* Status Badge */}
-        <View style={{
-          position: 'absolute',
-          bottom: spacing.md,
-          right: spacing.md,
-        }}>
-          <Chip
-            icon="clock-outline"
-            style={{
-              backgroundColor: restaurantDetails.isOpen !== false ? '#4CAF50' : '#F44336',
-            }}
-            textStyle={{ color: 'white', fontWeight: '600' }}
-          >
-            {restaurantDetails.isOpen !== false ? t('open') : t('closed')}
-          </Chip>
-        </View>
       </View>
 
       {/* Restaurant Information */}
       <View style={{ padding: spacing.lg }}>
         {/* Restaurant Name and Basic Info */}
-        <Card style={{ 
-          backgroundColor: colors.surface, 
-          marginBottom: spacing.lg,
-          elevation: 2,
-        }}>
+        <Card
+          style={{
+            backgroundColor: colors.surface,
+            marginBottom: spacing.lg,
+            elevation: 2,
+          }}
+        >
           <Card.Content style={{ padding: spacing.lg }}>
-            <View style={{ 
-              flexDirection: 'row', 
-              justifyContent: 'space-between', 
-              alignItems: 'flex-start',
-              marginBottom: spacing.md,
-            }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                marginBottom: spacing.md,
+              }}
+            >
               <View style={{ flex: 1, marginRight: spacing.md }}>
-                <Heading2 
-                  color={colors.onSurface} 
+                <Heading2
+                  color={colors.onSurface}
                   weight="bold"
                   style={{ marginBottom: spacing.xs }}
                 >
                   {restaurantDetails.name}
                 </Heading2>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm }}>
-                  <Ionicons name="location-outline" size={scale(16)} color={colors.primary} />
-                  <Body color={colors.onSurfaceVariant} style={{ marginLeft: spacing.xs, flex: 1 }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginBottom: spacing.sm,
+                  }}
+                >
+                  <Ionicons
+                    name="location-outline"
+                    size={scale(16)}
+                    color={colors.primary}
+                  />
+                  <Body
+                    color={colors.onSurfaceVariant}
+                    style={{ marginLeft: spacing.xs, flex: 1 }}
+                  >
                     {restaurantDetails.address || t('address_not_available')}
                   </Body>
                 </View>
               </View>
-              
+
               {/* Delivery Fee Badge */}
-              <View style={{
-                backgroundColor: colors.primaryContainer,
-                paddingHorizontal: spacing.sm,
-                paddingVertical: spacing.xs,
-                borderRadius: scale(8),
-                alignItems: 'center',
-              }}>
+              <View
+                style={{
+                  backgroundColor: colors.primaryContainer,
+                  paddingHorizontal: spacing.sm,
+                  paddingVertical: spacing.xs,
+                  borderRadius: scale(8),
+                  alignItems: 'center',
+                }}
+              >
                 <Caption color={colors.onPrimaryContainer} weight="medium">
-                  {t('delivery')}
+                  {t('delivery_fee')}
                 </Caption>
                 <Label color={colors.onPrimaryContainer} weight="bold">
-                  {restaurantDetails.deliveryBaseFee || 500} XAF
+                  {restaurantDetails.deliveryPrice || 'N/A'} XAF
                 </Label>
               </View>
             </View>
 
             {/* Restaurant Description */}
-            <Body 
-              color={colors.onSurfaceVariant} 
-              style={{ 
+            <Body
+              color={colors.onSurfaceVariant}
+              style={{
                 marginBottom: spacing.md,
                 lineHeight: scale(22),
               }}
             >
               {restaurantDetails.description || t('delicious_food_awaits_you')}
             </Body>
-
-            {/* Operating Hours */}
-            <View style={{ 
-              flexDirection: 'row', 
-              alignItems: 'center',
-              backgroundColor: colors.surfaceVariant,
-              padding: spacing.sm,
-              borderRadius: scale(8),
-            }}>
-              <Ionicons 
-                name="time-outline" 
-                size={scale(16)} 
-                color={restaurantDetails.isOpen !== false ? colors.primary : colors.error} 
-              />
-              <Label 
-                color={restaurantDetails.isOpen !== false ? colors.primary : colors.error}
-                weight="medium"
-                style={{ marginLeft: spacing.xs }}
-              >
-                {restaurantDetails.isOpen !== false ? t('open_now') : t('closed_now')}
-              </Label>
-              <Body 
-                color={colors.onSurfaceVariant} 
-                style={{ marginLeft: spacing.sm }}
-              >
-                • {t('opens_daily_9am_10pm')}
-              </Body>
-            </View>
           </Card.Content>
         </Card>
 
         {/* Rating Section */}
-        <Card style={{ 
-          backgroundColor: colors.surface, 
-          marginBottom: spacing.md,
-          elevation: 1,
-        }}>
+        <Card
+          style={{
+            backgroundColor: colors.surface,
+            marginBottom: spacing.md,
+            elevation: 1,
+          }}
+        >
           <TouchableRipple onPress={handleViewReviews}>
-            <Card.Content style={{ 
-              flexDirection: 'row', 
-              justifyContent: 'space-between', 
-              alignItems: 'center',
-              paddingVertical: spacing.md,
-            }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-                <View style={{
-                  backgroundColor: '#FFD700',
-                  borderRadius: scale(20),
-                  padding: spacing.xs,
-                  marginRight: spacing.sm,
-                }}>
+            <Card.Content
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                paddingVertical: spacing.md,
+              }}
+            >
+              <View
+                style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
+              >
+                <View
+                  style={{
+                    backgroundColor: '#FFD700',
+                    borderRadius: scale(20),
+                    padding: spacing.xs,
+                    marginRight: spacing.sm,
+                  }}
+                >
                   <Ionicons name="star" color="white" size={scale(16)} />
                 </View>
                 <View style={{ flex: 1 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Label color={colors.onSurface} weight="bold" style={{ fontSize: scale(18) }}>
+                    <Label
+                      color={colors.onSurface}
+                      weight="bold"
+                      style={{ fontSize: scale(18) }}
+                    >
                       {restaurantDetails.rating || '4.5'}
                     </Label>
-                    <Body color={colors.onSurfaceVariant} style={{ marginLeft: spacing.xs }}>
+                    <Body
+                      color={colors.onSurfaceVariant}
+                      style={{ marginLeft: spacing.xs }}
+                    >
                       ({restaurantDetails.ratingCount || 0} {t('reviews')})
                     </Body>
                   </View>
@@ -448,28 +477,81 @@ const RestaurantDetailScreen = ({
               />
             </Card.Content>
           </TouchableRipple>
+
+          {/* Write Review Button */}
+          <Divider style={{ marginHorizontal: spacing.lg }} />
+          <TouchableRipple onPress={handleWriteReview}>
+            <Card.Content
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                paddingVertical: spacing.md,
+              }}
+            >
+              <View
+                style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
+              >
+                <View
+                  style={{
+                    backgroundColor: colors.primaryContainer,
+                    borderRadius: scale(20),
+                    padding: spacing.xs,
+                    marginRight: spacing.sm,
+                  }}
+                >
+                  <Ionicons
+                    name="create-outline"
+                    color={colors.onPrimaryContainer}
+                    size={scale(16)}
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Label color={colors.onSurface} weight="semibold">
+                    {t('write_review')}
+                  </Label>
+                  <Caption color={colors.onSurfaceVariant}>
+                    {t('share_your_experience')}
+                  </Caption>
+                </View>
+              </View>
+              <MaterialIcons
+                name="arrow-forward-ios"
+                size={scale(16)}
+                color={colors.onSurfaceVariant}
+              />
+            </Card.Content>
+          </TouchableRipple>
         </Card>
 
         {/* Delivery Info */}
-        <Card style={{ 
-          backgroundColor: colors.surface, 
-          marginBottom: spacing.md,
-          elevation: 1,
-        }}>
+        <Card
+          style={{
+            backgroundColor: colors.surface,
+            marginBottom: spacing.md,
+            elevation: 1,
+          }}
+        >
           <TouchableRipple onPress={handleViewLocation}>
-            <Card.Content style={{ 
-              flexDirection: 'row', 
-              justifyContent: 'space-between', 
-              alignItems: 'center',
-              paddingVertical: spacing.md,
-            }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-                <View style={{
-                  backgroundColor: colors.primaryContainer,
-                  borderRadius: scale(20),
-                  padding: spacing.xs,
-                  marginRight: spacing.sm,
-                }}>
+            <Card.Content
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                paddingVertical: spacing.md,
+              }}
+            >
+              <View
+                style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
+              >
+                <View
+                  style={{
+                    backgroundColor: colors.primaryContainer,
+                    borderRadius: scale(20),
+                    padding: spacing.xs,
+                    marginRight: spacing.sm,
+                  }}
+                >
                   <Ionicons
                     name="location-outline"
                     color={colors.onPrimaryContainer}
@@ -480,28 +562,68 @@ const RestaurantDetailScreen = ({
                   <Label color={colors.onSurface} weight="semibold">
                     {t('delivery_info')}
                   </Label>
-                  <View style={{ 
-                    flexDirection: 'row', 
-                    alignItems: 'center', 
-                    marginTop: spacing.xs,
-                    flexWrap: 'wrap',
-                  }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: spacing.sm }}>
-                      <Ionicons name="time-outline" size={scale(12)} color={colors.primary} />
-                      <Caption color={colors.onSurfaceVariant} style={{ marginLeft: spacing.xs }}>
-                        25-35 {t('mins')}
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginTop: spacing.xs,
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        marginRight: spacing.sm,
+                      }}
+                    >
+                      <Ionicons
+                        name="time-outline"
+                        size={scale(12)}
+                        color={colors.primary}
+                      />
+                      <Caption
+                        color={colors.onSurfaceVariant}
+                        style={{ marginLeft: spacing.xs }}
+                      >
+                        {restaurantDetails.estimatedDeliveryTime ||
+                          '25-35 mins'}
                       </Caption>
                     </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: spacing.sm }}>
-                      <Ionicons name="car-outline" size={scale(12)} color={colors.primary} />
-                      <Caption color={colors.onSurfaceVariant} style={{ marginLeft: spacing.xs }}>
-                        {restaurantDetails.deliveryBaseFee || 500} XAF
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        marginRight: spacing.sm,
+                      }}
+                    >
+                      <Ionicons
+                        name="car-outline"
+                        size={scale(12)}
+                        color={colors.primary}
+                      />
+                      <Caption
+                        color={colors.onSurfaceVariant}
+                        style={{ marginLeft: spacing.xs }}
+                      >
+                        {restaurantDetails.deliveryPrice || 'N/A'} XAF
                       </Caption>
                     </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                      <Ionicons name="location" size={scale(12)} color={colors.primary} />
-                      <Caption color={colors.onSurfaceVariant} style={{ marginLeft: spacing.xs }}>
-                        {restaurantDetails.distanceKm ? `${restaurantDetails.distanceKm.toFixed(1)} km` : '2.5 km'}
+                    <View
+                      style={{ flexDirection: 'row', alignItems: 'center' }}
+                    >
+                      <Ionicons
+                        name="location"
+                        size={scale(12)}
+                        color={colors.primary}
+                      />
+                      <Caption
+                        color={colors.onSurfaceVariant}
+                        style={{ marginLeft: spacing.xs }}
+                      >
+                        {restaurantDetails.distance
+                          ? `${restaurantDetails.distance.toFixed(1)} km`
+                          : 'N/A km'}
                       </Caption>
                     </View>
                   </View>
@@ -517,25 +639,33 @@ const RestaurantDetailScreen = ({
         </Card>
 
         {/* Offers Section */}
-        <Card style={{ 
-          backgroundColor: colors.surface, 
-          marginBottom: spacing.lg,
-          elevation: 1,
-        }}>
+        <Card
+          style={{
+            backgroundColor: colors.surface,
+            marginBottom: spacing.lg,
+            elevation: 1,
+          }}
+        >
           <TouchableRipple onPress={handleViewOffers}>
-            <Card.Content style={{ 
-              flexDirection: 'row', 
-              justifyContent: 'space-between', 
-              alignItems: 'center',
-              paddingVertical: spacing.md,
-            }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-                <View style={{
-                  backgroundColor: colors.secondaryContainer,
-                  borderRadius: scale(20),
-                  padding: spacing.xs,
-                  marginRight: spacing.sm,
-                }}>
+            <Card.Content
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                paddingVertical: spacing.md,
+              }}
+            >
+              <View
+                style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
+              >
+                <View
+                  style={{
+                    backgroundColor: colors.secondaryContainer,
+                    borderRadius: scale(20),
+                    padding: spacing.xs,
+                    marginRight: spacing.sm,
+                  }}
+                >
                   <MaterialIcons
                     name="local-offer"
                     color={colors.onSecondaryContainer}
@@ -550,9 +680,12 @@ const RestaurantDetailScreen = ({
                     {t('tap_to_view_available_deals')}
                   </Caption>
                 </View>
-                <Chip 
+                <Chip
                   style={{ backgroundColor: colors.errorContainer }}
-                  textStyle={{ color: colors.onErrorContainer, fontSize: scale(10) }}
+                  textStyle={{
+                    color: colors.onErrorContainer,
+                    fontSize: scale(10),
+                  }}
                   compact
                 >
                   {t('new')}
@@ -570,45 +703,26 @@ const RestaurantDetailScreen = ({
 
         {/* For You Section */}
         <View style={{ marginTop: spacing.lg }}>
-          <View style={{ 
-            flexDirection: 'row', 
-            justifyContent: 'space-between', 
-            alignItems: 'center',
-            marginBottom: spacing.md,
-          }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: spacing.md,
+            }}
+          >
             <Heading3 color={colors.onSurface} weight="bold">
               {t('recommended_for_you')}
             </Heading3>
-            <TouchableRipple 
-              onPress={() => navigation.navigate('RestaurantMenu', { restaurantId })}
-              style={{ borderRadius: scale(16) }}
-            >
-              <View style={{ 
-                flexDirection: 'row', 
-                alignItems: 'center',
-                paddingHorizontal: spacing.sm,
-                paddingVertical: spacing.xs,
-              }}>
-                <Label color={colors.primary} weight="medium">
-                  {t('view_all')}
-                </Label>
-                <MaterialIcons 
-                  name="arrow-forward" 
-                  size={scale(16)} 
-                  color={colors.primary} 
-                  style={{ marginLeft: spacing.xs }}
-                />
-              </View>
-            </TouchableRipple>
           </View>
           {restaurantDetails.menu && restaurantDetails.menu.length > 0 ? (
             <FlatList
-              data={restaurantDetails.menu.slice(0, 3)} // Show first 3 menu items
+              data={restaurantDetails.menu} // Show first 3 menu items
               renderItem={({ item }) => (
                 <ClassicFoodCard
                   foodName={item.name}
                   id={item.id}
-                  foodPrice={parseFloat(item.price)}
+                  foodPrice={item.price}
                   restaurantName={item.restaurant.name}
                   distance={item.distanceKm || 0}
                   rating={4.5}
@@ -622,32 +736,22 @@ const RestaurantDetailScreen = ({
               ItemSeparatorComponent={seperator}
             />
           ) : (
-            <Card style={{ 
-              backgroundColor: colors.surfaceVariant, 
-              padding: spacing.lg,
-              alignItems: 'center',
-            }}>
-              <Ionicons 
-                name="restaurant-outline" 
-                size={scale(48)} 
-                color={colors.onSurfaceVariant} 
-                style={{ marginBottom: spacing.md }}
-              />
-              <Heading3 
-                color={colors.onSurface} 
-                weight="semibold" 
+            <Card
+              style={{
+                backgroundColor: colors.background,
+                padding: spacing.lg,
+                alignItems: 'center',
+              }}
+            >
+              <Heading3
+                color={colors.onSurface}
+                weight="semibold"
                 align="center"
                 style={{ marginBottom: spacing.sm }}
               >
                 {t('no_menu_items')}
               </Heading3>
-              <Body 
-                color={colors.onSurfaceVariant} 
-                align="center"
-                style={{ marginBottom: spacing.md }}
-              >
-                {t('restaurant_has_no_menu_items_yet')}
-              </Body>
+              <Image source={images.noMenu} className="h-[200px] w-[200px]" />
               <Button
                 mode="outlined"
                 onPress={() => onRefresh()}
@@ -662,8 +766,8 @@ const RestaurantDetailScreen = ({
 
         {/* Menu Section */}
         <View style={{ marginTop: spacing.xl }}>
-          <Heading3 
-            color={colors.onSurface} 
+          <Heading3
+            color={colors.onSurface}
             weight="bold"
             style={{ marginBottom: spacing.md }}
           >
@@ -683,9 +787,10 @@ const RestaurantDetailScreen = ({
                   key={category}
                   onPress={() => setSelectedCategory(category)}
                   style={{
-                    backgroundColor: selectedCategory === category 
-                      ? colors.primary 
-                      : colors.surfaceVariant,
+                    backgroundColor:
+                      selectedCategory === category
+                        ? colors.primary
+                        : colors.surfaceVariant,
                     paddingHorizontal: spacing.md,
                     paddingVertical: spacing.sm,
                     borderRadius: scale(20),
@@ -694,9 +799,11 @@ const RestaurantDetailScreen = ({
                   }}
                 >
                   <Label
-                    color={selectedCategory === category 
-                      ? 'white' 
-                      : colors.onSurfaceVariant}
+                    color={
+                      selectedCategory === category
+                        ? 'white'
+                        : colors.onSurfaceVariant
+                    }
                     weight={selectedCategory === category ? 'bold' : 'medium'}
                     style={{ fontSize: scale(14) }}
                   >
@@ -710,19 +817,28 @@ const RestaurantDetailScreen = ({
           {/* Menu Items or Empty State */}
           {filteredMenuItems && filteredMenuItems.length > 0 ? (
             <View>
-              <View style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: spacing.md,
-                paddingHorizontal: spacing.xs,
-              }}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: spacing.md,
+                  paddingHorizontal: spacing.xs,
+                }}
+              >
                 <Body color={colors.onSurfaceVariant}>
                   {filteredMenuItems.length} {t('items_found')}
                 </Body>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Ionicons name="filter-outline" size={scale(16)} color={colors.onSurfaceVariant} />
-                  <Caption color={colors.onSurfaceVariant} style={{ marginLeft: spacing.xs }}>
+                  <Ionicons
+                    name="filter-outline"
+                    size={scale(16)}
+                    color={colors.onSurfaceVariant}
+                  />
+                  <Caption
+                    color={colors.onSurfaceVariant}
+                    style={{ marginLeft: spacing.xs }}
+                  >
                     {selectedCategory}
                   </Caption>
                 </View>
@@ -733,37 +849,29 @@ const RestaurantDetailScreen = ({
                 keyExtractor={(item) => item.id}
                 scrollEnabled={false}
                 showsVerticalScrollIndicator={false}
-                ItemSeparatorComponent={() => <View style={{ height: spacing.sm }} />}
+                ItemSeparatorComponent={() => (
+                  <View style={{ height: spacing.sm }} />
+                )}
               />
             </View>
           ) : (
-            <Card style={{ 
-              backgroundColor: colors.surfaceVariant, 
-              padding: spacing.xl,
-              alignItems: 'center',
-              marginTop: spacing.md,
-            }}>
-              <Ionicons 
-                name="search-outline" 
-                size={scale(64)} 
-                color={colors.onSurfaceVariant} 
-                style={{ marginBottom: spacing.md }}
-              />
-              <Heading3 
-                color={colors.onSurface} 
-                weight="semibold" 
+            <Card
+              style={{
+                backgroundColor: colors.background,
+                padding: spacing.xl,
+                alignItems: 'center',
+                marginTop: spacing.md,
+              }}
+            >
+              <Heading3
+                color={colors.onSurface}
+                weight="semibold"
                 align="center"
                 style={{ marginBottom: spacing.sm }}
               >
                 {t('no_items_in_category')}
               </Heading3>
-              <Body 
-                color={colors.onSurfaceVariant} 
-                align="center"
-                style={{ marginBottom: spacing.lg }}
-              >
-                {t('try_different_category_or_view_all')}
-              </Body>
+              <Image source={images.noMenu} className="h-[200px] w-[200px]" />
               <View style={{ flexDirection: 'row', gap: spacing.sm }}>
                 <Button
                   mode="outlined"

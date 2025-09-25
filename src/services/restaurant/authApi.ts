@@ -28,15 +28,20 @@ export type {
 
 export const restaurantAuthApi = {
   register: (data: RestaurantRegisterRequest) => {
-    return apiClient.post<RestaurantRegisterResponse>('/restaurants/auth/register-and-create', {...data});
+    return apiClient.post<RestaurantRegisterResponse>(
+      '/restaurants/auth/register-and-create',
+      { ...data },
+    );
   },
 
   login: (credentials: { email: string; password: string }) => {
-    return apiClient.post<RestaurantLoginResponse>('/restaurants/auth/login', {...credentials});
+    return apiClient.post<RestaurantLoginResponse>('/restaurants/auth/login', {
+      ...credentials,
+    });
   },
 
   verifyOTP: (data: { userId: string; otp: string; type: 'email' }) => {
-    return apiClient.post('/restaurants/auth/verify-otp', {...data});
+    return apiClient.post('/restaurants/auth/verify-otp', { ...data });
   },
 
   // logout: () => {
@@ -44,7 +49,10 @@ export const restaurantAuthApi = {
   // },
 
   refreshToken: (refreshToken: string) => {
-    return apiClient.post<{ accessToken: string; refreshToken: string }>('/auth/refresh-token', { refreshToken });
+    return apiClient.post<{ accessToken: string; refreshToken: string }>(
+      '/auth/refresh-token',
+      { refreshToken },
+    );
   },
 
   updateProfile: (data: any) => {
@@ -59,7 +67,11 @@ export const restaurantAuthApi = {
     return apiClient.post('/auth/forgot-password', data);
   },
 
-  resetPassword: (data: { email: string; otp: string; newPassword: string }) => {
+  resetPassword: (data: {
+    email: string;
+    otp: string;
+    newPassword: string;
+  }) => {
     return apiClient.post('/auth/reset-password', data);
   },
 

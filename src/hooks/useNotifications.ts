@@ -2,7 +2,10 @@
 import { useEffect, useCallback, useMemo } from 'react';
 import { useNotificationStore } from '@/src/stores/shared/notificationStore';
 import { useAuthStore } from '@/src/stores/AuthStore';
-import { getNotificationService, initializeNotifications } from '@/src/notifications';
+import {
+  getNotificationService,
+  initializeNotifications,
+} from '@/src/notifications';
 
 /**
  * Unified notification hook for both customer and restaurant users
@@ -45,7 +48,7 @@ export const useNotifications = () => {
     if (isAuthenticated && user) {
       // Initialize the notification service
       initializeNotifications(user.role, user.id);
-      
+
       // Fetch server notifications
       fetchNotifications();
       updateUnreadCount();
@@ -63,11 +66,11 @@ export const useNotifications = () => {
   const notificationCounts = useMemo(() => {
     return {
       all: notifications.length,
-      unread: notifications.filter(n => !n.readAt).length,
-      order: notifications.filter(n => n.type === 'order').length,
-      system: notifications.filter(n => n.type === 'system').length,
-      promotion: notifications.filter(n => n.type === 'promotion').length,
-      alert: notifications.filter(n => n.type === 'alert').length,
+      unread: notifications.filter((n) => !n.readAt).length,
+      order: notifications.filter((n) => n.type === 'order').length,
+      system: notifications.filter((n) => n.type === 'system').length,
+      promotion: notifications.filter((n) => n.type === 'promotion').length,
+      alert: notifications.filter((n) => n.type === 'alert').length,
     };
   }, [notifications]);
 
@@ -120,7 +123,7 @@ export const useNotifications = () => {
   const sendLocalNotification = useCallback(
     async (title: string, body: string, data?: any) => {
       if (!notificationService) return null;
-      
+
       try {
         return await notificationService.sendLocalNotification({
           title,
@@ -138,9 +141,13 @@ export const useNotifications = () => {
   const sendOrderNotification = useCallback(
     async (orderId: string, status: string, details?: any) => {
       if (!notificationService) return null;
-      
+
       try {
-        return await notificationService.sendOrderNotification(orderId, status, details);
+        return await notificationService.sendOrderNotification(
+          orderId,
+          status,
+          details,
+        );
       } catch (error) {
         console.error('Failed to send order notification:', error);
         return null;
@@ -152,9 +159,13 @@ export const useNotifications = () => {
   const sendPromotionNotification = useCallback(
     async (title: string, message: string, data?: any) => {
       if (!notificationService) return null;
-      
+
       try {
-        return await notificationService.sendPromotionNotification(title, message, data);
+        return await notificationService.sendPromotionNotification(
+          title,
+          message,
+          data,
+        );
       } catch (error) {
         console.error('Failed to send promotion notification:', error);
         return null;
@@ -164,11 +175,21 @@ export const useNotifications = () => {
   );
 
   const scheduleReminder = useCallback(
-    async (title: string, message: string, minutesFromNow: number, data?: any) => {
+    async (
+      title: string,
+      message: string,
+      minutesFromNow: number,
+      data?: any,
+    ) => {
       if (!notificationService) return null;
-      
+
       try {
-        return await notificationService.scheduleReminder(title, message, minutesFromNow, data);
+        return await notificationService.scheduleReminder(
+          title,
+          message,
+          minutesFromNow,
+          data,
+        );
       } catch (error) {
         console.error('Failed to schedule reminder:', error);
         return null;
@@ -215,7 +236,7 @@ export const useNotifications = () => {
     // Computed
     hasNotifications: filteredNotifications.length > 0,
     hasUnreadNotifications: unreadCount > 0,
-    
+
     // User context
     userType: user?.role || null,
     isCustomer: user?.role === 'customer',
@@ -228,7 +249,9 @@ export const useNotifications = () => {
  */
 export const useUnreadNotificationCount = () => {
   const unreadCount = useNotificationStore((state) => state.unreadCount);
-  const updateUnreadCount = useNotificationStore((state) => state.updateUnreadCount);
+  const updateUnreadCount = useNotificationStore(
+    (state) => state.updateUnreadCount,
+  );
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
   useEffect(() => {

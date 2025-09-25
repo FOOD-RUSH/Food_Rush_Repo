@@ -1,4 +1,11 @@
-import * as FileSystem from 'expo-file-system';
+import {
+  documentDirectory,
+  cacheDirectory,
+  getInfoAsync,
+  makeDirectoryAsync,
+  copyAsync,
+  deleteAsync,
+} from 'expo-file-system';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
@@ -17,14 +24,17 @@ export interface StoredImage {
  * @param imageId - Unique identifier for the image
  * @returns Promise<string> - Local file path
  */
-export const saveImageLocally = async (imageUri: string, imageId: string): Promise<string> => {
+export const saveImageLocally = async (
+  imageUri: string,
+  imageId: string,
+): Promise<string> => {
   try {
     // Create directory if it doesn't exist
-    const directory = `${FileSystem.documentDirectory || ''}images/`;
-    const dirInfo = await FileSystem.getInfoAsync(directory);
+    const directory = `${documentDirectory || ''}images/`;
+    const dirInfo = await getInfoAsync(directory);
 
     if (!dirInfo.exists) {
-      await FileSystem.makeDirectoryAsync(directory, { intermediates: true });
+      await makeDirectoryAsync(directory, { intermediates: true });
     }
 
     // Generate local file path
@@ -32,7 +42,7 @@ export const saveImageLocally = async (imageUri: string, imageId: string): Promi
     const localUri = `${directory}${imageId}.${fileExtension}`;
 
     // Copy image to local storage
-    await FileSystem.copyAsync({
+    await copyAsync({
       from: imageUri,
       to: localUri,
     });
@@ -60,7 +70,9 @@ export const saveImageLocally = async (imageUri: string, imageId: string): Promi
  * Get stored image metadata from AsyncStorage
  * @returns Promise<Record<string, StoredImage>>
  */
-export const getStoredImages = async (): Promise<Record<string, StoredImage>> => {
+export const getStoredImages = async (): Promise<
+  Record<string, StoredImage>
+> => {
   try {
     const stored = await AsyncStorage.getItem(IMAGE_STORAGE_KEY);
     return stored ? JSON.parse(stored) : {};
@@ -75,7 +87,9 @@ export const getStoredImages = async (): Promise<Record<string, StoredImage>> =>
  * @param imageId - The image ID
  * @returns Promise<StoredImage | null>
  */
-export const getStoredImage = async (imageId: string): Promise<StoredImage | null> => {
+export const getStoredImage = async (
+  imageId: string,
+): Promise<StoredImage | null> => {
   try {
     const storedImages = await getStoredImages();
     return storedImages[imageId] || null;
@@ -95,11 +109,14 @@ export const deleteStoredImage = async (imageId: string): Promise<void> => {
 
     if (storedImages[imageId]) {
       // Delete file from file system
-      await FileSystem.deleteAsync(storedImages[imageId].localUri, { idempotent: true });
+      await deleteAsync(storedImages[imageId].localUri, { idempotent: true });
 
       // Remove from storage
       delete storedImages[imageId];
-      await AsyncStorage.setItem(IMAGE_STORAGE_KEY, JSON.stringify(storedImages));
+      await AsyncStorage.setItem(
+        IMAGE_STORAGE_KEY,
+        JSON.stringify(storedImages),
+      );
     }
   } catch (error) {
     console.error('Error deleting stored image:', error);
@@ -114,7 +131,7 @@ export const deleteStoredImage = async (imageId: string): Promise<void> => {
 export const cleanupOldImages = async (daysOld: number = 30): Promise<void> => {
   try {
     const storedImages = await getStoredImages();
-    const cutoffTime = Date.now() - (daysOld * 24 * 60 * 60 * 1000);
+    const cutoffTime = Date.now() - daysOld * 24 * 60 * 60 * 1000;
 
     const imagesToDelete: string[] = [];
 
@@ -148,9 +165,11 @@ export const generateImageId = (): string => {
  * @returns boolean
  */
 export const isLocalUri = (uri: string): boolean => {
-  const docDir = FileSystem.documentDirectory || '';
-  const cacheDir = FileSystem.cacheDirectory || '';
-  return uri.startsWith(docDir) ||
-         uri.startsWith(cacheDir) ||
-         (Platform.OS === 'android' && uri.startsWith('file://'));
+  const docDir = documentDirectory || '';
+  const cacheDir = cacheDirectory || '';
+  return (
+    uri.startsWith(docDir) ||
+    uri.startsWith(cacheDir) ||
+    (Platform.OS === 'android' && uri.startsWith('file://'))
+  );
 };

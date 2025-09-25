@@ -30,7 +30,13 @@ import { useNetwork } from '@/src/contexts/NetworkContext';
 import { useTranslation } from 'react-i18next';
 import { useRegister } from '@/src/hooks/customer/useAuthhooks';
 import ErrorDisplay from '@/src/components/auth/ErrorDisplay';
-import { Typography, Heading2, Heading5, Body, Label } from '@/src/components/common/Typography';
+import {
+  Typography,
+  Heading2,
+  Heading5,
+  Body,
+  Label,
+} from '@/src/components/common/Typography';
 
 // Optimized country codes data - moved outside component to prevent recreation
 const COUNTRY_CODES = [
@@ -84,9 +90,15 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
         onPress={() => onSelect(item)}
         activeOpacity={0.7}
       >
-        <Typography variant="h5" style={{ marginRight: 16 }}>{item.flag}</Typography>
-        <Label color={colors.onSurface} weight="medium" style={{ flex: 1 }}>{item.country}</Label>
-        <Label color={colors.onSurface} weight="semibold">{item.code}</Label>
+        <Typography variant="h5" style={{ marginRight: 16 }}>
+          {item.flag}
+        </Typography>
+        <Label color={colors.onSurface} weight="medium" style={{ flex: 1 }}>
+          {item.country}
+        </Label>
+        <Label color={colors.onSurface} weight="semibold">
+          {item.code}
+        </Label>
       </TouchableOpacity>
     ),
   );
@@ -337,9 +349,17 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
             {/* Logo and Title */}
             <View style={styles.logoContainer}>
               <View style={styles.logo}>
-                <Heading2 color="white" weight="bold">R</Heading2>
+                <Heading2 color="white" weight="bold">
+                  R
+                </Heading2>
               </View>
-              <Heading2 color={colors.onSurface} weight="bold" style={{ marginBottom: 8 }}>{t('create_account')}</Heading2>
+              <Heading2
+                color={colors.onSurface}
+                weight="bold"
+                style={{ marginBottom: 8 }}
+              >
+                {t('create_account')}
+              </Heading2>
             </View>
 
             {/* Form */}
@@ -359,7 +379,11 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                         <Typography variant="body" style={{ marginRight: 8 }}>
                           {selectedCountryCode.flag}
                         </Typography>
-                        <Label color={colors.onSurface} weight="medium" style={{ marginRight: 8 }}>
+                        <Label
+                          color={colors.onSurface}
+                          weight="medium"
+                          style={{ marginRight: 8 }}
+                        >
                           {selectedCountryCode.code}
                         </Label>
                         <Ionicons
@@ -597,7 +621,9 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
               {/* Divider */}
               <View style={styles.dividerContainer}>
                 <View style={styles.dividerLine} />
-                <Label color={colors.outline} style={{ paddingHorizontal: 16 }}>{t('or_continue_with')}</Label>
+                <Label color={colors.outline} style={{ paddingHorizontal: 16 }}>
+                  {t('or_continue_with')}
+                </Label>
                 <View style={styles.dividerLine} />
               </View>
 
@@ -650,12 +676,16 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
           >
             <SafeAreaView style={styles.modalContainer}>
               <View style={styles.modalHeader}>
-                <Heading5 color={colors.onSurface} weight="semibold">{t('select_country')}</Heading5>
+                <Heading5 color={colors.onSurface} weight="semibold">
+                  {t('select_country')}
+                </Heading5>
                 <TouchableOpacity
                   onPress={closeCountryModal}
                   activeOpacity={0.7}
                 >
-                  <Label color={colors.primary} weight="medium">{t('ok')}</Label>
+                  <Label color={colors.primary} weight="medium">
+                    {t('ok')}
+                  </Label>
                 </TouchableOpacity>
               </View>
               <FlatList

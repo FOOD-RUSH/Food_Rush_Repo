@@ -24,7 +24,14 @@ import {
   useOrderStatus,
 } from '@/src/hooks/customer/useOrdersApi';
 import { Order } from '@/src/types';
-import { Typography, Heading2, Heading5, Body, Label, Caption } from '@/src/components/common/Typography';
+import {
+  Typography,
+  Heading2,
+  Heading5,
+  Body,
+  Label,
+  Caption,
+} from '@/src/components/common/Typography';
 
 const OrderReceiptScreen = ({
   navigation,
@@ -47,10 +54,7 @@ const OrderReceiptScreen = ({
       <CommonView>
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color={colors.primary} />
-          <Body
-            color={colors.onSurfaceVariant}
-            style={{ marginTop: 16 }}
-          >
+          <Body color={colors.onSurfaceVariant} style={{ marginTop: 16 }}>
             {t('loading_order_details')}
           </Body>
         </View>
@@ -88,7 +92,9 @@ const OrderReceiptScreen = ({
             className="mt-4 px-6 py-3 rounded-xl"
             style={{ backgroundColor: colors.primary }}
           >
-            <Label color="white" weight="semibold">{t('retry')}</Label>
+            <Label color="white" weight="semibold">
+              {t('retry')}
+            </Label>
           </TouchableOpacity>
         </View>
       </CommonView>
@@ -156,10 +162,7 @@ const OrderReceiptScreen = ({
           style={{ backgroundColor: colors.surface }}
         >
           <View className="flex-row justify-between items-center mb-4">
-            <Heading2
-              color={colors.onSurface}
-              weight="bold"
-            >
+            <Heading2 color={colors.onSurface} weight="bold">
               {t('order_receipt')}
             </Heading2>
             <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -170,15 +173,10 @@ const OrderReceiptScreen = ({
           {/* Order Info */}
           <View className="flex-row justify-between items-center mb-4">
             <View>
-              <Heading5
-                color={colors.onSurface}
-                weight="semibold"
-              >
+              <Heading5 color={colors.onSurface} weight="semibold">
                 {orderNumber}
               </Heading5>
-              <Caption
-                color={colors.onSurfaceVariant}
-              >
+              <Caption color={colors.onSurfaceVariant}>
                 {formatDate(order.createdAt)}
               </Caption>
             </View>
@@ -214,10 +212,7 @@ const OrderReceiptScreen = ({
                   resizeMode="cover"
                 />
                 <View className="flex-1">
-                  <Label
-                    color={colors.onSurface}
-                    weight="semibold"
-                  >
+                  <Label color={colors.onSurface} weight="semibold">
                     {t('restaurant_details_placeholder')}
                   </Label>
                   <Caption
@@ -263,10 +258,7 @@ const OrderReceiptScreen = ({
                   resizeMode="cover"
                 />
                 <View className="flex-1">
-                  <Label
-                    color={colors.onSurface}
-                    weight="semibold"
-                  >
+                  <Label color={colors.onSurface} weight="semibold">
                     {item.name}
                   </Label>
                   {item.specialInstructions && (
@@ -285,10 +277,7 @@ const OrderReceiptScreen = ({
                     {t('quantity')}: {item.quantity}
                   </Caption>
                 </View>
-                <Label
-                  color={colors.onSurface}
-                  weight="semibold"
-                >
+                <Label color={colors.onSurface} weight="semibold">
                   {item.total} {currency}
                 </Label>
               </View>
@@ -311,18 +300,14 @@ const OrderReceiptScreen = ({
 
           <View className="space-y-2">
             <View className="flex-row justify-between">
-              <Body color={colors.onSurfaceVariant}>
-                {t('subtotal')}
-              </Body>
+              <Body color={colors.onSurfaceVariant}>{t('subtotal')}</Body>
               <Body color={colors.onSurface}>
                 {order.subtotal} {currency}
               </Body>
             </View>
 
             <View className="flex-row justify-between">
-              <Body color={colors.onSurfaceVariant}>
-                {t('delivery_fee')}
-              </Body>
+              <Body color={colors.onSurfaceVariant}>{t('delivery_fee')}</Body>
               <Body color={colors.onSurface}>
                 {order.deliveryPrice} {currency}
               </Body>
@@ -331,16 +316,10 @@ const OrderReceiptScreen = ({
             <Divider className="my-3" />
 
             <View className="flex-row justify-between">
-              <Heading5
-                color={colors.onSurface}
-                weight="semibold"
-              >
+              <Heading5 color={colors.onSurface} weight="semibold">
                 {t('total')}
               </Heading5>
-              <Heading5
-                color={colors.primary}
-                weight="semibold"
-              >
+              <Heading5 color={colors.primary} weight="semibold">
                 {order.total} {currency}
               </Heading5>
             </View>
@@ -367,9 +346,7 @@ const OrderReceiptScreen = ({
             >
               {t('delivery_address')}
             </Caption>
-            <Caption
-              color={colors.onSurfaceVariant}
-            >
+            <Caption color={colors.onSurfaceVariant}>
               {t('delivery_address_placeholder')}
             </Caption>
           </View>
@@ -382,16 +359,11 @@ const OrderReceiptScreen = ({
             >
               {t('order_status')}
             </Caption>
-            <Caption
-              color={colors.onSurfaceVariant}
-            >
+            <Caption color={colors.onSurfaceVariant}>
               {orderStatus.description}
             </Caption>
             {order.delivery?.deliveredAt && (
-              <Caption
-                color={colors.onSurfaceVariant}
-                style={{ marginTop: 4 }}
-              >
+              <Caption color={colors.onSurfaceVariant} style={{ marginTop: 4 }}>
                 {t('delivered_at')}: {formatDate(order.delivery.deliveredAt)}
               </Caption>
             )}
@@ -419,19 +391,14 @@ const OrderReceiptScreen = ({
                 style={{ marginRight: 12 }}
               />
               <View>
-                <Caption
-                  color={colors.onSurface}
-                  weight="medium"
-                >
+                <Caption color={colors.onSurface} weight="medium">
                   {order.paymentMethod === 'mtn_mobile_money'
                     ? 'MTN Mobile Money'
                     : order.paymentMethod === 'orange_money'
                       ? 'Orange Money'
                       : order.paymentMethod}
                 </Caption>
-                <Caption
-                  color={colors.onSurfaceVariant}
-                >
+                <Caption color={colors.onSurfaceVariant}>
                   {t('payment_completed')}
                 </Caption>
               </View>

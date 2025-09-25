@@ -23,7 +23,9 @@ interface AddressState {
 
 interface AddressActions {
   // Actions
-  addAddress: (address: Omit<AddressData, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  addAddress: (
+    address: Omit<AddressData, 'id' | 'createdAt' | 'updatedAt'>,
+  ) => void;
   updateAddress: (id: string, address: Partial<AddressData>) => void;
   deleteAddress: (id: string) => void;
   setDefaultAddress: (id: string) => void;
@@ -50,7 +52,7 @@ export const useAddressStore = create<AddressState & AddressActions>()(
           createdAt: Date.now(),
           updatedAt: Date.now(),
         };
-        
+
         set((state) => ({
           addresses: [...state.addresses, newAddress],
         }));
@@ -61,7 +63,7 @@ export const useAddressStore = create<AddressState & AddressActions>()(
           addresses: state.addresses.map((addr) =>
             addr.id === id
               ? { ...addr, ...address, updatedAt: Date.now() }
-              : addr
+              : addr,
           ),
         }));
       },
@@ -96,13 +98,14 @@ export const useAddressStore = create<AddressState & AddressActions>()(
       partialize: (state) => ({
         addresses: state.addresses,
       }),
-    }
-  )
+    },
+  ),
 );
 
 // Selector hooks for better performance
 export const useAddresses = () => useAddressStore((state) => state.addresses);
-export const useDefaultAddress = () => 
-  useAddressStore((state) => state.addresses.find(addr => addr.isDefault));
-export const useAddressLoading = () => useAddressStore((state) => state.isLoading);
+export const useDefaultAddress = () =>
+  useAddressStore((state) => state.addresses.find((addr) => addr.isDefault));
+export const useAddressLoading = () =>
+  useAddressStore((state) => state.isLoading);
 export const useAddressError = () => useAddressStore((state) => state.error);

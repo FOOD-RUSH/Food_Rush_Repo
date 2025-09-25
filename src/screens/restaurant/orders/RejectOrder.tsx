@@ -9,7 +9,8 @@ import CommonView from '@/src/components/common/CommonView';
 import { Heading3, Body, Label } from '@/src/components/common/Typography';
 
 const RejectOrder: React.FC = () => {
-  const route = useRoute<RouteProp<RootStackParamList, 'RestaurantRejectOrder'>>();
+  const route =
+    useRoute<RouteProp<RootStackParamList, 'RestaurantRejectOrder'>>();
   const navigation = useNavigation();
   const { t } = useTranslation();
   const { colors } = useTheme();
@@ -40,7 +41,7 @@ const RejectOrder: React.FC = () => {
         <Body color={colors.onSurfaceVariant} style={{ marginBottom: 24 }}>
           {t('order_id')}: {orderId}
         </Body>
-        
+
         <View className="mb-6">
           <Label color={colors.onSurface} style={{ marginBottom: 8 }}>
             {t('reason_for_rejection')} ({t('optional')})
@@ -55,19 +56,19 @@ const RejectOrder: React.FC = () => {
             style={{ backgroundColor: colors.surface }}
           />
         </View>
-        
+
         <View className="space-y-4">
-          <Button 
-            mode="outlined" 
+          <Button
+            mode="outlined"
             onPress={() => navigation.goBack()}
             className="mb-4"
           >
             {t('cancel')}
           </Button>
-          
-          <Button 
-            mode="contained" 
-            onPress={handleReject} 
+
+          <Button
+            mode="contained"
+            onPress={handleReject}
             loading={rejectOrderMutation.isPending}
           >
             {t('reject')}

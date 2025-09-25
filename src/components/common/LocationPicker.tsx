@@ -42,14 +42,19 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
     setIsModalVisible(false);
   }, []);
 
-  const handleLocationSelected = useCallback((location: Location) => {
-    onLocationSelected(location);
-    setIsModalVisible(false);
-  }, [onLocationSelected]);
+  const handleLocationSelected = useCallback(
+    (location: Location) => {
+      onLocationSelected(location);
+      setIsModalVisible(false);
+    },
+    [onLocationSelected],
+  );
 
   const getLocationDisplayText = () => {
     if (selectedLocation) {
-      return selectedLocation.formattedAddress || selectedLocation.exactLocation;
+      return (
+        selectedLocation.formattedAddress || selectedLocation.exactLocation
+      );
     }
     return placeholder || t('tap_to_select_location');
   };
@@ -82,7 +87,10 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
   };
 
   return (
-    <ResponsiveContainer padding="none" style={{ marginBottom: spacing.md, marginHorizontal: 12 }}>
+    <ResponsiveContainer
+      padding="none"
+      style={{ marginBottom: spacing.md, marginHorizontal: 12 }}
+    >
       <Card
         style={{
           backgroundColor: colors.surface,
@@ -129,17 +137,13 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
               style={{ marginBottom: spacing.xs }}
             >
               {label || t('restaurant_location')}
-              {required && (
-                <Typography color={colors.error}> *</Typography>
-              )}
+              {required && <Typography color={colors.error}> *</Typography>}
             </Typography>
-            
+
             <Typography
               variant={isSmallScreen ? 'bodySmall' : 'body'}
               color={
-                selectedLocation
-                  ? colors.onSurface
-                  : colors.onSurfaceVariant
+                selectedLocation ? colors.onSurface : colors.onSurfaceVariant
               }
               numberOfLines={2}
               style={{ lineHeight: isSmallScreen ? 18 : 20 }}
@@ -162,10 +166,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
                   color={colors.primary}
                   style={{ marginRight: 4 }}
                 />
-                <Typography
-                  variant="caption"
-                  color={colors.primary}
-                >
+                <Typography variant="caption" color={colors.primary}>
                   {t('accurate_location')}
                 </Typography>
               </View>
@@ -186,10 +187,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
                   color={colors.onSurfaceVariant}
                   style={{ marginRight: 4 }}
                 />
-                <Typography
-                  variant="caption"
-                  color={colors.onSurfaceVariant}
-                >
+                <Typography variant="caption" color={colors.onSurfaceVariant}>
                   {t('approximate_location')}
                 </Typography>
               </View>

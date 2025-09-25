@@ -7,12 +7,14 @@ The 2-step restaurant signup has been properly implemented as a **better UX expe
 ### **🎯 How It Works**
 
 **Step 1 (RestaurantSignupStep1.tsx):**
+
 - Collects personal information
 - Fields: Email, Full Name, Phone Number, Password, Confirm Password
 - Validates all fields with proper Yup schema
 - Passes data to Step 2 via navigation params
 
 **Step 2 (RestaurantSignupStep2.tsx):**
+
 - Collects restaurant information
 - Fields: Restaurant Name, GPS Location, Optional Documents
 - **COMBINES** Step 1 + Step 2 data
@@ -45,7 +47,7 @@ const registrationData = {
   phoneNumber: step1Data.phoneNumber.replace('+237', ''),
   password: step1Data.password,
   phone: step1Data.phoneNumber, // Full phone with country code
-  
+
   // From Step 2
   name: data.restaurantName.trim(),
   address: selectedLocation.formattedAddress,
@@ -85,6 +87,7 @@ const registrationData = {
 ### **🗂️ Files Modified/Created**
 
 **Updated Files:**
+
 - ✅ `src/screens/restaurant/auth/RestaurantSignupStep1.tsx` - Added email & confirm password
 - ✅ `src/screens/restaurant/auth/RestaurantSignupStep2.tsx` - Updated to combine all data
 - ✅ `src/navigation/AuthNavigator.tsx` - Updated to use 2-step flow
@@ -92,6 +95,7 @@ const registrationData = {
 - ✅ `src/navigation/RootNavigator.tsx` - Added both steps to navigation
 
 **Removed Files:**
+
 - ✅ `src/screens/restaurant/auth/SignupScreen.tsx` - Old single-page signup (deleted)
 - ✅ `restaurantRegisterSchema` from `src/utils/validation.ts` - No longer needed
 

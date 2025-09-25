@@ -43,7 +43,6 @@ const ClassicFoodCard = ({
       onPress={() => {
         navigation.navigate('FoodDetails', {
           foodId: id,
-          restaurantId: restaurantId,
         });
       }}
     >
@@ -131,8 +130,7 @@ const ClassicFoodCard = ({
               className="font-bold text-base"
               style={{ color: colors.primary }}
             >
-              {foodPrice}
-              {t('fcfa_suffix')}
+              {foodPrice} XAF
             </Text>
             <View className="flex-row items-center">
               <MaterialIcons

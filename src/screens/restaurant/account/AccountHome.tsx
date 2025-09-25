@@ -1,5 +1,12 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert, Dimensions } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  Dimensions,
+} from 'react-native';
 import { useTheme, Card, Avatar, Button, Switch } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
@@ -8,8 +15,15 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 import CommonView from '@/src/components/common/CommonView';
 import { RestaurantAccountStackScreenProps } from '@/src/navigation/types';
-import { useRestaurantProfile as useAuthRestaurantProfile, useRestaurantInfo, useLogout } from '@/src/stores/AuthStore';
-import { useRestaurantProfile, useRestaurantStatus } from '@/src/hooks/restaurant/useRestaurantProfile';
+import {
+  useRestaurantProfile as useAuthRestaurantProfile,
+  useRestaurantInfo,
+  useLogout,
+} from '@/src/stores/AuthStore';
+import {
+  useRestaurantProfile,
+  useRestaurantStatus,
+} from '@/src/hooks/restaurant/useRestaurantProfile';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -23,104 +37,98 @@ interface MenuItemProps {
   badgeText?: string;
 }
 
-const MenuItem: React.FC<MenuItemProps> = React.memo(({ 
-  icon, 
-  title, 
-  subtitle, 
-  onPress, 
-  color,
-  showBadge = false,
-  badgeText
-}) => {
-  const { colors } = useTheme();
-  const iconColor = color || colors.primary;
+const MenuItem: React.FC<MenuItemProps> = React.memo(
+  ({ icon, title, subtitle, onPress, color, showBadge = false, badgeText }) => {
+    const { colors } = useTheme();
+    const iconColor = color || colors.primary;
 
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: 16,
-        paddingHorizontal: 20,
-        borderBottomWidth: 1,
-        borderBottomColor: colors.outline + '20',
-      }}
-      activeOpacity={0.7}
-    >
-      <View
+    return (
+      <TouchableOpacity
+        onPress={onPress}
         style={{
-          width: 44,
-          height: 44,
-          borderRadius: 22,
-          backgroundColor: iconColor + '15',
+          flexDirection: 'row',
           alignItems: 'center',
-          justifyContent: 'center',
-          marginRight: 16,
+          paddingVertical: 16,
+          paddingHorizontal: 20,
+          borderBottomWidth: 1,
+          borderBottomColor: colors.outline + '20',
         }}
+        activeOpacity={0.7}
       >
-        <MaterialCommunityIcons
-          name={icon as any}
-          size={22}
-          color={iconColor}
-        />
-      </View>
-      
-      <View style={{ flex: 1 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <Text
-            style={{
-              fontSize: 16,
-              fontWeight: '600',
-              color: colors.onSurface,
-              flex: 1,
-            }}
-          >
-            {title}
-          </Text>
-          {showBadge && badgeText && (
-            <View
-              style={{
-                backgroundColor: colors.primary,
-                paddingHorizontal: 8,
-                paddingVertical: 2,
-                borderRadius: 10,
-                marginLeft: 8,
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 10,
-                  fontWeight: '600',
-                  color: colors.onPrimary,
-                }}
-              >
-                {badgeText}
-              </Text>
-            </View>
-          )}
-        </View>
-        <Text
+        <View
           style={{
-            fontSize: 13,
-            color: colors.onSurfaceVariant,
-            marginTop: 2,
-            lineHeight: 18,
+            width: 44,
+            height: 44,
+            borderRadius: 22,
+            backgroundColor: iconColor + '15',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginRight: 16,
           }}
         >
-          {subtitle}
-        </Text>
-      </View>
-      
-      <MaterialCommunityIcons
-        name="chevron-right"
-        size={20}
-        color={colors.onSurfaceVariant}
-        style={{ marginLeft: 12 }}
-      />
-    </TouchableOpacity>
-  );
-});
+          <MaterialCommunityIcons
+            name={icon as any}
+            size={22}
+            color={iconColor}
+          />
+        </View>
+
+        <View style={{ flex: 1 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: '600',
+                color: colors.onSurface,
+                flex: 1,
+              }}
+            >
+              {title}
+            </Text>
+            {showBadge && badgeText && (
+              <View
+                style={{
+                  backgroundColor: colors.primary,
+                  paddingHorizontal: 8,
+                  paddingVertical: 2,
+                  borderRadius: 10,
+                  marginLeft: 8,
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 10,
+                    fontWeight: '600',
+                    color: colors.onPrimary,
+                  }}
+                >
+                  {badgeText}
+                </Text>
+              </View>
+            )}
+          </View>
+          <Text
+            style={{
+              fontSize: 13,
+              color: colors.onSurfaceVariant,
+              marginTop: 2,
+              lineHeight: 18,
+            }}
+          >
+            {subtitle}
+          </Text>
+        </View>
+
+        <MaterialCommunityIcons
+          name="chevron-right"
+          size={20}
+          color={colors.onSurfaceVariant}
+          style={{ marginLeft: 12 }}
+        />
+      </TouchableOpacity>
+    );
+  },
+);
 MenuItem.displayName = 'MenuItem';
 const AccountHome: React.FC<
   RestaurantAccountStackScreenProps<'AccountHome'>
@@ -130,22 +138,20 @@ const AccountHome: React.FC<
   const user = useAuthRestaurantProfile();
   const { currentRestaurant } = useRestaurantInfo();
   const logout = useLogout();
-  
+
   // Use new restaurant profile hook
   const {
     restaurantProfile,
     isLoading: profileLoading,
     loadProfileIfNeeded,
-    isOpen,
-    restaurantName,
   } = useRestaurantProfile();
-  
+
   const {
     isOpen: statusIsOpen,
     isUpdating,
     toggleStatus,
   } = useRestaurantStatus();
-  
+
   // Local state for UI responsiveness
   const [isRestaurantOpen, setIsRestaurantOpen] = useState(statusIsOpen);
 
@@ -175,9 +181,11 @@ const AccountHome: React.FC<
             console.log('Logout function completed successfully');
           } catch (error) {
             console.error('Logout error in AccountHome:', error);
-            Alert.alert('Logout Error', 'There was an error logging out. Please try again.', [
-              { text: 'OK' }
-            ]);
+            Alert.alert(
+              'Logout Error',
+              'There was an error logging out. Please try again.',
+              [{ text: 'OK' }],
+            );
           }
         },
       },
@@ -203,7 +211,9 @@ const AccountHome: React.FC<
                 setIsRestaurantOpen(false);
                 await toggleStatus(false);
                 console.log('Restaurant closed successfully');
-                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                Haptics.notificationAsync(
+                  Haptics.NotificationFeedbackType.Success,
+                );
               } catch (error) {
                 console.error('Failed to close restaurant:', error);
                 setIsRestaurantOpen(true);
@@ -232,7 +242,11 @@ const AccountHome: React.FC<
     const displayName = user?.fullName || 'Restaurant Owner';
     const displayEmail = user?.email || 'owner@restaurant.com';
     // Use restaurant profile name first, then fallback to current restaurant or user business name
-    const restaurantDisplayName = restaurantProfile?.name || currentRestaurant?.name || user?.businessName || 'My Restaurant';
+    const restaurantDisplayName =
+      restaurantProfile?.name ||
+      currentRestaurant?.name ||
+      user?.businessName ||
+      'My Restaurant';
     const avatarLabel = user?.fullName
       ? user.fullName
           .split(' ')
@@ -240,69 +254,77 @@ const AccountHome: React.FC<
           .join('')
           .toUpperCase()
       : restaurantDisplayName
-      ? restaurantDisplayName
-          .split(' ')
-          .map((n) => n[0])
-          .join('')
-          .toUpperCase()
-      : 'R';
-    
-    return { displayName, displayEmail, restaurantName: restaurantDisplayName, avatarLabel };
-  }, [user?.fullName, user?.email, user?.businessName, restaurantProfile?.name, currentRestaurant?.name]);
+        ? restaurantDisplayName
+            .split(' ')
+            .map((n) => n[0])
+            .join('')
+            .toUpperCase()
+        : 'R';
+
+    return {
+      displayName,
+      displayEmail,
+      restaurantName: restaurantDisplayName,
+      avatarLabel,
+    };
+  }, [
+    user?.fullName,
+    user?.email,
+    user?.businessName,
+    restaurantProfile?.name,
+    currentRestaurant?.name,
+  ]);
 
   // Memoize menu items to prevent recreation
-  const menuItems = useMemo(() => [
-    {
-      icon: 'account-edit',
-      title: t('edit_profile'),
-      subtitle: t('update_personal_and_restaurant_information'),
-      onPress: () => navigation.navigate('RestaurantEditProfile'),
-      color: colors.primary,
-    },
-    {
-      icon: 'map-marker-outline',
-      title: t('restaurant_location'),
-      subtitle: t('manage_address_and_delivery_zones'),
-      onPress: () => navigation.navigate('RestaurantLocation'),
-      color: '#00D084',
-    },
-    {
-      icon: 'credit-card-outline',
-      title: t('payments'),
-      subtitle: t('view_payment_information'),
-      onPress: () => navigation.navigate('RestaurantPayments'),
-      color: '#FF6B35',
-    },
-    {
-      icon: 'bell-outline',
-      title: t('notifications'),
-      subtitle: t('manage_notification_preferences'),
-      onPress: () => navigation.navigate('RestaurantNotifications'),
-      color: '#8B5CF6',
-    },
-    {
-      icon: 'palette-outline',
-      title: t('appearance_language'),
-      subtitle: t('theme_language_preferences'),
-      onPress: () => navigation.navigate('RestaurantThemeSettings'),
-      color: '#FF9500',
-    },
+  const menuItems = useMemo(
+    () => [
+      {
+        icon: 'account-edit',
+        title: t('edit_profile'),
+        subtitle: t('update_personal_and_restaurant_information'),
+        onPress: () => navigation.navigate('RestaurantEditProfile'),
+        color: colors.primary,
+      },
+      {
+        icon: 'map-marker-outline',
+        title: t('restaurant_location'),
+        subtitle: t('manage_address_and_delivery_zones'),
+        onPress: () => navigation.navigate('RestaurantLocation'),
+        color: '#00D084',
+      },
 
-    {
-      icon: 'help-circle-outline',
-      title: t('help_support'),
-      subtitle: t('faq_contact_support_team'),
-      onPress: () => navigation.navigate('RestaurantSupport'),
-      color: colors.primary,
-    },
-    {
-      icon: 'information-outline',
-      title: t('about'),
-      subtitle: t('app_version_terms_privacy'),
-      onPress: () => navigation.navigate('RestaurantAbout'),
-      color: colors.onSurfaceVariant,
-    },
-  ], [t, navigation, colors]);
+      {
+        icon: 'bell-outline',
+        title: t('notifications'),
+        subtitle: t('manage_notification_preferences'),
+        onPress: () => navigation.navigate('RestaurantNotifications'),
+        color: '#8B5CF6',
+      },
+      {
+        icon: 'palette-outline',
+        title: t('appearance_language'),
+        subtitle: t('theme_language_preferences'),
+        onPress: () => navigation.navigate('RestaurantThemeSettings'),
+        color: '#FF9500',
+      },
+
+      {
+        icon: 'help-circle-outline',
+        title: t('help_support'),
+        subtitle: t('faq_contact_support_team'),
+        onPress: () => navigation.navigate('RestaurantSupport'),
+        color: colors.primary,
+      },
+      {
+        icon: 'information-outline',
+        title: t('about'),
+        subtitle: t('app_version_terms_privacy'),
+        onPress: () => navigation.navigate('RestaurantAbout'),
+        color: colors.onSurfaceVariant,
+      },
+    ],
+    [t, navigation, colors],
+  );
 
   const statusColor = isRestaurantOpen ? '#00D084' : '#FF3B30';
   const statusText = isRestaurantOpen ? t('open') : t('closed');
@@ -334,13 +356,13 @@ const AccountHome: React.FC<
               <Avatar.Text
                 size={64}
                 label={userDisplayData.avatarLabel}
-                style={{ 
+                style={{
                   backgroundColor: colors.primary,
                   marginRight: 16,
                 }}
                 labelStyle={{ fontSize: 22, fontWeight: 'bold' }}
               />
-              
+
               <View style={{ flex: 1 }}>
                 <Text
                   style={{
@@ -352,7 +374,7 @@ const AccountHome: React.FC<
                 >
                   {userDisplayData.restaurantName}
                 </Text>
-                
+
                 <Text
                   style={{
                     fontSize: 14,
@@ -362,7 +384,7 @@ const AccountHome: React.FC<
                 >
                   {userDisplayData.displayEmail}
                 </Text>
-                
+
                 {user?.phoneNumber && (
                   <Text
                     style={{
@@ -376,14 +398,22 @@ const AccountHome: React.FC<
                 )}
 
                 {/* Status Row */}
-                <View style={{ 
-                  flexDirection: 'row', 
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  paddingHorizontal: 12,
-                  paddingVertical: 8,
-                }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    paddingHorizontal: 12,
+                    paddingVertical: 8,
+                  }}
+                >
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      flex: 1,
+                    }}
+                  >
                     <View
                       style={{
                         width: 8,
@@ -413,7 +443,7 @@ const AccountHome: React.FC<
                       </Text>
                     </View>
                   </View>
-                  
+
                   <Switch
                     value={isRestaurantOpen}
                     onValueChange={handleStatusToggle}
@@ -427,8 +457,6 @@ const AccountHome: React.FC<
                 </View>
               </View>
             </View>
-
-            
           </LinearGradient>
         </Card>
 
@@ -445,7 +473,7 @@ const AccountHome: React.FC<
           >
             {t('account_management')}
           </Text>
-          
+
           <Card
             style={{
               backgroundColor: colors.surface,
@@ -480,7 +508,7 @@ const AccountHome: React.FC<
           >
             {t('app_settings')}
           </Text>
-          
+
           <Card
             style={{
               backgroundColor: colors.surface,

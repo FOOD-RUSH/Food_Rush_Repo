@@ -54,12 +54,19 @@ const NotificationScreen = () => {
 
       // Handle navigation based on notification type and data
       if (notification.data?.orderId) {
-        const screenName = userType === 'restaurant' ? 'RestaurantOrderDetails' : 'OrderDetails';
-        navigation.navigate(screenName as never, { orderId: notification.data.orderId } as never);
+        const screenName =
+          userType === 'restaurant' ? 'RestaurantOrderDetails' : 'OrderDetails';
+        navigation.navigate(
+          screenName as never,
+          { orderId: notification.data.orderId } as never,
+        );
       } else if (notification.data?.restaurantId) {
-        navigation.navigate('RestaurantDetails' as never, { 
-          restaurantId: notification.data.restaurantId 
-        } as never);
+        navigation.navigate(
+          'RestaurantDetails' as never,
+          {
+            restaurantId: notification.data.restaurantId,
+          } as never,
+        );
       } else {
         // Show notification details
         Alert.alert(notification.title, notification.body);
@@ -79,29 +86,35 @@ const NotificationScreen = () => {
   }, [unreadCount, markAllAsRead, t]);
 
   // Get notification icon
-  const getNotificationIcon = (type: Notification['type'], priority?: string) => {
+  const getNotificationIcon = (
+    type: Notification['type'],
+    priority?: string,
+  ) => {
     const icons = {
       order: 'receipt-outline',
       system: 'settings-outline',
       promotion: 'gift-outline',
       alert: 'warning-outline',
     };
-    
+
     if (priority === 'high') return 'alert-circle';
     return icons[type] || 'notifications-outline';
   };
 
   // Get notification color
-  const getNotificationColor = (type: Notification['type'], priority?: string) => {
+  const getNotificationColor = (
+    type: Notification['type'],
+    priority?: string,
+  ) => {
     if (priority === 'high') return '#FF4444';
-    
+
     const typeColors = {
       order: colors.primary,
       system: colors.onSurfaceVariant,
       promotion: '#10B981',
       alert: '#F59E0B',
     };
-    
+
     return typeColors[type] || colors.onSurfaceVariant;
   };
 
@@ -109,7 +122,9 @@ const NotificationScreen = () => {
   const formatTime = (createdAt: string) => {
     const date = new Date(createdAt);
     const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    const diffInHours = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60),
+    );
 
     if (diffInHours < 1) return t('just_now');
     if (diffInHours < 24) return `${diffInHours}h ago`;
@@ -129,7 +144,9 @@ const NotificationScreen = () => {
         onPress={() => handleNotificationPress(item)}
         className="px-4 py-4 border-b"
         style={{
-          backgroundColor: isUnread ? colors.surfaceVariant + '40' : 'transparent',
+          backgroundColor: isUnread
+            ? colors.surfaceVariant + '40'
+            : 'transparent',
           borderBottomColor: colors.outline + '30',
         }}
         activeOpacity={0.7}
@@ -153,7 +170,7 @@ const NotificationScreen = () => {
               >
                 {item.title}
               </Text>
-              
+
               <View className="flex-row items-center ml-2">
                 <Text
                   className="text-xs"
@@ -193,7 +210,7 @@ const NotificationScreen = () => {
               >
                 {item.type}
               </Chip>
-              
+
               {item.priority === 'high' && (
                 <Text
                   className="text-xs px-2 py-1 rounded-full"
@@ -223,18 +240,22 @@ const NotificationScreen = () => {
   ];
 
   // Render filter item
-  const renderFilter = ({ item }: { item: typeof filters[0] }) => (
+  const renderFilter = ({ item }: { item: (typeof filters)[0] }) => (
     <TouchableOpacity
       onPress={() => setFilter(item.key as any)}
       className="px-3 py-2 mr-2 rounded-full flex-row items-center"
       style={{
-        backgroundColor: selectedFilter === item.key ? colors.primary : colors.surfaceVariant,
+        backgroundColor:
+          selectedFilter === item.key ? colors.primary : colors.surfaceVariant,
       }}
     >
       <Text
         className="text-sm font-medium"
         style={{
-          color: selectedFilter === item.key ? colors.onPrimary : colors.onSurfaceVariant,
+          color:
+            selectedFilter === item.key
+              ? colors.onPrimary
+              : colors.onSurfaceVariant,
         }}
       >
         {item.label}
@@ -243,13 +264,15 @@ const NotificationScreen = () => {
         <View
           className="ml-2 px-2 py-0.5 rounded-full min-w-[20px] items-center"
           style={{
-            backgroundColor: selectedFilter === item.key ? colors.onPrimary : colors.primary,
+            backgroundColor:
+              selectedFilter === item.key ? colors.onPrimary : colors.primary,
           }}
         >
           <Text
             className="text-xs font-bold"
             style={{
-              color: selectedFilter === item.key ? colors.primary : colors.onPrimary,
+              color:
+                selectedFilter === item.key ? colors.primary : colors.onPrimary,
             }}
           >
             {item.count}
@@ -272,16 +295,17 @@ const NotificationScreen = () => {
         className="text-xl font-semibold text-center mb-2"
         style={{ color: colors.onSurface }}
       >
-        {selectedFilter === 'unread' ? 'No Unread Notifications' : 'No Notifications'}
+        {selectedFilter === 'unread'
+          ? 'No Unread Notifications'
+          : 'No Notifications'}
       </Text>
       <Text
         className="text-center text-base"
         style={{ color: colors.onSurfaceVariant }}
       >
-        {selectedFilter === 'unread' 
+        {selectedFilter === 'unread'
           ? "You're all caught up!"
-          : "We'll notify you when something new happens."
-        }
+          : "We'll notify you when something new happens."}
       </Text>
     </View>
   );
@@ -316,10 +340,7 @@ const NotificationScreen = () => {
               {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
             </Text>
             <TouchableOpacity onPress={handleMarkAllAsRead}>
-              <Text
-                className="font-semibold"
-                style={{ color: colors.primary }}
-              >
+              <Text className="font-semibold" style={{ color: colors.primary }}>
                 Mark All Read
               </Text>
             </TouchableOpacity>
@@ -331,7 +352,7 @@ const NotificationScreen = () => {
           <FlatList
             horizontal
             showsHorizontalScrollIndicator={false}
-            data={filters.filter(f => f.count > 0 || f.key === 'all')}
+            data={filters.filter((f) => f.count > 0 || f.key === 'all')}
             renderItem={renderFilter}
             keyExtractor={(item) => item.key}
             contentContainerStyle={{ paddingHorizontal: 16 }}

@@ -12,8 +12,17 @@ import CommonView from '@/src/components/common/CommonView';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import { Order, OrderStatus } from '@/src/types';
 import Toast from 'react-native-toast-message';
-import { useOrderById, useConfirmOrderReceived } from '@/src/hooks/customer/useOrdersApi';
-import { Typography, Heading5, Body, Label, Caption } from '@/src/components/common/Typography';
+import {
+  useOrderById,
+  useConfirmOrderReceived,
+} from '@/src/hooks/customer/useOrdersApi';
+import {
+  Typography,
+  Heading5,
+  Body,
+  Label,
+  Caption,
+} from '@/src/components/common/Typography';
 import DeliveryConfirmationModal from '@/src/components/customer/OrderConfirmation/DeliveryConfirmationModal';
 import { useDeliveryConfirmation } from '@/src/hooks/customer/useDeliveryConfirmation';
 
@@ -155,10 +164,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order }) => {
       style={{ backgroundColor: colors.surfaceVariant }}
     >
       <View className="flex-row justify-between items-center mb-3">
-        <Label
-          color={colors.onSurface}
-          weight="semibold"
-        >
+        <Label color={colors.onSurface} weight="semibold">
           {t('order_details')}
         </Label>
         <Label color={colors.primary} weight="medium">
@@ -168,9 +174,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order }) => {
 
       <View className="border-t border-gray-200 pt-3">
         <View className="flex-row justify-between mb-2">
-          <Body color={colors.onSurfaceVariant}>
-            {t('restaurant')}
-          </Body>
+          <Body color={colors.onSurfaceVariant}>{t('restaurant')}</Body>
           <Body color={colors.onSurface}>Restaurant Name</Body>
         </View>
         <View className="flex-row justify-between mb-2">
@@ -218,10 +222,7 @@ const ETAComponent: React.FC<ETAComponentProps> = ({ order }) => {
     >
       <Ionicons name="time-outline" size={24} color="#007aff" />
       <View className="ml-3">
-        <Label
-          color={colors.onSurface}
-          weight="semibold"
-        >
+        <Label color={colors.onSurface} weight="semibold">
           {t('estimated_arrival')}
         </Label>
         <Body color={colors.primary}>{getETA()}</Body>
@@ -310,7 +311,9 @@ const OrderTrackingScreen = ({
             style={{ backgroundColor: colors.primary }}
             onPress={() => navigation.goBack()}
           >
-            <Label color="white" weight="medium">{t('go_back')}</Label>
+            <Label color="white" weight="medium">
+              {t('go_back')}
+            </Label>
           </TouchableOpacity>
         </View>
       </CommonView>
@@ -375,9 +378,7 @@ const OrderTrackingScreen = ({
                 >
                   {ORDER_STATUS_STEPS[currentStepIndex]?.title}
                 </Label>
-                <Caption
-                  color={colors.onSurfaceVariant}
-                >
+                <Caption color={colors.onSurfaceVariant}>
                   {ORDER_STATUS_STEPS[currentStepIndex]?.description}
                 </Caption>
               </View>
@@ -403,12 +404,10 @@ const OrderTrackingScreen = ({
                 size={20}
                 color="white"
               />
-              <Label
-                color="white"
-                weight="medium"
-                style={{ marginLeft: 8 }}
-              >
-                {isConfirming ? t('confirming_delivery') : t('confirm_delivery_received')}
+              <Label color="white" weight="medium" style={{ marginLeft: 8 }}>
+                {isConfirming
+                  ? t('confirming_delivery')
+                  : t('confirm_delivery_received')}
               </Label>
             </TouchableOpacity>
           )}

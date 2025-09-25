@@ -6,7 +6,11 @@ import { RootStackParamList } from '@/src/navigation/types';
 import { useTheme, ActivityIndicator } from 'react-native-paper';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { Typography, Caption, Overline } from '@/src/components/common/Typography';
+import {
+  Typography,
+  Caption,
+  Overline,
+} from '@/src/components/common/Typography';
 
 interface CategoryItemProps {
   title: string;
@@ -113,10 +117,7 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
               zIndex: 1,
             }}
           >
-            <Overline
-              color="white"
-              weight="bold"
-            >
+            <Overline color="white" weight="bold">
               {badgeText}
             </Overline>
           </View>
@@ -173,7 +174,10 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
           numberOfLines={2}
           ellipsizeMode="tail"
         >
-          {t(`category_${title?.toLowerCase().replace(/[\s-]/g, '_') || 'unknown'}`, title || 'Unknown Category')}
+          {t(
+            `category_${title?.toLowerCase().replace(/[\s-]/g, '_') || 'unknown'}`,
+            title || 'Unknown Category',
+          )}
         </Caption>
 
         {/* Item Count */}

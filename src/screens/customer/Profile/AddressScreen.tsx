@@ -18,7 +18,13 @@ import AddressEditModal from '@/src/components/customer/AddressEditModal';
 import { Card, useTheme, FAB, Snackbar } from 'react-native-paper';
 import { AntDesign, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useAddressManager } from '@/src/hooks/customer/useAddressManager';
-import { Typography, Heading5, Body, Label, Caption } from '@/src/components/common/Typography';
+import {
+  Typography,
+  Heading5,
+  Body,
+  Label,
+  Caption,
+} from '@/src/components/common/Typography';
 
 const AddressScreen = ({
   navigation,
@@ -199,10 +205,7 @@ const AddressScreen = ({
 
               <View className="flex-col mx-3 flex-1">
                 <View className="flex-row items-center">
-                  <Heading5
-                    color={colors.onSurface}
-                    weight="semibold"
-                  >
+                  <Heading5 color={colors.onSurface} weight="semibold">
                     {address.label || 'Address'}
                   </Heading5>
                   {isDefault && (
@@ -293,7 +296,11 @@ const AddressScreen = ({
                 <Heading5 color="#1e40af" weight="semibold">
                   Use Current Location
                 </Heading5>
-                <Caption color="#2563eb" numberOfLines={2} style={{ marginTop: 4 }}>
+                <Caption
+                  color="#2563eb"
+                  numberOfLines={2}
+                  style={{ marginTop: 4 }}
+                >
                   {currentLocation.formattedAddress ||
                     `${currentLocation.city}, Cameroon`}
                 </Caption>
@@ -450,9 +457,7 @@ const AddressScreen = ({
           duration={3000}
           style={{ backgroundColor: colors.inverseSurface }}
         >
-          <Body color={colors.inverseOnSurface}>
-            {snackbarMessage}
-          </Body>
+          <Body color={colors.inverseOnSurface}>{snackbarMessage}</Body>
         </Snackbar>
       </View>
     </CommonView>

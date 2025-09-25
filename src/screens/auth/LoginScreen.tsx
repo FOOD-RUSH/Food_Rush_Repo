@@ -1,4 +1,10 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, {
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+  useMemo,
+} from 'react';
 import {
   View,
   KeyboardAvoidingView,
@@ -15,6 +21,7 @@ import {
   HelperText,
   Checkbox,
   useTheme,
+  Button,
 } from 'react-native-paper';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -34,6 +41,7 @@ interface LoginFormData {
 }
 
 const { height } = Dimensions.get('window');
+const WelcomeImage = require('@/assets/images/vendor_background.jpg');
 
 const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
   navigation,
@@ -42,73 +50,109 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
   const { colors } = useTheme();
   const { t } = useTranslation('auth');
   const { isConnected, isInternetReachable } = useNetwork();
+  const { clearError, error: authError } = useAuthStore();
+  const loginMutation = useLogin();
 
+  // State
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [emailFocused, setEmailFocused] = useState(false);
-  const [passwordFocused, setPasswordFocused] = useState(false);
 
-  // Animation values
+  // Animations - simplified to single values
   const overlayAnim = useRef(new Animated.Value(1)).current;
   const formAnim = useRef(new Animated.Value(height)).current;
   const titleAnim = useRef(new Animated.Value(0)).current;
 
+  // Form
   const {
     control,
     handleSubmit,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: yupResolver(loginSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
+    defaultValues: { email: '', password: '' },
   });
 
   const userType = route.params?.userType;
-  const WelcomeImage = require('@/assets/images/Welcome.png');
-  const { clearError } = useAuthStore();
 
-  const loginMutation = useLogin();
-  const { error: authError } = useAuthStore();
+  // Memoized styles
+  const containerStyle = useMemo(
+    () => ({
+      backgroundColor: colors.surface,
+      borderTopLeftRadius: 28,
+      borderTopRightRadius: 28,
+      paddingHorizontal: 24,
+      paddingTop: 24,
+    }),
+    [colors.surface],
+  );
 
-  // Staggered entrance animations
+  const loginButtonStyle = useMemo(
+    () => ({
+      backgroundColor: colors.primary,
+      borderRadius: 14,
+      marginBottom: 24,
+    }),
+    [colors.primary],
+  );
+
+  const socialButtonStyle = useMemo(
+    () => ({
+      backgroundColor: colors.surfaceVariant,
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: colors.outline,
+      flex: 1,
+    }),
+    [colors.surfaceVariant, colors.outline],
+  );
+
+  // Entrance animations - run once
   useEffect(() => {
-    Animated.sequence([
-      Animated.timing(titleAnim, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-      Animated.parallel([
-        Animated.timing(overlayAnim, {
-          toValue: 0.7,
-          duration: 600,
-          useNativeDriver: false,
+    const animateEntrance = () => {
+      Animated.sequence([
+        Animated.timing(titleAnim, {
+          toValue: 1,
+          duration: 400,
+          useNativeDriver: true,
         }),
-        Animated.timing(formAnim, {
-          toValue: height * 0.35,
-          duration: 800,
-          useNativeDriver: false,
-        }),
-      ]),
-    ]).start();
-  }, [titleAnim, overlayAnim, formAnim]);
+        Animated.parallel([
+          Animated.timing(overlayAnim, {
+            toValue: 0.4,
+            duration: 300,
+            useNativeDriver: false,
+          }),
+          Animated.timing(formAnim, {
+            toValue: height * 0.35,
+            duration: 400,
+            useNativeDriver: false,
+          }),
+        ]),
+      ]).start();
+    };
 
+    animateEntrance();
+  }, [formAnim, overlayAnim, titleAnim]);
+
+  // Network check helper
+  const checkNetwork = useCallback(() => {
+    if (!isConnected || !isInternetReachable) {
+      Toast.show({
+        type: 'error',
+        text1: t('error'),
+        text2: 'No internet connection. Please check your network settings.',
+        position: 'top',
+      });
+      return false;
+    }
+    return true;
+  }, [isConnected, isInternetReachable, t]);
+
+  // Submit handler
   const onSubmit = useCallback(
     async (data: LoginFormData) => {
-      if (!isConnected || !isInternetReachable) {
-        Toast.show({
-          type: 'error',
-          text1: t('error'),
-          text2: 'No internet connection. Please check your network settings.',
-          position: 'top',
-        });
-        return;
-      }
+      if (!checkNetwork()) return;
 
       clearError();
-      console.log('Attempting login with email:', data.email);
 
       try {
         await loginMutation.mutateAsync({
@@ -116,8 +160,6 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
           password: data.password,
         });
 
-        console.log('Customer login successful');
-        
         Toast.show({
           type: 'success',
           text1: t('success'),
@@ -127,18 +169,18 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
 
         navigation.getParent()?.navigate('CustomerApp');
       } catch (error: any) {
-        console.error('Customer login failed:', error);
-        
         let errorMessage = 'Login failed. Please try again.';
 
         if (error?.message) {
           errorMessage = error.message;
         } else if (error?.status === 401) {
-          errorMessage = 'Invalid email or password. Please check your credentials.';
+          errorMessage =
+            'Invalid email or password. Please check your credentials.';
         } else if (error?.status === 429) {
           errorMessage = 'Too many login attempts. Please try again later.';
         } else if (error?.code === 'NETWORK_ERROR') {
-          errorMessage = 'Network error. Please check your internet connection.';
+          errorMessage =
+            'Network error. Please check your internet connection.';
         }
 
         Toast.show({
@@ -149,71 +191,53 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
         });
       }
     },
-    [isConnected, isInternetReachable, clearError, t, loginMutation, navigation],
+    [checkNetwork, clearError, loginMutation, navigation, t],
   );
 
-  const handleGoogleSignIn = async () => {
-    if (!isConnected || !isInternetReachable) {
+  // Event handlers
+  const handleSocialSignIn = useCallback(
+    (provider: string) => {
+      if (!checkNetwork()) return;
+
       Toast.show({
-        type: 'error',
-        text1: t('error'),
-        text2: 'No internet connection. Please check your network settings.',
+        type: 'info',
+        text1: t('info'),
+        text2: `${provider} Sign In not implemented yet`,
         position: 'top',
       });
-      return;
-    }
+    },
+    [checkNetwork, t],
+  );
 
-    Toast.show({
-      type: 'info',
-      text1: t('info'),
-      text2: 'Google Sign In not implemented yet',
-      position: 'top',
-    });
-  };
-
-  const handleAppleSignIn = async () => {
-    if (!isConnected || !isInternetReachable) {
-      Toast.show({
-        type: 'error',
-        text1: t('error'),
-        text2: 'No internet connection. Please check your network settings.',
-        position: 'top',
-      });
-      return;
-    }
-
-    Toast.show({
-      type: 'info',
-      text1: t('info'),
-      text2: 'Apple Sign In not implemented yet',
-      position: 'top',
-    });
-  };
-
-  const handleForgotPassword = () => {
-    navigation.navigate('ForgotPassword');
-  };
-
-  const handleSignUp = () => {
-    navigation.navigate('SignUp', { userType: userType });
-  };
+  const togglePassword = useCallback(
+    () => setShowPassword((prev) => !prev),
+    [],
+  );
+  const toggleRememberMe = useCallback(
+    () => setRememberMe((prev) => !prev),
+    [],
+  );
+  const handleForgotPassword = useCallback(
+    () => navigation.navigate('ForgotPassword'),
+    [navigation],
+  );
+  const handleSignUp = useCallback(
+    () => navigation.navigate('SignUp', { userType }),
+    [navigation, userType],
+  );
 
   return (
     <View style={{ flex: 1 }}>
-      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
-      
-      {/* Background Image with Overlay */}
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor="transparent"
+        translucent
+      />
+
+      {/* Background with Overlay */}
       <ImageBackground
         source={WelcomeImage}
-        style={{ 
-          position: 'absolute',
-          top: -10,
-          left: 15,
-          right: 0,
-          bottom: 10,
-          width: 400,
-          height: 400,
-        }}
+        style={{ flex: 1 }}
         resizeMode="cover"
       >
         <Animated.View
@@ -224,7 +248,7 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
         />
       </ImageBackground>
 
-      {/* Welcome Title Overlay */}
+      {/* Welcome Title */}
       <Animated.View
         style={{
           position: 'absolute',
@@ -233,12 +257,6 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
           right: 0,
           alignItems: 'center',
           opacity: titleAnim,
-          transform: [{
-            translateY: titleAnim.interpolate({
-              inputRange: [0, 1],
-              outputRange: [20, 0],
-            })
-          }],
         }}
       >
         <Heading1
@@ -254,23 +272,19 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
         >
           {t('welcome_back')}
         </Heading1>
-        
         <Body
           style={{
             fontSize: 18,
             color: 'rgba(255, 255, 255, 0.9)',
             textAlign: 'center',
             marginTop: 8,
-            textShadowColor: 'rgba(0, 0, 0, 0.3)',
-            textShadowOffset: { width: 0, height: 1 },
-            textShadowRadius: 4,
           }}
         >
           Sign in to continue
         </Body>
       </Animated.View>
 
-      {/* Sliding Form Container */}
+      {/* Form Container */}
       <Animated.View
         style={{
           position: 'absolute',
@@ -278,21 +292,14 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: colors.surface,
-          borderTopLeftRadius: 28,
-          borderTopRightRadius: 28,
-          paddingHorizontal: 24,
-          paddingTop: 24,
+          ...containerStyle,
         }}
       >
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={{ flex: 1 }}
         >
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 40 }}
-          >
+          <ScrollView showsVerticalScrollIndicator={false}>
             {/* Drag Handle */}
             <View
               style={{
@@ -306,177 +313,71 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
             />
 
             {/* Email Input */}
-            <View style={{ marginBottom: 16 }}>
-              <Label style={{ 
-                color: colors.onSurfaceVariant, 
-                fontSize: 14,
-                fontWeight: '600',
-                marginBottom: 8,
-                marginLeft: 4,
-              }}>
-                Email Address
-              </Label>
-              <Controller
-                control={control}
-                name="email"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <>
-                    <View
-                      style={{
-                        backgroundColor: colors.surfaceVariant,
-                        borderRadius: 14,
-                        borderWidth: 1.5,
-                        borderColor: errors.email 
-                          ? colors.error 
-                          : emailFocused 
-                            ? colors.primary 
-                            : colors.outline,
-                        paddingHorizontal: 16,
-                        paddingVertical: 16,
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <TextInput.Icon 
-                        icon="email-outline" 
-                        color={emailFocused ? colors.primary : colors.onSurfaceVariant}
-                        size={20}
-                        style={{ marginRight: 8 }}
-                      />
-                      <TextInput
-                        placeholder="Enter your email"
-                        onBlur={() => {
-                          onBlur();
-                          setEmailFocused(false);
-                        }}
-                        onFocus={() => setEmailFocused(true)}
-                        onChangeText={onChange}
-                        value={value}
-                        mode="flat"
-                        keyboardType="email-address"
-                        autoCapitalize="none"
-                        autoComplete="email"
-                        autoCorrect={false}
-                        style={{
-                          flex: 1,
-                          backgroundColor: 'transparent',
-                          fontSize: 16,
-                        }}
-                        contentStyle={{
-                          backgroundColor: 'transparent',
-                          paddingHorizontal: 0,
-                          paddingVertical: 0,
-                        }}
-                        underlineStyle={{ display: 'none' }}
-                        placeholderTextColor={colors.onSurfaceVariant}
-                      />
-                    </View>
-                    {errors.email && (
-                      <HelperText 
-                        type="error" 
-                        visible={!!errors.email}
-                        style={{ marginLeft: 4, marginTop: 4 }}
-                      >
-                        {errors.email.message}
-                      </HelperText>
-                    )}
-                  </>
-                )}
-              />
-            </View>
+            <Controller
+              control={control}
+              name="email"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <View style={{ marginBottom: 16 }}>
+                  <TextInput
+                    label="Email Address"
+                    placeholder="Enter your email"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoComplete="email"
+                    autoCorrect={false}
+                    mode="outlined"
+                    left={<TextInput.Icon icon="email-outline" />}
+                    error={!!errors.email}
+                    style={{ backgroundColor: colors.surfaceVariant }}
+                  />
+                  <HelperText type="error" visible={!!errors.email}>
+                    {errors.email?.message}
+                  </HelperText>
+                </View>
+              )}
+            />
 
             {/* Password Input */}
-            <View style={{ marginBottom: 20 }}>
-              <Label style={{ 
-                color: colors.onSurfaceVariant, 
-                fontSize: 14,
-                fontWeight: '600',
-                marginBottom: 8,
-                marginLeft: 4,
-              }}>
-                Password
-              </Label>
-              <Controller
-                control={control}
-                name="password"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <>
-                    <View
-                      style={{
-                        backgroundColor: colors.surfaceVariant,
-                        borderRadius: 14,
-                        borderWidth: 1.5,
-                        borderColor: errors.password 
-                          ? colors.error 
-                          : passwordFocused 
-                            ? colors.primary 
-                            : colors.outline,
-                        paddingHorizontal: 16,
-                        paddingVertical: 16,
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <TextInput.Icon 
-                        icon="lock-outline" 
-                        color={passwordFocused ? colors.primary : colors.onSurfaceVariant}
-                        size={20}
-                        style={{ marginRight: 8 }}
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <View style={{ marginBottom: 20 }}>
+                  <TextInput
+                    label="Password"
+                    placeholder="Enter your password"
+                    value={value}
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    secureTextEntry={!showPassword}
+                    autoComplete="password"
+                    mode="outlined"
+                    left={<TextInput.Icon icon="lock-outline" />}
+                    right={
+                      <TextInput.Icon
+                        icon={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                        onPress={togglePassword}
                       />
-                      <TextInput
-                        placeholder="Enter your password"
-                        onBlur={() => {
-                          onBlur();
-                          setPasswordFocused(false);
-                        }}
-                        onFocus={() => setPasswordFocused(true)}
-                        onChangeText={onChange}
-                        value={value}
-                        mode="flat"
-                        secureTextEntry={!showPassword}
-                        autoCapitalize="none"
-                        autoComplete="password"
-                        autoCorrect={false}
-                        style={{
-                          flex: 1,
-                          backgroundColor: 'transparent',
-                          fontSize: 16,
-                        }}
-                        contentStyle={{
-                          backgroundColor: 'transparent',
-                          paddingHorizontal: 0,
-                          paddingVertical: 0,
-                        }}
-                        underlineStyle={{ display: 'none' }}
-                        placeholderTextColor={colors.onSurfaceVariant}
-                      />
-                      <TouchableOpacity
-                        onPress={() => setShowPassword(!showPassword)}
-                        style={{ paddingLeft: 8 }}
-                      >
-                        <TextInput.Icon
-                          icon={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                          color={colors.primary}
-                          size={20}
-                        />
-                      </TouchableOpacity>
-                    </View>
-                    {errors.password && (
-                      <HelperText 
-                        type="error" 
-                        visible={!!errors.password}
-                        style={{ marginLeft: 4, marginTop: 4 }}
-                      >
-                        {errors.password.message}
-                      </HelperText>
-                    )}
-                  </>
-                )}
-              />
-            </View>
+                    }
+                    error={!!errors.password}
+                    style={{
+                      backgroundColor: colors.surfaceVariant,
+                      borderWidth: 0,
+                      borderRadius: 16,
+                    }}
+                  />
+                  <HelperText type="error" visible={!!errors.password}>
+                    {errors.password?.message}
+                  </HelperText>
+                </View>
+              )}
+            />
 
             {/* Remember Me & Forgot Password */}
-            <View 
+            <View
               style={{
                 flexDirection: 'row',
                 justifyContent: 'space-between',
@@ -485,23 +386,18 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
               }}
             >
               <TouchableOpacity
-                onPress={() => setRememberMe(!rememberMe)}
+                onPress={toggleRememberMe}
                 style={{ flexDirection: 'row', alignItems: 'center' }}
               >
                 <Checkbox
                   status={rememberMe ? 'checked' : 'unchecked'}
-                  onPress={() => setRememberMe(!rememberMe)}
-                  color={colors.primary}
+                  onPress={toggleRememberMe}
                 />
-                <Body style={{ marginLeft: 4, color: colors.onSurface }}>
-                  Remember me
-                </Body>
+                <Body style={{ marginLeft: 4 }}>Remember me</Body>
               </TouchableOpacity>
 
               <TouchableOpacity onPress={handleForgotPassword}>
-                <Body style={{ color: colors.primary, fontWeight: '600' }}>
-                  Forgot Password?
-                </Body>
+                <Body style={{ color: colors.primary }}>Forgot Password?</Body>
               </TouchableOpacity>
             </View>
 
@@ -512,121 +408,74 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
             />
 
             {/* Login Button */}
-            <TouchableOpacity
+            <Button
+              mode="contained"
               onPress={handleSubmit(onSubmit)}
+              loading={loginMutation.isPending}
               disabled={loginMutation.isPending}
-              style={{
-                backgroundColor: colors.primary,
-                borderRadius: 14,
-                paddingVertical: 18,
-                marginBottom: 24,
-                opacity: loginMutation.isPending ? 0.7 : 1,
-                shadowColor: colors.primary,
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.3,
-                shadowRadius: 8,
-                elevation: 6,
-              }}
+              style={loginButtonStyle}
+              contentStyle={{ paddingVertical: 8 }}
             >
-              <Body
-                style={{
-                  textAlign: 'center',
-                  color: 'white',
-                  fontSize: 17,
-                  fontWeight: '700',
-                }}
-              >
-                {loginMutation.isPending ? 'Signing In...' : 'Sign In'}
-              </Body>
-            </TouchableOpacity>
+              {loginMutation.isPending ? 'Signing In...' : 'Sign In'}
+            </Button>
 
             {/* Divider */}
-            <View style={{ 
-              flexDirection: 'row', 
-              alignItems: 'center', 
-              marginVertical: 24,
-            }}>
-              <View style={{ flex: 1, height: 1, backgroundColor: colors.outline }} />
-              <Body 
-                style={{ 
-                  marginHorizontal: 16, 
-                  color: colors.onSurfaceVariant,
-                  fontSize: 14,
-                  fontWeight: '500',
-                }}
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginVertical: 24,
+              }}
+            >
+              <View
+                style={{ flex: 1, height: 1, backgroundColor: colors.outline }}
+              />
+              <Body
+                style={{ marginHorizontal: 16, color: colors.onSurfaceVariant }}
               >
                 or sign in with
               </Body>
-              <View style={{ flex: 1, height: 1, backgroundColor: colors.outline }} />
+              <View
+                style={{ flex: 1, height: 1, backgroundColor: colors.outline }}
+              />
             </View>
 
             {/* Social Login Buttons */}
             <View style={{ flexDirection: 'row', gap: 12, marginBottom: 32 }}>
-              <TouchableOpacity
-                onPress={handleGoogleSignIn}
+              <Button
+                mode="outlined"
+                onPress={() => handleSocialSignIn('Google')}
                 disabled={loginMutation.isPending}
-                style={{
-                  flex: 1,
-                  backgroundColor: colors.surfaceVariant,
-                  borderRadius: 14,
-                  paddingVertical: 14,
-                  borderWidth: 1,
-                  borderColor: colors.outline,
-                  flexDirection: 'row',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}
+                style={socialButtonStyle}
+                icon="google"
               >
-                <TextInput.Icon 
-                  icon="google" 
-                  size={50} 
-                  color={colors.onSurfaceVariant}
-                  style={{ opacity: 0.2 }}
-                />
-                <Body style={{ marginLeft: 8, color: colors.onSurfaceVariant, fontWeight: '600' }}>
-                  Google
-                </Body>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                onPress={handleAppleSignIn}
+                Google
+              </Button>
+              <Button
+                mode="outlined"
+                onPress={() => handleSocialSignIn('Apple')}
                 disabled={loginMutation.isPending}
-                style={{
-                  flex: 1,
-                  backgroundColor: colors.surfaceVariant,
-                  borderRadius: 14,
-                  paddingVertical: 14,
-                  borderWidth: 1,
-                  borderColor: colors.outline,
-                  flexDirection: 'row',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}
+                style={socialButtonStyle}
+                icon="apple"
               >
-                <TextInput.Icon 
-                  icon="apple" 
-                  size={50} 
-                  color={colors.onSurfaceVariant}
-                  style={{ opacity: 0.2 }}
-                />
-                <Body style={{ marginLeft: 8, color: colors.onSurfaceVariant, fontWeight: '600' }}>
-                  Apple
-                </Body>
-              </TouchableOpacity>
+                Apple
+              </Button>
             </View>
 
             {/* Sign Up Link */}
-            <View style={{ 
-              flexDirection: 'row', 
-              justifyContent: 'center', 
-              alignItems: 'center',
-              paddingBottom: 20,
-            }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+                paddingBottom: 20,
+              }}
+            >
               <Body style={{ color: colors.onSurfaceVariant }}>
                 Don&apos;t have an account?{' '}
               </Body>
               <TouchableOpacity onPress={handleSignUp}>
-                <Body style={{ color: colors.primary, fontWeight: '700' }}>
+                <Body style={{ color: colors.primary, fontWeight: 'bold' }}>
                   Sign Up
                 </Body>
               </TouchableOpacity>

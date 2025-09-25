@@ -1,5 +1,10 @@
 import { useMemo } from 'react';
-import { FOOD_CATEGORIES, Category, getCategoryByValue, getAllCategories } from '@/src/data/categories';
+import {
+  FOOD_CATEGORIES,
+  Category,
+  getCategoryByValue,
+  getAllCategories,
+} from '@/src/data/categories';
 
 export interface UseCategoriesReturn {
   categories: Category[];
@@ -37,7 +42,7 @@ export const useCategory = (value: string): Category | undefined => {
  */
 export const useCategoriesForPicker = () => {
   return useMemo(() => {
-    return FOOD_CATEGORIES.map(category => ({
+    return FOOD_CATEGORIES.map((category) => ({
       label: category.label,
       value: category.value,
       emoji: category.emoji,

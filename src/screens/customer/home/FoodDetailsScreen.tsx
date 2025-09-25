@@ -6,10 +6,17 @@ import {
   Button,
   ActivityIndicator,
   useTheme,
-  Card,
   Chip,
 } from 'react-native-paper';
-import { Typography, Heading2, Heading4, Body, BodyLarge, Label, LabelLarge, Caption } from '@/src/components/common/Typography';
+import {
+  Typography,
+  Heading2,
+  Heading4,
+  Body,
+  BodyLarge,
+  Label,
+  LabelLarge,
+} from '@/src/components/common/Typography';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { images } from '@/assets/images';
 import { RootStackScreenProps } from '@/src/navigation/types';
@@ -125,16 +132,16 @@ const FoodDetailsScreen = ({
           size={80}
           color={colors.onSurfaceVariant}
         />
-        <Heading4 
-          color={colors.onSurface} 
-          align="center" 
+        <Heading4
+          color={colors.onSurface}
+          align="center"
           style={{ marginTop: 16, marginBottom: 8 }}
         >
           {t('failed_to_load_food_details') || 'Failed to load food details'}
         </Heading4>
-        <Body 
-          color={colors.onSurfaceVariant} 
-          align="center" 
+        <Body
+          color={colors.onSurfaceVariant}
+          align="center"
           style={{ marginBottom: 24 }}
         >
           {t('please_check_connection_and_try_again') ||
@@ -201,7 +208,7 @@ const FoodDetailsScreen = ({
             style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}
           >
             <LabelLarge color="white" weight="bold">
-              {MenuDetails.price} {t('fcfa_unit')}
+              {MenuDetails.price} XAF
             </LabelLarge>
           </View>
         </View>
@@ -210,9 +217,9 @@ const FoodDetailsScreen = ({
         <View className="px-4 py-6">
           {/* Title and Basic Info */}
           <View className="mb-6">
-            <Heading2 
-              color={colors.onSurface} 
-              weight="bold" 
+            <Heading2
+              color={colors.onSurface}
+              weight="bold"
               style={{ marginBottom: 8 }}
             >
               {MenuDetails.name}
@@ -225,10 +232,7 @@ const FoodDetailsScreen = ({
                   className="self-start px-3 py-1 rounded-full"
                   style={{ backgroundColor: colors.primaryContainer }}
                 >
-                  <Label 
-                    color={colors.onPrimaryContainer} 
-                    weight="medium"
-                  >
+                  <Label color={colors.onPrimaryContainer} weight="medium">
                     {MenuDetails.category}
                   </Label>
                 </View>
@@ -237,10 +241,7 @@ const FoodDetailsScreen = ({
 
             <Seperator />
 
-            <BodyLarge 
-              color={colors.onSurface} 
-              style={{ marginBottom: 16 }}
-            >
+            <BodyLarge color={colors.onSurface} style={{ marginBottom: 16 }}>
               {MenuDetails.description || t('no_description_available')}
             </BodyLarge>
 
@@ -259,97 +260,81 @@ const FoodDetailsScreen = ({
           </View>
 
           {/* Quantity Selector */}
-          <Card
-            style={{
-              marginBottom: 20,
-              backgroundColor: colors.surface,
-              elevation: 0,
-              borderWidth: 0,
-            }}
-          >
-            <View className="p-6">
-              <LabelLarge 
-                color={colors.onSurface} 
-                weight="semibold" 
-                style={{ marginBottom: 16 }}
+
+          <View className="p-6">
+            <LabelLarge
+              color={colors.onSurface}
+              weight="semibold"
+              style={{ marginBottom: 16 }}
+            >
+              {t('quantity')}
+            </LabelLarge>
+
+            <View className="flex-row items-center justify-center">
+              <Pressable
+                onPress={() => handleQuantityChange(-1)}
+                disabled={quantity <= 1}
+                className="w-12 h-12 rounded-full items-center justify-center border"
+                style={{
+                  borderColor: quantity > 1 ? colors.primary : colors.outline,
+                  backgroundColor:
+                    quantity > 1 ? colors.primary : colors.surface,
+                }}
               >
-                {t('quantity')}
-              </LabelLarge>
+                <Ionicons
+                  name="remove"
+                  size={24}
+                  color={quantity > 1 ? 'white' : colors.onSurfaceVariant}
+                />
+              </Pressable>
 
-              <View className="flex-row items-center justify-center">
-                <Pressable
-                  onPress={() => handleQuantityChange(-1)}
-                  disabled={quantity <= 1}
-                  className="w-12 h-12 rounded-full items-center justify-center border"
-                  style={{
-                    borderColor: quantity > 1 ? colors.primary : colors.outline,
-                    backgroundColor:
-                      quantity > 1 ? colors.primary : colors.surface,
-                  }}
-                >
-                  <Ionicons
-                    name="remove"
-                    size={24}
-                    color={quantity > 1 ? 'white' : colors.onSurfaceVariant}
-                  />
-                </Pressable>
+              <Typography
+                variant="display2"
+                color={colors.onSurface}
+                weight="bold"
+                align="center"
+                style={{ marginHorizontal: 16, minWidth: 60 }}
+              >
+                {quantity}
+              </Typography>
 
-                <Typography 
-                  variant="display2" 
-                  color={colors.onSurface} 
-                  weight="bold" 
-                  align="center" 
-                  style={{ marginHorizontal: 16, minWidth: 60 }}
-                >
-                  {quantity}
-                </Typography>
-
-                <Pressable
-                  onPress={() => handleQuantityChange(1)}
-                  disabled={quantity >= 99}
-                  className="w-12 h-12 rounded-full items-center justify-center"
-                  style={{
-                    backgroundColor: colors.primary,
-                    opacity: quantity >= 99 ? 0.5 : 1,
-                  }}
-                >
-                  <Ionicons name="add" size={24} color="white" />
-                </Pressable>
-              </View>
+              <Pressable
+                onPress={() => handleQuantityChange(1)}
+                disabled={quantity >= 99}
+                className="w-12 h-12 rounded-full items-center justify-center"
+                style={{
+                  backgroundColor: colors.primary,
+                  opacity: quantity >= 99 ? 0.5 : 1,
+                }}
+              >
+                <Ionicons name="add" size={24} color="white" />
+              </Pressable>
             </View>
-          </Card>
+          </View>
 
           {/* Special Instructions */}
-          <Card
-            style={{
-              marginBottom: 20,
-              backgroundColor: colors.surface,
-              elevation: 0,
-              borderWidth: 0,
-            }}
-          >
-            <View className="p-6">
-              <LabelLarge 
-                color={colors.onSurface} 
-                weight="semibold" 
-                style={{ marginBottom: 16 }}
-              >
-                {t('special_instructions_optional')}
-              </LabelLarge>
 
-              <InputField
-                multiline
-                numberOfLines={4}
-                style={{
-                  backgroundColor: colors.surface,
-                  minHeight: 120,
-                }}
-                placeholder={t('special_instruction')}
-                value={instructions}
-                onChangeText={setInstructions}
-              />
-            </View>
-          </Card>
+          <View className="p-6">
+            <LabelLarge
+              color={colors.onSurface}
+              weight="semibold"
+              style={{ marginBottom: 16 }}
+            >
+              {t('special_instructions_optional')}
+            </LabelLarge>
+
+            <InputField
+              multiline
+              numberOfLines={4}
+              style={{
+                backgroundColor: colors.surface,
+                height: 120,
+              }}
+              placeholder={t('special_instruction')}
+              value={instructions}
+              onChangeText={setInstructions}
+            />
+          </View>
         </View>
       </ScrollView>
 
@@ -370,10 +355,7 @@ const FoodDetailsScreen = ({
         >
           <View className="flex-row justify-between items-center">
             <View>
-              <LabelLarge 
-                color="white" 
-                weight="semibold"
-              >
+              <LabelLarge color="white" weight="semibold">
                 {isInCart ? t('update_cart') : t('add_to_basket')}
               </LabelLarge>
               <Label color="white" style={{ opacity: 0.9 }}>
@@ -382,7 +364,7 @@ const FoodDetailsScreen = ({
             </View>
 
             <Heading4 color="white" weight="bold">
-              {formattedTotalPrice} {t('fcfa_unit')}
+              {formattedTotalPrice} XAF
             </Heading4>
           </View>
         </TouchableRipple>

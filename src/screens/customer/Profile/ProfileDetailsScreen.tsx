@@ -1,49 +1,97 @@
+import { View, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
+import React, { useCallback, useMemo } from 'react';
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  Dimensions,
-} from 'react-native';
-import React, { useCallback } from 'react';
-import { useTheme, Card, Divider, Surface } from 'react-native-paper';
+  useTheme,
+  Divider,
+  Surface,
+  ActivityIndicator,
+} from 'react-native-paper';
+import { MaterialCommunityIcons, Feather } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import CommonView from '@/src/components/common/CommonView';
 import Avatar from '@/src/components/common/Avatar';
 import {
-  AntDesign,
-  MaterialIcons,
-  Feather,
-  Ionicons,
-} from '@expo/vector-icons';
-import CommonView from '@/src/components/common/CommonView';
+  Typography,
+  Heading1,
+  Heading2,
+  Body,
+  Label,
+  Caption,
+} from '@/src/components/common/Typography';
+import { useCustomerProfile, useAuthLoading } from '@/src/stores/AuthStore';
 import { useProfileManager } from '@/src/hooks/customer/useAuthhooks';
-import SkeletonLoader from '@/src/components/common/SkeletonLoader';
-import ProfileErrorState from '@/src/components/profile/ProfileErrorState';
-import { icons } from '@/assets/images';
-import { useTranslation } from 'react-i18next';
 import { CustomerProfileStackScreenProps } from '@/src/navigation/types';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width: screenWidth } = Dimensions.get('window');
 
 const ProfileDetailsScreen = ({
   navigation,
 }: CustomerProfileStackScreenProps<'ProfileDetails'>) => {
-  const { user, isLoading, error, refreshProfile } = useProfileManager();
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
   const insets = useSafeAreaInsets();
+
+  // Use stored profile data instead of making API calls
+  const user = useCustomerProfile();
+  const isAuthLoading = useAuthLoading();
+  const { refreshProfile, isRefetching } = useProfileManager();
 
   const isTablet = screenWidth > 768;
   const contentWidth = isTablet
     ? Math.min(600, screenWidth * 0.8)
     : screenWidth - 32;
 
-  // Retry
-  const handleRetry = useCallback(async () => {
+  // Profile field configuration
+  const profileFields = useMemo(
+    () => [
+      {
+        label: t('full_name'),
+        value: user?.fullName,
+        icon: 'account',
+        iconSet: 'MaterialCommunityIcons' as const,
+      },
+      {
+        label: t('email'),
+        value: user?.email,
+        icon: 'email',
+        iconSet: 'MaterialCommunityIcons' as const,
+      },
+      {
+        label: t('phone_number'),
+        value: user?.phoneNumber,
+        icon: 'phone',
+        iconSet: 'MaterialCommunityIcons' as const,
+      },
+      {
+        label: t('role'),
+        value: user?.role,
+        icon: 'shield-account',
+        iconSet: 'MaterialCommunityIcons' as const,
+      },
+      {
+        label: t('status'),
+        value: user?.status,
+        icon: 'check-circle',
+        iconSet: 'MaterialCommunityIcons' as const,
+      },
+      {
+        label: t('user_id'),
+        value: user?.id,
+        icon: 'fingerprint',
+        iconSet: 'MaterialCommunityIcons' as const,
+      },
+    ],
+    [user, t],
+  );
+
+  // Refresh profile data
+  const handleRefresh = useCallback(async () => {
     try {
       await refreshProfile();
     } catch (error) {
-      console.error('Failed to retry profile fetch:', error);
+      console.error('Failed to refresh profile:', error);
     }
   }, [refreshProfile]);
 
@@ -52,22 +100,11 @@ const ProfileDetailsScreen = ({
     navigation.navigate('EditProfile');
   }, [navigation]);
 
-  if (error && !user) {
-    return (
-      <CommonView>
-        <ProfileErrorState
-          error={error?.message || 'Failed to load profile. Please try again.'}
-          onRetry={handleRetry}
-          showRetryButton={true}
-        />
-      </CommonView>
-    );
-  }
+  const isLoading = isAuthLoading || isRefetching;
 
   return (
     <CommonView>
       <ScrollView
-        className="flex-1"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingBottom: insets.bottom + 40,
@@ -87,7 +124,8 @@ const ProfileDetailsScreen = ({
             }}
           >
             <View style={{ alignItems: 'center', position: 'relative' }}>
-              <View style={{ position: 'relative' }}>
+              {/* Avatar with Edit Button */}
+              <View style={{ position: 'relative', marginBottom: 20 }}>
                 <Avatar
                   profilePicture={user?.profilePicture}
                   fullName={user?.fullName || 'User'}
@@ -114,71 +152,61 @@ const ProfileDetailsScreen = ({
                 </TouchableOpacity>
               </View>
 
-              <View style={{ marginTop: 16, alignItems: 'center' }}>
+              {/* User Info */}
+              <View style={{ alignItems: 'center' }}>
                 {isLoading ? (
-                  <>
-                    <SkeletonLoader
-                      width={160}
-                      height={24}
-                      borderRadius={8}
-                      style={{ marginBottom: 8 }}
-                    />
-                    <SkeletonLoader
-                      width={120}
-                      height={18}
-                      borderRadius={6}
-                      style={{ marginBottom: 4 }}
-                    />
-                    <SkeletonLoader width={140} height={18} borderRadius={6} />
-                  </>
+                  <View style={{ alignItems: 'center' }}>
+                    <ActivityIndicator size="small" color={colors.primary} />
+                    <Caption
+                      color={colors.onSurfaceVariant}
+                      style={{ marginTop: 8 }}
+                    >
+                      {t('loading_profile')}
+                    </Caption>
+                  </View>
                 ) : (
                   <>
-                    <Text
-                      style={{
-                        color: colors.onSurface,
-                        fontSize: 22,
-                        fontWeight: '600',
-                        textAlign: 'center',
-                        marginBottom: 4,
-                      }}
+                    <Heading1
+                      color={colors.onSurface}
+                      weight="bold"
+                      align="center"
+                      style={{ marginBottom: 8 }}
                     >
                       {user?.fullName || t('full_name')}
-                    </Text>
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        marginBottom: 2,
-                      }}
-                    >
-                      <Feather name="phone" size={14} color={colors.primary} />
-                      <Text
-                        style={{
-                          color: colors.onSurfaceVariant,
-                          fontSize: 16,
-                          marginLeft: 6,
-                        }}
+                    </Heading1>
+
+                    <View style={{ alignItems: 'center', gap: 4 }}>
+                      <View
+                        style={{ flexDirection: 'row', alignItems: 'center' }}
                       >
-                        {user?.phoneNumber || t('phone_number')}
-                      </Text>
-                    </View>
-                    <View
-                      style={{ flexDirection: 'row', alignItems: 'center' }}
-                    >
-                      <MaterialIcons
-                        name="email"
-                        size={14}
-                        color={colors.primary}
-                      />
-                      <Text
-                        style={{
-                          color: colors.onSurfaceVariant,
-                          fontSize: 16,
-                          marginLeft: 6,
-                        }}
+                        <MaterialCommunityIcons
+                          name="phone"
+                          size={16}
+                          color={colors.primary}
+                        />
+                        <Body
+                          color={colors.onSurfaceVariant}
+                          style={{ marginLeft: 6 }}
+                        >
+                          {user?.phoneNumber || t('not_provided')}
+                        </Body>
+                      </View>
+
+                      <View
+                        style={{ flexDirection: 'row', alignItems: 'center' }}
                       >
-                        {user?.email || t('email')}
-                      </Text>
+                        <MaterialCommunityIcons
+                          name="email"
+                          size={16}
+                          color={colors.primary}
+                        />
+                        <Body
+                          color={colors.onSurfaceVariant}
+                          style={{ marginLeft: 6 }}
+                        >
+                          {user?.email || t('not_provided')}
+                        </Body>
+                      </View>
                     </View>
                   </>
                 )}
@@ -197,123 +225,108 @@ const ProfileDetailsScreen = ({
               backgroundColor: colors.surface,
             }}
           >
-            <Text
+            <View
               style={{
-                color: colors.onSurface,
-                fontSize: 18,
-                fontWeight: '600',
-                marginBottom: 16,
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: 20,
               }}
             >
-              {t('profile_details')}
-            </Text>
+              <Heading2 color={colors.onSurface} weight="bold">
+                {t('profile_details')}
+              </Heading2>
+
+              <TouchableOpacity
+                onPress={handleRefresh}
+                disabled={isLoading}
+                style={{
+                  backgroundColor: colors.primaryContainer,
+                  borderRadius: 12,
+                  padding: 8,
+                  opacity: isLoading ? 0.6 : 1,
+                }}
+              >
+                <MaterialCommunityIcons
+                  name="refresh"
+                  size={20}
+                  color={colors.primary}
+                />
+              </TouchableOpacity>
+            </View>
 
             {/* Account Information Cards */}
-            {[
-              {
-                label: t('full_name'),
-                value: user?.fullName,
-                icon: 'user',
-                iconSet: 'Feather',
-              },
-              {
-                label: t('email'),
-                value: user?.email,
-                icon: 'email',
-                iconSet: 'MaterialIcons',
-              },
-              {
-                label: t('phone_number'),
-                value: user?.phoneNumber,
-                icon: 'phone',
-                iconSet: 'Feather',
-              },
-              {
-                label: t('role'),
-                value: user?.role,
-                icon: 'shield-check',
-                iconSet: 'Feather',
-              },
-              {
-                label: t('user_id'),
-                value: user?.id,
-                icon: 'fingerprint',
-                iconSet: 'MaterialIcons',
-              },
-            ].map((item, idx) => {
-              const IconComponent =
-                item.iconSet === 'Feather'
-                  ? Feather
-                  : item.iconSet === 'MaterialIcons'
-                    ? MaterialIcons
-                    : Ionicons;
-
-              return (
-                <View key={idx}>
+            {profileFields.map((item, idx) => (
+              <View key={idx}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    paddingVertical: 16,
+                    paddingHorizontal: 4,
+                  }}
+                >
                   <View
                     style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      paddingVertical: 16,
-                      paddingHorizontal: 4,
+                      backgroundColor: colors.primaryContainer,
+                      borderRadius: 12,
+                      padding: 12,
+                      marginRight: 16,
                     }}
                   >
-                    <View
-                      style={{
-                        backgroundColor: colors.primary + '15',
-                        borderRadius: 12,
-                        padding: 12,
-                        marginRight: 16,
-                      }}
-                    >
-                      <IconComponent
-                        name={item.icon}
-                        size={20}
-                        color={colors.primary}
-                      />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text
-                        style={{
-                          color: colors.onSurfaceVariant,
-                          fontSize: 13,
-                          marginBottom: 4,
-                          fontWeight: '500',
-                        }}
-                      >
-                        {item.label}
-                      </Text>
-                      {isLoading ? (
-                        <SkeletonLoader
-                          width="85%"
-                          height={20}
-                          borderRadius={6}
-                        />
-                      ) : (
-                        <Text
-                          style={{
-                            color: colors.onSurface,
-                            fontSize: 16,
-                            fontWeight: '500',
-                          }}
-                          numberOfLines={2}
-                        >
-                          {item.value || t('not_provided')}
-                        </Text>
-                      )}
-                    </View>
-                  </View>
-                  {idx < 4 && (
-                    <Divider
-                      style={{
-                        marginLeft: 52,
-                        backgroundColor: colors.outline + '30',
-                      }}
+                    <MaterialCommunityIcons
+                      name={item.icon}
+                      size={20}
+                      color={colors.primary}
                     />
-                  )}
+                  </View>
+
+                  <View style={{ flex: 1 }}>
+                    <Label
+                      color={colors.onSurfaceVariant}
+                      weight="medium"
+                      style={{ marginBottom: 4 }}
+                    >
+                      {item.label}
+                    </Label>
+
+                    {isLoading ? (
+                      <View
+                        style={{ flexDirection: 'row', alignItems: 'center' }}
+                      >
+                        <ActivityIndicator
+                          size="small"
+                          color={colors.primary}
+                        />
+                        <Caption
+                          color={colors.onSurfaceVariant}
+                          style={{ marginLeft: 8 }}
+                        >
+                          {t('loading')}
+                        </Caption>
+                      </View>
+                    ) : (
+                      <Body
+                        color={colors.onSurface}
+                        weight="medium"
+                        numberOfLines={2}
+                      >
+                        {item.value || t('not_provided')}
+                      </Body>
+                    )}
+                  </View>
                 </View>
-              );
-            })}
+
+                {idx < profileFields.length - 1 && (
+                  <Divider
+                    style={{
+                      marginLeft: 52,
+                      backgroundColor: colors.outline + '30',
+                    }}
+                  />
+                )}
+              </View>
+            ))}
           </Surface>
         </View>
       </ScrollView>

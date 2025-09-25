@@ -173,10 +173,7 @@ const ForgotPasswordScreen = ({
               >
                 {errors.email?.message}
               </HelperText>
-              <BodySmall
-                color={colors.onBackground}
-                style={{ marginTop: 4 }}
-              >
+              <BodySmall color={colors.onBackground} style={{ marginTop: 4 }}>
                 Must have at least 8 characters
               </BodySmall>
             </View>

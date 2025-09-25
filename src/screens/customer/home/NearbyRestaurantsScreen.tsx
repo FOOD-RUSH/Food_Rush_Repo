@@ -3,7 +3,7 @@ import { View, Text, FlatList, RefreshControl } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import CommonView from '@/src/components/common/CommonView';
 import { RestaurantCard } from '@/src/components/customer/RestaurantCard';
-import { useNearbyRestaurants } from '@/src/hooks/customer';
+import { useBrowseRestaurants } from '@/src/hooks/customer/useCustomerApi';
 import { RootStackScreenProps } from '@/src/navigation/types';
 // Location system removed - using hardcoded coordinates
 import LoadingScreen from '@/src/components/common/LoadingScreen';
@@ -16,17 +16,18 @@ const NearbyRestaurantsScreen = ({
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
 
-  // Get nearby restaurants using location service
+  // Get browse restaurants using location service
   const {
-    data: nearbyRestaurants,
+    data: browseRestaurants,
     isLoading,
     error,
     refetch,
     isRefetching,
-  } = useNearbyRestaurants({
+  } = useBrowseRestaurants({
     radiusKm: 15,
     limit: 20,
     isOpen: true,
+    sortDir: 'ASC',
   });
 
   const handleRefresh = () => {
@@ -39,15 +40,20 @@ const NearbyRestaurantsScreen = ({
       id={item.id}
       name={item.name}
       address={item.address}
+      latitude={item.latitude || '0'}
+      longitude={item.longitude || '0'}
+      isOpen={item.isOpen}
+      verificationStatus={item.verificationStatus || 'APPROVED'}
+      menuMode={item.menuMode || 'FIXED'}
+      createdAt={item.createdAt || new Date().toISOString()}
+      distanceKm={item.distanceKm || item.distance || 0}
+      deliveryPrice={item.deliveryPrice || 500}
+      estimatedDeliveryTime={item.estimatedDeliveryTime || '30-40 mins'}
       rating={item.rating}
       ratingCount={item.ratingCount}
-      distance={item.distanceKm || item.distance} // Use distanceKm from API
-      deliveryPrice={item.deliveryPrice} // Optional
-      estimatedDeliveryTime={item.estimatedDeliveryTime} // Optional
-      image={item.image} // Will use default if null/undefined
-      menu={item.menu || []}
-      isOpen={item.isOpen}
+      image={item.image}
       phone={item.phone}
+      menu={item.menu || []}
     />
   );
 
@@ -97,7 +103,7 @@ const NearbyRestaurantsScreen = ({
     </View>
   );
 
-  if (isLoading && !nearbyRestaurants) {
+  if (isLoading && !browseRestaurants) {
     return <LoadingScreen />;
   }
 
@@ -107,12 +113,11 @@ const NearbyRestaurantsScreen = ({
         {/* Content */}
         {error ? (
           renderErrorState()
-        ) : nearbyRestaurants && nearbyRestaurants.length > 0 ? (
+        ) : browseRestaurants && browseRestaurants.length > 0 ? (
           <FlatList
-            data={nearbyRestaurants}
+            data={browseRestaurants}
             renderItem={renderRestaurant}
             keyExtractor={(item) => item.id}
-            contentContainerStyle={{ padding: 16 }}
             showsVerticalScrollIndicator={false}
             refreshControl={
               <RefreshControl
@@ -122,7 +127,6 @@ const NearbyRestaurantsScreen = ({
                 tintColor={colors.primary}
               />
             }
-            ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
           />
         ) : (
           renderEmptyState()

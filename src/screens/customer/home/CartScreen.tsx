@@ -12,7 +12,12 @@ import {
 import { images } from '@/assets/images';
 import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-toast-message';
-import { Heading5, Body, BodySmall, LabelLarge } from '@/src/components/common/Typography';
+import {
+  Heading5,
+  Body,
+  BodySmall,
+  LabelLarge,
+} from '@/src/components/common/Typography';
 
 const CartScreen = ({ navigation }: RootStackScreenProps<'Cart'>) => {
   const { colors } = useTheme();
@@ -92,10 +97,7 @@ const CartScreen = ({ navigation }: RootStackScreenProps<'Cart'>) => {
         >
           {t('cart_empty')}
         </Heading5>
-        <Body
-          color={colors.onSurfaceVariant}
-          align="center"
-        >
+        <Body color={colors.onSurfaceVariant} align="center">
           {t('cart_empty_description')}
         </Body>
       </View>
@@ -152,26 +154,17 @@ const CartScreen = ({ navigation }: RootStackScreenProps<'Cart'>) => {
         >
           <View className="flex-row justify-between items-center">
             <View>
-              <LabelLarge
-                color={colors.onPrimary}
-                weight="semibold"
-              >
+              <LabelLarge color={colors.onPrimary} weight="semibold">
                 {t('checkout')}
               </LabelLarge>
-              <BodySmall
-                color={colors.onPrimary}
-                style={{ opacity: 0.9 }}
-              >
+              <BodySmall color={colors.onPrimary} style={{ opacity: 0.9 }}>
                 {totalItems} {t('item')}
                 {totalItems !== 1 ? t('items_suffix') : ''}
               </BodySmall>
             </View>
 
-            <Heading5
-              color={colors.onPrimary}
-              weight="bold"
-            >
-              {formattedTotalPrice} {t('fcfa_unit')}
+            <Heading5 color={colors.onPrimary} weight="bold">
+              {formattedTotalPrice} FCFA
             </Heading5>
           </View>
         </TouchableRipple>

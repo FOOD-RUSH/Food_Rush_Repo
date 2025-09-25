@@ -13,9 +13,22 @@ export const useAnalyticsSummary = (dateRange?: AnalyticsDateRange) => {
     queryFn: () => analyticsApi.getSummary(dateRange),
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 5 * 60 * 1000, // 5 minutes
-    retry: 2,
+    retry: (failureCount, error) => {
+      // Don't retry on authentication errors
+      if (
+        error &&
+        typeof error === 'object' &&
+        'status' in error &&
+        error.status === 401
+      ) {
+        return false;
+      }
+      return failureCount < 3;
+    },
     refetchOnWindowFocus: false,
     refetchOnMount: true,
+    // Don't throw errors, handle them gracefully
+    throwOnError: false,
   });
 };
 
@@ -29,9 +42,22 @@ export const useRestaurantBalance = () => {
     queryFn: () => analyticsApi.getBalance(),
     staleTime: 5 * 60 * 1000, // 5 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
-    retry: 2,
+    retry: (failureCount, error) => {
+      // Don't retry on authentication errors
+      if (
+        error &&
+        typeof error === 'object' &&
+        'status' in error &&
+        error.status === 401
+      ) {
+        return false;
+      }
+      return failureCount < 3;
+    },
     refetchOnWindowFocus: false,
     refetchOnMount: true,
+    // Don't throw errors, handle them gracefully
+    throwOnError: false,
   });
 };
 
@@ -43,17 +69,30 @@ export const useRestaurantBalance = () => {
  */
 export const useRevenueBuckets = (
   period: AnalyticsPeriod = 'daily',
-  dateRange?: AnalyticsDateRange & { page?: number }
+  dateRange?: AnalyticsDateRange & { page?: number },
 ) => {
   return useQuery({
     queryKey: ['analytics', 'revenue-buckets', period, dateRange],
     queryFn: () => analyticsApi.getRevenueBuckets(period, dateRange),
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 5 * 60 * 1000, // 5 minutes
-    retry: 2,
+    retry: (failureCount, error) => {
+      // Don't retry on authentication errors
+      if (
+        error &&
+        typeof error === 'object' &&
+        'status' in error &&
+        error.status === 401
+      ) {
+        return false;
+      }
+      return failureCount < 3;
+    },
     enabled: !!period, // Only run query if period is provided
     refetchOnWindowFocus: false,
     refetchOnMount: true,
+    // Don't throw errors, handle them gracefully
+    throwOnError: false,
   });
 };
 
@@ -64,8 +103,8 @@ export const useRevenueBuckets = (
  */
 export const useDoualaDateRange = (days: number = 30): AnalyticsDateRange => {
   const now = new Date();
-  const from = new Date(now.getTime() - (days * 24 * 60 * 60 * 1000));
-  
+  const from = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+
   return {
     from: from.toISOString(),
     to: now.toISOString(),
@@ -80,23 +119,53 @@ export const useDoualaDateRange = (days: number = 30): AnalyticsDateRange => {
  */
 export const useAnalyticsData = (
   period: AnalyticsPeriod = 'daily',
-  dateRange?: AnalyticsDateRange
+  dateRange?: AnalyticsDateRange,
 ) => {
   const summaryQuery = useAnalyticsSummary(dateRange);
   const balanceQuery = useRestaurantBalance();
   const revenueQuery = useRevenueBuckets(period, dateRange);
 
+  // Calculate loading states more precisely
+  const isInitialLoading =
+    summaryQuery.isLoading || balanceQuery.isLoading || revenueQuery.isLoading;
+  const isFetching =
+    summaryQuery.isFetching ||
+    balanceQuery.isFetching ||
+    revenueQuery.isFetching;
+
+  // Only consider it an error if ALL queries fail or if there are authentication issues
+  const hasAuthError =
+    (summaryQuery.error && (summaryQuery.error as any)?.status === 401) ||
+    (balanceQuery.error && (balanceQuery.error as any)?.status === 401) ||
+    (revenueQuery.error && (revenueQuery.error as any)?.status === 401);
+
+  const hasDataFailure =
+    summaryQuery.isError && balanceQuery.isError && revenueQuery.isError;
+
   return {
     summary: summaryQuery.data,
     balance: balanceQuery.data,
     revenue: revenueQuery.data,
-    isLoading: summaryQuery.isLoading || balanceQuery.isLoading || revenueQuery.isLoading,
-    isError: summaryQuery.isError || balanceQuery.isError || revenueQuery.isError,
-    error: summaryQuery.error || balanceQuery.error || revenueQuery.error,
-    refetch: () => {
-      summaryQuery.refetch();
-      balanceQuery.refetch();
-      revenueQuery.refetch();
+    isLoading: isInitialLoading,
+    isFetching,
+    isError: hasAuthError || hasDataFailure,
+    error: hasAuthError
+      ? 'Authentication required'
+      : hasDataFailure
+        ? 'Failed to load analytics data'
+        : null,
+    queryErrors: {
+      summary: summaryQuery.error,
+      balance: balanceQuery.error,
+      revenue: revenueQuery.error,
+    },
+    refetch: async () => {
+      const results = await Promise.allSettled([
+        summaryQuery.refetch(),
+        balanceQuery.refetch(),
+        revenueQuery.refetch(),
+      ]);
+      return results;
     },
   };
 };

@@ -11,7 +11,11 @@ import {
   ChangePasswordRequest,
 } from '@/src/services/shared/authTypes';
 import TokenManager from '@/src/services/shared/tokenManager';
-import { useAuthStore, useSetAuthData, CustomerProfile } from '@/src/stores/AuthStore';
+import {
+  useAuthStore,
+  useSetAuthData,
+  CustomerProfile,
+} from '@/src/stores/AuthStore';
 
 const CACHE_CONFIG = {
   STALE_TIME: 5 * 60 * 1000, // 5 minutes
@@ -217,6 +221,8 @@ export const useVerifyOTP = () => {
   });
 };
 
+// Deprecated: Use useUpdateProfile from '@/src/hooks/shared/useProfileUpdate' instead
+// This hook is kept for backward compatibility
 export const useUpdateProfile = () => {
   const queryClient = useQueryClient();
   const { setUser, clearError } = useAuthStore();
@@ -230,10 +236,10 @@ export const useUpdateProfile = () => {
       clearError();
     },
     onSuccess: (updatedUser: CustomerProfile) => {
-      console.log('Customer profile updated successfully');
+      console.log('Customer profile updated successfully (legacy hook)');
       // Update user in store
       setUser(updatedUser);
-      
+
       // Update cached data
       queryClient.setQueryData(['auth', 'me'], updatedUser);
       queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });

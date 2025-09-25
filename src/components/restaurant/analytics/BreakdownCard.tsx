@@ -1,7 +1,12 @@
 import React from 'react';
 import { View } from 'react-native';
 import { useTheme, Card } from 'react-native-paper';
-import { Typography, Heading5, Body, Caption } from '@/src/components/common/Typography';
+import {
+  Typography,
+  Heading5,
+  Body,
+  Caption,
+} from '@/src/components/common/Typography';
 
 interface BreakdownItem {
   label: string;
@@ -34,9 +39,7 @@ const BreakdownCard: React.FC<BreakdownCardProps> = ({
           >
             {title}
           </Heading5>
-          <Caption color={colors.onSurfaceVariant}>
-            No data available
-          </Caption>
+          <Caption color={colors.onSurfaceVariant}>No data available</Caption>
         </View>
       </Card>
     );
@@ -84,10 +87,7 @@ const BreakdownCard: React.FC<BreakdownCardProps> = ({
             </View>
             <View style={{ alignItems: 'flex-end' }}>
               {showCounts && (
-                <Body
-                  color={colors.onSurface}
-                  weight="semibold"
-                >
+                <Body color={colors.onSurface} weight="semibold">
                   {item.count || 0}
                 </Body>
               )}
@@ -116,10 +116,7 @@ const BreakdownCard: React.FC<BreakdownCardProps> = ({
                     }}
                   />
                 </View>
-                <Caption
-                  color={colors.onSurfaceVariant}
-                  weight="semibold"
-                >
+                <Caption color={colors.onSurfaceVariant} weight="semibold">
                   {(item.percentage || 0).toFixed(1)}%
                 </Caption>
               </View>

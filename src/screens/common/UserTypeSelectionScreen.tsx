@@ -15,7 +15,13 @@ import { images } from '@/assets/images';
 import { useTranslation } from 'react-i18next';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import { useAppStore } from '@/src/stores/AppStore';
-import { Heading1, Heading4, Body, BodyLarge, Label } from '@/src/components/common/Typography';
+import {
+  Heading1,
+  Heading4,
+  Body,
+  BodyLarge,
+  Label,
+} from '@/src/components/common/Typography';
 // Types
 interface UserType {
   id: 'customer' | 'restaurant';
@@ -73,12 +79,7 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
         params: { userType: selectedType },
       });
     }
-  }, [
-    selectedType,
-    setSelectedUserType,
-    completeOnboarding,
-    navigation,
-  ]);
+  }, [selectedType, setSelectedUserType, completeOnboarding, navigation]);
 
   // Removed style functions - using inline styles for better performance
 
@@ -125,7 +126,9 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
         </View>
 
         {/* User Type Cards */}
-        <View style={{ gap: 24 }}> {/* Proper spacing between cards */}
+        <View style={{ gap: 24 }}>
+          {' '}
+          {/* Proper spacing between cards */}
           {userTypes.map((type, index) => (
             <TouchableOpacity
               key={type.id}
@@ -138,11 +141,16 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
                   borderRadius: 20,
                   backgroundColor: colors.surface,
                   borderWidth: 3,
-                  borderColor: selectedType === type.id ? colors.primary : 'transparent',
+                  borderColor:
+                    selectedType === type.id ? colors.primary : 'transparent',
                   overflow: 'hidden',
                   elevation: selectedType === type.id ? 8 : 3,
-                  shadowColor: selectedType === type.id ? colors.primary : '#000',
-                  shadowOffset: { width: 0, height: selectedType === type.id ? 4 : 2 },
+                  shadowColor:
+                    selectedType === type.id ? colors.primary : '#000',
+                  shadowOffset: {
+                    width: 0,
+                    height: selectedType === type.id ? 4 : 2,
+                  },
                   shadowOpacity: selectedType === type.id ? 0.3 : 0.1,
                   shadowRadius: selectedType === type.id ? 8 : 4,
                 },
@@ -204,9 +212,7 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
                 <Heading4
                   align="center"
                   color={
-                    selectedType === type.id
-                      ? colors.primary
-                      : colors.onSurface
+                    selectedType === type.id ? colors.primary : colors.onSurface
                   }
                 >
                   {t(type.title)}
@@ -225,7 +231,9 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
             contentStyle={{ paddingVertical: 16 }}
             style={{
               borderRadius: 30,
-              backgroundColor: selectedType ? colors.primary : colors.surfaceVariant,
+              backgroundColor: selectedType
+                ? colors.primary
+                : colors.surfaceVariant,
               elevation: selectedType ? 4 : 0,
               shadowColor: selectedType ? colors.primary : 'transparent',
               shadowOffset: { width: 0, height: selectedType ? 2 : 0 },
@@ -248,7 +256,10 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
               weight="medium"
               style={{ marginTop: 16 }}
             >
-              <Text>{t('you_selected')} {selectedType === 'customer' ? t('customer') : t('restaurant')}</Text>
+              <Text>
+                {t('you_selected')}{' '}
+                {selectedType === 'customer' ? t('customer') : t('restaurant')}
+              </Text>
             </Body>
           )}
         </View>

@@ -50,13 +50,13 @@ export const ResponsiveContainer: React.FC<ResponsiveContainerProps> = ({
   // Calculate responsive max width
   const getMaxWidth = () => {
     if (!responsive) return maxWidth;
-    
+
     if (maxWidth) {
       if (isSmallScreen) return Math.min(maxWidth, screen.width * 0.95);
       if (isTablet) return Math.min(maxWidth, screen.width * 0.9);
       return maxWidth;
     }
-    
+
     // Default responsive max widths
     if (isSmallScreen) return screen.width * 0.95;
     if (isTablet) return screen.width * 0.85;
@@ -72,8 +72,8 @@ export const ResponsiveContainer: React.FC<ResponsiveContainerProps> = ({
     marginVertical: getMargin(),
   };
 
-  const combinedStyle = Array.isArray(style) 
-    ? [containerStyle, ...style] 
+  const combinedStyle = Array.isArray(style)
+    ? [containerStyle, ...style]
     : [containerStyle, style].filter(Boolean);
 
   return (
@@ -85,25 +85,27 @@ export const ResponsiveContainer: React.FC<ResponsiveContainerProps> = ({
 
 // Predefined responsive containers
 export const ResponsiveRow: React.FC<ResponsiveContainerProps> = (props) => (
-  <ResponsiveContainer 
-    {...props} 
-    style={[{ flexDirection: 'row' }, props.style]} 
+  <ResponsiveContainer
+    {...props}
+    style={[{ flexDirection: 'row' }, props.style]}
   />
 );
 
 export const ResponsiveColumn: React.FC<ResponsiveContainerProps> = (props) => (
-  <ResponsiveContainer 
-    {...props} 
-    style={[{ flexDirection: 'column' }, props.style]} 
+  <ResponsiveContainer
+    {...props}
+    style={[{ flexDirection: 'column' }, props.style]}
   />
 );
 
-export const ResponsiveGrid: React.FC<ResponsiveContainerProps & {
-  columns?: number;
-  gap?: number;
-}> = ({ columns = 2, gap = 16, children, ...props }) => {
+export const ResponsiveGrid: React.FC<
+  ResponsiveContainerProps & {
+    columns?: number;
+    gap?: number;
+  }
+> = ({ columns = 2, gap = 16, children, ...props }) => {
   const { isSmallScreen, isTablet } = useResponsive();
-  
+
   // Responsive column count
   const getColumns = () => {
     if (isSmallScreen) return Math.min(columns, 1);

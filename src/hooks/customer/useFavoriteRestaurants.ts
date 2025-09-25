@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuthUser } from '@/src/stores/AuthStore';
+import { useAuthUser } from '@/src/stores/customerStores';
 import { RestaurantCard as RestaurantCardType } from '@/src/types';
 import { restaurantApi } from '@/src/services/customer/restaurant.service';
 import Toast from 'react-native-toast-message';
@@ -28,7 +28,8 @@ export const useFavoriteRestaurants = () => {
       // Don't retry on authentication errors
       if (
         error instanceof Error &&
-        (error.message === 'User not authenticated' || error.message.includes('401'))
+        (error.message === 'User not authenticated' ||
+          error.message.includes('401'))
       ) {
         return false;
       }
@@ -57,7 +58,7 @@ export const useLikeRestaurant = () => {
     onSuccess: (data, restaurantId) => {
       // Invalidate and refetch favorite restaurants
       queryClient.invalidateQueries({ queryKey: ['favorite-restaurants'] });
-      
+
       // Optionally update other restaurant-related queries
       queryClient.invalidateQueries({ queryKey: ['restaurants'] });
       queryClient.invalidateQueries({ queryKey: ['restaurant', restaurantId] });
@@ -74,7 +75,9 @@ export const useLikeRestaurant = () => {
       Toast.show({
         type: 'error',
         text1: t('error', 'Error'),
-        text2: error?.message || t('failed_to_like_restaurant', 'Failed to like restaurant'),
+        text2:
+          error?.message ||
+          t('failed_to_like_restaurant', 'Failed to like restaurant'),
         position: 'top',
       });
     },
@@ -97,7 +100,7 @@ export const useUnlikeRestaurant = () => {
     onSuccess: (data, restaurantId) => {
       // Invalidate and refetch favorite restaurants
       queryClient.invalidateQueries({ queryKey: ['favorite-restaurants'] });
-      
+
       // Optionally update other restaurant-related queries
       queryClient.invalidateQueries({ queryKey: ['restaurants'] });
       queryClient.invalidateQueries({ queryKey: ['restaurant', restaurantId] });
@@ -114,7 +117,9 @@ export const useUnlikeRestaurant = () => {
       Toast.show({
         type: 'error',
         text1: t('error', 'Error'),
-        text2: error?.message || t('failed_to_unlike_restaurant', 'Failed to remove from favorites'),
+        text2:
+          error?.message ||
+          t('failed_to_unlike_restaurant', 'Failed to remove from favorites'),
         position: 'top',
       });
     },
@@ -131,7 +136,7 @@ export const useToggleFavorite = () => {
     toggleFavorite: async (restaurantId: string) => {
       // Check if restaurant is currently liked
       const isCurrentlyLiked = favoriteRestaurants?.some(
-        (restaurant) => restaurant.id === restaurantId || restaurant.restaurantId === restaurantId
+        (restaurant) => restaurant.id === restaurantId,
       );
 
       if (isCurrentlyLiked) {
@@ -147,8 +152,9 @@ export const useToggleFavorite = () => {
 // Hook to check if a restaurant is liked
 export const useIsRestaurantLiked = (restaurantId: string) => {
   const { data: favoriteRestaurants } = useFavoriteRestaurants();
-  
-  return favoriteRestaurants?.some(
-    (restaurant) => restaurant.id === restaurantId || restaurant.restaurantId === restaurantId
-  ) || false;
+
+  return (
+    favoriteRestaurants?.some((restaurant) => restaurant.id === restaurantId) ||
+    false
+  );
 };

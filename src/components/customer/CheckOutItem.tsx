@@ -63,9 +63,9 @@ const CheckOutItem = memo<CheckOutItemProps>(
         <View className="flex-row items-center">
           {/* Food Image */}
           <View className="w-20 h-20 rounded-lg overflow-hidden bg-gray-200">
-            {menuItem.pictureUrl ? (
+            {menuItem.image ? (
               <Image
-                source={{ uri: menuItem.pictureUrl }}
+                source={{ uri: menuItem.image }}
                 className="w-full h-full"
                 resizeMode="cover"
               />
@@ -96,7 +96,7 @@ const CheckOutItem = memo<CheckOutItemProps>(
                 fontWeight: '700',
               }}
             >
-              {menuItem.price?.toLocaleString('fr-FR')} {t('fcfa_unit')}
+              {parseFloat(menuItem.price || '0').toLocaleString('fr-FR')} FCFA
             </Text>
           </View>
 

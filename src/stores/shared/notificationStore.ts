@@ -20,7 +20,10 @@ interface NotificationState {
 
 interface NotificationActions {
   // Fetch notifications
-  fetchNotifications: (params?: { limit?: number; page?: number }, append?: boolean) => Promise<void>;
+  fetchNotifications: (
+    params?: { limit?: number; page?: number },
+    append?: boolean,
+  ) => Promise<void>;
   loadMoreNotifications: () => Promise<void>;
   refreshNotifications: () => Promise<void>;
 
@@ -43,7 +46,11 @@ interface NotificationActions {
   reset: () => void;
 
   // Push token management
-  registerPushToken: (token: string, deviceInfo?: any) => Promise<void>;
+  registerPushToken: (
+    expoToken: string,
+    platform: string,
+    role: 'customer' | 'restaurant',
+  ) => Promise<void>;
   unregisterPushToken: (token?: string) => Promise<void>;
 }
 
@@ -60,19 +67,24 @@ const initialState: NotificationState = {
   selectedFilter: 'all',
 };
 
-export const useNotificationStore = create<NotificationState & NotificationActions>()(
+export const useNotificationStore = create<
+  NotificationState & NotificationActions
+>()(
   devtools(
     persist(
       (set, get) => ({
         ...initialState,
 
-        fetchNotifications: async (params = { limit: 20, page: 1 }, append = false) => {
+        fetchNotifications: async (
+          params = { limit: 20, page: 1 },
+          append = false,
+        ) => {
           try {
             const isFirstPage = params.page === 1;
-            set({ 
-              isLoading: isFirstPage && !append, 
+            set({
+              isLoading: isFirstPage && !append,
               isLoadingMore: !isFirstPage || append,
-              error: null 
+              error: null,
             });
 
             const response = await notificationApi.getNotifications(params);
@@ -81,7 +93,9 @@ export const useNotificationStore = create<NotificationState & NotificationActio
               const { items, total, page, pages } = response.data;
 
               set((state) => ({
-                notifications: append ? [...state.notifications, ...items] : items,
+                notifications: append
+                  ? [...state.notifications, ...items]
+                  : items,
                 total,
                 currentPage: page,
                 totalPages: pages,
@@ -90,7 +104,9 @@ export const useNotificationStore = create<NotificationState & NotificationActio
                 isLoadingMore: false,
               }));
             } else {
-              throw new Error(response.message || 'Failed to fetch notifications');
+              throw new Error(
+                response.message || 'Failed to fetch notifications',
+              );
             }
           } catch (error: any) {
             set({
@@ -103,10 +119,13 @@ export const useNotificationStore = create<NotificationState & NotificationActio
 
         loadMoreNotifications: async () => {
           const { currentPage, hasNextPage, isLoadingMore } = get();
-          
+
           if (!hasNextPage || isLoadingMore) return;
 
-          await get().fetchNotifications({ limit: 20, page: currentPage + 1 }, true);
+          await get().fetchNotifications(
+            { limit: 20, page: currentPage + 1 },
+            true,
+          );
         },
 
         refreshNotifications: async () => {
@@ -182,25 +201,31 @@ export const useNotificationStore = create<NotificationState & NotificationActio
 
         getFilteredNotifications: () => {
           const { notifications, selectedFilter } = get();
-          
+
           switch (selectedFilter) {
             case 'unread':
-              return notifications.filter(n => !n.readAt);
+              return notifications.filter((n) => !n.readAt);
             case 'order':
             case 'system':
             case 'promotion':
             case 'alert':
-              return notifications.filter(n => n.type === selectedFilter);
+              return notifications.filter((n) => n.type === selectedFilter);
             default:
               return notifications;
           }
         },
 
-        registerPushToken: async (token, deviceInfo) => {
+        registerPushToken: async (expoToken, platform, role) => {
           try {
-            const response = await notificationApi.registerDevice(token, deviceInfo);
+            const response = await notificationApi.registerDevice(
+              expoToken,
+              platform,
+              role,
+            );
             if (response.status_code !== 200) {
-              throw new Error(response.message || 'Failed to register push token');
+              throw new Error(
+                response.message || 'Failed to register push token',
+              );
             }
           } catch (error: any) {
             set({ error: error.message || 'Failed to register push token' });
@@ -212,7 +237,9 @@ export const useNotificationStore = create<NotificationState & NotificationActio
           try {
             const response = await notificationApi.unregisterDevice(token);
             if (response.status_code !== 200) {
-              throw new Error(response.message || 'Failed to unregister push token');
+              throw new Error(
+                response.message || 'Failed to unregister push token',
+              );
             }
           } catch (error: any) {
             set({ error: error.message || 'Failed to unregister push token' });
@@ -231,15 +258,20 @@ export const useNotificationStore = create<NotificationState & NotificationActio
           selectedFilter: state.selectedFilter,
         }),
         version: 1,
-      }
+      },
     ),
     { name: 'NotificationStore' },
   ),
 );
 
 // Selector hooks for performance
-export const useNotifications = () => useNotificationStore((state) => state.getFilteredNotifications());
-export const useAllNotifications = () => useNotificationStore((state) => state.notifications);
-export const useUnreadCount = () => useNotificationStore((state) => state.unreadCount);
-export const useNotificationLoading = () => useNotificationStore((state) => state.isLoading);
-export const useNotificationError = () => useNotificationStore((state) => state.error);
+export const useNotifications = () =>
+  useNotificationStore((state) => state.getFilteredNotifications());
+export const useAllNotifications = () =>
+  useNotificationStore((state) => state.notifications);
+export const useUnreadCount = () =>
+  useNotificationStore((state) => state.unreadCount);
+export const useNotificationLoading = () =>
+  useNotificationStore((state) => state.isLoading);
+export const useNotificationError = () =>
+  useNotificationStore((state) => state.error);

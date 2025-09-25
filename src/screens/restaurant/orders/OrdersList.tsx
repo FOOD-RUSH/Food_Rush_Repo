@@ -1,6 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, FlatList, Animated, TouchableOpacity, Dimensions } from 'react-native';
-import {  Badge, useTheme, TextInput } from 'react-native-paper';
+import {
+  View,
+  FlatList,
+  Animated,
+  TouchableOpacity,
+  Dimensions,
+} from 'react-native';
+import { Badge, useTheme, TextInput } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -9,10 +15,19 @@ import { createMaterialTopTabNavigator } from '@react-navigation/material-top-ta
 
 import CommonView from '@/src/components/common/CommonView';
 import { RestaurantOrdersStackScreenProps } from '@/src/navigation/types';
-import { useGetOrders, useConfirmOrder, useRejectOrder } from '@/src/hooks/restaurant/useOrderApi';
+import {
+  useGetOrders,
+  useConfirmOrder,
+  useRejectOrder,
+} from '@/src/hooks/restaurant/useOrderApi';
 import { Order } from '@/src/services/restaurant/orderApi';
-import { Heading1,  Body, Label, LabelLarge, Caption } from '@/src/components/common/Typography';
-
+import {
+  Heading1,
+  Body,
+  Label,
+  LabelLarge,
+  Caption,
+} from '@/src/components/common/Typography';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -24,18 +39,18 @@ const ORDER_STATUSES = {
   READY_FOR_PICKUP: 'ready_for_pickup',
   OUT_FOR_DELIVERY: 'out_for_delivery',
   DELIVERED: 'delivered',
-  CANCELLED: 'cancelled'
+  CANCELLED: 'cancelled',
 } as const;
 
 const getStatusColors = (colors: any) => ({
   pending: colors.primary,
   confirmed: '#4CAF50',
   preparing: colors.warning || '#FF8800',
-  ready_for_pickup: colors.success || '#00C851', 
+  ready_for_pickup: colors.success || '#00C851',
   out_for_delivery: '#2196F3',
   delivered: '#8B5CF6',
   cancelled: colors.error,
-  default: colors.onSurfaceVariant
+  default: colors.onSurfaceVariant,
 });
 
 interface OrderCardProps {
@@ -45,7 +60,12 @@ interface OrderCardProps {
   showActions?: boolean;
 }
 
-const OrderCard: React.FC<OrderCardProps> = ({ item, index, onPress, showActions = false }) => {
+const OrderCard: React.FC<OrderCardProps> = ({
+  item,
+  index,
+  onPress,
+  showActions = false,
+}) => {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const scaleAnim = useRef(new Animated.Value(0.9)).current;
@@ -76,7 +96,9 @@ const OrderCard: React.FC<OrderCardProps> = ({ item, index, onPress, showActions
 
   const getStatusColor = (status: string) => {
     const statusColors = getStatusColors(colors);
-    return statusColors[status as keyof typeof statusColors] || statusColors.default;
+    return (
+      statusColors[status as keyof typeof statusColors] || statusColors.default
+    );
   };
 
   const handleConfirm = async () => {
@@ -100,8 +122,10 @@ const OrderCard: React.FC<OrderCardProps> = ({ item, index, onPress, showActions
   const getTimeSinceOrder = () => {
     const orderTime = new Date(item.createdAt || item.time);
     const now = new Date();
-    const diffInMinutes = Math.floor((now.getTime() - orderTime.getTime()) / (1000 * 60));
-    
+    const diffInMinutes = Math.floor(
+      (now.getTime() - orderTime.getTime()) / (1000 * 60),
+    );
+
     if (diffInMinutes < 1) return 'Just now';
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
     const hours = Math.floor(diffInMinutes / 60);
@@ -112,7 +136,9 @@ const OrderCard: React.FC<OrderCardProps> = ({ item, index, onPress, showActions
     if (item.status !== 'pending') return false;
     const orderTime = new Date(item.createdAt || item.time);
     const now = new Date();
-    const diffInMinutes = Math.floor((now.getTime() - orderTime.getTime()) / (1000 * 60));
+    const diffInMinutes = Math.floor(
+      (now.getTime() - orderTime.getTime()) / (1000 * 60),
+    );
     return diffInMinutes > 5; // Consider overdue after 5 minutes
   };
 
@@ -130,7 +156,9 @@ const OrderCard: React.FC<OrderCardProps> = ({ item, index, onPress, showActions
           marginHorizontal: 4,
           padding: isSmallScreen ? 12 : 16,
           borderLeftWidth: 4,
-          borderLeftColor: isOverdue() ? colors.error : getStatusColor(item.status),
+          borderLeftColor: isOverdue()
+            ? colors.error
+            : getStatusColor(item.status),
           shadowColor: colors.shadow || '#000',
           shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.1,
@@ -141,13 +169,18 @@ const OrderCard: React.FC<OrderCardProps> = ({ item, index, onPress, showActions
         activeOpacity={0.8}
       >
         {/* Header */}
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 8,
+          }}
+        >
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <LabelLarge
-              color={colors.onSurface}
-              weight="bold"
-            >
-              {t('order_hash')}{item.id}
+            <LabelLarge color={colors.onSurface} weight="bold">
+              {t('order_hash')}
+              {item.id}
             </LabelLarge>
             {item.status === 'pending' && (
               <Badge
@@ -178,17 +211,18 @@ const OrderCard: React.FC<OrderCardProps> = ({ item, index, onPress, showActions
         </View>
 
         {/* Customer Info */}
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-          <Label
-            color={colors.onSurface}
-            weight="semibold"
-          >
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 8,
+          }}
+        >
+          <Label color={colors.onSurface} weight="semibold">
             {item.customerName}
           </Label>
-          <Label
-            color={colors.primary}
-            weight="bold"
-          >
+          <Label color={colors.primary} weight="bold">
             {item.total.toLocaleString()} XAF
           </Label>
         </View>
@@ -199,12 +233,18 @@ const OrderCard: React.FC<OrderCardProps> = ({ item, index, onPress, showActions
           numberOfLines={2}
           style={{ marginBottom: 8 }}
         >
-          {item.items.map(i => `${i.quantity}x ${i.name}`).join(', ')}
+          {item.items.map((i) => `${i.quantity}x ${i.name}`).join(', ')}
         </Body>
 
         {/* Actions for Pending Orders */}
         {showActions && item.status === 'pending' && (
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 12 }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              marginTop: 12,
+            }}
+          >
             <TouchableOpacity
               style={{
                 backgroundColor: colors.error,
@@ -251,15 +291,20 @@ const OrderTab: React.FC<OrderTabProps> = ({ status, showActions = false }) => {
   const navigation = useNavigation();
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { data: ordersData, isLoading, refetch } = useGetOrders({
+  const {
+    data: ordersData,
+    isLoading,
+    refetch,
+  } = useGetOrders({
     status: status === 'all' ? undefined : status,
   });
 
   const orders = ordersData?.orders || [];
 
-  const filteredOrders = orders.filter(order => {
-    const matchesSearch = order.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          order.id.includes(searchQuery);
+  const filteredOrders = orders.filter((order) => {
+    const matchesSearch =
+      order.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      order.id.includes(searchQuery);
     return matchesSearch;
   });
 
@@ -298,13 +343,19 @@ const OrderTab: React.FC<OrderTabProps> = ({ status, showActions = false }) => {
             showActions={showActions}
           />
         )}
-        keyExtractor={item => item.id}
+        keyExtractor={(item) => item.id}
         contentContainerStyle={{ padding: 16, paddingTop: 0 }}
         refreshing={isLoading}
         onRefresh={onRefresh}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
-          <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 40 }}>
+          <View
+            style={{
+              alignItems: 'center',
+              justifyContent: 'center',
+              paddingVertical: 40,
+            }}
+          >
             <MaterialCommunityIcons
               name="clipboard-list-outline"
               size={48}
@@ -320,7 +371,9 @@ const OrderTab: React.FC<OrderTabProps> = ({ status, showActions = false }) => {
   );
 };
 
-const OrdersList: React.FC<RestaurantOrdersStackScreenProps<'OrdersList'>> = () => {
+const OrdersList: React.FC<
+  RestaurantOrdersStackScreenProps<'OrdersList'>
+> = () => {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const navigation = useNavigation();
@@ -336,8 +389,14 @@ const OrdersList: React.FC<RestaurantOrdersStackScreenProps<'OrdersList'>> = () 
     <CommonView>
       <View style={{ flex: 1 }}>
         {/* Header */}
-        <View style={{ padding: 16, paddingBottom: 0 }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <View style={{ padding: 16, paddingBottom: 0, marginBottom: 16 }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
             <View style={{ flex: 1 }}>
               <Heading1 color={colors.onBackground} weight="bold">
                 {t('orders')}
@@ -346,8 +405,10 @@ const OrdersList: React.FC<RestaurantOrdersStackScreenProps<'OrdersList'>> = () 
                 {t('manage_your_orders')}
               </Body>
             </View>
-            
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+
+            <View
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}
+            >
               {pendingOrdersCount > 0 && (
                 <View
                   style={{
@@ -360,12 +421,16 @@ const OrdersList: React.FC<RestaurantOrdersStackScreenProps<'OrdersList'>> = () 
                   }}
                 >
                   <MaterialCommunityIcons name="bell" size={16} color="white" />
-                  <Caption color="white" weight="bold" style={{ marginLeft: 4 }}>
+                  <Caption
+                    color="white"
+                    weight="bold"
+                    style={{ marginLeft: 4 }}
+                  >
                     {pendingOrdersCount} {t('pending')}
                   </Caption>
                 </View>
               )}
-              
+
               {/* Notification Icon Button */}
               <TouchableOpacity
                 onPress={handleNotificationPress}
@@ -381,17 +446,15 @@ const OrdersList: React.FC<RestaurantOrdersStackScreenProps<'OrdersList'>> = () 
                 }}
                 activeOpacity={0.7}
               >
-                <MaterialCommunityIcons 
-                  name="bell-outline" 
-                  size={24} 
-                  color={colors.onSurface} 
+                <MaterialCommunityIcons
+                  name="bell-outline"
+                  size={24}
+                  color={colors.onSurface}
                 />
               </TouchableOpacity>
             </View>
           </View>
         </View>
-
-
 
         {/* Tabs */}
         <Tab.Navigator

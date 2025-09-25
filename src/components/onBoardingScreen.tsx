@@ -16,7 +16,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { images } from '@/assets/images';
 import { useTranslation } from 'react-i18next';
 import { LanguageSelector } from './common/LanguageSelector';
-import { Heading1, Heading4, Body, BodyLarge, Label } from './common/Typography';
+import {
+  Heading1,
+  Heading4,
+  Body,
+  BodyLarge,
+  Label,
+} from './common/Typography';
 
 interface OnboardingInfo {
   image: ImageSourcePropType;
@@ -258,10 +264,7 @@ const OnboardingSlide = memo(
                     style={{ paddingVertical: 12, paddingHorizontal: 16 }}
                     activeOpacity={0.7}
                   >
-                    <Label
-                      weight="medium"
-                      color="white"
-                    >
+                    <Label weight="medium" color="white">
                       {t('skip')}
                     </Label>
                   </TouchableOpacity>

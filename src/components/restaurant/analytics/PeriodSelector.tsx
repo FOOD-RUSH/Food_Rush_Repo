@@ -51,9 +51,7 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
             paddingHorizontal: 16,
             paddingVertical: 8,
             backgroundColor:
-              selectedPeriod === period.key
-                ? '#007aff'
-                : colors.surfaceVariant,
+              selectedPeriod === period.key ? '#007aff' : colors.surfaceVariant,
             borderRadius: 20,
             marginRight: 8,
           }}
@@ -63,9 +61,7 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
         >
           <Label
             color={
-              selectedPeriod === period.key
-                ? 'white'
-                : colors.onSurfaceVariant
+              selectedPeriod === period.key ? 'white' : colors.onSurfaceVariant
             }
             weight="semibold"
           >

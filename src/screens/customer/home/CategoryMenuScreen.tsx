@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useLayoutEffect } from 'react';
 import {
   View,
   Text,
@@ -18,7 +18,6 @@ import { RootStackScreenProps } from '@/src/navigation/types';
 import { FoodProps } from '@/src/types';
 import { useGetAllMenuItem } from '@/src/hooks/customer/useCustomerApi';
 import ErrorDisplay from '@/src/components/common/ErrorDisplay';
-import FoodItemCardSkeleton from '@/src/components/customer/FoodItemCardSkeleton';
 import { getCategoryByTitle } from '@/src/constants/categories';
 
 type CategoryMenuScreenProps = RootStackScreenProps<'CategoryMenu'>;
@@ -32,6 +31,9 @@ const CategoryMenuScreen: React.FC<CategoryMenuScreenProps> = ({
   const { t } = useTranslation('translation');
   const [refreshing, setRefreshing] = useState(false);
 
+  useLayoutEffect(() => {
+    navigation.setOptions({ headerTitle: categoryTitle });
+  }, [categoryTitle, navigation]);
   // Get category info
   const categoryInfo = getCategoryByTitle(categoryTitle);
 
@@ -118,12 +120,11 @@ const CategoryMenuScreen: React.FC<CategoryMenuScreenProps> = ({
           foodId={item.id}
           restaurantId={item.restaurant?.id!}
           FoodName={item.name}
-          FoodPrice={parseFloat(item.price)}
+          FoodPrice={item.price}
           FoodImage={item.pictureUrl}
           distanceFromUser={item.distanceKm || 0}
           DeliveryPrice={500} // Default delivery price
           isAvailable={item.isAvailable}
-          RestaurantName={item.restaurant?.name}
         />
       </View>
     ),

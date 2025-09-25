@@ -29,8 +29,7 @@ import {
   useGetAllMenu,
   useGetAllMenuItem,
   useAllRestaurants,
-  useNearbyRestaurants,
-
+  useBrowseRestaurants,
 } from '@/src/hooks/customer/useCustomerApi';
 import { FoodProps, RestaurantCard as RestaurantProps } from '@/src/types';
 import RestaurantCardSkeleton from '@/src/components/customer/RestaurantCardSkeleton';
@@ -57,7 +56,7 @@ const SKELETON_COUNTS = {
   carousel: 3,
 } as const;
 
-interface HomeScreenProps extends CustomerHomeStackScreenProps<'HomeScreen'> {}
+type HomeScreenProps = CustomerHomeStackScreenProps<'HomeScreen'>;
 
 // Simplified CarouselItem component
 interface CarouselItemProps {
@@ -97,9 +96,9 @@ const CarouselItem = React.memo<CarouselItemProps>(
           id={food.id}
           restaurantId={food.restaurant.id}
           foodName={food.name}
-          foodPrice={parseFloat(food.price)}
+          foodPrice={food.price}
           restaurantName={food.restaurant.name}
-          distance={food.distanceKm || 0}
+          distance={food.distance || 0}
           rating={4.5} // Default rating since not in API
           status={food.isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}
           imageUrl={food.pictureUrl}
@@ -136,33 +135,29 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
   const [refreshing, setRefreshing] = useState(false);
-  const [showPermissionModal, setShowPermissionModal] = useState(false);
 
   // Get location info for debugging
-  const { nearLat, nearLng, locationSource, hasLocation } = useLocationForQueries();
-  
+  const { nearLat, nearLng, locationSource, hasLocation } =
+    useLocationForQueries();
+
   // Log location data for debugging
   console.log('🏠 HomeScreen Location Data:', {
     coordinates: { lat: nearLat, lng: nearLng },
     locationSource,
     hasLocation,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 
   // Get categories from local data
   const { categories, isLoading: isCategoriesLoading } = useCategories();
 
-  // Use refs to prevent unnecessary re-renders
-  const lastRefreshTime = useRef<number>(0);
-  const refreshThrottle = 2000; // 2 seconds throttle
-
   // Updated data fetching with new hooks
   const {
-    data: nearbyRestaurants,
-    isLoading: nearbyLoading,
-    error: nearbyError,
-    refetch: refetchNearby,
-  } = useNearbyRestaurants();
+    data: browseRestaurants,
+    isLoading: browseLoading,
+    error: browseError,
+    refetch: refetchBrowse,
+  } = useBrowseRestaurants();
 
   const {
     data: allRestaurants,
@@ -193,29 +188,26 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
 
   // Using the same categories data from unified hook
   const categoriesData = categories;
-  const categoriesLoading = isCategoriesLoading;
-  const categoriesError = null; // No error for local data
-  const refetchCategories = () => {}; // No refetch needed for local data
 
-  // Determine which data to use - prioritize nearby data when available
+  // Determine which data to use - prioritize browse data when available
   const restaurantData =
-    nearbyRestaurants && nearbyRestaurants.length > 0
-      ? nearbyRestaurants
+    browseRestaurants && browseRestaurants.length > 0
+      ? browseRestaurants
       : allRestaurants;
-  
+
   // Use nearby menu data if available, otherwise fallback to all menu data
-  const foodData = 
-    nearbyMenuData && nearbyMenuData.length > 0
-      ? nearbyMenuData
-      : allMenuData;
+  const foodData =
+    nearbyMenuData && nearbyMenuData.length > 0 ? nearbyMenuData : allMenuData;
 
   // Simplified loading state
-  const isLoading = nearbyLoading || allLoading || nearbyMenuLoading || allMenuLoading;
-  const hasError = (nearbyError && allError) || (nearbyMenuError && allMenuError);
+  const isLoading =
+    browseLoading || allLoading || nearbyMenuLoading || allMenuLoading;
+  const hasError =
+    (browseError && allError) || (nearbyMenuError && allMenuError);
 
   // Memoized categories data
   const categoriesForDisplay = useMemo(() => {
-    return categoriesData.map(category => ({
+    return categoriesData.map((category) => ({
       id: category.value,
       value: category.value,
       label: category.label,
@@ -230,7 +222,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
     setRefreshing(true);
     try {
       await Promise.all([
-        refetchNearby(),
+        refetchBrowse(),
         refetchAll(),
         refetchNearbyMenu(),
         refetchAllMenu(),
@@ -241,7 +233,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
     } finally {
       setRefreshing(false);
     }
-  }, [refetchNearby, refetchAll, refetchNearbyMenu, refetchAllMenu]);
+  }, [refetchBrowse, refetchAll, refetchNearbyMenu, refetchAllMenu]);
 
   // Navigation handlers
   const handleSearchPress = useCallback(() => {
@@ -274,17 +266,21 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
         id={item.id}
         name={item.name}
         address={item.address}
+        latitude={item.latitude || '0'}
+        longitude={item.longitude || '0'}
+        isOpen={item.isOpen}
+        verificationStatus={item.verificationStatus || 'APPROVED'}
+        menuMode={item.menuMode || 'FIXED'}
+        createdAt={item.createdAt || new Date().toISOString()}
+        distanceKm={item.distanceKm || item.distance || 0}
+        deliveryPrice={item.deliveryPrice || 500}
+        estimatedDeliveryTime={item.estimatedDeliveryTime || '30-40 mins'}
         rating={item.rating}
         ratingCount={item.ratingCount}
-        distance={item.distanceKm || item.distance} // Use distanceKm from API
-        deliveryPrice={item.deliveryPrice} // Optional
-        estimatedDeliveryTime={item.estimatedDeliveryTime} // Optional
-        image={item.image} // Will use default if null/undefined
-        menu={item.menu || []}
-        isOpen={item.isOpen}
+        image={item.image}
         phone={item.phone}
+        menu={item.menu || []}
       />
-      
     ),
     [],
   );
@@ -298,8 +294,8 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
         FoodName={item.name}
         FoodPrice={parseFloat(item.price)}
         FoodImage={item.pictureUrl}
-        distanceFromUser={item.distanceKm || 0}
-        DeliveryPrice={500} // Default value
+        distanceFromUser={item.distance || 0}
+        DeliveryPrice={item.deliveryPrice || 500} // Use backend-calculated price or fallback
         isAvailable={item.isAvailable}
         RestaurantName={item.restaurant?.name}
       />
@@ -308,7 +304,18 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
   );
 
   const renderCategoryItem = useCallback(
-    ({ item }: { item: { id: string; value: string; label: string; emoji: string; color: string; image: any } }) => (
+    ({
+      item,
+    }: {
+      item: {
+        id: string;
+        value: string;
+        label: string;
+        emoji: string;
+        color: string;
+        image: any;
+      };
+    }) => (
       <CategoryItem
         key={item.value}
         image={item.image}
@@ -355,10 +362,14 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
         count: SKELETON_COUNTS.carousel,
       });
     } else if (hasError) {
-      data.push({ type: 'error', errorType: 'food', onRetry: () => {
-        refetchNearbyMenu();
-        refetchAllMenu();
-      }});
+      data.push({
+        type: 'error',
+        errorType: 'food',
+        onRetry: () => {
+          refetchNearbyMenu();
+          refetchAllMenu();
+        },
+      });
     } else if (carouselData.length === 0) {
       data.push({
         type: 'empty',
@@ -384,10 +395,14 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
         count: SKELETON_COUNTS.foods,
       });
     } else if (nearbyMenuError && allMenuError) {
-      data.push({ type: 'error', errorType: 'food', onRetry: () => {
-        refetchNearbyMenu();
-        refetchAllMenu();
-      }});
+      data.push({
+        type: 'error',
+        errorType: 'food',
+        onRetry: () => {
+          refetchNearbyMenu();
+          refetchAllMenu();
+        },
+      });
     } else if (recommendedFoodData.length === 0) {
       data.push({
         type: 'empty',
@@ -412,11 +427,11 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
         skeletonType: 'restaurants',
         count: SKELETON_COUNTS.restaurants,
       });
-    } else if (nearbyError && allError) {
+    } else if (browseError && allError) {
       data.push({
         type: 'error',
         errorType: 'restaurant',
-        onRetry: refetchNearby,
+        onRetry: refetchBrowse,
       });
     } else if (!restaurantData || restaurantData.length === 0) {
       data.push({
@@ -435,7 +450,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
     hasError,
     nearbyMenuError,
     allMenuError,
-    nearbyError,
+    browseError,
     allError,
     carouselData,
     recommendedFoodData,
@@ -443,7 +458,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
     categoriesForDisplay,
     refetchNearbyMenu,
     refetchAllMenu,
-    refetchNearby,
+    refetchBrowse,
     handleNearbyRestaurantsPress,
     navigation,
   ]);
@@ -619,7 +634,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
           return (
             <View className="px-4 mb-4">
               <ErrorDisplay
-                title={
+                error={
                   item.errorType === 'food'
                     ? t('network_error_food')
                     : t('network_error_restaurant')

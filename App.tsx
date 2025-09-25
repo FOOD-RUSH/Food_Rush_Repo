@@ -14,19 +14,23 @@ SplashScreen.preventAutoHideAsync();
 
 // Loading fallback component with font loading
 const LoadingFallback = ({ message = 'Loading...' }: { message?: string }) => (
-  <View style={{ 
-    flex: 1, 
-    justifyContent: 'center', 
-    alignItems: 'center',
-    backgroundColor: '#06102b'
-  }}>
+  <View
+    style={{
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: '#06102b',
+    }}
+  >
     <ActivityIndicator size="large" color="#007aff" />
-    <Text style={{ 
-      marginTop: 16, 
-      color: '#ffffff', 
-      fontSize: 16,
-      fontFamily: 'system'
-    }}>
+    <Text
+      style={{
+        marginTop: 16,
+        color: '#ffffff',
+        fontSize: 16,
+        fontFamily: 'system',
+      }}
+    >
       {message}
     </Text>
   </View>
@@ -59,8 +63,8 @@ export default function App() {
   // Show loading screen while fonts are loading
   if (!appReady) {
     return (
-      <LoadingFallback 
-        message={fontError ? 'Loading app...' : 'Loading fonts...'} 
+      <LoadingFallback
+        message={fontError ? 'Loading app...' : 'Loading fonts...'}
       />
     );
   }

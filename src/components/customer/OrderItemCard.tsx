@@ -30,7 +30,7 @@ const OrderItemCard = ({
   const statusInfo = useOrderStatus(order.status);
   const { mutate: confirmReceived, isPending: isConfirming } =
     useConfirmOrderReceived();
-  
+
   // State for confirmation modal
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
 
@@ -322,7 +322,7 @@ const OrderItemCard = ({
           )}
         </View>
       </View>
-      
+
       {/* Delivery Confirmation Modal */}
       <OrderDeliveryConfirmationModal
         visible={showConfirmationModal}

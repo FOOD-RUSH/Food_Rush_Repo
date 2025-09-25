@@ -2,7 +2,13 @@ import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { useTheme, Button } from 'react-native-paper';
 import { Ionicons } from '@expo/vector-icons';
-import { isNetworkError, isAuthError, isServerError, isValidationError, ApiError } from '@/src/utils/errorHandler';
+import {
+  isNetworkError,
+  isAuthError,
+  isServerError,
+  isValidationError,
+  ApiError,
+} from '@/src/utils/errorHandler';
 
 interface ErrorDisplayProps {
   error: ApiError | Error | any;
@@ -42,7 +48,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
 
     if (isNetworkError(error)) {
       message = error?.message || 'Network connection failed';
-      icon = 'wifi-off';
+      icon = 'cloud-offline';
       type = 'network';
     } else if (isAuthError(error)) {
       message = error?.message || 'Authentication required';
@@ -66,7 +72,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
   };
 
   const { message, icon, type } = getErrorInfo();
-  
+
   const showLoginButton = type === 'auth' && onLogin;
   const showRetryButton = onRetry && type !== 'auth';
 
@@ -121,7 +127,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
           testID={`${testID}-icon`}
         />
       )}
-      
+
       <Text
         style={styles.message}
         numberOfLines={compact ? 2 : undefined}
@@ -145,7 +151,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
 
         {showRetryButton && (
           <Button
-            mode={showLoginButton ? "outlined" : "contained"}
+            mode={showLoginButton ? 'outlined' : 'contained'}
             onPress={onRetry}
             style={styles.button}
             testID={`${testID}-retry-button`}

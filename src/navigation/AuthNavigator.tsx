@@ -3,10 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { AuthStackParamList } from './types';
 
 // Import from AuthStore
-import {
-  useIsAuthenticated,
-  useAuthUser,
-} from '../stores/AuthStore';
+import { useIsAuthenticated, useAuthUser } from '../stores/AuthStore';
 
 // Customer auth
 import LoginScreen from '../screens/auth/LoginScreen';

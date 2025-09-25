@@ -23,10 +23,12 @@ function MyComponent() {
 ## Components
 
 ### Display Typography
+
 - `<Display1>` - 48px, Bold - Hero sections
 - `<Display2>` - 40px, Bold - Major headers
 
 ### Headings
+
 - `<Heading1>` - 32px, Bold - Page titles
 - `<Heading2>` - 28px, SemiBold - Section headers
 - `<Heading3>` - 24px, SemiBold - Subsection headers
@@ -35,16 +37,19 @@ function MyComponent() {
 - `<Heading6>` - 16px, Medium - Small headers
 
 ### Body Text
+
 - `<BodyLarge>` - 18px, Regular - Important content
 - `<Body>` - 16px, Regular - Standard content
 - `<BodySmall>` - 14px, Regular - Secondary content
 
 ### Labels
+
 - `<LabelLarge>` - 16px, Medium - Form labels
 - `<Label>` - 14px, Medium - Button text
 - `<LabelSmall>` - 12px, Medium - Compact UI
 
 ### Small Text
+
 - `<Caption>` - 12px, Regular - Captions
 - `<Overline>` - 10px, Medium - Categories
 
@@ -54,13 +59,13 @@ All Typography components accept these props:
 
 ```tsx
 interface TypographyProps {
-  variant?: TypographyVariant;     // Override default variant
-  weight?: UrbanistWeight;         // Font weight
-  color?: string;                  // Text color
+  variant?: TypographyVariant; // Override default variant
+  weight?: UrbanistWeight; // Font weight
+  color?: string; // Text color
   align?: 'left' | 'center' | 'right' | 'justify';
-  responsive?: boolean;            // Enable responsive sizing
+  responsive?: boolean; // Enable responsive sizing
   style?: TextStyle | TextStyle[]; // Additional styles
-  children: React.ReactNode;       // Text content
+  children: React.ReactNode; // Text content
   // ...all React Native Text props
 }
 ```
@@ -68,15 +73,17 @@ interface TypographyProps {
 ## Examples
 
 ### Basic Usage
+
 ```tsx
 <Heading1>Welcome to Food Rush</Heading1>
 <Body>Find your favorite restaurants and order delicious food.</Body>
 ```
 
 ### With Props
+
 ```tsx
-<Heading2 
-  color={colors.primary} 
+<Heading2
+  color={colors.primary}
   align="center"
   style={{ marginBottom: 16 }}
 >
@@ -89,6 +96,7 @@ interface TypographyProps {
 ```
 
 ### Custom Weight
+
 ```tsx
 <Typography variant="body" weight="semibold">
   Important announcement
@@ -96,6 +104,7 @@ interface TypographyProps {
 ```
 
 ### Responsive Sizing
+
 ```tsx
 // Automatically scales with screen size (default)
 <Heading1 responsive={true}>Responsive Title</Heading1>
@@ -111,7 +120,7 @@ Urbanist font family includes these weights:
 - `thin` (100) - Urbanist-Thin
 - `extraLight` (200) - Urbanist-ExtraLight
 - `light` (300) - Urbanist-Light
-- `regular` (400) - Urbanist-Regular *(default)*
+- `regular` (400) - Urbanist-Regular _(default)_
 - `medium` (500) - Urbanist-Medium
 - `semibold` (600) - Urbanist-SemiBold
 - `bold` (700) - Urbanist-Bold
@@ -138,16 +147,19 @@ Typography components automatically adjust font sizes based on:
 ## Accessibility
 
 ### Font Scaling
+
 - Respects user font size preferences
 - Maintains readability at all scale levels
 - Preserves layout integrity
 
 ### Color Contrast
+
 - Use theme colors for proper contrast
 - Test with high contrast mode
 - Ensure WCAG AA compliance
 
 ### Screen Readers
+
 - Semantic heading structure
 - Meaningful text content
 - Proper reading order
@@ -155,6 +167,7 @@ Typography components automatically adjust font sizes based on:
 ## Best Practices
 
 ### ✅ Do
+
 ```tsx
 // Use semantic components
 <Heading1>Page Title</Heading1>
@@ -170,6 +183,7 @@ Typography components automatically adjust font sizes based on:
 ```
 
 ### ❌ Don't
+
 ```tsx
 // Don't use raw Text components
 <Text style={{ fontSize: 24 }}>Title</Text>
@@ -185,6 +199,7 @@ Typography components automatically adjust font sizes based on:
 ## Migration Guide
 
 ### From Raw Text
+
 ```tsx
 // Before
 <Text style={{ fontSize: 16, fontWeight: 'bold' }}>
@@ -196,6 +211,7 @@ Typography components automatically adjust font sizes based on:
 ```
 
 ### From Styled Components
+
 ```tsx
 // Before
 const StyledText = styled.Text`
@@ -205,10 +221,11 @@ const StyledText = styled.Text`
 `;
 
 // After
-<Heading3 color={colors.onSurface}>Title</Heading3>
+<Heading3 color={colors.onSurface}>Title</Heading3>;
 ```
 
 ### From className
+
 ```tsx
 // Before
 <Text className="text-lg font-semibold">Label</Text>
@@ -220,15 +237,17 @@ const StyledText = styled.Text`
 ## Testing
 
 ### Visual Testing
+
 ```tsx
 // Test different screen sizes
 import { TypographyShowcase } from '@/src/components/common/TypographyShowcase';
 
 // Use in development
-<TypographyShowcase />
+<TypographyShowcase />;
 ```
 
 ### Accessibility Testing
+
 - Enable large fonts in device settings
 - Test with screen readers
 - Verify color contrast ratios
@@ -236,16 +255,19 @@ import { TypographyShowcase } from '@/src/components/common/TypographyShowcase';
 ## Troubleshooting
 
 ### Fonts Not Loading
+
 1. Check font files in `assets/fonts/`
 2. Verify font loading in `useFonts` hook
 3. Ensure proper font names in config
 
 ### Inconsistent Sizing
+
 1. Check responsive settings
 2. Verify screen width calculations
 3. Test on different devices
 
 ### Style Conflicts
+
 1. Remove hardcoded fontSize/fontFamily
 2. Use Typography components consistently
 3. Check for conflicting styles

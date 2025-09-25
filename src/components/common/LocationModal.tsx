@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { View, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
-import { Button, useTheme,  } from 'react-native-paper';
+import { Button, useTheme } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
@@ -31,12 +31,9 @@ const LocationModal: React.FC<LocationModalProps> = ({
   const spacing = useResponsiveSpacing();
   const [isGettingLocation, setIsGettingLocation] = useState(false);
 
-  const {
-    location,
-    isLoading,
-    error,
-    hasPermission,
-  } = useLocation({ autoRequest: false });
+  const { location, isLoading, error, hasPermission } = useLocation({
+    autoRequest: false,
+  });
 
   const handleManualEntry = useCallback(() => {
     Alert.prompt(
@@ -67,7 +64,7 @@ const LocationModal: React.FC<LocationModalProps> = ({
       ],
       'plain-text',
       '',
-      'default'
+      'default',
     );
   }, [t, onLocationSelected, onClose]);
 
@@ -85,7 +82,10 @@ const LocationModal: React.FC<LocationModalProps> = ({
           t('location_services_disabled_description'),
           [
             { text: t('cancel'), style: 'cancel' },
-            { text: t('open_settings'), onPress: () => ExpoLocation.enableNetworkProviderAsync() },
+            {
+              text: t('open_settings'),
+              onPress: () => ExpoLocation.enableNetworkProviderAsync(),
+            },
           ],
         );
         return;
@@ -93,7 +93,8 @@ const LocationModal: React.FC<LocationModalProps> = ({
 
       if (!hasPermission) {
         // Request permission first
-        const { status } = await ExpoLocation.requestForegroundPermissionsAsync();
+        const { status } =
+          await ExpoLocation.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
           setIsGettingLocation(false);
           Alert.alert(
@@ -115,8 +116,9 @@ const LocationModal: React.FC<LocationModalProps> = ({
           timeInterval: 15000,
           distanceInterval: 1,
         }),
-        new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('GPS timeout')), 20000) // Increased timeout to 20 seconds
+        new Promise<never>(
+          (_, reject) =>
+            setTimeout(() => reject(new Error('GPS timeout')), 20000), // Increased timeout to 20 seconds
         ),
       ]);
 
@@ -124,13 +126,13 @@ const LocationModal: React.FC<LocationModalProps> = ({
         // Reverse geocode to get address
         let formattedAddress = 'Yaoundé, Cameroun';
         let exactLocation = 'Yaoundé';
-        
+
         try {
           const geocodeResult = await ExpoLocation.reverseGeocodeAsync({
             latitude: locationResult.coords.latitude,
             longitude: locationResult.coords.longitude,
           });
-          
+
           if (geocodeResult && geocodeResult.length > 0) {
             const result = geocodeResult[0];
             const addressParts = [
@@ -139,9 +141,10 @@ const LocationModal: React.FC<LocationModalProps> = ({
               result.city || 'Yaoundé',
               'Cameroun',
             ].filter(Boolean);
-            
+
             formattedAddress = addressParts.join(', ');
-            exactLocation = result.street || result.district || result.subregion || 'Yaoundé';
+            exactLocation =
+              result.street || result.district || result.subregion || 'Yaoundé';
           }
         } catch (geocodeError) {
           console.warn('Geocoding failed:', geocodeError);
@@ -163,43 +166,32 @@ const LocationModal: React.FC<LocationModalProps> = ({
       }
     } catch (error) {
       console.error('Location error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+
       if (errorMessage.includes('timeout')) {
-        Alert.alert(
-          t('location_timeout'),
-          t('location_timeout_message'),
-          [
-            { text: t('cancel'), style: 'cancel' },
-            { text: t('try_again'), onPress: handleGetCurrentLocation },
-            { text: t('use_manual'), onPress: handleManualEntry },
-          ],
-        );
+        Alert.alert(t('location_timeout'), t('location_timeout_message'), [
+          { text: t('cancel'), style: 'cancel' },
+          { text: t('try_again'), onPress: handleGetCurrentLocation },
+          { text: t('use_manual'), onPress: handleManualEntry },
+        ]);
       } else {
-        Alert.alert(
-          t('location_error'),
-          t('location_error_generic'),
-          [
-            { text: t('cancel'), style: 'cancel' },
-            { text: t('try_again'), onPress: handleGetCurrentLocation },
-            { text: t('use_manual'), onPress: handleManualEntry },
-          ],
-        );
+        Alert.alert(t('location_error'), t('location_error_generic'), [
+          { text: t('cancel'), style: 'cancel' },
+          { text: t('try_again'), onPress: handleGetCurrentLocation },
+          { text: t('use_manual'), onPress: handleManualEntry },
+        ]);
       }
     } finally {
       setIsGettingLocation(false);
     }
-  }, [
-    hasPermission,
-    onLocationSelected,
-    onClose,
-    t,
-    handleManualEntry,
-  ]);
+  }, [hasPermission, onLocationSelected, onClose, t, handleManualEntry]);
 
   const getLocationDisplayText = () => {
     if (selectedLocation) {
-      return selectedLocation.formattedAddress || selectedLocation.exactLocation;
+      return (
+        selectedLocation.formattedAddress || selectedLocation.exactLocation
+      );
     }
     if (location) {
       return location.formattedAddress || location.exactLocation;
@@ -270,7 +262,7 @@ const LocationModal: React.FC<LocationModalProps> = ({
               color={colors.primary}
             />
           </View>
-          
+
           <Typography
             variant="h6"
             weight="semibold"
@@ -280,7 +272,7 @@ const LocationModal: React.FC<LocationModalProps> = ({
             {t('restaurant_location')}
             {required && <Typography color={colors.error}> *</Typography>}
           </Typography>
-          
+
           <Typography
             variant="body"
             color={colors.onSurfaceVariant}
@@ -363,7 +355,7 @@ const LocationModal: React.FC<LocationModalProps> = ({
             style={{
               borderRadius: 12,
             }}
-            icon={({ size, color }) => (
+            icon={({ size, color }) =>
               isLocationLoading ? (
                 <ActivityIndicator size={size} color={color} />
               ) : (
@@ -373,12 +365,11 @@ const LocationModal: React.FC<LocationModalProps> = ({
                   color={color}
                 />
               )
-            )}
+            }
           >
             {isLocationLoading
               ? t('getting_location')
-              : t('use_current_location')
-            }
+              : t('use_current_location')}
           </Button>
 
           {/* Manual Entry Button */}
@@ -401,11 +392,7 @@ const LocationModal: React.FC<LocationModalProps> = ({
               borderColor: colors.outline,
             }}
             icon={({ size, color }) => (
-              <MaterialCommunityIcons
-                name="pencil"
-                size={size}
-                color={color}
-              />
+              <MaterialCommunityIcons name="pencil" size={size} color={color} />
             )}
           >
             {t('enter_address_manually')}

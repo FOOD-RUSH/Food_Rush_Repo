@@ -1,4 +1,10 @@
-import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig, AxiosError, InternalAxiosRequestConfig } from 'axios';
+import axios, {
+  AxiosInstance,
+  AxiosResponse,
+  AxiosRequestConfig,
+  AxiosError,
+  InternalAxiosRequestConfig,
+} from 'axios';
 import { Platform } from 'react-native';
 import TokenManager from './tokenManager';
 import { getUserFriendlyErrorMessage } from '../../utils/errorHandler';
@@ -28,13 +34,13 @@ class ApiClient {
 
   constructor() {
     const baseURL = this.getApiUrl();
-    
+
     this.client = axios.create({
       baseURL,
       timeout: 30000,
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        Accept: 'application/json',
       },
     });
 
@@ -42,13 +48,15 @@ class ApiClient {
   }
 
   private getApiUrl(): string {
-    const apiUrl = process.env.EXPO_PUBLIC_API_URL || 'https://foodrush-be.onrender.com/api/v1';
-    
+    const apiUrl =
+      process.env.EXPO_PUBLIC_API_URL ||
+      'https://foodrush-be.onrender.com/api/v1';
+
     // Handle Android emulator localhost
     if (Platform.OS === 'android' && apiUrl.includes('localhost')) {
       return apiUrl.replace('localhost', '10.0.2.2');
     }
-    
+
     return apiUrl;
   }
 
@@ -60,21 +68,54 @@ class ApiClient {
           const token = await TokenManager.getToken();
           if (token && config.headers) {
             config.headers.Authorization = `Bearer ${token}`;
+            // Log API request details for debugging (without sensitive data)
+            console.log('🚀 API Request:', {
+              method: config.method?.toUpperCase(),
+              url: `${config.baseURL}${config.url}`,
+              hasAuth: !!token,
+              contentType: config.headers['Content-Type'] || 'application/json',
+            });
+          } else if (config.url && !config.url.includes('/auth/')) {
+            // Warn if no token is available for protected routes
+            console.warn(
+              '⚠️ No auth token available for protected route:',
+              config.url,
+            );
           }
           return config;
         } catch (error) {
-          console.error('Error getting token:', error);
+          console.error('❌ Error getting token for request:', error);
           return config;
         }
       },
-      (error) => Promise.reject(error)
+      (error) => {
+        console.error('❌ Request interceptor error:', error);
+        return Promise.reject(error);
+      },
     );
 
     // Response interceptor - handle errors and token refresh
     this.client.interceptors.response.use(
-      (response) => response,
+      (response) => {
+        // Log successful API responses for debugging
+        console.log('✅ API Response:', {
+          status: response.status,
+          url: response.config.url,
+          method: response.config.method?.toUpperCase(),
+        });
+        return response;
+      },
       async (error: AxiosError) => {
         const originalRequest = error.config as RetryableRequest;
+
+        // Log API errors for debugging
+        console.error('❌ API Error:', {
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          url: originalRequest?.url,
+          method: originalRequest?.method?.toUpperCase(),
+          code: error.code,
+        });
 
         // Handle network errors
         if (!error.response) {
@@ -82,13 +123,17 @@ class ApiClient {
         }
 
         // Handle 401 - token refresh
-        if (error.response.status === 401 && originalRequest && !originalRequest._retry) {
+        if (
+          error.response.status === 401 &&
+          originalRequest &&
+          !originalRequest._retry
+        ) {
           return this.handleTokenRefresh(originalRequest);
         }
 
         // Handle other errors
         throw this.createApiError(error);
-      }
+      },
     );
   }
 
@@ -135,20 +180,28 @@ class ApiClient {
   private createApiError(error: AxiosError): ApiError {
     const status = error.response?.status;
     const data = error.response?.data as any;
-    
+
     const apiError = new Error(getUserFriendlyErrorMessage(error)) as ApiError;
     apiError.status = status;
     apiError.code = data?.code || data?.error?.code || `HTTP_${status}`;
     apiError.isApiError = true;
-    
+
     return apiError;
   }
 
-  private async handleTokenRefresh(originalRequest: RetryableRequest): Promise<AxiosResponse> {
+  private async handleTokenRefresh(
+    originalRequest: RetryableRequest,
+  ): Promise<AxiosResponse> {
     try {
       const refreshToken = await TokenManager.getRefreshToken();
-      
+
+      console.log(
+        '🔄 Attempting token refresh for request:',
+        originalRequest.url,
+      );
+
       if (!refreshToken) {
+        console.warn('⚠️ No refresh token available, logging out');
         await TokenManager.clearAllTokens();
         // Trigger full logout when no refresh token
         this.triggerLogout();
@@ -160,6 +213,7 @@ class ApiClient {
       }
 
       if (this.isRefreshing) {
+        console.log('🔄 Token refresh in progress, queuing request');
         return new Promise((resolve, reject) => {
           this.refreshSubscribers.push((token: string) => {
             if (originalRequest.headers) {
@@ -176,41 +230,47 @@ class ApiClient {
       const response = await axios.post<RefreshTokenResponse['data']>(
         `${this.client.defaults.baseURL}/auth/refresh-token`,
         { refresh_token: refreshToken },
-        { timeout: 10000 }
+        { timeout: 10000 },
       );
 
       const { accessToken, refreshToken: newRefreshToken } = response.data;
-      
+
       if (!accessToken || !newRefreshToken) {
+        console.error('❌ Invalid refresh token response:', {
+          hasAccessToken: !!accessToken,
+          hasRefreshToken: !!newRefreshToken,
+        });
         throw new Error('Invalid refresh token response');
       }
-      
+
+      console.log('✅ Token refresh successful');
       await TokenManager.setTokens(accessToken, newRefreshToken);
-      
+
       // Update original request
       if (originalRequest.headers) {
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;
       }
-      
+
       // Notify waiting requests
-      this.refreshSubscribers.forEach(callback => callback(accessToken));
+      this.refreshSubscribers.forEach((callback) => callback(accessToken));
       this.refreshSubscribers = [];
-      
+
       return this.client(originalRequest);
-      
     } catch (refreshError) {
+      console.error('❌ Token refresh failed:', refreshError);
       await TokenManager.clearAllTokens();
       this.refreshSubscribers = [];
-      
+
       // Trigger full logout when refresh fails
       this.triggerLogout();
-      
-      const error = new Error('Session expired. Please log in again.') as ApiError;
+
+      const error = new Error(
+        'Session expired. Please log in again.',
+      ) as ApiError;
       error.code = 'SESSION_EXPIRED';
       error.status = 401;
       error.isApiError = true;
       throw error;
-      
     } finally {
       this.isRefreshing = false;
     }
@@ -222,7 +282,10 @@ class ApiClient {
   }
 
   // HTTP Methods with better error handling
-  async get<T>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+  async get<T>(
+    url: string,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<T>> {
     try {
       return await this.client.get<T>(url, config);
     } catch (error) {
@@ -233,15 +296,22 @@ class ApiClient {
     }
   }
 
-  async post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+  async post<T>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<T>> {
     try {
       // Handle FormData requests - don't set Content-Type, let axios handle it
-      if (data instanceof FormData && config?.headers?.['Content-Type'] === 'multipart/form-data') {
+      if (
+        data instanceof FormData &&
+        config?.headers?.['Content-Type'] === 'multipart/form-data'
+      ) {
         const formDataConfig = { ...config };
         delete formDataConfig.headers['Content-Type']; // Let axios set the boundary
         return await this.client.post<T>(url, data, formDataConfig);
       }
-      
+
       return await this.client.post<T>(url, data, config);
     } catch (error) {
       if (this.isApiError(error)) {
@@ -251,7 +321,11 @@ class ApiClient {
     }
   }
 
-  async put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+  async put<T>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<T>> {
     try {
       return await this.client.put<T>(url, data, config);
     } catch (error) {
@@ -262,7 +336,11 @@ class ApiClient {
     }
   }
 
-  async patch<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+  async patch<T>(
+    url: string,
+    data?: any,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<T>> {
     try {
       return await this.client.patch<T>(url, data, config);
     } catch (error) {
@@ -273,7 +351,10 @@ class ApiClient {
     }
   }
 
-  async delete<T>(url: string, config?: AxiosRequestConfig): Promise<AxiosResponse<T>> {
+  async delete<T>(
+    url: string,
+    config?: AxiosRequestConfig,
+  ): Promise<AxiosResponse<T>> {
     try {
       return await this.client.delete<T>(url, config);
     } catch (error) {

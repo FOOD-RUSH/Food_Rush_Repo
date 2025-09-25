@@ -1,11 +1,11 @@
 import React from 'react';
 import { Text, TextProps, TextStyle } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import { 
-  TYPOGRAPHY_SCALE, 
-  getTypographyProps, 
+import {
+  TYPOGRAPHY_SCALE,
+  getTypographyProps,
   getUrbanistFont,
-  URBANIST_FONTS 
+  URBANIST_FONTS,
 } from '@/src/config/fonts';
 import { useResponsive } from '@/src/hooks/useResponsive';
 
@@ -35,11 +35,34 @@ export const Typography: React.FC<TypographyProps> = ({
   const { colors } = useTheme();
   const { screen } = useResponsive();
 
-  // Get typography props with responsive sizing
-  const typographyStyle = getTypographyProps(variant, responsive, screen.width);
-  
+  // Get typography props with responsive sizing and fallback
+  const typographyStyle = React.useMemo(() => {
+    try {
+      const style = getTypographyProps(variant, responsive, screen?.width);
+      // Ensure we have all required properties with fallbacks
+      return {
+        fontSize: style?.fontSize || TYPOGRAPHY_SCALE.body.fontSize,
+        lineHeight: style?.lineHeight || TYPOGRAPHY_SCALE.body.lineHeight,
+        fontFamily: style?.fontFamily || TYPOGRAPHY_SCALE.body.fontFamily,
+        letterSpacing:
+          style?.letterSpacing || TYPOGRAPHY_SCALE.body.letterSpacing,
+      };
+    } catch (error) {
+      console.warn('Typography error with variant:', variant, error);
+      // Return fallback style
+      return {
+        fontSize: TYPOGRAPHY_SCALE.body.fontSize,
+        lineHeight: TYPOGRAPHY_SCALE.body.lineHeight,
+        fontFamily: TYPOGRAPHY_SCALE.body.fontFamily,
+        letterSpacing: TYPOGRAPHY_SCALE.body.letterSpacing,
+      };
+    }
+  }, [variant, responsive, screen?.width]);
+
   // Override font family if weight is specified
-  const fontFamily = weight ? getUrbanistFont(weight) : typographyStyle.fontFamily;
+  const fontFamily = weight
+    ? getUrbanistFont(weight)
+    : typographyStyle.fontFamily;
 
   const textStyle: TextStyle = {
     ...typographyStyle,
@@ -48,8 +71,8 @@ export const Typography: React.FC<TypographyProps> = ({
     textAlign: align,
   };
 
-  const combinedStyle = Array.isArray(style) 
-    ? [textStyle, ...style] 
+  const combinedStyle = Array.isArray(style)
+    ? [textStyle, ...style]
     : [textStyle, style].filter(Boolean);
 
   return (
@@ -92,29 +115,29 @@ export const Heading6: React.FC<Omit<TypographyProps, 'variant'>> = (props) => (
   <Typography variant="h6" {...props} />
 );
 
-export const BodyLarge: React.FC<Omit<TypographyProps, 'variant'>> = (props) => (
-  <Typography variant="bodyLarge" {...props} />
-);
+export const BodyLarge: React.FC<Omit<TypographyProps, 'variant'>> = (
+  props,
+) => <Typography variant="bodyLarge" {...props} />;
 
 export const Body: React.FC<Omit<TypographyProps, 'variant'>> = (props) => (
   <Typography variant="body" {...props} />
 );
 
-export const BodySmall: React.FC<Omit<TypographyProps, 'variant'>> = (props) => (
-  <Typography variant="bodySmall" {...props} />
-);
+export const BodySmall: React.FC<Omit<TypographyProps, 'variant'>> = (
+  props,
+) => <Typography variant="bodySmall" {...props} />;
 
-export const LabelLarge: React.FC<Omit<TypographyProps, 'variant'>> = (props) => (
-  <Typography variant="labelLarge" {...props} />
-);
+export const LabelLarge: React.FC<Omit<TypographyProps, 'variant'>> = (
+  props,
+) => <Typography variant="labelLarge" {...props} />;
 
 export const Label: React.FC<Omit<TypographyProps, 'variant'>> = (props) => (
   <Typography variant="label" {...props} />
 );
 
-export const LabelSmall: React.FC<Omit<TypographyProps, 'variant'>> = (props) => (
-  <Typography variant="labelSmall" {...props} />
-);
+export const LabelSmall: React.FC<Omit<TypographyProps, 'variant'>> = (
+  props,
+) => <Typography variant="labelSmall" {...props} />;
 
 export const Caption: React.FC<Omit<TypographyProps, 'variant'>> = (props) => (
   <Typography variant="caption" {...props} />

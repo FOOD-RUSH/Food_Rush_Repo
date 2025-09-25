@@ -3,7 +3,13 @@ import { View, TouchableOpacity } from 'react-native';
 import { useTheme, Card } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { MetricCardData } from '@/src/types/analytics';
-import { Typography, Heading1, Body, Caption, Overline } from '@/src/components/common/Typography';
+import {
+  Typography,
+  Heading1,
+  Body,
+  Caption,
+  Overline,
+} from '@/src/components/common/Typography';
 
 interface MetricCardProps extends MetricCardData {
   onPress?: () => void;
@@ -109,11 +115,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
         >
           {value || '0'}
         </Heading1>
-        <Body
-          color={colors.onSurfaceVariant}
-          weight="medium"
-          numberOfLines={2}
-        >
+        <Body color={colors.onSurfaceVariant} weight="medium" numberOfLines={2}>
           {title || 'Untitled'}
         </Body>
         {subtitle && (

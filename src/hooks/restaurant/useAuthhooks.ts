@@ -4,7 +4,11 @@ import {
   RestaurantRegisterRequest,
   RestaurantLoginResponse,
 } from '@/src/services/shared/authTypes';
-import { RestaurantProfile, useAuthStore, useSetAuthData } from '@/src/stores/AuthStore';
+import {
+  RestaurantProfile,
+  useAuthStore,
+  useSetAuthData,
+} from '@/src/stores/AuthStore';
 import TokenManager from '@/src/services/shared/tokenManager';
 import { User } from '@/src/types';
 
@@ -41,8 +45,14 @@ export const useLoginRestaurant = () => {
     },
     onSuccess: async (data) => {
       console.log('🍽️ Restaurant Login Success - Processing response...');
-      
-      const { user, accessToken, refreshToken, restaurants, defaultRestaurantId } = data;
+
+      const {
+        user,
+        accessToken,
+        refreshToken,
+        restaurants,
+        defaultRestaurantId,
+      } = data;
 
       if (!accessToken || !refreshToken || !user) {
         throw new Error('Invalid response: missing required data');
@@ -82,7 +92,11 @@ export const useVerifyRestaurantOTP = () => {
   const { clearError } = useAuthStore();
 
   return useMutation({
-    mutationFn: async (otpData: { userId: string; otp: string; type: 'email' }) => {
+    mutationFn: async (otpData: {
+      userId: string;
+      otp: string;
+      type: 'email';
+    }) => {
       const response = await restaurantAuthApi.verifyOTP(otpData);
       return response.data;
     },
@@ -91,7 +105,7 @@ export const useVerifyRestaurantOTP = () => {
     },
     onSuccess: async (data: any) => {
       console.log('Restaurant OTP verification successful');
-      
+
       // Store tokens if provided
       if (data.accessToken && data.refreshToken && data.user) {
         // Set auth data using the simplified store method
@@ -102,7 +116,7 @@ export const useVerifyRestaurantOTP = () => {
           restaurants: data.restaurants,
           defaultRestaurantId: data.defaultRestaurantId,
         });
-        
+
         // Cache user data
         queryClient.setQueryData(['auth', 'me'], data.user);
         queryClient.invalidateQueries({ queryKey: ['restaurant'] });
@@ -140,6 +154,8 @@ export const useRestaurantLogout = () => {
   });
 };
 
+// Deprecated: Use useUpdateProfile from '@/src/hooks/shared/useProfileUpdate' instead
+// This hook is kept for backward compatibility
 export const useUpdateRestaurantProfile = () => {
   const queryClient = useQueryClient();
   const { setUser, clearError } = useAuthStore();
@@ -153,10 +169,10 @@ export const useUpdateRestaurantProfile = () => {
       clearError();
     },
     onSuccess: (updatedUser: User) => {
-      console.log('Restaurant profile updated successfully');
+      console.log('Restaurant profile updated successfully (legacy hook)');
       // Update user in store
       setUser(updatedUser);
-      
+
       // Update cached data
       queryClient.setQueryData(['auth', 'me'], updatedUser);
       queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });

@@ -1,1 +1,277 @@
-// Cart Reminder Settings Component\nimport React, { useState, useCallback } from 'react';\nimport {\n  View,\n  Text,\n  TouchableOpacity,\n  Alert,\n} from 'react-native';\nimport {\n  useTheme,\n  Switch,\n  Button,\n  Dialog,\n  Portal,\n  TextInput,\n} from 'react-native-paper';\nimport { useTranslation } from 'react-i18next';\nimport { Ionicons } from '@expo/vector-icons';\nimport { useCartReminders } from '@/src/hooks/customer/useCartReminders';\n\ninterface CartReminderSettingsProps {\n  visible: boolean;\n  onDismiss: () => void;\n}\n\nconst CartReminderSettings: React.FC<CartReminderSettingsProps> = ({\n  visible,\n  onDismiss,\n}) => {\n  const { colors } = useTheme();\n  const { t } = useTranslation('translation');\n  const {\n    reminderEnabled,\n    toggleReminders,\n    getReminderConfig,\n    updateReminderConfig,\n    getActiveReminders,\n  } = useCartReminders();\n\n  const [config, setConfig] = useState(() => getReminderConfig());\n  const [showAdvanced, setShowAdvanced] = useState(false);\n\n  const handleSave = useCallback(() => {\n    try {\n      updateReminderConfig(config);\n      Alert.alert(\n        t('success', 'Success'),\n        t('reminder_settings_saved', 'Cart reminder settings have been saved'),\n        [{ text: t('ok', 'OK'), onPress: onDismiss }]\n      );\n    } catch (error) {\n      Alert.alert(\n        t('error', 'Error'),\n        t('failed_to_save_settings', 'Failed to save reminder settings'),\n        [{ text: t('ok', 'OK') }]\n      );\n    }\n  }, [config, updateReminderConfig, t, onDismiss]);\n\n  const handleTestReminder = useCallback(() => {\n    Alert.alert(\n      t('test_reminder', 'Test Reminder'),\n      t('test_reminder_message', 'A test reminder will be sent in 10 seconds'),\n      [\n        { text: t('cancel', 'Cancel'), style: 'cancel' },\n        {\n          text: t('send_test', 'Send Test'),\n          onPress: () => {\n            // This would trigger a test notification\n            console.log('Test reminder scheduled');\n          },\n        },\n      ]\n    );\n  }, [t]);\n\n  const getActiveReminderInfo = useCallback(() => {\n    const activeReminders = getActiveReminders();\n    if (activeReminders.length === 0) {\n      return t('no_active_reminders', 'No active reminders');\n    }\n    \n    return t('active_reminders_count', '{{count}} active reminder(s)', {\n      count: activeReminders.length,\n    });\n  }, [getActiveReminders, t]);\n\n  return (\n    <Portal>\n      <Dialog visible={visible} onDismiss={onDismiss}>\n        <Dialog.Title>\n          <View className=\"flex-row items-center\">\n            <Ionicons\n              name=\"notifications-outline\"\n              size={24}\n              color={colors.primary}\n              style={{ marginRight: 8 }}\n            />\n            <Text style={{ color: colors.onSurface }}>\n              {t('cart_reminder_settings', 'Cart Reminder Settings')}\n            </Text>\n          </View>\n        </Dialog.Title>\n        \n        <Dialog.Content>\n          <View className=\"space-y-4\">\n            {/* Enable/Disable Reminders */}\n            <View className=\"flex-row items-center justify-between py-2\">\n              <View className=\"flex-1\">\n                <Text\n                  className=\"text-base font-medium\"\n                  style={{ color: colors.onSurface }}\n                >\n                  {t('enable_cart_reminders', 'Enable Cart Reminders')}\n                </Text>\n                <Text\n                  className=\"text-sm mt-1\"\n                  style={{ color: colors.onSurfaceVariant }}\n                >\n                  {t('cart_reminder_description', 'Get notified about items left in your cart')}\n                </Text>\n              </View>\n              <Switch\n                value={reminderEnabled}\n                onValueChange={toggleReminders}\n                thumbColor={reminderEnabled ? colors.primary : colors.outline}\n                trackColor={{\n                  false: colors.surfaceVariant,\n                  true: colors.primaryContainer,\n                }}\n              />\n            </View>\n\n            {/* Active Reminders Info */}\n            {reminderEnabled && (\n              <View\n                className=\"p-3 rounded-lg\"\n                style={{ backgroundColor: colors.surfaceVariant }}\n              >\n                <Text\n                  className=\"text-sm\"\n                  style={{ color: colors.onSurfaceVariant }}\n                >\n                  {getActiveReminderInfo()}\n                </Text>\n              </View>\n            )}\n\n            {/* Reminder Timing Settings */}\n            {reminderEnabled && (\n              <View className=\"space-y-3\">\n                <Text\n                  className=\"text-base font-medium\"\n                  style={{ color: colors.onSurface }}\n                >\n                  {t('reminder_timing', 'Reminder Timing')}\n                </Text>\n                \n                <View className=\"space-y-2\">\n                  <View className=\"flex-row items-center justify-between\">\n                    <Text\n                      className=\"text-sm\"\n                      style={{ color: colors.onSurfaceVariant }}\n                    >\n                      {t('first_reminder', 'First reminder (minutes)')}\n                    </Text>\n                    <TextInput\n                      value={config.firstReminderMinutes.toString()}\n                      onChangeText={(text) => {\n                        const value = parseInt(text) || 25;\n                        setConfig(prev => ({ ...prev, firstReminderMinutes: value }));\n                      }}\n                      keyboardType=\"numeric\"\n                      mode=\"outlined\"\n                      dense\n                      style={{ width: 80 }}\n                    />\n                  </View>\n                  \n                  <View className=\"flex-row items-center justify-between\">\n                    <Text\n                      className=\"text-sm\"\n                      style={{ color: colors.onSurfaceVariant }}\n                    >\n                      {t('second_reminder', 'Second reminder (minutes)')}\n                    </Text>\n                    <TextInput\n                      value={config.secondReminderMinutes.toString()}\n                      onChangeText={(text) => {\n                        const value = parseInt(text) || 60;\n                        setConfig(prev => ({ ...prev, secondReminderMinutes: value }));\n                      }}\n                      keyboardType=\"numeric\"\n                      mode=\"outlined\"\n                      dense\n                      style={{ width: 80 }}\n                    />\n                  </View>\n                </View>\n              </View>\n            )}\n\n            {/* Advanced Settings */}\n            {reminderEnabled && (\n              <TouchableOpacity\n                onPress={() => setShowAdvanced(!showAdvanced)}\n                className=\"flex-row items-center justify-between py-2\"\n              >\n                <Text\n                  className=\"text-sm font-medium\"\n                  style={{ color: colors.primary }}\n                >\n                  {t('advanced_settings', 'Advanced Settings')}\n                </Text>\n                <Ionicons\n                  name={showAdvanced ? 'chevron-up' : 'chevron-down'}\n                  size={20}\n                  color={colors.primary}\n                />\n              </TouchableOpacity>\n            )}\n\n            {/* Advanced Settings Content */}\n            {reminderEnabled && showAdvanced && (\n              <View className=\"space-y-2\">\n                <View className=\"flex-row items-center justify-between\">\n                  <Text\n                    className=\"text-sm\"\n                    style={{ color: colors.onSurfaceVariant }}\n                  >\n                    {t('max_reminders', 'Maximum reminders')}\n                  </Text>\n                  <TextInput\n                    value={config.maxReminders.toString()}\n                    onChangeText={(text) => {\n                      const value = Math.max(1, Math.min(5, parseInt(text) || 2));\n                      setConfig(prev => ({ ...prev, maxReminders: value }));\n                    }}\n                    keyboardType=\"numeric\"\n                    mode=\"outlined\"\n                    dense\n                    style={{ width: 80 }}\n                  />\n                </View>\n                \n                <TouchableOpacity\n                  onPress={handleTestReminder}\n                  className=\"py-2\"\n                >\n                  <Text\n                    className=\"text-sm font-medium\"\n                    style={{ color: colors.primary }}\n                  >\n                    {t('send_test_reminder', 'Send Test Reminder')}\n                  </Text>\n                </TouchableOpacity>\n              </View>\n            )}\n          </View>\n        </Dialog.Content>\n        \n        <Dialog.Actions>\n          <Button onPress={onDismiss}>\n            {t('cancel', 'Cancel')}\n          </Button>\n          <Button onPress={handleSave} mode=\"contained\">\n            {t('save', 'Save')}\n          </Button>\n        </Dialog.Actions>\n      </Dialog>\n    </Portal>\n  );\n};\n\nexport default CartReminderSettings;\n"
+// Cart Reminder Settings Component
+import React, { useState, useCallback } from 'react';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import {
+  useTheme,
+  Switch,
+  Button,
+  Dialog,
+  Portal,
+  TextInput,
+} from 'react-native-paper';
+import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
+import { useCartReminders } from '@/src/hooks/customer/useCartReminders';
+
+interface CartReminderSettingsProps {
+  visible: boolean;
+  onDismiss: () => void;
+}
+
+const CartReminderSettings: React.FC<CartReminderSettingsProps> = ({
+  visible,
+  onDismiss,
+}) => {
+  const { colors } = useTheme();
+  const { t } = useTranslation('translation');
+  const {
+    reminderEnabled,
+    toggleReminders,
+    getReminderConfig,
+    updateReminderConfig,
+    getActiveReminders,
+  } = useCartReminders();
+
+  const [config, setConfig] = useState(() => getReminderConfig());
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
+  const handleSave = useCallback(() => {
+    try {
+      updateReminderConfig(config);
+      Alert.alert(
+        t('success', 'Success'),
+        t('reminder_settings_saved', 'Cart reminder settings have been saved'),
+        [{ text: t('ok', 'OK'), onPress: onDismiss }],
+      );
+    } catch (error) {
+      Alert.alert(
+        t('error', 'Error'),
+        t('failed_to_save_settings', 'Failed to save reminder settings'),
+        [{ text: t('ok', 'OK') }],
+      );
+    }
+  }, [config, updateReminderConfig, t, onDismiss]);
+
+  const handleTestReminder = useCallback(() => {
+    Alert.alert(
+      t('test_reminder', 'Test Reminder'),
+      t('test_reminder_message', 'A test reminder will be sent in 10 seconds'),
+      [
+        { text: t('cancel', 'Cancel'), style: 'cancel' },
+        {
+          text: t('send_test', 'Send Test'),
+          onPress: () => {
+            // This would trigger a test notification
+            console.log('Test reminder scheduled');
+          },
+        },
+      ],
+    );
+  }, [t]);
+
+  const getActiveReminderInfo = useCallback(() => {
+    const activeReminders = getActiveReminders();
+    if (activeReminders.length === 0) {
+      return t('no_active_reminders', 'No active reminders');
+    }
+
+    return t('active_reminders_count', '{{count}} active reminder(s)', {
+      count: activeReminders.length,
+    });
+  }, [getActiveReminders, t]);
+
+  return (
+    <Portal>
+      <Dialog visible={visible} onDismiss={onDismiss}>
+        <Dialog.Title>
+          <View className="flex-row items-center">
+            <Ionicons
+              name="notifications-outline"
+              size={24}
+              color={colors.primary}
+              style={{ marginRight: 8 }}
+            />
+            <Text style={{ color: colors.onSurface }}>
+              {t('cart_reminder_settings', 'Cart Reminder Settings')}
+            </Text>
+          </View>
+        </Dialog.Title>
+
+        <Dialog.Content>
+          <View className="space-y-4">
+            {/* Enable/Disable Reminders */}
+            <View className="flex-row items-center justify-between py-2">
+              <View className="flex-1">
+                <Text
+                  className="text-base font-medium"
+                  style={{ color: colors.onSurface }}
+                >
+                  {t('enable_cart_reminders', 'Enable Cart Reminders')}
+                </Text>
+                <Text
+                  className="text-sm mt-1"
+                  style={{ color: colors.onSurfaceVariant }}
+                >
+                  {t(
+                    'cart_reminder_description',
+                    'Get notified about items left in your cart',
+                  )}
+                </Text>
+              </View>
+              <Switch
+                value={reminderEnabled}
+                onValueChange={toggleReminders}
+                thumbColor={reminderEnabled ? colors.primary : colors.outline}
+                trackColor={{
+                  false: colors.surfaceVariant,
+                  true: colors.primaryContainer,
+                }}
+              />
+            </View>
+
+            {/* Active Reminders Info */}
+            {reminderEnabled && (
+              <View
+                className="p-3 rounded-lg"
+                style={{ backgroundColor: colors.surfaceVariant }}
+              >
+                <Text
+                  className="text-sm"
+                  style={{ color: colors.onSurfaceVariant }}
+                >
+                  {getActiveReminderInfo()}
+                </Text>
+              </View>
+            )}
+
+            {/* Reminder Timing Settings */}
+            {reminderEnabled && (
+              <View className="space-y-3">
+                <Text
+                  className="text-base font-medium"
+                  style={{ color: colors.onSurface }}
+                >
+                  {t('reminder_timing', 'Reminder Timing')}
+                </Text>
+
+                <View className="space-y-2">
+                  <View className="flex-row items-center justify-between">
+                    <Text
+                      className="text-sm"
+                      style={{ color: colors.onSurfaceVariant }}
+                    >
+                      {t('first_reminder', 'First reminder (minutes)')}
+                    </Text>
+                    <TextInput
+                      value={config.firstReminderMinutes.toString()}
+                      onChangeText={(text) => {
+                        const value = parseInt(text) || 25;
+                        setConfig((prev) => ({
+                          ...prev,
+                          firstReminderMinutes: value,
+                        }));
+                      }}
+                      keyboardType="numeric"
+                      mode="outlined"
+                      dense
+                      style={{ width: 80 }}
+                    />
+                  </View>
+
+                  <View className="flex-row items-center justify-between">
+                    <Text
+                      className="text-sm"
+                      style={{ color: colors.onSurfaceVariant }}
+                    >
+                      {t('second_reminder', 'Second reminder (minutes)')}
+                    </Text>
+                    <TextInput
+                      value={config.secondReminderMinutes.toString()}
+                      onChangeText={(text) => {
+                        const value = parseInt(text) || 60;
+                        setConfig((prev) => ({
+                          ...prev,
+                          secondReminderMinutes: value,
+                        }));
+                      }}
+                      keyboardType="numeric"
+                      mode="outlined"
+                      dense
+                      style={{ width: 80 }}
+                    />
+                  </View>
+                </View>
+              </View>
+            )}
+
+            {/* Advanced Settings */}
+            {reminderEnabled && (
+              <TouchableOpacity
+                onPress={() => setShowAdvanced(!showAdvanced)}
+                className="flex-row items-center justify-between py-2"
+              >
+                <Text
+                  className="text-sm font-medium"
+                  style={{ color: colors.primary }}
+                >
+                  {t('advanced_settings', 'Advanced Settings')}
+                </Text>
+                <Ionicons
+                  name={showAdvanced ? 'chevron-up' : 'chevron-down'}
+                  size={20}
+                  color={colors.primary}
+                />
+              </TouchableOpacity>
+            )}
+
+            {/* Advanced Settings Content */}
+            {reminderEnabled && showAdvanced && (
+              <View className="space-y-2">
+                <View className="flex-row items-center justify-between">
+                  <Text
+                    className="text-sm"
+                    style={{ color: colors.onSurfaceVariant }}
+                  >
+                    {t('max_reminders', 'Maximum reminders')}
+                  </Text>
+                  <TextInput
+                    value={config.maxReminders.toString()}
+                    onChangeText={(text) => {
+                      const value = Math.max(
+                        1,
+                        Math.min(5, parseInt(text) || 2),
+                      );
+                      setConfig((prev) => ({ ...prev, maxReminders: value }));
+                    }}
+                    keyboardType="numeric"
+                    mode="outlined"
+                    dense
+                    style={{ width: 80 }}
+                  />
+                </View>
+
+                <TouchableOpacity onPress={handleTestReminder} className="py-2">
+                  <Text
+                    className="text-sm font-medium"
+                    style={{ color: colors.primary }}
+                  >
+                    {t('send_test_reminder', 'Send Test Reminder')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        </Dialog.Content>
+
+        <Dialog.Actions>
+          <Button onPress={onDismiss}>{t('cancel', 'Cancel')}</Button>
+          <Button onPress={handleSave} mode="contained">
+            {t('save', 'Save')}
+          </Button>
+        </Dialog.Actions>
+      </Dialog>
+    </Portal>
+  );
+};
+
+export default CartReminderSettings;

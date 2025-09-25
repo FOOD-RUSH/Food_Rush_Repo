@@ -2,19 +2,33 @@ import { create } from 'zustand';
 import { createJSONStorage, devtools, persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Simplified payment method type
-export type PaymentMethod = 'mtn_mobile_money' | 'orange_money' | 'card';
+// Unified payment method type - mobile_money covers both MTN and Orange
+export type PaymentMethod = 'mobile_money' | 'cash' | 'card';
+export type PaymentProvider = 'mtn' | 'orange';
+
+export interface PaymentMethodDetails {
+  type: PaymentMethod;
+  provider?: PaymentProvider;
+  name: string;
+}
 
 interface PaymentState {
   paymentMethods: PaymentMethod[];
   selectedPaymentMethod: PaymentMethod | null;
+  selectedProvider: PaymentProvider | null; // For mobile_money type
   isPaymentLoading: boolean;
   paymentError: string | null;
 }
 
 interface PaymentActions {
   // Set selected payment method
-  setSelectedPaymentMethod: (method: PaymentMethod) => void;
+  setSelectedPaymentMethod: (
+    method: PaymentMethod,
+    provider?: PaymentProvider,
+  ) => void;
+
+  // Set provider for mobile money
+  setSelectedProvider: (provider: PaymentProvider) => void;
 
   // Clear error
   clearError: () => void;
@@ -24,8 +38,9 @@ interface PaymentActions {
 }
 
 const initialState: PaymentState = {
-  paymentMethods: ['mtn_mobile_money', 'orange_money'],
-  selectedPaymentMethod: 'mtn_mobile_money', // Default to MTN Mobile Money
+  paymentMethods: ['mobile_money', 'cash'],
+  selectedPaymentMethod: 'mobile_money', // Default to Mobile Money
+  selectedProvider: 'mtn', // Default to MTN
   isPaymentLoading: false,
   paymentError: null,
 };
@@ -36,8 +51,16 @@ export const usePaymentStore = create<PaymentState & PaymentActions>()(
       (set, get) => ({
         ...initialState,
 
-        setSelectedPaymentMethod: (method) => {
-          set({ selectedPaymentMethod: method });
+        setSelectedPaymentMethod: (method, provider) => {
+          set({
+            selectedPaymentMethod: method,
+            selectedProvider:
+              method === 'mobile_money' ? provider || 'mtn' : null,
+          });
+        },
+
+        setSelectedProvider: (provider) => {
+          set({ selectedProvider: provider });
         },
 
         clearError: () => {
@@ -54,9 +77,10 @@ export const usePaymentStore = create<PaymentState & PaymentActions>()(
         partialize: (state) => ({
           paymentMethods: state.paymentMethods,
           selectedPaymentMethod: state.selectedPaymentMethod,
+          selectedProvider: state.selectedProvider,
         }),
         version: 1,
-      }
+      },
     ),
     { name: 'PaymentStore' },
   ),
@@ -67,6 +91,8 @@ export const usePaymentMethods = () =>
   usePaymentStore((state) => state.paymentMethods);
 export const useSelectedPaymentMethod = () =>
   usePaymentStore((state) => state.selectedPaymentMethod);
+export const useSelectedProvider = () =>
+  usePaymentStore((state) => state.selectedProvider);
 export const usePaymentLoading = () =>
   usePaymentStore((state) => state.isPaymentLoading);
 export const usePaymentError = () =>

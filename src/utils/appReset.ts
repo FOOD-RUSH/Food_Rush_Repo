@@ -1,6 +1,6 @@
 /**
  * App Reset Utilities
- * 
+ *
  * Provides centralized functions for resetting app state during logout
  * or when switching between user types.
  */
@@ -37,7 +37,7 @@ export const performCompleteAppReset = async (options?: {
     const appStore = useAppStore.getState();
     const isOnboardingComplete = appStore.isOnboardingComplete;
     appStore.resetApp();
-    
+
     if (preserveOnboarding && isOnboardingComplete) {
       appStore.completeOnboarding();
     }
@@ -54,7 +54,7 @@ export const performCompleteAppReset = async (options?: {
     return { success: true };
   } catch (error) {
     console.error('Error during app reset:', error);
-    
+
     // Try to at least clear what we can
     try {
       useCartStore.getState().clearCart();
@@ -74,7 +74,9 @@ export const performCompleteAppReset = async (options?: {
  * Switches between user types (customer/restaurant)
  * Clears relevant state but preserves authentication
  */
-export const switchUserType = async (newUserType: 'customer' | 'restaurant') => {
+export const switchUserType = async (
+  newUserType: 'customer' | 'restaurant',
+) => {
   try {
     // Clear cart since it's user-type specific
     useCartStore.getState().clearCart();
@@ -83,7 +85,8 @@ export const switchUserType = async (newUserType: 'customer' | 'restaurant') => 
     useAppStore.getState().setUserType(newUserType);
 
     // Navigate to appropriate app
-    const targetRoute = newUserType === 'customer' ? 'CustomerApp' : 'RestaurantApp';
+    const targetRoute =
+      newUserType === 'customer' ? 'CustomerApp' : 'RestaurantApp';
     reset(targetRoute);
 
     return { success: true };
@@ -129,7 +132,7 @@ export const performEmergencyReset = async () => {
 
     // Clear any additional storage if needed
     // This could include clearing AsyncStorage completely in extreme cases
-    
+
     return { success: true };
   } catch (error) {
     console.error('Error during emergency reset:', error);

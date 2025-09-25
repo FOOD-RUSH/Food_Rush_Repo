@@ -74,7 +74,7 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  
+
   // Restaurant-specific state (only for restaurant users)
   restaurants: Restaurant[];
   defaultRestaurantId: string | null;
@@ -89,14 +89,14 @@ interface AuthActions {
     restaurants?: Restaurant[];
     defaultRestaurantId?: string;
   }) => Promise<void>;
-  
+
   setUser: (user: UserProfile | null) => void;
   setIsAuthenticated: (value: boolean) => void;
   setIsLoading: (value: boolean) => void;
   setError: (error: string | null) => void;
   setRestaurants: (restaurants: Restaurant[]) => void;
   setDefaultRestaurantId: (restaurantId: string) => void;
-  
+
   // Utility actions
   logout: () => Promise<void>;
   clearError: () => void;
@@ -123,7 +123,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         try {
           const token = await TokenManager.getToken();
           const refreshToken = await TokenManager.getRefreshToken();
-          
+
           if (token && refreshToken) {
             set({ isAuthenticated: true });
           } else {
@@ -140,7 +140,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         try {
           // Store tokens
           await TokenManager.setTokens(data.accessToken, data.refreshToken);
-          
+
           // Update state
           const newState: Partial<AuthState> = {
             user: data.user,
@@ -153,18 +153,22 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           if (data.user.role === 'restaurant' && data.restaurants) {
             newState.restaurants = data.restaurants;
             newState.defaultRestaurantId = data.defaultRestaurantId || null;
-            
+
             // Initialize restaurant profile store for new login session
             try {
-              const { useRestaurantProfileStore } = await import('./restaurantStores/restaurantProfileStore');
+              const { useRestaurantProfileStore } = await import(
+                './restaurantStores/restaurantProfileStore'
+              );
               const profileStore = useRestaurantProfileStore.getState();
-              
+
               // Reset profile loading status for new login
               profileStore.reset();
-              
+
               // If we have restaurant data from login, extract and store basic info
               if (data.restaurants.length > 0 && data.defaultRestaurantId) {
-                const defaultRestaurant = data.restaurants.find(r => r.id === data.defaultRestaurantId);
+                const defaultRestaurant = data.restaurants.find(
+                  (r) => r.id === data.defaultRestaurantId,
+                );
                 if (defaultRestaurant) {
                   // Map the basic restaurant data to detailed profile structure
                   // This will be updated with full details when account screen is visited
@@ -187,18 +191,23 @@ export const useAuthStore = create<AuthState & AuthActions>()(
                     deliveryPerKmRate: defaultRestaurant.deliveryPerKmRate,
                     deliveryMinFee: defaultRestaurant.deliveryMinFee,
                     deliveryMaxFee: defaultRestaurant.deliveryMaxFee,
-                    deliveryFreeThreshold: defaultRestaurant.deliveryFreeThreshold,
-                    deliverySurgeMultiplier: defaultRestaurant.deliverySurgeMultiplier,
+                    deliveryFreeThreshold:
+                      defaultRestaurant.deliveryFreeThreshold,
+                    deliverySurgeMultiplier:
+                      defaultRestaurant.deliverySurgeMultiplier,
                     createdAt: defaultRestaurant.createdAt,
                     updatedAt: defaultRestaurant.updatedAt,
                   };
-                  
+
                   // Store basic profile data from login
                   profileStore.updateRestaurantProfile(basicProfile);
                 }
               }
             } catch (profileError) {
-              console.error('Error initializing restaurant profile store:', profileError);
+              console.error(
+                'Error initializing restaurant profile store:',
+                profileError,
+              );
             }
           } else {
             newState.restaurants = [];
@@ -218,49 +227,51 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       setIsLoading: (isLoading) => set({ isLoading }),
       setError: (error) => set({ error }),
       setRestaurants: (restaurants) => set({ restaurants }),
-      setDefaultRestaurantId: (defaultRestaurantId) => set({ defaultRestaurantId }),
+      setDefaultRestaurantId: (defaultRestaurantId) =>
+        set({ defaultRestaurantId }),
 
       // Optimized logout - prevent multiple calls and simplify store clearing
       logout: async () => {
         const currentState = get();
-        
+
         // Prevent multiple logout calls
         if (!currentState.isAuthenticated && !currentState.user) {
           console.log('Already logged out, skipping logout process');
           return;
         }
-        
+
         try {
           console.log('Starting logout process...');
           set({ isLoading: true });
-          
+
           // Clear authentication tokens
           await TokenManager.clearAllTokens();
-          
+
           // Clear stores efficiently - only clear what's necessary
           try {
             // Import stores dynamically to avoid circular dependencies
             const [cartStore, appStore] = await Promise.all([
-              import('./customerStores/cartStore').then(m => m.useCartStore.getState()),
-              import('./AppStore').then(m => m.useAppStore.getState())
+              import('./customerStores/cartStore').then((m) =>
+                m.useCartStore.getState(),
+              ),
+              import('./AppStore').then((m) => m.useAppStore.getState()),
             ]);
-            
+
             // Clear cart and user type only
             cartStore.clearCart();
             appStore.clearSelectedUserType();
-            
+
             console.log('Stores cleared successfully');
           } catch (storeError) {
             console.error('Error clearing stores:', storeError);
           }
-          
+
           // Reset auth state
           set({ ...initialState, isLoading: false });
-          
+
           // Emit logout event only once
           console.log('Emitting logout event');
           DeviceEventEmitter.emit('user-logout');
-          
         } catch (error) {
           console.error('Logout error:', error);
           set({ ...initialState, isLoading: false });
@@ -289,39 +300,52 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
 // Optimized selector hooks
 export const useUser = () => useAuthStore((state) => state.user);
-export const useIsAuthenticated = () => useAuthStore((state) => state.isAuthenticated);
+export const useIsAuthenticated = () =>
+  useAuthStore((state) => state.isAuthenticated);
 export const useAuthLoading = () => useAuthStore((state) => state.isLoading);
 export const useAuthError = () => useAuthStore((state) => state.error);
 
 // User type selectors
-export const useIsCustomer = () => useAuthStore((state) => state.user?.role === 'customer');
-export const useIsRestaurant = () => useAuthStore((state) => state.user?.role === 'restaurant');
-export const useUserType = () => useAuthStore((state) => state.user?.role || null);
+export const useIsCustomer = () =>
+  useAuthStore((state) => state.user?.role === 'customer');
+export const useIsRestaurant = () =>
+  useAuthStore((state) => state.user?.role === 'restaurant');
+export const useUserType = () =>
+  useAuthStore((state) => state.user?.role || null);
 
 // Customer profile selector
-export const useCustomerProfile = () => useAuthStore((state) => 
-  state.user?.role === 'customer' ? state.user as CustomerProfile : null
-);
+export const useCustomerProfile = () =>
+  useAuthStore((state) =>
+    state.user?.role === 'customer' ? (state.user as CustomerProfile) : null,
+  );
 
 // Restaurant profile and data selectors
-export const useRestaurantProfile = () => useAuthStore((state) => 
-  state.user?.role === 'restaurant' ? state.user as RestaurantProfile : null
-);
+export const useRestaurantProfile = () =>
+  useAuthStore((state) =>
+    state.user?.role === 'restaurant'
+      ? (state.user as RestaurantProfile)
+      : null,
+  );
 
 export const useRestaurants = () => useAuthStore((state) => state.restaurants);
-export const useDefaultRestaurantId = () => useAuthStore((state) => state.defaultRestaurantId);
+export const useDefaultRestaurantId = () =>
+  useAuthStore((state) => state.defaultRestaurantId);
 
-export const useCurrentRestaurant = () => useAuthStore((state) => {
-  if (!state.defaultRestaurantId || state.restaurants.length === 0) return null;
-  return state.restaurants.find(r => r.id === state.defaultRestaurantId) || null;
-});
+export const useCurrentRestaurant = () =>
+  useAuthStore((state) => {
+    if (!state.defaultRestaurantId || state.restaurants.length === 0)
+      return null;
+    return (
+      state.restaurants.find((r) => r.id === state.defaultRestaurantId) || null
+    );
+  });
 
 export const useRestaurantInfo = () => {
   const restaurants = useRestaurants();
   const defaultRestaurantId = useDefaultRestaurantId();
   const currentRestaurant = useCurrentRestaurant();
   const isRestaurant = useIsRestaurant();
-  
+
   return {
     restaurants,
     defaultRestaurantId,
@@ -335,8 +359,10 @@ export const useRestaurantInfo = () => {
 export const useSetAuthData = () => useAuthStore((state) => state.setAuthData);
 export const useLogout = () => useAuthStore((state) => state.logout);
 export const useSetUser = () => useAuthStore((state) => state.setUser);
-export const useSetIsAuthenticated = () => useAuthStore((state) => state.setIsAuthenticated);
-export const useSetIsLoading = () => useAuthStore((state) => state.setIsLoading);
+export const useSetIsAuthenticated = () =>
+  useAuthStore((state) => state.setIsAuthenticated);
+export const useSetIsLoading = () =>
+  useAuthStore((state) => state.setIsLoading);
 export const useSetError = () => useAuthStore((state) => state.setError);
 export const useClearError = () => useAuthStore((state) => state.clearError);
 export const useResetAuth = () => useAuthStore((state) => state.resetAuth);
@@ -346,4 +372,3 @@ export const useAuth = () => useAuthStore();
 export const useAuthUser = () => useUser();
 
 // Export types for use in other files
-export type { UserProfile, CustomerProfile, RestaurantProfile, Restaurant };

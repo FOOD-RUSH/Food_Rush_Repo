@@ -1,22 +1,22 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { 
-  restaurantMenuApi, 
-   
-  CreateMenuItemRequest, 
+import {
+  restaurantMenuApi,
+  CreateMenuItemRequest,
   UpdateMenuItemRequest,
- 
 } from '@/src/services/restaurant/menuApi';
 
 // Query Keys
 export const menuQueryKeys = {
   all: ['menu'] as const,
   restaurants: () => [...menuQueryKeys.all, 'restaurants'] as const,
-  restaurant: (restaurantId: string) => [...menuQueryKeys.restaurants(), restaurantId] as const,
-  menuItems: (restaurantId: string, category?: string) => [
-    ...menuQueryKeys.restaurant(restaurantId), 
-    'items', 
-    category || 'all'
-  ] as const,
+  restaurant: (restaurantId: string) =>
+    [...menuQueryKeys.restaurants(), restaurantId] as const,
+  menuItems: (restaurantId: string, category?: string) =>
+    [
+      ...menuQueryKeys.restaurant(restaurantId),
+      'items',
+      category || 'all',
+    ] as const,
   menuItem: (itemId: string) => [...menuQueryKeys.all, 'item', itemId] as const,
 };
 
@@ -25,7 +25,10 @@ export const useMenuItems = (restaurantId: string, category?: string) => {
   return useQuery({
     queryKey: menuQueryKeys.menuItems(restaurantId, category),
     queryFn: async () => {
-      const response = await restaurantMenuApi.getMenuItems(restaurantId, category);
+      const response = await restaurantMenuApi.getMenuItems(
+        restaurantId,
+        category,
+      );
       // Extract the data array from the API response
       return response.data?.data || [];
     },
@@ -54,14 +57,19 @@ export const useCreateMenuItem = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ restaurantId, data }: { restaurantId: string; data: CreateMenuItemRequest }) => 
-      restaurantMenuApi.createMenuItem(restaurantId, data),
+    mutationFn: ({
+      restaurantId,
+      data,
+    }: {
+      restaurantId: string;
+      data: CreateMenuItemRequest;
+    }) => restaurantMenuApi.createMenuItem(restaurantId, data),
     onSuccess: (response, { restaurantId }) => {
       // Invalidate and refetch menu items for this restaurant
       queryClient.invalidateQueries({
         queryKey: menuQueryKeys.restaurant(restaurantId),
       });
-      
+
       // Optionally, you can also update the cache optimistically
       // if you want immediate UI updates
       console.log('✅ Menu item created successfully in hook:', response.data);
@@ -77,14 +85,14 @@ export const useUpdateMenuItem = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ 
-      restaurantId, 
-      itemId, 
-      data 
-    }: { 
-      restaurantId: string; 
-      itemId: string; 
-      data: UpdateMenuItemRequest 
+    mutationFn: ({
+      restaurantId,
+      itemId,
+      data,
+    }: {
+      restaurantId: string;
+      itemId: string;
+      data: UpdateMenuItemRequest;
     }) => restaurantMenuApi.updateMenuItem(restaurantId, itemId, data),
     onSuccess: (response, { restaurantId, itemId }) => {
       // Invalidate queries
@@ -94,7 +102,7 @@ export const useUpdateMenuItem = () => {
       queryClient.invalidateQueries({
         queryKey: menuQueryKeys.menuItem(itemId),
       });
-      
+
       console.log('Menu item updated successfully:', response);
     },
     onError: (error) => {
@@ -108,19 +116,24 @@ export const useDeleteMenuItem = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ restaurantId, itemId }: { restaurantId: string; itemId: string }) => 
-      restaurantMenuApi.deleteMenuItem(restaurantId, itemId),
+    mutationFn: ({
+      restaurantId,
+      itemId,
+    }: {
+      restaurantId: string;
+      itemId: string;
+    }) => restaurantMenuApi.deleteMenuItem(restaurantId, itemId),
     onSuccess: (response, { restaurantId, itemId }) => {
       // Remove the item from cache
       queryClient.removeQueries({
         queryKey: menuQueryKeys.menuItem(itemId),
       });
-      
+
       // Invalidate menu items list
       queryClient.invalidateQueries({
         queryKey: menuQueryKeys.restaurant(restaurantId),
       });
-      
+
       console.log('Menu item deleted successfully:', response);
     },
     onError: (error) => {
@@ -134,40 +147,50 @@ export const useToggleMenuItemAvailability = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ 
-      restaurantId, 
-      itemId, 
-      isAvailable 
-    }: { 
-      restaurantId: string; 
-      itemId: string; 
-      isAvailable: boolean 
-    }) => restaurantMenuApi.toggleMenuItemAvailability(restaurantId, itemId, isAvailable),
+    mutationFn: ({
+      restaurantId,
+      itemId,
+      isAvailable,
+    }: {
+      restaurantId: string;
+      itemId: string;
+      isAvailable: boolean;
+    }) =>
+      restaurantMenuApi.toggleMenuItemAvailability(
+        restaurantId,
+        itemId,
+        isAvailable,
+      ),
     onMutate: async ({ restaurantId, itemId, isAvailable }) => {
       // Optimistic update
-      await queryClient.cancelQueries({ 
-        queryKey: menuQueryKeys.menuItem(itemId) 
+      await queryClient.cancelQueries({
+        queryKey: menuQueryKeys.menuItem(itemId),
       });
-      
-      const previousData = queryClient.getQueryData(menuQueryKeys.menuItem(itemId));
-      
+
+      const previousData = queryClient.getQueryData(
+        menuQueryKeys.menuItem(itemId),
+      );
+
       // Optimistically update the cache
       queryClient.setQueryData(menuQueryKeys.menuItem(itemId), (old: any) => {
         if (old) {
           return {
             ...old,
-            isAvailable
+            isAvailable,
           };
         }
         return old;
       });
-      
+
       return { previousData };
     },
     onError: (error, { restaurantId, itemId }, context) => {
       // Revert optimistic update on error
       if (context?.previousData) {
-        queryClient.setQueryData(menuQueryKeys.menuItem(itemId), context.previousData);
+        queryClient.setQueryData(
+          menuQueryKeys.menuItem(itemId),
+          context.previousData,
+        );
       }
       console.error('Failed to toggle menu item availability:', error);
     },
@@ -186,20 +209,22 @@ export const useToggleMenuItemAvailability = () => {
 // Utility hook for managing menu-related loading states
 export const useMenuLoadingStates = () => {
   const queryClient = useQueryClient();
-  
+
   return {
     isAnyMenuMutationLoading: () => {
-      return queryClient.isMutating({ 
-        mutationKey: menuQueryKeys.all 
-      }) > 0;
+      return (
+        queryClient.isMutating({
+          mutationKey: menuQueryKeys.all,
+        }) > 0
+      );
     },
-    
+
     invalidateAllMenuData: () => {
       queryClient.invalidateQueries({
         queryKey: menuQueryKeys.all,
       });
     },
-    
+
     clearMenuCache: () => {
       queryClient.removeQueries({
         queryKey: menuQueryKeys.all,

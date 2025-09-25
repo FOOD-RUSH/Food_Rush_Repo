@@ -5,10 +5,11 @@
   
   **A comprehensive React Native food delivery application connecting customers with restaurants for seamless food ordering and delivery services.**
 
-  [![React Native](https://img.shields.io/badge/React%20Native-0.81.4-blue.svg)](https://reactnative.dev/)
-  [![Expo](https://img.shields.io/badge/Expo-54.0.8-black.svg)](https://expo.dev/)
-  [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-blue.svg)](https://www.typescriptlang.org/)
-  [![License](https://img.shields.io/badge/License-Private-red.svg)]()
+[![React Native](https://img.shields.io/badge/React%20Native-0.81.4-blue.svg)](https://reactnative.dev/)
+[![Expo](https://img.shields.io/badge/Expo-54.0.8-black.svg)](https://expo.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9.2-blue.svg)](https://www.typescriptlang.org/)
+[![License](https://img.shields.io/badge/License-Private-red.svg)]()
+
 </div>
 
 ## 📱 Overview
@@ -82,17 +83,20 @@ food-rush/
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/your-username/food-rush.git
    cd food-rush
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Set up environment variables**
+
    ```bash
    cp .env.example .env
    # Edit .env with your configuration
@@ -125,11 +129,11 @@ npm run validate:translations
 
 ## 📱 Platform Support
 
-| Platform | Status | Notes |
-|----------|--------|-------|
+| Platform    | Status       | Notes                  |
+| ----------- | ------------ | ---------------------- |
 | **Android** | ✅ Supported | API 21+ (Android 5.0+) |
-| **iOS** | ✅ Supported | iOS 13.0+ |
-| **Web** | ✅ Supported | Modern browsers |
+| **iOS**     | ✅ Supported | iOS 13.0+              |
+| **Web**     | ✅ Supported | Modern browsers        |
 
 ## 🌍 Internationalization
 
@@ -157,15 +161,15 @@ The app supports multiple languages with automatic detection based on device set
 
 ```typescript
 // Primary Colors
-primary: '#007aff'      // Blue
-secondary: '#06102b'    // Dark Blue
-accent: '#ff6b35'       // Orange
+primary: '#007aff'; // Blue
+secondary: '#06102b'; // Dark Blue
+accent: '#ff6b35'; // Orange
 
 // Status Colors
-success: '#34c759'      // Green
-warning: '#ff9500'      // Orange
-error: '#ff3b30'        // Red
-info: '#5ac8fa'         // Light Blue
+success: '#34c759'; // Green
+warning: '#ff9500'; // Orange
+error: '#ff3b30'; // Red
+info: '#5ac8fa'; // Light Blue
 ```
 
 ## 🔐 Security Features
@@ -218,8 +222,8 @@ const useAppStore = create(
     {
       name: 'app-store',
       storage: createJSONStorage(() => AsyncStorage),
-    }
-  )
+    },
+  ),
 );
 ```
 
@@ -472,16 +476,19 @@ export const ExampleComponent: React.FC<Props> = ({ title, onPress }) => {
 ### Common Issues
 
 1. **Metro bundler issues**
+
    ```bash
    npx expo start --clear
    ```
 
 2. **iOS build issues**
+
    ```bash
    cd ios && pod install && cd ..
    ```
 
 3. **Android build issues**
+
    ```bash
    cd android && ./gradlew clean && cd ..
    ```

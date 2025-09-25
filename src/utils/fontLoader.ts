@@ -18,7 +18,7 @@ export const loadFonts = async (): Promise<void> => {
   }
 
   fontLoadingPromise = Font.loadAsync(FONT_ASSETS);
-  
+
   try {
     await fontLoadingPromise;
     fontsLoaded = true;

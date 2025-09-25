@@ -6,7 +6,11 @@ import { RootStackScreenProps } from '@/src/navigation/types';
 import { useLanguage } from '@/src/contexts/LanguageContext';
 import { useTranslation } from 'react-i18next';
 import { SupportedLanguage } from '@/src/locales/i18n';
-import { Typography, Heading4, LabelLarge } from '@/src/components/common/Typography';
+import {
+  Typography,
+  Heading4,
+  LabelLarge,
+} from '@/src/components/common/Typography';
 
 const LanguageScreen = ({
   navigation,
@@ -39,10 +43,7 @@ const LanguageScreen = ({
               <Typography variant="h4" style={{ marginRight: 12 }}>
                 {language.flag}
               </Typography>
-              <LabelLarge 
-                color={colors.onSurface}
-                weight="semibold"
-              >
+              <LabelLarge color={colors.onSurface} weight="semibold">
                 {language.name}
               </LabelLarge>
             </View>

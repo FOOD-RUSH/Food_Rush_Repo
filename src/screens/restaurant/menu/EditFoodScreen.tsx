@@ -1,43 +1,44 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Image, ScrollView, TouchableOpacity, Animated, StatusBar, Dimensions, KeyboardTypeOptions, Alert } from 'react-native';
+import {
+  View,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  Animated,
+  StatusBar,
+  KeyboardTypeOptions,
+  Alert,
+} from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
-import { useNavigation } from '@react-navigation/native';
 import CommonView from '@/src/components/common/CommonView';
 import { saveImageLocally, generateImageId } from '@/src/utils/imageStorage';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RestaurantMenuStackParamList } from '@/src/navigation/types';
+import { RootStackScreenProps } from '@/src/navigation/types';
 import { useCurrentRestaurant } from '@/src/stores/AuthStore';
-import { useMenuItem, useUpdateMenuItem } from '@/src/hooks/restaurant/useMenuApi';
-import { Typography, Heading3, Body, Label, Caption } from '@/src/components/common/Typography';
+import {
+  useMenuItem,
+  useUpdateMenuItem,
+} from '@/src/hooks/restaurant/useMenuApi';
+import {
+  Heading3,
+  Body,
+  Label,
+  Caption,
+} from '@/src/components/common/Typography';
 
-const { width, height } = Dimensions.get('window');
-
-interface FoodItem {
-  id: string;
-  name: string;
-  price: string;
-  description: string;
-  category: string;
-  image: string;
-}
-
-type EditFoodScreenProps = NativeStackScreenProps<
-  RestaurantMenuStackParamList,
-  'EditMenuItem'
->;
-
-export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
-  const navigation = useNavigation();
+export const EditFoodScreen = ({
+  route,
+  navigation,
+}: RootStackScreenProps<'RestaurantEditFoodItem'>) => {
   const currentRestaurant = useCurrentRestaurant();
   const restaurantId = currentRestaurant?.id;
 
-  const { itemId } = route.params;
+  const { menuId } = route.params;
 
   // API hooks
-  const { data: menuItem, isLoading, error } = useMenuItem(itemId);
+  const { data: menuItem, isLoading, error } = useMenuItem(menuId);
   const updateMenuItemMutation = useUpdateMenuItem();
 
   const [name, setName] = useState('');
@@ -127,7 +128,14 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
     entranceSequence.start(() => {
       startContinuousAnimations();
     });
-  }, []);
+  }, [
+    buttonSlideAnim,
+    fadeAnim,
+    formAnimations,
+    headerSlideAnim,
+    imageScaleAnim,
+    slideAnim,
+  ]);
 
   const startContinuousAnimations = () => {
     // Pulse animation for image
@@ -226,12 +234,12 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
 
       await updateMenuItemMutation.mutateAsync({
         restaurantId,
-        itemId,
+        itemId: menuId,
         data: updateData,
       });
 
       Alert.alert('Success', 'Menu item updated successfully!', [
-        { text: 'OK', onPress: () => navigation.goBack() }
+        { text: 'OK', onPress: () => navigation.goBack() },
       ]);
     } catch (error) {
       console.error('Error updating menu item:', error);
@@ -469,11 +477,7 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
                       zIndex: 3,
                     }}
                   >
-                    <Caption
-                      color="#ffffff"
-                      align="center"
-                      weight="medium"
-                    >
+                    <Caption color="#ffffff" align="center" weight="medium">
                       Tap to change image
                     </Caption>
                   </LinearGradient>
@@ -615,10 +619,7 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
                         borderColor: 'rgba(255, 255, 255, 0.2)',
                       }}
                     >
-                      <Label
-                        color="#ffffff"
-                        weight="semibold"
-                      >
+                      <Label color="#ffffff" weight="semibold">
                         Cancel
                       </Label>
                     </LinearGradient>
@@ -651,10 +652,7 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
                           color="#ffffff"
                           style={{ marginRight: 8 }}
                         />
-                        <Label
-                          color="#ffffff"
-                          weight="bold"
-                        >
+                        <Label color="#ffffff" weight="bold">
                           Save Changes
                         </Label>
                       </View>
@@ -678,10 +676,7 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
                         borderColor: 'rgba(52, 199, 89, 0.3)',
                       }}
                     >
-                      <Body
-                        color="#34c759"
-                        weight="semibold"
-                      >
+                      <Body color="#34c759" weight="semibold">
                         Mark Available
                       </Body>
                     </LinearGradient>
@@ -701,10 +696,7 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
                         borderColor: 'rgba(255, 149, 0, 0.3)',
                       }}
                     >
-                      <Body
-                        color="#ff9500"
-                        weight="semibold"
-                      >
+                      <Body color="#ff9500" weight="semibold">
                         Mark Popular
                       </Body>
                     </LinearGradient>
@@ -716,5 +708,5 @@ export const EditFoodScreen = ({ route }: EditFoodScreenProps) => {
         </CommonView>
       </LinearGradient>
     </>
-  )
-}
+  );
+};

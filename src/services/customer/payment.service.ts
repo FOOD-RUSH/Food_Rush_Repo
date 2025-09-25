@@ -1,17 +1,45 @@
-// Payment service - focused only on payment functionality
-// Location services have been moved to src/services/customer/LocationService.ts
+// Payment service - Mobile Money integration for Cameroon market
+// Supports MTN Mobile Money and Orange Money with USSD code flow
+
+import { apiClient } from '@/src/services/shared/apiClient';
 
 export interface PaymentMethod {
   id: string;
-  type: 'mtn' | 'orange' | 'card';
+  type: 'mobile_money' | 'cash' | 'card';
+  provider?: 'mtn' | 'orange'; // Only for mobile_money type
   name: string;
   isDefault: boolean;
+}
+
+export interface PaymentInitRequest {
+  amount: number;
+  phoneNumber: string;
+  provider: 'mtn' | 'orange';
+  orderId: string;
+  currency?: string;
+}
+
+export interface PaymentInitResponse {
+  success: boolean;
+  transactionId: string;
+  ussdCode?: string;
+  message: string;
+  expiresAt?: string;
+}
+
+export interface PaymentStatusResponse {
+  success: boolean;
+  status: 'pending' | 'completed' | 'failed' | 'expired';
+  transactionId: string;
+  message: string;
 }
 
 export interface PaymentResult {
   success: boolean;
   transactionId?: string;
+  ussdCode?: string;
   error?: string;
+  message?: string;
 }
 
 class PaymentService {
@@ -25,7 +53,115 @@ class PaymentService {
   }
 
   /**
-   * Process payment with selected method
+   * Validate phone number for Mobile Money providers
+   */
+  validatePhoneNumber(
+    phoneNumber: string,
+    provider: 'mtn' | 'orange',
+  ): boolean {
+    // Remove all non-digit characters
+    const cleanNumber = phoneNumber.replace(/\D/g, '');
+
+    // MTN numbers: 67, 68, 65, 66 (Cameroon)
+    // Orange numbers: 69, 65, 66 (some overlap with MTN)
+    if (provider === 'mtn') {
+      return /^(237)?(6[5-8])\d{7}$/.test(cleanNumber);
+    } else if (provider === 'orange') {
+      return /^(237)?(6[5-6,9])\d{7}$/.test(cleanNumber);
+    }
+
+    return false;
+  }
+
+  /**
+   * Format phone number for API calls
+   */
+  formatPhoneNumber(phoneNumber: string): string {
+    const cleanNumber = phoneNumber.replace(/\D/g, '');
+
+    // Add country code if not present
+    if (cleanNumber.startsWith('6') && cleanNumber.length === 9) {
+      return `237${cleanNumber}`;
+    }
+
+    return cleanNumber;
+  }
+
+  /**
+   * Initialize Mobile Money payment
+   */
+  async initializePayment(request: PaymentInitRequest): Promise<PaymentResult> {
+    try {
+      // Validate phone number
+      if (!this.validatePhoneNumber(request.phoneNumber, request.provider)) {
+        return {
+          success: false,
+          error: `Invalid ${request.provider.toUpperCase()} phone number format`,
+        };
+      }
+
+      // Format phone number
+      const formattedPhone = this.formatPhoneNumber(request.phoneNumber);
+
+      const response = await apiClient.post<PaymentInitResponse>(
+        '/payments/init',
+        {
+          amount: request.amount,
+          phoneNumber: formattedPhone,
+          provider: request.provider,
+          orderId: request.orderId,
+          currency: request.currency || 'XAF',
+        },
+      );
+
+      if (response.data.success) {
+        return {
+          success: true,
+          transactionId: response.data.transactionId,
+          ussdCode: response.data.ussdCode,
+          message: response.data.message,
+        };
+      } else {
+        return {
+          success: false,
+          error: response.data.message,
+        };
+      }
+    } catch (error: any) {
+      console.error('Payment initialization error:', error);
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to initialize payment',
+      };
+    }
+  }
+
+  /**
+   * Check payment status
+   */
+  async checkPaymentStatus(
+    transactionId: string,
+  ): Promise<PaymentStatusResponse> {
+    try {
+      const response = await apiClient.get<PaymentStatusResponse>(
+        `/payments/status/${transactionId}`,
+      );
+
+      return response.data;
+    } catch (error: any) {
+      console.error('Payment status check error:', error);
+      return {
+        success: false,
+        status: 'failed',
+        transactionId,
+        message:
+          error.response?.data?.message || 'Failed to check payment status',
+      };
+    }
+  }
+
+  /**
+   * Process payment with selected method (legacy method for backward compatibility)
    */
   async processPayment(
     amount: number,
@@ -33,10 +169,17 @@ class PaymentService {
     orderId: string,
   ): Promise<PaymentResult> {
     try {
-      // Implementation for payment processing
       console.log('Processing payment:', { amount, method, orderId });
 
-      // This would integrate with actual payment providers
+      // For Mobile Money, we need phone number - this should be handled by the UI
+      if (method.type === 'mobile_money') {
+        return {
+          success: false,
+          error: 'Phone number required for Mobile Money payments',
+        };
+      }
+
+      // For other payment methods (future implementation)
       return {
         success: true,
         transactionId: `txn_${Date.now()}`,
@@ -56,8 +199,26 @@ class PaymentService {
   async getPaymentMethods(): Promise<PaymentMethod[]> {
     // This would fetch from API or local storage
     return [
-      { id: '1', type: 'mtn', name: 'MTN Mobile Money', isDefault: true },
-      { id: '2', type: 'orange', name: 'Orange Money', isDefault: false },
+      {
+        id: 'mtn_mobile_money',
+        type: 'mobile_money',
+        provider: 'mtn',
+        name: 'MTN Mobile Money',
+        isDefault: true,
+      },
+      {
+        id: 'orange_money',
+        type: 'mobile_money',
+        provider: 'orange',
+        name: 'Orange Money',
+        isDefault: false,
+      },
+      {
+        id: 'cash_on_delivery',
+        type: 'cash',
+        name: 'Cash on Delivery',
+        isDefault: false,
+      },
     ];
   }
 }

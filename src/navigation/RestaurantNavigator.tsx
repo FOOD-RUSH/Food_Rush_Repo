@@ -139,19 +139,25 @@ export default function RestaurantNavigator() {
           borderTopLeftRadius: 40,
           marginTop: -50,
           paddingTop: 10,
-          shadowColor: '#000000ff',
+          borderTopWidth: 0, // Remove the white border line
+          elevation: 20, // Android shadow
+          shadowColor: '#000', // iOS shadow
           shadowOffset: {
             width: 0,
-            height: -2,
+            height: -4,
           },
           shadowOpacity: 0.1,
-          shadowRadius: 3,
-          elevation: 8,
+          shadowRadius: 8,
         },
         tabBarLabelStyle: {
           fontSize: 12,
           fontFamily: 'Urbanist-Medium',
         },
+        lazy: true,
+        unmountOnBlur: false,
+        tabBarHideOnKeyboard: true,
+        // Prevent going back to auth screens
+        gestureEnabled: false,
       })}
     >
       <RestaurantTab.Screen
@@ -159,9 +165,6 @@ export default function RestaurantNavigator() {
         component={RestaurantOrdersStackScreen}
         options={{
           tabBarLabel: t('orders'),
-          tabBarBackground: () => (
-            <View style={{ backgroundColor: colors.surface }} />
-          ),
         }}
       />
 
@@ -170,9 +173,6 @@ export default function RestaurantNavigator() {
         component={RestaurantMenuStackScreen}
         options={{
           tabBarLabel: t('menu'),
-          tabBarBackground: () => (
-            <View style={{ backgroundColor: colors.surface }} />
-          ),
         }}
       />
 
@@ -181,9 +181,6 @@ export default function RestaurantNavigator() {
         component={RestaurantAnalyticsStackScreen}
         options={{
           tabBarLabel: t('analytics'),
-          tabBarBackground: () => (
-            <View style={{ backgroundColor: colors.surface }} />
-          ),
         }}
       />
 
@@ -192,9 +189,6 @@ export default function RestaurantNavigator() {
         component={RestaurantAccountStackScreen}
         options={{
           tabBarLabel: t('account'),
-          tabBarBackground: () => (
-            <View style={{ backgroundColor: colors.surface }} />
-          ),
         }}
       />
     </RestaurantTab.Navigator>

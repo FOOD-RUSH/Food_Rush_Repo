@@ -7,13 +7,16 @@ import {
 // Unified hook for fetching categories - replaces all other category hooks
 export const useCategoriesApi = () => {
   console.log('🎣 [Unified Categories Hook] Initializing categories query');
-  
+
   const queryResult = useQuery({
     queryKey: ['categories'],
     queryFn: () => {
       console.log('🚀 [Unified Categories Hook] Executing query function');
       return categoriesApi.getAllCategories().then((res) => {
-        console.log('🎉 [Unified Categories Hook] Query completed, data:', res.data);
+        console.log(
+          '🎉 [Unified Categories Hook] Query completed, data:',
+          res.data,
+        );
         return res.data;
       });
     },
@@ -23,8 +26,11 @@ export const useCategoriesApi = () => {
   });
 
   const { data: categories, ...rest } = queryResult;
-  
-  console.log('📊 [Unified Categories Hook] Categories data received:', categories);
+
+  console.log(
+    '📊 [Unified Categories Hook] Categories data received:',
+    categories,
+  );
 
   return {
     ...rest,

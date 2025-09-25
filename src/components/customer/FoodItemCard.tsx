@@ -85,17 +85,15 @@ const FoodItemCard = ({
             />
             {/* PROMO Badge - Only show if hasPromo is true */}
             {hasPromo && (
-              <View 
+              <View
                 className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md"
                 style={{ backgroundColor: colors.primary }}
               >
-                <Text className="text-white text-xs font-bold">
-                  PROMO
-                </Text>
+                <Text className="text-white text-xs font-bold">PROMO</Text>
               </View>
             )}
           </View>
-          
+
           <TouchableOpacity
             onPress={onLike}
             className="absolute top-2.5 right-2.5 p-2 rounded-full shadow-sm"
@@ -112,7 +110,7 @@ const FoodItemCard = ({
           {/* Right side - Food Details */}
           <View className="flex-1">
             {/* Food Name */}
-            <Text 
+            <Text
               className={`${isSmallDevice ? 'text-base' : 'text-lg'} font-bold mb-2 p-1`}
               style={{ color: colors.onSurface }}
               numberOfLines={2}
@@ -122,15 +120,17 @@ const FoodItemCard = ({
 
             {/* Distance */}
             <View className="flex-row items-center mb-2">
-              <Text 
-                className="text-xs"
-                style={{ color: colors.onSurface }}
-              >
+              <Text className="text-xs" style={{ color: colors.onSurface }}>
                 {(distanceKm || distanceFromUser).toFixed(1)} km
               </Text>
               {!isAvailable && (
                 <>
-                  <Text className="text-xs mx-1" style={{ color: colors.onSurface }}>|</Text>
+                  <Text
+                    className="text-xs mx-1"
+                    style={{ color: colors.onSurface }}
+                  >
+                    |
+                  </Text>
                   <Text className="text-xs font-bold text-red-500">
                     UNAVAILABLE
                   </Text>
@@ -147,14 +147,22 @@ const FoodItemCard = ({
                 >
                   {FoodPrice} XAF
                 </Text>
-                <Text className="text-xs ml-1" style={{ color: colors.onSurface }}>|</Text>
+                <Text
+                  className="text-xs ml-1"
+                  style={{ color: colors.onSurface }}
+                >
+                  |
+                </Text>
                 <Ionicons
                   name="car-sharp"
                   size={12}
                   color={primaryColor}
                   className="ml-1"
                 />
-                <Text className="text-xs ml-1" style={{ color: colors.onSurface }}>
+                <Text
+                  className="text-xs ml-1"
+                  style={{ color: colors.onSurface }}
+                >
                   {DeliveryPrice.toFixed(0)} F
                 </Text>
               </View>

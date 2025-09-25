@@ -17,7 +17,12 @@ import { useBottomSheet } from '@/src/components/common/BottomSheet/BottomSheetC
 import ResettingPassword from '@/src/components/auth/ResettingPassword';
 import OTPInput from '@/src/components/auth/OTPInput';
 import { AuthStackScreenProps } from '@/src/navigation/types';
-import { Heading1, Body, BodySmall, Label } from '@/src/components/common/Typography';
+import {
+  Heading1,
+  Body,
+  BodySmall,
+  Label,
+} from '@/src/components/common/Typography';
 
 // Validation schema
 const validationSchema = yup.object({
@@ -255,10 +260,7 @@ const ResetPasswordScreen = ({
                 >
                   {errors.password?.message}
                 </HelperText>
-                <BodySmall
-                  color={colors.onBackground}
-                  style={{ marginTop: 4 }}
-                >
+                <BodySmall color={colors.onBackground} style={{ marginTop: 4 }}>
                   Must have at least 8 characters
                 </BodySmall>
               </View>
@@ -315,10 +317,7 @@ const ResetPasswordScreen = ({
                 >
                   {errors.confirmPassword?.message}
                 </HelperText>
-                <BodySmall
-                  color={colors.onBackground}
-                  style={{ marginTop: 4 }}
-                >
+                <BodySmall color={colors.onBackground} style={{ marginTop: 4 }}>
                   Both passwords must match
                 </BodySmall>
               </View>

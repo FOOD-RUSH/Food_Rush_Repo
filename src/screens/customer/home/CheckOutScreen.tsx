@@ -23,7 +23,12 @@ import { useAuthUser } from '@/src/stores/customerStores';
 import CheckoutContent from '@/src/components/common/BottomSheet/CheckoutContent';
 import { useBottomSheet } from '@/src/components/common/BottomSheet/BottomSheetContext';
 import { useDefaultAddress } from '@/src/location/store';
-import { useSelectedPaymentMethod } from '@/src/stores/customerStores/paymentStore';
+import {
+  useSelectedPaymentMethod,
+  useSelectedProvider,
+} from '@/src/stores/customerStores/paymentStore';
+import { useOrderFlow } from '@/src/hooks/customer/useOrderFlow';
+import OrderStatusModal from '@/src/components/customer/OrderFlow/OrderStatusModal';
 
 import { useTranslation } from 'react-i18next';
 
@@ -39,7 +44,24 @@ const CheckOutScreen = ({
   const clearCart = useCartStore((state) => state.clearCart);
   const defaultAddress = useDefaultAddress();
   const selectedPaymentMethod = useSelectedPaymentMethod();
+  const selectedProvider = useSelectedProvider();
   const user = useAuthUser();
+
+  // Order flow hook
+  const {
+    flowState,
+    createOrderFromCart,
+    confirmOrder,
+    completePayment,
+    resetFlow,
+    isReadyForCustomerConfirmation,
+    isWaitingForRestaurant,
+    isPaymentInProgress,
+    isCompleted,
+    isFailed,
+    isCreatingOrder,
+    isConfirmingOrder,
+  } = useOrderFlow();
 
   // Constants for fees
   const DELIVERY_FEE = 2300;
@@ -104,27 +126,60 @@ const CheckOutScreen = ({
     Alert.alert(t('info'), t('promo_code_functionality_coming_soon'));
   }, [t]);
 
-  // Handle place order confirmation
-  const confirmOrder = useCallback(() => {
+  // Handle place order confirmation - create actual order
+  const handleConfirmOrder = useCallback(async () => {
     try {
-      // Simulate order processing
-      Alert.alert(t('success'), t('order_placed_successfully'), [
-        {
-          text: 'OK',
-          onPress: () => {
-            clearCart(); // Clear the cart after successful order
-            navigation.navigate('CustomerApp', {
-              screen: 'Home',
-              params: { screen: 'HomeScreen' },
-            }); // Navigate back to home
-          },
-        },
-      ]);
+      // Get restaurant ID from route params or cart
+      const restaurantId =
+        route.params?.restaurantId || cartItems[0]?.menuItem?.restaurantId;
+
+      if (!restaurantId) {
+        Alert.alert(t('error'), 'Restaurant information missing');
+        return;
+      }
+
+      await createOrderFromCart(restaurantId);
     } catch (error) {
       Alert.alert(t('error'), t('failed_to_place_order'));
       console.error('Order placement error:', error);
     }
-  }, [clearCart, navigation, t]);
+  }, [createOrderFromCart, route.params, cartItems, t]);
+
+  // Handle customer order confirmation (after restaurant confirms)
+  const handleCustomerConfirmOrder = useCallback(() => {
+    confirmOrder();
+  }, [confirmOrder]);
+
+  // Handle proceed to payment
+  const handleProceedToPayment = useCallback(() => {
+    if (flowState.orderId && flowState.orderData) {
+      navigation.navigate('PaymentProcessing', {
+        orderId: flowState.orderId,
+        amount: flowState.orderData.total,
+        paymentMethod: selectedPaymentMethod || 'mobile_money',
+        provider: selectedProvider || 'mtn',
+      });
+    }
+  }, [navigation, flowState, selectedPaymentMethod, selectedProvider]);
+
+  // Handle order status modal close
+  const handleCloseOrderModal = useCallback(() => {
+    if (isCompleted) {
+      // Navigate to orders screen
+      navigation.reset({
+        index: 0,
+        routes: [
+          {
+            name: 'CustomerApp',
+            params: { screen: 'Orders' },
+          },
+        ],
+      });
+    } else if (isFailed) {
+      // Reset flow and stay on checkout
+      resetFlow();
+    }
+  }, [isCompleted, isFailed, navigation, resetFlow]);
 
   // Handle place order - show bottom sheet
   const handlePlaceOrder = useCallback(() => {
@@ -157,19 +212,22 @@ const CheckOutScreen = ({
     }
 
     // Present the enhanced checkout content with cart management
-    present(<CheckoutContent onConfirm={confirmOrder} onDismiss={dismiss} />, {
-      snapPoints: ['40%'], // Allow for more content
-      enablePanDownToClose: true,
-      title: t('confirm_your_order'),
-      showHandle: true,
-      backdropOpacity: 0.5,
-    });
+    present(
+      <CheckoutContent onConfirm={handleConfirmOrder} onDismiss={dismiss} />,
+      {
+        snapPoints: ['40%'], // Allow for more content
+        enablePanDownToClose: true,
+        title: t('confirm_your_order'),
+        showHandle: true,
+        backdropOpacity: 0.5,
+      },
+    );
   }, [
     cartItems.length,
     defaultAddress,
     selectedPaymentMethod,
     present,
-    confirmOrder,
+    handleConfirmOrder,
     dismiss,
     navigation,
     t,
@@ -392,10 +450,14 @@ const CheckOutScreen = ({
                   className="text-sm mr-2"
                   style={{ color: colors.onSurfaceVariant }}
                 >
-                  {selectedPaymentMethod === 'mtn_mobile_money'
-                    ? 'MTN Mobile Money'
-                    : selectedPaymentMethod === 'orange_money'
-                      ? 'Orange Mobile Money'
+                  {selectedPaymentMethod === 'mobile_money'
+                    ? selectedProvider === 'mtn'
+                      ? 'MTN Mobile Money'
+                      : selectedProvider === 'orange'
+                        ? 'Orange Money'
+                        : 'Mobile Money'
+                    : selectedPaymentMethod === 'cash'
+                      ? 'Cash on Delivery'
                       : t('e_wallet')}
                 </Text>
                 <MaterialIcons
@@ -474,7 +536,7 @@ const CheckOutScreen = ({
                   className="font-semibold text-base"
                   style={{ color: colors.onSurface }}
                 >
-                  {calculations.subtotal} {t('fcfa_unit')}
+                  {calculations.subtotal} FCFA
                 </Text>
               </View>
 
@@ -489,7 +551,7 @@ const CheckOutScreen = ({
                   className="font-semibold text-base"
                   style={{ color: colors.onSurface }}
                 >
-                  {calculations.deliveryFee} {t('fcfa_unit')}
+                  {calculations.deliveryFee}FCFA
                 </Text>
               </View>
 
@@ -504,7 +566,7 @@ const CheckOutScreen = ({
                       className="font-semibold"
                       style={{ color: colors.primary }}
                     >
-                      -{calculations.discount} {t('fcfa_unit')}
+                      -{calculations.discount} FCFA
                     </Text>
                   </View>
                 </>
@@ -526,7 +588,7 @@ const CheckOutScreen = ({
                   className="font-bold text-lg"
                   style={{ color: colors.primary }}
                 >
-                  {calculations.finalTotal} {t('fcfa_unit')}
+                  {calculations.finalTotal} FCFA
                 </Text>
               </View>
             </View>
@@ -551,10 +613,20 @@ const CheckOutScreen = ({
             className="text-lg font-bold text-center"
             style={{ color: colors.onPrimary }}
           >
-            {t('review_order')} - {calculations.finalTotal} {t('fcfa_unit')}
+            {t('review_order')} - {calculations.finalTotal} FCFA
           </Text>
         </TouchableOpacity>
       </View>
+
+      {/* Order Status Modal */}
+      <OrderStatusModal
+        visible={flowState.step !== 'creating' && !isCompleted}
+        flowState={flowState}
+        onConfirmOrder={handleCustomerConfirmOrder}
+        onProceedToPayment={handleProceedToPayment}
+        onClose={handleCloseOrderModal}
+        isConfirmingOrder={isConfirmingOrder}
+      />
     </CommonView>
   );
 };

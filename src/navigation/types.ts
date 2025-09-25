@@ -38,6 +38,12 @@ export type RootStackParamList = {
   AddressScreen: undefined;
   PaymentMethods: undefined;
   AddPayment: { paymentId?: string };
+  PaymentProcessing: {
+    orderId: string;
+    amount: number;
+    paymentMethod: 'mobile_money' | 'cash';
+    provider?: 'mtn' | 'orange';
+  };
   Settings: undefined;
   Help: NavigatorScreenParams<CustomerHelpCenterStackParamList>;
   About: undefined;
@@ -52,8 +58,7 @@ export type RootStackParamList = {
   RestaurantConfirmOrder: { orderId: string };
   RestaurantRejectOrder: { orderId: string };
   RestaurantMenuItemForm: { itemId?: string };
-  // Removed RestaurantAddCategory and RestaurantEditCategory - backend only returns categories
-
+  RestaurantEditFoodItem: { menuId: string };
 
   RestaurantTimeHeatmap: undefined;
   RestaurantNotificationDetails: { notificationId: string };

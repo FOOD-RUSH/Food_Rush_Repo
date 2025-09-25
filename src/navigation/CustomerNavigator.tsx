@@ -115,7 +115,9 @@ export function CustomerHelpCenterStackScreen() {
         tabBarStyle: {
           backgroundColor: navigationTheme.colors.card,
           borderTopColor: navigationTheme.colors.card,
+          marginBottom: -50,
         },
+        headerShown: true,
         tabBarIndicatorStyle: {
           backgroundColor: navigationTheme.colors.primary,
         },
@@ -240,6 +242,15 @@ export default function CustomerNavigator() {
       borderTopLeftRadius: 40,
       marginTop: -50,
       paddingTop: 10,
+      borderTopWidth: 0, // Remove the white border line
+      elevation: 20, // Android shadow
+      shadowColor: '#000', // iOS shadow
+      shadowOffset: {
+        width: 0,
+        height: -4,
+      },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
     }),
     [navigationTheme.colors.card, insets.bottom],
   );
@@ -307,7 +318,6 @@ export default function CustomerNavigator() {
           fontSize: 18,
           color: navigationTheme.colors.text,
         },
-        headerTitleAlign: 'left',
         lazy: true,
         unmountOnBlur: false,
         tabBarHideOnKeyboard: true,

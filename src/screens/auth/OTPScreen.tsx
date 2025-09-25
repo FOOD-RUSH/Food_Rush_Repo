@@ -9,7 +9,12 @@ import { useNetwork } from '@/src/contexts/NetworkContext';
 import { useTranslation } from 'react-i18next';
 import { useVerifyOTP, useResendOTP } from '@/src/hooks/customer/useAuthhooks';
 import ErrorDisplay from '@/src/components/auth/ErrorDisplay';
-import { Heading3, Body, BodySmall, Label } from '@/src/components/common/Typography';
+import {
+  Heading3,
+  Body,
+  BodySmall,
+  Label,
+} from '@/src/components/common/Typography';
 
 const OTPScreen: React.FC<AuthStackScreenProps<'OTPVerification'>> = ({
   navigation,
@@ -276,10 +281,7 @@ const OTPScreen: React.FC<AuthStackScreenProps<'OTPVerification'>> = ({
             className="-ml-2"
             onPress={goBack}
           />
-          <Heading3
-            color={colors.onBackground}
-            weight="semibold"
-          >
+          <Heading3 color={colors.onBackground} weight="semibold">
             {t('otp_verification')}
           </Heading3>
           <View className="w-10" />
@@ -327,14 +329,9 @@ const OTPScreen: React.FC<AuthStackScreenProps<'OTPVerification'>> = ({
 
         {/* Resend Timer */}
         <View className="mb-8">
-          <Body
-            align="center"
-            color={colors.onSurface}
-          >
+          <Body align="center" color={colors.onSurface}>
             {isResendEnabled ? (
-              <Body color={colors.primary}>
-                You can now resend the code
-              </Body>
+              <Body color={colors.primary}>You can now resend the code</Body>
             ) : (
               <>
                 {t('resend_code')} in{' '}
@@ -379,9 +376,7 @@ const OTPScreen: React.FC<AuthStackScreenProps<'OTPVerification'>> = ({
           <Label
             weight="medium"
             color={
-              isResendEnabled && !isResending
-                ? colors.primary
-                : colors.outline
+              isResendEnabled && !isResending ? colors.primary : colors.outline
             }
           >
             {isResending ? t('resending') : t('resend_code')}

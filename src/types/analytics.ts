@@ -133,6 +133,10 @@ export interface StandardApiResponse<T> {
   message?: string;
 }
 
-export type RestaurantAnalyticsSummaryResponse = StandardApiResponse<RestaurantAnalyticsSummary>;
-export type RestaurantRevenueBucketsResponse = StandardApiResponse<RevenueBucket[]>;
-export type RestaurantBalanceApiResponse = StandardApiResponse<RestaurantBalance>;
+export type RestaurantAnalyticsSummaryResponse =
+  StandardApiResponse<RestaurantAnalyticsSummary>;
+export type RestaurantRevenueBucketsResponse = StandardApiResponse<
+  RevenueBucket[]
+>;
+export type RestaurantBalanceApiResponse =
+  StandardApiResponse<RestaurantBalance>;

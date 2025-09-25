@@ -52,10 +52,7 @@
       "favicon": "./assets/images/favicon.png"
     },
 
-    "assetBundlePatterns": [
-      "assets/fonts/*",
-      "assets/images/*"
-    ],
+    "assetBundlePatterns": ["assets/fonts/*", "assets/images/*"],
     "plugins": [
       "expo-font",
       "expo-asset",

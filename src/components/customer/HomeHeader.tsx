@@ -72,15 +72,20 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
           const success = await requestPermissionWithLocation();
           if (success) {
             // Permission granted and location obtained - refresh nearby data
-            console.log('📍 Permission granted, refreshing location-based data');
-            queryClient.invalidateQueries({ queryKey: ['nearby-restaurants'] });
+            console.log(
+              '📍 Permission granted, refreshing location-based data',
+            );
+            queryClient.invalidateQueries({ queryKey: ['browse-restaurants'] });
             queryClient.invalidateQueries({ queryKey: ['restaurants'] });
             queryClient.invalidateQueries({ queryKey: ['menu'] });
-            
+
             Toast.show({
               type: 'success',
               text1: t('location_enabled', 'Location enabled'),
-              text2: t('showing_nearby_results', 'Now showing nearby restaurants and food'),
+              text2: t(
+                'showing_nearby_results',
+                'Now showing nearby restaurants and food',
+              ),
               visibilityTime: 3000,
             });
           }
@@ -112,22 +117,27 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
     }
 
     setIsRefreshing(true);
-    
+
     try {
       // Refresh location when any part of the header is tapped
       if (hasPermission) {
         const success = await refreshLocation();
         if (success) {
           // Manually trigger query invalidation to ensure fresh data
-          console.log('🔄 Location refreshed successfully, invalidating queries');
-          queryClient.invalidateQueries({ queryKey: ['nearby-restaurants'] });
+          console.log(
+            '🔄 Location refreshed successfully, invalidating queries',
+          );
+          queryClient.invalidateQueries({ queryKey: ['browse-restaurants'] });
           queryClient.invalidateQueries({ queryKey: ['restaurants'] });
           queryClient.invalidateQueries({ queryKey: ['menu'] });
-          
+
           Toast.show({
             type: 'success',
             text1: t('location_updated', 'Location updated'),
-            text2: t('location_refreshed_successfully', 'Your location has been refreshed'),
+            text2: t(
+              'location_refreshed_successfully',
+              'Your location has been refreshed',
+            ),
             visibilityTime: 2000,
           });
         } else {
@@ -152,7 +162,15 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
     } finally {
       setIsRefreshing(false);
     }
-  }, [hasPermission, refreshLocation, handleLocationPress, isRefreshing, locationLoading, t, queryClient]);
+  }, [
+    hasPermission,
+    refreshLocation,
+    handleLocationPress,
+    isRefreshing,
+    locationLoading,
+    t,
+    queryClient,
+  ]);
 
   const getLocationIcon = () => {
     if (locationLoading || isRefreshing) return 'time-outline';
@@ -222,7 +240,7 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
               )}
             </View>
 
-            {(locationLoading || isRefreshing) ? (
+            {locationLoading || isRefreshing ? (
               <ActivityIndicator
                 size={16}
                 color={getLocationIconColor()}

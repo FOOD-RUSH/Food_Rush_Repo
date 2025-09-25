@@ -3,11 +3,11 @@ import { useBreakpoint } from './responsive';
 
 // Image quality settings based on device capabilities
 export const IMAGE_QUALITY = {
-  xs: 70,  // Small phones - lower quality to save bandwidth
-  sm: 75,  // Large phones
-  md: 80,  // Tablets
-  lg: 85,  // Large tablets
-  xl: 90,  // Desktop - higher quality
+  xs: 70, // Small phones - lower quality to save bandwidth
+  sm: 75, // Large phones
+  md: 80, // Tablets
+  lg: 85, // Large tablets
+  xl: 90, // Desktop - higher quality
 } as const;
 
 // Image size presets for different use cases
@@ -39,12 +39,12 @@ export const getOptimizedImageUri = (
   customWidth?: number,
   customHeight?: number,
   breakpoint: keyof typeof IMAGE_QUALITY = 'md',
-  screenWidth: number = 375
+  screenWidth: number = 375,
 ): OptimizedImageConfig => {
   // Determine image dimensions
   let targetWidth: number;
   let targetHeight: number | undefined;
-  
+
   if (preset && IMAGE_SIZES[preset]) {
     targetWidth = IMAGE_SIZES[preset][breakpoint];
   } else if (customWidth) {
@@ -52,14 +52,14 @@ export const getOptimizedImageUri = (
   } else {
     targetWidth = screenWidth;
   }
-  
+
   if (customHeight) {
     targetHeight = customHeight;
   }
-  
+
   // Get quality based on breakpoint
   const quality = IMAGE_QUALITY[breakpoint];
-  
+
   // For now, return the original URI with metadata
   // In a real implementation, you might use a CDN service like Cloudinary
   return {
@@ -77,30 +77,30 @@ export const getOptimizedImageUri = (
 export const useResponsiveImage = () => {
   const breakpoint = useBreakpoint();
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
-  
+
   const getImageSize = (preset: ImageSizePreset) => {
     return IMAGE_SIZES[preset][breakpoint];
   };
-  
+
   const getImageQuality = () => {
     return IMAGE_QUALITY[breakpoint];
   };
-  
+
   const optimizeImageForScreen = (
     originalUri: string,
     maxWidth?: number,
-    aspectRatio?: number
+    aspectRatio?: number,
   ) => {
     const containerWidth = maxWidth || screenWidth;
     const quality = getImageQuality();
-    
+
     let targetWidth = containerWidth;
     let targetHeight: number | undefined;
-    
+
     if (aspectRatio) {
       targetHeight = targetWidth / aspectRatio;
     }
-    
+
     return {
       uri: originalUri,
       width: targetWidth,
@@ -109,7 +109,7 @@ export const useResponsiveImage = () => {
       format: 'webp' as const,
     };
   };
-  
+
   return {
     getImageSize,
     getImageQuality,
@@ -124,9 +124,7 @@ export const useResponsiveImage = () => {
  * Generate srcSet for responsive images (useful for web)
  */
 export const generateImageSrcSet = (baseUri: string, sizes: number[]) => {
-  return sizes
-    .map(size => `${baseUri}?w=${size}&q=80 ${size}w`)
-    .join(', ');
+  return sizes.map((size) => `${baseUri}?w=${size}&q=80 ${size}w`).join(', ');
 };
 
 /**
@@ -150,7 +148,11 @@ export const IMAGE_CACHE_CONFIG = {
 /**
  * Placeholder image generator
  */
-export const generatePlaceholder = (width: number, height: number, color = '#f0f0f0') => {
+export const generatePlaceholder = (
+  width: number,
+  height: number,
+  color = '#f0f0f0',
+) => {
   // Generate a simple placeholder data URI
   return `data:image/svg+xml;base64,${btoa(`
     <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
@@ -165,14 +167,15 @@ export const generatePlaceholder = (width: number, height: number, color = '#f0f
 export const getOptimalImageFormat = (originalUri: string) => {
   // Check if WebP is supported (most modern devices do)
   const supportsWebP = true; // Assume WebP support for React Native
-  
+
   if (supportsWebP && !originalUri.includes('.gif')) {
     return 'webp';
   }
-  
+
   // Fallback to original format
   if (originalUri.includes('.png')) return 'png';
-  if (originalUri.includes('.jpg') || originalUri.includes('.jpeg')) return 'jpeg';
-  
+  if (originalUri.includes('.jpg') || originalUri.includes('.jpeg'))
+    return 'jpeg';
+
   return 'jpeg'; // Default fallback
 };

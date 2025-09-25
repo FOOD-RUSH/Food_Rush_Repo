@@ -45,18 +45,26 @@ const BREAKPOINTS = {
 export const useResponsive = (): ResponsiveUtils => {
   const [screenData, setScreenData] = useState<ScreenData>(() => {
     const { width, height, scale, fontScale } = Dimensions.get('window');
-    return { width, height, scale, fontScale };
+    return {
+      width: width || 375, // fallback to iPhone X width
+      height: height || 812, // fallback to iPhone X height
+      scale: scale || 2,
+      fontScale: fontScale || 1,
+    };
   });
 
   useEffect(() => {
-    const subscription = Dimensions.addEventListener('change', ({ window }: { window: ScaledSize }) => {
-      setScreenData({
-        width: window.width,
-        height: window.height,
-        scale: window.scale,
-        fontScale: window.fontScale,
-      });
-    });
+    const subscription = Dimensions.addEventListener(
+      'change',
+      ({ window }: { window: ScaledSize }) => {
+        setScreenData({
+          width: window.width || 375,
+          height: window.height || 812,
+          scale: window.scale || 2,
+          fontScale: window.fontScale || 1,
+        });
+      },
+    );
 
     return () => subscription?.remove();
   }, []);
@@ -102,13 +110,13 @@ export const useResponsive = (): ResponsiveUtils => {
 
   const getResponsiveText = (baseSize: number): number => {
     const scaleFactor = Math.min(screenData.fontScale, 1.3); // Cap at 1.3x
-    
+
     if (isSmallScreen) {
       return Math.round(baseSize * 0.9 * scaleFactor);
     } else if (isLargeScreen) {
       return Math.round(baseSize * 1.1 * scaleFactor);
     }
-    
+
     return Math.round(baseSize * scaleFactor);
   };
 
@@ -168,7 +176,8 @@ export const useResponsiveFontSize = () => {
 
 // Hook for responsive spacing
 export const useResponsiveSpacing = () => {
-  const { responsiveSize, wp, hp, isSmallScreen, isLargeScreen } = useResponsive();
+  const { responsiveSize, wp, hp, isSmallScreen, isLargeScreen } =
+    useResponsive();
 
   return {
     xs: responsiveSize(4),

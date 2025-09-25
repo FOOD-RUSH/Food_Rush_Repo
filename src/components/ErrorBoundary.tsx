@@ -14,7 +14,10 @@ interface ErrorBoundaryState {
   error: Error | null;
 }
 
-export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends React.Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, error: null };
@@ -39,7 +42,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
           <Ionicons name="warning-outline" size={48} color="#FF6B6B" />
           <Text style={styles.errorTitle}>Something went wrong</Text>
           <Text style={styles.errorMessage}>
-            We're sorry for the inconvenience. Please try again.
+            We&apos;re sorry for the inconvenience. Please try again.
           </Text>
           <TouchableOpacity
             style={styles.retryButton}
@@ -71,7 +74,9 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
 }) => {
   if (!error) return null;
 
-  const isAuthError = (error as ApiError)?.code === 'SESSION_EXPIRED' || (error as ApiError)?.status === 401;
+  const isAuthError =
+    (error as ApiError)?.code === 'SESSION_EXPIRED' ||
+    (error as ApiError)?.status === 401;
   const isNetworkError = (error as ApiError)?.code === 'NETWORK_ERROR';
 
   const getErrorIcon = () => {
@@ -80,7 +85,8 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
     return 'alert-circle';
   };
 
-  const message = (error as ApiError)?.message || error.message || 'Something went wrong';
+  const message =
+    (error as ApiError)?.message || error.message || 'Something went wrong';
 
   return (
     <View style={[styles.errorDisplay, compact && styles.errorDisplayCompact]}>
@@ -93,16 +99,22 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
       <Text style={[styles.errorText, compact && styles.errorTextCompact]}>
         {message}
       </Text>
-      
+
       <View style={styles.buttonContainer}>
         {isAuthError && onLogin && (
-          <TouchableOpacity style={[styles.actionButton, styles.primaryButton]} onPress={onLogin}>
+          <TouchableOpacity
+            style={[styles.actionButton, styles.primaryButton]}
+            onPress={onLogin}
+          >
             <Text style={styles.primaryButtonText}>Log In</Text>
           </TouchableOpacity>
         )}
-        
+
         {onRetry && !isAuthError && (
-          <TouchableOpacity style={[styles.actionButton, styles.secondaryButton]} onPress={onRetry}>
+          <TouchableOpacity
+            style={[styles.actionButton, styles.secondaryButton]}
+            onPress={onRetry}
+          >
             <Text style={styles.secondaryButtonText}>Try Again</Text>
           </TouchableOpacity>
         )}
@@ -120,7 +132,8 @@ interface InlineErrorProps {
 export const InlineError: React.FC<InlineErrorProps> = ({ error, style }) => {
   if (!error) return null;
 
-  const message = (error as ApiError)?.message || error.message || 'Error occurred';
+  const message =
+    (error as ApiError)?.message || error.message || 'Error occurred';
 
   return (
     <View style={[styles.inlineError, style]}>

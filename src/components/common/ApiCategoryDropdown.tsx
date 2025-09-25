@@ -11,7 +11,13 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { useCategories } from '@/src/hooks/useCategories';
 import { getCategoryEmoji, getCategoryColor } from '@/src/data/categories';
-import { Typography, Heading5, Body, Label, LabelLarge } from '@/src/components/common/Typography';
+import {
+  Typography,
+  Heading5,
+  Body,
+  Label,
+  LabelLarge,
+} from '@/src/components/common/Typography';
 
 interface ApiCategoryDropdownProps {
   selectedValue?: string;
@@ -38,14 +44,14 @@ const ApiCategoryDropdown: React.FC<ApiCategoryDropdownProps> = ({
 
   // Categories is always an array from the local data
   const categoriesArray = React.useMemo(() => {
-    return categories.map(cat => ({
+    return categories.map((cat) => ({
       value: cat.value,
       label: cat.label,
       emoji: cat.emoji,
       color: cat.color,
     }));
   }, [categories]);
-  
+
   const selectedCategory = React.useMemo(() => {
     if (!selectedValue || categoriesArray.length === 0) {
       return null;
@@ -54,7 +60,10 @@ const ApiCategoryDropdown: React.FC<ApiCategoryDropdownProps> = ({
   }, [categoriesArray, selectedValue]);
 
   const handleSelect = (category: { value: string; label: string }) => {
-    console.log('Category selected:', { value: category.value, label: category.label });
+    console.log('Category selected:', {
+      value: category.value,
+      label: category.label,
+    });
     onValueChange(category.value, category.label);
     setIsVisible(false);
   };
@@ -93,11 +102,7 @@ const ApiCategoryDropdown: React.FC<ApiCategoryDropdownProps> = ({
           </Label>
         </View>
         {selectedValue === item.value && (
-          <MaterialCommunityIcons
-            name="check"
-            size={20}
-            color={item.color}
-          />
+          <MaterialCommunityIcons name="check" size={20} color={item.color} />
         )}
       </View>
     </TouchableOpacity>
@@ -153,10 +158,14 @@ const ApiCategoryDropdown: React.FC<ApiCategoryDropdownProps> = ({
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
           {selectedCategory?.emoji && (
-            <LabelLarge style={{ marginRight: 8 }}>{selectedCategory.emoji}</LabelLarge>
+            <LabelLarge style={{ marginRight: 8 }}>
+              {selectedCategory.emoji}
+            </LabelLarge>
           )}
           <Label
-            color={selectedCategory ? colors.onSurface : colors.onSurfaceVariant}
+            color={
+              selectedCategory ? colors.onSurface : colors.onSurfaceVariant
+            }
           >
             {selectedCategory?.label || placeholder || t('select_category')}
           </Label>
@@ -207,10 +216,7 @@ const ApiCategoryDropdown: React.FC<ApiCategoryDropdownProps> = ({
                 alignItems: 'center',
               }}
             >
-              <Heading5 
-                color={colors.onSurface}
-                weight="semibold"
-              >
+              <Heading5 color={colors.onSurface} weight="semibold">
                 {t('select_category')}
               </Heading5>
               <TouchableOpacity onPress={() => setIsVisible(false)}>
@@ -242,7 +248,7 @@ const ApiCategoryDropdown: React.FC<ApiCategoryDropdownProps> = ({
                       size={48}
                       color={colors.onSurfaceVariant}
                     />
-                    <Body 
+                    <Body
                       color={colors.onSurfaceVariant}
                       style={{ marginTop: 8 }}
                     >

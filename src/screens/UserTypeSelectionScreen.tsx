@@ -44,12 +44,14 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
   const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = useWindowDimensions();
-  
+
   // Store actions
   const { setSelectedUserType, completeOnboarding } = useAppStore();
-  
+
   // Local state
-  const [selectedType, setSelectedType] = useState<'customer' | 'restaurant' | null>(null);
+  const [selectedType, setSelectedType] = useState<
+    'customer' | 'restaurant' | null
+  >(null);
 
   const handleUserTypePress = useCallback(
     (userType: 'customer' | 'restaurant') => {
@@ -70,12 +72,7 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
         params: { userType: selectedType },
       });
     }
-  }, [
-    selectedType,
-    setSelectedUserType,
-    completeOnboarding,
-    navigation,
-  ]);
+  }, [selectedType, setSelectedUserType, completeOnboarding, navigation]);
 
   const getCardStyle = useCallback(
     (isSelected: boolean) => ({
@@ -165,7 +162,9 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
         </View>
 
         {/* User Type Cards */}
-        <View style={{ flex: 1, justifyContent: 'center', paddingVertical: 20 }}>
+        <View
+          style={{ flex: 1, justifyContent: 'center', paddingVertical: 20 }}
+        >
           {userTypes.map((type, index) => (
             <TouchableOpacity
               key={type.id}
@@ -181,7 +180,7 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
               onPress={() => handleUserTypePress(type.id)}
             >
               {/* Image Container */}
-              <View 
+              <View
                 style={{
                   height: imageHeight,
                   width: '100%',
@@ -192,8 +191,8 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
               >
                 <Image
                   source={type.image}
-                  style={{ 
-                    width: '100%', 
+                  style={{
+                    width: '100%',
                     height: '100%',
                   }}
                   resizeMode="cover"
@@ -246,7 +245,10 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
                     fontSize: 20,
                     fontWeight: 'bold',
                     textAlign: 'center',
-                    color: selectedType === type.id ? colors.primary : colors.onSurface,
+                    color:
+                      selectedType === type.id
+                        ? colors.primary
+                        : colors.onSurface,
                   }}
                 >
                   {t(type.title)}
@@ -279,7 +281,8 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
                 fontWeight: '500',
               }}
             >
-              {t('you_selected')} {selectedType === 'customer' ? t('customer') : t('restaurant')}
+              {t('you_selected')}{' '}
+              {selectedType === 'customer' ? t('customer') : t('restaurant')}
             </Text>
           )}
         </View>

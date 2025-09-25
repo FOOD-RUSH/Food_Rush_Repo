@@ -1,11 +1,11 @@
-import { 
-  AnalyticsSummaryResponse, 
-  RevenueBucketData, 
-  MetricCardData, 
+import {
+  AnalyticsSummaryResponse,
+  RevenueBucketData,
+  MetricCardData,
   ChartDataPoint,
   OrderStatusBreakdown,
   PaymentMethodBreakdown,
-  OperatorBreakdown
+  OperatorBreakdown,
 } from '@/src/types/analytics';
 
 /**
@@ -36,7 +36,10 @@ export const formatLargeNumber = (value: number): string => {
 /**
  * Calculate percentage change between two values
  */
-export const calculatePercentageChange = (current: number, previous: number): number => {
+export const calculatePercentageChange = (
+  current: number,
+  previous: number,
+): number => {
   if (previous === 0) return current > 0 ? 100 : 0;
   return ((current - previous) / previous) * 100;
 };
@@ -52,7 +55,9 @@ export const formatPercentageChange = (change: number): string => {
 /**
  * Get change type based on percentage change
  */
-export const getChangeType = (change: number): 'positive' | 'negative' | 'neutral' => {
+export const getChangeType = (
+  change: number,
+): 'positive' | 'negative' | 'neutral' => {
   if (change > 0) return 'positive';
   if (change < 0) return 'negative';
   return 'neutral';
@@ -63,15 +68,18 @@ export const getChangeType = (change: number): 'positive' | 'negative' | 'neutra
  */
 export const convertToMetricCards = (
   data: AnalyticsSummaryResponse['data'],
-  previousData?: AnalyticsSummaryResponse['data']
+  previousData?: AnalyticsSummaryResponse['data'],
 ): MetricCardData[] => {
   const cards: MetricCardData[] = [];
 
   // Revenue card
-  const revenueChange = previousData 
-    ? calculatePercentageChange(data.revenueCollected, previousData.revenueCollected)
+  const revenueChange = previousData
+    ? calculatePercentageChange(
+        data.revenueCollected,
+        previousData.revenueCollected,
+      )
     : 0;
-  
+
   cards.push({
     title: 'Revenue',
     value: formatLargeNumber(data.revenueCollected),
@@ -83,10 +91,10 @@ export const convertToMetricCards = (
   });
 
   // Total orders card
-  const ordersChange = previousData 
+  const ordersChange = previousData
     ? calculatePercentageChange(data.counts.total, previousData.counts.total)
     : 0;
-  
+
   cards.push({
     title: 'Total Orders',
     value: data.counts.total.toString(),
@@ -98,10 +106,10 @@ export const convertToMetricCards = (
   });
 
   // Average Order Value card
-  const aovChange = previousData 
+  const aovChange = previousData
     ? calculatePercentageChange(data.aov, previousData.aov)
     : 0;
-  
+
   cards.push({
     title: 'Avg Order Value',
     value: formatLargeNumber(data.aov),
@@ -113,10 +121,13 @@ export const convertToMetricCards = (
   });
 
   // Acceptance Rate card
-  const acceptanceChange = previousData 
-    ? calculatePercentageChange(data.acceptanceRate, previousData.acceptanceRate)
+  const acceptanceChange = previousData
+    ? calculatePercentageChange(
+        data.acceptanceRate,
+        previousData.acceptanceRate,
+      )
     : 0;
-  
+
   cards.push({
     title: 'Acceptance Rate',
     value: `${data.acceptanceRate.toFixed(1)}%`,
@@ -135,7 +146,7 @@ export const convertToMetricCards = (
  */
 export const convertToChartData = (
   buckets: RevenueBucketData[],
-  color = '#007aff'
+  color = '#007aff',
 ): ChartDataPoint[] => {
   return buckets.map((bucket, index) => ({
     label: formatDateLabel(bucket.day),
@@ -158,12 +169,12 @@ export const formatDateLabel = (dateString: string): string => {
   if (diffDays <= 7) {
     return date.toLocaleDateString('en-US', { weekday: 'short' });
   }
-  
+
   // If within last 30 days, show month/day
   if (diffDays <= 30) {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   }
-  
+
   // Otherwise show month/year
   return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
 };
@@ -173,7 +184,7 @@ export const formatDateLabel = (dateString: string): string => {
  */
 export const getOrderStatusBreakdown = (counts: OrderStatusBreakdown) => {
   const total = Object.values(counts).reduce((sum, count) => sum + count, 0);
-  
+
   return [
     {
       status: 'Completed',
@@ -205,15 +216,17 @@ export const getOrderStatusBreakdown = (counts: OrderStatusBreakdown) => {
       percentage: total > 0 ? (counts.cancelled / total) * 100 : 0,
       color: '#FF3B30',
     },
-  ].filter(item => item.count > 0); // Only show statuses with orders
+  ].filter((item) => item.count > 0); // Only show statuses with orders
 };
 
 /**
  * Get payment method breakdown with colors
  */
-export const getPaymentMethodBreakdown = (paymentMethods: PaymentMethodBreakdown) => {
+export const getPaymentMethodBreakdown = (
+  paymentMethods: PaymentMethodBreakdown,
+) => {
   const total = paymentMethods.mobile_money + paymentMethods.cash_on_delivery;
-  
+
   return [
     {
       method: 'Mobile Money',
@@ -224,10 +237,11 @@ export const getPaymentMethodBreakdown = (paymentMethods: PaymentMethodBreakdown
     {
       method: 'Cash on Delivery',
       count: paymentMethods.cash_on_delivery,
-      percentage: total > 0 ? (paymentMethods.cash_on_delivery / total) * 100 : 0,
+      percentage:
+        total > 0 ? (paymentMethods.cash_on_delivery / total) * 100 : 0,
       color: '#00D084',
     },
-  ].filter(item => item.count > 0);
+  ].filter((item) => item.count > 0);
 };
 
 /**
@@ -235,7 +249,7 @@ export const getPaymentMethodBreakdown = (paymentMethods: PaymentMethodBreakdown
  */
 export const getOperatorBreakdown = (operators: OperatorBreakdown) => {
   const total = operators.mtn + operators.orange;
-  
+
   return [
     {
       operator: 'MTN',
@@ -249,52 +263,54 @@ export const getOperatorBreakdown = (operators: OperatorBreakdown) => {
       percentage: total > 0 ? (operators.orange / total) * 100 : 0,
       color: '#FF6B35',
     },
-  ].filter(item => item.count > 0);
+  ].filter((item) => item.count > 0);
 };
 
 /**
  * Generate date range for analytics queries
  */
-export const generateDateRange = (period: 'today' | 'yesterday' | '7days' | '30days') => {
+export const generateDateRange = (
+  period: 'today' | 'yesterday' | '7days' | '30days',
+) => {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  
+
   switch (period) {
     case 'today':
       return {
         from: today.toISOString(),
         to: now.toISOString(),
       };
-    
+
     case 'yesterday':
       const yesterday = new Date(today);
       yesterday.setDate(yesterday.getDate() - 1);
       const endOfYesterday = new Date(yesterday);
       endOfYesterday.setHours(23, 59, 59, 999);
-      
+
       return {
         from: yesterday.toISOString(),
         to: endOfYesterday.toISOString(),
       };
-    
+
     case '7days':
       const sevenDaysAgo = new Date(today);
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      
+
       return {
         from: sevenDaysAgo.toISOString(),
         to: now.toISOString(),
       };
-    
+
     case '30days':
       const thirtyDaysAgo = new Date(today);
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      
+
       return {
         from: thirtyDaysAgo.toISOString(),
         to: now.toISOString(),
       };
-    
+
     default:
       return undefined;
   }

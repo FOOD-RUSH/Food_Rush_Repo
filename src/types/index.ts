@@ -40,14 +40,14 @@ export interface User {
   isPhoneVerified?: boolean;
   profilePicture?: string | null;
   status?: 'active' | 'pending_verification' | 'suspended' | 'inactive';
-  
+
   // Restaurant-specific fields
   restaurantId?: string;
   restaurantName?: string;
   verificationStatus?: 'PENDING_VERIFICATION' | 'APPROVED' | 'REJECTED';
   restaurants?: Restaurant[];
   defaultRestaurantId?: string;
-  
+
   // Legacy restaurant field for backward compatibility
   restaurant?: {
     id: string;
@@ -63,7 +63,7 @@ export interface FoodProps {
   price: number;
   pictureUrl?: string;
   image?: any;
-  category?: string; // Added category as optional field
+  category?: string;
   isAvailable?: boolean;
   restaurant?: {
     id: string;
@@ -75,7 +75,11 @@ export interface FoodProps {
   endAt: string | null;
   createdAt: string;
   updatedAt: string;
-  distanceKm: number | null;
+  // Backend-calculated distance from user's location (in kilometers)
+  distance: number | null;
+  // Backend-calculated delivery info (when available)
+  estimatedDeliveryTime?: string;
+  deliveryPrice?: number;
 }
 
 export interface MenuProps {
@@ -86,22 +90,28 @@ export interface MenuProps {
   image: string;
   restaurantId: string;
   isAvailable: boolean;
+  category: string;
 }
 
 export interface RestaurantCard {
   id: string;
   name: string;
   address: string;
-  phone?: string;
-  isOpen?: boolean;
-  latitude?: string | number;
-  longitude?: string | number;
-  verificationStatus?: 'PENDING_VERIFICATION' | 'APPROVED' | 'REJECTED';
-  documentUrl?: string | null;
+  latitude: string;
+  longitude: string;
+  isOpen: boolean;
+  verificationStatus: string;
+  menuMode: string;
+  createdAt: string;
+  distanceKm: number;
+  deliveryPrice: number;
+  estimatedDeliveryTime: string;
   rating: number | null;
   ratingCount: number;
+  // Optional fields for backward compatibility
+  phone?: string;
+  documentUrl?: string | null;
   ownerId?: string;
-  menuMode?: 'FIXED' | 'DAILY';
   timezone?: string;
   deliveryBaseFee?: number | null;
   deliveryPerKmRate?: number | null;
@@ -109,14 +119,11 @@ export interface RestaurantCard {
   deliveryMaxFee?: number | null;
   deliveryFreeThreshold?: number | null;
   deliverySurgeMultiplier?: number | null;
-  createdAt?: string;
   updatedAt?: string;
-  distanceKm?: number; // From API response
-  distance?: number; // Legacy field
-  deliveryPrice?: number; // Optional since API doesn't provide it
-  image?: string | null; // Optional since API might not provide it
-  estimatedDeliveryTime?: string; // Optional since API doesn't provide it
-  menu?: any[]; // Optional
+  // Legacy fields for backward compatibility
+  distance?: number; // Legacy field - use distanceKm instead
+  image?: string | null; // Restaurant image
+  menu?: any[]; // Restaurant menu items
 }
 
 // Onboarding slides
@@ -127,7 +134,7 @@ export interface OnboardingSlide {
   image: any;
 }
 
-//Restaurant profile
+// Restaurant profile with backend-calculated location data
 export interface RestaurantProfile {
   id: string;
   name: string;
@@ -135,7 +142,16 @@ export interface RestaurantProfile {
   image: string | null;
   rating: number | null;
   ratingCount: number;
+  // Backend-calculated fields based on user's location
+  distance: number; // Distance in kilometers from user's location (calculated by backend)
+  deliveryPrice: number; // Delivery fee (calculated by backend)
+  estimatedDeliveryTime: string; // e.g., "10-20 mins" (calculated by backend)
   menu: FoodProps[];
+  // Additional restaurant details
+  phone?: string;
+  isOpen?: boolean;
+  latitude?: number;
+  longitude?: number;
 }
 
 // Auth response types for different user types
@@ -157,7 +173,9 @@ export interface RestaurantAuthResponse extends BaseAuthResponse {
 export type AuthResponse = CustomerAuthResponse | RestaurantAuthResponse;
 
 // Type guard to check if response is restaurant auth response
-export function isRestaurantAuthResponse(response: AuthResponse): response is RestaurantAuthResponse {
+export function isRestaurantAuthResponse(
+  response: AuthResponse,
+): response is RestaurantAuthResponse {
   return 'restaurants' in response && 'defaultRestaurantId' in response;
 }
 

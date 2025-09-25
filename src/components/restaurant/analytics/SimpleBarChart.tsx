@@ -21,7 +21,13 @@ const SimpleBarChart: React.FC<SimpleBarChartProps> = ({
 
   if (!data || data.length === 0) {
     return (
-      <View style={{ height: maxHeight + 40, justifyContent: 'center', alignItems: 'center' }}>
+      <View
+        style={{
+          height: maxHeight + 40,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
         <Overline color={colors.onSurfaceVariant}>No data available</Overline>
       </View>
     );
@@ -42,14 +48,14 @@ const SimpleBarChart: React.FC<SimpleBarChartProps> = ({
       {data.map((item, index) => {
         const value = item.value || 0;
         const height = maxValue > 0 ? (value / maxValue) * maxHeight : 0;
-        const barWidth = Math.max(12, Math.min(32, (100 / data.length) - 4)); // Dynamic width with limits
-        
+        const barWidth = Math.max(12, Math.min(32, 100 / data.length - 4)); // Dynamic width with limits
+
         return (
-          <View 
-            key={`${item.label || 'bar'}-${index}`} 
-            style={{ 
-              alignItems: 'center', 
-              flex: 1, 
+          <View
+            key={`${item.label || 'bar'}-${index}`}
+            style={{
+              alignItems: 'center',
+              flex: 1,
               marginHorizontal: 1,
               maxWidth: barWidth + 8,
             }}
@@ -67,7 +73,7 @@ const SimpleBarChart: React.FC<SimpleBarChartProps> = ({
               <Overline
                 color={colors.onSurfaceVariant}
                 align="center"
-                style={{ 
+                style={{
                   fontSize: 10,
                   lineHeight: 12,
                 }}
@@ -80,8 +86,8 @@ const SimpleBarChart: React.FC<SimpleBarChartProps> = ({
               <Overline
                 color={colors.onSurface}
                 weight="bold"
-                style={{ 
-                  fontSize: 10, 
+                style={{
+                  fontSize: 10,
                   marginTop: 2,
                   lineHeight: 12,
                 }}

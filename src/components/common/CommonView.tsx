@@ -7,7 +7,7 @@ interface CommonViewProps {
   children: React.ReactNode;
   showStatusBar?: boolean;
   paddingHorizontal?: number;
-  safeAreaEdges?: Array<'top' | 'right' | 'bottom' | 'left'>;
+  safeAreaEdges?: ('top' | 'right' | 'bottom' | 'left')[];
   style?: StyleProp<ViewStyle>;
 }
 

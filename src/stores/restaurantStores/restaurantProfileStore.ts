@@ -32,14 +32,14 @@ export interface DetailedRestaurantProfile {
 interface RestaurantProfileState {
   // Restaurant profile data
   restaurantProfile: DetailedRestaurantProfile | null;
-  
+
   // Loading states
   isLoading: boolean;
   isUpdating: boolean;
-  
+
   // Error handling
   error: string | null;
-  
+
   // Session tracking
   hasLoadedProfile: boolean;
 }
@@ -47,23 +47,26 @@ interface RestaurantProfileState {
 interface RestaurantProfileActions {
   // Fetch restaurant profile from API
   fetchRestaurantProfile: (restaurantId: string) => Promise<void>;
-  
+
   // Update restaurant profile data
   updateRestaurantProfile: (profile: DetailedRestaurantProfile) => void;
-  
+
   // Update specific fields
   updateIsOpen: (isOpen: boolean) => void;
-  updateRestaurantField: (field: keyof DetailedRestaurantProfile, value: any) => void;
-  
+  updateRestaurantField: (
+    field: keyof DetailedRestaurantProfile,
+    value: any,
+  ) => void;
+
   // Session management
   markProfileAsLoaded: () => void;
-  
+
   // State management
   setLoading: (loading: boolean) => void;
   setUpdating: (updating: boolean) => void;
   setError: (error: string | null) => void;
   clearError: () => void;
-  
+
   // Reset store
   reset: () => void;
 }
@@ -89,13 +92,18 @@ export const useRestaurantProfileStore = create<
             set({ isLoading: true, error: null });
 
             // Import API client dynamically to avoid circular dependencies
-            const { apiClient } = await import('@/src/services/shared/apiClient');
-            
-            const response = await apiClient.get(`/restaurants/${restaurantId}`);
+            const { apiClient } = await import(
+              '@/src/services/shared/apiClient'
+            );
+
+            const response = await apiClient.get(
+              `/restaurants/${restaurantId}`,
+            );
 
             if (response.data.status_code === 200) {
-              const profileData = response.data.data as DetailedRestaurantProfile;
-              
+              const profileData = response.data
+                .data as DetailedRestaurantProfile;
+
               set({
                 restaurantProfile: profileData,
                 hasLoadedProfile: true,
@@ -103,7 +111,9 @@ export const useRestaurantProfileStore = create<
                 error: null,
               });
             } else {
-              throw new Error(response.data.message || 'Failed to fetch restaurant profile');
+              throw new Error(
+                response.data.message || 'Failed to fetch restaurant profile',
+              );
             }
           } catch (error: any) {
             console.error('Error fetching restaurant profile:', error);
@@ -136,7 +146,10 @@ export const useRestaurantProfileStore = create<
           }
         },
 
-        updateRestaurantField: (field: keyof DetailedRestaurantProfile, value: any) => {
+        updateRestaurantField: (
+          field: keyof DetailedRestaurantProfile,
+          value: any,
+        ) => {
           const { restaurantProfile } = get();
           if (restaurantProfile) {
             set({
@@ -169,10 +182,10 @@ export const useRestaurantProfileStore = create<
           // Don't persist hasLoadedProfile - should reload on app restart
         }),
         version: 1,
-      }
+      },
     ),
-    { name: 'RestaurantProfileStore' }
-  )
+    { name: 'RestaurantProfileStore' },
+  ),
 );
 
 // Selector hooks for better performance
@@ -195,7 +208,8 @@ export const useRestaurantProfileHasLoaded = () =>
 export const useRestaurantStatus = () =>
   useRestaurantProfileStore((state) => ({
     isOpen: state.restaurantProfile?.isOpen || false,
-    verificationStatus: state.restaurantProfile?.verificationStatus || 'PENDING',
+    verificationStatus:
+      state.restaurantProfile?.verificationStatus || 'PENDING',
     isLoading: state.isLoading,
     isUpdating: state.isUpdating,
   }));

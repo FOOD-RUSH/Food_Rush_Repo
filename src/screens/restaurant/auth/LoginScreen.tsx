@@ -1,7 +1,12 @@
-import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import React, {
+  useState,
+  useCallback,
+  useMemo,
+  useRef,
+  useEffect,
+} from 'react';
 import {
   View,
-  Text,
   ScrollView,
   TouchableOpacity,
   KeyboardAvoidingView,
@@ -9,28 +14,27 @@ import {
   StyleSheet,
   Animated,
   Dimensions,
-  Image,
+  Text,
 } from 'react-native';
 import { Checkbox, HelperText, TextInput, useTheme } from 'react-native-paper';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { loginSchema } from '@/src/utils/validation';
 import { Ionicons } from '@expo/vector-icons';
-import CommonView from '@/src/components/common/CommonView';
 import { AuthStackScreenProps } from '@/src/navigation/types';
 import { useAuthStore } from '@/src/stores/AuthStore';
 import { useNetwork } from '@/src/contexts/NetworkContext';
 import { useTranslation } from 'react-i18next';
 import { useLoginRestaurant } from '@/src/hooks/restaurant/useAuthhooks';
 import ErrorDisplay from '@/src/components/auth/ErrorDisplay';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Heading1, Heading2, Body, Label } from '@/src/components/common/Typography';
+import {
+  Heading1,
+  Heading2,
+  Body,
+  Label,
+} from '@/src/components/common/Typography';
 
-// ✅ Add logo assets
-const googleLogo = require('@/assets/images/google.png');
-const appleLogo = require('@/assets/images/apple.png');
-
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 interface LoginFormData {
   email: string;
@@ -48,13 +52,9 @@ const RestaurantLoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
   const loginMutation = useLoginRestaurant();
   const { error: authError, clearError } = useAuthStore();
 
-  // Animations
+  // Optimized animations - only essential ones
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(100)).current;
-  const logoScaleAnim = useRef(new Animated.Value(0)).current;
-  const logoRotateAnim = useRef(new Animated.Value(0)).current;
-  const formSlideAnim = useRef(new Animated.Value(50)).current;
-  const socialButtonsAnim = useRef(new Animated.Value(0)).current;
+  const logoScaleAnim = useRef(new Animated.Value(0.8)).current;
 
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
@@ -72,55 +72,22 @@ const RestaurantLoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
     },
   });
 
-  // Run intro animations
+  // Simplified entrance animation
   useEffect(() => {
-    Animated.sequence([
-      Animated.parallel([
-        Animated.spring(logoScaleAnim, {
-          toValue: 1,
-          tension: 50,
-          friction: 7,
-          useNativeDriver: true,
-        }),
-        Animated.timing(logoRotateAnim, {
-          toValue: 1,
-          duration: 1000,
-          useNativeDriver: true,
-        }),
-      ]),
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 600,
-          useNativeDriver: true,
-        }),
-        Animated.spring(slideAnim, {
-          toValue: 0,
-          tension: 40,
-          friction: 8,
-          useNativeDriver: true,
-        }),
-        Animated.spring(formSlideAnim, {
-          toValue: 0,
-          tension: 35,
-          friction: 7,
-          useNativeDriver: true,
-        }),
-      ]),
-      Animated.spring(socialButtonsAnim, {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
         toValue: 1,
-        tension: 30,
-        friction: 6,
-        delay: 200,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+      Animated.spring(logoScaleAnim, {
+        toValue: 1,
+        tension: 80,
+        friction: 8,
         useNativeDriver: true,
       }),
     ]).start();
-  }, [fadeAnim, formSlideAnim, logoRotateAnim, logoScaleAnim, slideAnim, socialButtonsAnim]);
-
-  const logoRotate = logoRotateAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg'],
-  });
+  }, [fadeAnim, logoScaleAnim]);
 
   const onSubmit = useCallback(
     async (data: LoginFormData) => {
@@ -128,26 +95,22 @@ const RestaurantLoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
         return;
       }
       clearError();
-      
+
       try {
         await loginMutation.mutateAsync({
           email: data.email.trim().toLowerCase(),
           password: data.password,
         });
 
-        console.log('🍽️ Restaurant login successful');
-        
-        // Navigate to restaurant app - the RootNavigator will handle routing based on auth state
+        console.log('Restaurant login successful');
         navigation.getParent()?.navigate('RestaurantApp');
       } catch (error: any) {
-        console.error('🍽️ Restaurant login failed:', error);
-        // Error is handled by React Query
+        console.error('Restaurant login failed:', error);
       }
     },
     [isConnected, isInternetReachable, loginMutation, clearError, navigation],
   );
 
-  // Social handlers
   const handleGoogleSignIn = useCallback(() => {
     console.log('Google login pressed');
   }, []);
@@ -156,237 +119,434 @@ const RestaurantLoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
     console.log('Apple login pressed');
   }, []);
 
+  const togglePassword = useCallback(() => {
+    setShowPassword((prev) => !prev);
+  }, []);
+
+  const toggleRememberMe = useCallback(() => {
+    setRememberMe((prev) => !prev);
+  }, []);
+
   return (
-    <CommonView>
-      <LinearGradient
-        colors={[colors.surfaceVariant, colors.background, colors.surfaceVariant]}
-        style={styles.gradientBackground}
+    <View style={styles.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardView}
       >
-        <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles.container}
+        <ScrollView
+          style={styles.scrollView}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {/* Header */}
+          <Animated.View style={[styles.header, { opacity: fadeAnim }]}>
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={styles.backButton}
+            >
+              <Ionicons name="arrow-back" size={24} color={colors.primary} />
+            </TouchableOpacity>
+          </Animated.View>
+
+          {/* Logo Section */}
+          <Animated.View
+            style={[
+              styles.logoSection,
+              {
+                opacity: fadeAnim,
+                transform: [{ scale: logoScaleAnim }],
+              },
+            ]}
           >
-            {/* Back button */}
-            <Animated.View 
-              style={[styles.header, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}
+            <View style={styles.logoContainer}>
+              <View style={[styles.logo, { backgroundColor: colors.primary }]}>
+                <Text style={styles.logoText}>🍽️</Text>
+              </View>
+            </View>
+            <Heading1 color={colors.onBackground} weight="bold" align="center">
+              {t('welcome_back')}
+            </Heading1>
+            <Body
+              color={colors.onSurfaceVariant}
+              align="center"
+              style={styles.subtitle}
             >
-              <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                <Ionicons name="arrow-back" size={24} color={colors.primary} />
-              </TouchableOpacity>
-            </Animated.View>
+              Sign in to your restaurant dashboard
+            </Body>
+          </Animated.View>
 
-            {/* Logo */}
-            <Animated.View 
-              style={[styles.logoContainer, { transform: [{ scale: logoScaleAnim }] }]}
-            >
-              <Animated.View 
-                style={[styles.logoWrapper, { transform: [{ rotate: logoRotate }] }]}
-              >
-                <LinearGradient colors={[colors.primary, colors.primaryContainer]} style={styles.logo}>
-                  <Text style={styles.logoEmoji}>🍽️</Text>
-                </LinearGradient>
-              </Animated.View>
-              <Animated.View style={{ opacity: fadeAnim }}>
-                <Heading1 color={colors.onBackground} weight="bold" align="center" style={{ marginBottom: 8 }}>{t('welcome_back')}</Heading1>
-                <Body color={colors.onSurfaceVariant} align="center">Sign in to your restaurant dashboard</Body>
-              </Animated.View>
-            </Animated.View>
-
-            {/* Form */}
-            <Animated.View style={[styles.formContainer, { opacity: fadeAnim, transform: [{ translateY: formSlideAnim }] }]}>
-              {/* Email */}
-              <Controller
-                control={control}
-                name="email"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <View style={styles.inputContainer}>
-                    <TextInput
-                      placeholder={t('email_placeholder')}
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value}
-                      mode="outlined"
-                      keyboardType="email-address"
-                      autoCapitalize="none"
-                      left={<TextInput.Icon icon="email-outline" color={colors.primary} />}
-                      style={styles.textInput}
-                      outlineStyle={[styles.inputOutline, errors.email && styles.inputError]}
-                      error={!!errors.email}
-                      theme={{ colors: { primary: colors.primary, outline: colors.outline } }}
-                    />
-                    {errors.email && (
-                      <HelperText type="error" visible={!!errors.email}>
-                        {errors.email.message}
-                      </HelperText>
-                    )}
-                  </View>
-                )}
-              />
-
-              {/* Password */}
-              <Controller
-                control={control}
-                name="password"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <View style={styles.inputContainer}>
-                    <TextInput
-                      placeholder={t('enter_password')}
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                      value={value}
-                      mode="outlined"
-                      secureTextEntry={!showPassword}
-                      autoCapitalize="none"
-                      left={<TextInput.Icon icon="lock-outline" color={colors.primary} />}
-                      right={
-                        <TextInput.Icon
-                          icon={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                          onPress={() => setShowPassword(!showPassword)}
-                          color={colors.primary}
-                        />
-                      }
-                      style={styles.textInput}
-                      outlineStyle={[styles.inputOutline, errors.password && styles.inputError]}
-                      error={!!errors.password}
-                      theme={{ colors: { primary: colors.primary, outline: colors.outline } }}
-                    />
-                    {errors.password && (
-                      <HelperText type="error" visible={!!errors.password}>
-                        {errors.password.message}
-                      </HelperText>
-                    )}
-                  </View>
-                )}
-              />
-
-              {/* Remember / Forgot */}
-              <View style={styles.optionsRow}>
-                <TouchableOpacity style={styles.rememberMeContainer} onPress={() => setRememberMe(!rememberMe)}>
-                  <Checkbox
-                    status={rememberMe ? 'checked' : 'unchecked'}
-                    onPress={() => setRememberMe(!rememberMe)}
-                    uncheckedColor={colors.outline}
-                    color={colors.primary}
+          {/* Form Section */}
+          <Animated.View style={[styles.formSection, { opacity: fadeAnim }]}>
+            {/* Email Input */}
+            <Controller
+              control={control}
+              name="email"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <View style={styles.inputContainer}>
+                  <TextInput
+                    placeholder={t('email_placeholder')}
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    value={value}
+                    mode="outlined"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoComplete="email"
+                    left={
+                      <TextInput.Icon
+                        icon="email-outline"
+                        color={colors.primary}
+                      />
+                    }
+                    style={styles.textInput}
+                    outlineStyle={[
+                      styles.inputOutline,
+                      errors.email && styles.inputError,
+                    ]}
+                    error={!!errors.email}
+                    theme={{ colors: { primary: colors.primary } }}
                   />
-                  <Label color={colors.onSurfaceVariant} weight="medium" style={{ marginLeft: 8 }}>{t('remember_me')}</Label>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
-                  <Label color={colors.primary} weight="semibold">{t('forgot_password')}</Label>
-                </TouchableOpacity>
-              </View>
+                  {errors.email && (
+                    <HelperText type="error" visible={!!errors.email}>
+                      {errors.email.message}
+                    </HelperText>
+                  )}
+                </View>
+              )}
+            />
 
-              {/* Error */}
-              <ErrorDisplay error={loginMutation.error?.message || authError || null} visible={!!(loginMutation.error?.message || authError)} />
+            {/* Password Input */}
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <View style={styles.inputContainer}>
+                  <TextInput
+                    placeholder={t('enter_password')}
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    value={value}
+                    mode="outlined"
+                    secureTextEntry={!showPassword}
+                    autoCapitalize="none"
+                    autoComplete="password"
+                    left={
+                      <TextInput.Icon
+                        icon="lock-outline"
+                        color={colors.primary}
+                      />
+                    }
+                    right={
+                      <TextInput.Icon
+                        icon={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                        onPress={togglePassword}
+                        color={colors.primary}
+                      />
+                    }
+                    style={styles.textInput}
+                    outlineStyle={[
+                      styles.inputOutline,
+                      errors.password && styles.inputError,
+                    ]}
+                    error={!!errors.password}
+                    theme={{ colors: { primary: colors.primary } }}
+                  />
+                  {errors.password && (
+                    <HelperText type="error" visible={!!errors.password}>
+                      {errors.password.message}
+                    </HelperText>
+                  )}
+                </View>
+              )}
+            />
 
-              {/* Login Button */}
+            {/* Options Row */}
+            <View style={styles.optionsRow}>
               <TouchableOpacity
-                onPress={handleSubmit(onSubmit)}
-                disabled={loginMutation.isPending || !isValid}
-                style={[styles.loginButton, (!isValid || loginMutation.isPending) && styles.loginButtonDisabled]}
+                style={styles.rememberContainer}
+                onPress={toggleRememberMe}
               >
-                <LinearGradient
-                  colors={
-                    loginMutation.isPending || !isValid
-                      ? [colors.outline, colors.outline]
-                      : [colors.primary, colors.primaryContainer]
-                  }
-                  style={styles.loginButtonGradient}
+                <Checkbox
+                  status={rememberMe ? 'checked' : 'unchecked'}
+                  onPress={toggleRememberMe}
+                  uncheckedColor={colors.outline}
+                  color={colors.primary}
+                />
+                <Label
+                  color={colors.onSurfaceVariant}
+                  style={styles.rememberText}
                 >
-                  <Heading2 color={colors.onPrimary} weight="bold">
-                    {loginMutation.isPending ? t('logging_in') : t('login')}
-                  </Heading2>
-                </LinearGradient>
+                  {t('remember_me')}
+                </Label>
               </TouchableOpacity>
 
-              {/* Divider */}
-              <View style={styles.dividerContainer}>
-                <View style={styles.dividerLine} />
-                <Label color={colors.onSurfaceVariant} weight="medium" style={{ paddingHorizontal: 16 }}>{t('or_signin_with')}</Label>
-                <View style={styles.dividerLine} />
-              </View>
-
-              {/* ✅ Social Login Buttons */}
-              <Animated.View 
-                style={[
-                  styles.socialButtonsContainer,
-                  { opacity: socialButtonsAnim, transform: [{ translateY: socialButtonsAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [30, 0]
-                  })}] }
-                ]}
+              <TouchableOpacity
+                onPress={() => navigation.navigate('ForgotPassword')}
               >
-                {/* Google */}
-                <TouchableOpacity style={styles.socialButton} onPress={handleGoogleSignIn} disabled={loginMutation.isPending}>
-                  <Image source={googleLogo} style={styles.socialIcon} />
-                  <Body color={colors.onSurfaceVariant} weight="semibold">Continue with Google</Body>
-                </TouchableOpacity>
+                <Label color={colors.primary} weight="semibold">
+                  {t('forgot_password')}
+                </Label>
+              </TouchableOpacity>
+            </View>
 
-                {/* Apple */}
-                <TouchableOpacity style={styles.socialButton} onPress={handleAppleSignIn} disabled={loginMutation.isPending}>
-                  <Image source={appleLogo} style={styles.socialIcon} />
-                  <Body color={colors.onSurfaceVariant} weight="semibold">Continue with Apple</Body>
-                </TouchableOpacity>
-              </Animated.View>
+            {/* Error Display */}
+            <ErrorDisplay
+              error={loginMutation.error?.message || authError || null}
+              visible={!!(loginMutation.error?.message || authError)}
+            />
 
-              {/* Signup */}
-              <Animated.View style={[styles.signupContainer, { opacity: socialButtonsAnim }]}>
-                <Body color={colors.onSurfaceVariant}>{t('dont_have_account')} </Body>
-                <TouchableOpacity onPress={() => navigation.navigate('SignUp', { userType: route.params?.userType || 'restaurant' })}>
-                  <Label color={colors.primary} weight="bold">{t('signup')}</Label>
-                </TouchableOpacity>
-              </Animated.View>
-            </Animated.View>
-          </KeyboardAvoidingView>
+            {/* Login Button */}
+            <TouchableOpacity
+              onPress={handleSubmit(onSubmit)}
+              disabled={loginMutation.isPending || !isValid}
+              style={[
+                styles.loginButton,
+                { backgroundColor: colors.primary },
+                (loginMutation.isPending || !isValid) &&
+                  styles.loginButtonDisabled,
+              ]}
+            >
+              <Heading2 color={colors.onPrimary} weight="bold">
+                {loginMutation.isPending ? t('logging_in') : t('login')}
+              </Heading2>
+            </TouchableOpacity>
+
+            {/* Divider */}
+            <View style={styles.divider}>
+              <View
+                style={[
+                  styles.dividerLine,
+                  { backgroundColor: colors.outline },
+                ]}
+              />
+              <Label color={colors.onSurfaceVariant} style={styles.dividerText}>
+                {t('or_signin_with')}
+              </Label>
+              <View
+                style={[
+                  styles.dividerLine,
+                  { backgroundColor: colors.outline },
+                ]}
+              />
+            </View>
+
+            {/* Social Buttons */}
+            <View style={styles.socialButtons}>
+              <TouchableOpacity
+                style={[
+                  styles.socialButton,
+                  {
+                    backgroundColor: colors.surface,
+                    borderColor: colors.outline,
+                  },
+                ]}
+                onPress={handleGoogleSignIn}
+                disabled={loginMutation.isPending}
+              >
+                <Ionicons
+                  name="logo-google"
+                  size={20}
+                  color={colors.onSurfaceVariant}
+                />
+                <Body color={colors.onSurfaceVariant} weight="medium">
+                  Google
+                </Body>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.socialButton,
+                  {
+                    backgroundColor: colors.surface,
+                    borderColor: colors.outline,
+                  },
+                ]}
+                onPress={handleAppleSignIn}
+                disabled={loginMutation.isPending}
+              >
+                <Ionicons
+                  name="logo-apple"
+                  size={20}
+                  color={colors.onSurfaceVariant}
+                />
+                <Body color={colors.onSurfaceVariant} weight="medium">
+                  Apple
+                </Body>
+              </TouchableOpacity>
+            </View>
+
+            {/* Signup Link */}
+            <View style={styles.signupContainer}>
+              <Body color={colors.onSurfaceVariant}>
+                {t('dont_have_account')}{' '}
+              </Body>
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate('SignUp', {
+                    userType: route.params?.userType || 'restaurant',
+                  })
+                }
+              >
+                <Label color={colors.primary} weight="bold">
+                  {t('signup')}
+                </Label>
+              </TouchableOpacity>
+            </View>
+          </Animated.View>
         </ScrollView>
-      </LinearGradient>
-    </CommonView>
+      </KeyboardAvoidingView>
+    </View>
   );
 };
 
-const createStyles = (colors: any) => StyleSheet.create({
-  gradientBackground: { flex: 1 },
-  scrollContainer: { flex: 1 },
-  container: { flex: 1, minHeight: SCREEN_HEIGHT },
+const createStyles = (colors: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    keyboardView: {
+      flex: 1,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+      paddingHorizontal: 24,
+    },
 
-  header: { flexDirection: 'row', paddingHorizontal: 8, paddingVertical: 16, marginTop: 40 },
-  backButton: { padding: 10, borderRadius: 25, backgroundColor: colors.surface },
+    header: {
+      paddingTop: 50,
+      paddingBottom: 20,
+    },
+    backButton: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      backgroundColor: colors.surface,
+      alignItems: 'center',
+      justifyContent: 'center',
+      elevation: 2,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+    },
 
-  logoContainer: { alignItems: 'center', paddingHorizontal: 24, paddingVertical: 30 },
-  logoWrapper: { marginBottom: 20 },
-  logo: { width: 90, height: 90, borderRadius: 25, alignItems: 'center', justifyContent: 'center' },
-  logoEmoji: { fontSize: 36 },
-  title: { fontSize: 32, fontWeight: 'bold', color: colors.onBackground, textAlign: 'center', marginBottom: 8 },
-  subtitle: { fontSize: 16, color: colors.onSurfaceVariant, textAlign: 'center' },
+    logoSection: {
+      alignItems: 'center',
+      paddingVertical: 40,
+    },
+    logoContainer: {
+      marginBottom: 24,
+    },
+    logo: {
+      width: 80,
+      height: 80,
+      borderRadius: 20,
+      alignItems: 'center',
+      justifyContent: 'center',
+      elevation: 4,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+    },
+    logoText: {
+      fontSize: 32,
+    },
+    subtitle: {
+      marginTop: 8,
+    },
 
-  formContainer: { paddingHorizontal: 24, paddingBottom: 40 },
-  inputContainer: { marginBottom: 20 },
-  textInput: { backgroundColor: colors.surface, fontSize: 16, minHeight: 60 },
-  inputOutline: { borderRadius: 15, borderWidth: 2, borderColor: colors.outline },
-  inputError: { borderColor: colors.error },
+    formSection: {
+      flex: 1,
+      paddingBottom: 40,
+    },
+    inputContainer: {
+      marginBottom: 20,
+    },
+    textInput: {
+      backgroundColor: colors.surface,
+      fontSize: 16,
+      fontFamily: 'Urbanist-Regular',
+    },
+    inputOutline: {
+      borderRadius: 12,
+      borderWidth: 1.5,
+      borderColor: colors.outline,
+    },
+    inputError: {
+      borderColor: colors.error,
+    },
 
-  optionsRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 30 },
-  rememberMeContainer: { flexDirection: 'row', alignItems: 'center' },
-  rememberMeText: { marginLeft: 8, color: colors.onSurfaceVariant, fontSize: 14, fontWeight: '500' },
-  forgotPasswordText: { color: colors.primary, fontSize: 14, fontWeight: '600' },
+    optionsRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 24,
+    },
+    rememberContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    rememberText: {
+      marginLeft: 8,
+      fontFamily: 'Urbanist-Medium',
+    },
 
-  loginButton: { borderRadius: 30, marginBottom: 30 },
-  loginButtonDisabled: { opacity: 0.6 },
-  loginButtonGradient: { paddingVertical: 18, borderRadius: 30, alignItems: 'center', minHeight: 60 },
-  loginButtonText: { fontSize: 18, fontWeight: 'bold', color: colors.onPrimary },
+    loginButton: {
+      borderRadius: 16,
+      paddingVertical: 16,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: 32,
+      elevation: 3,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.2,
+      shadowRadius: 4,
+    },
+    loginButtonDisabled: {
+      opacity: 0.6,
+    },
 
-  dividerContainer: { flexDirection: 'row', alignItems: 'center', marginVertical: 30 },
-  dividerLine: { flex: 1, height: 1, backgroundColor: colors.outline },
-  dividerText: { paddingHorizontal: 16, color: colors.onSurfaceVariant, fontSize: 14, fontWeight: '500' },
+    divider: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginVertical: 24,
+    },
+    dividerLine: {
+      flex: 1,
+      height: 1,
+    },
+    dividerText: {
+      paddingHorizontal: 16,
+      fontFamily: 'Urbanist-Medium',
+    },
 
-  socialButtonsContainer: { flexDirection: 'column', gap: 15, marginBottom: 30 },
-  socialButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surface, borderRadius: 25, paddingVertical: 16, borderWidth: 2, borderColor: colors.outline },
-  socialIcon: { width: 24, height: 24, resizeMode: 'contain', marginRight: 8 },
-  socialButtonText: { fontSize: 16, color: colors.onSurfaceVariant, fontWeight: '600' },
+    socialButtons: {
+      flexDirection: 'row',
+      gap: 12,
+      marginBottom: 32,
+    },
+    socialButton: {
+      flex: 1,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 14,
+      borderRadius: 12,
+      borderWidth: 1,
+      gap: 8,
+    },
 
-  signupContainer: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 20 },
-  signupPrompt: { color: colors.onSurfaceVariant, fontSize: 16 },
-  signupLink: { color: colors.primary, fontSize: 16, fontWeight: 'bold' },
-});
+    signupContainer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+  });
 
 export default RestaurantLoginScreen;

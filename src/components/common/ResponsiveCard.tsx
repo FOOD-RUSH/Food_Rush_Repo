@@ -1,5 +1,10 @@
 import React from 'react';
-import { View, ViewStyle, TouchableOpacity, TouchableOpacityProps } from 'react-native';
+import {
+  View,
+  ViewStyle,
+  TouchableOpacity,
+  TouchableOpacityProps,
+} from 'react-native';
 import { Card, CardProps, useTheme } from 'react-native-paper';
 import { useResponsive, useResponsiveSpacing } from '@/src/hooks/useResponsive';
 
@@ -76,8 +81,8 @@ export const ResponsiveCard: React.FC<ResponsiveCardProps> = ({
     padding: getPadding(),
   };
 
-  const combinedStyle = Array.isArray(style) 
-    ? [cardStyle, ...style] 
+  const combinedStyle = Array.isArray(style)
+    ? [cardStyle, ...style]
     : [cardStyle, style].filter(Boolean);
 
   const combinedContentStyle = Array.isArray(contentStyle)
@@ -88,9 +93,7 @@ export const ResponsiveCard: React.FC<ResponsiveCardProps> = ({
     return (
       <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
         <Card style={combinedStyle} {...props}>
-          <View style={combinedContentStyle}>
-            {children}
-          </View>
+          <View style={combinedContentStyle}>{children}</View>
         </Card>
       </TouchableOpacity>
     );
@@ -98,9 +101,7 @@ export const ResponsiveCard: React.FC<ResponsiveCardProps> = ({
 
   return (
     <Card style={combinedStyle} {...props}>
-      <View style={combinedContentStyle}>
-        {children}
-      </View>
+      <View style={combinedContentStyle}>{children}</View>
     </Card>
   );
 };

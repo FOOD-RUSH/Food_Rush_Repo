@@ -1,10 +1,15 @@
 import React from 'react';
 import { ViewStyle, TextStyle } from 'react-native';
 import { Button, ButtonProps, useTheme } from 'react-native-paper';
-import { useResponsive, useResponsiveFontSize, useResponsiveSpacing } from '@/src/hooks/useResponsive';
+import {
+  useResponsive,
+  useResponsiveFontSize,
+  useResponsiveSpacing,
+} from '@/src/hooks/useResponsive';
 import { getUrbanistFont } from '@/src/config/fonts';
 
-interface ResponsiveButtonProps extends Omit<ButtonProps, 'labelStyle' | 'contentStyle'> {
+interface ResponsiveButtonProps
+  extends Omit<ButtonProps, 'labelStyle' | 'contentStyle'> {
   size?: 'small' | 'medium' | 'large';
   fullWidth?: boolean;
   fontWeight?: 'regular' | 'medium' | 'semibold' | 'bold';
@@ -57,11 +62,13 @@ export const ResponsiveButton: React.FC<ResponsiveButtonProps> = ({
     if (!responsive) return config;
 
     const adjustmentFactor = isSmallScreen ? 0.9 : isTablet ? 1.1 : 1;
-    
+
     return {
       fontSize: Math.round(config.fontSize * adjustmentFactor),
       paddingVertical: Math.round(config.paddingVertical * adjustmentFactor),
-      paddingHorizontal: Math.round(config.paddingHorizontal * adjustmentFactor),
+      paddingHorizontal: Math.round(
+        config.paddingHorizontal * adjustmentFactor,
+      ),
       borderRadius: Math.round(config.borderRadius * adjustmentFactor),
     };
   };
@@ -107,20 +114,20 @@ export const ResponsiveButton: React.FC<ResponsiveButtonProps> = ({
 };
 
 // Predefined button variants
-export const SmallButton: React.FC<Omit<ResponsiveButtonProps, 'size'>> = (props) => (
-  <ResponsiveButton size="small" {...props} />
-);
+export const SmallButton: React.FC<Omit<ResponsiveButtonProps, 'size'>> = (
+  props,
+) => <ResponsiveButton size="small" {...props} />;
 
-export const MediumButton: React.FC<Omit<ResponsiveButtonProps, 'size'>> = (props) => (
-  <ResponsiveButton size="medium" {...props} />
-);
+export const MediumButton: React.FC<Omit<ResponsiveButtonProps, 'size'>> = (
+  props,
+) => <ResponsiveButton size="medium" {...props} />;
 
-export const LargeButton: React.FC<Omit<ResponsiveButtonProps, 'size'>> = (props) => (
-  <ResponsiveButton size="large" {...props} />
-);
+export const LargeButton: React.FC<Omit<ResponsiveButtonProps, 'size'>> = (
+  props,
+) => <ResponsiveButton size="large" {...props} />;
 
-export const FullWidthButton: React.FC<Omit<ResponsiveButtonProps, 'fullWidth'>> = (props) => (
-  <ResponsiveButton fullWidth {...props} />
-);
+export const FullWidthButton: React.FC<
+  Omit<ResponsiveButtonProps, 'fullWidth'>
+> = (props) => <ResponsiveButton fullWidth {...props} />;
 
 export default ResponsiveButton;

@@ -45,7 +45,11 @@ export interface UpdateOrderStatusRequest {
 
 export const restaurantOrderApi = {
   // Get all orders for the restaurant
-  getOrders: (params?: { status?: string; limit?: number; offset?: number }) => {
+  getOrders: (params?: {
+    status?: string;
+    limit?: number;
+    offset?: number;
+  }) => {
     return apiClient.get<OrderResponse>('/orders/my-restaurant', { params });
   },
 
@@ -56,7 +60,9 @@ export const restaurantOrderApi = {
 
   // Get order by ID
   getOrderById: (orderId: string) => {
-    return apiClient.get<{ status_code: number; message: string; data: Order }>(`/orders/${orderId}`);
+    return apiClient.get<{ status_code: number; message: string; data: Order }>(
+      `/orders/${orderId}`,
+    );
   },
 
   // Confirm order
@@ -68,5 +74,4 @@ export const restaurantOrderApi = {
   rejectOrder: (orderId: string) => {
     return apiClient.post(`/orders/${orderId}/reject`);
   },
-
 };

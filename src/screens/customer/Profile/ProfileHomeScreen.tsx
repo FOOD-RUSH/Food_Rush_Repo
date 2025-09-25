@@ -153,12 +153,15 @@ const ProfileHomeScreen = ({
             )}
             {user?.status && (
               <Text
-                style={{ 
-                  color: user.status === 'active' ? '#00D084' : colors.onSurfaceVariant,
+                style={{
+                  color:
+                    user.status === 'active'
+                      ? '#00D084'
+                      : colors.onSurfaceVariant,
                   fontSize: 12,
                   fontWeight: '500',
                   marginTop: 4,
-                  textTransform: 'capitalize'
+                  textTransform: 'capitalize',
                 }}
               >
                 {user.status}
@@ -250,11 +253,22 @@ const ProfileHomeScreen = ({
 
         {/* Dark Mode Toggle */}
         <View className="flex-row justify-between mb-4 items-center px-2 py-2">
-          <MaterialIcons
-            name={isDarkMode ? 'dark-mode' : 'light-mode'}
-            size={25}
-            color={colors.onSurface}
-          />
+          <View
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              backgroundColor: isDarkMode ? '#FFD700' : '#007aff',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <MaterialIcons
+              name={isDarkMode ? 'dark-mode' : 'light-mode'}
+              size={22}
+              color={isDarkMode ? '#1a1a1a' : '#ffffff'}
+            />
+          </View>
           <View className="flex-1 ml-3">
             <Text
               className="font-semibold text-base"

@@ -14,6 +14,43 @@ export interface CreateOrderRequest {
   deliveryAddress: string;
   deliveryLatitude: number;
   deliveryLongitude: number;
+  paymentMethod: 'mobile_money' | 'cash' | 'card';
+}
+
+// Order creation response (matches API docs)
+export interface CreateOrderResponse {
+  status_code: number;
+  message: string;
+  data: {
+    id: string;
+    userId: string;
+    restaurantId: string;
+    items: {
+      foodId: string;
+      name: string;
+      quantity: number;
+      price: number;
+      total: number;
+      specialInstructions?: string;
+    }[];
+    subtotal: number;
+    deliveryPrice: number;
+    total: number;
+    status:
+      | 'pending'
+      | 'confirmed'
+      | 'preparing'
+      | 'ready'
+      | 'delivered'
+      | 'cancelled';
+    paymentMethod: string;
+    createdAt: string;
+  };
+}
+
+// Customer confirm order request
+export interface CustomerConfirmOrderRequest {
+  orderId: string;
 }
 
 // Order status update
@@ -23,14 +60,19 @@ export interface UpdateOrderStatusRequest {
 
 export const OrderApi = {
   // Create a new order (matches API docs)
-  createOrder: async (orderData: CreateOrderRequest) => {
+  createOrder: async (
+    orderData: CreateOrderRequest,
+  ): Promise<CreateOrderResponse> => {
     try {
-      const response = await apiClient.post<{
-        data: Order;
-      }>('/orders', orderData);
+      console.log('🚀 Creating order with data:', orderData);
+      const response = await apiClient.post<CreateOrderResponse>(
+        '/orders',
+        orderData,
+      );
+      console.log('✅ Order created successfully:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Error creating order:', error);
+      console.error('❌ Error creating order:', error);
       throw error;
     }
   },
@@ -40,7 +82,7 @@ export const OrderApi = {
     try {
       const response = await apiClient.get<{
         data: Order;
-      }>(`/orders/${orderId}`);
+      }>(`/api/v1/orders/${orderId}`);
       return response.data.data;
     } catch (error) {
       console.error(`Error fetching order ${orderId}:`, error);
@@ -74,13 +116,30 @@ export const OrderApi = {
     return OrderApi.getUserOrders(params);
   },
 
-  // Customer confirms order (if needed)
+  // Customer confirms order to lock delivery fee and proceed to payment
   customerConfirmOrder: async (orderId: string) => {
     try {
-      const response = await apiClient.post(`/orders/${orderId}/confirm`);
+      console.log('🚀 Customer confirming order:', orderId);
+      const response = await apiClient.post(
+        `/orders/${orderId}/customer-confirm`,
+      );
+      console.log('✅ Customer order confirmation successful:', response.data);
       return response.data;
     } catch (error) {
-      console.error(`Error confirming order ${orderId}:`, error);
+      console.error(`❌ Error confirming order ${orderId}:`, error);
+      throw error;
+    }
+  },
+
+  // Check if order is ready for customer confirmation (status = 'confirmed')
+  checkOrderStatus: async (orderId: string) => {
+    try {
+      const response = await apiClient.get<{
+        data: Order;
+      }>(`/orders/${orderId}`);
+      return response.data.data;
+    } catch (error) {
+      console.error(`Error checking order status ${orderId}:`, error);
       throw error;
     }
   },
@@ -89,11 +148,16 @@ export const OrderApi = {
   confirmOrderReceived: async (orderId: string) => {
     try {
       console.log('🚀 Confirming delivery received for order:', orderId);
-      const response = await apiClient.post(`/api/v1/orders/${orderId}/confirm-received`);
+      const response = await apiClient.post(
+        `orders/${orderId}/confirm-received`,
+      );
       console.log('✅ Delivery confirmation response:', response.data);
       return response.data;
     } catch (error) {
-      console.error(`❌ Error confirming delivery received for order ${orderId}:`, error);
+      console.error(
+        `❌ Error confirming delivery received for order ${orderId}:`,
+        error,
+      );
       throw error;
     }
   },

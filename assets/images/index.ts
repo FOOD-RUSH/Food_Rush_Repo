@@ -23,7 +23,7 @@ import onboarding3 from '@/assets/images/background3.png';
 import appleIcon from '@/assets/images/apple.png';
 import customerImg from '@/assets/images/Food Illustrations/Illustrations 04.png';
 import restaurantImg from '@/assets/images/Food Illustrations/Illustrations 02.png';
-
+import noMenu from '@/assets/images/Food Illustrations/No_menu.png';
 import ApplogoWhite from '@/assets/images/Foodrushlogo.png';
 import ApplogoDark from '@/assets/images/foodrush.svg';
 import NoOrdersLight from '@/assets/images/Food Illustrations/Clipboard light-1.png';
@@ -57,6 +57,7 @@ export const images = {
   success_1,
   success_2,
   success_3,
+  noMenu,
 };
 
 export const icons = {

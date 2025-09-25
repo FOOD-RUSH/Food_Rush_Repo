@@ -1,15 +1,16 @@
 import { useTranslation } from 'react-i18next';
-import { View, Text, Image, Alert } from 'react-native';
+import { View, Text, Image, Alert, TouchableOpacity } from 'react-native';
 import React, { useState } from 'react';
 import { ScrollView } from 'react-native-gesture-handler';
 import { icons } from '@/assets/images';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import InputField from '@/src/components/customer/InputField';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import { Button, useTheme } from 'react-native-paper';
 import CommonView from '@/src/components/common/CommonView';
 import { useCustomerProfile } from '@/src/stores/AuthStore';
-import { useUpdateProfile } from '@/src/hooks/customer/useAuthhooks';
+import { useUpdateProfile } from '@/src/hooks/shared/useProfileUpdate';
 
 const EditProfileScreen = ({
   navigation,
@@ -19,27 +20,83 @@ const EditProfileScreen = ({
   const LoggedInUser = useCustomerProfile();
 
   const [fullName, setFullName] = useState(LoggedInUser?.fullName || '');
-  const [email, setEmail] = useState(LoggedInUser?.email || '');
   const [phoneNumber, setPhoneNumber] = useState(
     LoggedInUser?.phoneNumber || '',
   );
+  const [profileImage, setProfileImage] = useState<string | null>(
+    LoggedInUser?.profilePicture || null,
+  );
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const { colors } = useTheme();
 
   const updateProfileMutation = useUpdateProfile();
 
+  const handleImagePicker = async () => {
+    try {
+      setIsUploadingImage(true);
+
+      // Request permissions
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert(
+          t('permission_required') || 'Permission Required',
+          t('camera_permission_message') ||
+            'We need camera roll permissions to update your profile picture.',
+        );
+        return;
+      }
+
+      // Launch image picker
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+        allowsMultipleSelection: false,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setProfileImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      Alert.alert(
+        t('error') || 'Error',
+        t('failed_to_pick_image') || 'Failed to pick image',
+      );
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
   const handleUpdate = async () => {
     try {
-      await updateProfileMutation.mutateAsync({
+      // Use the unified profile update with only the specified fields
+      const updateData: any = {
         fullName,
-        email,
         phoneNumber,
-      });
+      };
+
+      // Only include profilePicture if it exists
+      if (profileImage) {
+        updateData.profilePicture = profileImage;
+      }
+
+      await updateProfileMutation.mutateAsync(updateData);
       Alert.alert(t('success'), t('profile_updated_successfully'));
       navigation.goBack();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to update profile:', error);
-      Alert.alert(t('error'), t('failed_to_update_profile' as any));
+
+      // Show more specific error messages
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        t('failed_to_update_profile' as any);
+
+      Alert.alert(t('error'), errorMessage);
     }
   };
 
@@ -51,31 +108,43 @@ const EditProfileScreen = ({
         showsVerticalScrollIndicator={false}
       >
         <View className="flex-column px-2 justify-center items-center">
-          <View className="relative mb-3 ">
+          <TouchableOpacity
+            className="relative mb-3"
+            onPress={handleImagePicker}
+            disabled={isUploadingImage}
+          >
             <Image
-              className="h-[100px] w-[100px] object-cover relative"
-              source={icons.ProfilePlogo}
+              className="h-[100px] w-[100px] object-cover relative rounded-full"
+              source={profileImage ? { uri: profileImage } : icons.ProfilePlogo}
             />
-            <MaterialIcons
-              name="edit"
-              color={'#007aff'}
-              size={20}
-              className="absolute bottom-1 right-2"
-            />
-          </View>
+            <View
+              className="absolute bottom-1 right-2 bg-blue-500 rounded-full p-1"
+              style={{ backgroundColor: '#007aff' }}
+            >
+              <MaterialIcons
+                name={isUploadingImage ? 'hourglass-empty' : 'edit'}
+                color="white"
+                size={16}
+              />
+            </View>
+          </TouchableOpacity>
+          <Text
+            className="text-sm text-gray-600 mb-4"
+            style={{ color: colors.onSurfaceVariant }}
+          >
+            {t('tap_to_change_photo') || 'Tap to change photo'}
+          </Text>
         </View>
         <InputField
           placeholder={t('enter_name')}
           value={fullName}
           onChangeText={setFullName}
-        />
-        <InputField placeholder="mm/dd/yy" />
-        <InputField
-          placeholder={t('email')}
-          value={email}
-          onChangeText={setEmail}
           leftIcon={
-            <Ionicons size={23} name="mail-outline" color={colors.onSurface} />
+            <Ionicons
+              size={23}
+              name="person-outline"
+              color={colors.onSurface}
+            />
           }
         />
         <InputField
@@ -109,7 +178,7 @@ const EditProfileScreen = ({
           className="active:opacity-75 mb-2"
           onPress={handleUpdate}
           loading={updateProfileMutation.status === 'pending'}
-          disabled={updateProfileMutation.status === 'pending'}
+          disabled={updateProfileMutation.isPending || isUploadingImage}
         >
           {t('update')}
         </Button>

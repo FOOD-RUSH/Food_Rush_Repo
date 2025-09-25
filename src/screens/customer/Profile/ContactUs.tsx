@@ -14,14 +14,20 @@ const getContactData = (t: any) => [
     icon_name: 'headset-outline' as const,
     social_platform: t('customer_service', 'Customer Service'),
     link: 'tel:+237690000000', // Food Rush customer service phone
-    description: t('call_support', 'Call our support team for immediate assistance'),
+    description: t(
+      'call_support',
+      'Call our support team for immediate assistance',
+    ),
   },
   {
     id: 2,
     icon_name: 'logo-whatsapp' as const,
     social_platform: t('whatsapp', 'WhatsApp'),
     link: 'https://wa.me/237690000000', // Food Rush WhatsApp
-    description: t('whatsapp_support', 'Chat with us on WhatsApp for quick help'),
+    description: t(
+      'whatsapp_support',
+      'Chat with us on WhatsApp for quick help',
+    ),
   },
   {
     id: 3,
@@ -49,7 +55,10 @@ const getContactData = (t: any) => [
     icon_name: 'logo-instagram' as const,
     social_platform: t('instagram', 'Instagram'),
     link: 'https://instagram.com/foodrushcm',
-    description: t('instagram_page', 'Follow us on Instagram for food inspiration'),
+    description: t(
+      'instagram_page',
+      'Follow us on Instagram for food inspiration',
+    ),
   },
 ];
 
@@ -57,18 +66,28 @@ const ContactUs = () => {
   const { t } = useTranslation('translation');
   const { colors } = useTheme();
   const { scale } = useResponsive();
-  
+
   const contactData = getContactData(t);
 
   return (
     <CommonView>
       {/* Header */}
-      <View className="px-4 py-6 border-b" style={{ borderBottomColor: colors.outline + '30' }}>
-        <Heading4 color={colors.onSurface} weight="bold" style={{ marginBottom: 8 }}>
+      <View
+        className="px-4 py-6 border-b"
+        style={{ borderBottomColor: colors.outline + '30' }}
+      >
+        <Heading4
+          color={colors.onSurface}
+          weight="bold"
+          style={{ marginBottom: 8 }}
+        >
           {t('contact_us', 'Contact Us')}
         </Heading4>
         <Body color={colors.onSurfaceVariant}>
-          {t('contact_subtitle', 'Get in touch with our support team. We\'re here to help!')}
+          {t(
+            'contact_subtitle',
+            "Get in touch with our support team. We're here to help!",
+          )}
         </Body>
       </View>
 
@@ -78,14 +97,26 @@ const ContactUs = () => {
         contentContainerStyle={{ paddingBottom: scale(20) }}
       >
         {/* Support Hours Info */}
-        <View 
+        <View
           className="mb-6 p-4 rounded-xl"
-          style={{ backgroundColor: colors.primaryContainer || colors.primary + '20' }}
+          style={{
+            backgroundColor: colors.primaryContainer || colors.primary + '20',
+          }}
         >
-          <Typography variant="h6" style={{ color: colors.primary, fontWeight: 'bold', marginBottom: 8 }}>
+          <Typography
+            variant="h6"
+            style={{
+              color: colors.primary,
+              fontWeight: 'bold',
+              marginBottom: 8,
+            }}
+          >
             {t('support_hours', 'Support Hours')}
           </Typography>
-          <Body color={colors.onPrimaryContainer || colors.primary} style={{ lineHeight: 20 }}>
+          <Body
+            color={colors.onPrimaryContainer || colors.primary}
+            style={{ lineHeight: 20 }}
+          >
             {t('support_schedule', 'Monday - Sunday: 6:00 AM - 11:00 PM (WAT)')}
           </Body>
         </View>
@@ -102,15 +133,26 @@ const ContactUs = () => {
         ))}
 
         {/* Emergency Contact */}
-        <View 
+        <View
           className="mt-6 p-4 rounded-xl"
-          style={{ backgroundColor: colors.errorContainer || colors.error + '20' }}
+          style={{
+            backgroundColor: colors.errorContainer || colors.error + '20',
+          }}
         >
-          <Typography variant="h6" style={{ color: colors.error, fontWeight: 'bold', marginBottom: 8 }}>
+          <Typography
+            variant="h6"
+            style={{ color: colors.error, fontWeight: 'bold', marginBottom: 8 }}
+          >
             {t('emergency_contact', 'Emergency Contact')}
           </Typography>
-          <Body color={colors.onErrorContainer || colors.error} style={{ lineHeight: 20 }}>
-            {t('emergency_info', 'For urgent delivery issues or safety concerns, call our 24/7 emergency line: +237 690 000 001')}
+          <Body
+            color={colors.onErrorContainer || colors.error}
+            style={{ lineHeight: 20 }}
+          >
+            {t(
+              'emergency_info',
+              'For urgent delivery issues or safety concerns, call our 24/7 emergency line: +237 690 000 001',
+            )}
           </Body>
         </View>
       </ScrollView>

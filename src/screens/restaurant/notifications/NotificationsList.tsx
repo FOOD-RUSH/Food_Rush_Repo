@@ -49,7 +49,7 @@ const RestaurantNotificationScreen = () => {
   const handleNotificationPress = useCallback(
     async (notification: Notification) => {
       Haptics.selectionAsync();
-      
+
       // Mark as read if not already read
       if (!notification.readAt) {
         await markAsRead(notification.id);
@@ -59,29 +59,32 @@ const RestaurantNotificationScreen = () => {
       switch (notification.type) {
         case 'order':
           if (notification.data?.orderId) {
-            navigation.navigate('RestaurantOrderDetails' as never, { 
-              orderId: notification.data.orderId 
-            } as never);
+            navigation.navigate(
+              'RestaurantOrderDetails' as never,
+              {
+                orderId: notification.data.orderId,
+              } as never,
+            );
           }
           break;
-          
+
         case 'system':
           // Show system notification details
           Alert.alert(notification.title, notification.body);
           break;
-          
+
         case 'promotion':
           // Navigate to promotions or show details
           Alert.alert(notification.title, notification.body);
           break;
-          
+
         case 'alert':
           // Show alert details
           Alert.alert(notification.title, notification.body, [
-            { text: t('ok'), style: 'default' }
+            { text: t('ok'), style: 'default' },
           ]);
           break;
-          
+
         default:
           Alert.alert(notification.title, notification.body);
       }
@@ -103,17 +106,20 @@ const RestaurantNotificationScreen = () => {
   }, [unreadCount, markAllAsRead, t]);
 
   // Filter change with haptic feedback
-  const handleFilterChange = useCallback((filter: string) => {
-    Haptics.selectionAsync();
-    setFilter(filter as any);
-  }, [setFilter]);
+  const handleFilterChange = useCallback(
+    (filter: string) => {
+      Haptics.selectionAsync();
+      setFilter(filter as any);
+    },
+    [setFilter],
+  );
 
   // Send test notification (for development)
   const handleSendTestNotification = useCallback(async () => {
     await sendLocalNotification(
       'Test Notification',
       'This is a test notification for the restaurant app',
-      { type: 'test' }
+      { type: 'test' },
     );
   }, [sendLocalNotification]);
 
@@ -128,7 +134,7 @@ const RestaurantNotificationScreen = () => {
       inventory: 'package-variant',
       reminder: 'clock-outline',
     };
-    
+
     if (priority === 'high') return 'alert-circle';
     return iconMap[type] || 'bell';
   };
@@ -137,7 +143,7 @@ const RestaurantNotificationScreen = () => {
   const getNotificationColor = (type: string, priority?: string) => {
     if (priority === 'high') return '#FF4444';
     if (priority === 'medium') return '#FF8800';
-    
+
     const colorMap: Record<string, string> = {
       order: colors.primary,
       system: '#6B7280',
@@ -147,7 +153,7 @@ const RestaurantNotificationScreen = () => {
       inventory: '#EF4444',
       reminder: '#06B6D4',
     };
-    
+
     return colorMap[type] || colors.onSurfaceVariant;
   };
 
@@ -156,8 +162,10 @@ const RestaurantNotificationScreen = () => {
     try {
       const date = new Date(timestamp);
       const now = new Date();
-      const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-      
+      const diffInMinutes = Math.floor(
+        (now.getTime() - date.getTime()) / (1000 * 60),
+      );
+
       if (diffInMinutes < 1) return t('just_now');
       if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
       if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
@@ -183,11 +191,11 @@ const RestaurantNotificationScreen = () => {
             t('what_would_you_like_to_do'),
             [
               { text: t('cancel'), style: 'cancel' },
-              { 
-                text: t('mark_as_read'), 
-                onPress: () => markAsRead(item.id) 
+              {
+                text: t('mark_as_read'),
+                onPress: () => markAsRead(item.id),
               },
-            ]
+            ],
           );
         }}
         style={{
@@ -219,12 +227,14 @@ const RestaurantNotificationScreen = () => {
           </View>
 
           <View style={{ flex: 1 }}>
-            <View style={{ 
-              flexDirection: 'row', 
-              justifyContent: 'space-between', 
-              alignItems: 'flex-start',
-              marginBottom: 4 
-            }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                marginBottom: 4,
+              }}
+            >
               <Text
                 style={{
                   fontSize: 16,
@@ -236,7 +246,7 @@ const RestaurantNotificationScreen = () => {
               >
                 {item.title}
               </Text>
-              
+
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Text
                   style={{
@@ -272,11 +282,13 @@ const RestaurantNotificationScreen = () => {
               {item.body}
             </Text>
 
-            <View style={{ 
-              flexDirection: 'row', 
-              justifyContent: 'space-between', 
-              alignItems: 'center' 
-            }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
               <Chip
                 compact
                 style={{
@@ -291,19 +303,23 @@ const RestaurantNotificationScreen = () => {
               >
                 {t(item.type)}
               </Chip>
-              
+
               {item.priority === 'high' && (
-                <View style={{
-                  backgroundColor: '#FF4444',
-                  paddingHorizontal: 8,
-                  paddingVertical: 2,
-                  borderRadius: 12,
-                }}>
-                  <Text style={{ 
-                    color: 'white', 
-                    fontSize: 10, 
-                    fontWeight: '600' 
-                  }}>
+                <View
+                  style={{
+                    backgroundColor: '#FF4444',
+                    paddingHorizontal: 8,
+                    paddingVertical: 2,
+                    borderRadius: 12,
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: 'white',
+                      fontSize: 10,
+                      fontWeight: '600',
+                    }}
+                  >
                     HIGH
                   </Text>
                 </View>
@@ -322,17 +338,26 @@ const RestaurantNotificationScreen = () => {
     { key: 'order', label: t('orders'), count: notificationCounts.order },
     { key: 'alert', label: t('alerts'), count: notificationCounts.alert },
     { key: 'system', label: t('system'), count: notificationCounts.system },
-    { key: 'promotion', label: t('promos'), count: notificationCounts.promotion },
+    {
+      key: 'promotion',
+      label: t('promos'),
+      count: notificationCounts.promotion,
+    },
   ];
 
   // Render filter chip
-  const renderFilterChip = ({ item }: { item: typeof restaurantFilters[0] }) => (
+  const renderFilterChip = ({
+    item,
+  }: {
+    item: (typeof restaurantFilters)[0];
+  }) => (
     <TouchableOpacity
       onPress={() => handleFilterChange(item.key)}
       style={{
         paddingHorizontal: 16,
         paddingVertical: 8,
-        backgroundColor: selectedFilter === item.key ? colors.primary : colors.surfaceVariant,
+        backgroundColor:
+          selectedFilter === item.key ? colors.primary : colors.surfaceVariant,
         borderRadius: 20,
         marginRight: 8,
         flexDirection: 'row',
@@ -343,7 +368,10 @@ const RestaurantNotificationScreen = () => {
         style={{
           fontSize: 14,
           fontWeight: '600',
-          color: selectedFilter === item.key ? colors.onPrimary : colors.onSurfaceVariant,
+          color:
+            selectedFilter === item.key
+              ? colors.onPrimary
+              : colors.onSurfaceVariant,
         }}
       >
         {item.label}
@@ -351,7 +379,8 @@ const RestaurantNotificationScreen = () => {
       {item.count > 0 && (
         <View
           style={{
-            backgroundColor: selectedFilter === item.key ? colors.onPrimary : colors.primary,
+            backgroundColor:
+              selectedFilter === item.key ? colors.onPrimary : colors.primary,
             borderRadius: 10,
             minWidth: 20,
             height: 20,
@@ -364,7 +393,8 @@ const RestaurantNotificationScreen = () => {
             style={{
               fontSize: 11,
               fontWeight: 'bold',
-              color: selectedFilter === item.key ? colors.primary : colors.onPrimary,
+              color:
+                selectedFilter === item.key ? colors.primary : colors.onPrimary,
             }}
           >
             {item.count}
@@ -376,12 +406,14 @@ const RestaurantNotificationScreen = () => {
 
   // Empty state for restaurant
   const renderEmptyState = () => (
-    <View style={{ 
-      alignItems: 'center', 
-      justifyContent: 'center', 
-      paddingVertical: 60,
-      paddingHorizontal: 24,
-    }}>
+    <View
+      style={{
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 60,
+        paddingHorizontal: 24,
+      }}
+    >
       <MaterialCommunityIcons
         name="bell-outline"
         size={64}
@@ -406,10 +438,9 @@ const RestaurantNotificationScreen = () => {
           textAlign: 'center',
         }}
       >
-        {selectedFilter === 'unread' 
+        {selectedFilter === 'unread'
           ? "You've read all your notifications"
-          : "New orders and updates will appear here"
-        }
+          : 'New orders and updates will appear here'}
       </Text>
     </View>
   );
@@ -418,11 +449,13 @@ const RestaurantNotificationScreen = () => {
   if (isLoading && !hasNotifications) {
     return (
       <CommonView>
-        <View style={{ 
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          flex: 1 
-        }}>
+        <View
+          style={{
+            justifyContent: 'center',
+            alignItems: 'center',
+            flex: 1,
+          }}
+        >
           <ActivityIndicator size="large" color={colors.primary} />
           <Text
             style={{
@@ -443,12 +476,14 @@ const RestaurantNotificationScreen = () => {
       <View style={{ flex: 1, backgroundColor: colors.background }}>
         {/* Mark all read button */}
         {hasNotifications && unreadCount > 0 && (
-          <View style={{ 
-            paddingHorizontal: 16, 
-            paddingVertical: 12,
-            borderBottomWidth: 1,
-            borderBottomColor: colors.outline + '30',
-          }}>
+          <View
+            style={{
+              paddingHorizontal: 16,
+              paddingVertical: 12,
+              borderBottomWidth: 1,
+              borderBottomColor: colors.outline + '30',
+            }}
+          >
             <TouchableOpacity
               onPress={handleMarkAllAsRead}
               style={{
@@ -459,11 +494,13 @@ const RestaurantNotificationScreen = () => {
                 alignSelf: 'flex-end',
               }}
             >
-              <Text style={{ 
-                color: colors.onPrimary, 
-                fontWeight: '600',
-                fontSize: 14,
-              }}>
+              <Text
+                style={{
+                  color: colors.onPrimary,
+                  fontWeight: '600',
+                  fontSize: 14,
+                }}
+              >
                 Mark All Read ({unreadCount})
               </Text>
             </TouchableOpacity>
@@ -475,7 +512,9 @@ const RestaurantNotificationScreen = () => {
           <FlatList
             horizontal
             showsHorizontalScrollIndicator={false}
-            data={restaurantFilters.filter(f => f.count > 0 || f.key === 'all')}
+            data={restaurantFilters.filter(
+              (f) => f.count > 0 || f.key === 'all',
+            )}
             renderItem={renderFilterChip}
             keyExtractor={(item) => item.key}
             contentContainerStyle={{ paddingHorizontal: 16 }}
@@ -506,10 +545,12 @@ const RestaurantNotificationScreen = () => {
           }}
           ListFooterComponent={
             isLoadingMore ? (
-              <View style={{ 
-                paddingVertical: 16, 
-                alignItems: 'center' 
-              }}>
+              <View
+                style={{
+                  paddingVertical: 16,
+                  alignItems: 'center',
+                }}
+              >
                 <ActivityIndicator size="small" color={colors.primary} />
                 <Text
                   style={{

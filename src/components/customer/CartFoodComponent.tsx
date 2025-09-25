@@ -235,7 +235,7 @@ const CartFoodComponent: React.FC<CartFoodComponentProps> = React.memo(
                             { color: colors.onSurfaceVariant },
                           ]}
                         >
-                          {quantity}
+                          {quantity}{' '}
                           {quantity > 1 ? t('items_suffix') : t('item')}
                         </Text>
                         <Text
@@ -277,7 +277,7 @@ const CartFoodComponent: React.FC<CartFoodComponentProps> = React.memo(
                       )}
 
                       <Text style={[styles.price, { color: colors.primary }]}>
-                        {formattedPrice} {t('fcfa_unit')}
+                        {formattedPrice} FCFA
                       </Text>
                     </View>
                   </View>

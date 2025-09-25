@@ -11,7 +11,7 @@ export const createMockNotification = (
   type: Notification['type'] = 'SYSTEM',
   title: string = 'Test Notification',
   body: string = 'This is a test notification',
-  data?: Notification['data']
+  data?: Notification['data'],
 ): Notification => {
   return {
     id: `ntf_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -30,7 +30,7 @@ export const createMockNotification = (
 export const createOrderNotification = (
   orderId: string,
   status: string,
-  restaurantName?: string
+  restaurantName?: string,
 ): Notification => {
   const getOrderMessage = (status: string) => {
     switch (status.toLowerCase()) {
@@ -55,7 +55,7 @@ export const createOrderNotification = (
     'ORDER',
     'Order Update',
     getOrderMessage(status),
-    { orderId }
+    { orderId },
   );
 };
 
@@ -65,13 +65,13 @@ export const createOrderNotification = (
 export const createDeliveryNotification = (
   orderId: string,
   message: string,
-  estimatedTime?: string
+  estimatedTime?: string,
 ): Notification => {
   return createMockNotification(
     'DELIVERY',
     'Delivery Update',
     `${message}${estimatedTime ? ` ETA: ${estimatedTime}` : ''}`,
-    { orderId }
+    { orderId },
   );
 };
 
@@ -81,13 +81,13 @@ export const createDeliveryNotification = (
 export const createPromotionNotification = (
   title: string,
   message: string,
-  restaurantId?: string
+  restaurantId?: string,
 ): Notification => {
   return createMockNotification(
     'PROMOTION',
     title,
     message,
-    restaurantId ? { restaurantId } : undefined
+    restaurantId ? { restaurantId } : undefined,
   );
 };
 
@@ -96,7 +96,7 @@ export const createPromotionNotification = (
  */
 export const createSystemNotification = (
   title: string,
-  message: string
+  message: string,
 ): Notification => {
   return createMockNotification('SYSTEM', title, message);
 };
@@ -107,13 +107,16 @@ export const createSystemNotification = (
 export const formatNotificationTime = (createdAt: string): string => {
   const date = new Date(createdAt);
   const now = new Date();
-  const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
-  
+  const diffInMinutes = Math.floor(
+    (now.getTime() - date.getTime()) / (1000 * 60),
+  );
+
   if (diffInMinutes < 1) {
     return 'Just now';
   } else if (diffInMinutes < 60) {
     return `${diffInMinutes}m ago`;
-  } else if (diffInMinutes < 1440) { // 24 hours
+  } else if (diffInMinutes < 1440) {
+    // 24 hours
     const hours = Math.floor(diffInMinutes / 60);
     return `${hours}h ago`;
   } else {
@@ -168,24 +171,26 @@ export const getNotificationPriority = (type: Notification['type']): number => {
 /**
  * Sort notifications by priority and time
  */
-export const sortNotifications = (notifications: Notification[]): Notification[] => {
+export const sortNotifications = (
+  notifications: Notification[],
+): Notification[] => {
   return [...notifications].sort((a, b) => {
     // First sort by read status (unread first)
     const aUnread = isNotificationUnread(a) ? 0 : 1;
     const bUnread = isNotificationUnread(b) ? 0 : 1;
-    
+
     if (aUnread !== bUnread) {
       return aUnread - bUnread;
     }
-    
+
     // Then by priority
     const aPriority = getNotificationPriority(a.type);
     const bPriority = getNotificationPriority(b.type);
-    
+
     if (aPriority !== bPriority) {
       return aPriority - bPriority;
     }
-    
+
     // Finally by time (newest first)
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
