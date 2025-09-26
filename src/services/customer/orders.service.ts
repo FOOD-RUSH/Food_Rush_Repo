@@ -14,7 +14,7 @@ export interface CreateOrderRequest {
   deliveryAddress: string;
   deliveryLatitude: number;
   deliveryLongitude: number;
-  paymentMethod: 'mobile_money' | 'cash' | 'card';
+  paymentMethod: 'mobile_money'; // Only mobile money is supported
 }
 
 // Order creation response (matches API docs)
@@ -82,7 +82,7 @@ export const OrderApi = {
     try {
       const response = await apiClient.get<{
         data: Order;
-      }>(`/api/v1/orders/${orderId}`);
+      }>(`orders/${orderId}`);
       return response.data.data;
     } catch (error) {
       console.error(`Error fetching order ${orderId}:`, error);
@@ -99,7 +99,7 @@ export const OrderApi = {
     try {
       const response = await apiClient.get<{
         data: Order[];
-      }>('/orders', { params });
+      }>('/orders/my', {params});
       return response.data.data;
     } catch (error) {
       console.error('Error fetching user orders:', error);
@@ -158,6 +158,21 @@ export const OrderApi = {
         `❌ Error confirming delivery received for order ${orderId}:`,
         error,
       );
+      throw error;
+    }
+  },
+
+  // Cancel order (customer cancels their own order)
+  cancelOrder: async (orderId: string, reason?: string) => {
+    try {
+      console.log('🚀 Cancelling order:', orderId, 'Reason:', reason);
+      const response = await apiClient.post(`/orders/${orderId}/cancel`, {
+        reason: reason || 'Customer cancelled',
+      });
+      console.log('✅ Order cancellation response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error(`❌ Error cancelling order ${orderId}:`, error);
       throw error;
     }
   },

@@ -122,7 +122,10 @@ export const useCartStore = create<CartState & CartActions>()(
           // Check if the item has a restaurantId field (for menu items)
           const itemRestaurantId =
             item.restaurantId || (item as any).restaurant?.id;
-          if (!itemRestaurantId) return false;
+          if (!itemRestaurantId) {
+            console.warn('Menu item missing restaurantId:', item);
+            return false;
+          }
           return itemRestaurantId === restaurantID;
         },
 
@@ -247,6 +250,11 @@ export const useCartStore = create<CartState & CartActions>()(
                   item.restaurantId || (item as any).restaurant?.id;
                 const restaurantName =
                   (item as any).restaurant?.name || 'Unknown Restaurant';
+                console.log('Setting cart restaurant info:', {
+                  restaurantId: itemRestaurantId,
+                  restaurantName,
+                  menuItem: item,
+                });
                 set({
                   restaurantID: itemRestaurantId || null,
                   restaurantName: restaurantName,

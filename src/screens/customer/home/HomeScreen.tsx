@@ -96,9 +96,9 @@ const CarouselItem = React.memo<CarouselItemProps>(
           id={food.id}
           restaurantId={food.restaurant.id}
           foodName={food.name}
-          foodPrice={food.price}
+          foodPrice={typeof food.price === 'string' ? parseFloat(food.price) : food.price}
           restaurantName={food.restaurant.name}
-          distance={food.distance || 0}
+          distance={food.distanceKm || food.distance || 0}
           rating={4.5} // Default rating since not in API
           status={food.isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}
           imageUrl={food.pictureUrl}
@@ -292,12 +292,13 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
         foodId={item.id}
         restaurantId={item.restaurant.id}
         FoodName={item.name}
-        FoodPrice={parseFloat(item.price)}
-        FoodImage={item.pictureUrl}
-        distanceFromUser={item.distance || 0}
-        DeliveryPrice={item.deliveryPrice || 500} // Use backend-calculated price or fallback
+        FoodPrice={item.price}
+        FoodImage={null} // Will use pictureUrl instead
+        pictureUrl={item.pictureUrl}
+        RestaurantName={item.restaurant.name}
+        distanceKm={item.distanceKm || item.distance || 0}
+        deliveryFee={item.deliveryFee}
         isAvailable={item.isAvailable}
-        RestaurantName={item.restaurant?.name}
       />
     ),
     [],

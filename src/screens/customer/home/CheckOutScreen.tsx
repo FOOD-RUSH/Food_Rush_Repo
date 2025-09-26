@@ -129,15 +129,25 @@ const CheckOutScreen = ({
   // Handle place order confirmation - create actual order
   const handleConfirmOrder = useCallback(async () => {
     try {
-      // Get restaurant ID from route params or cart
+      // Get restaurant ID from cart store or cart items
+      const cartRestaurantId = useCartStore.getState().restaurantID;
       const restaurantId =
-        route.params?.restaurantId || cartItems[0]?.menuItem?.restaurantId;
+        cartRestaurantId ||
+        route.params?.restaurantId ||
+        cartItems[0]?.menuItem?.restaurantId;
 
       if (!restaurantId) {
         Alert.alert(t('error'), 'Restaurant information missing');
+        console.error('Missing restaurant ID:', {
+          cartRestaurantId,
+          routeRestaurantId: route.params?.restaurantId,
+          firstItemRestaurantId: cartItems[0]?.menuItem?.restaurantId,
+          cartItemsLength: cartItems.length,
+        });
         return;
       }
 
+      console.log('🚀 Creating order for restaurant:', restaurantId);
       await createOrderFromCart(restaurantId);
     } catch (error) {
       Alert.alert(t('error'), t('failed_to_place_order'));
@@ -200,16 +210,17 @@ const CheckOutScreen = ({
       return;
     }
 
-    if (!selectedPaymentMethod) {
-      Alert.alert(t('error'), t('please_select_payment_method'), [
-        {
-          text: t('select_payment'),
-          onPress: () => navigation.navigate('PaymentMethods'),
-        },
-        { text: t('cancel'), style: 'cancel' },
-      ]);
-      return;
-    }
+    // Payment method is always mobile_money, no need to check
+    // if (!selectedPaymentMethod) {
+    //   Alert.alert(t('error'), t('please_select_payment_method'), [
+    //     {
+    //       text: t('select_payment'),
+    //       onPress: () => navigation.navigate('PaymentMethods'),
+    //     },
+    //     { text: t('cancel'), style: 'cancel' },
+    //   ]);
+    //   return;
+    // }
 
     // Present the enhanced checkout content with cart management
     present(
@@ -450,15 +461,11 @@ const CheckOutScreen = ({
                   className="text-sm mr-2"
                   style={{ color: colors.onSurfaceVariant }}
                 >
-                  {selectedPaymentMethod === 'mobile_money'
-                    ? selectedProvider === 'mtn'
-                      ? 'MTN Mobile Money'
-                      : selectedProvider === 'orange'
-                        ? 'Orange Money'
-                        : 'Mobile Money'
-                    : selectedPaymentMethod === 'cash'
-                      ? 'Cash on Delivery'
-                      : t('e_wallet')}
+                  {selectedProvider === 'mtn'
+                    ? 'MTN Mobile Money'
+                    : selectedProvider === 'orange'
+                      ? 'Orange Money'
+                      : 'Mobile Money'}
                 </Text>
                 <MaterialIcons
                   name="arrow-forward-ios"

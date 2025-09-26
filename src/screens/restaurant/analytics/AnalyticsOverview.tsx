@@ -17,6 +17,7 @@ import {
 } from '@/src/navigation/types';
 import { useRestaurantReviewStats } from '@/src/hooks/restaurant/useRestaurantReviews';
 import { useRestaurantProfile } from '@/src/hooks/restaurant/useRestaurantApi';
+import { useRestaurantProfileData } from '@/src/stores/restaurantStores';
 import {
   useAnalyticsSummary,
   useRevenueBuckets,
@@ -69,9 +70,14 @@ const AnalyticsOverview: React.FC<
     useState<AnalyticsPeriodOption>('7days');
   const [refreshing, setRefreshing] = useState(false);
 
-  // Get restaurant profile and review stats
-  const { data: restaurantProfile } = useRestaurantProfile();
-  const restaurantId = restaurantProfile?.data?.id;
+  // Get restaurant profile from store (primary) and API (fallback)
+  const restaurantProfileFromStore = useRestaurantProfileData();
+  const { data: restaurantProfileFromAPI } = useRestaurantProfile();
+  
+  // Prioritize store data, fallback to API data
+  const restaurantProfile = restaurantProfileFromStore || restaurantProfileFromAPI?.data;
+  const restaurantId = restaurantProfile?.id;
+  
   const { data: reviewStats } = useRestaurantReviewStats(restaurantId || '');
 
   // Calculate days for selected period
@@ -181,8 +187,8 @@ const AnalyticsOverview: React.FC<
     try {
       Haptics.selectionAsync();
 
-      Validate required data before navigation
-      if (!restaurantProfile?.data?.id) {
+      //Validate required data before navigation
+      if (!restaurantProfile?.id) {
         console.warn('Cannot navigate to reviews: Restaurant ID not available');
         return;
       }
@@ -195,12 +201,12 @@ const AnalyticsOverview: React.FC<
       // Type-safe navigation with proper error handling
       console.log(
         'Navigating to customer reviews for restaurant:',
-        restaurantProfile.data.id,
+        restaurantProfile.id,
       );
 
       navigation.navigate('RestaurantCustomerReviews', {
-        restaurantId: restaurantProfile.data.id || '12345',
-        restaurantName: restaurantProfile.data.name || 'Restaurant',
+        restaurantId: restaurantProfile.id || '12345',
+        restaurantName: restaurantProfile.name || 'Restaurant',
       });
     } catch (error) {
       console.error('Navigation error when trying to view reviews:', error);

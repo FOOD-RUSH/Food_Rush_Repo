@@ -6,17 +6,18 @@ import { apiClient } from '@/src/services/shared/apiClient';
 export interface PaymentMethod {
   id: string;
   type: 'mobile_money' | 'cash' | 'card';
-  provider?: 'mtn' | 'orange'; // Only for mobile_money type
+  provider?: 'mtn' | 'orange_money'; // Only for mobile_money type
   name: string;
   isDefault: boolean;
 }
 
 export interface PaymentInitRequest {
-  amount: number;
-  phoneNumber: string;
-  provider: 'mtn' | 'orange';
   orderId: string;
-  currency?: string;
+  method: 'mobile_money';
+  phone: string;
+  medium: 'mtn' | 'orange_money';
+  name: string;
+  email: string;
 }
 
 export interface PaymentInitResponse {
@@ -57,16 +58,16 @@ class PaymentService {
    */
   validatePhoneNumber(
     phoneNumber: string,
-    provider: 'mtn' | 'orange',
+    medium: 'mtn' | 'orange_money',
   ): boolean {
     // Remove all non-digit characters
     const cleanNumber = phoneNumber.replace(/\D/g, '');
 
     // MTN numbers: 67, 68, 65, 66 (Cameroon)
     // Orange numbers: 69, 65, 66 (some overlap with MTN)
-    if (provider === 'mtn') {
+    if (medium === 'mtn') {
       return /^(237)?(6[5-8])\d{7}$/.test(cleanNumber);
-    } else if (provider === 'orange') {
+    } else if (medium === 'orange_money') {
       return /^(237)?(6[5-6,9])\d{7}$/.test(cleanNumber);
     }
 
@@ -92,27 +93,45 @@ class PaymentService {
    */
   async initializePayment(request: PaymentInitRequest): Promise<PaymentResult> {
     try {
+      console.log('🚀 Initializing payment with request:', request);
+      
       // Validate phone number
-      if (!this.validatePhoneNumber(request.phoneNumber, request.provider)) {
+      if (!this.validatePhoneNumber(request.phone, request.medium)) {
         return {
           success: false,
-          error: `Invalid ${request.provider.toUpperCase()} phone number format`,
+          error: `Invalid ${request.medium.toUpperCase()} phone number format`,
+        };
+      }
+
+      // Validate required fields
+      if (!request.orderId || !request.name || !request.email) {
+        return {
+          success: false,
+          error: 'Order ID, name, and email are required',
         };
       }
 
       // Format phone number
-      const formattedPhone = this.formatPhoneNumber(request.phoneNumber);
+      const formattedPhone = this.formatPhoneNumber(request.phone);
+
+      // Prepare API request body according to your specification
+      const paymentData = {
+        orderId: request.orderId,
+        method: request.method, // Always 'mobile_money'
+        phone: formattedPhone,
+        medium: request.medium, // 'mtn' or 'orange_money'
+        name: request.name,
+        email: request.email,
+      };
+
+      console.log('📤 Sending payment request:', paymentData);
 
       const response = await apiClient.post<PaymentInitResponse>(
         '/payments/init',
-        {
-          amount: request.amount,
-          phoneNumber: formattedPhone,
-          provider: request.provider,
-          orderId: request.orderId,
-          currency: request.currency || 'XAF',
-        },
+        paymentData,
       );
+
+      console.log('📥 Payment response:', response.data);
 
       if (response.data.success) {
         return {
@@ -128,7 +147,7 @@ class PaymentService {
         };
       }
     } catch (error: any) {
-      console.error('Payment initialization error:', error);
+      console.error('❌ Payment initialization error:', error);
       return {
         success: false,
         error: error.response?.data?.message || 'Failed to initialize payment',
@@ -209,7 +228,7 @@ class PaymentService {
       {
         id: 'orange_money',
         type: 'mobile_money',
-        provider: 'orange',
+        provider: 'orange_money',
         name: 'Orange Money',
         isDefault: false,
       },

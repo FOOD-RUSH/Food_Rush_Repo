@@ -16,6 +16,8 @@ import { useTranslation } from 'react-i18next';
 import PaymentService from '@/src/services/customer/payment.service';
 import { useCartStore } from '@/src/stores/customerStores/cartStore';
 import { useOrderFlow } from '@/src/hooks/customer/useOrderFlow';
+import { useAuthUser } from '@/src/stores/customerStores';
+import { useInitializePayment, useCreatePaymentRequest } from '@/src/hooks/customer/usePayment';
 
 type PaymentStep =
   | 'phone_input'
@@ -34,6 +36,9 @@ const PaymentProcessingScreen = ({
   const { orderId, amount, paymentMethod, provider } = route.params;
   const clearCart = useCartStore((state) => state.clearCart);
   const { completePayment } = useOrderFlow();
+  const user = useAuthUser();
+  const createPaymentRequest = useCreatePaymentRequest();
+  const { mutate: initializePayment, isPending: isInitializingPayment } = useInitializePayment();
 
   // State management
   const [currentStep, setCurrentStep] = useState<PaymentStep>('phone_input');
@@ -69,7 +74,9 @@ const PaymentProcessingScreen = ({
   const validatePhoneNumber = useCallback(
     (phone: string) => {
       if (!provider) return false;
-      return PaymentService.validatePhoneNumber(phone, provider);
+      // Convert provider to medium format for validation
+      const medium = provider === 'orange' ? 'orange_money' : 'mtn';
+      return PaymentService.validatePhoneNumber(phone, medium);
     },
     [provider],
   );
@@ -89,29 +96,49 @@ const PaymentProcessingScreen = ({
       return;
     }
 
+    if (!user?.fullName || !user?.email) {
+      setError('User information is missing. Please log in again.');
+      return;
+    }
+
     setIsLoading(true);
     setError('');
 
     try {
       if (paymentMethod === 'mobile_money' && provider) {
-        const result = await PaymentService.initializePayment({
-          amount,
-          phoneNumber,
-          provider,
+        // Convert provider to the new medium format
+        const medium = provider === 'orange' ? 'orange_money' : 'mtn';
+        
+        // Create payment request using the new API structure
+        const paymentRequest = createPaymentRequest(
           orderId,
-          currency: 'XAF',
+          phoneNumber,
+          medium,
+          user.fullName,
+          user.email
+        );
+
+        console.log('🚀 Initializing payment with new API structure:', paymentRequest);
+
+        // Use the new payment hook
+        initializePayment(paymentRequest, {
+          onSuccess: (result) => {
+            if (result.success && result.transactionId) {
+              setTransactionId(result.transactionId);
+              setUssdCode(result.ussdCode || '');
+              setCurrentStep(result.ussdCode ? 'ussd_display' : 'confirmation');
+
+              // Start polling for payment status
+              startPaymentStatusPolling(result.transactionId);
+            } else {
+              setError(result.error || 'Failed to initialize payment');
+            }
+          },
+          onError: (error) => {
+            console.error('Payment initialization error:', error);
+            setError('Failed to initialize payment. Please try again.');
+          },
         });
-
-        if (result.success && result.transactionId) {
-          setTransactionId(result.transactionId);
-          setUssdCode(result.ussdCode || '');
-          setCurrentStep(result.ussdCode ? 'ussd_display' : 'confirmation');
-
-          // Start polling for payment status
-          startPaymentStatusPolling(result.transactionId);
-        } else {
-          setError(result.error || 'Failed to initialize payment');
-        }
       } else {
         // Handle cash payment
         setCurrentStep('success');
@@ -258,7 +285,7 @@ const PaymentProcessingScreen = ({
             }}
             value={phoneNumber}
             onChangeText={handlePhoneNumberChange}
-            placeholder={provider === 'mtn' ? '6XXXXXXXX' : '6XXXXXXXX'}
+            placeholder={t('phone_number_placeholder')}
             placeholderTextColor={colors.onSurfaceVariant}
             keyboardType="phone-pad"
             maxLength={15}
@@ -274,9 +301,9 @@ const PaymentProcessingScreen = ({
           className="rounded-lg py-4 items-center"
           style={{ backgroundColor: colors.primary }}
           onPress={handleInitializePayment}
-          disabled={isLoading || !phoneNumber}
+          disabled={isLoading || isInitializingPayment || !phoneNumber}
         >
-          {isLoading ? (
+          {(isLoading || isInitializingPayment) ? (
             <ActivityIndicator color={colors.onPrimary} />
           ) : (
             <Text

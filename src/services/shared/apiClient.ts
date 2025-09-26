@@ -69,11 +69,12 @@ class ApiClient {
           if (token && config.headers) {
             config.headers.Authorization = `Bearer ${token}`;
             // Log API request details for debugging (without sensitive data)
+            const isFormData = config.data instanceof FormData;
             console.log('🚀 API Request:', {
               method: config.method?.toUpperCase(),
               url: `${config.baseURL}${config.url}`,
               hasAuth: !!token,
-              contentType: config.headers['Content-Type'] || 'application/json',
+              contentType: isFormData ? 'multipart/form-data' : (config.headers['Content-Type'] || 'application/json'),
             });
           } else if (config.url && !config.url.includes('/auth/')) {
             // Warn if no token is available for protected routes
@@ -303,12 +304,11 @@ class ApiClient {
   ): Promise<AxiosResponse<T>> {
     try {
       // Handle FormData requests - don't set Content-Type, let axios handle it
-      if (
-        data instanceof FormData &&
-        config?.headers?.['Content-Type'] === 'multipart/form-data'
-      ) {
+      if (data instanceof FormData) {
         const formDataConfig = { ...config };
-        delete formDataConfig.headers['Content-Type']; // Let axios set the boundary
+        if (formDataConfig.headers) {
+          delete formDataConfig.headers['Content-Type']; // Let axios set the boundary
+        }
         return await this.client.post<T>(url, data, formDataConfig);
       }
 

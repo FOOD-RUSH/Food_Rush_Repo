@@ -7,7 +7,8 @@ import Constants from 'expo-constants';
 // Configure notification behavior
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
   }),
@@ -194,6 +195,13 @@ class NotificationService {
         '../navigation/navigationHelpers'
       );
 
+      // Handle cart reminder notifications
+      if (data?.type === 'cart_reminder' || data?.deepLink === 'foodrush://cart') {
+        console.log('Navigating to cart from reminder');
+        ServiceNavigation.goToCart();
+        return;
+      }
+
       // Handle order notifications
       if (data?.orderId && data?.type === 'order') {
         console.log('Navigating to order details:', data.orderId);
@@ -221,7 +229,7 @@ class NotificationService {
       }
 
       // Handle general notifications - navigate to notifications screen
-      if (data?.type && ['system', 'promotion', 'alert'].includes(data.type)) {
+      if (data?.type && ['system', 'promotion', 'alert', 'reminder'].includes(data.type)) {
         console.log('Navigating to notifications screen');
         ServiceNavigation.goToNotifications();
         return;
@@ -411,7 +419,10 @@ class NotificationService {
         useNotificationStore,
       } = require('../stores/shared/notificationStore');
       const { unreadCount } = useNotificationStore.getState();
-      await Notifications.setBadgeCountAsync(unreadCount || 0);
+      
+      // Ensure badge count is a valid number
+      const badgeCount = typeof unreadCount === 'number' ? Math.max(0, unreadCount) : 0;
+      await Notifications.setBadgeCountAsync(badgeCount);
     } catch (error) {
       console.warn('Could not update badge count:', error);
     }

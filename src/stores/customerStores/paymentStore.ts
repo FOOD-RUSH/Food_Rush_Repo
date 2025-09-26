@@ -2,8 +2,8 @@ import { create } from 'zustand';
 import { createJSONStorage, devtools, persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Unified payment method type - mobile_money covers both MTN and Orange
-export type PaymentMethod = 'mobile_money' | 'cash' | 'card';
+// Only mobile_money payment method is supported
+export type PaymentMethod = 'mobile_money';
 export type PaymentProvider = 'mtn' | 'orange';
 
 export interface PaymentMethodDetails {
@@ -38,8 +38,8 @@ interface PaymentActions {
 }
 
 const initialState: PaymentState = {
-  paymentMethods: ['mobile_money', 'cash'],
-  selectedPaymentMethod: 'mobile_money', // Default to Mobile Money
+  paymentMethods: ['mobile_money'], // Only mobile money is supported
+  selectedPaymentMethod: 'mobile_money', // Default and only option
   selectedProvider: 'mtn', // Default to MTN
   isPaymentLoading: false,
   paymentError: null,

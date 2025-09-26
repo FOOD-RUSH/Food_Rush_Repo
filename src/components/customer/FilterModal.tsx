@@ -80,8 +80,8 @@ const FilterModal: React.FC<FilterModalProps> = ({
       title: t('food_category'),
       icon: 'restaurant-menu',
       options: categories.map((cat) => ({
-        value: cat.title,
-        label: cat.displayName,
+        value: cat.title, // Use the title as the value (e.g., 'local-dishes')
+        label: cat.displayName, // Use displayName for UI (e.g., 'Local Dishes')
         description: cat.description || '',
         icon: 'restaurant',
       })),

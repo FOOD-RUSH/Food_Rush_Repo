@@ -29,23 +29,29 @@ export const useMyOrders = (params?: {
   });
 };
 
-// Hook to get pending/active orders
+// Hook to get pending/active orders (all statuses except delivered and cancelled)
 export const useActiveOrders = () => {
   return useQuery({
     queryKey: ['orders', 'active'],
     queryFn: async () => {
       // Get all orders and filter on frontend since backend doesn't support comma-separated status
-      const allOrders = await OrderApi.getMyOrders({ limit: 50 });
+      const allOrders = await OrderApi.getMyOrders();
 
-      // Filter for active orders (not completed/delivered/cancelled)
+      // Filter for active orders (all statuses except delivered and cancelled)
       const activeStatuses = [
         'pending',
-        'confirmed',
+        'confirmed', 
         'preparing',
         'ready',
+        'ready_for_pickup',
         'picked_up',
+        'out_for_delivery',
+        'payment_pending',
+        'payment_confirmed'
       ];
-      return allOrders.filter((order) => activeStatuses.includes(order.status));
+      return allOrders.filter((order) => 
+        !['delivered', 'cancelled'].includes(order.status)
+      );
     },
     staleTime: 15 * 1000, // 15 seconds for active orders
     gcTime: CACHE_CONFIG.CACHE_TIME,
@@ -55,7 +61,7 @@ export const useActiveOrders = () => {
   });
 };
 
-// Hook to get completed orders
+// Hook to get completed orders (delivered only)
 export const useCompletedOrders = (limit = 50) => {
   return useQuery({
     queryKey: ['orders', 'completed', limit],
@@ -63,13 +69,27 @@ export const useCompletedOrders = (limit = 50) => {
       // Get all orders and filter on frontend
       const allOrders = await OrderApi.getMyOrders({ limit });
 
-      // Filter for completed orders
-      const completedStatuses = ['delivered', 'cancelled'];
-      return allOrders.filter((order) =>
-        completedStatuses.includes(order.status),
-      );
+      // Filter for completed orders (delivered only)
+      return allOrders.filter((order) => order.status === 'delivered');
     },
     staleTime: 5 * 60 * 1000, // 5 minutes for completed orders
+    gcTime: 10 * 60 * 1000,
+    retry: CACHE_CONFIG.MAX_RETRIES,
+  });
+};
+
+// Hook to get cancelled orders
+export const useCancelledOrders = (limit = 50) => {
+  return useQuery({
+    queryKey: ['orders', 'cancelled', limit],
+    queryFn: async () => {
+      // Get all orders and filter on frontend
+      const allOrders = await OrderApi.getMyOrders({ limit });
+
+      // Filter for cancelled orders only
+      return allOrders.filter((order) => order.status === 'cancelled');
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes for cancelled orders
     gcTime: 10 * 60 * 1000,
     retry: CACHE_CONFIG.MAX_RETRIES,
   });
@@ -196,6 +216,39 @@ export const useConfirmOrderReceived = () => {
   });
 };
 
+// Hook to cancel order
+export const useCancelOrder = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ orderId, reason }: { orderId: string; reason?: string }) =>
+      OrderApi.cancelOrder(orderId, reason),
+    onSuccess: (_, { orderId }) => {
+      // Update order status in cache
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({
+        queryKey: ['orders', 'detail', orderId],
+      });
+
+      Toast.show({
+        type: 'success',
+        text1: 'Order Cancelled',
+        text2: 'Your order has been cancelled successfully',
+        position: 'top',
+      });
+    },
+    onError: (error) => {
+      console.error('Error cancelling order:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Cancellation Failed',
+        text2: 'Failed to cancel your order. Please try again.',
+        position: 'top',
+      });
+    },
+  });
+};
+
 // Helper hook to get order status information
 export const useOrderStatus = (status: Order['status']) => {
   const statusInfo = {
@@ -205,13 +258,43 @@ export const useOrderStatus = (status: Order['status']) => {
       icon: 'clock-outline',
       description: 'Waiting for restaurant confirmation',
       canCancel: true,
+      showConfirm: false,
+      showTrack: false,
+      showConfirmDelivery: false,
+      buttonText: 'Cancel Order'
     },
     confirmed: {
       label: 'Confirmed',
       color: '#4CAF50',
       icon: 'checkmark-circle-outline',
       description: 'Restaurant confirmed your order',
+      canCancel: true,
+      showConfirm: true,
+      showTrack: false,
+      showConfirmDelivery: false,
+      buttonText: 'Confirm & Pay'
+    },
+    payment_pending: {
+      label: 'Payment Pending',
+      color: '#FF9800',
+      icon: 'card-outline',
+      description: 'Complete your payment',
       canCancel: false,
+      showConfirm: false,
+      showTrack: false,
+      showConfirmDelivery: false,
+      buttonText: 'Complete Payment'
+    },
+    payment_confirmed: {
+      label: 'Payment Confirmed',
+      color: '#4CAF50',
+      icon: 'checkmark-circle',
+      description: 'Payment successful, order being prepared',
+      canCancel: false,
+      showConfirm: false,
+      showTrack: true,
+      showConfirmDelivery: false,
+      buttonText: 'Track Order'
     },
     preparing: {
       label: 'Preparing',
@@ -219,6 +302,10 @@ export const useOrderStatus = (status: Order['status']) => {
       icon: 'restaurant-outline',
       description: 'Your order is being prepared',
       canCancel: false,
+      showConfirm: false,
+      showTrack: true,
+      showConfirmDelivery: false,
+      buttonText: 'Track Order'
     },
     ready: {
       label: 'Ready for Pickup',
@@ -226,6 +313,21 @@ export const useOrderStatus = (status: Order['status']) => {
       icon: 'bag-check-outline',
       description: 'Order ready for delivery',
       canCancel: false,
+      showConfirm: false,
+      showTrack: true,
+      showConfirmDelivery: false,
+      buttonText: 'Track Order'
+    },
+    ready_for_pickup: {
+      label: 'Ready for Pickup',
+      color: '#FF9800',
+      icon: 'bag-check-outline',
+      description: 'Order ready for delivery',
+      canCancel: false,
+      showConfirm: false,
+      showTrack: true,
+      showConfirmDelivery: false,
+      buttonText: 'Track Order'
     },
     picked_up: {
       label: 'Out for Delivery',
@@ -233,6 +335,21 @@ export const useOrderStatus = (status: Order['status']) => {
       icon: 'car-outline',
       description: 'Driver is on the way',
       canCancel: false,
+      showConfirm: false,
+      showTrack: true,
+      showConfirmDelivery: false,
+      buttonText: 'Track Order'
+    },
+    out_for_delivery: {
+      label: 'Out for Delivery',
+      color: '#9C27B0',
+      icon: 'car-outline',
+      description: 'Driver is on the way',
+      canCancel: false,
+      showConfirm: false,
+      showTrack: true,
+      showConfirmDelivery: false,
+      buttonText: 'Track Order'
     },
     delivered: {
       label: 'Delivered',
@@ -240,6 +357,10 @@ export const useOrderStatus = (status: Order['status']) => {
       icon: 'checkmark-done-circle',
       description: 'Order delivered successfully',
       canCancel: false,
+      showConfirm: false,
+      showTrack: false,
+      showConfirmDelivery: true,
+      buttonText: 'Confirm Delivery'
     },
     cancelled: {
       label: 'Cancelled',
@@ -247,6 +368,10 @@ export const useOrderStatus = (status: Order['status']) => {
       icon: 'close-circle-outline',
       description: 'Order was cancelled',
       canCancel: false,
+      showConfirm: false,
+      showTrack: false,
+      showConfirmDelivery: false,
+      buttonText: ''
     },
   };
 

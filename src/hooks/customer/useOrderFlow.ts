@@ -130,10 +130,7 @@ export const useOrderFlow = () => {
         deliveryAddress: defaultAddress.fullAddress,
         deliveryLatitude: defaultAddress.latitude || 0,
         deliveryLongitude: defaultAddress.longitude || 0,
-        paymentMethod: selectedPaymentMethod as
-          | 'mobile_money'
-          | 'cash'
-          | 'card',
+        paymentMethod: 'mobile_money', // Only mobile money is supported
       };
 
       setFlowState({ step: 'creating' });

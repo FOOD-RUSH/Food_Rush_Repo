@@ -9,6 +9,8 @@ import { Ionicons } from '@expo/vector-icons';
 import {
   useOrderStatus,
   useConfirmOrderReceived,
+  useConfirmOrder,
+  useCancelOrder,
 } from '@/src/hooks/customer/useOrdersApi';
 import { getFoodPlaceholderImage } from '@/src/types/orderReceipt';
 import { OrderDeliveryConfirmationModal } from '@/src/components/customer/OrderConfirmation';
@@ -30,6 +32,10 @@ const OrderItemCard = ({
   const statusInfo = useOrderStatus(order.status);
   const { mutate: confirmReceived, isPending: isConfirming } =
     useConfirmOrderReceived();
+  const { mutate: confirmOrder, isPending: isConfirmingOrder } =
+    useConfirmOrder();
+  const { mutate: cancelOrder, isPending: isCancelling } =
+    useCancelOrder();
 
   // State for confirmation modal
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
@@ -79,6 +85,29 @@ const OrderItemCard = ({
       },
     });
   }, [confirmReceived, order.id]);
+
+  const handleConfirmOrder = useCallback(() => {
+    confirmOrder(order.id, {
+      onSuccess: () => {
+        // Order confirmed, proceed to payment
+        console.log('Order confirmed, proceeding to payment');
+      },
+      onError: (error) => {
+        console.error('Failed to confirm order:', error);
+      },
+    });
+  }, [confirmOrder, order.id]);
+
+  const handleCancelOrder = useCallback(() => {
+    cancelOrder({ orderId: order.id, reason: 'Customer cancelled' }, {
+      onSuccess: () => {
+        console.log('Order cancelled successfully');
+      },
+      onError: (error) => {
+        console.error('Failed to cancel order:', error);
+      },
+    });
+  }, [cancelOrder, order.id]);
 
   const handleReviews = useCallback(
     () =>
@@ -258,66 +287,211 @@ const OrderItemCard = ({
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
           {isActiveOrder ? (
             <>
-              <TouchableOpacity
-                style={{
-                  flex: 1,
-                  borderWidth: 1,
-                  borderRadius: 9999,
-                  paddingVertical: 8,
-                  marginRight: 8,
-                  borderColor: colors.primary,
-                }}
-                onPress={handleTrackOrder}
-              >
-                <Text
-                  style={{
-                    fontWeight: '500',
-                    textAlign: 'center',
-                    fontSize: 18,
-                    color: colors.primary,
-                  }}
-                >
-                  {t('track_driver')}
-                </Text>
-              </TouchableOpacity>
-
-              {order.status === 'picked_up' && (
+              {/* Pending Status - Show Cancel Button Only */}
+              {order.status === 'pending' && (
                 <TouchableOpacity
-                  className="flex-1 rounded-full py-2 ml-2"
-                  style={{ backgroundColor: colors.primary }}
-                  onPress={handleShowConfirmationModal}
-                  disabled={isConfirming}
+                  style={{
+                    flex: 1,
+                    borderWidth: 1,
+                    borderRadius: 9999,
+                    paddingVertical: 8,
+                    borderColor: '#F44336',
+                  }}
+                  onPress={handleCancelOrder}
+                  disabled={isCancelling}
                 >
-                  <Text className="text-white font-medium text-center text-lg">
-                    {t('confirm_delivery', 'Confirm Delivery')}
+                  <Text
+                    style={{
+                      fontWeight: '500',
+                      textAlign: 'center',
+                      fontSize: 18,
+                      color: '#F44336',
+                    }}
+                  >
+                    {isCancelling ? t('cancelling', 'Cancelling...') : t('cancel_order')}
+                  </Text>
+                </TouchableOpacity>
+              )}
+
+              {/* Confirmed Status - Show Confirm & Cancel Buttons */}
+              {order.status === 'confirmed' && (
+                <>
+                  <TouchableOpacity
+                    style={{
+                      flex: 1,
+                      borderWidth: 1,
+                      borderRadius: 9999,
+                      paddingVertical: 8,
+                      marginRight: 8,
+                      borderColor: '#F44336',
+                    }}
+                    onPress={handleCancelOrder}
+                    disabled={isCancelling}
+                  >
+                    <Text
+                      style={{
+                        fontWeight: '500',
+                        textAlign: 'center',
+                        fontSize: 18,
+                        color: '#F44336',
+                      }}
+                    >
+                      {isCancelling ? t('cancelling', 'Cancelling...') : t('cancel_order')}
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={{
+                      flex: 1,
+                      borderRadius: 9999,
+                      paddingVertical: 8,
+                      marginLeft: 8,
+                      backgroundColor: colors.primary,
+                    }}
+                    onPress={handleConfirmOrder}
+                    disabled={isConfirmingOrder}
+                  >
+                    <Text
+                      style={{
+                        fontWeight: '500',
+                        textAlign: 'center',
+                        fontSize: 18,
+                        color: 'white',
+                      }}
+                    >
+                      {isConfirmingOrder ? t('confirming', 'Confirming...') : t('confirm_pay', 'Confirm & Pay')}
+                    </Text>
+                  </TouchableOpacity>
+                </>
+              )}
+
+              {/* After Payment - Show Track Order Button */}
+              {['payment_confirmed', 'preparing', 'ready', 'ready_for_pickup', 'picked_up', 'out_for_delivery'].includes(order.status) && (
+                <TouchableOpacity
+                  style={{
+                    flex: 1,
+                    borderWidth: 1,
+                    borderRadius: 9999,
+                    paddingVertical: 8,
+                    borderColor: colors.primary,
+                  }}
+                  onPress={handleTrackOrder}
+                >
+                  <Text
+                    style={{
+                      fontWeight: '500',
+                      textAlign: 'center',
+                      fontSize: 18,
+                      color: colors.primary,
+                    }}
+                  >
+                    {t('track_order')}
                   </Text>
                 </TouchableOpacity>
               )}
             </>
           ) : (
             <>
-              <TouchableOpacity
-                className="flex-1 border rounded-full py-2 mr-2"
-                style={{ borderColor: colors.primary }}
-                onPress={handleReviews}
-              >
-                <Text
-                  className="font-medium text-center text-lg"
-                  style={{ color: colors.primary }}
-                >
-                  {t('leave_a_review')}
-                </Text>
-              </TouchableOpacity>
+              {/* Delivered Status - Show Confirm Delivery Button OR Review & Reorder Buttons */}
+              {order.status === 'delivered' && (
+                // Check if delivery has been confirmed by customer
+                order.delivery?.customerConfirmed ? (
+                  // Show Review & Reorder Buttons after delivery confirmation
+                  <>
+                    <TouchableOpacity
+                      style={{
+                        flex: 1,
+                        borderWidth: 1,
+                        borderRadius: 9999,
+                        paddingVertical: 8,
+                        marginRight: 8,
+                        borderColor: colors.primary,
+                      }}
+                      onPress={handleReviews}
+                    >
+                      <Text
+                        style={{
+                          fontWeight: '500',
+                          textAlign: 'center',
+                          fontSize: 18,
+                          color: colors.primary,
+                        }}
+                      >
+                        {t('leave_a_review')}
+                      </Text>
+                    </TouchableOpacity>
 
-              <TouchableOpacity
-                className="flex-1 rounded-full py-2 ml-2"
-                style={{ backgroundColor: colors.primary }}
-                onPress={handleReorder}
-              >
-                <Text className="text-white font-medium text-center text-lg">
-                  {t('order_again')}
-                </Text>
-              </TouchableOpacity>
+                    <TouchableOpacity
+                      style={{
+                        flex: 1,
+                        borderRadius: 9999,
+                        paddingVertical: 8,
+                        marginLeft: 8,
+                        backgroundColor: colors.primary,
+                      }}
+                      onPress={handleReorder}
+                    >
+                      <Text
+                        style={{
+                          fontWeight: '500',
+                          textAlign: 'center',
+                          fontSize: 18,
+                          color: 'white',
+                        }}
+                      >
+                        {t('order_again')}
+                      </Text>
+                    </TouchableOpacity>
+                  </>
+                ) : (
+                  // Show Confirm Delivery Button before customer confirmation
+                  <TouchableOpacity
+                    style={{
+                      flex: 1,
+                      borderRadius: 9999,
+                      paddingVertical: 8,
+                      backgroundColor: colors.primary,
+                    }}
+                    onPress={handleShowConfirmationModal}
+                    disabled={isConfirming}
+                  >
+                    <Text
+                      style={{
+                        fontWeight: '500',
+                        textAlign: 'center',
+                        fontSize: 18,
+                        color: 'white',
+                      }}
+                    >
+                      {isConfirming ? t('confirming', 'Confirming...') : t('confirm_delivery')}
+                    </Text>
+                  </TouchableOpacity>
+                )
+              )}
+
+              {/* Cancelled Orders - Show Reorder Button Only */}
+              {order.status === 'cancelled' && (
+                <TouchableOpacity
+                  style={{
+                    flex: 1,
+                    borderRadius: 9999,
+                    paddingVertical: 8,
+                    backgroundColor: colors.primary,
+                  }}
+                  onPress={handleReorder}
+                >
+                  <Text
+                    style={{
+                      fontWeight: '500',
+                      textAlign: 'center',
+                      fontSize: 18,
+                      color: 'white',
+                    }}
+                  >
+                    {t('order_again')}
+                  </Text>
+                </TouchableOpacity>
+              )}
             </>
           )}
         </View>

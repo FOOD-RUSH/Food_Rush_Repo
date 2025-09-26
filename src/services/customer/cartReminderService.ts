@@ -21,6 +21,9 @@ class CartReminderService {
   private config: CartReminderConfig;
   private activeReminders: Map<string, ActiveCartReminder> = new Map();
   private storageKey = 'cart-reminders';
+  private isScheduling = false; // Prevent duplicate scheduling
+  private lastScheduleTime = 0; // Debounce mechanism
+  private readonly SCHEDULE_DEBOUNCE_MS = 2000; // 2 seconds debounce
 
   constructor(config?: Partial<CartReminderConfig>) {
     this.config = {
@@ -99,10 +102,27 @@ class CartReminderService {
     restaurantName?: string,
     lastActivity?: number,
   ): Promise<void> {
+    const now = Date.now();
+    
+    // Debounce rapid successive calls
+    if (now - this.lastScheduleTime < this.SCHEDULE_DEBOUNCE_MS) {
+      console.log('Cart reminder scheduling debounced');
+      return;
+    }
+    
+    // Prevent duplicate scheduling
+    if (this.isScheduling) {
+      console.log('Cart reminder scheduling already in progress');
+      return;
+    }
+
     if (cartItemCount === 0) {
       await this.cancelAllCartReminders();
       return;
     }
+
+    this.lastScheduleTime = now;
+    this.isScheduling = true;
 
     try {
       // Cancel existing reminders first
@@ -139,6 +159,8 @@ class CartReminderService {
       await this.saveActiveReminders();
     } catch (error) {
       console.error('Failed to schedule cart reminders:', error);
+    } finally {
+      this.isScheduling = false;
     }
   }
 
@@ -193,7 +215,9 @@ class CartReminderService {
     restaurantName?: string,
   ): { title: string; body: string } {
     const itemText = cartItemCount === 1 ? 'item' : 'items';
-    const restaurantText = restaurantName ? ` from ${restaurantName}` : '';
+    const restaurantText = restaurantName && restaurantName !== 'Unknown Restaurant' 
+      ? ` from ${restaurantName}` 
+      : '';
 
     if (type === 'first') {
       return {

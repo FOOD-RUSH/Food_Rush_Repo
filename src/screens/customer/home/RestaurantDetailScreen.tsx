@@ -32,6 +32,7 @@ import {
   Caption,
 } from '@/src/components/common/Typography';
 import { useResponsive, useResponsiveSpacing } from '@/src/hooks/useResponsive';
+import ProfessionalErrorDisplay from '@/src/components/common/ProfessionalErrorDisplay';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -701,68 +702,7 @@ const RestaurantDetailScreen = ({
           </TouchableRipple>
         </Card>
 
-        {/* For You Section */}
-        <View style={{ marginTop: spacing.lg }}>
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: spacing.md,
-            }}
-          >
-            <Heading3 color={colors.onSurface} weight="bold">
-              {t('recommended_for_you')}
-            </Heading3>
-          </View>
-          {restaurantDetails.menu && restaurantDetails.menu.length > 0 ? (
-            <FlatList
-              data={restaurantDetails.menu} // Show first 3 menu items
-              renderItem={({ item }) => (
-                <ClassicFoodCard
-                  foodName={item.name}
-                  id={item.id}
-                  foodPrice={item.price}
-                  restaurantName={item.restaurant.name}
-                  distance={item.distanceKm || 0}
-                  rating={4.5}
-                  imageUrl={item.pictureUrl}
-                />
-              )}
-              keyExtractor={(item) => item.id}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingRight: 16 }}
-              ItemSeparatorComponent={seperator}
-            />
-          ) : (
-            <Card
-              style={{
-                backgroundColor: colors.background,
-                padding: spacing.lg,
-                alignItems: 'center',
-              }}
-            >
-              <Heading3
-                color={colors.onSurface}
-                weight="semibold"
-                align="center"
-                style={{ marginBottom: spacing.sm }}
-              >
-                {t('no_menu_items')}
-              </Heading3>
-              <Image source={images.noMenu} className="h-[200px] w-[200px]" />
-              <Button
-                mode="outlined"
-                onPress={() => onRefresh()}
-                textColor={colors.primary}
-                style={{ borderColor: colors.primary }}
-              >
-                {t('refresh')}
-              </Button>
-            </Card>
-          )}
-        </View>
+      
 
         {/* Menu Section */}
         <View style={{ marginTop: spacing.xl }}>
@@ -855,41 +795,20 @@ const RestaurantDetailScreen = ({
               />
             </View>
           ) : (
-            <Card
-              style={{
-                backgroundColor: colors.background,
-                padding: spacing.xl,
-                alignItems: 'center',
-                marginTop: spacing.md,
-              }}
-            >
-              <Heading3
-                color={colors.onSurface}
-                weight="semibold"
-                align="center"
-                style={{ marginBottom: spacing.sm }}
-              >
-                {t('no_items_in_category')}
-              </Heading3>
-              <Image source={images.noMenu} className="h-[200px] w-[200px]" />
-              <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-                <Button
-                  mode="outlined"
-                  onPress={() => setSelectedCategory('All')}
-                  textColor={colors.primary}
-                  style={{ borderColor: colors.primary }}
-                >
-                  {t('view_all_items')}
-                </Button>
-                <Button
-                  mode="contained"
-                  onPress={handleGoBack}
-                  buttonColor={colors.primary}
-                >
-                  {t('back')}
-                </Button>
-              </View>
-            </Card>
+            <View style={{ marginTop: spacing.md }}>
+              <ProfessionalErrorDisplay
+                type="no_items"
+                title={t('no_items_in_category')}
+                message={t('no_items_match_your_current_selection')}
+                onRefresh={() => setSelectedCategory('All')}
+                refreshButtonText={t('view_all_items')}
+                containerStyle={{
+                  backgroundColor: colors.background,
+                  padding: spacing.xl,
+                  minHeight: 350,
+                }}
+              />
+            </View>
           )}
         </View>
       </View>

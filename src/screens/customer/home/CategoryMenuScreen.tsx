@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useLayoutEffect } from 'react';
+import React, { useState, useCallback, useLayoutEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -16,9 +16,10 @@ import CommonView from '@/src/components/common/CommonView';
 import FoodItemCard from '@/src/components/customer/FoodItemCard';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import { FoodProps } from '@/src/types';
-import { useGetAllMenuItem } from '@/src/hooks/customer/useCustomerApi';
+import { useBrowseMenuItems } from '@/src/hooks/customer/useCustomerApi';
 import ErrorDisplay from '@/src/components/common/ErrorDisplay';
 import { getCategoryByTitle } from '@/src/constants/categories';
+import ProfessionalErrorDisplay from '@/src/components/common/ProfessionalErrorDisplay';
 
 type CategoryMenuScreenProps = RootStackScreenProps<'CategoryMenu'>;
 
@@ -37,65 +38,91 @@ const CategoryMenuScreen: React.FC<CategoryMenuScreenProps> = ({
   // Get category info
   const categoryInfo = getCategoryByTitle(categoryTitle);
 
-  // Fetch all menu items
-  const { data: allMenuItems, isLoading, error, refetch } = useGetAllMenuItem();
+  // Fetch menu items for this category using the browse API
+  // Convert display title to API category value
+  const categoryValue = categoryInfo?.title || categoryTitle.toLowerCase().replace(/\s+/g, '-');
+  const { data: categoryMenuItems, isLoading, error, refetch } = useBrowseMenuItems(categoryValue);
+  
+  console.log('Category filtering:', {
+    categoryTitle,
+    categoryValue,
+    categoryInfo,
+  });
 
-  // Filter menu items by category
-  const categoryMenuItems = useMemo(() => {
-    if (!allMenuItems) return [];
-
-    // Filter items based on category
-    // Since we don't have category field from backend, we'll filter by name/description
-    return allMenuItems.filter((item) => {
+  // Apply client-side filtering as backup if API doesn't filter properly
+  const filteredMenuItems = useMemo(() => {
+    if (!categoryMenuItems) return [];
+    
+    // If we have items, check if they're already filtered by the API
+    // If not, apply client-side filtering
+    const filtered = categoryMenuItems.filter((item) => {
+      // First check if item has a category field that matches
+      if (item.category) {
+        return item.category.toLowerCase() === categoryValue.toLowerCase();
+      }
+      
+      // Fallback to name/description matching
       const itemName = item.name.toLowerCase();
       const itemDescription = item.description?.toLowerCase() || '';
-
-      switch (categoryTitle) {
+      
+      switch (categoryValue) {
         case 'local-dishes':
           return (
-            itemName.includes('local') ||
-            itemName.includes('traditional') ||
+            itemName.includes('local') || 
             itemDescription.includes('local') ||
+            itemName.includes('traditional') ||
             itemDescription.includes('traditional')
           );
         case 'snacks':
           return (
-            itemName.includes('snack') ||
+            itemName.includes('snack') || 
+            itemDescription.includes('snack') ||
             itemName.includes('bite') ||
-            itemName.includes('chip') ||
-            itemDescription.includes('snack')
+            itemDescription.includes('bite')
           );
         case 'drinks':
           return (
-            itemName.includes('drink') ||
+            itemName.includes('drink') || 
+            itemDescription.includes('drink') ||
+            itemName.includes('beverage') ||
+            itemDescription.includes('beverage') ||
             itemName.includes('juice') ||
             itemName.includes('water') ||
-            itemName.includes('soda') ||
-            itemDescription.includes('beverage')
+            itemName.includes('soda')
           );
         case 'breakfast':
           return (
             itemName.includes('breakfast') ||
+            itemDescription.includes('breakfast') ||
             itemName.includes('morning') ||
-            itemName.includes('pancake') ||
-            itemName.includes('egg') ||
-            itemDescription.includes('breakfast')
+            itemDescription.includes('morning')
           );
         case 'fast-food':
           return (
-            itemName.includes('burger') ||
-            itemName.includes('fries') ||
+            itemName.includes('burger') || 
             itemName.includes('fast') ||
-            itemDescription.includes('fast')
+            itemName.includes('quick') ||
+            itemDescription.includes('fast') ||
+            itemDescription.includes('quick')
           );
         default:
           return (
-            itemName.includes(categoryTitle) ||
-            itemDescription.includes(categoryTitle)
+            itemName.includes(categoryValue) ||
+            itemDescription.includes(categoryValue)
           );
       }
     });
-  }, [allMenuItems, categoryTitle]);
+    
+    return filtered;
+  }, [categoryMenuItems, categoryValue]);
+
+  console.log('CategoryMenuScreen:', {
+    categoryTitle,
+    categoryValue,
+    totalItems: categoryMenuItems?.length || 0,
+    filteredItems: filteredMenuItems?.length || 0,
+    items: filteredMenuItems,
+  });
 
   const handleGoBack = useCallback(() => {
     navigation.goBack();
@@ -118,12 +145,14 @@ const CategoryMenuScreen: React.FC<CategoryMenuScreenProps> = ({
         <FoodItemCard
           key={item.id}
           foodId={item.id}
-          restaurantId={item.restaurant?.id!}
+          restaurantId={item.restaurant.id}
           FoodName={item.name}
           FoodPrice={item.price}
-          FoodImage={item.pictureUrl}
-          distanceFromUser={item.distanceKm || 0}
-          DeliveryPrice={500} // Default delivery price
+          FoodImage={null} // Will use pictureUrl instead
+          pictureUrl={item.pictureUrl}
+          RestaurantName={item.restaurant.name}
+          distanceKm={item.distanceKm || item.distance || 0}
+          deliveryFee={item.deliveryFee}
           isAvailable={item.isAvailable}
         />
       </View>
@@ -183,9 +212,12 @@ const CategoryMenuScreen: React.FC<CategoryMenuScreenProps> = ({
       <CommonView>
         <SafeAreaView style={{ flex: 1 }}>
           <Header />
-          <ErrorDisplay
-            onRetry={refetch}
-            message={t('error_loading_menu') || t('something_went_wrong')}
+          <ProfessionalErrorDisplay
+            type="network_error"
+            title={t('error_loading_menu')}
+            message={t('please_check_your_internet_connection')}
+            onRefresh={refetch}
+            refreshButtonText={t('retry')}
           />
         </SafeAreaView>
       </CommonView>
@@ -195,9 +227,9 @@ const CategoryMenuScreen: React.FC<CategoryMenuScreenProps> = ({
   return (
     <CommonView>
       {/* Content */}
-      {categoryMenuItems.length > 0 ? (
+      {filteredMenuItems.length > 0 ? (
         <FlatList
-          data={categoryMenuItems}
+          data={filteredMenuItems}
           renderItem={renderFoodItem}
           keyExtractor={keyExtractor}
           contentContainerStyle={styles.listContent}
@@ -212,21 +244,14 @@ const CategoryMenuScreen: React.FC<CategoryMenuScreenProps> = ({
           }
         />
       ) : (
-        <View style={styles.emptyState}>
-          <MaterialIcons
-            name="restaurant-menu"
-            size={64}
-            color={colors.onSurfaceVariant}
-          />
-          <Text style={[styles.emptyTitle, { color: colors.onSurface }]}>
-            {t('no_items_in_category')}
-          </Text>
-          <Text
-            style={[styles.emptySubtitle, { color: colors.onSurfaceVariant }]}
-          >
-            {t('try_browsing_other_categories')}
-          </Text>
-        </View>
+        <ProfessionalErrorDisplay
+          type="no_items"
+          title={t('no_items_in_category')}
+          message={t('try_browsing_other_categories')}
+          onRefresh={onRefresh}
+          refreshButtonText={t('refresh')}
+          containerStyle={{ flex: 1 }}
+        />
       )}
     </CommonView>
   );

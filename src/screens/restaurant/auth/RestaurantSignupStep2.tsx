@@ -46,6 +46,7 @@ import {
   Body,
   Label,
 } from '@/src/components/common/Typography';
+import { useResponsive, useResponsiveFontSize } from '@/src/hooks/useResponsive';
 import * as yup from 'yup';
 
 interface Step2FormData {
@@ -75,8 +76,10 @@ const RestaurantSignupStep2: React.FC<
   AuthStackScreenProps<'RestaurantSignupStep2'>
 > = ({ navigation, route }) => {
   const { colors } = useTheme();
-  const { t } = useTranslation('auth');
+  const { t } = useTranslation('translation');
   const { isConnected, isInternetReachable } = useNetwork();
+  const { scale } = useResponsive();
+  const fontSize = useResponsiveFontSize();
   const {
     mutate: registerRestaurantMutation,
     isPending,
@@ -193,7 +196,7 @@ const RestaurantSignupStep2: React.FC<
       Toast.show({
         type: 'error',
         text1: t('error'),
-        text2: 'No internet connection. Please check your network settings.',
+        text2: t('no_internet_connection'),
         position: 'top',
       });
       return false;
@@ -209,8 +212,8 @@ const RestaurantSignupStep2: React.FC<
       if (!servicesEnabled) {
         Toast.show({
           type: 'error',
-          text1: 'Location Services Disabled',
-          text2: 'Please enable location services in your device settings',
+          text1: t('location_services_disabled'),
+          text2: t('enable_location_services'),
           position: 'top',
         });
         return;
@@ -221,8 +224,8 @@ const RestaurantSignupStep2: React.FC<
         if (!permissionGranted) {
           Toast.show({
             type: 'error',
-            text1: 'Location Permission Required',
-            text2: 'Please allow location access to get exact coordinates',
+            text1: t('location_permission_required'),
+            text2: t('allow_location_access'),
             position: 'top',
           });
           return;
@@ -239,25 +242,25 @@ const RestaurantSignupStep2: React.FC<
         setSelectedLocation(locationResult.location);
         Toast.show({
           type: 'success',
-          text1: 'Location Found',
-          text2: 'Exact GPS coordinates obtained successfully',
+          text1: t('location_found'),
+          text2: t('exact_gps_coordinates_obtained'),
           position: 'top',
         });
       } else {
         Toast.show({
           type: 'error',
-          text1: 'Location Error',
+          text1: t('location_error'),
           text2:
             locationResult.error ||
-            'Could not get exact GPS location. Please try again.',
+            t('could_not_get_exact_location'),
           position: 'top',
         });
       }
     } catch (error) {
       Toast.show({
         type: 'error',
-        text1: 'Location Error',
-        text2: 'Failed to get GPS location. Please try again.',
+        text1: t('location_error'),
+        text2: t('failed_to_get_gps_location'),
         position: 'top',
       });
     } finally {
@@ -273,7 +276,7 @@ const RestaurantSignupStep2: React.FC<
         Toast.show({
           type: 'error',
           text1: t('error'),
-          text2: 'Please accept the terms and conditions',
+          text2: t('please_accept_terms'),
           position: 'top',
         });
         return;
@@ -282,8 +285,8 @@ const RestaurantSignupStep2: React.FC<
       if (!selectedLocation || selectedLocation.isFallback) {
         Toast.show({
           type: 'error',
-          text1: 'Exact Location Required',
-          text2: 'Please get your exact GPS location before registering',
+          text1: t('exact_location_required'),
+          text2: t('get_exact_gps_location'),
           position: 'top',
         });
         return;
@@ -309,9 +312,8 @@ const RestaurantSignupStep2: React.FC<
           onSuccess: () => {
             Toast.show({
               type: 'success',
-              text1: 'Registration Successful',
-              text2:
-                'Your restaurant registration has been submitted and is awaiting approval.',
+              text1: t('registration_successful'),
+              text2: t('registration_submitted_awaiting_approval'),
               position: 'top',
             });
             navigation.navigate('AwaitingApproval');
@@ -359,7 +361,7 @@ const RestaurantSignupStep2: React.FC<
     Toast.show({
       type: 'info',
       text1: t('info'),
-      text2: 'Terms of service will be implemented',
+      text2: t('terms_will_be_implemented'),
       position: 'top',
     });
   }, [t]);
@@ -368,7 +370,7 @@ const RestaurantSignupStep2: React.FC<
     Toast.show({
       type: 'info',
       text1: t('info'),
-      text2: 'Privacy policy will be implemented',
+      text2: t('privacy_policy_will_be_implemented'),
       position: 'top',
     });
   }, [t]);
@@ -389,16 +391,16 @@ const RestaurantSignupStep2: React.FC<
         setDocumentName(asset.fileName || 'Document');
         Toast.show({
           type: 'success',
-          text1: 'Success',
-          text2: 'Document uploaded successfully',
+          text1: t('success'),
+          text2: t('document_uploaded_successfully'),
           position: 'top',
         });
       }
     } catch (error) {
       Toast.show({
         type: 'error',
-        text1: 'Error',
-        text2: 'Failed to pick document',
+        text1: t('error'),
+        text2: t('failed_to_pick_document'),
         position: 'top',
       });
     }
@@ -419,16 +421,16 @@ const RestaurantSignupStep2: React.FC<
         setProfileImageUri(asset.uri);
         Toast.show({
           type: 'success',
-          text1: 'Success',
-          text2: 'Profile image updated successfully',
+          text1: t('success'),
+          text2: t('profile_image_updated_successfully'),
           position: 'top',
         });
       }
     } catch (error) {
       Toast.show({
         type: 'error',
-        text1: 'Error',
-        text2: 'Failed to pick image',
+        text1: t('error'),
+        text2: t('failed_to_pick_image'),
         position: 'top',
       });
     }
@@ -566,7 +568,7 @@ const RestaurantSignupStep2: React.FC<
 
         <Heading1
           style={{
-            fontSize: 28,
+            fontSize: fontSize.getSize(28),
             fontWeight: '700',
             color: 'white',
             textAlign: 'center',
@@ -577,12 +579,12 @@ const RestaurantSignupStep2: React.FC<
             fontFamily: 'Urbanist-Bold',
           }}
         >
-          Restaurant Details
+          {t('restaurant_details')}
         </Heading1>
 
         <Body
           style={{
-            fontSize: 16,
+            fontSize: fontSize.getSize(16),
             color: 'rgba(255, 255, 255, 0.9)',
             textAlign: 'center',
             fontFamily: 'Urbanist-Medium',
@@ -591,7 +593,7 @@ const RestaurantSignupStep2: React.FC<
             textShadowRadius: 4,
           }}
         >
-          Step 2 of 2 - Almost done!
+          {t('step_2_of_2_almost_done')}
         </Body>
       </Animated.View>
 
@@ -634,8 +636,8 @@ const RestaurantSignupStep2: React.FC<
               render={({ field: { onChange, onBlur, value } }) => (
                 <View style={{ marginBottom: 24 }}>
                   <TextInput
-                    label="Restaurant Name"
-                    placeholder="Enter your restaurant name"
+                    label={t('restaurant_name')}
+                    placeholder={t('enter_your_restaurant_name')}
                     value={value}
                     onChangeText={onChange}
                     onBlur={onBlur}
@@ -649,7 +651,7 @@ const RestaurantSignupStep2: React.FC<
                     }}
                     contentStyle={{
                       fontFamily: 'Urbanist-Regular',
-                      fontSize: 16,
+                      fontSize: fontSize.getSize(16),
                     }}
                     outlineStyle={{
                       borderRadius: 14,
@@ -695,18 +697,18 @@ const RestaurantSignupStep2: React.FC<
                         ? colors.primary
                         : colors.onSurface,
                       fontFamily: 'Urbanist-SemiBold',
-                      fontSize: 14,
+                      fontSize: fontSize.getSize(14),
                       marginBottom: 4,
                     }}
                   >
-                    Restaurant Location
+                    {t('restaurant_location')}
                   </Label>
                   {selectedLocation ? (
                     <Body
                       style={{
                         color: colors.onSurface,
                         fontFamily: 'Urbanist-Regular',
-                        fontSize: 14,
+                        fontSize: fontSize.getSize(14),
                       }}
                       numberOfLines={2}
                     >
@@ -717,10 +719,10 @@ const RestaurantSignupStep2: React.FC<
                       style={{
                         color: colors.onSurfaceVariant,
                         fontFamily: 'Urbanist-Regular',
-                        fontSize: 14,
+                        fontSize: fontSize.getSize(14),
                       }}
                     >
-                      Tap to set your exact location
+                      {t('tap_to_set_exact_location')}
                     </Body>
                   )}
                 </View>
@@ -777,7 +779,7 @@ const RestaurantSignupStep2: React.FC<
                   flex: 1,
                 }}
               >
-                {documentName || 'Upload Document (Optional)'}
+                {documentName || t('upload_document_optional')}
               </Body>
               <Ionicons
                 name="cloud-upload-outline"
@@ -808,11 +810,11 @@ const RestaurantSignupStep2: React.FC<
                     flexWrap: 'wrap',
                   }}
                 >
-                  I agree to the{' '}
-                  <TextButton onPress={openTerms} text="Terms of Service" /> and{' '}
+                  {t('i_agree_to_the')}{' '}
+                  <TextButton onPress={openTerms} text={t('terms_of_service')} /> {t('and')}{' '}
                   <TextButton
                     onPress={openPrivacyPolicy}
-                    text="Privacy Policy"
+                    text={t('privacy_policy')}
                   />
                 </Body>
               </View>
@@ -839,12 +841,12 @@ const RestaurantSignupStep2: React.FC<
               style={buttonStyle}
               contentStyle={{ paddingVertical: 10 }}
               labelStyle={{
-                fontSize: 16,
+                fontSize: fontSize.getSize(16),
                 fontWeight: '600',
                 fontFamily: 'Urbanist-Bold',
               }}
             >
-              {isPending ? 'Creating Account...' : 'Complete Registration'}
+              {isPending ? t('creating_account') : t('complete_registration')}
             </Button>
           </ScrollView>
         </KeyboardAvoidingView>
@@ -881,7 +883,7 @@ const RestaurantSignupStep2: React.FC<
                 color: colors.onSurface,
               }}
             >
-              Restaurant Location
+              {t('restaurant_location')}
             </Heading2>
             <TouchableOpacity onPress={() => setShowLocationModal(false)}>
               <Ionicons name="close" size={24} color={colors.onSurface} />
@@ -913,14 +915,14 @@ const RestaurantSignupStep2: React.FC<
                   color: colors.onSurface,
                 }}
               >
-                Location Instructions
+                {t('location_instructions')}
               </Heading2>
 
               <View style={{ width: '100%', gap: 16, marginBottom: 20 }}>
                 {[
-                  'You must be physically present at your restaurant location',
-                  'Ensure GPS and location services are enabled',
-                  'This will be your official address for deliveries',
+                  t('you_must_be_physically_present'),
+                  t('ensure_gps_location_enabled'),
+                  t('official_address_for_deliveries'),
                 ].map((instruction, index) => (
                   <View
                     key={index}
@@ -964,7 +966,7 @@ const RestaurantSignupStep2: React.FC<
                     color: colors.error,
                   }}
                 >
-                  Ensure you are at the correct location before proceeding
+                  {t('ensure_correct_location')}
                 </Body>
               </View>
             </View>
@@ -987,7 +989,7 @@ const RestaurantSignupStep2: React.FC<
               style={{ flex: 1, borderRadius: 12 }}
               labelStyle={{ fontFamily: 'Urbanist-SemiBold' }}
             >
-              Cancel
+              {t('cancel')}
             </Button>
 
             <Button
@@ -1001,7 +1003,7 @@ const RestaurantSignupStep2: React.FC<
               style={{ flex: 1, borderRadius: 12 }}
               labelStyle={{ fontFamily: 'Urbanist-Bold' }}
             >
-              {isGettingLocation ? 'Getting Location...' : 'Get Location'}
+              {isGettingLocation ? t('getting_location') : t('get_location')}
             </Button>
           </View>
         </View>

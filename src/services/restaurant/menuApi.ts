@@ -118,12 +118,16 @@ export const restaurantMenuApi = {
       // Following React Native FormData requirements for binary uploads
       const formData = new FormData();
 
-      // Append text fields
+      // Append text fields - all FormData values must be strings
       formData.append('name', data.name);
-      formData.append('description', data.description);
+      
+      if (data.description) {
+        formData.append('description', data.description);
+      }
+      
       formData.append('price', data.price.toString());
       formData.append('category', data.category);
-      formData.append('isAvailable', data.isAvailable.toString());
+      formData.append('isAvailable', data.isAvailable.toString()); // Convert boolean to string
 
       // Add scheduling times if provided
       if (data.startAt) {
@@ -150,7 +154,7 @@ export const restaurantMenuApi = {
         description: data.description,
         price: data.price,
         category: data.category,
-        isAvailable: data.isAvailable,
+        isAvailable: data.isAvailable.toString(), // Showing as string (FormData requirement)
         picture: {
           name: data.picture.name,
           type: data.picture.type,
@@ -158,22 +162,22 @@ export const restaurantMenuApi = {
         },
         startAt: data.startAt || null,
         endAt: data.endAt || null,
-        contentType: 'multipart/form-data',
+        note: 'All FormData values are converted to strings as required',
       });
 
       // Send multipart/form-data request
-      // Important: Do NOT set Content-Type manually - let fetch/axios set the boundary
+      // Important: Do NOT set Content-Type manually - let axios set the boundary
+      console.log('📤 Sending FormData to:', `/restaurants/${restaurantId}/menu`);
+      
       const response = await apiClient.post<ApiResponse<MenuItem>>(
         `/restaurants/${restaurantId}/menu`,
         formData,
         {
-          timeout: 60000, // Increase timeout for file uploads
+          // Explicitly ensure no Content-Type header is set for FormData
           headers: {
-            // Do NOT set Content-Type manually for FormData
-            // axios will automatically set 'multipart/form-data' with proper boundary
-            Accept: 'application/json',
+            // Let axios set the Content-Type with proper boundary
           },
-        },
+        }
       );
 
       console.log('✅ Menu item created successfully with image:', {

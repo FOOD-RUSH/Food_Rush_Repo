@@ -20,12 +20,18 @@
           "location",
           "fetch",
           "background-processing",
+          "remote-notification",
+          "location",
+          "fetch",
+          "background-processing",
           "remote-notification"
         ],
         "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to your location to show nearby restaurants and provide accurate delivery services.",
         "NSLocationWhenInUseUsageDescription": "This app needs access to your location to show nearby restaurants and calculate delivery times.",
-        "NSUserNotificationUsageDescription": "This app uses notifications to update you about your orders and special offers."
-      }
+        "NSUserNotificationUsageDescription": "This app uses notifications to update you about your orders and special offers.",
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "bundleIdentifier": "com.mrcalculus.foodrush"
     },
     "android": {
       "package": "com.mrcalculus.foodrush",
@@ -43,7 +49,9 @@
         "ACCESS_NETWORK_STATE",
         "RECEIVE_BOOT_COMPLETED",
         "VIBRATE",
-        "WAKE_LOCK"
+        "WAKE_LOCK",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
       ]
     },
     "web": {
@@ -51,8 +59,10 @@
       "output": "single",
       "favicon": "./assets/images/favicon.png"
     },
-
-    "assetBundlePatterns": ["assets/fonts/*", "assets/images/*"],
+    "assetBundlePatterns": [
+      "assets/fonts/*",
+      "assets/images/*"
+    ],
     "plugins": [
       "expo-font",
       "expo-asset",
@@ -75,7 +85,9 @@
           "icon": "./assets/images/notification-icon.png",
           "color": "#007aff",
           "defaultChannel": "default",
-          "sounds": ["./assets/sounds/notification.wav"]
+          "sounds": [
+            "./assets/sounds/notification.wav"
+          ]
         }
       ]
     ],

@@ -12,17 +12,19 @@ export interface FoodItemCardProps {
   foodId: string;
   restaurantId: string;
   FoodName?: string;
-  FoodPrice: number;
+  FoodPrice: string | number; // Accept both string and number
   FoodImage: any;
   RestaurantName: string;
-  distanceFromUser: number;
-  DeliveryPrice: number;
+  distanceFromUser?: number;
+  DeliveryPrice?: number;
   hasPromo?: boolean;
   onLike?: () => void;
   loved?: boolean;
   // Additional props from API
   distanceKm?: number;
   isAvailable?: boolean;
+  deliveryFee?: number | null;
+  pictureUrl?: string | null;
 }
 
 const FoodItemCard = ({
@@ -32,13 +34,15 @@ const FoodItemCard = ({
   FoodPrice,
   FoodImage,
   RestaurantName,
-  distanceFromUser,
-  DeliveryPrice,
+  distanceFromUser = 0,
+  DeliveryPrice = 0,
   hasPromo = false,
   onLike,
   loved = false,
   distanceKm,
   isAvailable = true,
+  deliveryFee,
+  pictureUrl,
 }: FoodItemCardProps) => {
   const navigation =
     useNavigation<CustomerHomeStackScreenProps<'HomeScreen'>['navigation']>();
@@ -47,6 +51,35 @@ const FoodItemCard = ({
   const { isSmallDevice, getResponsiveSpacing, scale } = useResponsive();
 
   const primaryColor = colors.primary;
+
+  // Helper functions to handle data
+  const getImageSource = () => {
+    if (pictureUrl) {
+      // Handle backend image URL
+      const baseUrl = 'https://your-api-base-url.com'; // Replace with actual API base URL
+      return { uri: pictureUrl.startsWith('http') ? pictureUrl : `${baseUrl}${pictureUrl}` };
+    }
+    return FoodImage || images.onboarding2;
+  };
+
+  const getFormattedPrice = () => {
+    const price = typeof FoodPrice === 'string' ? parseFloat(FoodPrice) : FoodPrice;
+    return isNaN(price) ? 'N/A' : price.toLocaleString();
+  };
+
+  const getDeliveryFee = () => {
+    if (deliveryFee !== null && deliveryFee !== undefined) {
+      return deliveryFee;
+    }
+    return DeliveryPrice || 0;
+  };
+
+  const getDistance = () => {
+    if (distanceKm !== null && distanceKm !== undefined) {
+      return distanceKm;
+    }
+    return distanceFromUser || 0;
+  };
 
   return (
     <TouchableOpacity

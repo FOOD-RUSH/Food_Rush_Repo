@@ -24,6 +24,9 @@ export interface RestaurantQuery {
 export interface FoodQuery {
   nearLat?: number;
   nearLng?: number;
+  category?: string;
+  limit?: number;
+  page?: number;
 }
 
 interface FoodItems {
@@ -85,15 +88,62 @@ export const restaurantApi = {
     }
   },
 
-  // Get all nearby menu items
+  // Get all nearby menu items with coordinates
   getAllMenuItems: async (query: FoodQuery) => {
     try {
+      console.log('🍽️ Get All Menu Items API Call:', {
+        endpoint: '/menu/all/nearby',
+        params: query,
+        coordinates: { lat: query.nearLat, lng: query.nearLng },
+      });
+      
       const response = await apiClient.get<FoodItems>('/menu/all/nearby', {
         params: query,
       });
+      
+      console.log('🍽️ Get All Menu Items API Response:', {
+        status: response.status,
+        dataCount: response.data.data?.length || 0,
+        firstItem: response.data.data?.[0] || null,
+      });
+      
       return response.data.data;
     } catch (error) {
+      console.error('❌ Get All Menu Items API Error:', error);
       logError(error, 'getAllMenuItems');
+      throw error;
+    }
+  },
+
+  // Browse menu items with category filtering
+  browseMenuItems: async (query: FoodQuery) => {
+    try {
+      console.log('🍽️ Browse Menu Items API Call:', {
+        endpoint: '/menu/browse',
+        params: query,
+        coordinates: { lat: query.nearLat, lng: query.nearLng },
+        category: query.category,
+      });
+      
+      const response = await apiClient.get<FoodItems>('/menu/browse', {
+        params: query,
+      });
+      
+      console.log('🍽️ Browse Menu Items API Response:', {
+        status: response.status,
+        dataCount: response.data.data?.length || 0,
+        category: query.category,
+        firstItem: response.data.data?.[0] || null,
+        sampleCategories: response.data.data?.slice(0, 3).map(item => ({
+          name: item.name,
+          category: item.category
+        })) || [],
+      });
+      
+      return response.data.data;
+    } catch (error) {
+      console.error('❌ Browse Menu Items API Error:', error);
+      logError(error, 'browseMenuItems');
       throw error;
     }
   },

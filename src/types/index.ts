@@ -60,23 +60,25 @@ export interface FoodProps {
   id: string;
   name: string;
   description: string;
-  price: number;
-  pictureUrl?: string;
-  image?: any;
-  category?: string;
-  isAvailable?: boolean;
-  restaurant?: {
+  price: string; // Backend returns price as string
+  pictureUrl: string | null;
+  image?: any; // For backward compatibility
+  category: string;
+  isAvailable: boolean;
+  restaurant: {
     id: string;
     name: string;
     latitude: number | null;
     longitude: number | null;
   };
-  startAt: string | null;
-  endAt: string | null;
+  startAt: string;
+  endAt: string;
   createdAt: string;
   updatedAt: string;
+  deliveryFee: number | null;
   // Backend-calculated distance from user's location (in kilometers)
-  distance: number | null;
+  distance?: number | null;
+  distanceKm?: number | null;
   // Backend-calculated delivery info (when available)
   estimatedDeliveryTime?: string;
   deliveryPrice?: number;

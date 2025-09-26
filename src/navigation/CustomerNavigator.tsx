@@ -22,6 +22,7 @@ import HomeScreen from '../screens/customer/home/HomeScreen';
 import ProfileHomeScreen from '../screens/customer/Profile/ProfileHomeScreen';
 import CompletedOrderScreen from '../screens/customer/Order/CompletedOrderScreen';
 import ActiveOrderScreen from '../screens/customer/Order/ActiveOrderScreen';
+import CancelledOrderScreen from '../screens/customer/Order/CancelledOrderScreen';
 import FAQ from '../screens/customer/Profile/FAQ';
 
 // Import theme and assets
@@ -81,7 +82,7 @@ function CustomerOrderStackScreen() {
         },
         tabBarLabelStyle: {
           fontFamily: 'Urbanist-SemiBold',
-          fontSize: 14,
+          fontSize: 12,
           textTransform: 'none',
         },
         lazy: true,
@@ -96,6 +97,11 @@ function CustomerOrderStackScreen() {
         name="PendingOrdersScreen"
         component={ActiveOrderScreen}
         options={{ title: t('pending') }}
+      />
+      <CustomerOrderStack.Screen
+        name="CancelledOrdersScreen"
+        component={CancelledOrderScreen}
+        options={{ title: t('cancelled') }}
       />
     </CustomerOrderStack.Navigator>
   );
@@ -117,7 +123,6 @@ export function CustomerHelpCenterStackScreen() {
           borderTopColor: navigationTheme.colors.card,
           marginBottom: -50,
         },
-        headerShown: true,
         tabBarIndicatorStyle: {
           backgroundColor: navigationTheme.colors.primary,
         },
@@ -129,7 +134,11 @@ export function CustomerHelpCenterStackScreen() {
         lazy: true,
       }}
     >
-      <CustomerHelpStack.Screen name="FAQ" component={FAQ} />
+      <CustomerHelpStack.Screen 
+        name="FAQ" 
+        component={FAQ}
+        options={{ title: t('faq') }}
+      />
       <CustomerHelpStack.Screen
         name="ContactUs"
         component={ContactUs}

@@ -14,6 +14,53 @@ const CACHE_CONFIG = {
 
 // Note: useMenuCategories has been moved to shared/useCategoriesApi for consistency
 
+// Hook for browsing menu items with category filtering
+export const useBrowseMenuItems = (
+  category?: string,
+  options: { enabled?: boolean } = {},
+) => {
+  const { nearLat, nearLng, locationQueryKey, locationSource } =
+    useLocationForQueries();
+
+  console.log('🍽️ useBrowseMenuItems Hook:', {
+    nearLat,
+    nearLng,
+    category,
+    locationSource,
+    enabled: (options.enabled ?? true) && !!(nearLat && nearLng),
+  });
+
+  return useQuery({
+    queryKey: ['menu', 'browse', category || 'all', ...locationQueryKey],
+    queryFn: async () => {
+      try {
+        console.log('🔄 Fetching menu items with category filter:', {
+          nearLat,
+          nearLng,
+          category,
+        });
+        const result = await restaurantApi.browseMenuItems({
+          nearLat,
+          nearLng,
+          category,
+        });
+        console.log('✅ Menu items fetched:', {
+          count: result?.length || 0,
+          category,
+        });
+        return result;
+      } catch (error) {
+        console.error('❌ Error fetching menu items:', error);
+        throw error;
+      }
+    },
+    enabled: (options.enabled ?? true) && !!(nearLat && nearLng),
+    staleTime: CACHE_CONFIG.STALE_TIME,
+    gcTime: CACHE_CONFIG.CACHE_TIME,
+    retry: CACHE_CONFIG.MAX_RETRIES,
+  });
+};
+
 // Hook for nearby menu items with live location
 export const useGetAllMenu = (options: { enabled?: boolean } = {}) => {
   const { nearLat, nearLng, locationQueryKey, locationSource } =

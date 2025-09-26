@@ -53,32 +53,58 @@ const useSearchFood = (query: string, filters: GeneralFilterOptions) => {
       );
     }
 
-    // Apply category filter
+    // Apply category filter - use actual category field from API
     if (filters.category) {
       results = results.filter((item) => {
+        // First check if item has a category field that matches exactly
+        if (item.category) {
+          return item.category.toLowerCase() === filters.category.toLowerCase();
+        }
+        
+        // Fallback to name/description matching for backward compatibility
         const itemName = item.name.toLowerCase();
         const itemDescription = item.description?.toLowerCase() || '';
 
         switch (filters.category) {
           case 'local-dishes':
             return (
-              itemName.includes('local') || itemDescription.includes('local')
+              itemName.includes('local') || 
+              itemDescription.includes('local') ||
+              itemName.includes('traditional') ||
+              itemDescription.includes('traditional')
             );
           case 'snacks':
             return (
-              itemName.includes('snack') || itemDescription.includes('snack')
+              itemName.includes('snack') || 
+              itemDescription.includes('snack') ||
+              itemName.includes('bite') ||
+              itemDescription.includes('bite')
             );
           case 'drinks':
             return (
-              itemName.includes('drink') || itemDescription.includes('drink')
+              itemName.includes('drink') || 
+              itemDescription.includes('drink') ||
+              itemName.includes('beverage') ||
+              itemDescription.includes('beverage') ||
+              itemName.includes('juice') ||
+              itemName.includes('water') ||
+              itemName.includes('soda')
             );
           case 'breakfast':
             return (
               itemName.includes('breakfast') ||
-              itemDescription.includes('breakfast')
+              itemDescription.includes('breakfast') ||
+              itemName.includes('morning') ||
+              itemDescription.includes('morning')
             );
           case 'fast-food':
-            return itemName.includes('burger') || itemName.includes('fast');
+            return (
+              itemName.includes('burger') || 
+              itemName.includes('fast') ||
+              itemName.includes('quick') ||
+              itemDescription.includes('fast') ||
+              itemDescription.includes('quick')
+            );
           default:
             return (
               itemName.includes(filters.category) ||
