@@ -8,6 +8,7 @@
     "scheme": "foodrush",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "platforms": ["android", "ios"],
     "splash": {
       "image": "./assets/images/SplashScreen.png",
       "resizeMode": "contain",
@@ -27,7 +28,9 @@
         "NSUserNotificationUsageDescription": "This app uses notifications to update you about your orders and special offers.",
         "ITSAppUsesNonExemptEncryption": false
       },
-      "bundleIdentifier": "com.mrcalculus.foodrush"
+      "bundleIdentifier": "com.mrcalculus.foodrush",
+      "buildNumber": "1",
+      "deploymentTarget": "13.0"
     },
     "android": {
       "package": "com.mrcalculus.foodrush",
@@ -47,18 +50,17 @@
         "WAKE_LOCK"
       ],
       "enableProguard": true,
-      "enableHermes": true
-    },
-    "web": {
-      "bundler": "metro",
-      "output": "single",
-      "favicon": "./assets/images/favicon.png"
+      "enableHermes": true,
+      "usesCleartextTraffic": false,
+      "allowBackup": false,
+      "compileSdkVersion": 34,
+      "targetSdkVersion": 34,
+      "minSdkVersion": 23
     },
     "assetBundlePatterns": [
       "assets/fonts/*.ttf",
       "assets/images/Foodrushlogo.png",
       "assets/images/SplashScreen.png",
-      "assets/images/favicon.png",
       "assets/images/notification-icon.png",
       "assets/images/NoOrdersDark.png",
       "assets/images/NoOrdersLight.png",
@@ -86,7 +88,7 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "This app needs access to your location to show nearby restaurants and provide accurate delivery services.",
+          "locationAlwaysAndWhenInUseUsageDescription": "This app needs access to your location to show nearby restaurants and provide accurate delivery services.",
           "locationAlwaysPermission": "This app needs access to your location to show nearby restaurants and provide delivery services even when the app is in the background.",
           "locationWhenInUsePermission": "This app needs access to your location to show nearby restaurants and calculate delivery times.",
           "isIosBackgroundLocationEnabled": false,

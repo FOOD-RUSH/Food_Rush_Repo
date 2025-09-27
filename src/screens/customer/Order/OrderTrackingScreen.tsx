@@ -415,7 +415,7 @@ const OrderTrackingScreen = ({
             className="flex-row items-center justify-center py-4 rounded-xl mb-4"
             style={{ backgroundColor: colors.surfaceVariant }}
             onPress={() => {
-              // TODO: Implement contact support functionality
+              // Contact support functionality to be implemented
               Toast.show({
                 type: 'info',
                 text1: t('info'),

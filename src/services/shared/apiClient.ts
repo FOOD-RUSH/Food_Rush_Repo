@@ -38,10 +38,6 @@ class ApiClient {
     this.client = axios.create({
       baseURL,
       timeout: 30000,
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-      },
     });
 
     this.setupInterceptors();
@@ -70,12 +66,7 @@ class ApiClient {
             config.headers.Authorization = `Bearer ${token}`;
             // Log API request details for debugging (without sensitive data)
             const isFormData = config.data instanceof FormData;
-            console.log('🚀 API Request:', {
-              method: config.method?.toUpperCase(),
-              url: `${config.baseURL}${config.url}`,
-              hasAuth: !!token,
-              contentType: isFormData ? 'multipart/form-data' : (config.headers['Content-Type'] || 'application/json'),
-            });
+            // API Request: method, url, hasAuth, contentType
           } else if (config.url && !config.url.includes('/auth/')) {
             // Warn if no token is available for protected routes
             console.warn(
@@ -99,11 +90,7 @@ class ApiClient {
     this.client.interceptors.response.use(
       (response) => {
         // Log successful API responses for debugging
-        console.log('✅ API Response:', {
-          status: response.status,
-          url: response.config.url,
-          method: response.config.method?.toUpperCase(),
-        });
+        // API Response: status, url, method
         return response;
       },
       async (error: AxiosError) => {
@@ -196,10 +183,7 @@ class ApiClient {
     try {
       const refreshToken = await TokenManager.getRefreshToken();
 
-      console.log(
-        '🔄 Attempting token refresh for request:',
-        originalRequest.url,
-      );
+      // Attempting token refresh for request: originalRequest.url
 
       if (!refreshToken) {
         console.warn('⚠️ No refresh token available, logging out');
@@ -214,7 +198,7 @@ class ApiClient {
       }
 
       if (this.isRefreshing) {
-        console.log('🔄 Token refresh in progress, queuing request');
+        // Token refresh in progress, queuing request
         return new Promise((resolve, reject) => {
           this.refreshSubscribers.push((token: string) => {
             if (originalRequest.headers) {
@@ -244,7 +228,7 @@ class ApiClient {
         throw new Error('Invalid refresh token response');
       }
 
-      console.log('✅ Token refresh successful');
+      // Token refresh successful
       await TokenManager.setTokens(accessToken, newRefreshToken);
 
       // Update original request

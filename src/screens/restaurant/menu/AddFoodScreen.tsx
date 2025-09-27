@@ -24,7 +24,7 @@ import { useTranslation } from 'react-i18next';
 import {
   pickImageForUpload,
   isValidImageType,
-  createImageFormDataObject,
+  SimpleImageResult,
 } from '@/src/utils/imageUtils';
 import { CreateMenuItemRequest } from '@/src/services/restaurant/menuApi';
 import {
@@ -41,8 +41,7 @@ interface FormData {
   price: string;
   description: string;
   category: string;
-  imageUri: string | null;
-  imageFile: { uri: string; type: string; name: string } | null;
+  picture?: SimpleImageResult; // Fixed: Use proper SimpleImageResult type
   startTime: Date | null;
   endTime: Date | null;
 }
@@ -111,7 +110,8 @@ const ImageUploadSection = React.memo<{
             <ActivityIndicator size="large" color={colors.primary} />
           ) : (
             <>
-              <MaterialCommunityIcon                 name="camera-plus"
+              <MaterialCommunityIcon 
+                name="camera-plus"
                 size={48}
                 color={colors.primary}
               />
@@ -224,8 +224,7 @@ export const AddFoodScreen = () => {
     price: '',
     description: '',
     category: '',
-    imageUri: null,
-    imageFile: null,
+    picture: undefined, // Fixed: Initialize as undefined instead of object
     startTime: null,
     endTime: null,
   });
@@ -296,50 +295,37 @@ export const AddFoodScreen = () => {
     };
   }, [formData, t]);
 
-  // Enhanced image picker for menu items - only JPG or PNG with proper validation
+  // Fixed image picker that properly validates JPG/PNG and returns correct format
   const handleImagePick = useCallback(async () => {
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       setIsUploading(true);
 
-      const result = await pickImageForUpload();
-
-      if (result) {
-        // Enhanced validation for image type (JPG/PNG only)
-        if (!isValidImageType(result.type)) {
+      // Use the utility function for proper image picking and validation
+      const imageResult = await pickImageForUpload();
+      
+      if (imageResult) {
+        // Validate image type (JPG/PNG only)
+        if (!isValidImageType(imageResult.type)) {
           Alert.alert(
             t('invalid_image_type') || 'Invalid Image Type',
-            `Please select a JPG or PNG image only. Selected type: ${result.type}`,
+            `Please select a JPG or PNG image only. Selected type: ${imageResult.type}`,
           );
           return;
         }
 
-        // Optional: Validate image file size (10MB limit)
-        // Note: fileSize might not be available on all platforms
-        // if (!isValidImageSize(result.fileSize, 10)) {
-        //   Alert.alert(
-        //     t('image_too_large') || 'Image Too Large',
-        //     'Please select an image smaller than 10MB.'
-        //   );
-        //   return;
-        // }
-
-        // Create properly formatted image object for FormData upload
-        const imageFormDataObject = createImageFormDataObject(result);
-
         // Update form data with validated image
         updateFormData({
-          imageUri: result.uri,
-          imageFile: imageFormDataObject, // Properly formatted for React Native FormData
+          picture: imageResult // This now has proper { uri, type, name } format
         });
 
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
         console.log('✅ Image validated and selected for menu item:', {
-          type: result.type,
-          name: result.name,
-          uri: result.uri.substring(0, 50) + '...',
-          isValidType: isValidImageType(result.type),
+          type: imageResult.type,
+          name: imageResult.name,
+          uri: imageResult.uri.substring(0, 50) + '...',
+          isValidType: isValidImageType(imageResult.type),
           formDataReady: true,
         });
       }
@@ -351,7 +337,7 @@ export const AddFoodScreen = () => {
       // Handle specific error types
       if (error?.message?.includes('Permission')) {
         errorMessage =
-          t('camera_permission_denied') ||
+          t('errors.camera_permission_denied') ||
           'Camera permission was denied. Please enable it in settings.';
       } else if (error?.message?.includes('Unsupported image type')) {
         errorMessage = error.message;
@@ -411,7 +397,7 @@ export const AddFoodScreen = () => {
         price: parseFloat(formData.price),
         category: formData.category as any,
         isAvailable: true,
-        picture: formData.imageFile || undefined,
+        picture: formData.picture, // Fixed: Use the properly formatted picture object
         startAt: startAtISO,
         endAt: endAtISO,
       };
@@ -422,6 +408,11 @@ export const AddFoodScreen = () => {
         price: menuItemData.price,
         category: menuItemData.category,
         hasImage: !!menuItemData.picture,
+        imageDetails: menuItemData.picture ? {
+          name: menuItemData.picture.name,
+          type: menuItemData.picture.type,
+          uri: menuItemData.picture.uri.substring(0, 50) + '...'
+        } : null,
         hasSchedule: !!(menuItemData.startAt && menuItemData.endAt),
       });
 
@@ -492,7 +483,7 @@ export const AddFoodScreen = () => {
 
           {/* Image Upload */}
           <ImageUploadSection
-            imageUri={formData.imageUri}
+            imageUri={formData.picture?.uri || null}
             isUploading={isUploading}
             onImagePick={handleImagePick}
           />
@@ -655,7 +646,8 @@ export const AddFoodScreen = () => {
               style={{ backgroundColor: colors.errorContainer }}
             >
               <View className="flex-row items-center mb-2">
-                <MaterialCommunityIcon                   name="alert-circle"
+                <MaterialCommunityIcon 
+                  name="alert-circle"
                   size={20}
                   color={colors.error}
                 />

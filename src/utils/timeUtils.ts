@@ -450,34 +450,4 @@ export const getMaximumAvailabilityDate = (): Date => {
   return maxDate;
 };
 
-/**
- * Test function to verify time format generation
- * This will log examples of the generated format
- */
-export const testTimeFormat = () => {
-  console.log('Testing time format generation:');
-
-  // Test with 6:00 AM (like the example: 2025-08-13T06:00:00Z)
-  const morning = createTimeOnlyISO(6, 0);
-  console.log('6:00 AM =>', morning);
-
-  // Test with 2:30 PM
-  const afternoon = createTimeOnlyISO(14, 30);
-  console.log('2:30 PM =>', afternoon);
-
-  // Test with 11:59 PM
-  const night = createTimeOnlyISO(23, 59);
-  console.log('11:59 PM =>', night);
-
-  // Test with specific date and time
-  const specificDate = new Date(2025, 0, 15); // January 15, 2025
-  const specificTime = new Date();
-  specificTime.setHours(10, 30, 0, 0); // 10:30 AM
-  const specificSchedule = createScheduleISOWithDate(
-    specificDate,
-    specificTime,
-  );
-  console.log('Jan 15, 2025 at 10:30 AM =>', specificSchedule);
-
-  return { morning, afternoon, night, specificSchedule };
-};
+// Test function removed for production build

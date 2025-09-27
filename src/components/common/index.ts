@@ -45,7 +45,6 @@ export {
 export { default as Avatar } from './Avatar';
 export { default as CommonView } from './CommonView';
 export { default as ErrorDisplay } from './ErrorDisplay';
-export { default as Icon } from './Icon';
 export { default as LanguageSelector } from './LanguageSelector';
 export { default as LoadingScreen } from './LoadingScreen';
 export { default as OpacityButton } from './OpacityButton';

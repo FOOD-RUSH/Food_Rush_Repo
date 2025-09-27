@@ -240,7 +240,7 @@ const RootNavigator: React.FC = () => {
   }, [cartItemsLength, clearCart, t]);
 
   const handleDeepLink = useCallback((url: string) => {
-    console.log('Deep link received:', url);
+    // Deep link received: url
   }, []);
 
   // Stable onboarding handlers
@@ -273,8 +273,9 @@ const RootNavigator: React.FC = () => {
     }
 
     // Add single logout event listener
+    // Add single logout event listener
     const logoutListener = () => {
-      console.log('Logout event received, navigating to UserTypeSelection');
+      // Logout event received, navigating to UserTypeSelection
       // Navigate to user type selection when logout event is received
       if (navigationRef.isReady()) {
         navigationRef.reset({
@@ -325,32 +326,32 @@ const RootNavigator: React.FC = () => {
   const getInitialRouteName = useCallback((): keyof RootStackParamList => {
     // If onboarding is not complete, show onboarding
     if (!isOnboardingComplete) {
-      console.log('Onboarding not complete, showing onboarding');
+      // Onboarding not complete, showing onboarding
       return 'Onboarding';
     }
 
     // If onboarding is complete but no user type selected, show user type selection
     if (!userType && !appUserType) {
-      console.log('No user type selected, showing user type selection');
+      // No user type selected, showing user type selection
       return 'UserTypeSelection';
     }
 
     // If not authenticated, go to auth
     if (!isAuthenticated) {
-      console.log('User not authenticated, navigating to Auth');
+      // User not authenticated, navigating to Auth
       return 'UserTypeSelection';
     }
 
     // Navigate based on user type
     switch (userType) {
       case 'customer':
-        console.log('Navigating to CustomerApp');
+        // Navigating to CustomerApp
         return 'CustomerApp';
       case 'restaurant':
-        console.log('Navigating to RestaurantApp');
+        // Navigating to RestaurantApp
         return 'RestaurantApp';
       default:
-        console.log('Unknown user type, navigating to UserTypeSelection');
+        // Unknown user type, navigating to UserTypeSelection
         return 'UserTypeSelection';
     }
   }, [isAuthenticated, userType, appUserType, isOnboardingComplete]);

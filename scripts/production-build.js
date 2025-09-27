@@ -3,55 +3,55 @@
 const { execSync } = require('child_process');
 const fs = require('fs');
 
-console.log('🚀 Starting optimized production build...\n');
+// Starting optimized production build...
 
 // Step 1: Clean previous builds
-console.log('🧹 Cleaning previous builds...');
+// Cleaning previous builds...
 try {
   execSync('expo export --clear', { stdio: 'inherit' });
-  console.log('✅ Build cache cleared\n');
+  // Build cache cleared
 } catch (error) {
-  console.log('⚠️  Could not clear cache, continuing...\n');
+  // Could not clear cache, continuing...
 }
 
 // Step 2: Optimize assets
-console.log('🎯 Optimizing assets...');
+// Optimizing assets...
 try {
   execSync('node scripts/optimize-assets.js', { stdio: 'inherit' });
-  console.log('✅ Assets optimized\n');
+  // Assets optimized
 } catch (error) {
-  console.log('⚠️  Asset optimization failed, continuing...\n');
+  // Asset optimization failed, continuing...
 }
 
 // Step 3: Build with optimized profile
-console.log('📦 Building optimized APK...');
-console.log('   Using AAB format for smaller size');
-console.log('   Hermes engine enabled');
-console.log('   ProGuard enabled for code minification\n');
+// Building optimized APK...
+// Using AAB format for smaller size
+// Hermes engine enabled
+// ProGuard enabled for code minification
 
 try {
   execSync('eas build --platform android --profile production-optimized', { stdio: 'inherit' });
-  console.log('\n✅ Build completed successfully!');
+  // Build completed successfully!
   
-  console.log('\n📊 Expected size reduction:');
-  console.log('   • Assets: ~70% smaller (5.2MB → ~1.5MB)');
-  console.log('   • Code: ~30% smaller with ProGuard + Hermes');
-  console.log('   • Total: 220MB → ~50-80MB estimated');
+  // Expected size reduction:
+  // • Assets: ~70% smaller (5.2MB → ~1.5MB)
+  // • Code: ~30% smaller with ProGuard + Hermes
+  // • Total: 220MB → ~50-80MB estimated
   
 } catch (error) {
   console.error('\n❌ Build failed:', error.message);
   
-  console.log('\n🔄 Fallback: Building regular production APK...');
+  // Fallback: Building regular production APK...
   try {
     execSync('eas build --platform android --profile production-apk', { stdio: 'inherit' });
-    console.log('\n✅ Fallback build completed!');
+    // Fallback build completed!
   } catch (fallbackError) {
     console.error('\n❌ Fallback build also failed:', fallbackError.message);
   }
 }
 
-console.log('\n📋 Post-build recommendations:');
-console.log('   1. Use AAB format for Play Store (smaller downloads)');
-console.log('   2. Enable Play Asset Delivery for large assets');
-console.log('   3. Consider lazy loading for food emoji images');
-console.log('   4. Implement image caching for dynamic content');
+// Post-build recommendations:
+// 1. Use AAB format for Play Store (smaller downloads)
+// 2. Enable Play Asset Delivery for large assets
+// 3. Consider lazy loading for food emoji images
+// 4. Implement image caching for dynamic content

@@ -38,8 +38,7 @@ export default function OrderConfirmationScreen({ route, navigation }: Props) {
         />
       </View>
 
-      {/* TODO: If you need to re-fetch order details, call GET /api/v1/orders/{id} here */}
-      {/* TODO: If you need webhooks or followups, mark other endpoints here */}
+      {/* Order details and webhooks can be implemented here if needed */}
     </SafeAreaView>
   );
 }

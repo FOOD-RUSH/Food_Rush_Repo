@@ -11,7 +11,8 @@
         "buildType": "apk"
       },
       "ios": {
-        "buildConfiguration": "Debug"
+        "buildConfiguration": "Debug",
+        "simulator": true
       }
     },
     "preview": {
@@ -21,7 +22,8 @@
         "gradleCommand": ":app:assembleRelease"
       },
       "ios": {
-        "buildConfiguration": "Release"
+        "buildConfiguration": "Release",
+        "enterpriseProvisioning": "universal"
       },
       "env": {
         "NODE_ENV": "production"
@@ -59,9 +61,42 @@
         "NODE_ENV": "production",
         "EXPO_OPTIMIZE_ASSETS": "true"
       }
+    },
+    "store-android": {
+      "extends": "production",
+      "android": {
+        "buildType": "app-bundle",
+        "gradleCommand": ":app:bundleRelease"
+      },
+      "env": {
+        "NODE_ENV": "production",
+        "EXPO_OPTIMIZE_ASSETS": "true",
+        "EXPO_MINIFY": "true"
+      }
+    },
+    "store-ios": {
+      "extends": "production", 
+      "ios": {
+        "buildConfiguration": "Release"
+      },
+      "env": {
+        "NODE_ENV": "production",
+        "EXPO_OPTIMIZE_ASSETS": "true",
+        "EXPO_MINIFY": "true"
+      }
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "android": {
+        "serviceAccountKeyPath": "./service-account-key.json",
+        "track": "internal"
+      },
+      "ios": {
+        "appleId": "your-apple-id@example.com",
+        "ascAppId": "your-app-store-connect-app-id",
+        "appleTeamId": "your-apple-team-id"
+      }
+    }
   }
 }

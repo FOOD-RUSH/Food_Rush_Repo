@@ -39,7 +39,7 @@ class NotificationService {
   // Initialize notification service
   async initialize(): Promise<boolean> {
     if (this.isInitialized) {
-      console.log('Notification service already initialized');
+      // Notification service already initialized
       return true;
     }
 
@@ -54,7 +54,7 @@ class NotificationService {
       this.setupNotificationListeners();
       this.isInitialized = true;
 
-      console.log(`${this.config.userType} notification service initialized`);
+      // ${this.config.userType} notification service initialized
       return true;
     } catch (error) {
       console.error('Failed to initialize notification service:', error);
@@ -119,11 +119,7 @@ class NotificationService {
 
       await apiClient.post('/notifications/device', payload);
 
-      console.log('Push token registered with backend:', {
-        platform: payload.platform,
-        role: payload.role,
-        tokenPreview: `${token.substring(0, 20)}...`,
-      });
+      // Push token registered with backend: platform, role, tokenPreview
     } catch (error: any) {
       console.error('Error registering push token:', {
         error: error?.message || error,
@@ -141,16 +137,13 @@ class NotificationService {
   private setupNotificationListeners(): void {
     // Handle notifications when app is in foreground
     Notifications.addNotificationReceivedListener((notification) => {
-      console.log('Notification received:', notification.request.content.title);
+      // Notification received: notification.request.content.title
       this.handleNotificationReceived(notification);
     });
 
     // Handle notification taps
     Notifications.addNotificationResponseReceivedListener((response) => {
-      console.log(
-        'Notification tapped:',
-        response.notification.request.content.title,
-      );
+      // Notification tapped: response.notification.request.content.title
       this.handleNotificationTap(response.notification.request.content.data);
     });
   }
@@ -188,7 +181,7 @@ class NotificationService {
   // Handle notification tap
   private async handleNotificationTap(data: any): Promise<void> {
     try {
-      console.log('Handling notification tap with data:', data);
+      // Handling notification tap with data: data
 
       // Import navigation helpers dynamically to avoid circular dependencies
       const { ServiceNavigation } = await import(
@@ -197,14 +190,14 @@ class NotificationService {
 
       // Handle cart reminder notifications
       if (data?.type === 'cart_reminder' || data?.deepLink === 'foodrush://cart') {
-        console.log('Navigating to cart from reminder');
+        // Navigating to cart from reminder
         ServiceNavigation.goToCart();
         return;
       }
 
       // Handle order notifications
       if (data?.orderId && data?.type === 'order') {
-        console.log('Navigating to order details:', data.orderId);
+        // Navigating to order details: data.orderId
 
         if (this.config.userType === 'restaurant') {
           // Navigate to restaurant order details screen where they can accept/decline
@@ -218,7 +211,7 @@ class NotificationService {
 
       // Handle restaurant notifications
       if (data?.restaurantId) {
-        console.log('Navigating to restaurant details:', data.restaurantId);
+        // Navigating to restaurant details: data.restaurantId
         const { navigateFromService } = await import(
           '../navigation/navigationHelpers'
         );
@@ -230,12 +223,12 @@ class NotificationService {
 
       // Handle general notifications - navigate to notifications screen
       if (data?.type && ['system', 'promotion', 'alert', 'reminder'].includes(data.type)) {
-        console.log('Navigating to notifications screen');
+        // Navigating to notifications screen
         ServiceNavigation.goToNotifications();
         return;
       }
 
-      console.log('No specific navigation action for notification data:', data);
+      // No specific navigation action for notification data: data
     } catch (error) {
       console.error('Error handling notification tap:', error);
     }

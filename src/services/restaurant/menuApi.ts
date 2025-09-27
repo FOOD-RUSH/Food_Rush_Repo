@@ -112,123 +112,101 @@ export const restaurantMenuApi = {
   },
 
   createMenuItem: async (restaurantId: string, data: CreateMenuItemRequest) => {
-    // Check if we have an image to upload
-    if (data.picture) {
-      // Use FormData for multipart/form-data request when image is present
-      // Following React Native FormData requirements for binary uploads
-      const formData = new FormData();
+  try {
+    // Always use FormData approach
+    const formData = new FormData();
 
-      // Append text fields - all FormData values must be strings
-      formData.append('name', data.name);
-      
-      if (data.description) {
-        formData.append('description', data.description);
-      }
-      
-      formData.append('price', data.price.toString());
-      formData.append('category', data.category);
-      formData.append('isAvailable', data.isAvailable.toString()); // Convert boolean to string
+    // Append text fields
+    formData.append('name', data.name);
+    if (data.description) {
+      formData.append('description', data.description);
+    }
+    formData.append('price', data.price.toString());
+    formData.append('category', data.category);
+    formData.append('isAvailable', data.isAvailable.toString());
 
-      // Add scheduling times if provided
-      if (data.startAt) {
-        formData.append('startAt', data.startAt);
-      }
-      if (data.endAt) {
-        formData.append('endAt', data.endAt);
-      }
+    if (data.startAt) {
+      formData.append('startAt', data.startAt);
+    }
+    if (data.endAt) {
+      formData.append('endAt', data.endAt);
+    }
 
-      // Create properly formatted image object for React Native FormData
-      // This structure is required for React Native to handle binary uploads correctly
-      const imageFile = {
-        uri: data.picture.uri, // File URI from image picker
-        name: data.picture.name, // Filename with proper extension
-        type: data.picture.type, // MIME type: 'image/jpeg' or 'image/png'
-      };
+    // Add image (required)
+    const imageFile = {
+      uri: data.picture.uri,
+      name: data.picture.name,
+      type: data.picture.type,
+    };
+    formData.append('picture', imageFile as any);
 
-      // Append the image file as binary data
-      // React Native will automatically handle the binary conversion
-      formData.append('picture', imageFile as any);
-
-      console.log('FormData being sent to backend:', {
+    // Log what we're sending
+    console.log('Sending to backend:', {
+      restaurantId,
+      url: `/restaurants/${restaurantId}/menu`,
+      fields: {
         name: data.name,
-        description: data.description,
-        price: data.price,
+        description: data.description || null,
+        price: data.price.toString(),
         category: data.category,
-        isAvailable: data.isAvailable.toString(), // Showing as string (FormData requirement)
-        picture: {
-          name: data.picture.name,
-          type: data.picture.type,
-          uri: data.picture.uri.substring(0, 50) + '...',
-        },
+        isAvailable: data.isAvailable.toString(),
         startAt: data.startAt || null,
         endAt: data.endAt || null,
-        note: 'All FormData values are converted to strings as required',
-      });
-
-      // Send multipart/form-data request
-      // Important: Do NOT set Content-Type manually - let axios set the boundary
-      console.log('📤 Sending FormData to:', `/restaurants/${restaurantId}/menu`);
-      
-      const response = await apiClient.post<ApiResponse<MenuItem>>(
-        `/restaurants/${restaurantId}/menu`,
-        formData,
-        {
-          // Explicitly ensure no Content-Type header is set for FormData
-          headers: {
-            // Let axios set the Content-Type with proper boundary
-          },
+        hasPicture: true,
+        pictureDetails: {
+          name: data.picture.name,
+          type: data.picture.type,
+          uri: data.picture.uri.substring(0, 50) + '...'
         }
-      );
+      }
+    });
 
-      console.log('✅ Menu item created successfully with image:', {
-        status: response.status,
-        itemId: response.data?.data?.id,
-        itemName: response.data?.data?.name,
-        hasPicture: !!response.data?.data?.pictureUrl,
-      });
-
-      return response;
-    } else {
-      // Use JSON for regular requests without image
-      const jsonData = {
-        name: data.name,
-        description: data.description,
-        price: data.price,
-        category: data.category,
-        isAvailable: data.isAvailable,
-        ...(data.startAt && { startAt: data.startAt }),
-        ...(data.endAt && { endAt: data.endAt }),
-      };
-
-      console.log('JSON data being sent to backend:', jsonData);
-
-      const response = await apiClient.post<ApiResponse<MenuItem>>(
-        `/restaurants/${restaurantId}/menu`,
-        jsonData,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
+    const response = await apiClient.post<ApiResponse<MenuItem>>(
+      `/restaurants/${restaurantId}/menu`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Accept: 'application/json',
         },
-      );
+        timeout: 30000,
+      }
+    );
 
-      console.log('✅ Menu item created successfully without image:', {
-        status: response.status,
-        itemId: response.data?.data?.id,
-        itemName: response.data?.data?.name,
-      });
+    // Log successful response
+    console.log('SUCCESS RESPONSE FROM BACKEND:', {
+      status: response.status,
+      statusText: response.statusText,
+      data: response.data,
+      headers: response.headers
+    });
 
-      return response;
-    }
-  },
+    return response;
+
+  } catch (error: any) {
+    // Log error response from backend
+    console.log('ERROR RESPONSE FROM BACKEND:', {
+      message: error.message,
+      code: error.code,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      responseData: error.response?.data,
+      responseHeaders: error.response?.headers,
+      requestUrl: error.config?.url,
+      requestMethod: error.config?.method,
+      fullError: error
+    });
+
+    throw error;
+  }
+},
 
   updateMenuItem: (
     restaurantId: string,
     itemId: string,
     data: UpdateMenuItemRequest,
   ) => {
-    return apiClient.put(`/restaurants/${restaurantId}/menu/${itemId}`, {
+    return apiClient.patch(`/restaurants/${restaurantId}/menu/${itemId}`, {
       ...data,
     });
   },
