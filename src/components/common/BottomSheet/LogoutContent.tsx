@@ -1,7 +1,8 @@
+import { MaterialIcon } from '@/src/components/common/icons';
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import { MaterialIcons } from '@expo/vector-icons';
+
 import { useTranslation } from 'react-i18next';
 
 interface LogoutContentProps {
@@ -43,8 +44,7 @@ const LogoutContent: React.FC<LogoutContentProps> = ({
             backgroundColor: colors.errorContainer,
           }}
         >
-          <MaterialIcons
-            name="logout"
+          <MaterialIcon             name="logout"
             size={32}
             color={colors.onErrorContainer}
           />

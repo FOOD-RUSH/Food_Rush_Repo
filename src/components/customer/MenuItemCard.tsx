@@ -1,3 +1,4 @@
+import { MaterialIcon } from '@/src/components/common/icons';
 import { View, Text, TouchableOpacity } from 'react-native';
 import React, { useState } from 'react';
 import { Card, useTheme } from 'react-native-paper';
@@ -11,7 +12,7 @@ import {
   useItemQuantityInCart,
 } from '@/src/stores/customerStores/cartStore';
 import { useTranslation } from 'react-i18next';
-import { MaterialIcons } from '@expo/vector-icons';
+
 
 const MenuItemCard = ({ item }: { item: FoodProps }) => {
   const addToCart = useCartStore((state) => state.addtoCart);
@@ -86,8 +87,7 @@ const MenuItemCard = ({ item }: { item: FoodProps }) => {
               </Text>
               {isInCart && (
                 <View className="ml-2">
-                  <MaterialIcons
-                    name="shopping-cart"
+                  <MaterialIcon                     name="shopping-cart"
                     size={20}
                     color={colors.primary}
                   />

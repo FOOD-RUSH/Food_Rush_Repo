@@ -1,3 +1,4 @@
+import { IoniconsIcon } from '@/src/components/common/icons';
 import React, {
   useState,
   useCallback,
@@ -20,7 +21,7 @@ import { Checkbox, HelperText, TextInput, useTheme } from 'react-native-paper';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { loginSchema } from '@/src/utils/validation';
-import { Ionicons } from '@expo/vector-icons';
+
 import { AuthStackScreenProps } from '@/src/navigation/types';
 import { useAuthStore } from '@/src/stores/AuthStore';
 import { useNetwork } from '@/src/contexts/NetworkContext';
@@ -144,7 +145,7 @@ const RestaurantLoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
               onPress={() => navigation.goBack()}
               style={styles.backButton}
             >
-              <Ionicons name="arrow-back" size={24} color={colors.primary} />
+              <IoniconsIcon name="arrow-back" size={24} color={colors.primary} />
             </TouchableOpacity>
           </Animated.View>
 
@@ -343,8 +344,7 @@ const RestaurantLoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                 onPress={handleGoogleSignIn}
                 disabled={loginMutation.isPending}
               >
-                <Ionicons
-                  name="logo-google"
+                <IoniconsIcon                   name="logo-google"
                   size={20}
                   color={colors.onSurfaceVariant}
                 />
@@ -364,8 +364,7 @@ const RestaurantLoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                 onPress={handleAppleSignIn}
                 disabled={loginMutation.isPending}
               >
-                <Ionicons
-                  name="logo-apple"
+                <IoniconsIcon                   name="logo-apple"
                   size={20}
                   color={colors.onSurfaceVariant}
                 />

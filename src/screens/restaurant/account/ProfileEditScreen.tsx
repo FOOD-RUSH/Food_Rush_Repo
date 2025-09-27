@@ -1,3 +1,4 @@
+import { MaterialCommunityIcon } from '@/src/components/common/icons';
 import React, { useState } from 'react';
 import {
   View,
@@ -8,7 +9,7 @@ import {
   Image,
 } from 'react-native';
 import { TextInput, Button, Avatar, useTheme } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+
 import { useTranslation } from 'react-i18next';
 import * as ImagePicker from 'expo-image-picker';
 
@@ -162,8 +163,7 @@ const ProfileEditScreen: React.FC<ProfileEditScreenProps> = ({
                 padding: 6,
               }}
             >
-              <MaterialCommunityIcons
-                name={isUploadingImage ? 'loading' : 'camera'}
+              <MaterialCommunityIcon                 name={isUploadingImage ? 'loading' : 'camera'}
                 size={18}
                 color="white"
               />

@@ -1,7 +1,8 @@
+import { IoniconsIcon } from '@/src/components/common/icons';
 import React, { useState } from 'react';
 import { View, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { useTheme, Button, TextInput } from 'react-native-paper';
-import { Ionicons } from '@expo/vector-icons';
+
 import { useTranslation } from 'react-i18next';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import CommonView from '@/src/components/common/CommonView';
@@ -99,8 +100,7 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
             }}
             activeOpacity={0.7}
           >
-            <Ionicons
-              name={star <= score ? 'star' : 'star-outline'}
+            <IoniconsIcon               name={star <= score ? 'star' : 'star-outline'}
               size={isSmallDevice ? 32 : 40}
               color={star <= score ? '#FFD700' : colors.onSurfaceVariant}
             />
@@ -140,7 +140,7 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
             }}
             activeOpacity={0.7}
           >
-            <Ionicons name="arrow-back" size={24} color={colors.onSurface} />
+            <IoniconsIcon name="arrow-back" size={24} color={colors.onSurface} />
           </TouchableOpacity>
         </View>
 

@@ -1,7 +1,8 @@
+import { MaterialCommunityIcon } from '@/src/components/common/icons';
 import React, { useState } from 'react';
 import { View, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { Card, Button, Switch, Divider, useTheme } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+
 import { useTranslation } from 'react-i18next';
 
 import CommonView from '@/src/components/common/CommonView';
@@ -237,8 +238,7 @@ const PaymentBillingScreen: React.FC = () => {
                       marginRight: 12,
                     }}
                   >
-                    <MaterialCommunityIcons
-                      name={getPaymentIcon(method.type) as any}
+                    <MaterialCommunityIcon                       name={getPaymentIcon(method.type) as any}
                       size={20}
                       color={colors.primary}
                     />
@@ -335,8 +335,7 @@ const PaymentBillingScreen: React.FC = () => {
                   >
                     {t('weekly')}
                   </Body>
-                  <MaterialCommunityIcons
-                    name="chevron-right"
+                  <MaterialCommunityIcon                     name="chevron-right"
                     size={20}
                     color={colors.onSurfaceVariant}
                   />
@@ -368,8 +367,7 @@ const PaymentBillingScreen: React.FC = () => {
                 <Label color={colors.onSurface}>
                   {t('view_all_transactions')}
                 </Label>
-                <MaterialCommunityIcons
-                  name="chevron-right"
+                <MaterialCommunityIcon                   name="chevron-right"
                   size={20}
                   color={colors.onSurfaceVariant}
                 />

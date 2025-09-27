@@ -1,3 +1,4 @@
+import { IoniconsIcon, MaterialIcon } from '@/src/components/common/icons';
 import React, { useEffect } from 'react';
 import {
   View,
@@ -7,7 +8,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+
 import { useTranslation } from 'react-i18next';
 import { OrderFlowState } from '@/src/hooks/customer/useOrderFlow';
 
@@ -47,15 +48,15 @@ const OrderStatusModal: React.FC<OrderStatusModalProps> = ({
       case 'pending_restaurant_confirmation':
         return <ActivityIndicator size={48} color={colors.primary} />;
       case 'ready_for_customer_confirmation':
-        return <Ionicons name="checkmark-circle" size={48} color="#4CAF50" />;
+        return <IoniconsIcon name="checkmark-circle" size={48} color="#4CAF50" />;
       case 'customer_confirming':
         return <ActivityIndicator size={48} color={colors.primary} />;
       case 'payment_processing':
-        return <Ionicons name="card" size={48} color={colors.primary} />;
+        return <IoniconsIcon name="card" size={48} color={colors.primary} />;
       case 'completed':
-        return <Ionicons name="checkmark-circle" size={48} color="#4CAF50" />;
+        return <IoniconsIcon name="checkmark-circle" size={48} color="#4CAF50" />;
       case 'failed':
-        return <Ionicons name="close-circle" size={48} color={colors.error} />;
+        return <IoniconsIcon name="close-circle" size={48} color={colors.error} />;
       default:
         return <ActivityIndicator size={48} color={colors.primary} />;
     }

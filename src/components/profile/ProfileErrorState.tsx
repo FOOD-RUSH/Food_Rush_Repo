@@ -1,7 +1,8 @@
+import { IoniconsIcon } from '@/src/components/common/icons';
 import React from 'react';
 import { View, Text } from 'react-native';
 import { Button, useTheme } from 'react-native-paper';
-import { Ionicons } from '@expo/vector-icons';
+
 import { useTranslation } from 'react-i18next';
 
 interface ProfileErrorStateProps {
@@ -39,8 +40,7 @@ const ProfileErrorState: React.FC<ProfileErrorStateProps> = ({
           marginBottom: 24,
         }}
       >
-        <Ionicons
-          name="alert-circle"
+        <IoniconsIcon           name="alert-circle"
           size={32}
           color={colors.onErrorContainer}
         />

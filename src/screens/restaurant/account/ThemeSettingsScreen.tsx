@@ -1,3 +1,4 @@
+import { MaterialCommunityIcon, IoniconsIcon } from '@/src/components/common/icons';
 import React, { useState } from 'react';
 import {
   View,
@@ -13,7 +14,7 @@ import {
   Switch,
   Divider,
 } from 'react-native-paper';
-import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
+
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
 import CommonView from '@/src/components/common/CommonView';
@@ -146,8 +147,7 @@ const ThemeSettingsScreen: React.FC = () => {
                 marginRight: 12,
               }}
             >
-              <MaterialCommunityIcons
-                name={option.icon as any}
+              <MaterialCommunityIcon                 name={option.icon as any}
                 size={20}
                 color={option.color}
               />
@@ -228,8 +228,7 @@ const ThemeSettingsScreen: React.FC = () => {
           </View>
         </View>
 
-        <Ionicons
-          name="chevron-down"
+        <IoniconsIcon           name="chevron-down"
           size={20}
           color={colors.onSurfaceVariant}
         />
@@ -260,7 +259,7 @@ const ThemeSettingsScreen: React.FC = () => {
             {t('select_language')}
           </Heading5>
           <TouchableOpacity onPress={() => setShowLanguageModal(false)}>
-            <Ionicons name="close" size={24} color={colors.onSurface} />
+            <IoniconsIcon name="close" size={24} color={colors.onSurface} />
           </TouchableOpacity>
         </View>
 
@@ -307,7 +306,7 @@ const ThemeSettingsScreen: React.FC = () => {
                 </View>
 
                 {selectedLanguage === item.value && (
-                  <Ionicons name="checkmark" size={24} color="#007aff" />
+                  <IoniconsIcon name="checkmark" size={24} color="#007aff" />
                 )}
               </View>
             </TouchableOpacity>
@@ -379,8 +378,7 @@ const ThemeSettingsScreen: React.FC = () => {
                     marginRight: 12,
                   }}
                 >
-                  <MaterialCommunityIcons
-                    name="store"
+                  <MaterialCommunityIcon                     name="store"
                     size={16}
                     color="white"
                   />

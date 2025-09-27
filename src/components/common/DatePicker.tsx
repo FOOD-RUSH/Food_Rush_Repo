@@ -1,7 +1,8 @@
+import { MaterialCommunityIcon } from '@/src/components/common/icons';
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Platform } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { formatDateOnly } from '../../utils/timeUtils';
 
@@ -87,8 +88,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
         >
           {displayValue}
         </Text>
-        <MaterialCommunityIcons
-          name="calendar-outline"
+        <MaterialCommunityIcon           name="calendar-outline"
           size={20}
           color={colors.onSurfaceVariant}
         />

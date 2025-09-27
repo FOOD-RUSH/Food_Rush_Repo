@@ -1,3 +1,4 @@
+import { MaterialCommunityIcon, IoniconsIcon } from '@/src/components/common/icons';
 import React, { useState, useCallback } from 'react';
 import {
   View,
@@ -7,7 +8,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { useTheme, Button, Card } from 'react-native-paper';
-import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
+
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
 
@@ -131,7 +132,7 @@ const DeliveryConfirmationModal: React.FC<DeliveryConfirmationModalProps> = ({
             disabled={isConfirming}
             style={styles.closeButton}
           >
-            <Ionicons name="close" size={24} color={colors.onSurface} />
+            <IoniconsIcon name="close" size={24} color={colors.onSurface} />
           </TouchableOpacity>
         </View>
 
@@ -147,8 +148,7 @@ const DeliveryConfirmationModal: React.FC<DeliveryConfirmationModalProps> = ({
               },
             ]}
           >
-            <MaterialCommunityIcons
-              name="package-variant-closed"
+            <MaterialCommunityIcon               name="package-variant-closed"
               size={64}
               color={colors.primary}
             />
@@ -178,8 +178,7 @@ const DeliveryConfirmationModal: React.FC<DeliveryConfirmationModalProps> = ({
           <Card style={[styles.orderCard, { backgroundColor: colors.surface }]}>
             <View style={styles.orderCardContent}>
               <View style={styles.orderDetailRow}>
-                <MaterialCommunityIcons
-                  name="store"
+                <MaterialCommunityIcon                   name="store"
                   size={20}
                   color={colors.onSurfaceVariant}
                 />
@@ -195,8 +194,7 @@ const DeliveryConfirmationModal: React.FC<DeliveryConfirmationModalProps> = ({
 
               {deliveryAddress && (
                 <View style={styles.orderDetailRow}>
-                  <MaterialCommunityIcons
-                    name="map-marker"
+                  <MaterialCommunityIcon                     name="map-marker"
                     size={20}
                     color={colors.onSurfaceVariant}
                   />
@@ -212,8 +210,7 @@ const DeliveryConfirmationModal: React.FC<DeliveryConfirmationModalProps> = ({
               )}
 
               <View style={styles.orderDetailRow}>
-                <MaterialCommunityIcons
-                  name="clock-outline"
+                <MaterialCommunityIcon                   name="clock-outline"
                   size={20}
                   color={colors.onSurfaceVariant}
                 />
@@ -240,8 +237,7 @@ const DeliveryConfirmationModal: React.FC<DeliveryConfirmationModalProps> = ({
             ]}
           >
             <View style={styles.infoCardContent}>
-              <MaterialCommunityIcons
-                name="information"
+              <MaterialCommunityIcon                 name="information"
                 size={20}
                 color={colors.primary}
               />

@@ -1,3 +1,4 @@
+import { IoniconsIcon } from '@/src/components/common/icons';
 import React, { useState } from 'react';
 import {
   View,
@@ -11,7 +12,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/src/contexts/LanguageContext';
 import { SupportedLanguage } from '@/src/locales/i18n';
-import { Ionicons } from '@expo/vector-icons';
+
 
 interface LanguageSelectorProps {
   style?: any;
@@ -48,7 +49,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
             {language.name}
           </Text>
         </View>
-        {isSelected && <Ionicons name="checkmark" size={20} color="#007AFF" />}
+        {isSelected && <IoniconsIcon name="checkmark" size={20} color="#007AFF" />}
       </TouchableOpacity>
     );
   };
@@ -69,7 +70,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
             </Text>
           )}
         </View>
-        <Ionicons name="chevron-down" size={16} color="#666" />
+        <IoniconsIcon name="chevron-down" size={16} color="#666" />
       </TouchableOpacity>
 
       <Modal
@@ -89,7 +90,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                 onPress={() => setIsModalVisible(false)}
                 style={styles.closeButton}
               >
-                <Ionicons name="close" size={24} color="#666" />
+                <IoniconsIcon name="close" size={24} color="#666" />
               </TouchableOpacity>
             </View>
 

@@ -1,3 +1,4 @@
+import { IoniconsIcon } from '@/src/components/common/icons';
 import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
@@ -20,7 +21,7 @@ import {
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { registerSchema } from '@/src/utils/validation';
-import { Ionicons } from '@expo/vector-icons';
+
 import CommonView from '@/src/components/common/CommonView';
 import { AuthStackScreenProps } from '@/src/navigation/types';
 import { useAuthStore } from '@/src/stores/AuthStore';
@@ -338,8 +339,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                   navigation.goBack();
                 }}
               >
-                <Ionicons
-                  name="arrow-back"
+                <IoniconsIcon                   name="arrow-back"
                   size={24}
                   color={colors.onSurface}
                 />
@@ -386,8 +386,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                         >
                           {selectedCountryCode.code}
                         </Label>
-                        <Ionicons
-                          name="chevron-down"
+                        <IoniconsIcon                           name="chevron-down"
                           size={16}
                           color={colors.onSurface}
                         />

@@ -1,7 +1,8 @@
+import { MaterialIcon } from '@/src/components/common/icons';
 import React, { useCallback, useState, useMemo } from 'react';
 import { View, Text, TouchableOpacity, TextInput, Image } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import { MaterialIcons } from '@expo/vector-icons';
+
 import { useCartStore, CartItem } from '@/src/stores/customerStores/cartStore';
 import { useTranslation } from 'react-i18next';
 
@@ -128,8 +129,7 @@ const EditCartItemContent: React.FC<CartItemProps> = ({
             }}
             activeOpacity={0.7}
           >
-            <MaterialIcons
-              name="remove"
+            <MaterialIcon               name="remove"
               size={20}
               color={pquantity > 1 ? colors.onPrimary : colors.onSurfaceVariant}
             />
@@ -163,7 +163,7 @@ const EditCartItemContent: React.FC<CartItemProps> = ({
             }}
             activeOpacity={0.7}
           >
-            <MaterialIcons name="add" size={20} color={colors.onPrimary} />
+            <MaterialIcon name="add" size={20} color={colors.onPrimary} />
           </TouchableOpacity>
         </View>
       </View>

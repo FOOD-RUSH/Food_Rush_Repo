@@ -1,3 +1,4 @@
+import { MaterialCommunityIcon } from '@/src/components/common/icons';
 import React, { useMemo, useState } from 'react';
 import {
   View,
@@ -9,7 +10,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { useTheme, ActivityIndicator, Chip } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 
@@ -75,8 +76,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
       <View style={styles.cardHeader}>
         <Text style={styles.orderNumber}>Order #{order.orderNumber}</Text>
         <View style={styles.statusContainer}>
-          <MaterialCommunityIcons
-            name={statusConfig.icon}
+          <MaterialCommunityIcon             name={statusConfig.icon}
             color={statusConfig.color}
             size={16}
           />
@@ -217,8 +217,7 @@ const SimpleOrdersList: React.FC = () => {
           <TouchableOpacity
             onPress={() => navigation.navigate('Notifications')}
           >
-            <MaterialCommunityIcons
-              name="bell-outline"
+            <MaterialCommunityIcon               name="bell-outline"
               size={24}
               color={colors.onSurface}
             />
@@ -252,8 +251,7 @@ const SimpleOrdersList: React.FC = () => {
           )}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <MaterialCommunityIcons
-                name="clipboard-text-outline"
+              <MaterialCommunityIcon                 name="clipboard-text-outline"
                 size={48}
                 color={colors.onSurfaceDisabled}
               />

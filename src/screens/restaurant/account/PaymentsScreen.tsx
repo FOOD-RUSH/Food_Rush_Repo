@@ -1,7 +1,8 @@
+import { MaterialCommunityIcon } from '@/src/components/common/icons';
 import React from 'react';
 import { View, ScrollView } from 'react-native';
 import { useTheme, Card } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+
 import { useTranslation } from 'react-i18next';
 
 import CommonView from '@/src/components/common/CommonView';
@@ -51,8 +52,7 @@ const PaymentsScreen: React.FC = () => {
                   marginBottom: 24,
                 }}
               >
-                <MaterialCommunityIcons
-                  name="credit-card-clock"
+                <MaterialCommunityIcon                   name="credit-card-clock"
                   size={40}
                   color={colors.primary}
                 />
@@ -86,8 +86,7 @@ const PaymentsScreen: React.FC = () => {
                     marginBottom: 12,
                   }}
                 >
-                  <MaterialCommunityIcons
-                    name="check-circle"
+                  <MaterialCommunityIcon                     name="check-circle"
                     size={20}
                     color={colors.primary}
                   />
@@ -103,8 +102,7 @@ const PaymentsScreen: React.FC = () => {
                     marginBottom: 12,
                   }}
                 >
-                  <MaterialCommunityIcons
-                    name="check-circle"
+                  <MaterialCommunityIcon                     name="check-circle"
                     size={20}
                     color={colors.primary}
                   />
@@ -120,8 +118,7 @@ const PaymentsScreen: React.FC = () => {
                     marginBottom: 12,
                   }}
                 >
-                  <MaterialCommunityIcons
-                    name="check-circle"
+                  <MaterialCommunityIcon                     name="check-circle"
                     size={20}
                     color={colors.primary}
                   />
@@ -131,8 +128,7 @@ const PaymentsScreen: React.FC = () => {
                 </View>
 
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <MaterialCommunityIcons
-                    name="check-circle"
+                  <MaterialCommunityIcon                     name="check-circle"
                     size={20}
                     color={colors.primary}
                   />
@@ -158,8 +154,7 @@ const PaymentsScreen: React.FC = () => {
                   marginBottom: 8,
                 }}
               >
-                <MaterialCommunityIcons
-                  name="information"
+                <MaterialCommunityIcon                   name="information"
                   size={20}
                   color={colors.primary}
                 />

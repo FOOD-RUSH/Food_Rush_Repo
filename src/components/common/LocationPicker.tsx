@@ -1,7 +1,8 @@
+import { MaterialCommunityIcon } from '@/src/components/common/icons';
 import React, { useCallback, useState } from 'react';
 import { View, TouchableOpacity, Modal } from 'react-native';
 import { Card, useTheme } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -121,8 +122,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
               marginRight: spacing.md,
             }}
           >
-            <MaterialCommunityIcons
-              name={getLocationIcon() as any}
+            <MaterialCommunityIcon               name={getLocationIcon() as any}
               size={isSmallScreen ? 20 : 24}
               color={getLocationColor()}
             />
@@ -160,8 +160,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
                   marginTop: spacing.xs,
                 }}
               >
-                <MaterialCommunityIcons
-                  name="check-circle"
+                <MaterialCommunityIcon                   name="check-circle"
                   size={12}
                   color={colors.primary}
                   style={{ marginRight: 4 }}
@@ -181,8 +180,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
                   marginTop: spacing.xs,
                 }}
               >
-                <MaterialCommunityIcons
-                  name="information"
+                <MaterialCommunityIcon                   name="information"
                   size={12}
                   color={colors.onSurfaceVariant}
                   style={{ marginRight: 4 }}
@@ -196,8 +194,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
 
           {/* Arrow Icon */}
           <View style={{ alignItems: 'center' }}>
-            <MaterialCommunityIcons
-              name="chevron-right"
+            <MaterialCommunityIcon               name="chevron-right"
               size={24}
               color={colors.onSurfaceVariant}
             />

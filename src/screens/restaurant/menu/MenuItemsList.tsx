@@ -1,3 +1,4 @@
+import { MaterialCommunityIcon } from '@/src/components/common/icons';
 import React, { useState } from 'react';
 import {
   View,
@@ -8,7 +9,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { useTheme, Card, FAB, Switch, Chip } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
@@ -235,8 +236,7 @@ const MenuItemsList: React.FC<
                 alignItems: 'center',
               }}
             >
-              <MaterialCommunityIcons
-                name="food"
+              <MaterialCommunityIcon                 name="food"
                 size={isSmallScreen ? 36 : 40}
                 color={colors.onSurfaceVariant}
               />
@@ -319,8 +319,7 @@ const MenuItemsList: React.FC<
                 }}
                 className="items-center justify-center"
               >
-                <MaterialCommunityIcons
-                  name="pencil"
+                <MaterialCommunityIcon                   name="pencil"
                   size={isSmallScreen ? 16 : 18}
                   color="#007aff"
                 />
@@ -335,8 +334,7 @@ const MenuItemsList: React.FC<
                 }}
                 className="items-center justify-center"
               >
-                <MaterialCommunityIcons
-                  name="delete"
+                <MaterialCommunityIcon                   name="delete"
                   size={isSmallScreen ? 16 : 18}
                   color="#FF4444"
                 />
@@ -363,8 +361,7 @@ const MenuItemsList: React.FC<
               marginBottom: 24,
             }}
           >
-            <MaterialCommunityIcons
-              name="alert-circle"
+            <MaterialCommunityIcon               name="alert-circle"
               size={48}
               color="#FF4444"
             />
@@ -397,8 +394,7 @@ const MenuItemsList: React.FC<
               alignItems: 'center',
             }}
           >
-            <MaterialCommunityIcons
-              name="refresh"
+            <MaterialCommunityIcon               name="refresh"
               size={20}
               color="white"
               style={{ marginRight: 8 }}
@@ -507,8 +503,7 @@ const MenuItemsList: React.FC<
                   marginBottom: 24,
                 }}
               >
-                <MaterialCommunityIcons
-                  name="food-off"
+                <MaterialCommunityIcon                   name="food-off"
                   size={48}
                   color={colors.onSurfaceVariant}
                 />
@@ -540,8 +535,7 @@ const MenuItemsList: React.FC<
                   alignItems: 'center',
                 }}
               >
-                <MaterialCommunityIcons
-                  name="plus"
+                <MaterialCommunityIcon                   name="plus"
                   size={20}
                   color="white"
                   style={{ marginRight: 8 }}

@@ -1,3 +1,4 @@
+import { MaterialIcon } from '@/src/components/common/icons';
 import React, { useState } from 'react';
 import {
   View,
@@ -8,7 +9,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { useTheme, Button } from 'react-native-paper';
-import { MaterialIcons } from '@expo/vector-icons';
+
 import { useTranslation } from 'react-i18next';
 import { getAllCategories } from '@/src/constants/categories';
 
@@ -224,7 +225,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
               )}
             </View>
             <TouchableOpacity onPress={onClose}>
-              <MaterialIcons name="close" size={24} color={colors.onSurface} />
+              <MaterialIcon name="close" size={24} color={colors.onSurface} />
             </TouchableOpacity>
           </View>
 
@@ -235,8 +236,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
             {filterSections.map((section) => (
               <View key={section.key} style={styles.section}>
                 <View style={styles.sectionHeader}>
-                  <MaterialIcons
-                    name={section.icon as any}
+                  <MaterialIcon                     name={section.icon as any}
                     size={20}
                     color={colors.primary}
                   />
@@ -270,8 +270,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
                         }
                       >
                         <View style={styles.optionContent}>
-                          <MaterialIcons
-                            name={option.icon as any}
+                          <MaterialIcon                             name={option.icon as any}
                             size={18}
                             color={
                               isSelected
@@ -307,8 +306,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
                           </View>
                         </View>
                         {isSelected && (
-                          <MaterialIcons
-                            name="check-circle"
+                          <MaterialIcon                             name="check-circle"
                             size={20}
                             color={colors.primary}
                           />

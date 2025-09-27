@@ -1,3 +1,4 @@
+import { MaterialCommunityIcon } from '@/src/components/common/icons';
 import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
@@ -9,7 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import { TextInput, useTheme, ActivityIndicator } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+
 import * as Haptics from 'expo-haptics';
 
 import CommonView from '@/src/components/common/CommonView';
@@ -98,7 +99,7 @@ const ImageUploadSection = React.memo<{
             resizeMode="cover"
           />
           <View className="absolute inset-0 bg-black/30 items-center justify-center">
-            <MaterialCommunityIcons name="camera" size={32} color="white" />
+            <MaterialCommunityIcon name="camera" size={32} color="white" />
             <Caption color="white" weight="medium" style={{ marginTop: 8 }}>
               {t('change_image') || 'Change Image'}
             </Caption>
@@ -110,8 +111,7 @@ const ImageUploadSection = React.memo<{
             <ActivityIndicator size="large" color={colors.primary} />
           ) : (
             <>
-              <MaterialCommunityIcons
-                name="camera-plus"
+              <MaterialCommunityIcon                 name="camera-plus"
                 size={48}
                 color={colors.primary}
               />
@@ -655,8 +655,7 @@ export const AddFoodScreen = () => {
               style={{ backgroundColor: colors.errorContainer }}
             >
               <View className="flex-row items-center mb-2">
-                <MaterialCommunityIcons
-                  name="alert-circle"
+                <MaterialCommunityIcon                   name="alert-circle"
                   size={20}
                   color={colors.error}
                 />

@@ -1,3 +1,4 @@
+import { MaterialCommunityIcon, IoniconsIcon } from '@/src/components/common/icons';
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   View,
@@ -9,7 +10,7 @@ import {
   Animated,
 } from 'react-native';
 import { useTheme, Card, Button } from 'react-native-paper';
-import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
+
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
@@ -244,8 +245,7 @@ const RestaurantLocationScreen: React.FC = () => {
     return (
       <CommonView>
         <View style={styles.centerContainer}>
-          <MaterialCommunityIcons
-            name="loading"
+          <MaterialCommunityIcon             name="loading"
             size={48}
             color={colors.primary}
           />
@@ -262,8 +262,7 @@ const RestaurantLocationScreen: React.FC = () => {
     return (
       <CommonView>
         <View style={styles.centerContainer}>
-          <MaterialCommunityIcons
-            name="alert-circle"
+          <MaterialCommunityIcon             name="alert-circle"
             size={48}
             color={colors.error}
           />
@@ -297,8 +296,7 @@ const RestaurantLocationScreen: React.FC = () => {
     return (
       <CommonView>
         <View style={styles.centerContainer}>
-          <MaterialCommunityIcons
-            name="store-off"
+          <MaterialCommunityIcon             name="store-off"
             size={48}
             color={colors.onSurfaceVariant}
           />
@@ -361,8 +359,7 @@ const RestaurantLocationScreen: React.FC = () => {
                   zIndex: 1,
                 }}
               >
-                <MaterialCommunityIcons
-                  name="loading"
+                <MaterialCommunityIcon                   name="loading"
                   size={24}
                   color={colors.primary}
                 />
@@ -377,8 +374,7 @@ const RestaurantLocationScreen: React.FC = () => {
                     { backgroundColor: colors.primary + '20' },
                   ]}
                 >
-                  <MaterialCommunityIcons
-                    name="store-marker"
+                  <MaterialCommunityIcon                     name="store-marker"
                     size={24}
                     color={colors.primary}
                   />
@@ -412,8 +408,7 @@ const RestaurantLocationScreen: React.FC = () => {
                 {/* Coordinates */}
                 {restaurant.latitude && restaurant.longitude && (
                   <View style={styles.coordinatesContainer}>
-                    <MaterialCommunityIcons
-                      name="map-marker"
+                    <MaterialCommunityIcon                       name="map-marker"
                       size={16}
                       color={colors.onSurfaceVariant}
                     />
@@ -430,8 +425,7 @@ const RestaurantLocationScreen: React.FC = () => {
                 {/* Delivery Radius */}
                 {restaurant.deliveryRadius && (
                   <View style={[styles.coordinatesContainer, { marginTop: 4 }]}>
-                    <MaterialCommunityIcons
-                      name="map-marker-radius"
+                    <MaterialCommunityIcon                       name="map-marker-radius"
                       size={16}
                       color={colors.onSurfaceVariant}
                     />
@@ -458,8 +452,7 @@ const RestaurantLocationScreen: React.FC = () => {
             style={{ borderRadius: 12 }}
             labelStyle={{ fontSize: 16, fontWeight: '600' }}
             icon={() => (
-              <MaterialCommunityIcons
-                name="crosshairs-gps"
+              <MaterialCommunityIcon                 name="crosshairs-gps"
                 size={20}
                 color="white"
               />
@@ -479,8 +472,7 @@ const RestaurantLocationScreen: React.FC = () => {
           >
             <View style={{ padding: 16 }}>
               <View style={styles.infoHeader}>
-                <MaterialCommunityIcons
-                  name="information"
+                <MaterialCommunityIcon                   name="information"
                   size={20}
                   color={colors.primary}
                 />
@@ -532,7 +524,7 @@ const RestaurantLocationScreen: React.FC = () => {
               Update Restaurant Location
             </Heading4>
             <TouchableOpacity onPress={closeUpdateModal}>
-              <Ionicons name="close" size={24} color={colors.onSurface} />
+              <IoniconsIcon name="close" size={24} color={colors.onSurface} />
             </TouchableOpacity>
           </View>
 
@@ -549,7 +541,7 @@ const RestaurantLocationScreen: React.FC = () => {
             >
               <View style={{ padding: 16 }}>
                 <View style={styles.warningHeader}>
-                  <Ionicons name="warning" size={24} color={colors.error} />
+                  <IoniconsIcon name="warning" size={24} color={colors.error} />
                   <Label
                     color={colors.error}
                     weight="semibold"
@@ -582,8 +574,7 @@ const RestaurantLocationScreen: React.FC = () => {
               >
                 <View style={{ padding: 16 }}>
                   <View style={styles.selectedLocationHeader}>
-                    <MaterialCommunityIcons
-                      name="map-marker-check"
+                    <MaterialCommunityIcon                       name="map-marker-check"
                       size={24}
                       color={colors.primary}
                     />
@@ -623,8 +614,7 @@ const RestaurantLocationScreen: React.FC = () => {
               </Label>
 
               <View style={styles.instructionItem}>
-                <Ionicons
-                  name="checkmark-circle"
+                <IoniconsIcon                   name="checkmark-circle"
                   size={20}
                   color={colors.primary}
                 />
@@ -637,8 +627,7 @@ const RestaurantLocationScreen: React.FC = () => {
               </View>
 
               <View style={styles.instructionItem}>
-                <Ionicons
-                  name="checkmark-circle"
+                <IoniconsIcon                   name="checkmark-circle"
                   size={20}
                   color={colors.primary}
                 />
@@ -651,8 +640,7 @@ const RestaurantLocationScreen: React.FC = () => {
               </View>
 
               <View style={styles.instructionItem}>
-                <Ionicons
-                  name="checkmark-circle"
+                <IoniconsIcon                   name="checkmark-circle"
                   size={20}
                   color={colors.primary}
                 />
@@ -707,8 +695,7 @@ const RestaurantLocationScreen: React.FC = () => {
                         ],
                       }}
                     >
-                      <MaterialCommunityIcons
-                        name={isGettingLocation ? 'loading' : 'crosshairs-gps'}
+                      <MaterialCommunityIcon                         name={isGettingLocation ? 'loading' : 'crosshairs-gps'}
                         size={20}
                         color="white"
                       />

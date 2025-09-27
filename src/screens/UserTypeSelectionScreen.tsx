@@ -1,3 +1,4 @@
+import { IoniconsIcon } from '@/src/components/common/icons';
 import React, { useState, useCallback } from 'react';
 import {
   View,
@@ -9,7 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme, Button } from 'react-native-paper';
-import { Ionicons } from '@expo/vector-icons';
+
 import { images } from '@/assets/images';
 import { useTranslation } from 'react-i18next';
 import { RootStackScreenProps } from '../navigation/types';
@@ -215,7 +216,7 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
                       shadowRadius: 4,
                     }}
                   >
-                    <Ionicons name="checkmark" size={20} color="white" />
+                    <IoniconsIcon name="checkmark" size={20} color="white" />
                   </View>
                 )}
 

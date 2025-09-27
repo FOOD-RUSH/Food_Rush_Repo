@@ -1,10 +1,11 @@
+import { MaterialIcon } from '@/src/components/common/icons';
 import React, { useCallback, useState } from 'react';
 import { View, Image, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '@/src/navigation/types';
 import { useTheme, ActivityIndicator } from 'react-native-paper';
-import { MaterialIcons } from '@expo/vector-icons';
+
 import { useTranslation } from 'react-i18next';
 import {
   Typography,
@@ -150,8 +151,7 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
                 alignItems: 'center',
               }}
             >
-              <MaterialIcons
-                name="restaurant"
+              <MaterialIcon                 name="restaurant"
                 size={20}
                 color={colors.onSurfaceVariant}
               />

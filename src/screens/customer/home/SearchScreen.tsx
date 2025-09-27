@@ -1,3 +1,4 @@
+import { MaterialIcon } from '@/src/components/common/icons';
 import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
@@ -8,7 +9,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { useTheme, ActivityIndicator } from 'react-native-paper';
-import { MaterialIcons } from '@expo/vector-icons';
+
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
@@ -297,7 +298,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
             onPress={handleGoBack}
             style={[styles.backButton, { backgroundColor: colors.primary }]}
           >
-            <MaterialIcons name="arrow-back" size={20} color="white" />
+            <MaterialIcon name="arrow-back" size={20} color="white" />
           </TouchableOpacity>
           <Text style={[styles.categoryTitle, { color: colors.onSurface }]}>
             {category}
@@ -315,7 +316,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
             onPress={handleGoBack}
             style={[styles.backButton, { backgroundColor: colors.primary }]}
           >
-            <MaterialIcons name="arrow-back" size={20} color="white" />
+            <MaterialIcon name="arrow-back" size={20} color="white" />
           </TouchableOpacity>
           <SearchInput value={query} onChangeText={setQuery} />
         </View>
@@ -335,8 +336,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
         ]}
         onPress={() => setIsFilterModalVisible(true)}
       >
-        <MaterialIcons
-          name="tune"
+        <MaterialIcon           name="tune"
           size={20}
           color={
             hasActiveFilters
@@ -381,8 +381,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
             });
           }}
         >
-          <MaterialIcons
-            name="clear"
+          <MaterialIcon             name="clear"
             size={16}
             color={colors.onErrorContainer}
           />
@@ -470,8 +469,7 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
           />
         ) : (
           <View style={styles.emptyState}>
-            <MaterialIcons
-              name="search-off"
+            <MaterialIcon               name="search-off"
               size={64}
               color={colors.onSurfaceVariant}
             />

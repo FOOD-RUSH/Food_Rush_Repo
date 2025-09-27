@@ -1,3 +1,4 @@
+import { IoniconsIcon } from '@/src/components/common/icons';
 import React, {
   useState,
   useCallback,
@@ -27,7 +28,7 @@ import {
 } from 'react-native-paper';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Ionicons } from '@expo/vector-icons';
+
 import { AuthStackScreenProps } from '@/src/navigation/types';
 import { useAuthStore } from '@/src/stores/AuthStore';
 import { TextButton } from '@/src/components/common/TextButton';
@@ -482,7 +483,7 @@ const RestaurantSignupStep2: React.FC<
             backdropFilter: 'blur(10px)',
           }}
         >
-          <Ionicons name="arrow-back" size={24} color="white" />
+          <IoniconsIcon name="arrow-back" size={24} color="white" />
         </TouchableOpacity>
       </Animated.View>
 
@@ -540,8 +541,7 @@ const RestaurantSignupStep2: React.FC<
                 backdropFilter: 'blur(10px)',
               }}
             >
-              <Ionicons
-                name="camera-outline"
+              <IoniconsIcon                 name="camera-outline"
                 size={36}
                 color="rgba(255, 255, 255, 0.8)"
               />
@@ -562,7 +562,7 @@ const RestaurantSignupStep2: React.FC<
               borderColor: 'white',
             }}
           >
-            <Ionicons name="camera" size={16} color="white" />
+            <IoniconsIcon name="camera" size={16} color="white" />
           </View>
         </TouchableOpacity>
 
@@ -683,8 +683,7 @@ const RestaurantSignupStep2: React.FC<
                 onPress={() => setShowLocationModal(true)}
                 activeOpacity={0.7}
               >
-                <Ionicons
-                  name="location-outline"
+                <IoniconsIcon                   name="location-outline"
                   size={24}
                   color={
                     selectedLocation ? colors.primary : colors.onSurfaceVariant
@@ -739,11 +738,10 @@ const RestaurantSignupStep2: React.FC<
                       ],
                     }}
                   >
-                    <Ionicons name="refresh" size={20} color={colors.primary} />
+                    <IoniconsIcon name="refresh" size={20} color={colors.primary} />
                   </Animated.View>
                 ) : (
-                  <Ionicons
-                    name="chevron-forward"
+                  <IoniconsIcon                     name="chevron-forward"
                     size={20}
                     color={colors.onSurfaceVariant}
                   />
@@ -766,8 +764,7 @@ const RestaurantSignupStep2: React.FC<
               onPress={pickDocument}
               activeOpacity={0.7}
             >
-              <Ionicons
-                name="document-attach-outline"
+              <IoniconsIcon                 name="document-attach-outline"
                 size={24}
                 color={colors.primary}
               />
@@ -781,8 +778,7 @@ const RestaurantSignupStep2: React.FC<
               >
                 {documentName || t('upload_document_optional')}
               </Body>
-              <Ionicons
-                name="cloud-upload-outline"
+              <IoniconsIcon                 name="cloud-upload-outline"
                 size={20}
                 color={colors.onSurfaceVariant}
               />
@@ -886,7 +882,7 @@ const RestaurantSignupStep2: React.FC<
               {t('restaurant_location')}
             </Heading2>
             <TouchableOpacity onPress={() => setShowLocationModal(false)}>
-              <Ionicons name="close" size={24} color={colors.onSurface} />
+              <IoniconsIcon name="close" size={24} color={colors.onSurface} />
             </TouchableOpacity>
           </View>
 
@@ -900,8 +896,7 @@ const RestaurantSignupStep2: React.FC<
                 alignItems: 'center',
               }}
             >
-              <Ionicons
-                name="location"
+              <IoniconsIcon                 name="location"
                 size={64}
                 color={colors.primary}
                 style={{ marginBottom: 20 }}
@@ -928,8 +923,7 @@ const RestaurantSignupStep2: React.FC<
                     key={index}
                     style={{ flexDirection: 'row', alignItems: 'flex-start' }}
                   >
-                    <Ionicons
-                      name="checkmark-circle"
+                    <IoniconsIcon                       name="checkmark-circle"
                       size={24}
                       color={colors.primary}
                     />
@@ -957,7 +951,7 @@ const RestaurantSignupStep2: React.FC<
                   width: '100%',
                 }}
               >
-                <Ionicons name="warning" size={24} color={colors.error} />
+                <IoniconsIcon name="warning" size={24} color={colors.error} />
                 <Body
                   style={{
                     flex: 1,

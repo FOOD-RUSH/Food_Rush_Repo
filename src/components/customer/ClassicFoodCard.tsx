@@ -1,8 +1,9 @@
+import { IoniconsIcon, MaterialIcon } from '@/src/components/common/icons';
 import { TouchableOpacity, View, Text } from 'react-native';
 import React from 'react';
 import { Card, useTheme } from 'react-native-paper';
 import { images } from '@/assets/images';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+
 import { CustomerHomeStackScreenProps } from '@/src/navigation/types';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -11,26 +12,30 @@ interface ClassicFoodCardProps {
   id: string;
   restaurantId?: string;
   foodName?: string;
-  foodPrice?: number;
+  foodPrice?: number | string;
   restaurantName?: string;
   distance?: number;
   rating?: number;
   status?: string;
   imageUrl?: string;
   deliveryStatus?: string;
+  deliveryFee?: number;
+  isAvailable?: boolean;
 }
 
 const ClassicFoodCard = ({
   id,
-  restaurantId = '1',
-  foodName = 'Egg & Pasta',
-  foodPrice = 650,
-  restaurantName = 'Resto Chez Dialo',
-  distance = 190,
-  rating = 4.9,
-  status = 'PROMO',
+  restaurantId,
+  foodName,
+  foodPrice,
+  restaurantName,
+  distance,
+  rating,
+  status,
   imageUrl,
-  deliveryStatus = 'Available',
+  deliveryStatus,
+  deliveryFee,
+  isAvailable = true,
 }: ClassicFoodCardProps) => {
   const navigation =
     useNavigation<CustomerHomeStackScreenProps<'HomeScreen'>['navigation']>();
@@ -68,15 +73,19 @@ const ClassicFoodCard = ({
               }}
             />
             <TouchableOpacity className="absolute top-2 right-2 bg-white rounded-full p-1.5 shadow-sm">
-              <Ionicons name="heart-outline" color={'#ff6b6b'} size={20} />
+              <IoniconsIcon name="heart-outline" color={'#ff6b6b'} size={20} />
             </TouchableOpacity>
 
             {/* Status badge */}
-            <View className="absolute top-2 left-2 bg-blue-500 rounded-md px-2 py-1">
-              <Text className="text-white text-xs font-bold text-center">
-                {status}
-              </Text>
-            </View>
+            {(status || !isAvailable) && (
+              <View className={`absolute top-2 left-2 rounded-md px-2 py-1 ${
+                !isAvailable ? 'bg-red-500' : 'bg-blue-500'
+              }`}>
+                <Text className="text-white text-xs font-bold text-center">
+                  {!isAvailable ? t('sold_out') : (status || 'AVAILABLE')}
+                </Text>
+              </View>
+            )}
           </View>
 
           {/* Food info */}
@@ -86,30 +95,30 @@ const ClassicFoodCard = ({
               style={{ color: colors.onSurface }}
               numberOfLines={1}
             >
-              {foodName}
+              {foodName || 'N/A'}
             </Text>
             <Text
               className="mb-2 text-center text-base"
               style={{ color: colors.onSurface }}
               numberOfLines={1}
             >
-              {restaurantName}
+              {restaurantName || 'N/A'}
             </Text>
           </View>
 
           {/* Rating and distance */}
           <View className="flex-row justify-between items-center mb-3">
             <View className="flex-row items-center">
-              <Ionicons name="star" size={16} color={'#ffbb00'} />
+              <IoniconsIcon name="star" size={16} color={'#ffbb00'} />
               <Text
                 className="text-sm ml-1"
                 style={{ color: colors.onSurface }}
               >
-                {rating}
+                {rating ? rating.toFixed(1) : 'N/A'}
               </Text>
             </View>
             <View className="flex-row items-center">
-              <Ionicons
+              <IoniconsIcon
                 name="location-outline"
                 size={16}
                 color={colors.primary}
@@ -118,8 +127,7 @@ const ClassicFoodCard = ({
                 className="text-sm ml-1"
                 style={{ color: colors.onSurface }}
               >
-                {distance}
-                {t('meter_unit')}
+                {distance ? `${distance.toFixed(1)}km` : 'N/A'}
               </Text>
             </View>
           </View>
@@ -130,10 +138,10 @@ const ClassicFoodCard = ({
               className="font-bold text-base"
               style={{ color: colors.primary }}
             >
-              {foodPrice} XAF
+              {foodPrice ? `${typeof foodPrice === 'string' ? parseFloat(foodPrice) : foodPrice} XAF` : 'N/A'}
             </Text>
             <View className="flex-row items-center">
-              <MaterialIcons
+              <MaterialIcon
                 name="delivery-dining"
                 color={colors.primary}
                 size={18}
@@ -142,7 +150,7 @@ const ClassicFoodCard = ({
                 className="ml-1 text-xs"
                 style={{ color: colors.onSurface }}
               >
-                500 XAF
+                {deliveryFee ? `${deliveryFee} XAF` : 'N/A'}
               </Text>
             </View>
           </View>

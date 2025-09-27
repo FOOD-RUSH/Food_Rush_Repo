@@ -1,3 +1,4 @@
+import { IoniconsIcon } from '@/src/components/common/icons';
 import React, { useCallback } from 'react';
 import {
   View,
@@ -9,7 +10,7 @@ import {
   Image,
 } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import { Ionicons } from '@expo/vector-icons';
+
 import CommonView from '@/src/components/common/CommonView';
 import { AuthStackScreenProps } from '@/src/navigation/types';
 import { useAuthStore } from '@/src/stores/AuthStore';
@@ -109,7 +110,7 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
             style={styles.headerButton}
             activeOpacity={0.7}
           >
-            <Ionicons name="arrow-back" size={24} color={colors.onSurface} />
+            <IoniconsIcon name="arrow-back" size={24} color={colors.onSurface} />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -117,8 +118,7 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
             style={styles.headerButton}
             activeOpacity={0.7}
           >
-            <Ionicons
-              name="log-out-outline"
+            <IoniconsIcon               name="log-out-outline"
               size={24}
               color={colors.onSurface}
             />
@@ -158,7 +158,7 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
           <View style={styles.stepsContainer}>
             <View style={styles.step}>
               <View style={[styles.stepIcon, styles.stepCompleted]}>
-                <Ionicons name="checkmark" size={20} color="white" />
+                <IoniconsIcon name="checkmark" size={20} color="white" />
               </View>
               <View style={styles.stepContent}>
                 <Label
@@ -181,7 +181,7 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
 
             <View style={styles.step}>
               <View style={[styles.stepIcon, styles.stepActive]}>
-                <Ionicons name="time" size={20} color="white" />
+                <IoniconsIcon name="time" size={20} color="white" />
               </View>
               <View style={styles.stepContent}>
                 <Label
@@ -204,8 +204,7 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
 
             <View style={styles.step}>
               <View style={[styles.stepIcon, styles.stepPending]}>
-                <Ionicons
-                  name="mail"
+                <IoniconsIcon                   name="mail"
                   size={20}
                   color={colors.onSurfaceVariant}
                 />
@@ -241,7 +240,7 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
               </Heading2>
               {restaurantId && (
                 <View style={styles.infoRow}>
-                  <Ionicons name="business" size={18} color={colors.primary} />
+                  <IoniconsIcon name="business" size={18} color={colors.primary} />
                   <Label
                     color={colors.onSurfaceVariant}
                     weight="medium"
@@ -260,7 +259,7 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
               )}
               {userId && (
                 <View style={styles.infoRow}>
-                  <Ionicons name="person" size={18} color={colors.primary} />
+                  <IoniconsIcon name="person" size={18} color={colors.primary} />
                   <Label
                     color={colors.onSurfaceVariant}
                     weight="medium"
@@ -283,7 +282,7 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
           {/* Expected Timeline */}
           <View style={styles.timelineCard}>
             <View style={styles.timelineHeader}>
-              <Ionicons name="time-outline" size={24} color={colors.primary} />
+              <IoniconsIcon name="time-outline" size={24} color={colors.primary} />
               <Label
                 color={colors.onPrimaryContainer}
                 weight="semibold"
@@ -307,7 +306,7 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
               onPress={handleRefresh}
               activeOpacity={0.8}
             >
-              <Ionicons name="refresh" size={20} color="white" />
+              <IoniconsIcon name="refresh" size={20} color="white" />
               <Label color="white" weight="semibold">
                 {t('check_status')}
               </Label>
@@ -318,8 +317,7 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
               onPress={handleContactSupport}
               activeOpacity={0.8}
             >
-              <Ionicons
-                name="chatbubble-outline"
+              <IoniconsIcon                 name="chatbubble-outline"
                 size={20}
                 color={colors.primary}
               />

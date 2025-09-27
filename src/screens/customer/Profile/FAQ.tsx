@@ -1,10 +1,11 @@
+import { MaterialIcon } from '@/src/components/common/icons';
 import { useTranslation } from 'react-i18next';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import React, { useState } from 'react';
 import CommonView from '@/src/components/common/CommonView';
 import { Card, useTheme } from 'react-native-paper';
 import Seperator from '@/src/components/common/Seperator';
-import { MaterialIcons } from '@expo/vector-icons';
+
 import {
   Typography,
   Heading4,
@@ -160,8 +161,7 @@ const FAQ = () => {
         >
           <View className="p-5">
             <View className="flex-row items-center mb-3">
-              <MaterialIcons
-                name="support-agent"
+              <MaterialIcon                 name="support-agent"
                 size={24}
                 color={colors.primary}
               />
@@ -220,8 +220,7 @@ const QuestionCard = ({ item, isExpanded, onToggle }: QuestionCardProps) => {
           >
             {item.title}
           </Label>
-          <MaterialIcons
-            name={isExpanded ? 'keyboard-arrow-up' : 'keyboard-arrow-down'}
+          <MaterialIcon             name={isExpanded ? 'keyboard-arrow-up' : 'keyboard-arrow-down'}
             size={scale(24)}
             color={colors.primary}
           />

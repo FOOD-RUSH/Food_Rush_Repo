@@ -1,3 +1,4 @@
+import { MaterialIcon } from '@/src/components/common/icons';
 import React, { useState, useCallback, useLayoutEffect, useMemo } from 'react';
 import {
   View,
@@ -8,7 +9,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useTheme, ActivityIndicator } from 'react-native-paper';
-import { MaterialIcons } from '@expo/vector-icons';
+
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
@@ -169,7 +170,7 @@ const CategoryMenuScreen: React.FC<CategoryMenuScreenProps> = ({
         onPress={handleGoBack}
         style={[styles.backButton, { backgroundColor: colors.primary }]}
       >
-        <MaterialIcons name="arrow-back" size={20} color="white" />
+        <MaterialIcon name="arrow-back" size={20} color="white" />
       </TouchableOpacity>
       <View style={styles.headerContent}>
         <Text style={[styles.categoryTitle, { color: colors.onSurface }]}>

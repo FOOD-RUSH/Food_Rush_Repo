@@ -1,3 +1,4 @@
+import { IoniconsIcon, MaterialIcon } from '@/src/components/common/icons';
 import React, { useMemo, useCallback } from 'react';
 import {
   View,
@@ -9,7 +10,7 @@ import {
 } from 'react-native';
 import CommonView from '@/src/components/common/CommonView';
 import { ScrollView } from 'react-native-gesture-handler';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+
 import { RootStackScreenProps } from '@/src/navigation/types';
 import { Card, useTheme } from 'react-native-paper';
 import Seperator from '@/src/components/common/Seperator';
@@ -287,8 +288,7 @@ const CheckOutScreen = ({
     return (
       <CommonView>
         <View className="flex-1 items-center justify-center px-6">
-          <MaterialIcons
-            name="shopping-cart"
+          <MaterialIcon             name="shopping-cart"
             size={80}
             color={colors.onSurfaceVariant}
           />
@@ -350,7 +350,7 @@ const CheckOutScreen = ({
               activeOpacity={0.7}
             >
               <View className="flex-row items-center flex-1">
-                <Ionicons name="location" color={colors.primary} size={28} />
+                <IoniconsIcon name="location" color={colors.primary} size={28} />
 
                 <View className="flex-col mx-3 flex-1">
                   <View className="flex-row mb-1 items-center">
@@ -384,8 +384,7 @@ const CheckOutScreen = ({
                 </View>
               </View>
 
-              <MaterialIcons
-                name="arrow-forward-ios"
+              <MaterialIcon                 name="arrow-forward-ios"
                 size={20}
                 color={colors.onSurfaceVariant}
               />
@@ -443,8 +442,7 @@ const CheckOutScreen = ({
               activeOpacity={0.7}
             >
               <View className="flex-row items-center">
-                <Ionicons
-                  name="card-outline"
+                <IoniconsIcon                   name="card-outline"
                   color={colors.primary}
                   size={26}
                 />
@@ -467,8 +465,7 @@ const CheckOutScreen = ({
                       ? 'Orange Money'
                       : 'Mobile Money'}
                 </Text>
-                <MaterialIcons
-                  name="arrow-forward-ios"
+                <MaterialIcon                   name="arrow-forward-ios"
                   size={18}
                   color={colors.onSurfaceVariant}
                 />
@@ -486,8 +483,7 @@ const CheckOutScreen = ({
               activeOpacity={0.7}
             >
               <View className="flex-row items-center">
-                <MaterialIcons
-                  name="local-offer"
+                <MaterialIcon                   name="local-offer"
                   color={colors.primary}
                   size={26}
                 />
@@ -506,8 +502,7 @@ const CheckOutScreen = ({
                 >
                   {t('add_code')}
                 </Text>
-                <MaterialIcons
-                  name="arrow-forward-ios"
+                <MaterialIcon                   name="arrow-forward-ios"
                   size={18}
                   color={colors.onSurfaceVariant}
                 />

@@ -1,3 +1,4 @@
+import { AntDesignIcon, IoniconsIcon, MaterialIcon } from '@/src/components/common/icons';
 import { useTranslation } from 'react-i18next';
 import {
   View,
@@ -16,7 +17,7 @@ import {
 } from '@/src/location';
 import AddressEditModal from '@/src/components/customer/AddressEditModal';
 import { Card, useTheme, FAB, Snackbar } from 'react-native-paper';
-import { AntDesign, Ionicons, MaterialIcons } from '@expo/vector-icons';
+
 import { useAddressManager } from '@/src/hooks/customer/useAddressManager';
 import {
   Typography,
@@ -201,7 +202,7 @@ const AddressScreen = ({
         <View className="p-4">
           <View className="flex-row items-center justify-between">
             <View className="flex-row items-center flex-1">
-              <Ionicons name="location-outline" color="#007aff" size={24} />
+              <IoniconsIcon name="location-outline" color="#007aff" size={24} />
 
               <View className="flex-col mx-3 flex-1">
                 <View className="flex-row items-center">
@@ -238,7 +239,7 @@ const AddressScreen = ({
                 style={{ backgroundColor: colors.surfaceVariant }}
                 activeOpacity={0.7}
               >
-                <AntDesign name="edit" size={18} color="#007aff" />
+                <AntDesignIcon name="edit" size={18} color="#007aff" />
               </TouchableOpacity>
 
               {!isDefault && (
@@ -248,7 +249,7 @@ const AddressScreen = ({
                   style={{ backgroundColor: colors.surfaceVariant }}
                   activeOpacity={0.7}
                 >
-                  <Ionicons name="star-outline" size={18} color="#007aff" />
+                  <IoniconsIcon name="star-outline" size={18} color="#007aff" />
                 </TouchableOpacity>
               )}
 
@@ -259,8 +260,7 @@ const AddressScreen = ({
                   style={{ backgroundColor: colors.surfaceVariant }}
                   activeOpacity={0.7}
                 >
-                  <MaterialIcons
-                    name="delete-outline"
+                  <MaterialIcon                     name="delete-outline"
                     size={18}
                     color="#ff4444"
                   />
@@ -291,7 +291,7 @@ const AddressScreen = ({
         <View className="p-4">
           <View className="flex-row items-center justify-between">
             <View className="flex-row items-center flex-1">
-              <Ionicons name="location" color="#007aff" size={24} />
+              <IoniconsIcon name="location" color="#007aff" size={24} />
               <View className="flex-col mx-3 flex-1">
                 <Heading5 color="#1e40af" weight="semibold">
                   Use Current Location
@@ -326,7 +326,7 @@ const AddressScreen = ({
                 className="p-2"
                 activeOpacity={0.7}
               >
-                <Ionicons name="close" size={20} color="#666" />
+                <IoniconsIcon name="close" size={20} color="#666" />
               </TouchableOpacity>
             </View>
           </View>
@@ -338,8 +338,7 @@ const AddressScreen = ({
   const EmptyState = () => {
     return (
       <View className="flex-1 items-center justify-center px-6">
-        <Ionicons
-          name="location-outline"
+        <IoniconsIcon           name="location-outline"
           size={80}
           color={colors.onSurfaceVariant}
         />
@@ -372,7 +371,7 @@ const AddressScreen = ({
               }}
               activeOpacity={0.7}
             >
-              <Ionicons name="location" size={20} color="white" />
+              <IoniconsIcon name="location" size={20} color="white" />
               <Label color="white" weight="medium" style={{ marginLeft: 8 }}>
                 {isProcessing
                   ? 'Adding Current Location...'
@@ -390,7 +389,7 @@ const AddressScreen = ({
             }}
             activeOpacity={0.7}
           >
-            <Ionicons name="add" size={20} color="#007aff" />
+            <IoniconsIcon name="add" size={20} color="#007aff" />
             <Label color="#007aff" weight="medium" style={{ marginLeft: 8 }}>
               {t('add_new_address')}
             </Label>

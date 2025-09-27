@@ -1,3 +1,4 @@
+import { MaterialIcon } from '@/src/components/common/icons';
 import React, { useCallback, useMemo } from 'react';
 import { View, Text, Image, Pressable, StyleSheet, Alert } from 'react-native';
 import { images } from '@/assets/images';
@@ -13,7 +14,7 @@ import Animated, {
   interpolate,
   clamp,
 } from 'react-native-reanimated';
-import { MaterialIcons } from '@expo/vector-icons';
+
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
 
@@ -190,7 +191,7 @@ const CartFoodComponent: React.FC<CartFoodComponentProps> = React.memo(
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
               <Animated.View style={deleteIconStyle}>
-                <MaterialIcons name="delete" size={24} color="#fff" />
+                <MaterialIcon name="delete" size={24} color="#fff" />
               </Animated.View>
               <Text style={styles.deleteText}>{t('remove')}</Text>
             </Pressable>
@@ -258,8 +259,7 @@ const CartFoodComponent: React.FC<CartFoodComponentProps> = React.memo(
 
                       {specialInstructions && (
                         <View style={styles.instructionsContainer}>
-                          <MaterialIcons
-                            name="note"
+                          <MaterialIcon                             name="note"
                             size={12}
                             color={colors.onSurfaceVariant}
                             style={styles.noteIcon}

@@ -1,7 +1,8 @@
+import { MaterialCommunityIcon } from '@/src/components/common/icons';
 import React, { useState } from 'react';
 import { View, ScrollView, Switch } from 'react-native';
 import { useTheme, Card, Divider } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
 
@@ -45,8 +46,7 @@ const NotificationSetting: React.FC<NotificationSettingProps> = ({
           className="w-12 h-12 rounded-full items-center justify-center mr-4"
           style={{ backgroundColor: colors.primaryContainer }}
         >
-          <MaterialCommunityIcons
-            name={icon as any}
+          <MaterialCommunityIcon             name={icon as any}
             size={24}
             color={colors.primary}
           />

@@ -2,67 +2,54 @@
 
 ## Project Structure & Module Organization
 
-Food Rush is organized into a modular React Native architecture with clear separation of concerns:
-
-- **src/components/** - Reusable UI components organized by feature (auth, customer, common, settings)
-- **src/screens/** - Screen components separated by user type (auth, customer, restaurant)
-- **src/services/** - API services and business logic with TanStack Query integration
-- **src/stores/** - Zustand state management stores with persistence
-- **src/navigation/** - Type-safe React Navigation configuration
-- **src/types/** - TypeScript type definitions and interfaces
-- **src/utils/** - Utility functions for validation, formatting, and helpers
-- **src/hooks/** - Custom React hooks for business logic
-- **src/locales/** - i18next internationalization files (English/French)
-- **assets/** - Images, fonts, and static resources
+Food Rush is organized as a React Native Expo app with TypeScript. Source code is located in `src/` with clear separation between customer and restaurant features. Components are organized by user type (`src/components/customer/`, `src/components/restaurant/`) and shared components in `src/components/common/`. Screens follow the same pattern in `src/screens/`. State management uses Zustand stores in `src/stores/` with separate stores for customer and restaurant features. Assets including images, fonts, and sounds are in the `assets/` directory.
 
 ## Build, Test, and Development Commands
 
 ```bash
-# Install dependencies
-npm install
-
 # Start development server
 npm start
-# or
-npx expo start
 
-# Platform-specific development
-npm run android    # Start Android development
-npm run ios        # Start iOS development
-npm run web        # Start web development
+# Run on specific platforms
+npm run android          # Android emulator/device
+npm run ios             # iOS simulator/device  
+npm run web             # Web browser
 
-# Code quality
-npm run lint       # Run ESLint
-npm run format     # Format with Prettier
+# Code quality and testing
+npm run lint            # ESLint with Expo config
+npm run format          # Prettier formatting
+npm test               # Jest tests with watch mode
 
-# Testing
-npm test           # Run Jest tests in watch mode
+# Bundle analysis and optimization
+npm run bundle:size     # Analyze and monitor bundle size
+npm run deps:analyze    # Check for unused dependencies
 
-# Translation validation
-npm run validate:translations  # Validate translation consistency
+# Production builds
+npm run production:build:android  # Android production build
+npm run production:build:ios      # iOS production build
 ```
 
 ## Coding Style & Naming Conventions
 
-- **Indentation**: 2 spaces (configured in .prettierrc)
-- **File naming**: PascalCase for components/screens, camelCase for utilities
-- **Function/variable naming**: camelCase with descriptive names
-- **Component naming**: PascalCase with feature prefixes (e.g., CustomerHomeScreen)
-- **Linting**: ESLint with Expo config and TypeScript rules
-- **Formatting**: Prettier with single quotes, trailing commas, 80 char width
+- **Indentation**: 2 spaces, no tabs
+- **File naming**: PascalCase for components (`UserTypeSelectionScreen.tsx`), camelCase for utilities (`errorHandler.ts`)
+- **Function/variable naming**: camelCase with descriptive names (`handleOnboardingComplete`, `isAuthenticated`)
+- **Linting**: ESLint with Expo configuration and Prettier integration
+- **Styling**: NativeWind (Tailwind CSS for React Native) with utility classes
 
 ## Testing Guidelines
 
-- **Framework**: Jest with jest-expo preset
-- **Test files**: Co-located with components using `.test.ts/.test.tsx` suffix
+- **Framework**: Jest with React Native Testing Library
+- **Test files**: `*.test.ts`, `*.test.tsx` or `__tests__/` directories
 - **Running tests**: `npm test` for watch mode
-- **Coverage**: Focus on business logic, hooks, and critical user flows
+- **Coverage**: Tests focus on utility functions and business logic
 
 ## Commit & Pull Request Guidelines
 
-- **Commit format**: Descriptive messages with feature context (e.g., "Updated setup", "API integrations for authentication calls")
-- **PR process**: Code review required, ensure linting and tests pass
-- **Branch naming**: Feature-based branches (e.g., restaurant-screen, authentication-flow)
+- **Commit format**: Conventional commits with type prefixes (`feat:`, `fix:`, `refactor:`)
+- **Examples from repo**: `feat: Complete notification system consolidation and cleanup`, `fix: Resolve type errors and remove duplicate notification setup`
+- **PR process**: Code review required, ESLint and Prettier checks must pass
+- **Branch naming**: Feature branches with descriptive names
 
 ---
 
@@ -70,45 +57,39 @@ npm run validate:translations  # Validate translation consistency
 
 ## 🎯 What This Repository Does
 
-Food Rush is a comprehensive React Native food delivery mobile application that connects customers with restaurants for seamless food ordering and delivery services.
+Food Rush is a comprehensive React Native food delivery application that connects customers with restaurants for seamless food ordering and delivery services, featuring dual user interfaces, real-time order tracking, and multi-language support.
 
 **Key responsibilities:**
-
 - Customer food ordering and delivery tracking
-- Restaurant menu management and order processing
-- Real-time order status updates and notifications
-- Multi-language support (English/French) with location-based services
+- Restaurant order management and menu administration
+- Real-time notifications and location services
 
 ---
 
 ## 🏗️ Architecture Overview
 
 ### System Context
-
 ```
-[Customer Mobile App] → [Food Rush Backend API] → [Restaurant Dashboard]
-                              ↓
-                        [Payment Services]
-                              ↓
-                        [Notification Services]
+[Customers] → [Food Rush App] → [Backend API]
+                    ↓
+[Restaurants] → [Restaurant Interface] → [Order Management]
+                    ↓
+              [Push Notifications] ← [External Services]
 ```
 
 ### Key Components
-
-- **Authentication System** - JWT-based auth with OTP verification for both customers and restaurants
-- **Navigation System** - Type-safe React Navigation with role-based routing (customer/restaurant flows)
-- **State Management** - Zustand stores for client state, TanStack Query for server state with caching
-- **UI System** - NativeWind (Tailwind CSS) with React Native Paper components and custom theme system
-- **Internationalization** - i18next with English/French support and device language detection
-- **Notification System** - Expo notifications with cart reminders and order updates
+- **Dual Navigation System** - Separate customer and restaurant app flows with React Navigation
+- **State Management** - Zustand stores with AsyncStorage persistence for offline support
+- **Real-time Features** - TanStack Query for server state with push notifications via Expo
+- **Location Services** - GPS integration with Expo Location for delivery tracking
+- **Internationalization** - i18next with English and French support
 
 ### Data Flow
-
-1. **User Authentication** - Login/signup with OTP verification, JWT token storage
-2. **App Initialization** - Hydrate stores, check auth state, determine user type (customer/restaurant)
-3. **Navigation Setup** - Route to appropriate app flow based on authentication and user type
-4. **Data Fetching** - TanStack Query handles API calls with automatic caching and background updates
-5. **State Updates** - Zustand stores manage local state with AsyncStorage persistence
+1. User selects customer or restaurant mode during onboarding
+2. Authentication flow determines user type and permissions
+3. Type-specific navigation and state management activated
+4. API calls managed through TanStack Query with error handling
+5. Real-time updates via push notifications and query invalidation
 
 ---
 
@@ -118,166 +99,149 @@ Food Rush is a comprehensive React Native food delivery mobile application that 
 food-rush/
 ├── src/                           # Main application source code
 │   ├── components/                # Reusable UI components
-│   │   ├── auth/                  # Authentication-specific components
-│   │   ├── common/                # Shared components (LoadingScreen, ErrorBoundary)
-│   │   ├── customer/              # Customer-specific components
-│   │   └── settings/              # Settings and profile components
-│   ├── screens/                   # Screen components organized by user type
-│   │   ├── auth/                  # Login, signup, OTP, password reset
-│   │   ├── customer/              # Customer app screens (home, cart, profile, orders)
-│   │   └── restaurant/            # Restaurant management (orders, menu, analytics)
-│   ├── navigation/                # React Navigation configuration
-│   │   ├── RootNavigator.tsx      # Main navigation entry point
-│   │   ├── AuthNavigator.tsx      # Authentication flow navigation
-│   │   ├── CustomerNavigator.tsx  # Customer app navigation with tabs
-│   │   └── types.ts               # Navigation type definitions
-│   ├── stores/                    # Zustand state management
-│   │   └── customerStores/        # Customer-specific stores
-│   ├── services/                  # API services and business logic
-│   │   ├── queryClient.ts         # TanStack Query configuration
-│   │   └── customer/              # Customer-specific API services
-│   ├── hooks/                     # Custom React hooks
-│   ├── types/                     # TypeScript type definitions
-│   ├── utils/                     # Utility functions and helpers
-│   ├── locales/                   # Internationalization files
-│   │   ├── en/                    # English translations
-│   │   └── fr/                    # French translations
-│   └── contexts/                  # React context providers
-├── assets/                        # Static assets (images, fonts)
-│   ├── images/                    # App images and illustrations
-│   └── fonts/                     # Custom fonts
-├── App.tsx                        # Main app entry point
-├── app.json                       # Expo configuration
-├── package.json                   # Dependencies and scripts
-└── tsconfig.json                  # TypeScript configuration
+│   │   ├── auth/                 # Authentication components
+│   │   ├── common/               # Shared components (buttons, forms, etc.)
+│   │   ├── customer/             # Customer-specific components
+│   │   └── restaurant/           # Restaurant-specific components
+│   ├── screens/                  # Screen components organized by user type
+│   │   ├── auth/                 # Login, signup, OTP verification
+│   │   ├── customer/             # Customer app screens
+│   │   └── restaurant/           # Restaurant management screens
+│   ├── navigation/               # Navigation configuration and types
+│   ├── stores/                   # Zustand state management
+│   │   ├── customerStores/       # Customer-specific stores
+│   │   ├── restaurantStores/     # Restaurant-specific stores
+│   │   └── shared/               # Shared stores
+│   ├── services/                 # API services and business logic
+│   ├── hooks/                    # Custom React hooks
+│   ├── utils/                    # Utility functions and helpers
+│   ├── types/                    # TypeScript type definitions
+│   ├── locales/                  # Internationalization files
+│   └── contexts/                 # React context providers
+├── assets/                       # Static assets
+│   ├── fonts/                    # Custom fonts (Urbanist family)
+│   ├── images/                   # App images and illustrations
+│   └── sounds/                   # Notification sounds
+├── scripts/                      # Build and utility scripts
+└── docs/                         # Documentation
 ```
 
 ### Key Files to Know
 
-| File                                    | Purpose                                | When You'd Touch It                       |
-| --------------------------------------- | -------------------------------------- | ----------------------------------------- |
-| `App.tsx`                               | Application entry point with providers | Adding global providers or initialization |
-| `src/navigation/RootNavigator.tsx`      | Main navigation logic and routing      | Adding new screens or navigation flows    |
-| `src/contexts/AppContextProvider.tsx`   | Context provider hierarchy             | Adding new global contexts                |
-| `package.json`                          | Dependencies and build scripts         | Adding new libraries or scripts           |
-| `app.json`                              | Expo configuration and permissions     | Configuring app metadata or permissions   |
-| `src/stores/customerStores/AppStore.ts` | Global app state management            | Managing theme, onboarding, user type     |
-| `src/services/queryClient.ts`           | API client configuration               | Configuring API behavior and caching      |
-| `src/types/index.ts`                    | Core type definitions                  | Adding new data types or interfaces       |
-| `src/locales/en/translation.json`       | English translations                   | Adding new translatable text              |
-| `tailwind.config.js`                    | Styling configuration                  | Customizing design system                 |
+| File | Purpose | When You'd Touch It |
+|------|---------|---------------------|
+| `App.tsx` | Application entry point with providers | Adding global providers or app-level logic |
+| `src/navigation/RootNavigator.tsx` | Main navigation configuration | Adding new screens or navigation flows |
+| `src/stores/index.ts` | Store exports and organization | Adding new stores or state management |
+| `package.json` | Dependencies and scripts | Adding libraries or build commands |
+| `app.json` | Expo configuration | Changing app metadata or permissions |
+| `src/config/theme.ts` | Theme and styling configuration | Updating colors or design tokens |
+| `src/locales/i18n.ts` | Internationalization setup | Adding new languages or translation logic |
+| `src/services/shared/apiClient.ts` | API client configuration | Modifying API endpoints or authentication |
+| `babel.config.js` | Babel and NativeWind configuration | Changing build optimizations |
+| `metro.config.js` | Metro bundler configuration | Bundle optimization and asset handling |
 
 ---
 
 ## 🔧 Technology Stack
 
 ### Core Technologies
-
-- **Language:** TypeScript (5.8.3) - Provides type safety and enhanced developer experience
-- **Framework:** React Native (0.79.5) with Expo (53.0.22) - Cross-platform mobile development
-- **State Management:** Zustand (5.0.7) - Lightweight state management with persistence
-- **Server State:** TanStack Query (5.85.0) - Data fetching, caching, and synchronization
+- **Language:** TypeScript 5.9.2 - Strict type safety with comprehensive type definitions
+- **Framework:** React Native 0.81.4 with Expo 54.0.8 - Cross-platform mobile development
+- **State Management:** Zustand 5.0.7 - Lightweight state management with persistence
+- **Server State:** TanStack Query 5.85.0 - Data fetching, caching, and synchronization
 
 ### Key Libraries
-
-- **React Navigation (7.x)** - Type-safe navigation with stack and tab navigators
-- **NativeWind (4.1.23)** - Tailwind CSS for React Native styling
-- **React Native Paper (5.14.5)** - Material Design components for consistent UI
-- **i18next (25.3.6)** - Internationalization with React Native integration
-- **React Hook Form (7.61.1)** - Form management with Yup validation
-- **Expo Modules** - Location services, notifications, image picker, secure storage
+- **Navigation:** React Navigation 7.x - Type-safe navigation with stack, tab, and modal support
+- **Styling:** NativeWind 4.1.23 - Tailwind CSS utilities for React Native
+- **UI Components:** React Native Paper 5.14.5 - Material Design components
+- **Forms:** React Hook Form 7.61.1 with Yup validation - Type-safe form management
+- **Internationalization:** i18next 25.3.6 with React Native integration
+- **Animations:** React Native Reanimated 4.1.0 - High-performance animations
 
 ### Development Tools
-
-- **ESLint** - Code linting with Expo and TypeScript configurations
-- **Prettier** - Code formatting with consistent style rules
-- **Jest** - Testing framework with Expo preset
-- **Babel** - JavaScript compilation with React Native and NativeWind presets
-- **Metro** - React Native bundler with NativeWind integration
+- **Testing:** Jest with React Native Testing Library - Unit and integration testing
+- **Linting:** ESLint with Expo configuration and Prettier - Code quality and formatting
+- **Build:** EAS Build - Cloud-based builds for iOS and Android
+- **Bundle Analysis:** Custom scripts for monitoring bundle size and dependencies
 
 ---
 
 ## 🌐 External Dependencies
 
 ### Required Services
-
-- **Backend API** - RESTful API for user management, orders, restaurants, and payments
-- **Push Notification Service** - Expo push notifications for order updates and cart reminders
-- **Location Services** - Expo Location for geocoding and restaurant proximity
+- **Backend API** - RESTful API for user management, orders, and restaurant data
+- **Push Notifications** - Expo Push Notifications for real-time order updates
+- **Location Services** - Expo Location for GPS tracking and delivery routing
 
 ### Optional Integrations
-
-- **Payment Gateways** - MTN Mobile Money and Orange Money for payment processing
-- **Image Storage** - Cloud storage for restaurant and food images
-- **Analytics Service** - App usage and performance tracking
+- **Image Storage** - AsyncStorage with optimization for menu item photos
+- **Analytics** - Custom analytics utilities for restaurant performance tracking
+- **Error Tracking** - Production-safe error handling with user-friendly messages
 
 ### Environment Variables
 
 ```bash
 # Required
-API_BASE_URL=          # Backend API base URL
-EXPO_PROJECT_ID=       # Expo project ID for notifications
+API_BASE_URL=              # Backend API endpoint
+EXPO_PROJECT_ID=           # Expo project identifier
 
 # Optional
-SENTRY_DSN=           # Error tracking (if configured)
-ANALYTICS_KEY=        # Analytics service key (if configured)
+MAPBOX_ACCESS_TOKEN=       # For enhanced mapping features
+SENTRY_DSN=               # Error tracking (if implemented)
 ```
 
 ---
 
 ## 🔄 Common Workflows
 
-### Customer Food Ordering Flow
+### Customer Order Flow
+1. Browse restaurants and menu items on home screen
+2. Add items to cart with special instructions and quantity
+3. Proceed to checkout with address and payment selection
+4. Place order and receive real-time tracking updates
+5. Rate and review restaurant after delivery completion
 
-1. **Browse Restaurants** - View nearby restaurants with ratings and delivery info
-2. **Select Restaurant** - Browse menu items with categories and search functionality
-3. **Add to Cart** - Select items with quantities and special instructions
-4. **Checkout Process** - Review order, select payment method, confirm delivery address
-5. **Order Tracking** - Real-time status updates from preparation to delivery
+**Code path:** `HomeScreen` → `CartStore` → `CheckOutScreen` → `OrdersAPI` → `OrderTrackingScreen`
 
-**Code path:** `HomeScreen` → `RestaurantDetailScreen` → `FoodDetailsScreen` → `CartScreen` → `CheckOutScreen` → `OrderTrackingScreen`
+### Restaurant Order Management
+1. Receive new order notifications via push notifications
+2. View order details and customer information
+3. Accept or reject orders with optional reason
+4. Update order status through preparation and delivery
+5. Track analytics and customer reviews
 
-### Restaurant Order Management Flow
-
-1. **Receive Orders** - Real-time order notifications with order details
-2. **Order Processing** - Accept/reject orders, update preparation status
-3. **Menu Management** - Add/edit menu items, categories, and availability
-4. **Analytics Dashboard** - View sales data, popular items, and performance metrics
-
-**Code path:** `OrderScreen` → `OrderDetailsScreen` → `MenuScreen` → `AnalyticsScreen`
+**Code path:** `OrdersList` → `OrderDetailsScreen` → `RestaurantOrderAPI` → `AnalyticsOverview`
 
 ---
 
 ## 📈 Performance & Scale
 
 ### Performance Considerations
-
-- **State Management** - Zustand with optimized selectors to prevent unnecessary re-renders
-- **Image Optimization** - Expo Image with caching and lazy loading for restaurant/food images
-- **List Virtualization** - FlatList with performance optimizations for large restaurant/menu lists
-- **Bundle Optimization** - Metro bundler with tree shaking and code splitting
+- **Bundle Optimization:** Metro configuration with production minification and tree shaking
+- **Image Optimization:** Automatic image compression and caching with AsyncStorage
+- **State Management:** Selective store subscriptions to minimize re-renders
+- **Navigation:** Lazy loading of screens and components where appropriate
 
 ### Monitoring
-
-- **Error Tracking** - ErrorBoundary components for graceful error handling
-- **Performance Context** - App state monitoring for lifecycle events and performance metrics
-- **Network State** - Connection monitoring with offline support indicators
+- **Bundle Size:** Automated scripts track bundle size and warn on increases
+- **Dependencies:** Regular analysis of unused dependencies with depcheck
+- **Error Handling:** Production-safe error messages with development logging
 
 ---
 
 ## 🚨 Things to Be Careful About
 
 ### 🔒 Security Considerations
+- **Error Handling:** Production builds sanitize error messages to prevent information disclosure
+- **Authentication:** JWT tokens with automatic refresh and secure storage via Expo SecureStore
+- **Data Validation:** Client and server-side validation with Yup schemas
+- **API Security:** HTTPS-only communication with proper error handling
 
-- **Authentication** - JWT tokens stored securely with Expo SecureStore, automatic refresh handling
-- **Data Validation** - Yup schemas for form validation, TypeScript for compile-time safety
-- **API Security** - Request/response interceptors for authentication headers and error handling
+### Development Considerations
+- **State Persistence:** Zustand stores automatically persist to AsyncStorage - be mindful of sensitive data
+- **Navigation Types:** Strict TypeScript navigation types prevent runtime navigation errors
+- **Bundle Size:** Monitor bundle size with provided scripts - large increases affect app performance
+- **Platform Differences:** Test on both iOS and Android as some features have platform-specific behavior
 
-### Development Notes
-
-- **Platform Compatibility** - Code must work across iOS, Android, and Web platforms
-- **Translation Requirements** - All user-facing text must be internationalized with i18next
-- **State Persistence** - Critical state (auth, cart, preferences) persisted with AsyncStorage
-- **Navigation Types** - Maintain type safety across all navigation flows and screen parameters
-
-_Updated at: 2025-01-27 UTC_
+*Updated at: 2025-01-27 15:30:00 UTC*

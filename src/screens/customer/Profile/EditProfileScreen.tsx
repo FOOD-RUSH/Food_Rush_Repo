@@ -1,9 +1,10 @@
+import { IoniconsIcon, MaterialIcon } from '@/src/components/common/icons';
 import { useTranslation } from 'react-i18next';
 import { View, Text, Image, Alert, TouchableOpacity } from 'react-native';
 import React, { useState } from 'react';
 import { ScrollView } from 'react-native-gesture-handler';
 import { icons } from '@/assets/images';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+
 import * as ImagePicker from 'expo-image-picker';
 import InputField from '@/src/components/customer/InputField';
 import { RootStackScreenProps } from '@/src/navigation/types';
@@ -121,8 +122,7 @@ const EditProfileScreen = ({
               className="absolute bottom-1 right-2 bg-blue-500 rounded-full p-1"
               style={{ backgroundColor: '#007aff' }}
             >
-              <MaterialIcons
-                name={isUploadingImage ? 'hourglass-empty' : 'edit'}
+              <MaterialIcon                 name={isUploadingImage ? 'hourglass-empty' : 'edit'}
                 color="white"
                 size={16}
               />
@@ -140,8 +140,7 @@ const EditProfileScreen = ({
           value={fullName}
           onChangeText={setFullName}
           leftIcon={
-            <Ionicons
-              size={23}
+            <IoniconsIcon               size={23}
               name="person-outline"
               color={colors.onSurface}
             />
@@ -151,8 +150,7 @@ const EditProfileScreen = ({
           leftIcon={
             <View className="flex-row items-center">
               <Text className="text-2xl">🇨🇲</Text>
-              <MaterialIcons
-                name="keyboard-arrow-down"
+              <MaterialIcon                 name="keyboard-arrow-down"
                 size={25}
                 color={colors.onSurface}
               />

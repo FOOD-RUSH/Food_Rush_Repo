@@ -16,7 +16,7 @@ import ice_cream from '@/assets/images/Food Emojies/🍔21.png';
 import salad from '@/assets/images/Food Emojies/🍔16.png';
 import others from '@/assets/images/Food Emojies/🍔24.png';
 import R_logo from '@/assets/images/R-Logo.png';
-import deliveryGif from '@/assets/images/Delivery.gif';
+import deliveryGif from '@/assets/images/Delivery_static.png';
 import onboarding1 from '@/assets/images/background.png';
 import onboarding2 from '@/assets/images/background2.png';
 import onboarding3 from '@/assets/images/background3.png';
@@ -26,9 +26,9 @@ import restaurantImg from '@/assets/images/Food Illustrations/Illustrations 02.p
 import noMenu from '@/assets/images/Food Illustrations/No_menu.png';
 import ApplogoWhite from '@/assets/images/Foodrushlogo.png';
 import ApplogoDark from '@/assets/images/foodrush.svg';
-import NoOrdersLight from '@/assets/images/Food Illustrations/Clipboard light-1.png';
-import NoOrdersDark from '@/assets/images/Food Illustrations/Clipboard light.png';
-import ProfilePlogo from '@/assets/images/Food Illustrations/Type=Edit Avatar, Component=Avatar lIGHT.png';
+import NoOrdersLight from '@/assets/images/NoOrdersLight.png';
+import NoOrdersDark from '@/assets/images/NoOrdersDark.png';
+import ProfilePlogo from '@/assets/images/Food Illustrations/Type=Edit Avatar, Component=Avatar lIGHT.svg';
 import Orange_Money from '@/assets/images/Orange_money.png';
 import Mobile_Money from '@/assets/images/MTN_mobileMoney.png';
 import Loading_reset from '@/assets/images/Food Illustrations/LoadingFood.png';
@@ -37,7 +37,7 @@ import success_1 from '@/assets/images/Food Illustrations/Different Success stat
 import success_2 from '@/assets/images/Food Illustrations/Different Success states 02.png';
 import success_3 from '@/assets/images/Food Illustrations/Different Success states 03.png';
 // Icons
-import not_found from '@/assets/images/Food Illustrations/Not found darck.png';
+import not_found from '@/assets/images/Food Illustrations/Not found darck.svg';
 
 export const images = {
   deliveryGif,

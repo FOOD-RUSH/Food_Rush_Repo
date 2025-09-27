@@ -1,3 +1,4 @@
+import { IoniconsIcon } from '@/src/components/common/icons';
 import React from 'react';
 import { View, Text, FlatList, RefreshControl } from 'react-native';
 import { useTheme } from 'react-native-paper';
@@ -7,7 +8,7 @@ import { useBrowseRestaurants } from '@/src/hooks/customer/useCustomerApi';
 import { RootStackScreenProps } from '@/src/navigation/types';
 // Location system removed - using hardcoded coordinates
 import LoadingScreen from '@/src/components/common/LoadingScreen';
-import { Ionicons } from '@expo/vector-icons';
+
 import { useTranslation } from 'react-i18next';
 
 const NearbyRestaurantsScreen = ({
@@ -59,8 +60,7 @@ const NearbyRestaurantsScreen = ({
 
   const renderEmptyState = () => (
     <View className="flex-1 justify-center items-center px-6">
-      <Ionicons
-        name="restaurant-outline"
+      <IoniconsIcon         name="restaurant-outline"
         size={64}
         color={colors.onSurfaceVariant}
         style={{ marginBottom: 16 }}
@@ -82,8 +82,7 @@ const NearbyRestaurantsScreen = ({
 
   const renderErrorState = () => (
     <View className="flex-1 justify-center items-center px-6">
-      <Ionicons
-        name="alert-circle-outline"
+      <IoniconsIcon         name="alert-circle-outline"
         size={64}
         color={colors.error}
         style={{ marginBottom: 16 }}

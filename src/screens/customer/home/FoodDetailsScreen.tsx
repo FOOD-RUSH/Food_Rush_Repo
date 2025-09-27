@@ -1,3 +1,4 @@
+import { IoniconsIcon, MaterialIcon } from '@/src/components/common/icons';
 import { View, StatusBar, Image, Pressable, Alert } from 'react-native';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -17,7 +18,7 @@ import {
   Label,
   LabelLarge,
 } from '@/src/components/common/Typography';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+
 import { images } from '@/assets/images';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import Seperator from '@/src/components/common/Seperator';
@@ -127,8 +128,7 @@ const FoodDetailsScreen = ({
         className="flex-1 justify-center items-center px-6"
         style={{ backgroundColor: colors.background }}
       >
-        <MaterialIcons
-          name="error-outline"
+        <MaterialIcon           name="error-outline"
           size={80}
           color={colors.onSurfaceVariant}
         />
@@ -186,7 +186,7 @@ const FoodDetailsScreen = ({
             className="absolute top-12 left-4 w-10 h-10 rounded-full items-center justify-center"
             style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
           >
-            <Ionicons name="arrow-back" size={24} color="white" />
+            <IoniconsIcon name="arrow-back" size={24} color="white" />
           </Pressable>
 
           {/* Cart Status Badge */}
@@ -195,7 +195,7 @@ const FoodDetailsScreen = ({
               className="absolute top-12 right-4 px-3 py-2 rounded-full flex-row items-center"
               style={{ backgroundColor: colors.primary }}
             >
-              <MaterialIcons name="shopping-cart" size={16} color="white" />
+              <MaterialIcon name="shopping-cart" size={16} color="white" />
               <Label color="white" weight="bold" style={{ marginLeft: 4 }}>
                 {cartQuantity} in cart
               </Label>
@@ -281,8 +281,7 @@ const FoodDetailsScreen = ({
                     quantity > 1 ? colors.primary : colors.surface,
                 }}
               >
-                <Ionicons
-                  name="remove"
+                <IoniconsIcon                   name="remove"
                   size={24}
                   color={quantity > 1 ? 'white' : colors.onSurfaceVariant}
                 />
@@ -307,7 +306,7 @@ const FoodDetailsScreen = ({
                   opacity: quantity >= 99 ? 0.5 : 1,
                 }}
               >
-                <Ionicons name="add" size={24} color="white" />
+                <IoniconsIcon name="add" size={24} color="white" />
               </Pressable>
             </View>
           </View>

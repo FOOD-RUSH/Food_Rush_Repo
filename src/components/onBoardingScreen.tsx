@@ -1,3 +1,4 @@
+import { IoniconsIcon } from '@/src/components/common/icons';
 import React, { useState, useEffect, useRef, useCallback, memo } from 'react';
 import {
   View,
@@ -12,7 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme, Button } from 'react-native-paper';
-import { Ionicons } from '@expo/vector-icons';
+
 import { images } from '@/assets/images';
 import { useTranslation } from 'react-i18next';
 import { LanguageSelector } from './common/LanguageSelector';
@@ -125,7 +126,7 @@ const OnboardingWelcome = memo(({ onComplete }: { onComplete: () => void }) => {
 
           {/* Animation */}
           <Image
-            source={require('@/assets/images/Delivery.gif')}
+            source={require('@/assets/images/Delivery_static.png')}
             style={{ width: SCREEN_WIDTH * 0.92, height: SCREEN_HEIGHT * 0.4 }}
             resizeMode="contain"
           />
@@ -290,7 +291,7 @@ const OnboardingSlide = memo(
                     >
                       {isLastSlide ? t('next') : t('next')}
                     </Label>
-                    <Ionicons name="arrow-forward" size={16} color="white" />
+                    <IoniconsIcon name="arrow-forward" size={16} color="white" />
                   </TouchableOpacity>
                 </View>
 

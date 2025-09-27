@@ -1,12 +1,12 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import React from 'react';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { IoniconsIcon, MaterialIcon, type IoniconsName, type MaterialIconsName } from './icons';
 import { useTheme } from 'react-native-paper';
 
 interface rowView {
-  leftIconName: keyof typeof Ionicons.glyphMap;
+  leftIconName: IoniconsName;
   onPress: () => void;
-  rightIconName?: keyof typeof MaterialIcons.glyphMap;
+  rightIconName?: MaterialIconsName;
   title: string;
   subtitle?: string;
   iconColor?: string;
@@ -38,10 +38,10 @@ const RowView = ({
               justifyContent: 'center',
             }}
           >
-            <Ionicons name={leftIconName} size={22} color={finalIconColor} />
+            <IoniconsIcon name={leftIconName} size={22} color={finalIconColor} />
           </View>
         ) : (
-          <Ionicons name={leftIconName} size={22} color={finalIconColor} />
+          <IoniconsIcon name={leftIconName} size={22} color={finalIconColor} />
         )}
 
         <View className="flex-1 ml-3">
@@ -61,7 +61,7 @@ const RowView = ({
           )}
         </View>
 
-        <MaterialIcons
+        <MaterialIcon
           name={rightIconName}
           size={18}
           color={colors.onSurface}

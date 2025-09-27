@@ -1,7 +1,8 @@
+import { IoniconsIcon } from '@/src/components/common/icons';
 import React from 'react';
 import { View, Text } from 'react-native';
 import { ActivityIndicator, useTheme } from 'react-native-paper';
-import { Ionicons } from '@expo/vector-icons';
+
 import { useTranslation } from 'react-i18next';
 
 interface ProfileLoadingStateProps {
@@ -39,7 +40,7 @@ const ProfileLoadingState: React.FC<ProfileLoadingStateProps> = ({
             marginBottom: 24,
           }}
         >
-          <Ionicons name="person" size={32} color={colors.onPrimaryContainer} />
+          <IoniconsIcon name="person" size={32} color={colors.onPrimaryContainer} />
         </View>
       )}
 

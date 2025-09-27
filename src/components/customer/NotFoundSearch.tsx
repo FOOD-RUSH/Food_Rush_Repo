@@ -1,7 +1,8 @@
+import { MaterialCommunityIcon } from '@/src/components/common/icons';
 import React from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { useTheme, Button } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+
 import { images } from '@/assets/images';
 import { useTranslation } from 'react-i18next';
 
@@ -92,8 +93,7 @@ const NotFoundSearch: React.FC<NotFoundSearchProps> = ({
             marginBottom: 24,
           }}
         >
-          <MaterialCommunityIcons
-            name={content.icon as any}
+          <MaterialCommunityIcon             name={content.icon as any}
             size={60}
             color={colors.onSurfaceVariant}
           />

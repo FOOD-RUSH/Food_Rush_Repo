@@ -1,9 +1,10 @@
+import { MaterialIcon } from '@/src/components/common/icons';
 import React, { useMemo, useCallback, useRef } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { TouchableOpacity, Linking, DeviceEventEmitter } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+
 import Toast from 'react-native-toast-message';
 import { useTranslation } from 'react-i18next';
 import RestaurantReviewScreen from '../screens/customer/RestaurantReviewScreen';
@@ -310,8 +311,7 @@ const RootNavigator: React.FC = () => {
       headerBackTitleVisible: false,
       headerRight: () => (
         <TouchableOpacity onPress={handleClearCart} style={{ marginRight: 16 }}>
-          <MaterialIcons
-            name="delete-forever"
+          <MaterialIcon             name="delete-forever"
             size={24}
             color={navigationTheme.colors.notification}
           />

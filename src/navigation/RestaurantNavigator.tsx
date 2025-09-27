@@ -1,7 +1,8 @@
+import { IoniconsIcon } from '@/src/components/common/icons';
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Ionicons } from '@expo/vector-icons';
+
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Platform, View } from 'react-native';
 import { useTheme } from 'react-native-paper';
@@ -107,7 +108,7 @@ export default function RestaurantNavigator() {
     <RestaurantTab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
-          let iconName: keyof typeof Ionicons.glyphMap;
+          let iconName: keyof IoniconsIconName;
 
           switch (route.name) {
             case 'Orders':
@@ -126,7 +127,7 @@ export default function RestaurantNavigator() {
               iconName = 'help-outline';
           }
 
-          return <Ionicons name={iconName} size={size} color={color} />;
+          return <IoniconsIcon name={iconName} size={size} color={color} />;
         },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.onSurfaceVariant,

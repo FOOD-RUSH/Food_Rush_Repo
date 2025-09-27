@@ -1,27 +1,17 @@
-// Font loading configuration for expo-font
+// Font loading configuration for expo-font - optimized for production
 export const FONT_ASSETS = {
-  'Urbanist-Thin': require('../../assets/fonts/Urbanist-Thin.ttf'),
-  'Urbanist-ExtraLight': require('../../assets/fonts/Urbanist-ExtraLight.ttf'),
-  'Urbanist-Light': require('../../assets/fonts/Urbanist-Light.ttf'),
   'Urbanist-Regular': require('../../assets/fonts/Urbanist-Regular.ttf'),
   'Urbanist-Medium': require('../../assets/fonts/Urbanist-Medium.ttf'),
   'Urbanist-SemiBold': require('../../assets/fonts/Urbanist-SemiBold.ttf'),
   'Urbanist-Bold': require('../../assets/fonts/Urbanist-Bold.ttf'),
-  'Urbanist-ExtraBold': require('../../assets/fonts/Urbanist-ExtraBold.ttf'),
-  'Urbanist-Black': require('../../assets/fonts/Urbanist-Black.ttf'),
-} as const; // Urbanist font configuration
+} as const; // Optimized Urbanist font configuration
 // Modern, clean font family for the Food Rush app
 export const FONT_DEFINITIONS = {
-  // Urbanist font variants
-  'Urbanist-Thin': 'Urbanist-Thin',
-  'Urbanist-ExtraLight': 'Urbanist-ExtraLight',
-  'Urbanist-Light': 'Urbanist-Light',
+  // Urbanist font variants - production optimized
   'Urbanist-Regular': 'Urbanist-Regular',
   'Urbanist-Medium': 'Urbanist-Medium',
   'Urbanist-SemiBold': 'Urbanist-SemiBold',
   'Urbanist-Bold': 'Urbanist-Bold',
-  'Urbanist-ExtraBold': 'Urbanist-ExtraBold',
-  'Urbanist-Black': 'Urbanist-Black',
 } as const;
 
 // Font family mappings for different use cases
@@ -46,17 +36,18 @@ export const FONT_WEIGHTS = {
   black: '900' as const,
 } as const;
 
-// Urbanist font family with weight mapping
+// Urbanist font family with weight mapping - production optimized
 export const URBANIST_FONTS = {
-  thin: 'Urbanist-Thin',
-  extraLight: 'Urbanist-ExtraLight',
-  light: 'Urbanist-Light',
+  // Fallback to available weights for removed fonts
+  thin: 'Urbanist-Regular', // fallback
+  extraLight: 'Urbanist-Regular', // fallback
+  light: 'Urbanist-Regular', // fallback
   regular: 'Urbanist-Regular',
   medium: 'Urbanist-Medium',
   semibold: 'Urbanist-SemiBold',
   bold: 'Urbanist-Bold',
-  extraBold: 'Urbanist-ExtraBold',
-  black: 'Urbanist-Black',
+  extraBold: 'Urbanist-Bold', // fallback
+  black: 'Urbanist-Bold', // fallback
 } as const;
 
 // Responsive typography scale with Urbanist

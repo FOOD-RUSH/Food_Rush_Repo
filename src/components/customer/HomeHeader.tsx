@@ -1,8 +1,9 @@
 // HomeHeader.tsx - Updated with production UX
+import { IoniconsIcon } from '@/src/components/common/icons';
 import React, { useCallback, useState } from 'react';
 import { TouchableOpacity, View, Text, ActivityIndicator } from 'react-native';
 import { useTheme, Badge } from 'react-native-paper';
-import { Ionicons } from '@expo/vector-icons';
+
 import { useTranslation } from 'react-i18next';
 import { useLocation } from '@/src/location/useLocation';
 import { useCartItemCount } from '@/src/stores/customerStores/cartStore';
@@ -247,8 +248,7 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
                 style={{ marginLeft: 4 }}
               />
             ) : (
-              <Ionicons
-                name={getLocationIcon()}
+              <IoniconsIcon                 name={getLocationIcon()}
                 size={16}
                 color={getLocationIconColor()}
                 style={{ marginLeft: 4 }}
@@ -274,8 +274,7 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
               borderColor: colors.outline,
             }}
           >
-            <Ionicons
-              name="notifications-outline"
+            <IoniconsIcon               name="notifications-outline"
               size={22}
               color={colors.onSurface}
             />
@@ -309,7 +308,7 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
               borderColor: colors.outline,
             }}
           >
-            <Ionicons name="bag-outline" size={22} color={colors.onSurface} />
+            <IoniconsIcon name="bag-outline" size={22} color={colors.onSurface} />
           </View>
           {cartItemCount > 0 && (
             <Badge

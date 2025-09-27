@@ -1,7 +1,8 @@
+import { MaterialCommunityIcon } from '@/src/components/common/icons';
 import React, { useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { Button, Card, useTheme } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
 
@@ -146,8 +147,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
               marginRight: 12,
             }}
           >
-            <MaterialCommunityIcons
-              name={getLocationIcon() as any}
+            <MaterialCommunityIcon               name={getLocationIcon() as any}
               size={20}
               color={getLocationColor()}
             />
@@ -193,14 +193,12 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
 
           <View style={{ alignItems: 'center' }}>
             {isLoading || isPickingLocation ? (
-              <MaterialCommunityIcons
-                name="loading"
+              <MaterialCommunityIcon                 name="loading"
                 size={24}
                 color={colors.primary}
               />
             ) : (
-              <MaterialCommunityIcons
-                name="chevron-right"
+              <MaterialCommunityIcon                 name="chevron-right"
                 size={24}
                 color={colors.onSurfaceVariant}
               />

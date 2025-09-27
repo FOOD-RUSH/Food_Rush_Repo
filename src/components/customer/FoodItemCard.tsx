@@ -1,5 +1,6 @@
+import { IoniconsIcon } from '@/src/components/common/icons';
 import { CustomerHomeStackScreenProps } from '@/src/navigation/types';
-import { Ionicons } from '@expo/vector-icons';
+
 import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { View, TouchableOpacity, Image } from 'react-native';
@@ -133,8 +134,7 @@ const FoodItemCard = ({
             style={{ backgroundColor: colors.surface }}
             activeOpacity={0.7}
           >
-            <Ionicons
-              name={loved ? 'heart' : 'heart-outline'}
+            <IoniconsIcon               name={loved ? 'heart' : 'heart-outline'}
               size={18}
               color={loved ? '#e0245e' : colors.onSurface}
             />
@@ -186,8 +186,7 @@ const FoodItemCard = ({
                 >
                   |
                 </Text>
-                <Ionicons
-                  name="car-sharp"
+                <IoniconsIcon                   name="car-sharp"
                   size={12}
                   color={primaryColor}
                   className="ml-1"

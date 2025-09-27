@@ -1,3 +1,4 @@
+import { MaterialCommunityIcon } from '@/src/components/common/icons';
 import React, { useState } from 'react';
 import {
   View,
@@ -7,7 +8,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+
 import { useTranslation } from 'react-i18next';
 import { useCategories } from '@/src/hooks/useCategories';
 import { getCategoryEmoji, getCategoryColor } from '@/src/data/categories';
@@ -102,7 +103,7 @@ const ApiCategoryDropdown: React.FC<ApiCategoryDropdownProps> = ({
           </Label>
         </View>
         {selectedValue === item.value && (
-          <MaterialCommunityIcons name="check" size={20} color={item.color} />
+          <MaterialCommunityIcon name="check" size={20} color={item.color} />
         )}
       </View>
     </TouchableOpacity>
@@ -125,8 +126,7 @@ const ApiCategoryDropdown: React.FC<ApiCategoryDropdownProps> = ({
           style,
         ]}
       >
-        <MaterialCommunityIcons
-          name="alert-circle"
+        <MaterialCommunityIcon           name="alert-circle"
           size={20}
           color={colors.error}
           style={{ marginRight: 8 }}
@@ -173,8 +173,7 @@ const ApiCategoryDropdown: React.FC<ApiCategoryDropdownProps> = ({
         {isLoading ? (
           <ActivityIndicator size="small" color={colors.primary} />
         ) : (
-          <MaterialCommunityIcons
-            name="chevron-down"
+          <MaterialCommunityIcon             name="chevron-down"
             size={20}
             color={colors.onSurfaceVariant}
           />
@@ -220,8 +219,7 @@ const ApiCategoryDropdown: React.FC<ApiCategoryDropdownProps> = ({
                 {t('select_category')}
               </Heading5>
               <TouchableOpacity onPress={() => setIsVisible(false)}>
-                <MaterialCommunityIcons
-                  name="close"
+                <MaterialCommunityIcon                   name="close"
                   size={24}
                   color={colors.onSurface}
                 />
@@ -243,8 +241,7 @@ const ApiCategoryDropdown: React.FC<ApiCategoryDropdownProps> = ({
                 showsVerticalScrollIndicator={false}
                 ListEmptyComponent={
                   <View style={{ padding: 32, alignItems: 'center' }}>
-                    <MaterialCommunityIcons
-                      name="food-off"
+                    <MaterialCommunityIcon                       name="food-off"
                       size={48}
                       color={colors.onSurfaceVariant}
                     />

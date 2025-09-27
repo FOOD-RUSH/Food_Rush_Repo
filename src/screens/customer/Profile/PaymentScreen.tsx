@@ -1,3 +1,4 @@
+import { MaterialIcon } from '@/src/components/common/icons';
 import { useTranslation } from 'react-i18next';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import React from 'react';
@@ -7,7 +8,7 @@ import { PaymentMethod } from '@/src/types';
 import CommonView from '@/src/components/common/CommonView';
 import { Card, useTheme } from 'react-native-paper';
 import { images } from '@/assets/images';
-import { MaterialIcons } from '@expo/vector-icons';
+
 
 const PaymentScreen = ({
   navigation,
@@ -66,8 +67,7 @@ const PaymentScreen = ({
                   </Text>
                 </View>
               </View>
-              <MaterialIcons
-                name="arrow-forward-ios"
+              <MaterialIcon                 name="arrow-forward-ios"
                 size={20}
                 color={colors.onSurfaceVariant}
               />
@@ -104,8 +104,7 @@ const PaymentScreen = ({
                   </Text>
                 </View>
               </View>
-              <MaterialIcons
-                name="arrow-forward-ios"
+              <MaterialIcon                 name="arrow-forward-ios"
                 size={20}
                 color={colors.onSurfaceVariant}
               />

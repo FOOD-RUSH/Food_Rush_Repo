@@ -1,7 +1,8 @@
+import { MaterialIcon } from '@/src/components/common/icons';
 import React from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import { MaterialIcons } from '@expo/vector-icons';
+
 import { useTranslation } from 'react-i18next';
 import { images } from '@/assets/images';
 
@@ -113,8 +114,7 @@ const ProfessionalErrorDisplay: React.FC<ProfessionalErrorDisplayProps> = ({
           marginBottom: 16,
         }}
       >
-        <MaterialIcons
-          name={config.icon as any}
+        <MaterialIcon           name={config.icon as any}
           size={24}
           color={colors.onErrorContainer}
         />
@@ -168,8 +168,7 @@ const ProfessionalErrorDisplay: React.FC<ProfessionalErrorDisplayProps> = ({
             onPress={handleAction}
             activeOpacity={0.8}
           >
-            <MaterialIcons
-              name="refresh"
+            <MaterialIcon               name="refresh"
               size={20}
               color={colors.onPrimary}
             />

@@ -1,3 +1,4 @@
+import { IoniconsIcon, MaterialCommunityIcon } from '@/src/components/common/icons';
 import React, { useRef, useEffect, useState } from 'react';
 import {
   View,
@@ -9,7 +10,7 @@ import {
   Linking,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+
 import { useTranslation } from 'react-i18next';
 import { useTheme } from 'react-native-paper';
 import { RestaurantProfileStackScreenProps } from '../../../navigation/types';
@@ -77,8 +78,7 @@ const SupportScreen = ({ navigation }: Props) => {
                 onPress={() => setExpanded(expanded === idx ? null : idx)}
                 style={styles.faqQuestionRow}
               >
-                <MaterialCommunityIcons
-                  name={expanded === idx ? 'chevron-up' : 'chevron-down'}
+                <MaterialCommunityIcon                   name={expanded === idx ? 'chevron-up' : 'chevron-down'}
                   size={22}
                   color={RESTAURANT_COLORS.PRIMARY}
                 />
@@ -96,8 +96,7 @@ const SupportScreen = ({ navigation }: Props) => {
             style={styles.contactBtn}
             onPress={() => Linking.openURL('mailto:support@restaurant.com')}
           >
-            <MaterialCommunityIcons
-              name="email-outline"
+            <MaterialCommunityIcon               name="email-outline"
               size={22}
               color="#fff"
             />
@@ -107,8 +106,7 @@ const SupportScreen = ({ navigation }: Props) => {
             style={styles.contactBtn}
             onPress={() => Linking.openURL('https://wa.me/650979844')}
           >
-            <MaterialCommunityIcons
-              name="chat-outline"
+            <MaterialCommunityIcon               name="chat-outline"
               size={22}
               color="#fff"
             />

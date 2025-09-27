@@ -1,4 +1,5 @@
 // src/screens/NotificationScreen.tsx
+import { IoniconsIcon } from '@/src/components/common/icons';
 import React, { useCallback } from 'react';
 import {
   View,
@@ -11,7 +12,7 @@ import {
 } from 'react-native';
 import { useTheme, ActivityIndicator, Chip } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
-import { Ionicons } from '@expo/vector-icons';
+
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 
@@ -157,7 +158,7 @@ const NotificationScreen = () => {
             className="w-10 h-10 rounded-full items-center justify-center"
             style={{ backgroundColor: iconColor + '20' }}
           >
-            <Ionicons name={iconName as any} size={20} color={iconColor} />
+            <IoniconsIcon name={iconName as any} size={20} color={iconColor} />
           </View>
 
           {/* Content */}
@@ -285,8 +286,7 @@ const NotificationScreen = () => {
   // Render empty state
   const renderEmptyState = () => (
     <View className="justify-center items-center flex-1 px-6 py-12">
-      <Ionicons
-        name="notifications-outline"
+      <IoniconsIcon         name="notifications-outline"
         size={64}
         color={colors.onSurfaceVariant}
         style={{ marginBottom: 16 }}

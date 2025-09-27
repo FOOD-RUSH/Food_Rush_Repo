@@ -1,10 +1,11 @@
+import { IoniconsIcon } from '@/src/components/common/icons';
 import React, { useMemo } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image, Platform, TouchableOpacity, Text } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+
 import { useTranslation } from 'react-i18next';
 import { useTheme } from 'react-native-paper';
 import { useAppNavigationTheme } from '../config/theme';
@@ -193,8 +194,7 @@ function CustomerProfileStackScreen() {
           headerTitleAlign: 'left',
           headerRight: () => (
             <TouchableOpacity onPress={() => {}} style={{ marginRight: 8 }}>
-              <Ionicons
-                name="settings-outline"
+              <IoniconsIcon                 name="settings-outline"
                 size={25}
                 color={navigationTheme.colors.text}
               />
@@ -213,7 +213,7 @@ const TabBarIcon: React.FC<{
   color: string;
   size: number;
 }> = React.memo(({ routeName, focused, color, size }) => {
-  let iconName: keyof typeof Ionicons.glyphMap;
+  let iconName: keyof IoniconsIconName;
 
   switch (routeName) {
     case 'Home':
@@ -229,7 +229,7 @@ const TabBarIcon: React.FC<{
       iconName = 'help-outline';
   }
 
-  return <Ionicons name={iconName} size={size} color={color} />;
+  return <IoniconsIcon name={iconName} size={size} color={color} />;
 });
 
 TabBarIcon.displayName = 'TabBarIcon';
@@ -355,8 +355,7 @@ export default function CustomerNavigator() {
               }}
               style={{ marginRight: 20 }}
             >
-              <Ionicons
-                name="search-outline"
+              <IoniconsIcon                 name="search-outline"
                 size={25}
                 color={navigationTheme.colors.primary}
               />

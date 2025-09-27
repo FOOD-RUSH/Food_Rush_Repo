@@ -1,3 +1,4 @@
+import { IoniconsIcon } from '@/src/components/common/icons';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import React, { useCallback, useState } from 'react';
 import { useTheme, Card, Chip } from 'react-native-paper';
@@ -5,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import { Order } from '@/src/types';
-import { Ionicons } from '@expo/vector-icons';
+
 import {
   useOrderStatus,
   useConfirmOrderReceived,
@@ -244,7 +245,7 @@ const OrderItemCard = ({
               marginBottom: 8,
             }}
           >
-            <Ionicons name="bicycle-outline" size={16} color={colors.primary} />
+            <IoniconsIcon name="bicycle-outline" size={16} color={colors.primary} />
             <Text
               style={{
                 color: colors.onSurfaceVariant,
@@ -263,8 +264,7 @@ const OrderItemCard = ({
                   /* Handle call driver */
                 }}
               >
-                <Ionicons
-                  name="call-outline"
+                <IoniconsIcon                   name="call-outline"
                   size={18}
                   color={colors.primary}
                 />

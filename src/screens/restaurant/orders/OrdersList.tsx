@@ -1,3 +1,4 @@
+import { MaterialCommunityIcon } from '@/src/components/common/icons';
 import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
@@ -7,7 +8,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { Badge, useTheme, TextInput } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
@@ -195,8 +196,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
             )}
           </View>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <MaterialCommunityIcons
-              name="clock-outline"
+            <MaterialCommunityIcon               name="clock-outline"
               size={16}
               color={isOverdue() ? colors.error : colors.onSurfaceVariant}
             />
@@ -356,8 +356,7 @@ const OrderTab: React.FC<OrderTabProps> = ({ status, showActions = false }) => {
               paddingVertical: 40,
             }}
           >
-            <MaterialCommunityIcons
-              name="clipboard-list-outline"
+            <MaterialCommunityIcon               name="clipboard-list-outline"
               size={48}
               color={colors.onSurfaceVariant}
             />
@@ -420,7 +419,7 @@ const OrdersList: React.FC<
                     alignItems: 'center',
                   }}
                 >
-                  <MaterialCommunityIcons name="bell" size={16} color="white" />
+                  <MaterialCommunityIcon name="bell" size={16} color="white" />
                   <Caption
                     color="white"
                     weight="bold"
@@ -446,8 +445,7 @@ const OrdersList: React.FC<
                 }}
                 activeOpacity={0.7}
               >
-                <MaterialCommunityIcons
-                  name="bell-outline"
+                <MaterialCommunityIcon                   name="bell-outline"
                   size={24}
                   color={colors.onSurface}
                 />

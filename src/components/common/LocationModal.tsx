@@ -1,7 +1,8 @@
+import { MaterialCommunityIcon } from '@/src/components/common/icons';
 import React, { useState, useCallback } from 'react';
 import { View, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { Button, useTheme } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
 import * as ExpoLocation from 'expo-location';
@@ -228,8 +229,7 @@ const LocationModal: React.FC<LocationModalProps> = ({
           }}
           activeOpacity={0.7}
         >
-          <MaterialCommunityIcons
-            name="close"
+          <MaterialCommunityIcon             name="close"
             size={20}
             color={colors.onSurfaceVariant}
           />
@@ -256,8 +256,7 @@ const LocationModal: React.FC<LocationModalProps> = ({
               marginBottom: spacing.lg,
             }}
           >
-            <MaterialCommunityIcons
-              name="map-marker"
+            <MaterialCommunityIcon               name="map-marker"
               size={wp(8)}
               color={colors.primary}
             />
@@ -296,8 +295,7 @@ const LocationModal: React.FC<LocationModalProps> = ({
             }}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <MaterialCommunityIcons
-                name="map-marker-check"
+              <MaterialCommunityIcon                 name="map-marker-check"
                 size={20}
                 color={colors.primary}
                 style={{ marginRight: spacing.sm }}
@@ -359,8 +357,7 @@ const LocationModal: React.FC<LocationModalProps> = ({
               isLocationLoading ? (
                 <ActivityIndicator size={size} color={color} />
               ) : (
-                <MaterialCommunityIcons
-                  name="crosshairs-gps"
+                <MaterialCommunityIcon                   name="crosshairs-gps"
                   size={size}
                   color={color}
                 />
@@ -392,7 +389,7 @@ const LocationModal: React.FC<LocationModalProps> = ({
               borderColor: colors.outline,
             }}
             icon={({ size, color }) => (
-              <MaterialCommunityIcons name="pencil" size={size} color={color} />
+              <MaterialCommunityIcon name="pencil" size={size} color={color} />
             )}
           >
             {t('enter_address_manually')}

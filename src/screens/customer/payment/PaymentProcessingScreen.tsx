@@ -1,3 +1,4 @@
+import { IoniconsIcon, MaterialIcon } from '@/src/components/common/icons';
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
@@ -9,7 +10,7 @@ import {
   Clipboard,
 } from 'react-native';
 import { useTheme, Card } from 'react-native-paper';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+
 import { RootStackScreenProps } from '@/src/navigation/types';
 import CommonView from '@/src/components/common/CommonView';
 import { useTranslation } from 'react-i18next';
@@ -249,8 +250,7 @@ const PaymentProcessingScreen = ({
             className="w-16 h-16 rounded-full items-center justify-center mb-4"
             style={{ backgroundColor: getProviderColor() + '20' }}
           >
-            <Ionicons
-              name="phone-portrait"
+            <IoniconsIcon               name="phone-portrait"
               size={32}
               color={getProviderColor()}
             />
@@ -327,7 +327,7 @@ const PaymentProcessingScreen = ({
             className="w-16 h-16 rounded-full items-center justify-center mb-4"
             style={{ backgroundColor: colors.primary + '20' }}
           >
-            <MaterialIcons name="dialpad" size={32} color={colors.primary} />
+            <MaterialIcon name="dialpad" size={32} color={colors.primary} />
           </View>
           <Text
             className="text-xl font-bold text-center"
@@ -359,7 +359,7 @@ const PaymentProcessingScreen = ({
               className="ml-2 p-2"
               style={{ backgroundColor: colors.primaryContainer }}
             >
-              <Ionicons name="copy" size={20} color={colors.primary} />
+              <IoniconsIcon name="copy" size={20} color={colors.primary} />
             </TouchableOpacity>
           </View>
         </View>
@@ -410,7 +410,7 @@ const PaymentProcessingScreen = ({
             className="w-20 h-20 rounded-full items-center justify-center mb-4"
             style={{ backgroundColor: '#4CAF50' + '20' }}
           >
-            <Ionicons name="checkmark-circle" size={48} color="#4CAF50" />
+            <IoniconsIcon name="checkmark-circle" size={48} color="#4CAF50" />
           </View>
           <Text
             className="text-2xl font-bold text-center mb-2"
@@ -451,7 +451,7 @@ const PaymentProcessingScreen = ({
             className="w-20 h-20 rounded-full items-center justify-center mb-4"
             style={{ backgroundColor: colors.error + '20' }}
           >
-            <Ionicons name="close-circle" size={48} color={colors.error} />
+            <IoniconsIcon name="close-circle" size={48} color={colors.error} />
           </View>
           <Text
             className="text-2xl font-bold text-center mb-2"
@@ -526,7 +526,7 @@ const PaymentProcessingScreen = ({
             onPress={() => navigation.goBack()}
             className="mr-3"
           >
-            <Ionicons name="arrow-back" size={24} color={colors.onSurface} />
+            <IoniconsIcon name="arrow-back" size={24} color={colors.onSurface} />
           </TouchableOpacity>
           <Text
             className="text-lg font-semibold"

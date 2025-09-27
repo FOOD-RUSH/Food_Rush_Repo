@@ -1,3 +1,4 @@
+import { MaterialCommunityIcon } from '@/src/components/common/icons';
 import React, { useState, useRef, useEffect } from 'react';
 import { View, ScrollView, Animated } from 'react-native';
 import {
@@ -8,7 +9,7 @@ import {
   useTheme,
 } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+
 import * as Haptics from 'expo-haptics';
 
 import CommonView from '@/src/components/common/CommonView';
@@ -89,8 +90,7 @@ const OrderDetailsScreen: React.FC<
     return (
       <CommonView>
         <View className="flex-1 justify-center items-center p-6">
-          <MaterialCommunityIcons
-            name="alert-circle"
+          <MaterialCommunityIcon             name="alert-circle"
             size={48}
             color={colors.error}
           />
@@ -197,8 +197,7 @@ const OrderDetailsScreen: React.FC<
                   {orderId}
                 </Heading2>
                 <View className="flex-row items-center mt-1">
-                  <MaterialCommunityIcons
-                    name="clock-outline"
+                  <MaterialCommunityIcon                     name="clock-outline"
                     size={18}
                     color={colors.onSurfaceVariant}
                   />
@@ -242,8 +241,7 @@ const OrderDetailsScreen: React.FC<
             style={{ backgroundColor: colors.surface }}
           >
             <View className="flex-row items-center mb-3">
-              <MaterialCommunityIcons
-                name="account-circle"
+              <MaterialCommunityIcon                 name="account-circle"
                 size={24}
                 color={colors.onSurfaceVariant}
               />
@@ -258,8 +256,7 @@ const OrderDetailsScreen: React.FC<
 
             <View className="space-y-3">
               <View className="flex-row items-center mb-3">
-                <MaterialCommunityIcons
-                  name="account"
+                <MaterialCommunityIcon                   name="account"
                   size={18}
                   color={colors.onSurfaceVariant}
                 />
@@ -269,8 +266,7 @@ const OrderDetailsScreen: React.FC<
               </View>
 
               <View className="flex-row items-center mb-3">
-                <MaterialCommunityIcons
-                  name="phone"
+                <MaterialCommunityIcon                   name="phone"
                   size={18}
                   color={colors.onSurfaceVariant}
                 />
@@ -280,8 +276,7 @@ const OrderDetailsScreen: React.FC<
               </View>
 
               <View className="flex-row items-start">
-                <MaterialCommunityIcons
-                  name="map-marker"
+                <MaterialCommunityIcon                   name="map-marker"
                   size={18}
                   color={colors.onSurfaceVariant}
                   style={{ marginTop: 2 }}
@@ -304,8 +299,7 @@ const OrderDetailsScreen: React.FC<
                 }}
               >
                 <View className="flex-row items-center">
-                  <MaterialCommunityIcons
-                    name="alert-circle"
+                  <MaterialCommunityIcon                     name="alert-circle"
                     size={18}
                     color={colors.warning || '#D97706'}
                   />
@@ -333,8 +327,7 @@ const OrderDetailsScreen: React.FC<
             style={{ backgroundColor: colors.surface }}
           >
             <View className="flex-row items-center mb-3">
-              <MaterialCommunityIcons
-                name="food"
+              <MaterialCommunityIcon                 name="food"
                 size={24}
                 color={colors.onSurfaceVariant}
               />
@@ -382,8 +375,7 @@ const OrderDetailsScreen: React.FC<
                   <View className="ml-8 mt-1">
                     {item.modifications.map((mod: string, modIndex: number) => (
                       <View key={modIndex} className="flex-row items-center">
-                        <MaterialCommunityIcons
-                          name="circle-small"
+                        <MaterialCommunityIcon                           name="circle-small"
                           size={20}
                           color={colors.onSurfaceVariant}
                         />
@@ -440,8 +432,7 @@ const OrderDetailsScreen: React.FC<
             </View>
 
             <View className="mt-4 flex-row items-center">
-              <MaterialCommunityIcons
-                name={
+              <MaterialCommunityIcon                 name={
                   orderData.paymentMethod === 'credit_card'
                     ? 'credit-card'
                     : orderData.paymentMethod === 'cash'

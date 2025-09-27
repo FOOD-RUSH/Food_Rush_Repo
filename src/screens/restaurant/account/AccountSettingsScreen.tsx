@@ -1,3 +1,4 @@
+import { IoniconsIcon, MaterialCommunityIcon } from '@/src/components/common/icons';
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import {
   View,
@@ -10,7 +11,7 @@ import {
   TextInput,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+
 import { RestaurantProfileStackScreenProps } from '../../../navigation/types';
 import { useAppStore } from '@/src/stores/AppStore';
 import { useLanguage } from '@/src/contexts/LanguageContext';
@@ -105,7 +106,7 @@ const AccountSettingsScreen = ({ navigation }: Props) => {
                   {availableLanguages[currentLanguage].name}
                 </Text>
               </View>
-              <Ionicons name="chevron-down" size={16} color={colors.outline} />
+              <IoniconsIcon name="chevron-down" size={16} color={colors.outline} />
             </TouchableOpacity>
           </View>
         </Animated.View>
@@ -121,7 +122,7 @@ const AccountSettingsScreen = ({ navigation }: Props) => {
                 onPress={() => setShowLanguageSelector(false)}
                 style={styles.closeButton}
               >
-                <Ionicons name="close" size={24} color={colors.outline} />
+                <IoniconsIcon name="close" size={24} color={colors.outline} />
               </TouchableOpacity>
             </View>
             <ScrollView style={styles.languageList}>

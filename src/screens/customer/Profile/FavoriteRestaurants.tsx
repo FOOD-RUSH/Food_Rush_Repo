@@ -1,8 +1,9 @@
+import { IoniconsIcon } from '@/src/components/common/icons';
 import React, { useCallback, useState } from 'react';
 import { View, Text, FlatList, RefreshControl } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from 'react-native-paper';
-import { Ionicons } from '@expo/vector-icons';
+
 import { RootStackScreenProps } from '@/src/navigation/types';
 import CommonView from '@/src/components/common/CommonView';
 import { RestaurantCard } from '@/src/components/customer/RestaurantCard';
@@ -212,8 +213,7 @@ const FavoriteRestaurants = ({
                   marginBottom: 4,
                 }}
               >
-                <Ionicons
-                  name="heart"
+                <IoniconsIcon                   name="heart"
                   size={20}
                   color={colors.primary}
                   style={{ marginRight: 8 }}

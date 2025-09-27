@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import { Ionicons } from '@expo/vector-icons';
+import { IoniconsIcon, type IoniconsName } from './icons';
 import { useTranslation } from 'react-i18next';
 import {
   Heading5,
@@ -13,7 +13,7 @@ import {
 } from './Typography';
 
 interface EmptyStateProps {
-  icon?: keyof typeof Ionicons.glyphMap;
+  icon?: IoniconsName;
   title: string;
   description: string;
   actionText?: string;
@@ -68,7 +68,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
       className={`items-center justify-center ${sizeStyles.padding}`}
       style={[{ backgroundColor: colors.background }, style]}
     >
-      <Ionicons
+      <IoniconsIcon
         name={icon}
         size={sizeStyles.iconSize}
         color={colors.onSurfaceVariant}

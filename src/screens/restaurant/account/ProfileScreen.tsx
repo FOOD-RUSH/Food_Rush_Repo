@@ -1,3 +1,4 @@
+import { MaterialCommunityIcon } from '@/src/components/common/icons';
 import React, { useRef, useEffect } from 'react';
 import {
   View,
@@ -8,7 +9,7 @@ import {
   Alert,
   StyleSheet,
 } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+
 import { Button, Avatar, Divider, useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import CommonView from '@/src/components/common/CommonView';
@@ -148,14 +149,14 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           ]}
         >
           <View style={styles.infoRow}>
-            <MaterialCommunityIcons name="phone" size={20} color="#666" />
+            <MaterialCommunityIcon name="phone" size={20} color="#666" />
             <Text style={[styles.infoText, { color: colors.onSurface }]}>
               {profileData?.phoneNumber || 'No phone number'}
             </Text>
           </View>
           {profileData?.businessName && (
             <View style={styles.infoRow}>
-              <MaterialCommunityIcons name="briefcase" size={20} color="#666" />
+              <MaterialCommunityIcon name="briefcase" size={20} color="#666" />
               <Text style={[styles.infoText, { color: colors.onSurface }]}>
                 {profileData.businessName}
               </Text>
@@ -163,8 +164,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           )}
           {profileData?.businessAddress && (
             <View style={styles.infoRow}>
-              <MaterialCommunityIcons
-                name="map-marker"
+              <MaterialCommunityIcon                 name="map-marker"
                 size={20}
                 color="#666"
               />
@@ -174,13 +174,13 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             </View>
           )}
           <View style={styles.infoRow}>
-            <MaterialCommunityIcons name="store" size={20} color="#666" />
+            <MaterialCommunityIcon name="store" size={20} color="#666" />
             <Text style={[styles.infoText, { color: colors.onBackground }]}>
               {currentRestaurant?.address || 'Restaurant Address'}
             </Text>
           </View>
           <View style={styles.infoRow}>
-            <MaterialCommunityIcons name="star" size={20} color="#666" />
+            <MaterialCommunityIcon name="star" size={20} color="#666" />
             <Text style={[styles.infoText, { color: colors.onBackground }]}>
               {currentRestaurant?.rating
                 ? `${currentRestaurant.rating} (${currentRestaurant.ratingCount} reviews)`
@@ -204,8 +204,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
               onPress={option.onPress}
             >
               <View style={styles.optionLeft}>
-                <MaterialCommunityIcons
-                  name={option.icon}
+                <MaterialCommunityIcon                   name={option.icon}
                   size={24}
                   color={option.iconColor ?? '#007AFF'}
                   style={styles.optionIcon}
@@ -223,8 +222,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                   </Text>
                 </View>
               </View>
-              <MaterialCommunityIcons
-                name="chevron-right"
+              <MaterialCommunityIcon                 name="chevron-right"
                 size={20}
                 color="#ccc"
               />

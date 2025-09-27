@@ -1,4 +1,5 @@
 // src/screens/restaurant/RestaurantNotificationScreen.tsx
+import { MaterialCommunityIcon } from '@/src/components/common/icons';
 import React, { useCallback } from 'react';
 import {
   View,
@@ -11,7 +12,7 @@ import {
 } from 'react-native';
 import { useTheme, ActivityIndicator, Chip, FAB } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import * as Haptics from 'expo-haptics';
@@ -219,8 +220,7 @@ const RestaurantNotificationScreen = () => {
               marginRight: 12,
             }}
           >
-            <MaterialCommunityIcons
-              name={iconName as any}
+            <MaterialCommunityIcon               name={iconName as any}
               size={20}
               color={iconColor}
             />
@@ -414,8 +414,7 @@ const RestaurantNotificationScreen = () => {
         paddingHorizontal: 24,
       }}
     >
-      <MaterialCommunityIcons
-        name="bell-outline"
+      <MaterialCommunityIcon         name="bell-outline"
         size={64}
         color={colors.onSurfaceVariant}
         style={{ marginBottom: 16 }}

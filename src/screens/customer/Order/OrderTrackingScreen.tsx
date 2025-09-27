@@ -1,3 +1,4 @@
+import { IoniconsIcon } from '@/src/components/common/icons';
 import React, { useState, useCallback } from 'react';
 import {
   View,
@@ -6,7 +7,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import { Ionicons } from '@expo/vector-icons';
+
 import { useTranslation } from 'react-i18next';
 import CommonView from '@/src/components/common/CommonView';
 import { RootStackScreenProps } from '@/src/navigation/types';
@@ -118,10 +119,9 @@ const OrderStatusStep: React.FC<OrderStatusStepProps> = ({
         }}
       >
         {isCompleted ? (
-          <Ionicons name="checkmark" size={24} color="white" />
+          <IoniconsIcon name="checkmark" size={24} color="white" />
         ) : (
-          <Ionicons
-            name={step.icon as any}
+          <IoniconsIcon             name={step.icon as any}
             size={24}
             color={isActive ? 'white' : '#666'}
           />
@@ -220,7 +220,7 @@ const ETAComponent: React.FC<ETAComponentProps> = ({ order }) => {
       className="rounded-xl p-4 mb-6 flex-row items-center"
       style={{ backgroundColor: colors.surfaceVariant }}
     >
-      <Ionicons name="time-outline" size={24} color="#007aff" />
+      <IoniconsIcon name="time-outline" size={24} color="#007aff" />
       <View className="ml-3">
         <Label color={colors.onSurface} weight="semibold">
           {t('estimated_arrival')}
@@ -285,8 +285,7 @@ const OrderTrackingScreen = ({
           className="flex-1 items-center justify-center"
           style={{ backgroundColor: colors.background }}
         >
-          <Ionicons
-            name="alert-circle-outline"
+          <IoniconsIcon             name="alert-circle-outline"
             size={48}
             color={colors.error}
           />
@@ -399,8 +398,7 @@ const OrderTrackingScreen = ({
               }}
               disabled={isConfirming}
             >
-              <Ionicons
-                name="checkmark-circle-outline"
+              <IoniconsIcon                 name="checkmark-circle-outline"
                 size={20}
                 color="white"
               />
@@ -425,8 +423,7 @@ const OrderTrackingScreen = ({
               });
             }}
           >
-            <Ionicons
-              name="chatbubble-ellipses-outline"
+            <IoniconsIcon               name="chatbubble-ellipses-outline"
               size={20}
               color={colors.primary}
             />

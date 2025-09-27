@@ -1,6 +1,7 @@
+import { IoniconsIcon } from '@/src/components/common/icons';
 import { images } from '@/assets/images';
 import { CustomerHomeStackScreenProps } from '@/src/navigation/types';
-import { Ionicons } from '@expo/vector-icons';
+
 import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { TouchableOpacity, View } from 'react-native';
@@ -140,7 +141,7 @@ export const RestaurantCard = ({
                 alignItems: 'center',
               }}
             >
-              <Ionicons name="checkmark-circle" size={12} color="white" />
+              <IoniconsIcon name="checkmark-circle" size={12} color="white" />
               <Caption color="white" style={{ marginLeft: 4, fontSize: 10 }}>
                 Verified
               </Caption>
@@ -168,7 +169,7 @@ export const RestaurantCard = ({
             }}
             activeOpacity={0.7}
           >
-            <Ionicons name="heart-outline" size={20} color={colors.onSurface} />
+            <IoniconsIcon name="heart-outline" size={20} color={colors.onSurface} />
           </TouchableOpacity>
 
           {/* Rating badge */}
@@ -191,8 +192,7 @@ export const RestaurantCard = ({
                 alignItems: 'center',
               }}
             >
-              <Ionicons
-                name="star"
+              <IoniconsIcon                 name="star"
                 size={12}
                 color={rating !== null ? 'yellow' : colors.onSurfaceVariant}
               />

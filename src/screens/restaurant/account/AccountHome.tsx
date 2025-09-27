@@ -1,3 +1,4 @@
+import { MaterialCommunityIcon } from '@/src/components/common/icons';
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import {
   View,
@@ -8,7 +9,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { useTheme, Card, Avatar, Button, Switch } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -66,8 +67,7 @@ const MenuItem: React.FC<MenuItemProps> = React.memo(
             marginRight: 16,
           }}
         >
-          <MaterialCommunityIcons
-            name={icon as any}
+          <MaterialCommunityIcon             name={icon as any}
             size={22}
             color={iconColor}
           />
@@ -119,8 +119,7 @@ const MenuItem: React.FC<MenuItemProps> = React.memo(
           </Text>
         </View>
 
-        <MaterialCommunityIcons
-          name="chevron-right"
+        <MaterialCommunityIcon           name="chevron-right"
           size={20}
           color={colors.onSurfaceVariant}
           style={{ marginLeft: 12 }}

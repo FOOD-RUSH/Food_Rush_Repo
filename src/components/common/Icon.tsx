@@ -1,11 +1,6 @@
+import { IoniconsIcon, MaterialIcon, MaterialCommunityIcon, AntDesignIcon, FontAwesome5Icon } from '@/src/components/common/icons';
 import React from 'react';
-import {
-  Ionicons,
-  MaterialIcons,
-  MaterialCommunityIcons,
-  AntDesign,
-  FontAwesome5,
-} from '@expo/vector-icons';
+
 
 // Define the icon sets we actually use
 const ICON_SETS = {

@@ -1,7 +1,8 @@
+import { MaterialIcon } from '@/src/components/common/icons';
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import { MaterialIcons } from '@expo/vector-icons';
+
 import { useTranslation } from 'react-i18next';
 
 interface CheckoutContentProps {
@@ -43,8 +44,7 @@ const CheckoutContent: React.FC<CheckoutContentProps> = ({
             backgroundColor: colors.primaryContainer,
           }}
         >
-          <MaterialIcons
-            name="shopping-cart-checkout"
+          <MaterialIcon             name="shopping-cart-checkout"
             size={24}
             color={colors.onPrimaryContainer}
           />

@@ -1,3 +1,4 @@
+import { IoniconsIcon } from '@/src/components/common/icons';
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -8,7 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import { Ionicons } from '@expo/vector-icons';
+
 import ReusableModal from './ReusableModal';
 import { useTranslation } from 'react-i18next';
 import { useAddressManager } from '@/src/hooks/customer/useAddressManager';
@@ -191,8 +192,7 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
               }}
               activeOpacity={0.7}
             >
-              <Ionicons
-                name={isProcessing ? 'hourglass-outline' : 'location'}
+              <IoniconsIcon                 name={isProcessing ? 'hourglass-outline' : 'location'}
                 size={14}
                 color="white"
               />
@@ -240,7 +240,7 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
               backgroundColor: isDefault ? '#007aff' : 'transparent',
             }}
           >
-            {isDefault && <Ionicons name="checkmark" size={16} color="white" />}
+            {isDefault && <IoniconsIcon name="checkmark" size={16} color="white" />}
           </View>
         </TouchableOpacity>
 

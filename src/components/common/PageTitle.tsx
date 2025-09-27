@@ -1,6 +1,7 @@
+import { MaterialIcon } from '@/src/components/common/icons';
 import { View, Text } from 'react-native';
 import React from 'react';
-import { MaterialIcons } from '@expo/vector-icons';
+
 import { useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 
@@ -10,8 +11,7 @@ const PageTitle = () => {
 
   return (
     <View className="flex-row flex-1 justify-between item-center px-2">
-      <MaterialIcons
-        name="arrow-back-ios-new"
+      <MaterialIcon         name="arrow-back-ios-new"
         size={20}
         color={colors.onSurface}
       />

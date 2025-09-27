@@ -1,9 +1,10 @@
+import { IoniconsIcon } from '@/src/components/common/icons';
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/src/contexts/LanguageContext';
 import { LanguageSelector } from '@/src/components/common/LanguageSelector';
-import { Ionicons } from '@expo/vector-icons';
+
 
 interface LanguageSettingsProps {
   style?: any;
@@ -41,7 +42,7 @@ export const LanguageSettings: React.FC<LanguageSettingsProps> = ({
                 <Text style={styles.languageName}>{language.name}</Text>
               </View>
               {code === currentLanguage && (
-                <Ionicons name="checkmark-circle" size={20} color="#007AFF" />
+                <IoniconsIcon name="checkmark-circle" size={20} color="#007AFF" />
               )}
             </View>
           ))}

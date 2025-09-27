@@ -1,7 +1,8 @@
+import { MaterialCommunityIcon } from '@/src/components/common/icons';
 import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { useTheme, Card } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+
 import { MetricCardData } from '@/src/types/analytics';
 import {
   Typography,
@@ -38,7 +39,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
     }
   };
 
-  const getChangeIcon = (): keyof typeof MaterialCommunityIcons.glyphMap => {
+  const getChangeIcon = (): keyof MaterialCommunityIconName => {
     switch (changeType) {
       case 'positive':
         return 'trending-up';
@@ -84,16 +85,14 @@ const MetricCard: React.FC<MetricCardProps> = ({
               justifyContent: 'center',
             }}
           >
-            <MaterialCommunityIcons
-              name={icon as keyof typeof MaterialCommunityIcons.glyphMap}
+            <MaterialCommunityIcon               name={icon as keyof MaterialCommunityIconName}
               size={20}
               color={color || colors.primary}
             />
           </View>
           {change && (
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <MaterialCommunityIcons
-                name={getChangeIcon()}
+              <MaterialCommunityIcon                 name={getChangeIcon()}
                 size={16}
                 color={getChangeColor()}
               />

@@ -1,3 +1,4 @@
+import { IoniconsIcon, MaterialCommunityIcon } from '@/src/components/common/icons';
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
@@ -10,7 +11,7 @@ import {
   Easing,
 } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+
 import { useTranslation } from 'react-i18next';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as Haptics from 'expo-haptics';
@@ -278,7 +279,7 @@ const OrderDeliveryConfirmationModal: React.FC<
                 zIndex: 10,
               }}
             >
-              <Ionicons name="close" size={20} color={colors.onSurface} />
+              <IoniconsIcon name="close" size={20} color={colors.onSurface} />
             </TouchableOpacity>
 
             {/* Animated Delivery Scene */}
@@ -308,8 +309,7 @@ const OrderDeliveryConfirmationModal: React.FC<
                     alignItems: 'center',
                   }}
                 >
-                  <MaterialCommunityIcons
-                    name="bike"
+                  <MaterialCommunityIcon                     name="bike"
                     size={40}
                     color={colors.primary}
                   />
@@ -320,7 +320,7 @@ const OrderDeliveryConfirmationModal: React.FC<
                       left: 15,
                     }}
                   >
-                    <Ionicons name="person" size={20} color={colors.primary} />
+                    <IoniconsIcon name="person" size={20} color={colors.primary} />
                   </View>
                 </Animated.View>
 
@@ -333,8 +333,7 @@ const OrderDeliveryConfirmationModal: React.FC<
                     transform: [{ translateY: foodBoxTranslateY }],
                   }}
                 >
-                  <MaterialCommunityIcons
-                    name="food-takeout-box"
+                  <MaterialCommunityIcon                     name="food-takeout-box"
                     size={24}
                     color={colors.primary}
                   />
@@ -351,8 +350,7 @@ const OrderDeliveryConfirmationModal: React.FC<
                       transform: [{ rotate: sparkleRotation }],
                     }}
                   >
-                    <Ionicons
-                      name="sparkles"
+                    <IoniconsIcon                       name="sparkles"
                       size={12}
                       color={colors.primary + '60'}
                     />
@@ -439,7 +437,7 @@ const OrderDeliveryConfirmationModal: React.FC<
                 <View
                   style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
                 >
-                  <Ionicons name="checkmark-circle" size={24} color="white" />
+                  <IoniconsIcon name="checkmark-circle" size={24} color="white" />
                   <Text
                     style={{
                       fontSize: 18,
@@ -469,8 +467,7 @@ const OrderDeliveryConfirmationModal: React.FC<
                 <View
                   style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
                 >
-                  <Ionicons
-                    name="time-outline"
+                  <IoniconsIcon                     name="time-outline"
                     size={24}
                     color={colors.onSurfaceVariant}
                   />

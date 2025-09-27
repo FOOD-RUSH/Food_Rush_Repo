@@ -1,3 +1,4 @@
+import { IoniconsIcon } from '@/src/components/common/icons';
 import React, {
   useState,
   useCallback,
@@ -19,7 +20,7 @@ import {
 import { Button, HelperText, TextInput, useTheme } from 'react-native-paper';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { Ionicons } from '@expo/vector-icons';
+
 import { AuthStackScreenProps } from '@/src/navigation/types';
 import { useNetwork } from '@/src/contexts/NetworkContext';
 import { useTranslation } from 'react-i18next';
@@ -220,7 +221,7 @@ const RestaurantSignupStep1: React.FC<
             backdropFilter: 'blur(10px)',
           }}
         >
-          <Ionicons name="arrow-back" size={24} color="white" />
+          <IoniconsIcon name="arrow-back" size={24} color="white" />
         </TouchableOpacity>
       </Animated.View>
 

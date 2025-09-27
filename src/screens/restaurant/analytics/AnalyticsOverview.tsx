@@ -1,3 +1,4 @@
+import { MaterialCommunityIcon } from '@/src/components/common/icons';
 import React, { useState, useMemo, useCallback } from 'react';
 import {
   View,
@@ -6,7 +7,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { useTheme, Card } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
 
@@ -289,8 +290,7 @@ const AnalyticsOverview: React.FC<
               }}
             >
               <View style={{ padding: 16, alignItems: 'center' }}>
-                <MaterialCommunityIcons
-                  name="alert-circle"
+                <MaterialCommunityIcon                   name="alert-circle"
                   size={48}
                   color={colors.onErrorContainer}
                 />
@@ -328,8 +328,7 @@ const AnalyticsOverview: React.FC<
           <View style={{ padding: 16 }}>
             <Card style={{ backgroundColor: colors.surface, borderRadius: 16 }}>
               <View style={{ padding: 32, alignItems: 'center' }}>
-                <MaterialCommunityIcons
-                  name="loading"
+                <MaterialCommunityIcon                   name="loading"
                   size={48}
                   color={colors.onSurfaceVariant}
                 />
@@ -362,8 +361,7 @@ const AnalyticsOverview: React.FC<
                       <Heading5 color={colors.onSurface} weight="bold">
                         {t('account_balance')}
                       </Heading5>
-                      <MaterialCommunityIcons
-                        name="wallet"
+                      <MaterialCommunityIcon                         name="wallet"
                         size={24}
                         color={colors.primary}
                       />
@@ -455,8 +453,7 @@ const AnalyticsOverview: React.FC<
                       <View
                         style={{ flexDirection: 'row', alignItems: 'center' }}
                       >
-                        <MaterialCommunityIcons
-                          name="chart-line"
+                        <MaterialCommunityIcon                           name="chart-line"
                           size={16}
                           color={colors.onSurfaceVariant}
                         />
@@ -561,8 +558,7 @@ const AnalyticsOverview: React.FC<
                       marginRight: 12,
                     }}
                   >
-                    <MaterialCommunityIcons
-                      name="star-circle"
+                    <MaterialCommunityIcon                       name="star-circle"
                       size={24}
                       color="#FF9500"
                     />
@@ -620,8 +616,7 @@ const AnalyticsOverview: React.FC<
                 </View>
 
                 <View style={{ alignItems: 'center' }}>
-                  <MaterialCommunityIcons
-                    name="chevron-right"
+                  <MaterialCommunityIcon                     name="chevron-right"
                     size={24}
                     color={colors.primary}
                   />
@@ -662,8 +657,7 @@ const AnalyticsOverview: React.FC<
                 }}
               >
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <MaterialCommunityIcons
-                    name="chart-timeline-variant"
+                  <MaterialCommunityIcon                     name="chart-timeline-variant"
                     size={24}
                     color="#007aff"
                   />
@@ -676,8 +670,7 @@ const AnalyticsOverview: React.FC<
                     </Caption>
                   </View>
                 </View>
-                <MaterialCommunityIcons
-                  name="chevron-right"
+                <MaterialCommunityIcon                   name="chevron-right"
                   size={24}
                   color={colors.onSurfaceVariant}
                 />

@@ -1,3 +1,4 @@
+import { MaterialCommunityIcon, IoniconsIcon } from '@/src/components/common/icons';
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
@@ -10,7 +11,7 @@ import {
   Alert,
 } from 'react-native';
 import { TextInput } from 'react-native-paper';
-import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
+
 import { LinearGradient } from 'expo-linear-gradient';
 import * as ImagePicker from 'expo-image-picker';
 import CommonView from '@/src/components/common/CommonView';
@@ -335,7 +336,7 @@ export const EditFoodScreen = ({
                 marginRight: 16,
               }}
             >
-              <Ionicons name="arrow-back" size={24} color="#ffffff" />
+              <IoniconsIcon name="arrow-back" size={24} color="#ffffff" />
             </TouchableOpacity>
             <View style={{ flex: 1 }}>
               <Heading3 color="#ffffff" weight="bold">
@@ -355,7 +356,7 @@ export const EditFoodScreen = ({
                 justifyContent: 'center',
               }}
             >
-              <MaterialCommunityIcons name="delete" size={20} color="#ef4444" />
+              <MaterialCommunityIcon name="delete" size={20} color="#ef4444" />
             </TouchableOpacity>
           </Animated.View>
 
@@ -432,8 +433,7 @@ export const EditFoodScreen = ({
                         justifyContent: 'center',
                       }}
                     >
-                      <MaterialCommunityIcons
-                        name="camera"
+                      <MaterialCommunityIcon                         name="camera"
                         size={40}
                         color="#ffffff"
                       />
@@ -458,8 +458,7 @@ export const EditFoodScreen = ({
                       zIndex: 3,
                     }}
                   >
-                    <MaterialCommunityIcons
-                      name="camera"
+                    <MaterialCommunityIcon                       name="camera"
                       size={20}
                       color="#007AFF"
                     />
@@ -646,8 +645,7 @@ export const EditFoodScreen = ({
                       <View
                         style={{ flexDirection: 'row', alignItems: 'center' }}
                       >
-                        <MaterialCommunityIcons
-                          name="content-save"
+                        <MaterialCommunityIcon                           name="content-save"
                           size={20}
                           color="#ffffff"
                           style={{ marginRight: 8 }}

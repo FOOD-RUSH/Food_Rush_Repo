@@ -1,7 +1,8 @@
+import { AntDesignIcon, MaterialIcon } from '@/src/components/common/icons';
 import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import React, { useCallback } from 'react';
 import { Switch, useTheme } from 'react-native-paper';
-import { AntDesign, MaterialIcons } from '@expo/vector-icons';
+
 import RowView from '@/src/components/common/RowView';
 import { CustomerProfileStackScreenProps } from '@/src/navigation/types';
 import CommonView from '@/src/components/common/CommonView';
@@ -169,7 +170,7 @@ const ProfileHomeScreen = ({
             )}
           </View>
           <TouchableOpacity activeOpacity={0.7} onPress={navigateToEditProfile}>
-            <AntDesign name="edit" color={'#007aff'} size={25} />
+            <AntDesignIcon name="edit" color={'#007aff'} size={25} />
           </TouchableOpacity>
         </View>
 
@@ -263,8 +264,7 @@ const ProfileHomeScreen = ({
               alignItems: 'center',
             }}
           >
-            <MaterialIcons
-              name={isDarkMode ? 'dark-mode' : 'light-mode'}
+            <MaterialIcon               name={isDarkMode ? 'dark-mode' : 'light-mode'}
               size={22}
               color={isDarkMode ? '#1a1a1a' : '#ffffff'}
             />

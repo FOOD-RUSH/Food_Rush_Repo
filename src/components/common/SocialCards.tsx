@@ -1,12 +1,13 @@
+import { IoniconsIcon } from '@/src/components/common/icons';
 import { View, Text, TouchableOpacity, Linking, Alert } from 'react-native';
 import React from 'react';
-import { Ionicons } from '@expo/vector-icons';
+
 import { useTheme, Card } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 
 interface SocialCardsProps {
   id: number;
-  icon_name: keyof typeof Ionicons.glyphMap;
+  icon_name: keyof IoniconsIconName;
   social_platform: string;
   link?: string;
 }
@@ -59,7 +60,7 @@ const SocialCards = ({
             className="w-12 h-12 rounded-full items-center justify-center mr-4"
             style={{ backgroundColor: colors.primaryContainer }}
           >
-            <Ionicons name={icon_name} color={colors.primary} size={24} />
+            <IoniconsIcon name={icon_name} color={colors.primary} size={24} />
           </View>
 
           <View className="flex-1">
@@ -98,8 +99,7 @@ const SocialCards = ({
             )}
           </View>
 
-          <Ionicons
-            name="chevron-forward"
+          <IoniconsIcon             name="chevron-forward"
             size={20}
             color={colors.onSurfaceVariant}
           />

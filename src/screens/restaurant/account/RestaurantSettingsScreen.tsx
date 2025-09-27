@@ -1,3 +1,4 @@
+import { IoniconsIcon, MaterialCommunityIcon } from '@/src/components/common/icons';
 import React, { useRef, useEffect, useState } from 'react';
 import {
   View,
@@ -10,7 +11,7 @@ import {
   TextInput,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+
 import { useTranslation } from 'react-i18next';
 import { useTheme } from 'react-native-paper';
 import { RestaurantProfileStackScreenProps } from '../../../navigation/types';
@@ -109,11 +110,10 @@ const RestaurantSettingsScreen = ({ navigation }: Props) => {
             onPress={() => navigation.goBack()}
             style={styles.backBtn}
           >
-            <Ionicons name="arrow-back" size={24} color="#fff" />
+            <IoniconsIcon name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>{t('restaurant_settings')}</Text>
-          <MaterialCommunityIcons
-            name="store-cog-outline"
+          <MaterialCommunityIcon             name="store-cog-outline"
             size={32}
             color="#fff"
             style={{ marginLeft: 10 }}
@@ -197,8 +197,7 @@ const RestaurantSettingsScreen = ({ navigation }: Props) => {
 
           {/* Accepting Orders Toggle */}
           <View className="flex-row justify-between mb-4 items-center px-2 py-2">
-            <MaterialCommunityIcons
-              name="store-check"
+            <MaterialCommunityIcon               name="store-check"
               size={22}
               color={colors.onSurface}
             />
@@ -226,8 +225,7 @@ const RestaurantSettingsScreen = ({ navigation }: Props) => {
 
           {/* Show on Map Toggle */}
           <View className="flex-row justify-between mb-4 items-center px-2 py-2">
-            <MaterialCommunityIcons
-              name="map-marker-check"
+            <MaterialCommunityIcon               name="map-marker-check"
               size={22}
               color={colors.onSurface}
             />

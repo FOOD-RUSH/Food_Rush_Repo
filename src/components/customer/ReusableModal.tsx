@@ -1,3 +1,4 @@
+import { IoniconsIcon } from '@/src/components/common/icons';
 import React from 'react';
 import {
   View,
@@ -12,7 +13,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { Card, useTheme } from 'react-native-paper';
-import { Ionicons } from '@expo/vector-icons';
+
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
@@ -180,8 +181,7 @@ const ReusableModal: React.FC<ReusableModalProps> = ({
                         }}
                         activeOpacity={0.7}
                       >
-                        <Ionicons
-                          name="close"
+                        <IoniconsIcon                           name="close"
                           size={20}
                           color={colors.onSurfaceVariant}
                         />

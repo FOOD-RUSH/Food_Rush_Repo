@@ -1,3 +1,4 @@
+import { IoniconsIcon, MaterialCommunityIcon } from '@/src/components/common/icons';
 import React, { useRef, useEffect } from 'react';
 import {
   View,
@@ -9,7 +10,7 @@ import {
   Image,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+
 import { useTranslation } from 'react-i18next';
 import { useTheme } from 'react-native-paper';
 import CommonView from '@/src/components/common/CommonView';
@@ -62,8 +63,7 @@ const AboutScreen = ({ navigation }: Props) => {
               ]}
               style={styles.logoBg}
             >
-              <MaterialCommunityIcons
-                name="silverware-fork-knife"
+              <MaterialCommunityIcon                 name="silverware-fork-knife"
                 size={48}
                 color="#fff"
               />

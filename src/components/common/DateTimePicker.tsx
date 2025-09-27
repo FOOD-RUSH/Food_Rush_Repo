@@ -1,7 +1,8 @@
+import { MaterialCommunityIcon } from '@/src/components/common/icons';
 import React, { useState } from 'react';
 import { View, TouchableOpacity, Platform } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useTranslation } from 'react-i18next';
 import { Typography, Label, Caption } from './Typography';
@@ -172,8 +173,7 @@ const CustomDateTimePicker: React.FC<DateTimePickerProps> = ({
         >
           {displayValue}
         </Typography>
-        <MaterialCommunityIcons
-          name={getIcon()}
+        <MaterialCommunityIcon           name={getIcon()}
           size={20}
           color={colors.onSurfaceVariant}
         />

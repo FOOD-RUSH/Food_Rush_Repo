@@ -1,4 +1,5 @@
 // Cart Reminder Settings Component
+import { IoniconsIcon } from '@/src/components/common/icons';
 import React, { useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import {
@@ -10,7 +11,7 @@ import {
   TextInput,
 } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
-import { Ionicons } from '@expo/vector-icons';
+
 import { useCartReminders } from '@/src/hooks/customer/useCartReminders';
 
 interface CartReminderSettingsProps {
@@ -85,8 +86,7 @@ const CartReminderSettings: React.FC<CartReminderSettingsProps> = ({
       <Dialog visible={visible} onDismiss={onDismiss}>
         <Dialog.Title>
           <View className="flex-row items-center">
-            <Ionicons
-              name="notifications-outline"
+            <IoniconsIcon               name="notifications-outline"
               size={24}
               color={colors.primary}
               style={{ marginRight: 8 }}
@@ -216,8 +216,7 @@ const CartReminderSettings: React.FC<CartReminderSettingsProps> = ({
                 >
                   {t('advanced_settings', 'Advanced Settings')}
                 </Text>
-                <Ionicons
-                  name={showAdvanced ? 'chevron-up' : 'chevron-down'}
+                <IoniconsIcon                   name={showAdvanced ? 'chevron-up' : 'chevron-down'}
                   size={20}
                   color={colors.primary}
                 />

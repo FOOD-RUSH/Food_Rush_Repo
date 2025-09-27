@@ -1,7 +1,8 @@
+import { IoniconsIcon } from '@/src/components/common/icons';
 import React from 'react';
 import { View, Text } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import { Ionicons } from '@expo/vector-icons';
+
 
 interface ErrorDisplayProps {
   error: string | null;
@@ -38,8 +39,7 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
         containerStyle,
       ]}
     >
-      <Ionicons
-        name="alert-circle"
+      <IoniconsIcon         name="alert-circle"
         size={20}
         color={colors.error}
         style={{ marginRight: 12, marginTop: 2 }}

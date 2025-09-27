@@ -1,6 +1,7 @@
+import { IoniconsIcon } from '@/src/components/common/icons';
 import React, { ReactNode } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+
 import { ApiError } from '../services/shared/apiClient';
 
 // Error Boundary Component
@@ -39,7 +40,7 @@ export class ErrorBoundary extends React.Component<
 
       return (
         <View style={styles.errorContainer}>
-          <Ionicons name="warning-outline" size={48} color="#FF6B6B" />
+          <IoniconsIcon name="warning-outline" size={48} color="#FF6B6B" />
           <Text style={styles.errorTitle}>Something went wrong</Text>
           <Text style={styles.errorMessage}>
             We&apos;re sorry for the inconvenience. Please try again.
@@ -90,8 +91,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
 
   return (
     <View style={[styles.errorDisplay, compact && styles.errorDisplayCompact]}>
-      <Ionicons
-        name={getErrorIcon()}
+      <IoniconsIcon         name={getErrorIcon()}
         size={compact ? 24 : 32}
         color="#FF6B6B"
         style={styles.errorIcon}
@@ -137,7 +137,7 @@ export const InlineError: React.FC<InlineErrorProps> = ({ error, style }) => {
 
   return (
     <View style={[styles.inlineError, style]}>
-      <Ionicons name="alert-circle" size={14} color="#FF6B6B" />
+      <IoniconsIcon name="alert-circle" size={14} color="#FF6B6B" />
       <Text style={styles.inlineErrorText}>{message}</Text>
     </View>
   );
