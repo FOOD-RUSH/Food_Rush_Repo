@@ -34,6 +34,7 @@ import { useNetwork } from '@/src/contexts/NetworkContext';
 import { useTranslation } from 'react-i18next';
 import ErrorDisplay from '@/src/components/auth/ErrorDisplay';
 import { Heading1, Body, Label } from '@/src/components/common/Typography';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface LoginFormData {
   email: string;
@@ -52,6 +53,7 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
   const { isConnected, isInternetReachable } = useNetwork();
   const { clearError, error: authError } = useAuthStore();
   const loginMutation = useLogin();
+  const insets = useSafeAreaInsets();
 
   // State
   const [showPassword, setShowPassword] = useState(false);
@@ -82,8 +84,9 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
       borderTopRightRadius: 28,
       paddingHorizontal: 24,
       paddingTop: 24,
+      paddingBottom: insets.bottom + 20, // Add bottom insets
     }),
-    [colors.surface],
+    [colors.surface, insets.bottom],
   );
 
   const loginButtonStyle = useMemo(
@@ -99,11 +102,18 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
     () => ({
       backgroundColor: colors.surfaceVariant,
       borderRadius: 14,
-      borderWidth: 1,
-      borderColor: colors.outline,
       flex: 1,
     }),
-    [colors.surfaceVariant, colors.outline],
+    [colors.surfaceVariant],
+  );
+
+  // Input style without borders
+  const inputStyle = useMemo(
+    () => ({
+      backgroundColor: colors.surfaceVariant,
+      borderWidth: 0,
+    }),
+    [colors.surfaceVariant],
   );
 
   // Entrance animations - run once
@@ -122,7 +132,7 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
             useNativeDriver: false,
           }),
           Animated.timing(formAnim, {
-            toValue: height * 0.35,
+            toValue: height * 0.3, // Increased height slightly
             duration: 400,
             useNativeDriver: false,
           }),
@@ -299,7 +309,10 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={{ flex: 1 }}
         >
-          <ScrollView showsVerticalScrollIndicator={false}>
+          <ScrollView 
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ flexGrow: 1 }}
+          >
             {/* Drag Handle */}
             <View
               style={{
@@ -331,7 +344,8 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                     mode="outlined"
                     left={<TextInput.Icon icon="email-outline" />}
                     error={!!errors.email}
-                    style={{ backgroundColor: colors.surfaceVariant }}
+                    style={inputStyle}
+                    outlineStyle={{ borderWidth: 0 }}
                   />
                   <HelperText type="error" visible={!!errors.email}>
                     {errors.email?.message}
@@ -363,11 +377,8 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                       />
                     }
                     error={!!errors.password}
-                    style={{
-                      backgroundColor: colors.surfaceVariant,
-                      borderWidth: 0,
-                      borderRadius: 16,
-                    }}
+                    style={inputStyle}
+                    outlineStyle={{ borderWidth: 0 }}
                   />
                   <HelperText type="error" visible={!!errors.password}>
                     {errors.password?.message}

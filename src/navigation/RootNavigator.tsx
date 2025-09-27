@@ -60,7 +60,6 @@ import { EditFoodScreen } from '../screens/restaurant/menu/EditFoodScreen';
 import RestaurantAnalyticsReviewsScreen from '../screens/restaurant/analytics/RestaurantReviewsScreen';
 import TimeHeatmap from '../screens/restaurant/analytics/TimeHeatmap';
 import ProfileScreen from '../screens/restaurant/account/ProfileScreen';
-import PaymentBillingScreen from '../screens/restaurant/account/PaymentBillingScreen';
 import AccountSettingsScreen from '../screens/restaurant/account/AccountSettingsScreen';
 import SupportScreen from '../screens/restaurant/account/SupportScreen';
 import AboutScreen from '../screens/restaurant/account/AboutScreen';
