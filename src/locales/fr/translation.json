@@ -698,7 +698,7 @@
   "order_dashboard": "Tableau de Bord Commandes",
   "order_details": "Détails de la commande",
   "order_details_screen": "Détails de la commande",
-  "order_hash": "#",
+  "order_f": "Commande Pour",
   "order_heatmap": "Carte de Chaleur des Commandes",
   "order_history": "Historique des Commandes",
   "order_history_screen": "ÉcranHistoriqueCommandes",
@@ -1137,5 +1137,7 @@
   "your_cart_is_empty": "Votre panier est vide",
   "your_completed_orders_will_appear_here": "Vos commandes terminées apparaîtront ici",
   "your_feedback_matters": "Votre avis compte.",
+  "confirming_order": "Confirmation de la commande...",
+  "confirm_order_and_proceed_to_payment": "Confirmer la commande et procéder au paiement",
   "/": "/"
 }

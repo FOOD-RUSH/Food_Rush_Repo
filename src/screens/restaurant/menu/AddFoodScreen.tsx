@@ -239,62 +239,86 @@ export const AddFoodScreen = () => {
     setFormData((prev) => ({ ...prev, ...updates }));
   }, []);
 
-  // Enhanced validation with detailed error checking
-  const validation = useMemo(() => {
-    const { foodName, price, category, startTime, endTime } = formData;
-    const priceValue = parseFloat(price);
+ // Enhanced validation with detailed error checking - ADD THIS TO YOUR AddFoodScreen.tsx
+const validation = useMemo(() => {
+  const { foodName, price, category, startTime, endTime, picture } = formData;
+  const priceValue = parseFloat(price);
 
-    const errors: string[] = [];
+  const errors: string[] = [];
 
-    // Required field validation
-    if (!foodName.trim()) {
-      errors.push(
-        t('validation.food_name_required') || 'Food name is required',
-      );
-    } else if (foodName.trim().length < 2) {
-      errors.push(
-        t('validation.food_name_too_short') || 'Food name is too short',
-      );
+  // Required field validation
+  if (!foodName.trim()) {
+    errors.push(
+      t('validation.food_name_required') || 'Food name is required',
+    );
+  } else if (foodName.trim().length < 2) {
+    errors.push(
+      t('validation.food_name_too_short') || 'Food name is too short',
+    );
+  }
+
+  if (!category) {
+    errors.push(t('validation.category_required') || 'Category is required');
+  } else {
+    // Validate category is one of the accepted values
+    const validCategories = ['local-dishes', 'breakfast', 'fastfood', 'desserts', 'snacks', 'drinks'];
+    if (!validCategories.includes(category)) {
+      errors.push(`Category must be one of: ${validCategories.join(', ')}`);
     }
+  }
 
-    if (!category) {
-      errors.push(t('validation.category_required') || 'Category is required');
+  if (!price.trim()) {
+    errors.push(t('validation.price_required') || 'Price is required');
+  } else if (isNaN(priceValue) || priceValue <= 0) {
+    errors.push(
+      t('validation.price_must_be_positive') ||
+        'Price must be a positive number',
+    );
+  } else if (priceValue > 1000000) {
+    errors.push(t('validation.price_too_high') || 'Price is too high');
+  }
+
+  // CRITICAL: Picture is required according to API documentation
+  if (!picture) {
+    errors.push('Picture is required - please select an image');
+  } else {
+    // Validate picture format
+    if (!picture.uri) {
+      errors.push('Picture URI is missing');
     }
-
-    if (!price.trim()) {
-      errors.push(t('validation.price_required') || 'Price is required');
-    } else if (isNaN(priceValue) || priceValue <= 0) {
-      errors.push(
-        t('validation.price_must_be_positive') ||
-          'Price must be a positive number',
-      );
-    } else if (priceValue > 1000000) {
-      errors.push(t('validation.price_too_high') || 'Price is too high');
+    if (!picture.name) {
+      errors.push('Picture name is missing');  
     }
-
-    // Time validation - both times must be provided if one is provided
-    if ((startTime && !endTime) || (!startTime && endTime)) {
-      errors.push(
-        t('both_times_required_if_one_selected') ||
-          'Both start and end times are required if scheduling is used',
-      );
+    if (!picture.type) {
+      errors.push('Picture type is missing');
     }
-
-    // Time validation - start time must be before end time
-    if (startTime && endTime && startTime >= endTime) {
-      errors.push(
-        t('start_time_must_be_before_end_time') ||
-          'Start time must be before end time',
-      );
+    if (picture.type && !isValidImageType(picture.type)) {
+      errors.push(`Invalid image type: ${picture.type}. Only JPG and PNG are allowed.`);
     }
+  }
 
-    return {
-      isValid: errors.length === 0,
-      errors,
-      hasErrors: errors.length > 0,
-    };
-  }, [formData, t]);
+  // Time validation - both times must be provided if one is provided
+  if ((startTime && !endTime) || (!startTime && endTime)) {
+    errors.push(
+      t('both_times_required_if_one_selected') ||
+        'Both start and end times are required if scheduling is used',
+    );
+  }
 
+  // Time validation - start time must be before end time
+  if (startTime && endTime && startTime >= endTime) {
+    errors.push(
+      t('start_time_must_be_before_end_time') ||
+        'Start time must be before end time',
+    );
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    hasErrors: errors.length > 0,
+  };
+}, [formData, t]);
   // Fixed image picker that properly validates JPG/PNG and returns correct format
   const handleImagePick = useCallback(async () => {
     try {
@@ -571,8 +595,8 @@ export const AddFoodScreen = () => {
           <FormField
             label={`${t('daily_schedule') || 'Daily Schedule'} (${t('optional') || 'Optional'})`}
           >
-            <View className="flex-row" style={{ gap: 16 }}>
-              <View className="flex-1">
+            <View className="flex-row flex-wrap" style={{ gap: 12 }}>
+              <View className="flex-1 min-w-[45%]">
                 <CustomDateTimePicker
                   value={formData.startTime}
                   onDateTimeChange={(dateTime) =>
@@ -589,7 +613,7 @@ export const AddFoodScreen = () => {
                   }
                 />
               </View>
-              <View className="flex-1">
+              <View className="flex-1 min-w-[45%]">
                 <CustomDateTimePicker
                   value={formData.endTime}
                   onDateTimeChange={(dateTime) =>

@@ -10,28 +10,18 @@ export interface AppLoadingState {
 
 export const useAppLoading = () => {
   const { fontsLoaded, fontError } = useFonts();
-  const [showCustomSplash, setShowCustomSplash] = useState(true);
+  
+  const [showCustomSplash, setShowCustomSplash] = useState(false); // Don't show until fonts are loaded
   const [appReady, setAppReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const prepareApp = async () => {
-      try {
-        // Wait for fonts to load
-        if (fontsLoaded && !fontError) {
-          // Fonts are loaded, but keep showing custom splash
-          // The custom splash will handle its own timing
-        } else if (fontError) {
-          setError('Failed to load fonts');
-          // Still continue with app loading
-        }
-      } catch (err) {
-        console.error('Error preparing app:', err);
-        setError('Failed to initialize app');
-      }
-    };
-
-    prepareApp();
+    if (fontError) {
+      setError('Failed to load fonts');
+    } else if (fontsLoaded) {
+      // Now that fonts are loaded, show the custom splash
+      setShowCustomSplash(true);
+    }
   }, [fontsLoaded, fontError]);
 
   const handleSplashAnimationComplete = () => {

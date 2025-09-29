@@ -1,6 +1,6 @@
 import { MaterialCommunityIcon } from '@/src/components/common/icons';
 import React, { useState, useRef, useEffect } from 'react';
-import { View, ScrollView, Animated } from 'react-native';
+import { View, ScrollView, Animated, TouchableOpacity } from 'react-native';
 import {
   Button,
   Badge,
@@ -28,6 +28,15 @@ import {
   Label,
   Caption,
 } from '@/src/components/common/Typography';
+import {
+  getCustomerName,
+  getCustomerPhone,
+  getCustomerEmail,
+  formatOrderTotal,
+  ORDER_STATUS_COLORS,
+  logOrderData,
+} from '@/src/utils/orderUtils';
+import { formatDate } from '@/src/utils/dateUtils';
 
 const OrderDetailsScreen: React.FC<
   RootStackScreenProps<'RestaurantOrderDetails'>
@@ -41,9 +50,21 @@ const OrderDetailsScreen: React.FC<
   const slideAnim = useRef(new Animated.Value(50)).current;
 
   // API hooks
-  const { data: orderData, isLoading } = useGetOrderById(orderId);
+  const { data: orderData, isLoading, error, refetch } = useGetOrderById(orderId);
   const confirmOrderMutation = useConfirmOrder();
   const rejectOrderMutation = useRejectOrder();
+  
+  // Log order data for debugging
+  console.log(`📊 [OrderDetailsScreen] Order ${orderId} data:`, {
+    orderData,
+    isLoading,
+    error
+  });
+  
+  // Log detailed order information if data is available
+  if (orderData) {
+    logOrderData(orderData, `DETAILS-${orderId}`);
+  }
 
   // State
   const [status, setStatus] = useState(orderData?.status || 'pending');
@@ -85,12 +106,88 @@ const OrderDetailsScreen: React.FC<
     }
   }, [status, orderData, fadeAnim, slideAnim]);
 
+  // Handle loading state
+  if (isLoading && !orderData) {
+    return (
+      <CommonView>
+        <View className="flex-1 justify-center items-center p-6">
+          <MaterialCommunityIcon 
+            name="loading"
+            size={48}
+            color={colors.primary}
+            animation="spin"
+          />
+          <Heading5
+            color={colors.onSurface}
+            weight="bold"
+            align="center"
+            style={{ marginTop: 16 }}
+          >
+            {t('loading_order_details')}
+          </Heading5>
+          <Body
+            color={colors.onSurfaceVariant}
+            align="center"
+            style={{ marginTop: 8 }}
+          >
+            {t('please_wait')}
+          </Body>
+        </View>
+      </CommonView>
+    );
+  }
+
+  // Handle error state
+  if (error) {
+    return (
+      <CommonView>
+        <View className="flex-1 justify-center items-center p-6">
+          <MaterialCommunityIcon 
+            name="alert-circle"
+            size={48}
+            color={colors.error}
+          />
+          <Heading5
+            color={colors.onSurface}
+            weight="bold"
+            align="center"
+            style={{ marginTop: 16 }}
+          >
+            {t('error_loading_order')}
+          </Heading5>
+          <Body
+            color={colors.onSurfaceVariant}
+            align="center"
+            style={{ marginTop: 8 }}
+          >
+            {error.message || t('failed_to_load_order_details')}
+          </Body>
+          <Button
+            mode="contained"
+            onPress={() => refetch()}
+            style={{ marginTop: 16 }}
+          >
+            {t('retry')}
+          </Button>
+          <Button
+            mode="outlined"
+            onPress={() => navigation.goBack()}
+            style={{ marginTop: 8 }}
+          >
+            {t('go_back')}
+          </Button>
+        </View>
+      </CommonView>
+    );
+  }
+
   // Handle order not found
   if (!orderData) {
     return (
       <CommonView>
         <View className="flex-1 justify-center items-center p-6">
-          <MaterialCommunityIcon             name="alert-circle"
+          <MaterialCommunityIcon 
+            name="alert-circle"
             size={48}
             color={colors.error}
           />
@@ -112,7 +209,7 @@ const OrderDetailsScreen: React.FC<
           <Button
             mode="contained"
             onPress={() => navigation.goBack()}
-            className="mt-4"
+            style={{ marginTop: 16 }}
           >
             {t('go_back')}
           </Button>
@@ -122,20 +219,7 @@ const OrderDetailsScreen: React.FC<
   }
 
   const getStatusColor = () => {
-    switch (status) {
-      case 'pending':
-        return colors.warning || '#F59E0B';
-      case 'preparing':
-        return colors.primary;
-      case 'ready':
-        return colors.success || '#10B981';
-      case 'delivered':
-        return '#8B5CF6';
-      case 'cancelled':
-        return colors.error;
-      default:
-        return colors.onSurfaceVariant;
-    }
+    return ORDER_STATUS_COLORS[status as keyof typeof ORDER_STATUS_COLORS] || colors.onSurfaceVariant;
   };
 
   const handleStatusChange = async (newStatus: typeof status) => {
@@ -187,14 +271,14 @@ const OrderDetailsScreen: React.FC<
         >
           {/* Order Header */}
           <View
-            className="p-5 rounded-xl mb-4"
+            className="p-4 rounded-xl mb-4"
             style={{ backgroundColor: colors.surface }}
           >
             <View className="flex-row justify-between items-start">
               <View className="flex-1">
                 <Heading2 color={colors.onSurface} weight="bold">
                   {t('order_prefix')}
-                  {orderId}
+                  {orderId.length > 9 ? orderId.substring(0, 9) + '...' : orderId}
                 </Heading2>
                 <View className="flex-row items-center mt-1">
                   <MaterialCommunityIcon                     name="clock-outline"
@@ -261,7 +345,7 @@ const OrderDetailsScreen: React.FC<
                   color={colors.onSurfaceVariant}
                 />
                 <Body color={colors.onSurface} style={{ marginLeft: 12 }}>
-                  {orderData.customerName}
+                  {getCustomerName(orderData)}
                 </Body>
               </View>
 
@@ -271,7 +355,7 @@ const OrderDetailsScreen: React.FC<
                   color={colors.onSurfaceVariant}
                 />
                 <Body color={colors.onSurface} style={{ marginLeft: 12 }}>
-                  {orderData.customerPhone}
+                  {getCustomerPhone(orderData)}
                 </Body>
               </View>
 
@@ -285,7 +369,7 @@ const OrderDetailsScreen: React.FC<
                   color={colors.onSurface}
                   style={{ marginLeft: 12, flex: 1 }}
                 >
-                  {orderData.customerAddress}
+                  {orderData.customerAddress || 'No address provided'}
                 </Body>
               </View>
             </View>
@@ -357,13 +441,22 @@ const OrderDetailsScreen: React.FC<
                     >
                       {item.quantity}x
                     </Caption>
-                    <Label
-                      color={colors.onSurface}
-                      weight="medium"
-                      style={{ flex: 1 }}
-                    >
-                      {item.name}
-                    </Label>
+                    <View style={{ flex: 1 }}>
+                      <Label
+                        color={colors.onSurface}
+                        weight="medium"
+                      >
+                        {item.name}
+                      </Label>
+                      {item.description && (
+                        <Caption
+                          color={colors.onSurfaceVariant}
+                          style={{ marginTop: 2 }}
+                        >
+                          {item.description}
+                        </Caption>
+                      )}
+                    </View>
                   </View>
                   <Label color={colors.primary} weight="semibold">
                     {(item.price * item.quantity).toLocaleString()}{' '}
@@ -393,24 +486,26 @@ const OrderDetailsScreen: React.FC<
               <View className="flex-row justify-between mb-2">
                 <Body color={colors.onSurfaceVariant}>{t('subtotal')}</Body>
                 <Body color={colors.onSurface}>
-                  {orderData.subtotal.toLocaleString()} {t('currency_xaf')}
+                  {formatOrderTotal(orderData.subtotal)}
                 </Body>
               </View>
 
-              <View className="flex-row justify-between mb-2">
-                <Body color={colors.onSurfaceVariant}>{t('tax')}</Body>
-                <Body color={colors.onSurface}>
-                  {orderData.tax.toLocaleString()} {t('currency_xaf')}
-                </Body>
-              </View>
+              {orderData.tax && (
+                <View className="flex-row justify-between mb-2">
+                  <Body color={colors.onSurfaceVariant}>{t('tax')}</Body>
+                  <Body color={colors.onSurface}>
+                    {formatOrderTotal(orderData.tax)}
+                  </Body>
+                </View>
+              )}
 
-              {orderData.deliveryFee > 0 && (
+              {(orderData.deliveryFee || orderData.deliveryPrice) && (
                 <View className="flex-row justify-between mb-2">
                   <Body color={colors.onSurfaceVariant}>
                     {t('delivery_fee')}
                   </Body>
                   <Body color={colors.onSurface}>
-                    {orderData.deliveryFee.toLocaleString()} {t('currency_xaf')}
+                    {formatOrderTotal(orderData.deliveryFee || orderData.deliveryPrice)}
                   </Body>
                 </View>
               )}
@@ -426,7 +521,7 @@ const OrderDetailsScreen: React.FC<
                   {t('total')}
                 </Heading5>
                 <Heading5 color={colors.primary} weight="bold">
-                  {orderData.total.toLocaleString()} {t('currency_xaf')}
+                  {formatOrderTotal(orderData.total)}
                 </Heading5>
               </View>
             </View>
@@ -456,80 +551,108 @@ const OrderDetailsScreen: React.FC<
           {/* Order Actions */}
           <View className="px-4 pb-4">
             {status === 'pending' && (
-              <View className="space-y-3">
-                <Button
-                  mode="contained"
-                  onPress={() => handleStatusChange('preparing')}
-                  className="mb-3"
-                  contentStyle={{
-                    height: buttonHeight,
-                    flexDirection: 'row-reverse',
-                  }}
-                  labelStyle={{
-                    fontSize: fontSize,
-                    fontWeight: '600',
-                  }}
-                  icon="check"
-                >
-                  {t('accept_order')}
-                </Button>
-                <Button
-                  mode="outlined"
-                  onPress={() => handleStatusChange('cancelled')}
+              <View className="flex-row space-x-3">
+                <TouchableOpacity
+                  className="flex-1 rounded-xl p-4"
                   style={{
-                    borderColor: colors.error,
+                    backgroundColor: colors.error,
                   }}
-                  contentStyle={{
-                    height: buttonHeight,
-                    flexDirection: 'row-reverse',
-                  }}
-                  textColor={colors.error}
-                  labelStyle={{
-                    fontSize: fontSize,
-                    fontWeight: '600',
-                  }}
-                  icon="close"
+                  onPress={() => handleStatusChange('cancelled')}
                 >
-                  {t('reject_order')}
-                </Button>
+                  <View className="flex items-center">
+                    <MaterialCommunityIcon
+                      name="close"
+                      size={24}
+                      color="white"
+                    />
+                    <Body
+                      color="white"
+                      weight="bold"
+                      className="mt-1"
+                      align="center"
+                    >
+                      {t('reject_order')}
+                    </Body>
+                  </View>
+                </TouchableOpacity>
+                
+                <TouchableOpacity
+                  className="flex-1 rounded-xl p-4"
+                  style={{
+                    backgroundColor: '#4CAF50',
+                  }}
+                  onPress={() => handleStatusChange('preparing')}
+                >
+                  <View className="flex items-center">
+                    <MaterialCommunityIcon
+                      name="check"
+                      size={24}
+                      color="white"
+                    />
+                    <Body
+                      color="white"
+                      weight="bold"
+                      className="mt-1"
+                      align="center"
+                    >
+                      {t('accept_order')}
+                    </Body>
+                  </View>
+                </TouchableOpacity>
               </View>
             )}
 
             {status === 'preparing' && (
-              <Button
-                mode="contained"
+              <TouchableOpacity
+                className="rounded-xl p-4 mt-2"
+                style={{
+                  backgroundColor: colors.primary,
+                }}
                 onPress={() => handleStatusChange('ready')}
-                contentStyle={{
-                  height: buttonHeight,
-                  flexDirection: 'row-reverse',
-                }}
-                labelStyle={{
-                  fontSize: fontSize,
-                  fontWeight: '600',
-                }}
-                icon="check-all"
                 disabled={prepProgress < 1}
               >
-                {t('mark_as_ready')}
-              </Button>
+                <View className="flex-row items-center justify-center">
+                  <MaterialCommunityIcon
+                    name="check-all"
+                    size={24}
+                    color="white"
+                  />
+                  <Body
+                    color="white"
+                    weight="bold"
+                    className="ml-2"
+                    align="center"
+                  >
+                    {t('mark_as_ready')}
+                  </Body>
+                </View>
+              </TouchableOpacity>
             )}
 
             {(status === 'ready' || status === 'cancelled') && (
-              <Button
-                mode="outlined"
+              <TouchableOpacity
+                className="rounded-xl p-4 mt-2"
+                style={{
+                  backgroundColor: colors.primary,
+                }}
                 onPress={() => navigation.goBack()}
-                contentStyle={{
-                  height: buttonHeight,
-                  flexDirection: 'row-reverse',
-                }}
-                labelStyle={{
-                  fontSize: fontSize,
-                  fontWeight: '600',
-                }}
-                icon="arrow-left"
               >
-                {t('back_to_orders')}
-              </Button>
+                <View className="flex-row items-center justify-center">
+                  <MaterialCommunityIcon
+                    name="arrow-left"
+                    size={24}
+                    color="white"
+                  />
+                  <Body
+                    color="white"
+                    weight="bold"
+                    className="ml-2"
+                    align="center"
+                  >
+                    {t('back_to_orders')}
+                  </Body>
+                </View>
+              </TouchableOpacity>
             )}
           </View>
         </Animated.View>

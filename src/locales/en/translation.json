@@ -681,7 +681,7 @@
   "order_dashboard": "Order Dashboard",
   "order_details": "Order Details",
   "order_details_screen": "Order Details",
-  "order_hash": "#",
+  "order_f": "Order for",
   "order_heatmap": "Order Heatmap",
   "order_history": "Order History",
   "order_history_screen": "OrderHistoryScreen",
@@ -1119,5 +1119,14 @@
   "your_cart_is_empty": "Your cart is empty",
   "your_completed_orders_will_appear_here": "Your completed orders will appear here",
   "your_feedback_matters": "Your feedback matters.",
+  "confirming_order": "Confirming Order...",
+  "confirm_order_and_proceed_to_payment": "Confirm Order & Proceed to Payment",
+  "loading_orders": "Loading orders...",
+  "error_loading_orders": "Error loading orders",
+  "no_orders_match_search": "No orders match your search",
+  "accept": "Accept",
+  "accept_order": "Accept Order",
+  "currency_xaf": "XAF",
+  
   "/":" /"
 }

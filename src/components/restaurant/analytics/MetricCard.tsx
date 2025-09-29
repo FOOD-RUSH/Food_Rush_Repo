@@ -14,6 +14,7 @@ import {
 
 interface MetricCardProps extends MetricCardData {
   onPress?: () => void;
+  isLoading?: boolean;
 }
 
 const MetricCard: React.FC<MetricCardProps> = ({
@@ -25,6 +26,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
   color,
   subtitle,
   onPress,
+  isLoading = false,
 }) => {
   const { colors } = useTheme();
 
@@ -85,14 +87,16 @@ const MetricCard: React.FC<MetricCardProps> = ({
               justifyContent: 'center',
             }}
           >
-            <MaterialCommunityIcon               name={icon as keyof MaterialCommunityIconName}
+            <MaterialCommunityIcon
+              name={icon as keyof MaterialCommunityIconName}
               size={20}
               color={color || colors.primary}
             />
           </View>
-          {change && (
+          {!isLoading && change && (
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <MaterialCommunityIcon                 name={getChangeIcon()}
+              <MaterialCommunityIcon
+                name={getChangeIcon()}
                 size={16}
                 color={getChangeColor()}
               />
@@ -112,7 +116,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
           style={{ marginBottom: 4 }}
           numberOfLines={1}
         >
-          {value || '0'}
+          {isLoading ? '---' : value || '0'}
         </Heading1>
         <Body color={colors.onSurfaceVariant} weight="medium" numberOfLines={2}>
           {title || 'Untitled'}
@@ -123,7 +127,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
             style={{ marginTop: 2 }}
             numberOfLines={1}
           >
-            {subtitle}
+            {isLoading ? 'Loading...' : subtitle}
           </Caption>
         )}
       </CardComponent>

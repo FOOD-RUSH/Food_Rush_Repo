@@ -33,6 +33,9 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
+  
+  // State to track image loading failure
+  const [imageLoadError, setImageLoadError] = React.useState(false);
 
   const profileOptions = [
     {
@@ -85,6 +88,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       Animated.spring(slideAnim, { toValue: 0, useNativeDriver: true }),
     ]).start();
   }, [fadeAnim, slideAnim]);
+  
+  // Reset image error when restaurant changes
+  useEffect(() => {
+    setImageLoadError(false);
+  }, [currentRestaurant?.id, currentRestaurant?.image]);
 
   const handleLogout = () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
@@ -102,18 +110,28 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
           ]}
         >
-          <Avatar.Text
-            size={80}
-            label={
-              profileData?.fullName
-                ? profileData.fullName
-                    .split(' ')
-                    .map((n) => n[0])
-                    .join('')
-                : 'R'
-            }
-            style={[styles.avatar]}
-          />
+          {(currentRestaurant?.image && !imageLoadError) ? (
+            <Avatar.Image 
+              size={80} 
+              source={{ uri: currentRestaurant.image }} 
+              style={[styles.avatar]}
+              onError={() => setImageLoadError(true)}
+              onLoad={() => setImageLoadError(false)}
+            />
+          ) : (
+            <Avatar.Text
+              size={80}
+              label={
+                profileData?.fullName
+                  ? profileData.fullName
+                      .split(' ')
+                      .map((n) => n[0])
+                      .join('')
+                      : 'R'
+              }
+              style={[styles.avatar]}
+            />
+          )}
           <Text style={[styles.userName, { color: colors.onSurface }]}>
             {profileData?.fullName || ''}
           </Text>

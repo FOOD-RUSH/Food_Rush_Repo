@@ -150,18 +150,18 @@ const CustomDateTimePicker: React.FC<DateTimePickerProps> = ({
         style={{
           backgroundColor: colors.surface,
           borderRadius: 16,
-          padding: 8,
+          padding: 12,
           borderWidth: error ? 2 : 1,
           borderColor: error ? colors.error : colors.outline,
-          elevation: 2,
+          elevation: 3,
           shadowColor: '#000',
-          shadowOffset: { width: 0, height: 1 },
-          shadowOpacity: 0.1,
-          shadowRadius: 3,
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.15,
+          shadowRadius: 4,
           flexDirection: 'row',
           alignItems: 'center',
-          // justifyContent: 'space-between',
-          gap: 4,
+          justifyContent: 'space-between',
+          gap: 8,
           opacity: disabled ? 0.6 : 1,
           flex: 1,
         }}
@@ -169,11 +169,19 @@ const CustomDateTimePicker: React.FC<DateTimePickerProps> = ({
         <Typography
           variant="body"
           color={value ? colors.onSurface : colors.onSurfaceVariant}
-          style={{ fontFamily: 'Urbanist-Regular' }}
+          style={{ 
+            fontFamily: 'Urbanist-Regular',
+            flex: 1,
+            flexShrink: 1,
+            overflow: 'hidden',
+            paddingRight: 8
+          }}
+          numberOfLines={1}
         >
           {displayValue}
         </Typography>
-        <MaterialCommunityIcon           name={getIcon()}
+        <MaterialCommunityIcon 
+          name={getIcon()}
           size={20}
           color={colors.onSurfaceVariant}
         />

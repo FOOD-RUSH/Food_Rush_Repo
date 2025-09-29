@@ -112,94 +112,91 @@ export const restaurantMenuApi = {
   },
 
   createMenuItem: async (restaurantId: string, data: CreateMenuItemRequest) => {
-  try {
-    // Always use FormData approach
-    const formData = new FormData();
+    try {
+      // Always use FormData approach
+      const formData = new FormData();
 
-    // Append text fields
-    formData.append('name', data.name);
-    if (data.description) {
-      formData.append('description', data.description);
-    }
-    formData.append('price', data.price.toString());
-    formData.append('category', data.category);
-    formData.append('isAvailable', data.isAvailable.toString());
+      // Append text fields exactly as backend expects them
+      formData.append('name', data.name);
+      if (data.description) {
+        formData.append('description', data.description);
+      }
+      // Backend expects price as string, so convert number to string
+      formData.append('price', data.price.toString());
+      formData.append('category', data.category);
+      formData.append('isAvailable', data.isAvailable.toString());
 
-    if (data.startAt) {
-      formData.append('startAt', data.startAt);
-    }
-    if (data.endAt) {
-      formData.append('endAt', data.endAt);
-    }
+      if (data.startAt) {
+        formData.append('startAt', data.startAt);
+      }
+      if (data.endAt) {
+        formData.append('endAt', data.endAt);
+      }
 
-    // Add image (required)
-    const imageFile = {
-      uri: data.picture.uri,
-      name: data.picture.name,
-      type: data.picture.type,
-    };
-    formData.append('picture', imageFile as any);
-
-    // Log what we're sending
-    console.log('Sending to backend:', {
-      restaurantId,
-      url: `/restaurants/${restaurantId}/menu`,
-      fields: {
-        name: data.name,
-        description: data.description || null,
-        price: data.price.toString(),
-        category: data.category,
-        isAvailable: data.isAvailable.toString(),
-        startAt: data.startAt || null,
-        endAt: data.endAt || null,
-        hasPicture: true,
-        pictureDetails: {
+      // FIXED: Add image file properly - React Native expects this exact format
+      if (data.picture) {
+        // React Native FormData expects this specific object structure
+        const imageFile = {
+          uri: data.picture.uri,
           name: data.picture.name,
           type: data.picture.type,
-          uri: data.picture.uri.substring(0, 50) + '...'
+        };
+        
+        // Use 'picture' as the field name to match backend API
+        formData.append('picture', imageFile as any);
+      }
+
+      // Log what we're sending
+      console.log('Sending to backend:', {
+        restaurantId,
+        url: `/restaurants/${restaurantId}/menu`,
+        fields: {
+          name: data.name,
+          description: data.description || null,
+          price: data.price.toString(),
+          category: data.category,
+          isAvailable: data.isAvailable.toString(),
+          startAt: data.startAt || null,
+          endAt: data.endAt || null,
+          hasPicture: !!data.picture,
+          pictureDetails: data.picture ? {
+            name: data.picture.name,
+            type: data.picture.type,
+            uri: data.picture.uri.substring(0, 50) + '...'
+          } : null
         }
-      }
-    });
+      });
 
-    const response = await apiClient.post<ApiResponse<MenuItem>>(
-      `/restaurants/${restaurantId}/menu`,
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Accept: 'application/json',
-        },
-        timeout: 30000,
-      }
-    );
+      const response = await apiClient.post<ApiResponse<MenuItem>>(
+        `/restaurants/${restaurantId}/menu`,
+        formData,
+        {
+          // Don't set Content-Type for FormData - let axios handle it
+          // The apiClient will automatically set the proper Content-Type with boundary
+          headers: {
+            Accept: 'application/json',
+          },
+          timeout: 30000, // 30 seconds timeout for file upload
+        }
+      );
 
-    // Log successful response
-    console.log('SUCCESS RESPONSE FROM BACKEND:', {
-      status: response.status,
-      statusText: response.statusText,
-      data: response.data,
-      headers: response.headers
-    });
+      // Log successful response
+      console.log('SUCCESS RESPONSE FROM BACKEND:', {
+        status: response.status,
+        statusText: response.statusText,
+        data: response.data,
+        headers: response.headers
+      });
 
-    return response;
+      return response;
 
-  } catch (error: any) {
-    // Log error response from backend
-    console.log('ERROR RESPONSE FROM BACKEND:', {
-      message: error.message,
-      code: error.code,
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-      responseData: error.response?.data,
-      responseHeaders: error.response?.headers,
-      requestUrl: error.config?.url,
-      requestMethod: error.config?.method,
-      fullError: error
-    });
+    } catch (error: any) {
+      // Log error response from backend
+      console.log('ERROR RESPONSE FROM BACKEND:', error);
 
-    throw error;
-  }
-},
+      throw error;
+    }
+  },
 
   updateMenuItem: (
     restaurantId: string,

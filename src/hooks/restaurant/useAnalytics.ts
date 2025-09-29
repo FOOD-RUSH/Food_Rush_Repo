@@ -125,40 +125,28 @@ export const useAnalyticsData = (
   const balanceQuery = useRestaurantBalance();
   const revenueQuery = useRevenueBuckets(period, dateRange);
 
-  // Calculate loading states more precisely
-  const isInitialLoading =
-    summaryQuery.isLoading || balanceQuery.isLoading || revenueQuery.isLoading;
-  const isFetching =
-    summaryQuery.isFetching ||
-    balanceQuery.isFetching ||
-    revenueQuery.isFetching;
-
-  // Only consider it an error if ALL queries fail or if there are authentication issues
-  const hasAuthError =
+  // Simplified loading and error states
+  const isLoading = summaryQuery.isLoading || balanceQuery.isLoading || revenueQuery.isLoading;
+  const isFetching = summaryQuery.isFetching || balanceQuery.isFetching || revenueQuery.isFetching;
+  
+  // Combine errors - if any of the queries has an auth error, treat as auth error
+  const authError =
     (summaryQuery.error && (summaryQuery.error as any)?.status === 401) ||
     (balanceQuery.error && (balanceQuery.error as any)?.status === 401) ||
     (revenueQuery.error && (revenueQuery.error as any)?.status === 401);
-
-  const hasDataFailure =
+  
+  // Data error - if all queries failed
+  const dataError =
     summaryQuery.isError && balanceQuery.isError && revenueQuery.isError;
 
   return {
     summary: summaryQuery.data,
     balance: balanceQuery.data,
     revenue: revenueQuery.data,
-    isLoading: isInitialLoading,
+    isLoading,
     isFetching,
-    isError: hasAuthError || hasDataFailure,
-    error: hasAuthError
-      ? 'Authentication required'
-      : hasDataFailure
-        ? 'Failed to load analytics data'
-        : null,
-    queryErrors: {
-      summary: summaryQuery.error,
-      balance: balanceQuery.error,
-      revenue: revenueQuery.error,
-    },
+    isError: authError || dataError,
+    error: authError ? 'Authentication required' : dataError ? 'Failed to load analytics data' : null,
     refetch: async () => {
       const results = await Promise.allSettled([
         summaryQuery.refetch(),

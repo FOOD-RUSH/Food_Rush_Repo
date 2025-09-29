@@ -9,130 +9,187 @@ import {
 } from '@/src/types/analytics';
 
 /**
- * Format currency value for display
+ * Safe number formatter that handles undefined/null values
  */
-export const formatCurrency = (value: number, currency = 'XAF'): string => {
-  return new Intl.NumberFormat('fr-CM', {
-    style: 'currency',
-    currency: currency,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value);
+const safeNumber = (value?: number | null): number => {
+  return value === null || value === undefined || isNaN(value) ? 0 : value;
 };
 
 /**
- * Format large numbers with K/M suffixes
+ * Format currency value for display with loading state handling
  */
-export const formatLargeNumber = (value: number): string => {
-  if (value >= 1000000) {
-    return `${(value / 1000000).toFixed(1)}M`;
+export const formatCurrency = (
+  value?: number | null, 
+  currency = 'XAF', 
+  isLoading = false
+): string => {
+  if (isLoading) return '---';
+  const safeValue = safeNumber(value);
+  
+  try {
+    return new Intl.NumberFormat('fr-CM', {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(safeValue);
+  } catch (error) {
+    return `${safeValue.toLocaleString()} ${currency}`;
   }
-  if (value >= 1000) {
-    return `${(value / 1000).toFixed(1)}K`;
-  }
-  return value.toString();
 };
 
 /**
- * Calculate percentage change between two values
+ * Format large numbers with K/M suffixes with loading state handling
+ */
+export const formatLargeNumber = (
+  value?: number | null, 
+  isLoading = false
+): string => {
+  if (isLoading) return '---';
+  const safeValue = safeNumber(value);
+  
+  if (safeValue >= 1000000) {
+    return `${(safeValue / 1000000).toFixed(1)}M`;
+  }
+  if (safeValue >= 1000) {
+    return `${(safeValue / 1000).toFixed(1)}K`;
+  }
+  return safeValue.toString();
+};
+
+/**
+ * Calculate percentage change between two values with null handling
  */
 export const calculatePercentageChange = (
-  current: number,
-  previous: number,
+  current?: number | null,
+  previous?: number | null,
 ): number => {
-  if (previous === 0) return current > 0 ? 100 : 0;
-  return ((current - previous) / previous) * 100;
+  const currentSafe = safeNumber(current);
+  const previousSafe = safeNumber(previous);
+  
+  if (previousSafe === 0) return currentSafe > 0 ? 100 : 0;
+  return ((currentSafe - previousSafe) / previousSafe) * 100;
 };
 
 /**
- * Format percentage change for display
+ * Format percentage change for display with loading state handling
  */
-export const formatPercentageChange = (change: number): string => {
-  const sign = change >= 0 ? '+' : '';
-  return `${sign}${change.toFixed(1)}%`;
+export const formatPercentageChange = (
+  change?: number | null, 
+  isLoading = false
+): string => {
+  if (isLoading) return '---';
+  const safeChange = safeNumber(change);
+  const sign = safeChange >= 0 ? '+' : '';
+  return `${sign}${safeChange.toFixed(1)}%`;
 };
 
 /**
  * Get change type based on percentage change
  */
 export const getChangeType = (
-  change: number,
+  change?: number | null,
 ): 'positive' | 'negative' | 'neutral' => {
-  if (change > 0) return 'positive';
-  if (change < 0) return 'negative';
+  const safeChange = safeNumber(change);
+  if (safeChange > 0) return 'positive';
+  if (safeChange < 0) return 'negative';
   return 'neutral';
 };
 
 /**
- * Convert analytics summary to metric cards data
+ * Format percentage value with proper handling of undefined/null
+ */
+export const formatPercentage = (
+  value?: number | null,
+  isLoading = false,
+  decimals = 1
+): string => {
+  if (isLoading) return '---';
+  const safeValue = safeNumber(value);
+  return `${safeValue.toFixed(decimals)}%`;
+};
+
+/**
+ * Convert analytics summary to metric cards data with loading states
  */
 export const convertToMetricCards = (
-  data: AnalyticsSummaryResponse['data'],
-  previousData?: AnalyticsSummaryResponse['data'],
+  data?: AnalyticsSummaryResponse['data'] | null,
+  previousData?: AnalyticsSummaryResponse['data'] | null,
+  isLoading = false,
 ): MetricCardData[] => {
   const cards: MetricCardData[] = [];
 
   // Revenue card
-  const revenueChange = previousData
-    ? calculatePercentageChange(
-        data.revenueCollected,
-        previousData.revenueCollected,
-      )
+  const revenueChange = data && previousData
+    ? calculatePercentageChange(data.revenueCollected, previousData.revenueCollected)
     : 0;
 
   cards.push({
     title: 'Revenue',
-    value: formatLargeNumber(data.revenueCollected),
-    change: previousData ? formatPercentageChange(revenueChange) : undefined,
-    changeType: previousData ? getChangeType(revenueChange) : 'neutral',
+    value: isLoading ? '---' : formatLargeNumber(data?.revenueCollected),
+    change: data && previousData && !isLoading 
+      ? formatPercentageChange(revenueChange) 
+      : undefined,
+    changeType: data && previousData 
+      ? getChangeType(revenueChange) 
+      : 'neutral',
     icon: 'cash',
     color: '#007aff',
     subtitle: 'XAF',
   });
 
   // Total orders card
-  const ordersChange = previousData
-    ? calculatePercentageChange(data.counts.total, previousData.counts.total)
+  const ordersChange = data && previousData
+    ? calculatePercentageChange(data.counts?.total, previousData.counts?.total)
     : 0;
 
   cards.push({
     title: 'Total Orders',
-    value: data.counts.total.toString(),
-    change: previousData ? formatPercentageChange(ordersChange) : undefined,
-    changeType: previousData ? getChangeType(ordersChange) : 'neutral',
+    value: isLoading ? '---' : (data?.counts?.total?.toString() || '0'),
+    change: data && previousData && !isLoading 
+      ? formatPercentageChange(ordersChange) 
+      : undefined,
+    changeType: data && previousData 
+      ? getChangeType(ordersChange) 
+      : 'neutral',
     icon: 'receipt',
     color: '#00D084',
     subtitle: 'orders',
   });
 
   // Average Order Value card
-  const aovChange = previousData
+  const aovChange = data && previousData
     ? calculatePercentageChange(data.aov, previousData.aov)
     : 0;
 
   cards.push({
     title: 'Avg Order Value',
-    value: formatLargeNumber(data.aov),
-    change: previousData ? formatPercentageChange(aovChange) : undefined,
-    changeType: previousData ? getChangeType(aovChange) : 'neutral',
+    value: isLoading ? '---' : formatLargeNumber(data?.aov),
+    change: data && previousData && !isLoading 
+      ? formatPercentageChange(aovChange) 
+      : undefined,
+    changeType: data && previousData 
+      ? getChangeType(aovChange) 
+      : 'neutral',
     icon: 'calculator',
     color: '#FF9500',
     subtitle: 'XAF',
   });
 
   // Acceptance Rate card
-  const acceptanceChange = previousData
-    ? calculatePercentageChange(
-        data.acceptanceRate,
-        previousData.acceptanceRate,
-      )
+  const acceptanceChange = data && previousData
+    ? calculatePercentageChange(data.acceptanceRate, previousData.acceptanceRate)
     : 0;
 
   cards.push({
     title: 'Acceptance Rate',
-    value: `${data.acceptanceRate.toFixed(1)}%`,
-    change: previousData ? formatPercentageChange(acceptanceChange) : undefined,
-    changeType: previousData ? getChangeType(acceptanceChange) : 'neutral',
+    value: isLoading ? '---' : formatPercentage(data?.acceptanceRate),
+    change: data && previousData && !isLoading 
+      ? formatPercentageChange(acceptanceChange) 
+      : undefined,
+    changeType: data && previousData 
+      ? getChangeType(acceptanceChange) 
+      : 'neutral',
     icon: 'check-circle',
     color: '#8B5CF6',
     subtitle: 'of orders',
@@ -142,16 +199,31 @@ export const convertToMetricCards = (
 };
 
 /**
- * Convert revenue bucket data to chart data points
+ * Convert revenue bucket data to chart data points with loading handling
  */
 export const convertToChartData = (
-  buckets: RevenueBucketData[],
+  buckets?: RevenueBucketData[] | null,
   color = '#007aff',
+  isLoading = false,
 ): ChartDataPoint[] => {
+  if (isLoading) {
+    // Return placeholder data for loading state
+    return Array.from({ length: 7 }, (_, index) => ({
+      label: `Day ${index + 1}`,
+      value: 0,
+      color: `${color}40`,
+      date: new Date().toISOString(),
+    }));
+  }
+  
+  if (!buckets || buckets.length === 0) {
+    return [];
+  }
+
   return buckets.map((bucket, index) => ({
     label: formatDateLabel(bucket.day),
-    value: bucket.revenue,
-    color: index % 2 === 0 ? color : `${color}80`, // Alternate opacity
+    value: safeNumber(bucket.revenue),
+    color: index % 2 === 0 ? color : `${color}80`,
     date: bucket.day,
   }));
 };
@@ -159,119 +231,231 @@ export const convertToChartData = (
 /**
  * Format date for chart labels based on the date string
  */
-export const formatDateLabel = (dateString: string): string => {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffTime = Math.abs(now.getTime() - date.getTime());
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+export const formatDateLabel = (dateString?: string): string => {
+  if (!dateString) return 'N/A';
+  
+  try {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-  // If within last 7 days, show day name
-  if (diffDays <= 7) {
-    return date.toLocaleDateString('en-US', { weekday: 'short' });
+    // If within last 7 days, show day name
+    if (diffDays <= 7) {
+      return date.toLocaleDateString('en-US', { weekday: 'short' });
+    }
+
+    // If within last 30 days, show month/day
+    if (diffDays <= 30) {
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+
+    // Otherwise show month/year
+    return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+  } catch (error) {
+    return 'N/A';
   }
-
-  // If within last 30 days, show month/day
-  if (diffDays <= 30) {
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  }
-
-  // Otherwise show month/year
-  return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
 };
 
 /**
- * Get order status breakdown with colors
+ * Get order status breakdown with colors and safe handling
  */
-export const getOrderStatusBreakdown = (counts: OrderStatusBreakdown) => {
-  const total = Object.values(counts).reduce((sum, count) => sum + count, 0);
+export const getOrderStatusBreakdown = (
+  counts?: OrderStatusBreakdown | null,
+  isLoading = false,
+) => {
+  if (isLoading) {
+    return [
+      {
+        status: 'Loading...',
+        count: 0,
+        percentage: 0,
+        color: '#E0E0E0',
+      },
+    ];
+  }
+  
+  if (!counts) {
+    return [
+      {
+        status: 'No Data',
+        count: 0,
+        percentage: 0,
+        color: '#E0E0E0',
+      },
+    ];
+  }
 
-  return [
+  const total = Object.values(counts).reduce((sum, count) => sum + safeNumber(count), 0);
+
+  const breakdown = [
     {
       status: 'Completed',
-      count: counts.completed,
-      percentage: total > 0 ? (counts.completed / total) * 100 : 0,
+      count: safeNumber(counts.completed),
+      percentage: total > 0 ? (safeNumber(counts.completed) / total) * 100 : 0,
       color: '#00D084',
     },
     {
       status: 'Out for Delivery',
-      count: counts.outForDelivery,
-      percentage: total > 0 ? (counts.outForDelivery / total) * 100 : 0,
+      count: safeNumber(counts.outForDelivery),
+      percentage: total > 0 ? (safeNumber(counts.outForDelivery) / total) * 100 : 0,
       color: '#007aff',
     },
     {
       status: 'Confirmed',
-      count: counts.confirmed,
-      percentage: total > 0 ? (counts.confirmed / total) * 100 : 0,
+      count: safeNumber(counts.confirmed),
+      percentage: total > 0 ? (safeNumber(counts.confirmed) / total) * 100 : 0,
       color: '#FF9500',
     },
     {
       status: 'Pending',
-      count: counts.pending,
-      percentage: total > 0 ? (counts.pending / total) * 100 : 0,
+      count: safeNumber(counts.pending),
+      percentage: total > 0 ? (safeNumber(counts.pending) / total) * 100 : 0,
       color: '#8B5CF6',
     },
     {
       status: 'Cancelled',
-      count: counts.cancelled,
-      percentage: total > 0 ? (counts.cancelled / total) * 100 : 0,
+      count: safeNumber(counts.cancelled),
+      percentage: total > 0 ? (safeNumber(counts.cancelled) / total) * 100 : 0,
       color: '#FF3B30',
     },
-  ].filter((item) => item.count > 0); // Only show statuses with orders
+  ];
+
+  // Filter out zero counts, but if all are zero, show "No orders"
+  const filteredBreakdown = breakdown.filter((item) => item.count > 0);
+  
+  return filteredBreakdown.length > 0 ? filteredBreakdown : [
+    {
+      status: 'No Orders',
+      count: 0,
+      percentage: 0,
+      color: '#E0E0E0',
+    },
+  ];
 };
 
 /**
- * Get payment method breakdown with colors
+ * Get payment method breakdown with colors and safe handling
  */
 export const getPaymentMethodBreakdown = (
-  paymentMethods: PaymentMethodBreakdown,
+  paymentMethods?: PaymentMethodBreakdown | null,
+  isLoading = false,
 ) => {
-  const total = paymentMethods.mobile_money + paymentMethods.cash_on_delivery;
+  if (isLoading) {
+    return [
+      {
+        method: 'Loading...',
+        count: 0,
+        percentage: 0,
+        color: '#E0E0E0',
+      },
+    ];
+  }
+  
+  if (!paymentMethods) {
+    return [
+      {
+        method: 'No Data',
+        count: 0,
+        percentage: 0,
+        color: '#E0E0E0',
+      },
+    ];
+  }
 
-  return [
+  const total = safeNumber(paymentMethods.mobile_money) + safeNumber(paymentMethods.cash_on_delivery);
+
+  const breakdown = [
     {
       method: 'Mobile Money',
-      count: paymentMethods.mobile_money,
-      percentage: total > 0 ? (paymentMethods.mobile_money / total) * 100 : 0,
+      count: safeNumber(paymentMethods.mobile_money),
+      percentage: total > 0 ? (safeNumber(paymentMethods.mobile_money) / total) * 100 : 0,
       color: '#FF9500',
     },
     {
       method: 'Cash on Delivery',
-      count: paymentMethods.cash_on_delivery,
-      percentage:
-        total > 0 ? (paymentMethods.cash_on_delivery / total) * 100 : 0,
+      count: safeNumber(paymentMethods.cash_on_delivery),
+      percentage: total > 0 ? (safeNumber(paymentMethods.cash_on_delivery) / total) * 100 : 0,
       color: '#00D084',
     },
-  ].filter((item) => item.count > 0);
+  ];
+
+  const filteredBreakdown = breakdown.filter((item) => item.count > 0);
+  
+  return filteredBreakdown.length > 0 ? filteredBreakdown : [
+    {
+      method: 'No Payments',
+      count: 0,
+      percentage: 0,
+      color: '#E0E0E0',
+    },
+  ];
 };
 
 /**
- * Get operator breakdown with colors
+ * Get operator breakdown with colors and safe handling
  */
-export const getOperatorBreakdown = (operators: OperatorBreakdown) => {
-  const total = operators.mtn + operators.orange;
+export const getOperatorBreakdown = (
+  operators?: OperatorBreakdown | null,
+  isLoading = false,
+) => {
+  if (isLoading) {
+    return [
+      {
+        operator: 'Loading...',
+        count: 0,
+        percentage: 0,
+        color: '#E0E0E0',
+      },
+    ];
+  }
+  
+  if (!operators) {
+    return [
+      {
+        operator: 'No Data',
+        count: 0,
+        percentage: 0,
+        color: '#E0E0E0',
+      },
+    ];
+  }
 
-  return [
+  const total = safeNumber(operators.mtn) + safeNumber(operators.orange);
+
+  const breakdown = [
     {
       operator: 'MTN',
-      count: operators.mtn,
-      percentage: total > 0 ? (operators.mtn / total) * 100 : 0,
+      count: safeNumber(operators.mtn),
+      percentage: total > 0 ? (safeNumber(operators.mtn) / total) * 100 : 0,
       color: '#FFD93D',
     },
     {
       operator: 'Orange',
-      count: operators.orange,
-      percentage: total > 0 ? (operators.orange / total) * 100 : 0,
+      count: safeNumber(operators.orange),
+      percentage: total > 0 ? (safeNumber(operators.orange) / total) * 100 : 0,
       color: '#FF6B35',
     },
-  ].filter((item) => item.count > 0);
+  ];
+
+  const filteredBreakdown = breakdown.filter((item) => item.count > 0);
+  
+  return filteredBreakdown.length > 0 ? filteredBreakdown : [
+    {
+      operator: 'No Data',
+      count: 0,
+      percentage: 0,
+      color: '#E0E0E0',
+    },
+  ];
 };
 
 /**
- * Generate date range for analytics queries
+ * Generate date range for analytics queries (unchanged but with better typing)
  */
 export const generateDateRange = (
   period: 'today' | 'yesterday' | '7days' | '30days',
-) => {
+): { from: string; to: string } | undefined => {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
@@ -314,4 +498,40 @@ export const generateDateRange = (
     default:
       return undefined;
   }
+};
+
+/**
+ * Create loading state metric cards for skeleton UI
+ */
+export const createLoadingMetricCards = (): MetricCardData[] => {
+  return [
+    {
+      title: 'Revenue',
+      value: '---',
+      icon: 'cash',
+      color: '#007aff',
+      subtitle: 'XAF',
+    },
+    {
+      title: 'Total Orders',
+      value: '---',
+      icon: 'receipt',
+      color: '#00D084',
+      subtitle: 'orders',
+    },
+    {
+      title: 'Avg Order Value',
+      value: '---',
+      icon: 'calculator',
+      color: '#FF9500',
+      subtitle: 'XAF',
+    },
+    {
+      title: 'Acceptance Rate',
+      value: '---',
+      icon: 'check-circle',
+      color: '#8B5CF6',
+      subtitle: 'of orders',
+    },
+  ];
 };

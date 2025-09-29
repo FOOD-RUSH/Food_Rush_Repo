@@ -93,15 +93,23 @@ const FoodItemCard = ({
       className="m-2"
     >
       <Card
-        mode="outlined"
-        className="rounded-2xl overflow-hidden shadow-md"
+        mode="elevated"
+        className="rounded-2xl overflow-hidden shadow-lg"
         style={{
           backgroundColor: colors.surface,
-          borderColor: colors.outline,
+          borderColor: 'transparent', // Remove border color
           minWidth: isSmallDevice ? scale(280) : scale(320),
           maxWidth: isSmallDevice ? scale(360) : scale(520),
           minHeight: scale(120),
           maxHeight: scale(180),
+          elevation: 8, // Enhanced elevation
+          shadowColor: '#000',
+          shadowOffset: {
+            width: 0,
+            height: 4,
+          },
+          shadowOpacity: 0.2,
+          shadowRadius: 8,
         }}
       >
         {/* Card content with horizontal layout */}

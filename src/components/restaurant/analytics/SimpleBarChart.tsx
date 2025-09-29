@@ -28,7 +28,7 @@ const SimpleBarChart: React.FC<SimpleBarChartProps> = ({
           alignItems: 'center',
         }}
       >
-        <Overline color={colors.onSurfaceVariant}>No data available</Overline>
+        <Overline color={colors.onSurfaceVariant}>N/A</Overline>
       </View>
     );
   }

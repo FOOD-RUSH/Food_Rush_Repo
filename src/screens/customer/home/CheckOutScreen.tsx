@@ -1,5 +1,5 @@
 import { IoniconsIcon, MaterialIcon } from '@/src/components/common/icons';
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -29,7 +29,7 @@ import {
   useSelectedProvider,
 } from '@/src/stores/customerStores/paymentStore';
 import { useOrderFlow } from '@/src/hooks/customer/useOrderFlow';
-import OrderStatusModal from '@/src/components/customer/OrderFlow/OrderStatusModal';
+
 
 import { useTranslation } from 'react-i18next';
 
@@ -52,21 +52,25 @@ const CheckOutScreen = ({
   const {
     flowState,
     createOrderFromCart,
-    confirmOrder,
-    completePayment,
     resetFlow,
-    isReadyForCustomerConfirmation,
-    isWaitingForRestaurant,
-    isPaymentInProgress,
-    isCompleted,
-    isFailed,
+    isOrderCreated,
     isCreatingOrder,
-    isConfirmingOrder,
   } = useOrderFlow();
 
   // Constants for fees
   const DELIVERY_FEE = 2300;
   const DISCOUNT = 0; // Could be dynamic based on promo codes
+
+  // Navigate to order tracking when order is created
+  useEffect(() => {
+    if (isOrderCreated && flowState.orderId) {
+      // Clear cart and navigate to order tracking
+      clearCart();
+      navigation.navigate('OrderTracking', { orderId: flowState.orderId });
+      // Reset the flow state
+      resetFlow();
+    }
+  }, [isOrderCreated, flowState.orderId, clearCart, navigation, resetFlow]);
 
   // helper functions for bottom modal
   const { present, dismiss } = useBottomSheet();
@@ -156,41 +160,7 @@ const CheckOutScreen = ({
     }
   }, [createOrderFromCart, route.params, cartItems, t]);
 
-  // Handle customer order confirmation (after restaurant confirms)
-  const handleCustomerConfirmOrder = useCallback(() => {
-    confirmOrder();
-  }, [confirmOrder]);
 
-  // Handle proceed to payment
-  const handleProceedToPayment = useCallback(() => {
-    if (flowState.orderId && flowState.orderData) {
-      navigation.navigate('PaymentProcessing', {
-        orderId: flowState.orderId,
-        amount: flowState.orderData.total,
-        paymentMethod: selectedPaymentMethod || 'mobile_money',
-        provider: selectedProvider || 'mtn',
-      });
-    }
-  }, [navigation, flowState, selectedPaymentMethod, selectedProvider]);
-
-  // Handle order status modal close
-  const handleCloseOrderModal = useCallback(() => {
-    if (isCompleted) {
-      // Navigate to orders screen
-      navigation.reset({
-        index: 0,
-        routes: [
-          {
-            name: 'CustomerApp',
-            params: { screen: 'Orders' },
-          },
-        ],
-      });
-    } else if (isFailed) {
-      // Reset flow and stay on checkout
-      resetFlow();
-    }
-  }, [isCompleted, isFailed, navigation, resetFlow]);
 
   // Handle place order - show bottom sheet
   const handlePlaceOrder = useCallback(() => {
@@ -620,15 +590,7 @@ const CheckOutScreen = ({
         </TouchableOpacity>
       </View>
 
-      {/* Order Status Modal */}
-      <OrderStatusModal
-        visible={flowState.step !== 'creating' && !isCompleted}
-        flowState={flowState}
-        onConfirmOrder={handleCustomerConfirmOrder}
-        onProceedToPayment={handleProceedToPayment}
-        onClose={handleCloseOrderModal}
-        isConfirmingOrder={isConfirmingOrder}
-      />
+
     </CommonView>
   );
 };

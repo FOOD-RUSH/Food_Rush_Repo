@@ -15,14 +15,14 @@ export {
   type AntDesignName,
   type FontAwesome5Name,
   type FeatherName,
-  // Original exports for backward compatibility
+} from '../OptimizedIcon';
+
+// Original exports for backward compatibility (without duplicates)
+export {
   Ionicons,
   MaterialIcons,
   MaterialCommunityIcons,
   AntDesign,
   FontAwesome5,
   Feather,
-} from '../OptimizedIcon';
-
-// Re-export the original @expo/vector-icons for cases where direct access is needed
-export * from '@expo/vector-icons';
+} from '@expo/vector-icons';

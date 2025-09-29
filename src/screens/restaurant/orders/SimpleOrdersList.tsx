@@ -54,59 +54,64 @@ const OrderCard: React.FC<OrderCardProps> = ({
   const { t } = useTranslation();
   const statusConfig = ORDER_STATUS[order.status] || ORDER_STATUS.pending;
 
-  const getTimeAgo = (dateString: string) => {
-    const now = new Date();
-    const orderTime = new Date(dateString);
-    const diffMinutes = Math.floor(
-      (now.getTime() - orderTime.getTime()) / (1000 * 60),
-    );
-
-    if (diffMinutes < 1) return 'Just now';
-    if (diffMinutes < 60) return `${diffMinutes}m ago`;
-    const hours = Math.floor(diffMinutes / 60);
-    if (hours < 24) return `${hours}h ago`;
-    return `${Math.floor(hours / 24)}d ago`;
-  };
+  // Calculate total items in order
+  const totalItems = order.items?.reduce((sum, orderItem) => sum + orderItem.quantity, 0) || 0;
 
   return (
     <TouchableOpacity
       style={[styles.card, { backgroundColor: colors.surface }]}
       onPress={() => onPress(order.id)}
     >
+      {/* Order Header */}
       <View style={styles.cardHeader}>
-        <Text style={styles.orderNumber}>Order #{order.orderNumber}</Text>
-        <View style={styles.statusContainer}>
-          <MaterialCommunityIcon             name={statusConfig.icon}
-            color={statusConfig.color}
-            size={16}
-          />
-          <Text style={[styles.statusText, { color: statusConfig.color }]}>
+        <Text style={[styles.orderNumber, { fontSize: 16, fontWeight: '600' }]}>
+          {order.customer?.fullName || 'Customer'}
+        </Text>
+        <View style={{ 
+          backgroundColor: statusConfig.color,
+          paddingHorizontal: 8,
+          paddingVertical: 4,
+          borderRadius: 12,
+        }}>
+          <Text style={{ 
+            color: 'white', 
+            fontSize: 10, 
+            fontWeight: 'bold',
+            textTransform: 'uppercase'
+          }}>
             {statusConfig.label}
           </Text>
         </View>
       </View>
 
-      <Text style={[styles.timeText, { color: colors.onSurfaceVariant }]}>
-        {order.items?.length} items • {getTimeAgo(order.createdAt)}
-      </Text>
+      {/* Order Details */}
+      <View style={styles.detailsContainer}>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <MaterialCommunityIcon name="food" size={14} color={colors.onSurfaceVariant} />
+          <Text style={[styles.timeText, { marginLeft: 6, fontSize: 14 }]}>
+            {totalItems} {totalItems === 1 ? 'item' : 'items'}
+          </Text>
+        </View>
+        
+        <Text style={[styles.amountText, { fontSize: 16, fontWeight: 'bold' }]}>
+          ${order.total}
+        </Text>
+      </View>
 
-      <Text style={[styles.amountText, { color: colors.primary }]}>
-        ${(order.total / 100).toFixed(2)}
-      </Text>
-
+      {/* Action Buttons for Pending Orders */}
       {order.status === 'pending' && (
         <View style={styles.actionButtons}>
           <TouchableOpacity
             style={[styles.rejectButton, { backgroundColor: colors.error }]}
             onPress={() => onReject(order.id)}
           >
-            <Text style={styles.buttonText}>Reject</Text>
+            <Text style={[styles.buttonText, { color: 'white' }]}>Reject</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.acceptButton, { backgroundColor: colors.primary }]}
+            style={[styles.acceptButton, { backgroundColor: '#4CAF50' }]}
             onPress={() => onConfirm(order.id)}
           >
-            <Text style={styles.buttonText}>Accept</Text>
+            <Text style={[styles.buttonText, { color: 'white' }]}>Accept</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -306,53 +311,55 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     marginBottom: 12,
     padding: 16,
-    elevation: 1,
+    elevation: 2,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 2,
+    shadowRadius: 4,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 8,
   },
   orderNumber: {
-    fontWeight: 'bold',
     fontSize: 16,
+    fontWeight: '600',
   },
-  statusContainer: {
+  detailsContainer: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  statusText: {
-    marginLeft: 4,
-    fontSize: 14,
-    fontWeight: '500',
+    marginBottom: 12,
   },
   timeText: {
     fontSize: 14,
-    marginBottom: 8,
+    color: '#666',
   },
   amountText: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
   },
   actionButtons: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
     marginTop: 12,
     gap: 8,
   },
   rejectButton: {
-    paddingVertical: 8,
+    paddingVertical: 10,
     paddingHorizontal: 16,
-    borderRadius: 6,
+    borderRadius: 8,
+    flex: 0.48,
+    alignItems: 'center',
   },
   acceptButton: {
-    paddingVertical: 8,
+    paddingVertical: 10,
     paddingHorizontal: 16,
-    borderRadius: 6,
+    borderRadius: 8,
+    flex: 0.48,
+    alignItems: 'center',
   },
   buttonText: {
     color: 'white',

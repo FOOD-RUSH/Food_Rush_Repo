@@ -63,7 +63,16 @@ export default function App() {
     hideExpoSplash();
   }, [fontsLoaded]);
 
-  // Show custom splash screen while app is loading
+  // Show loading fallback while fonts are loading
+  if (!fontsLoaded || error) {
+    return (
+      <LoadingFallback
+        message={error || 'Loading fonts...'}
+      />
+    );
+  }
+
+  // Show custom splash screen after fonts are loaded
   if (showCustomSplash) {
     return (
       <CustomSplashScreen
@@ -73,11 +82,11 @@ export default function App() {
     );
   }
 
-  // Show loading fallback if there's an error or app isn't ready
-  if (!appReady || error) {
+  // Show loading fallback if app isn't ready after splash
+  if (!appReady) {
     return (
       <LoadingFallback
-        message={error || 'Loading app...'}
+        message="Loading app..."
       />
     );
   }

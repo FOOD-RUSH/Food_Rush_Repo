@@ -15,6 +15,7 @@ import {
 } from '@/src/hooks/customer/useOrdersApi';
 import { getFoodPlaceholderImage } from '@/src/types/orderReceipt';
 import { OrderDeliveryConfirmationModal } from '@/src/components/customer/OrderConfirmation';
+import { formatDate } from '@/src/utils/dateUtils';
 
 export interface OrderItemCardProps {
   order: Order;
@@ -139,25 +140,66 @@ const OrderItemCard = ({
         elevation: 2,
       }}
     >
+      {/* Status Badge */}
+      <View style={{ 
+        position: 'absolute', 
+        top: 12, 
+        right: 12, 
+        zIndex: 1,
+        backgroundColor: statusInfo.color,
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 12,
+      }}>
+        <Text style={{ 
+          color: 'white', 
+          fontSize: 12, 
+          fontWeight: '600',
+          textTransform: 'uppercase'
+        }}>
+          {t(order.status)}
+        </Text>
+      </View>
+
       {/* Main Content with Image and Order Info */}
       <View style={{ padding: 16, paddingBottom: 12 }}>
         <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
-          {/* Placeholder Image - Square format with considerable space */}
-          <Image
-            source={placeholderImage}
-            style={{
-              width: 90,
-              height: 90,
-              borderRadius: 12,
-              marginRight: 16,
-            }}
-            resizeMode="cover"
-          />
+          {/* Order Image - Square format with considerable space */}
+          <View style={{
+            width: 90,
+            height: 90,
+            borderRadius: 12,
+            marginRight: 16,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: colors.surfaceVariant,
+          }}>
+            {order.items && order.items.length > 0 && order.items[0].imageUrl ? (
+              <Image
+                source={{ uri: order.items[0].imageUrl }}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  borderRadius: 12,
+                }}
+                resizeMode="cover"
+              />
+            ) : (
+              <Image
+                source={placeholderImage}
+                style={{
+                  width: 50,
+                  height: 50,
+                }}
+                resizeMode="contain"
+              />
+            )}
+          </View>
 
           {/* Order Info */}
           <View style={{ flex: 1 }}>
-            {/* Order Number Only */}
-            <View style={{ marginBottom: 8 }}>
+            {/* Order Number and Date */}
+            <View style={{ marginBottom: 8, flexDirection: 'row', justifyContent: 'space-between' }}>
               <Text
                 style={{
                   color: colors.onSurface,
@@ -166,6 +208,14 @@ const OrderItemCard = ({
                 }}
               >
                 Order #{order.id.substring(0, 8).toUpperCase()}
+              </Text>
+              <Text
+                style={{
+                  color: colors.onSurfaceVariant,
+                  fontSize: 12,
+                }}
+              >
+                {formatDate(order.createdAt, 'MMM DD, h:mm a')}
               </Text>
             </View>
 
@@ -243,6 +293,9 @@ const OrderItemCard = ({
               flexDirection: 'row',
               alignItems: 'center',
               marginBottom: 8,
+              paddingTop: 8,
+              borderTopWidth: 1,
+              borderTopColor: colors.outline,
             }}
           >
             <IoniconsIcon name="bicycle-outline" size={16} color={colors.primary} />
@@ -273,15 +326,7 @@ const OrderItemCard = ({
           </View>
         )}
       </View>
-      {/* DIVIDER */}
-      <View
-        style={{
-          height: 1,
-          marginBottom: 12,
-          marginHorizontal: 8,
-          backgroundColor: colors.outline,
-        }}
-      />
+
       {/* Action Buttons */}
       <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
@@ -294,7 +339,7 @@ const OrderItemCard = ({
                     flex: 1,
                     borderWidth: 1,
                     borderRadius: 9999,
-                    paddingVertical: 8,
+                    paddingVertical: 12,
                     borderColor: '#F44336',
                   }}
                   onPress={handleCancelOrder}
@@ -304,7 +349,7 @@ const OrderItemCard = ({
                     style={{
                       fontWeight: '500',
                       textAlign: 'center',
-                      fontSize: 18,
+                      fontSize: 16,
                       color: '#F44336',
                     }}
                   >
@@ -321,7 +366,7 @@ const OrderItemCard = ({
                       flex: 1,
                       borderWidth: 1,
                       borderRadius: 9999,
-                      paddingVertical: 8,
+                      paddingVertical: 12,
                       marginRight: 8,
                       borderColor: '#F44336',
                     }}
@@ -332,7 +377,7 @@ const OrderItemCard = ({
                       style={{
                         fontWeight: '500',
                         textAlign: 'center',
-                        fontSize: 18,
+                        fontSize: 16,
                         color: '#F44336',
                       }}
                     >
@@ -344,7 +389,7 @@ const OrderItemCard = ({
                     style={{
                       flex: 1,
                       borderRadius: 9999,
-                      paddingVertical: 8,
+                      paddingVertical: 12,
                       marginLeft: 8,
                       backgroundColor: colors.primary,
                     }}
@@ -355,7 +400,7 @@ const OrderItemCard = ({
                       style={{
                         fontWeight: '500',
                         textAlign: 'center',
-                        fontSize: 18,
+                        fontSize: 16,
                         color: 'white',
                       }}
                     >
@@ -372,7 +417,7 @@ const OrderItemCard = ({
                     flex: 1,
                     borderWidth: 1,
                     borderRadius: 9999,
-                    paddingVertical: 8,
+                    paddingVertical: 12,
                     borderColor: colors.primary,
                   }}
                   onPress={handleTrackOrder}
@@ -381,7 +426,7 @@ const OrderItemCard = ({
                     style={{
                       fontWeight: '500',
                       textAlign: 'center',
-                      fontSize: 18,
+                      fontSize: 16,
                       color: colors.primary,
                     }}
                   >
@@ -403,7 +448,7 @@ const OrderItemCard = ({
                         flex: 1,
                         borderWidth: 1,
                         borderRadius: 9999,
-                        paddingVertical: 8,
+                        paddingVertical: 12,
                         marginRight: 8,
                         borderColor: colors.primary,
                       }}
@@ -413,7 +458,7 @@ const OrderItemCard = ({
                         style={{
                           fontWeight: '500',
                           textAlign: 'center',
-                          fontSize: 18,
+                          fontSize: 16,
                           color: colors.primary,
                         }}
                       >
@@ -425,7 +470,7 @@ const OrderItemCard = ({
                       style={{
                         flex: 1,
                         borderRadius: 9999,
-                        paddingVertical: 8,
+                        paddingVertical: 12,
                         marginLeft: 8,
                         backgroundColor: colors.primary,
                       }}
@@ -435,7 +480,7 @@ const OrderItemCard = ({
                         style={{
                           fontWeight: '500',
                           textAlign: 'center',
-                          fontSize: 18,
+                          fontSize: 16,
                           color: 'white',
                         }}
                       >
@@ -449,7 +494,7 @@ const OrderItemCard = ({
                     style={{
                       flex: 1,
                       borderRadius: 9999,
-                      paddingVertical: 8,
+                      paddingVertical: 12,
                       backgroundColor: colors.primary,
                     }}
                     onPress={handleShowConfirmationModal}
@@ -459,7 +504,7 @@ const OrderItemCard = ({
                       style={{
                         fontWeight: '500',
                         textAlign: 'center',
-                        fontSize: 18,
+                        fontSize: 16,
                         color: 'white',
                       }}
                     >
@@ -475,7 +520,7 @@ const OrderItemCard = ({
                   style={{
                     flex: 1,
                     borderRadius: 9999,
-                    paddingVertical: 8,
+                    paddingVertical: 12,
                     backgroundColor: colors.primary,
                   }}
                   onPress={handleReorder}
@@ -484,7 +529,7 @@ const OrderItemCard = ({
                     style={{
                       fontWeight: '500',
                       textAlign: 'center',
-                      fontSize: 18,
+                      fontSize: 16,
                       color: 'white',
                     }}
                   >

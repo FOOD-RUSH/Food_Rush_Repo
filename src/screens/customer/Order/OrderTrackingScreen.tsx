@@ -17,6 +17,11 @@ import {
   useOrderById,
   useConfirmOrderReceived,
 } from '@/src/hooks/customer/useOrdersApi';
+import { useOrderFlow } from '@/src/hooks/customer/useOrderFlow';
+import {
+  useSelectedPaymentMethod,
+  useSelectedProvider,
+} from '@/src/stores/customerStores/paymentStore';
 import {
   Typography,
   Heading5,
@@ -239,6 +244,11 @@ const OrderTrackingScreen = ({
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
   const [refreshing, setRefreshing] = useState(false);
+  
+  // Order flow for customer confirmation
+  const { confirmOrder, isConfirmingOrder } = useOrderFlow();
+  const selectedPaymentMethod = useSelectedPaymentMethod();
+  const selectedProvider = useSelectedProvider();
 
   // Use our custom hook for order tracking with polling
   const {
@@ -264,6 +274,24 @@ const OrderTrackingScreen = ({
     await refetch();
     setRefreshing(false);
   }, [refetch]);
+
+  // Handle customer order confirmation
+  const handleCustomerConfirmOrder = useCallback(async () => {
+    try {
+      await confirmOrder();
+      // Navigate to payment after successful confirmation
+      if (order) {
+        navigation.navigate('PaymentProcessing', {
+          orderId: order.id,
+          amount: order.total,
+          paymentMethod: selectedPaymentMethod || 'mobile_money',
+          provider: selectedProvider || 'mtn',
+        });
+      }
+    } catch (error) {
+      console.error('Failed to confirm order:', error);
+    }
+  }, [confirmOrder, order, navigation, selectedPaymentMethod, selectedProvider]);
 
   if (isLoading) {
     return (
@@ -383,6 +411,27 @@ const OrderTrackingScreen = ({
               </View>
             )}
           </View>
+
+          {/* Customer Order Confirmation Button - Only show when order is confirmed by restaurant */}
+          {order.status === 'confirmed' && (
+            <TouchableOpacity
+              className="flex-row items-center justify-center py-4 rounded-xl mb-4"
+              style={{ backgroundColor: colors.primary }}
+              onPress={handleCustomerConfirmOrder}
+              disabled={isConfirmingOrder}
+            >
+              <IoniconsIcon
+                name="checkmark-circle-outline"
+                size={20}
+                color="white"
+              />
+              <Label color="white" weight="medium" style={{ marginLeft: 8 }}>
+                {isConfirmingOrder
+                  ? t('confirming_order')
+                  : t('confirm_order_and_proceed_to_payment')}
+              </Label>
+            </TouchableOpacity>
+          )}
 
           {/* Delivery Confirmation Button - Only show when order is delivered */}
           {order.status === 'delivered' && (
