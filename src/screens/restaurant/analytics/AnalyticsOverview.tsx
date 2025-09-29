@@ -547,7 +547,7 @@ const AnalyticsOverview: React.FC<
                             {reviewStats.totalReviews === 1
                               ? t('review')
                               : t('reviews')
-                            )
+                            })
                           </Caption>
                         </View>
                         <Caption color={colors.onSurfaceVariant}>
