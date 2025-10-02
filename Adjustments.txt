@@ -1,0 +1,25 @@
+-TabBar
+
+-> size and position of tab bar with content overlap
+
+- PROFILE DETAILS SCREEN
+-styling
+-OrderDetails styling of restaurant App
+- editing menu item in restaurant App
+- Payment logic adjustment based on backend
+
+
+
+-> profile detail screen, other screen to check
+-> excess height of headers
+
+->
+
+base fee =  500
+-> SERVICE FEE TO CONCLUDE ON - CODE FOR THIS
+-> IOS BUGS IN HOME SCREEN, BOTTOM SHEETS 
+-> ORDER CREATION LOGIC TO FIX
+-> VERIFY SEARCH SCREEN IN ANDROID
+-> LOAD FOOD DETAILS IN MENU DETAILS AND UPDATE 
+
+
