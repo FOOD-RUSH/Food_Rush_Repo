@@ -44,8 +44,8 @@ export const useHeaderHeight = (): number => {
 export const useTabBarHeight = (): number => {
   const insets = useSafeAreaInsets();
   
-  const baseHeight = Platform.OS === 'ios' ? 80 : 60;
-  const bottomPadding = Platform.OS === 'ios' ? 25 : 10;
+  const baseHeight = Platform.OS === 'ios' ? 0 : 60;
+  const bottomPadding = Platform.OS === 'ios' ? 0 : 10;
   
   return baseHeight + bottomPadding + insets.bottom;
 };

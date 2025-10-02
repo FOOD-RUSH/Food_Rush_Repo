@@ -204,16 +204,7 @@ const CheckOutScreen = ({
         backdropOpacity: 0.5,
       },
     );
-  }, [
-    cartItems.length,
-    defaultAddress,
-    selectedPaymentMethod,
-    present,
-    handleConfirmOrder,
-    dismiss,
-    navigation,
-    t,
-  ]);
+  }, [cartItems.length, defaultAddress, present, handleConfirmOrder, dismiss, navigation, t]);
 
   // Optimized render item
   const renderCheckoutItem: ListRenderItem<CartItem> = useCallback(

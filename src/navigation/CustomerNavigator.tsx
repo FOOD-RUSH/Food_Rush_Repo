@@ -79,7 +79,7 @@ function CustomerOrderStackScreen() {
           backgroundColor: navigationTheme.colors.card,
           borderTopColor: navigationTheme.colors.card,
           // Platform-specific margin adjustment
-          marginBottom: Platform.OS === 'ios' ? -50 : -50,
+         // marginBottom: Platform.OS === 'ios' ? -50 : -50,
         },
         tabBarIndicatorStyle: {
           backgroundColor: navigationTheme.colors.primary,

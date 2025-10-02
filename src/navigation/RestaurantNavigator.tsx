@@ -4,7 +4,6 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Platform, View } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { getPlatformTabBarStyle } from './platformNavigation';
@@ -105,7 +104,7 @@ export default function RestaurantNavigator() {
   const { t } = useTranslation('translation');
   const tabBarStyle = useMemo(
      () => getPlatformTabBarStyle(colors.surface, insets),
-     [colors.surface, insets.bottom],
+     [colors.surface, insets],
    );
   return (
    <RestaurantTab.Navigator
@@ -139,7 +138,7 @@ export default function RestaurantNavigator() {
         tabBarLabelStyle: {
           fontSize: 12,
           fontFamily: 'Urbanist-Medium',
-          marginBottom: Platform.OS === 'ios' ? 2 : 0,
+         // marginBottom: Platform.OS === 'ios' ? 2 : 0,
         },
         lazy: true,
         unmountOnBlur: false,

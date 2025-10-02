@@ -9,12 +9,10 @@ import {
 } from 'react-native-paper';
 
 import { useTranslation } from 'react-i18next';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import CommonView from '@/src/components/common/CommonView';
 import Avatar from '@/src/components/common/Avatar';
 import {
-  Typography,
   Heading1,
   Heading2,
   Body,
@@ -32,7 +30,6 @@ const ProfileDetailsScreen = ({
 }: CustomerProfileStackScreenProps<'ProfileDetails'>) => {
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
-  const insets = useSafeAreaInsets();
 
   // Use stored profile data instead of making API calls
   const user = useCustomerProfile();
@@ -77,12 +74,7 @@ const ProfileDetailsScreen = ({
         icon: 'check-circle',
         iconSet: 'MaterialCommunityIcons' as const,
       },
-      {
-        label: t('user_id'),
-        value: user?.id,
-        icon: 'fingerprint',
-        iconSet: 'MaterialCommunityIcons' as const,
-      },
+     
     ],
     [user, t],
   );
@@ -108,7 +100,7 @@ const ProfileDetailsScreen = ({
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-          paddingBottom: insets.bottom + 40,
+        //  paddingBottom: insets.bottom + 40,
           alignItems: isTablet ? 'center' : 'stretch',
         }}
       >
