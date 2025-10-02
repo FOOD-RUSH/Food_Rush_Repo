@@ -22,6 +22,16 @@ const MenuItemCard = ({ item }: { item: FoodProps }) => {
   const [isSelect, setIsSelected] = useState(false);
   const { t } = useTranslation('translation');
 
+  // Helper function to get image source
+  const getImageSource = () => {
+    if (item.pictureUrl) {
+      // Handle backend image URL
+      const baseUrl = 'https://your-api-base-url.com'; // Replace with actual API base URL
+      return { uri: item.pictureUrl.startsWith('http') ? item.pictureUrl : `${baseUrl}${item.pictureUrl}` };
+    }
+    return images.onboarding2;
+  };
+
   const longPress = () => {
     setIsSelected(!isSelect);
     if (isSelect) {
@@ -59,9 +69,7 @@ const MenuItemCard = ({ item }: { item: FoodProps }) => {
         <View className="flex-row py-3 px-3 items-center justify-between">
           <View className="relative">
             <Card.Cover
-              source={
-                item.pictureUrl ? { uri: item.pictureUrl } : images.onboarding2
-              }
+              source={getImageSource()}
               style={{ height: 90, width: 90, borderRadius: 16 }}
             />
             {/* Cart indicator */}

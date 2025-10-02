@@ -5,6 +5,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image, Platform, TouchableOpacity, Text } from 'react-native';
+import { getPlatformTabBarStyle } from './platformNavigation';
+
 
 import { useTranslation } from 'react-i18next';
 import { useTheme } from 'react-native-paper';
@@ -76,10 +78,12 @@ function CustomerOrderStackScreen() {
         tabBarStyle: {
           backgroundColor: navigationTheme.colors.card,
           borderTopColor: navigationTheme.colors.card,
-          marginBottom: -50,
+          // Platform-specific margin adjustment
+          marginBottom: Platform.OS === 'ios' ? -50 : -50,
         },
         tabBarIndicatorStyle: {
           backgroundColor: navigationTheme.colors.primary,
+          height: Platform.OS === 'ios' ? 3 : 2,
         },
         tabBarLabelStyle: {
           fontFamily: 'Urbanist-SemiBold',
@@ -240,34 +244,17 @@ export default function CustomerNavigator() {
   const navigationTheme = useAppNavigationTheme();
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
-
-  const tabBarStyle = useMemo(
-    () => ({
-      backgroundColor: navigationTheme.colors.card,
-      borderColor: navigationTheme.colors.card,
-      height: (Platform.OS === 'ios' ? 80 : 60) + insets.bottom,
-      paddingBottom: (Platform.OS === 'ios' ? 25 : 10) + insets.bottom,
-      borderTopRightRadius: 40,
-      borderTopLeftRadius: 40,
-      marginTop: -50,
-      paddingTop: 10,
-      borderTopWidth: 0, // Remove the white border line
-      elevation: 20, // Android shadow
-      shadowColor: '#000', // iOS shadow
-      shadowOffset: {
-        width: 0,
-        height: -4,
-      },
-      shadowOpacity: 0.1,
-      shadowRadius: 8,
-    }),
+  
+ const tabBarStyle = useMemo(
+    () => getPlatformTabBarStyle(navigationTheme.colors.card, insets),
     [navigationTheme.colors.card, insets.bottom],
   );
+
 
   const headerStyle = useMemo(
     () => ({
       backgroundColor: navigationTheme.colors.card,
-      height: 60 + insets.top,
+      height: Platform.OS === 'ios' ? 60 + insets.top : 60,
       borderBottomWidth: 0,
       shadowColor: 'transparent',
       elevation: 0,
@@ -276,7 +263,7 @@ export default function CustomerNavigator() {
   );
 
   return (
-    <CustomerTab.Navigator
+   <CustomerTab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => (
           <TabBarIcon
@@ -287,7 +274,6 @@ export default function CustomerNavigator() {
           />
         ),
         tabBarLabel: ({ focused }) => {
-          // Only show label when tab is focused/selected
           if (!focused) return null;
 
           let label = '';
@@ -311,7 +297,7 @@ export default function CustomerNavigator() {
                 fontSize: 12,
                 fontFamily: 'Urbanist-SemiBold',
                 color: navigationTheme.colors.primary,
-                marginBottom: 4,
+                marginBottom: Platform.OS === 'ios' ? 4 : 2,
               }}
             >
               {label}
@@ -330,7 +316,6 @@ export default function CustomerNavigator() {
         lazy: true,
         unmountOnBlur: false,
         tabBarHideOnKeyboard: true,
-        // Prevent going back to auth screens
         gestureEnabled: false,
       })}
     >

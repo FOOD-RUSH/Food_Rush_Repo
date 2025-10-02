@@ -139,27 +139,28 @@ const ForgotPasswordScreen = ({
                 autoCapitalize="none"
                 autoComplete="email"
                 autoCorrect={false}
-                style={{ backgroundColor: colors.surfaceVariant }}
+                style={{ backgroundColor: colors.surfaceVariant, borderRadius: 16 }}
                 outlineStyle={{
-                  borderRadius: 12,
-                  borderWidth: 1,
+                  borderRadius: 16,
+                  borderWidth: 0,
                   borderColor: errors.email ? colors.error : colors.outline,
                 }}
                 contentStyle={{
                   paddingHorizontal: 16,
                   paddingVertical: 16,
+                  borderRadius: 16,
                 }}
                 error={!!errors.email}
                 left={
                   <TextInput.Icon
-                    icon="lock-outline"
+                    icon="email-outline"
                     color={colors.onSurface}
                   />
                 }
                 right={
                   value ? (
                     <TextInput.Icon
-                      icon="eye"
+                      icon="close"
                       onPress={clearEmail}
                       color={colors.onSurface}
                     />

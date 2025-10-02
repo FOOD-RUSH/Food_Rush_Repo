@@ -5,6 +5,7 @@ import React, {
   useState,
   useCallback,
 } from 'react';
+import { Platform } from 'react-native';
 import {
   BottomSheetConfig,
   BottomSheetContextType,
@@ -40,7 +41,16 @@ export const BottomSheetProvider: React.FC<BottomSheetProviderProps> = ({
       setContent(newContent);
       setConfig(newConfig || {});
       setIsPresented(true);
-      bottomSheetRef.current?.present();
+      
+      // Small delay to ensure state is set before presenting
+      // This helps on Android especially
+      if (Platform.OS === 'android') {
+        setTimeout(() => {
+          bottomSheetRef.current?.present();
+        }, 50);
+      } else {
+        bottomSheetRef.current?.present();
+      }
     },
     [],
   );
@@ -63,13 +73,14 @@ export const BottomSheetProvider: React.FC<BottomSheetProviderProps> = ({
 
   return (
     <BottomSheetContext.Provider value={value}>
-      {children}
-      <GlobalBottomSheet
-        ref={bottomSheetRef}
-        content={content}
-        config={config}
-        onDismiss={handleDismiss}
-      />
+        {children}
+        {/* GlobalBottomSheet is rendered at root level to ensure it's always on top */}
+        <GlobalBottomSheet
+          ref={bottomSheetRef}
+          content={content}
+          config={config}
+          onDismiss={handleDismiss}
+        />
     </BottomSheetContext.Provider>
   );
 };

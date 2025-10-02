@@ -60,7 +60,10 @@ const FoodItemCard = ({
       const baseUrl = 'https://your-api-base-url.com'; // Replace with actual API base URL
       return { uri: pictureUrl.startsWith('http') ? pictureUrl : `${baseUrl}${pictureUrl}` };
     }
-    return FoodImage || images.onboarding2;
+    if (FoodImage) {
+      return FoodImage;
+    }
+    return images.onboarding2;
   };
 
   const getFormattedPrice = () => {
@@ -117,7 +120,7 @@ const FoodItemCard = ({
           {/* Left side - Food Image with PROMO badge */}
           <View className="relative mr-4">
             <Image
-              source={FoodImage || images.onboarding2}
+              source={getImageSource()}
               className="rounded-2xl"
               style={{
                 width: isSmallDevice ? 80 : 100,

@@ -1,5 +1,5 @@
 import { IoniconsIcon } from '@/src/components/common/icons';
-import React from 'react';
+import React, {useMemo} from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Platform, View } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
-
+import { getPlatformTabBarStyle } from './platformNavigation';
 import {
   RestaurantAnalyticsStackParamList,
   RestaurantMenuStackParamList,
@@ -103,9 +103,12 @@ export default function RestaurantNavigator() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
-
+  const tabBarStyle = useMemo(
+     () => getPlatformTabBarStyle(colors.surface, insets),
+     [colors.surface, insets.bottom],
+   );
   return (
-    <RestaurantTab.Navigator
+   <RestaurantTab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused, color, size }) => {
           let iconName: keyof IoniconsIconName;
@@ -132,32 +135,15 @@ export default function RestaurantNavigator() {
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.onSurfaceVariant,
         headerShown: false,
-        tabBarStyle: {
-          backgroundColor: colors.surface,
-          height: (Platform.OS === 'ios' ? 80 : 60) + insets.bottom,
-          paddingBottom: (Platform.OS === 'ios' ? 25 : 10) + insets.bottom,
-          borderTopRightRadius: 40,
-          borderTopLeftRadius: 40,
-          marginTop: -50,
-          paddingTop: 10,
-          borderTopWidth: 0, // Remove the white border line
-          elevation: 20, // Android shadow
-          shadowColor: '#000', // iOS shadow
-          shadowOffset: {
-            width: 0,
-            height: -4,
-          },
-          shadowOpacity: 0.1,
-          shadowRadius: 8,
-        },
+        tabBarStyle,
         tabBarLabelStyle: {
           fontSize: 12,
           fontFamily: 'Urbanist-Medium',
+          marginBottom: Platform.OS === 'ios' ? 2 : 0,
         },
         lazy: true,
         unmountOnBlur: false,
         tabBarHideOnKeyboard: true,
-        // Prevent going back to auth screens
         gestureEnabled: false,
       })}
     >

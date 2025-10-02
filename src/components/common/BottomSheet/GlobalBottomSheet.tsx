@@ -5,7 +5,7 @@ import React, {
   useImperativeHandle,
   useCallback,
 } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, Platform, StatusBar } from 'react-native';
 import {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
@@ -65,7 +65,7 @@ const GlobalBottomSheet = forwardRef<
     [],
   );
 
-  // WhatsApp-style backdrop
+  // Fixed backdrop configuration
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => (
       <BottomSheetBackdrop
@@ -75,13 +75,20 @@ const GlobalBottomSheet = forwardRef<
         opacity={backdropOpacity}
         enableTouchThrough={false}
         pressBehavior="close"
-        style={[props.style, { backgroundColor: '#000000' }]}
+        style={[
+          props.style,
+          {
+            backgroundColor: '#000000',
+          },
+        ]}
+        // Ensure backdrop doesn't block content
+        pointerEvents="auto"
       />
     ),
     [backdropOpacity],
   );
 
-  // WhatsApp-style handle
+  // Platform-specific handle style
   const handleIndicatorStyle = useMemo(
     () =>
       showHandle
@@ -90,24 +97,30 @@ const GlobalBottomSheet = forwardRef<
             width: 32,
             height: 4,
             borderRadius: 2,
-            marginTop: 8,
-            marginBottom: 8,
+            marginTop: Platform.OS === 'ios' ? 8 : 12,
+            marginBottom: Platform.OS === 'ios' ? 8 : 12,
           }
         : { display: 'none' as const },
     [colors.onSurfaceVariant, showHandle],
   );
 
-  // Clean background style
+  // Platform-specific background style
   const backgroundStyle = useMemo(
     () => ({
       backgroundColor: colors.surface,
-      borderTopLeftRadius: 20,
-      borderTopRightRadius: 20,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: -2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-      elevation: 8,
+      borderTopLeftRadius: Platform.OS === 'ios' ? 20 : 28,
+      borderTopRightRadius: Platform.OS === 'ios' ? 20 : 28,
+      ...Platform.select({
+        ios: {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 8,
+        },
+        android: {
+          elevation: 16,
+        },
+      }),
     }),
     [colors.surface],
   );
@@ -121,16 +134,23 @@ const GlobalBottomSheet = forwardRef<
     [onDismiss],
   );
 
+  // Fixed container style - let the library handle z-index
   const containerStyle = useMemo(() => {
     if (detached) {
       return {
         marginHorizontal: 16,
-        borderRadius: 20,
+        marginBottom: Platform.OS === 'android' ? 16 : insets.bottom + 16,
+        borderRadius: Platform.OS === 'ios' ? 20 : 28,
         overflow: 'hidden' as const,
       };
     }
-    return undefined;
-  }, [detached]);
+    return {};
+  }, [detached, insets.bottom]);
+
+  // Calculate top inset for Android status bar
+  const topInset = Platform.OS === 'android' 
+    ? StatusBar.currentHeight || 0 
+    : insets.top;
 
   return (
     <BottomSheetModal
@@ -147,19 +167,36 @@ const GlobalBottomSheet = forwardRef<
       keyboardBlurBehavior="restore"
       android_keyboardInputMode="adjustResize"
       enableDynamicSizing={false}
-      bottomInset={insets.bottom}
+      topInset={topInset}
+      bottomInset={Platform.OS === 'android' ? insets.bottom : insets.bottom}
       detached={detached}
       style={containerStyle}
       stackBehavior="replace"
       enableContentPanningGesture={true}
       enableHandlePanningGesture={true}
+      animateOnMount={true}
+      // Ensure modal content is interactive
+      containerStyle={{ pointerEvents: 'auto' }}
+      // Additional props to ensure it's on top
+      {...Platform.select({
+        android: {
+          enableOverDrag: false,
+        },
+        ios: {
+          enableOverDrag: true,
+        },
+      })}
     >
       <View
         style={{
           flex: 1,
-          paddingHorizontal: 20,
-          paddingTop: title ? 8 : 16,
-          paddingBottom: 16 + insets.bottom,
+          paddingHorizontal: Platform.OS === 'ios' ? 20 : 24,
+          paddingTop: title ? 8 : (Platform.OS === 'ios' ? 16 : 20),
+          paddingBottom: Platform.OS === 'android' 
+            ? Math.max(16, insets.bottom) 
+            : 16 + insets.bottom,
+          // Ensure content is interactive
+          pointerEvents: 'auto',
         }}
       >
         {title && (
@@ -168,23 +205,23 @@ const GlobalBottomSheet = forwardRef<
               alignItems: 'center',
               marginBottom: 10,
               paddingBottom: 12,
-              borderBottomWidth: 1,
+              borderBottomWidth: Platform.OS === 'ios' ? 1 : 0.5,
               borderBottomColor: colors.outline + '15',
             }}
           >
             <Text
               style={{
                 color: colors.onSurface,
-                fontSize: 18,
-                fontWeight: '600',
-                letterSpacing: 0.15,
+                fontSize: Platform.OS === 'ios' ? 18 : 20,
+                fontWeight: Platform.OS === 'ios' ? '600' : '500',
+                letterSpacing: Platform.OS === 'ios' ? 0.15 : 0.25,
               }}
             >
               {title}
             </Text>
           </View>
         )}
-        <View style={{ flex: 1 }}>{content}</View>
+        <View style={{ flex: 1, pointerEvents: 'auto' }}>{content}</View>
       </View>
     </BottomSheetModal>
   );

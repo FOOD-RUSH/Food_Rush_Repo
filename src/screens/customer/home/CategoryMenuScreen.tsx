@@ -163,46 +163,20 @@ const CategoryMenuScreen: React.FC<CategoryMenuScreenProps> = ({
 
   const keyExtractor = useCallback((item: FoodProps) => item.id, []);
 
-  // Header component
-  const Header = () => (
-    <View style={[styles.header, { backgroundColor: colors.surface }]}>
-      <TouchableOpacity
-        onPress={handleGoBack}
-        style={[styles.backButton, { backgroundColor: colors.primary }]}
-      >
-        <MaterialIcon name="arrow-back" size={20} color="white" />
-      </TouchableOpacity>
-      <View style={styles.headerContent}>
-        <Text style={[styles.categoryTitle, { color: colors.onSurface }]}>
-          {categoryInfo?.displayName || categoryTitle}
-        </Text>
-        {categoryInfo?.description && (
-          <Text
-            style={[
-              styles.categoryDescription,
-              { color: colors.onSurfaceVariant },
-            ]}
-          >
-            {categoryInfo.description}
-          </Text>
-        )}
-      </View>
-    </View>
-  );
-
+ 
   // Loading state
   if (isLoading) {
     return (
       <CommonView>
-        <SafeAreaView style={{ flex: 1 }}>
-          <Header />
+
+
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color={colors.primary} />
             <Text style={[styles.loadingText, { color: colors.onSurface }]}>
               {t('loading_menu_items')}
             </Text>
           </View>
-        </SafeAreaView>
+
       </CommonView>
     );
   }

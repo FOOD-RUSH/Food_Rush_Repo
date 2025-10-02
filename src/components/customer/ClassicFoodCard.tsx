@@ -42,6 +42,16 @@ const ClassicFoodCard = ({
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
 
+  // Helper function to get image source
+  const getImageSource = () => {
+    if (imageUrl) {
+      // Handle backend image URL
+      const baseUrl = 'https://your-api-base-url.com'; // Replace with actual API base URL
+      return { uri: imageUrl.startsWith('http') ? imageUrl : `${baseUrl}${imageUrl}` };
+    }
+    return images.onboarding2;
+  };
+
   return (
     <TouchableOpacity
       activeOpacity={0.8}
@@ -64,7 +74,7 @@ const ClassicFoodCard = ({
           {/* Image with heart icon overlay */}
           <View className="relative mb-3">
             <Card.Cover
-              source={imageUrl ? { uri: imageUrl } : images.onboarding2}
+              source={getImageSource()}
               style={{
                 height: 150,
                 width: 150,

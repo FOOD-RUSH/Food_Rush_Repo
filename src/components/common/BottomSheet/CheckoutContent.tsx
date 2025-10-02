@@ -23,7 +23,7 @@ const CheckoutContent: React.FC<CheckoutContentProps> = ({
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, pointerEvents: 'auto' }}>
       {/* Content */}
       <View
         style={{
@@ -71,6 +71,7 @@ const CheckoutContent: React.FC<CheckoutContentProps> = ({
           paddingTop: 8,
           borderTopWidth: 1,
           borderTopColor: colors.outline + '30',
+          pointerEvents: 'auto',
         }}
       >
         <TouchableOpacity

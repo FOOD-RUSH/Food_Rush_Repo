@@ -180,14 +180,8 @@ const FoodDetailsScreen = ({
             onError={() => console.log('Image load error')}
           />
 
-          {/* Back Button */}
-          <Pressable
-            onPress={handleGoBack}
-            className="absolute top-12 left-4 w-10 h-10 rounded-full items-center justify-center"
-            style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
-          >
-            <IoniconsIcon name="arrow-back" size={24} color="white" />
-          </Pressable>
+
+         
 
           {/* Cart Status Badge */}
           {isInCart && (

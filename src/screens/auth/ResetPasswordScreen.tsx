@@ -226,10 +226,10 @@ const ResetPasswordScreen = ({
                   secureTextEntry={!showPassword}
                   autoCapitalize="none"
                   autoComplete="new-password"
-                  style={{ backgroundColor: colors.surfaceVariant }}
+                  style={{ backgroundColor: colors.surfaceVariant, borderRadius: 16 }}
                   outlineStyle={{
-                    borderRadius: 12,
-                    borderWidth: 1,
+                    borderRadius: 16,
+                    borderWidth: 0,
                     borderColor: errors.password
                       ? colors.error
                       : colors.outline,
@@ -237,6 +237,7 @@ const ResetPasswordScreen = ({
                   contentStyle={{
                     paddingHorizontal: 16,
                     paddingVertical: 16,
+                    borderRadius: 16,
                   }}
                   error={!!errors.password}
                   left={
@@ -283,10 +284,10 @@ const ResetPasswordScreen = ({
                   secureTextEntry={!showConfirmPassword}
                   autoCapitalize="none"
                   autoComplete="new-password"
-                  style={{ backgroundColor: colors.surfaceVariant }}
+                  style={{ backgroundColor: colors.surfaceVariant, borderRadius: 16 }}
                   outlineStyle={{
-                    borderRadius: 12,
-                    borderWidth: 1,
+                    borderRadius: 16,
+                    borderWidth: 0,
                     borderColor: errors.confirmPassword
                       ? colors.error
                       : colors.outline,
@@ -294,6 +295,7 @@ const ResetPasswordScreen = ({
                   contentStyle={{
                     paddingHorizontal: 16,
                     paddingVertical: 16,
+                    borderRadius: 16,
                   }}
                   error={!!errors.confirmPassword}
                   left={

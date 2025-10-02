@@ -23,7 +23,7 @@ const LogoutContent: React.FC<LogoutContentProps> = ({
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, pointerEvents: 'auto' }}>
       {/* Content */}
       <View
         style={{
@@ -71,6 +71,7 @@ const LogoutContent: React.FC<LogoutContentProps> = ({
           paddingTop: 16,
           borderTopWidth: 1,
           borderTopColor: colors.outline + '30',
+          pointerEvents: 'auto',
         }}
       >
         <TouchableOpacity

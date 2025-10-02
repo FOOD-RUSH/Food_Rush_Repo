@@ -1,7 +1,7 @@
 import { IoniconsIcon } from '@/src/components/common/icons';
-import { View, Text, TouchableOpacity, Image } from 'react-native';
+import { View, Text, TouchableOpacity, Image, Linking, Dimensions } from 'react-native';
 import React, { useCallback, useState } from 'react';
-import { useTheme, Card, Chip } from 'react-native-paper';
+import { useTheme, Card } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import { RootStackScreenProps } from '@/src/navigation/types';
@@ -22,6 +22,10 @@ export interface OrderItemCardProps {
   onReorder?: (order: Order) => void;
   onTrackOrder?: (orderId: string) => void;
 }
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const IS_SMALL_SCREEN = SCREEN_WIDTH < 360;
+
 const OrderItemCard = ({
   order,
   onReorder,
@@ -39,13 +43,9 @@ const OrderItemCard = ({
   const { mutate: cancelOrder, isPending: isCancelling } =
     useCancelOrder();
 
-  // State for confirmation modal
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
 
-  // Calculate total items in order
   const totalItems = order.items.reduce((sum, item) => sum + item.quantity, 0);
-
-  // Check if order is active (not delivered/cancelled)
   const isActiveOrder = !['delivered', 'cancelled'].includes(order.status);
 
   const handleNavigation = useCallback(
@@ -67,18 +67,9 @@ const OrderItemCard = ({
     }
   }, [order, onReorder]);
 
-  const handleShowConfirmationModal = useCallback(() => {
-    setShowConfirmationModal(true);
-  }, []);
-
-  const handleCloseConfirmationModal = useCallback(() => {
-    setShowConfirmationModal(false);
-  }, []);
-
   const handleConfirmReceived = useCallback(() => {
     confirmReceived(order.id, {
       onSuccess: () => {
-        // Modal will auto-close after celebration
         setShowConfirmationModal(false);
       },
       onError: (error) => {
@@ -91,7 +82,6 @@ const OrderItemCard = ({
   const handleConfirmOrder = useCallback(() => {
     confirmOrder(order.id, {
       onSuccess: () => {
-        // Order confirmed, proceed to payment
         console.log('Order confirmed, proceeding to payment');
       },
       onError: (error) => {
@@ -111,234 +101,207 @@ const OrderItemCard = ({
     });
   }, [cancelOrder, order.id]);
 
+  const handleCallRider = useCallback(() => {
+    if (order.delivery?.rider?.phoneNumber) {
+      Linking.openURL(`tel:${order.delivery.rider.phoneNumber}`);
+    }
+  }, [order.delivery?.rider?.phoneNumber]);
+
   const handleReviews = useCallback(
     () =>
       navigation.navigate('RestaurantReview', {
         restaurantId: order.restaurantId,
-        restaurantName: 'Restaurant Name', // You might want to include this in Order type
+        restaurantName: order.restaurant?.name || 'Restaurant',
       }),
-    [navigation, order.restaurantId],
+    [navigation, order.restaurantId, order.restaurant?.name],
   );
 
   const placeholderImage = getFoodPlaceholderImage();
-
-  // Get first 2 items for display
-  const displayItems = order.items.slice(0, 2);
-  const remainingItemsCount = order.items.length - 2;
 
   return (
     <Card
       onPress={handleNavigation}
       style={{
-        margin: 12,
+        marginHorizontal: IS_SMALL_SCREEN ? 8 : 12,
+        marginVertical: 8,
         borderRadius: 16,
         backgroundColor: colors.surface,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
         elevation: 2,
       }}
     >
-      {/* Status Badge */}
-      <View style={{ 
-        position: 'absolute', 
-        top: 12, 
-        right: 12, 
-        zIndex: 1,
-        backgroundColor: statusInfo.color,
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 12,
-      }}>
-        <Text style={{ 
-          color: 'white', 
-          fontSize: 12, 
-          fontWeight: '600',
-          textTransform: 'uppercase'
-        }}>
-          {t(order.status)}
-        </Text>
-      </View>
-
-      {/* Main Content with Image and Order Info */}
-      <View style={{ padding: 16, paddingBottom: 12 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
-          {/* Order Image - Square format with considerable space */}
-          <View style={{
-            width: 90,
-            height: 90,
-            borderRadius: 12,
-            marginRight: 16,
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: colors.surfaceVariant,
-          }}>
-            {order.items && order.items.length > 0 && order.items[0].imageUrl ? (
+      <View style={{ padding: IS_SMALL_SCREEN ? 12 : 16 }}>
+        {/* Top Row: Image, Info, Status */}
+        <View style={{ flexDirection: 'row', marginBottom: 12 }}>
+          {/* Order Image */}
+          <View
+            style={{
+              width: 80,
+              height: 80,
+              borderRadius: 12,
+              marginRight: 12,
+              backgroundColor: colors.surfaceVariant,
+              overflow: 'hidden',
+            }}
+          >
+            {order.items?.[0]?.imageUrl ? (
               <Image
                 source={{ uri: order.items[0].imageUrl }}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  borderRadius: 12,
-                }}
+                style={{ width: '100%', height: '100%' }}
                 resizeMode="cover"
               />
             ) : (
-              <Image
-                source={placeholderImage}
-                style={{
-                  width: 50,
-                  height: 50,
-                }}
-                resizeMode="contain"
-              />
+              <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                <Image
+                  source={placeholderImage}
+                  style={{ width: 40, height: 40 }}
+                  resizeMode="contain"
+                />
+              </View>
             )}
           </View>
 
           {/* Order Info */}
           <View style={{ flex: 1 }}>
-            {/* Order Number and Date */}
-            <View style={{ marginBottom: 8, flexDirection: 'row', justifyContent: 'space-between' }}>
+            {/* Order Number & Status */}
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
               <Text
                 style={{
-                  color: colors.onSurface,
                   fontSize: 16,
-                  fontWeight: '600',
+                  fontWeight: '700',
+                  color: colors.onSurface,
+                  flex: 1,
                 }}
+                numberOfLines={1}
               >
-                Order #{order.id.substring(0, 8).toUpperCase()}
+                #{order.id.substring(0, 8).toUpperCase()}
               </Text>
-              <Text
+              <View
                 style={{
-                  color: colors.onSurfaceVariant,
-                  fontSize: 12,
+                  backgroundColor: statusInfo.color,
+                  paddingHorizontal: 8,
+                  paddingVertical: 4,
+                  borderRadius: 8,
+                  marginLeft: 8,
                 }}
               >
-                {formatDate(order.createdAt, 'MMM DD, h:mm a')}
-              </Text>
+                <Text
+                  style={{
+                    color: 'white',
+                    fontSize: 10,
+                    fontWeight: '700',
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  {t(order.status)}
+                </Text>
+              </View>
             </View>
 
-            {/* Order Items Summary */}
-            <View
+            {/* Restaurant Name */}
+            <Text
+              numberOfLines={1}
               style={{
-                flexDirection: 'row',
-                alignItems: 'center',
+                fontSize: 14,
+                fontWeight: '500',
+                color: colors.onSurfaceVariant,
                 marginBottom: 8,
               }}
             >
+              {order.restaurant?.name || 'Restaurant'}
+            </Text>
+
+            {/* Items count and Total */}
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
               <Text
                 style={{
+                  fontSize: 13,
                   color: colors.onSurfaceVariant,
-                  fontSize: 14,
                 }}
               >
                 {totalItems} {totalItems === 1 ? 'item' : 'items'}
               </Text>
               <Text
                 style={{
-                  color: colors.onSurfaceVariant,
-                  fontSize: 14,
-                  marginHorizontal: 8,
-                }}
-              >
-                •
-              </Text>
-              <Text
-                style={{
+                  fontSize: 18,
+                  fontWeight: '700',
                   color: colors.onSurface,
-                  fontSize: 16,
-                  fontWeight: '600',
                 }}
               >
                 {order.total.toLocaleString()} XAF
               </Text>
             </View>
 
-            {/* Items Preview - First 2 items */}
-            <View style={{ marginBottom: 8 }}>
-              {displayItems.map((item, index) => (
-                <Text
-                  key={index}
-                  style={{
-                    color: colors.onSurface,
-                    fontSize: 14,
-                    marginBottom: 2,
-                    lineHeight: 18,
-                  }}
-                >
-                  {item.quantity}x {item.name}
-                </Text>
-              ))}
-              {remainingItemsCount > 0 && (
-                <Text
-                  style={{
-                    color: colors.onSurfaceVariant,
-                    fontSize: 14,
-                    fontStyle: 'italic',
-                  }}
-                >
-                  ...and {remainingItemsCount} more item
-                  {remainingItemsCount > 1 ? 's' : ''}
-                </Text>
-              )}
-            </View>
+            {/* Date */}
+            <Text
+              style={{
+                fontSize: 12,
+                color: colors.onSurfaceVariant,
+                marginTop: 4,
+              }}
+            >
+              {formatDate(order.createdAt, 'MMM DD, h:mm a')}
+            </Text>
           </View>
         </View>
 
-        {/* Delivery Info if available */}
-        {order.delivery && (
+        {/* Delivery Info */}
+        {order.delivery?.rider && (
           <View
             style={{
               flexDirection: 'row',
               alignItems: 'center',
-              marginBottom: 8,
-              paddingTop: 8,
-              borderTopWidth: 1,
-              borderTopColor: colors.outline,
+              justifyContent: 'space-between',
+              paddingVertical: 10,
+              paddingHorizontal: 12,
+              backgroundColor: colors.surfaceVariant,
+              borderRadius: 10,
+              marginBottom: 12,
             }}
           >
-            <IoniconsIcon name="bicycle-outline" size={16} color={colors.primary} />
-            <Text
-              style={{
-                color: colors.onSurfaceVariant,
-                fontSize: 14,
-                marginLeft: 6,
-              }}
-            >
-              {order.delivery.rider
-                ? order.delivery.rider.fullName
-                : 'Driver assigned'}
-            </Text>
-            {order.delivery.rider?.phoneNumber && (
-              <TouchableOpacity
-                style={{ marginLeft: 'auto' }}
-                onPress={() => {
-                  /* Handle call driver */
+            <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+              <IoniconsIcon name="bicycle" size={18} color={colors.primary} />
+              <Text
+                numberOfLines={1}
+                style={{
+                  fontSize: 14,
+                  fontWeight: '600',
+                  color: colors.onSurface,
+                  marginLeft: 8,
+                  flex: 1,
                 }}
               >
-                <IoniconsIcon                   name="call-outline"
-                  size={18}
-                  color={colors.primary}
-                />
+                {order.delivery.rider.fullName}
+              </Text>
+            </View>
+            {order.delivery.rider.phoneNumber && (
+              <TouchableOpacity
+                onPress={handleCallRider}
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 18,
+                  backgroundColor: colors.primary,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  marginLeft: 8,
+                }}
+              >
+                <IoniconsIcon name="call" size={18} color="white" />
               </TouchableOpacity>
             )}
           </View>
         )}
-      </View>
 
-      {/* Action Buttons */}
-      <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        {/* Action Buttons */}
+        <View style={{ flexDirection: 'row', gap: 8 }}>
           {isActiveOrder ? (
             <>
-              {/* Pending Status - Show Cancel Button Only */}
               {order.status === 'pending' && (
                 <TouchableOpacity
                   style={{
                     flex: 1,
-                    borderWidth: 1,
-                    borderRadius: 9999,
+                    borderWidth: 2,
+                    borderRadius: 12,
                     paddingVertical: 12,
                     borderColor: '#F44336',
                   }}
@@ -347,9 +310,9 @@ const OrderItemCard = ({
                 >
                   <Text
                     style={{
-                      fontWeight: '500',
+                      fontWeight: '600',
                       textAlign: 'center',
-                      fontSize: 16,
+                      fontSize: 15,
                       color: '#F44336',
                     }}
                   >
@@ -358,16 +321,14 @@ const OrderItemCard = ({
                 </TouchableOpacity>
               )}
 
-              {/* Confirmed Status - Show Confirm & Cancel Buttons */}
               {order.status === 'confirmed' && (
                 <>
                   <TouchableOpacity
                     style={{
                       flex: 1,
-                      borderWidth: 1,
-                      borderRadius: 9999,
+                      borderWidth: 2,
+                      borderRadius: 12,
                       paddingVertical: 12,
-                      marginRight: 8,
                       borderColor: '#F44336',
                     }}
                     onPress={handleCancelOrder}
@@ -375,22 +336,21 @@ const OrderItemCard = ({
                   >
                     <Text
                       style={{
-                        fontWeight: '500',
+                        fontWeight: '600',
                         textAlign: 'center',
-                        fontSize: 16,
+                        fontSize: 15,
                         color: '#F44336',
                       }}
                     >
-                      {isCancelling ? t('cancelling', 'Cancelling...') : t('cancel_order')}
+                      {t('cancel')}
                     </Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
                     style={{
                       flex: 1,
-                      borderRadius: 9999,
+                      borderRadius: 12,
                       paddingVertical: 12,
-                      marginLeft: 8,
                       backgroundColor: colors.primary,
                     }}
                     onPress={handleConfirmOrder}
@@ -398,25 +358,24 @@ const OrderItemCard = ({
                   >
                     <Text
                       style={{
-                        fontWeight: '500',
+                        fontWeight: '600',
                         textAlign: 'center',
-                        fontSize: 16,
+                        fontSize: 15,
                         color: 'white',
                       }}
                     >
-                      {isConfirmingOrder ? t('confirming', 'Confirming...') : t('confirm_pay', 'Confirm & Pay')}
+                      {isConfirmingOrder ? t('confirming') : t('confirm_pay', 'Confirm & Pay')}
                     </Text>
                   </TouchableOpacity>
                 </>
               )}
 
-              {/* After Payment - Show Track Order Button */}
               {['payment_confirmed', 'preparing', 'ready', 'ready_for_pickup', 'picked_up', 'out_for_delivery'].includes(order.status) && (
                 <TouchableOpacity
                   style={{
                     flex: 1,
-                    borderWidth: 1,
-                    borderRadius: 9999,
+                    borderWidth: 2,
+                    borderRadius: 12,
                     paddingVertical: 12,
                     borderColor: colors.primary,
                   }}
@@ -424,9 +383,9 @@ const OrderItemCard = ({
                 >
                   <Text
                     style={{
-                      fontWeight: '500',
+                      fontWeight: '600',
                       textAlign: 'center',
-                      fontSize: 16,
+                      fontSize: 15,
                       color: colors.primary,
                     }}
                   >
@@ -437,28 +396,24 @@ const OrderItemCard = ({
             </>
           ) : (
             <>
-              {/* Delivered Status - Show Confirm Delivery Button OR Review & Reorder Buttons */}
               {order.status === 'delivered' && (
-                // Check if delivery has been confirmed by customer
                 order.delivery?.customerConfirmed ? (
-                  // Show Review & Reorder Buttons after delivery confirmation
                   <>
                     <TouchableOpacity
                       style={{
                         flex: 1,
-                        borderWidth: 1,
-                        borderRadius: 9999,
+                        borderWidth: 2,
+                        borderRadius: 12,
                         paddingVertical: 12,
-                        marginRight: 8,
                         borderColor: colors.primary,
                       }}
                       onPress={handleReviews}
                     >
                       <Text
                         style={{
-                          fontWeight: '500',
+                          fontWeight: '600',
                           textAlign: 'center',
-                          fontSize: 16,
+                          fontSize: 15,
                           color: colors.primary,
                         }}
                       >
@@ -469,18 +424,17 @@ const OrderItemCard = ({
                     <TouchableOpacity
                       style={{
                         flex: 1,
-                        borderRadius: 9999,
+                        borderRadius: 12,
                         paddingVertical: 12,
-                        marginLeft: 8,
                         backgroundColor: colors.primary,
                       }}
                       onPress={handleReorder}
                     >
                       <Text
                         style={{
-                          fontWeight: '500',
+                          fontWeight: '600',
                           textAlign: 'center',
-                          fontSize: 16,
+                          fontSize: 15,
                           color: 'white',
                         }}
                       >
@@ -489,37 +443,35 @@ const OrderItemCard = ({
                     </TouchableOpacity>
                   </>
                 ) : (
-                  // Show Confirm Delivery Button before customer confirmation
                   <TouchableOpacity
                     style={{
                       flex: 1,
-                      borderRadius: 9999,
+                      borderRadius: 12,
                       paddingVertical: 12,
                       backgroundColor: colors.primary,
                     }}
-                    onPress={handleShowConfirmationModal}
+                    onPress={() => setShowConfirmationModal(true)}
                     disabled={isConfirming}
                   >
                     <Text
                       style={{
-                        fontWeight: '500',
+                        fontWeight: '600',
                         textAlign: 'center',
-                        fontSize: 16,
+                        fontSize: 15,
                         color: 'white',
                       }}
                     >
-                      {isConfirming ? t('confirming', 'Confirming...') : t('confirm_delivery')}
+                      {isConfirming ? t('confirming') : t('confirm_delivery')}
                     </Text>
                   </TouchableOpacity>
                 )
               )}
 
-              {/* Cancelled Orders - Show Reorder Button Only */}
               {order.status === 'cancelled' && (
                 <TouchableOpacity
                   style={{
                     flex: 1,
-                    borderRadius: 9999,
+                    borderRadius: 12,
                     paddingVertical: 12,
                     backgroundColor: colors.primary,
                   }}
@@ -527,9 +479,9 @@ const OrderItemCard = ({
                 >
                   <Text
                     style={{
-                      fontWeight: '500',
+                      fontWeight: '600',
                       textAlign: 'center',
-                      fontSize: 16,
+                      fontSize: 15,
                       color: 'white',
                     }}
                   >
@@ -545,7 +497,7 @@ const OrderItemCard = ({
       {/* Delivery Confirmation Modal */}
       <OrderDeliveryConfirmationModal
         visible={showConfirmationModal}
-        onClose={handleCloseConfirmationModal}
+        onClose={() => setShowConfirmationModal(false)}
         onConfirm={handleConfirmReceived}
         orderNumber={`#${order.id.substring(0, 8).toUpperCase()}`}
         restaurantName={order.restaurant?.name || 'Restaurant'}

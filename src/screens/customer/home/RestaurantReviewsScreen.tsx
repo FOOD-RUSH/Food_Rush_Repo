@@ -256,25 +256,6 @@ const RestaurantReviewsScreen: React.FC<
   if (isLoading) {
     return (
       <CommonView>
-        <StatusBar translucent backgroundColor="transparent" />
-
-        {/* Header */}
-        <View className="flex-row items-center px-4 py-3 border-b border-gray-200">
-          <TouchableOpacity onPress={handleGoBack} className="mr-4">
-            <MaterialIcon               name="arrow-back"
-              size={24}
-              color={colors.onSurface}
-            />
-          </TouchableOpacity>
-          <Text
-            className="text-lg font-semibold flex-1"
-            style={{ color: colors.onSurface }}
-            numberOfLines={1}
-          >
-            {restaurantName} {t('reviews')}
-          </Text>
-        </View>
-
         <View className="flex-1 justify-center items-center">
           <ActivityIndicator size="large" color={colors.primary} />
           <Text className="mt-4" style={{ color: colors.onSurfaceVariant }}>

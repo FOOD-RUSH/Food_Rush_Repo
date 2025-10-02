@@ -14,7 +14,7 @@ interface CommonViewProps {
 const CommonView = ({ children, showStatusBar = true }: CommonViewProps) => {
   const { colors, dark } = useTheme();
   const backgroundColor = colors.background;
-  const statusBarStyle = !dark ? 'dark-content' : 'light-content';
+  const statusBarStyle = dark ? 'light-content' : 'dark-content';
 
   return (
     <>

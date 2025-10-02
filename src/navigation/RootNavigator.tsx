@@ -31,6 +31,14 @@ import CustomerNavigator, {
 } from './CustomerNavigator';
 import RestaurantNavigator from './RestaurantNavigator';
 
+import {
+  createPlatformScreenOptions,
+  getPlatformGestureConfig,
+  getPlatformAnimation,
+  getContentMarginTop,
+} from './platformNavigation';
+
+
 // Components and screens
 import LoadingScreen from '../components/common/LoadingScreen';
 import OnboardingScreen from '../components/onBoardingScreen';
@@ -83,109 +91,6 @@ import ProfileDetailsScreen from '../screens/customer/Profile/ProfileDetailsScre
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
-// Screen option presets - moved outside component to prevent recreation
-const createScreenOptions = (colors: any, navigationColors: any, t: any) => ({
-  default: {
-    headerShown: false,
-    gestureEnabled: true,
-    animation: 'slide_from_right' as const,
-    contentStyle: { backgroundColor: colors.background },
-    headerStyle: {
-      backgroundColor: colors.card,
-      elevation: 0,
-      shadowOpacity: 0,
-    },
-    headerTintColor: navigationColors.text,
-    headerTitleStyle: {
-      fontFamily: 'Urbanist-SemiBold',
-      fontSize: 18,
-      fontWeight: '600',
-      color: navigationColors.text,
-    },
-  },
-  modal: {
-    presentation: 'modal' as const,
-    headerShown: true,
-    animation: 'slide_from_bottom' as const,
-    gestureDirection: 'vertical' as const,
-    contentStyle: { backgroundColor: colors.background, marginTop: -36 },
-    headerStyle: {
-      backgroundColor: colors.card,
-      elevation: 0,
-      shadowOpacity: 0,
-    },
-    headerTintColor: navigationColors.text,
-    headerTitleStyle: {
-      fontFamily: 'Urbanist-SemiBold',
-      fontSize: 18,
-      fontWeight: '600',
-      color: navigationColors.text,
-    },
-  },
-  card: {
-    presentation: 'card' as const,
-    headerShown: true,
-    headerBackTitleVisible: false,
-    animation: 'slide_from_right' as const,
-    contentStyle: { backgroundColor: colors.background, marginTop: -36 },
-    headerStyle: {
-      backgroundColor: colors.card,
-      elevation: 0,
-      shadowOpacity: 0,
-    },
-    headerTintColor: navigationColors.text,
-    headerTitleStyle: {
-      fontFamily: 'Urbanist-SemiBold',
-      fontSize: 18,
-      fontWeight: '600',
-      color: navigationColors.text,
-    },
-  },
-  profileCard: {
-    presentation: 'card' as const,
-    headerShown: true,
-    headerTitleAlign: 'center' as const,
-    animation: 'slide_from_right' as const,
-    headerShadowVisible: false,
-    contentStyle: { backgroundColor: colors.background, marginTop: -36 },
-    headerStyle: {
-      backgroundColor: colors.card,
-      elevation: 0,
-      shadowOpacity: 0,
-    },
-    headerTintColor: navigationColors.text,
-    headerTitleStyle: {
-      fontFamily: 'Urbanist-SemiBold',
-      fontSize: 18,
-      fontWeight: '600',
-      color: navigationColors.text,
-    },
-  },
-  checkout: {
-    headerShown: true,
-    headerTitleAlign: 'center' as const,
-    animation: 'slide_from_right' as const,
-    contentStyle: { backgroundColor: colors.background, marginTop: -36 },
-    headerStyle: {
-      backgroundColor: colors.card,
-      elevation: 0,
-      shadowOpacity: 0,
-    },
-    headerTintColor: navigationColors.text,
-    headerTitleStyle: {
-      fontFamily: 'Urbanist-SemiBold',
-      fontSize: 18,
-      fontWeight: '600',
-      color: navigationColors.text,
-    },
-  },
-  fullScreen: {
-    presentation: 'fullScreenModal' as const,
-    headerShown: false,
-    gestureEnabled: true,
-    animation: 'slide_from_bottom' as const,
-  },
-});
 
 const RootNavigator: React.FC = () => {
   // Store hooks with performance-optimized selectors
@@ -300,9 +205,10 @@ const RootNavigator: React.FC = () => {
   }, [handleDeepLink]);
 
   // Memoized screen options
-  const screenOptions = useMemo(() => {
-    return createScreenOptions(theme.colors, navigationTheme.colors, t);
-  }, [theme.colors, navigationTheme.colors, t]);
+  // Then in your RootNavigator component, replace the screenOptions useMemo with:
+const screenOptions = useMemo(() => {
+  return createPlatformScreenOptions(theme.colors, navigationTheme.colors, t);
+}, [theme.colors, navigationTheme.colors, t]);
 
   // Memoized cart screen options
   const cartScreenOptions = useMemo(
@@ -437,12 +343,12 @@ const RootNavigator: React.FC = () => {
             component={CategoryMenuScreen}
             options={{
               presentation: 'fullScreenModal',
-              headerShown: true,
-              gestureEnabled: true,
-              animation: 'slide_from_bottom',
-              contentStyle: {
-                backgroundColor: theme.colors.background,
-                marginTop: -34,
+    headerShown: true,
+    gestureEnabled: true,
+    animation: getPlatformAnimation('modal'),
+    contentStyle: {
+      backgroundColor: theme.colors.background,
+      marginTop: getContentMarginTop(true),
               },
             }}
           />
@@ -458,18 +364,16 @@ const RootNavigator: React.FC = () => {
               name="FoodDetails"
               component={FoodDetailsScreen}
               options={{
-                headerTitle: '',
-                headerTransparent: true,
-                contentStyle: { backgroundColor: theme.colors.background },
+                ...screenOptions.transparentHeader,
+    headerTitle: '',
               }}
             />
             <Stack.Screen
               name="RestaurantDetails"
               component={RestaurantDetailScreen}
               options={{
-                headerTitle: '',
-                headerTransparent: true,
-                contentStyle: { backgroundColor: theme.colors.background },
+              ...screenOptions.transparentHeader,
+    headerTitle: '',
               }}
             />
             <Stack.Screen

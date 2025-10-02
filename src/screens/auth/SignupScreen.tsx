@@ -771,11 +771,11 @@ const createStyles = (colors: any) =>
       backgroundColor: colors.surfaceVariant,
       paddingHorizontal: 16,
       paddingVertical: 16,
-      borderRadius: 12,
+      borderRadius: 16,
       borderTopRightRadius: 0,
       borderBottomRightRadius: 0,
       minWidth: 120,
-      borderWidth: 1,
+      borderWidth: 0,
       borderColor: colors.surfaceVariant,
     },
     selectedCountryFlag: {
@@ -789,20 +789,23 @@ const createStyles = (colors: any) =>
       fontWeight: '500',
     },
     phoneInput: {
-      borderRadius: 12,
+      borderRadius: 16,
       borderTopLeftRadius: 0,
       borderBottomLeftRadius: 0,
       borderColor: colors.surfaceVariant,
+      borderWidth: 0,
     },
     phoneTextInput: {
       flex: 1,
     },
     textInput: {
       backgroundColor: colors.surfaceVariant,
+      borderRadius: 16,
     },
     inputOutline: {
-      borderRadius: 12,
+      borderRadius: 16,
       borderColor: colors.surfaceVariant,
+      borderWidth: 0,
     },
     inputError: {
       borderColor: '#EF4444',

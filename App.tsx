@@ -15,28 +15,32 @@ import CustomSplashScreen from '@/src/components/common/CustomSplashScreen';
 SplashScreen.preventAutoHideAsync();
 
 // Loading fallback component with font loading
-const LoadingFallback = ({ message = 'Loading...' }: { message?: string }) => (
-  <View
-    style={{
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: '#06102b',
-    }}
-  >
-    <ActivityIndicator size="large" color="#007aff" />
-    <Text
+const LoadingFallback = ({ message = 'Loading...' }: { message?: string }) => {
+  // Use a neutral background that works for both themes during loading
+  // Since we can't access theme context here, use a safe neutral color
+  return (
+    <View
       style={{
-        marginTop: 16,
-        color: '#ffffff',
-        fontSize: 16,
-        fontFamily: 'system',
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#ffffff', // Use light background as default
       }}
     >
-      {message}
-    </Text>
-  </View>
-);
+      <ActivityIndicator size="large" color="#007aff" />
+      <Text
+        style={{
+          marginTop: 16,
+          color: '#1e293b', // Dark text for light background
+          fontSize: 16,
+          fontFamily: 'system',
+        }}
+      >
+        {message}
+      </Text>
+    </View>
+  );
+};
 
 export default function App() {
   const {

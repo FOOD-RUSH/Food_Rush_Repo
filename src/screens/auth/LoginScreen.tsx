@@ -107,13 +107,22 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
     [colors.surfaceVariant],
   );
 
-  // Input style without borders
+  // Input style without borders and labels, rounded 16px
   const inputStyle = useMemo(
     () => ({
       backgroundColor: colors.surfaceVariant,
       borderWidth: 0,
+      borderRadius: 16,
     }),
     [colors.surfaceVariant],
+  );
+
+  const inputOutlineStyle = useMemo(
+    () => ({
+      borderWidth: 0,
+      borderRadius: 16,
+    }),
+    [],
   );
 
   // Entrance animations - run once
@@ -332,7 +341,6 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
               render={({ field: { onChange, onBlur, value } }) => (
                 <View style={{ marginBottom: 16 }}>
                   <TextInput
-                    label="Email Address"
                     placeholder="Enter your email"
                     value={value}
                     onChangeText={onChange}
@@ -345,7 +353,8 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                     left={<TextInput.Icon icon="email-outline" />}
                     error={!!errors.email}
                     style={inputStyle}
-                    outlineStyle={{ borderWidth: 0 }}
+                    outlineStyle={inputOutlineStyle}
+                    contentStyle={{ borderRadius: 16 }}
                   />
                   <HelperText type="error" visible={!!errors.email}>
                     {errors.email?.message}
@@ -361,7 +370,6 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
               render={({ field: { onChange, onBlur, value } }) => (
                 <View style={{ marginBottom: 20 }}>
                   <TextInput
-                    label="Password"
                     placeholder="Enter your password"
                     value={value}
                     onChangeText={onChange}
@@ -378,7 +386,8 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                     }
                     error={!!errors.password}
                     style={inputStyle}
-                    outlineStyle={{ borderWidth: 0 }}
+                    outlineStyle={inputOutlineStyle}
+                    contentStyle={{ borderRadius: 16 }}
                   />
                   <HelperText type="error" visible={!!errors.password}>
                     {errors.password?.message}
