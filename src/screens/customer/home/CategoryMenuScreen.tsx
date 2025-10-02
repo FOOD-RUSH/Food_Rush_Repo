@@ -1,4 +1,3 @@
-import { MaterialIcon } from '@/src/components/common/icons';
 import React, { useState, useCallback, useLayoutEffect, useMemo } from 'react';
 import {
   View,
@@ -6,7 +5,6 @@ import {
   FlatList,
   RefreshControl,
   StyleSheet,
-  TouchableOpacity,
 } from 'react-native';
 import { useTheme, ActivityIndicator } from 'react-native-paper';
 
@@ -18,7 +16,6 @@ import FoodItemCard from '@/src/components/customer/FoodItemCard';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import { FoodProps } from '@/src/types';
 import { useBrowseMenuItems } from '@/src/hooks/customer/useCustomerApi';
-import ErrorDisplay from '@/src/components/common/ErrorDisplay';
 import { getCategoryByTitle } from '@/src/constants/categories';
 import ProfessionalErrorDisplay from '@/src/components/common/ProfessionalErrorDisplay';
 
@@ -125,10 +122,6 @@ const CategoryMenuScreen: React.FC<CategoryMenuScreenProps> = ({
     items: filteredMenuItems,
   });
 
-  const handleGoBack = useCallback(() => {
-    navigation.goBack();
-  }, [navigation]);
-
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
@@ -186,7 +179,6 @@ const CategoryMenuScreen: React.FC<CategoryMenuScreenProps> = ({
     return (
       <CommonView>
         <SafeAreaView style={{ flex: 1 }}>
-          <Header />
           <ProfessionalErrorDisplay
             type="network_error"
             title={t('error_loading_menu')}

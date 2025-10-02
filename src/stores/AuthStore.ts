@@ -15,6 +15,7 @@ export interface CustomerProfile {
   status: 'active' | 'inactive' | 'suspended';
   isEmailVerified: boolean;
   isPhoneVerified: boolean;
+  pictureUrl?: string;
   // Customer-specific fields
   address?: string;
   dateOfBirth?: string;

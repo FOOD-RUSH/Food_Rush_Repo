@@ -12,6 +12,7 @@ import {
   RefreshControl,
   FlatList,
   ListRenderItem,
+  TouchableOpacity
 } from 'react-native';
 import { CustomerHomeStackScreenProps } from '@/src/navigation/types';
 import { RestaurantCard } from '@/src/components/customer/RestaurantCard';
@@ -480,6 +481,10 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
 
         case 'search':
           return (
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={handleSearchPress}
+            >
             <View
               className="px-4 py-3"
               style={{ backgroundColor: colors.background }}
@@ -507,6 +512,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
                 pointerEvents="none"
               />
             </View>
+            </TouchableOpacity>
           );
 
         case 'category':

@@ -1,9 +1,9 @@
-import { MaterialIcon } from '@/src/components/common/icons';
+import { IoniconsIcon, MaterialIcon } from '@/src/components/common/icons';
 import React, { useMemo, useCallback, useRef } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
-import { TouchableOpacity, Linking, DeviceEventEmitter } from 'react-native';
+import { TouchableOpacity, Linking, DeviceEventEmitter, Platform } from 'react-native';
 
 import Toast from 'react-native-toast-message';
 import { useTranslation } from 'react-i18next';
@@ -33,7 +33,6 @@ import RestaurantNavigator from './RestaurantNavigator';
 
 import {
   createPlatformScreenOptions,
-  getPlatformGestureConfig,
   getPlatformAnimation,
   getContentMarginTop,
 } from './platformNavigation';
@@ -350,6 +349,11 @@ const screenOptions = useMemo(() => {
       backgroundColor: theme.colors.background,
       marginTop: getContentMarginTop(true),
               },
+              headerLeft: () => 
+                <TouchableOpacity onPressIn={() => navigationRef.goBack()}>
+                  <MaterialIcon name={Platform.OS === 'ios' ? 'arrow-back-ios' : 'arrow-back'} size={24} color={navigationTheme.colors.text} />
+                </TouchableOpacity>
+              
             }}
           />
 

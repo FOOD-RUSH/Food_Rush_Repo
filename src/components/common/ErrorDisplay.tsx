@@ -1,4 +1,4 @@
-import { IoniconsIcon } from '@/src/components/common/icons';
+import { IoniconsIcon, IoniconsName } from '@/src/components/common/icons';
 import React from 'react';
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
 import { useTheme, Button } from 'react-native-paper';
@@ -44,7 +44,7 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
 
     // Handle different error types
     let message: string;
-    let icon: keyof IoniconsIconName;
+    let icon: IoniconsName;
     let type: 'network' | 'auth' | 'validation' | 'server' | 'unknown';
 
     if (isNetworkError(error)) {
@@ -120,11 +120,11 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
       accessibilityLabel={`Error: ${message}`}
     >
       {showIcon && (
-        <IoniconsIcon           name={icon}
+        <IoniconsIcon
+          name={icon}
           size={compact ? 32 : 48}
           color={colors.error}
           style={styles.icon}
-          testID={`${testID}-icon`}
         />
       )}
 

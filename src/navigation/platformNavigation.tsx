@@ -205,6 +205,22 @@ export const getPlatformTabBarStyle = (
 };
 
 /**
+ * Floating tab bar styling - detached from bottom
+ */
+export const getFloatingTabBarStyle = () => {
+  return {
+    position: 'absolute' as const,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'transparent',
+    borderTopWidth: 0,
+    elevation: 0,
+    shadowOpacity: 0,
+  };
+};
+
+/**
  * Platform-specific gesture configurations
  */
 export const getPlatformGestureConfig = () => ({

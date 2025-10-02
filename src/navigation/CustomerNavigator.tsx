@@ -1,11 +1,11 @@
-import { IoniconsIcon } from '@/src/components/common/icons';
+import { IoniconsIcon, IoniconsName } from '@/src/components/common/icons';
 import React, { useMemo } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Image, Platform, TouchableOpacity, Text } from 'react-native';
-import { getPlatformTabBarStyle } from './platformNavigation';
+import { Image, Platform, TouchableOpacity } from 'react-native';
+import { FloatingTabBar } from '../components/common/FloatingTabBar';
 
 
 import { useTranslation } from 'react-i18next';
@@ -217,7 +217,7 @@ const TabBarIcon: React.FC<{
   color: string;
   size: number;
 }> = React.memo(({ routeName, focused, color, size }) => {
-  let iconName: keyof IoniconsIconName;
+  let iconName: IoniconsName;
 
   switch (routeName) {
     case 'Home':
@@ -242,14 +242,8 @@ export default function CustomerNavigator() {
   const insets = useSafeAreaInsets();
 
   const navigationTheme = useAppNavigationTheme();
-  const { colors } = useTheme();
+  //const { colors } = useTheme();
   const { t } = useTranslation('translation');
-  
- const tabBarStyle = useMemo(
-    () => getPlatformTabBarStyle(navigationTheme.colors.card, insets),
-    [navigationTheme.colors.card, insets.bottom],
-  );
-
 
   const headerStyle = useMemo(
     () => ({
@@ -264,18 +258,11 @@ export default function CustomerNavigator() {
 
   return (
    <CustomerTab.Navigator
+      tabBar={(props) => (
+        <FloatingTabBar {...props} userType="customer" />
+      )}
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => (
-          <TabBarIcon
-            routeName={route.name}
-            focused={focused}
-            color={color}
-            size={size}
-          />
-        ),
-        tabBarLabel: ({ focused }) => {
-          if (!focused) return null;
-
+        tabBarLabel: () => {
           let label = '';
           switch (route.name) {
             case 'Home':
@@ -290,23 +277,8 @@ export default function CustomerNavigator() {
             default:
               label = '';
           }
-
-          return focused ? (
-            <Text
-              style={{
-                fontSize: 12,
-                fontFamily: 'Urbanist-SemiBold',
-                color: navigationTheme.colors.primary,
-                marginBottom: Platform.OS === 'ios' ? 4 : 2,
-              }}
-            >
-              {label}
-            </Text>
-          ) : null;
+          return label;
         },
-        tabBarActiveTintColor: navigationTheme.colors.primary,
-        tabBarInactiveTintColor: colors.onSurfaceVariant,
-        tabBarStyle,
         headerStyle,
         headerTitleStyle: {
           fontFamily: 'Urbanist-Bold',

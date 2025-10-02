@@ -120,7 +120,7 @@ const ProfileDetailsScreen = ({
               {/* Avatar with Edit Button */}
               <View style={{ position: 'relative', marginBottom: 20 }}>
                 <Avatar
-                  profilePicture={user?.profilePicture}
+                  profilePicture={user?.pictureUrl}
                   fullName={user?.fullName || 'User'}
                   size={120}
                 />

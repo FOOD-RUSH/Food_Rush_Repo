@@ -4,9 +4,9 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme } from 'react-native-paper';
+import { Platform, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { getPlatformTabBarStyle } from './platformNavigation';
+import { FloatingTabBar } from '../components/common/FloatingTabBar';
 import {
   RestaurantAnalyticsStackParamList,
   RestaurantMenuStackParamList,
@@ -99,47 +99,36 @@ function RestaurantAccountStackScreen() {
 }
 
 export default function RestaurantNavigator() {
-  const insets = useSafeAreaInsets();
-  const { colors } = useTheme();
+ 
   const { t } = useTranslation('translation');
-  const tabBarStyle = useMemo(
-     () => getPlatformTabBarStyle(colors.surface, insets),
-     [colors.surface, insets],
-   );
+  
   return (
    <RestaurantTab.Navigator
+      tabBar={(props) => (
+        <FloatingTabBar {...props} userType="restaurant" />
+      )}
       screenOptions={({ route }) => ({
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName: keyof IoniconsIconName;
-
+        tabBarLabel: () => {
+          let label = '';
           switch (route.name) {
             case 'Orders':
-              iconName = focused ? 'receipt' : 'receipt-outline';
+              label = t('orders');
               break;
             case 'Menu':
-              iconName = focused ? 'restaurant' : 'restaurant-outline';
+              label = t('menu');
               break;
             case 'Analytics':
-              iconName = focused ? 'bar-chart' : 'bar-chart-outline';
+              label = t('analytics');
               break;
             case 'Account':
-              iconName = focused ? 'person' : 'person-outline';
+              label = t('account');
               break;
             default:
-              iconName = 'help-outline';
+              label = '';
           }
-
-          return <IoniconsIcon name={iconName} size={size} color={color} />;
+          return label;
         },
-        tabBarActiveTintColor: colors.primary,
-        tabBarInactiveTintColor: colors.onSurfaceVariant,
         headerShown: false,
-        tabBarStyle,
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontFamily: 'Urbanist-Medium',
-         // marginBottom: Platform.OS === 'ios' ? 2 : 0,
-        },
         lazy: true,
         unmountOnBlur: false,
         tabBarHideOnKeyboard: true,
