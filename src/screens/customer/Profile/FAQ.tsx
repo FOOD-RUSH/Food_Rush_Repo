@@ -118,7 +118,7 @@ const FAQ = () => {
     <CommonView>
       {/* Header */}
       <View
-        className="px-4 py-6 border-b"
+        className="px-4 pt-10 border-b"
         style={{ borderBottomColor: colors.outline + '30' }}
       >
         <Heading4
