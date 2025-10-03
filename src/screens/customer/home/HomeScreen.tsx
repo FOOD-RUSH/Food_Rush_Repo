@@ -40,6 +40,7 @@ import ErrorDisplay from '@/src/components/common/ErrorDisplay';
 import EmptyState from '@/src/components/common/EmptyState';
 import HomeHeader from '@/src/components/customer/HomeHeader';
 import { useLocationForQueries } from '@/src/hooks/customer/useLocationService';
+import { useFloatingTabBarHeight } from '@/src/hooks/useFloatingTabBarHeight';
 
 const { width } = Dimensions.get('window');
 
@@ -138,6 +139,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
   const [refreshing, setRefreshing] = useState(false);
+  const tabBarHeight = useFloatingTabBarHeight();
 
   // Get location info for debugging
   const { nearLat, nearLng, locationSource, hasLocation } =
@@ -726,6 +728,9 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
         keyExtractor={keyExtractor}
         style={{ backgroundColor: colors.background }}
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingBottom: tabBarHeight,
+        }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}

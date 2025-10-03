@@ -4,8 +4,11 @@ import { CustomerHomeStackScreenProps } from '@/src/navigation/types';
 
 import { useNavigation } from '@react-navigation/native';
 import React from 'react';
-import { TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, View, Dimensions } from 'react-native';
 import { useTheme, Card } from 'react-native-paper';
+import { useResponsive } from '@/src/hooks/useResponsive';
+
+const { width: screenWidth } = Dimensions.get('window');
 import { useTranslation } from 'react-i18next';
 import {
   Typography,
@@ -60,6 +63,32 @@ export const RestaurantCard = ({
     useNavigation<CustomerHomeStackScreenProps<'HomeScreen'>['navigation']>();
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
+  const { isSmallScreen, isTablet, isLargeScreen, wp, getResponsiveText } = useResponsive();
+  
+  // Calculate responsive dimensions
+  const getCardDimensions = () => {
+    if (isLargeScreen) {
+      return {
+        width: Math.min(wp(90), 500), // Max 500px width
+        imageHeight: 180,
+        padding: 16,
+      };
+    } else if (isTablet) {
+      return {
+        width: Math.min(wp(95), 400), // Max 400px width
+        imageHeight: 160,
+        padding: 14,
+      };
+    } else {
+      return {
+        width: wp(90), // 90% of screen width for phones
+        imageHeight: 140,
+        padding: 12,
+      };
+    }
+  };
+  
+  const cardDimensions = getCardDimensions();
 
   const { hasRealLocation, isUsingFallback, locationSource } =
     useLocationStatus();
@@ -96,22 +125,18 @@ export const RestaurantCard = ({
       <Card
         mode="outlined"
         style={{
-          margin: 10,
+          margin: 8,
           borderRadius: 16,
           overflow: 'hidden',
           shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 4,
+          shadowOffset: { width: 0, height: 3 },
+          shadowOpacity: 0.12,
+          shadowRadius: 6,
           backgroundColor: colors.surface,
-          borderWidth: 1,
-          marginVertical: 12,
-          borderColor: colors.surface,
-          boxShadow: '1px 0px 10px rgba(0, 0, 0, 0.15)',
-          minWidth: 320,
-          maxWidth: 520,
-          minHeight: 220,
-          maxHeight: 340,
+          borderWidth: 0.5,
+          borderColor: colors.outline + '20',
+          width: cardDimensions.width,
+          alignSelf: 'center',
           // Add opacity for closed restaurants
           opacity: isOpen ? 1 : 0.7,
         }}
@@ -120,7 +145,7 @@ export const RestaurantCard = ({
           <Card.Cover
             source={image ? { uri: image } : images.onboarding2}
             style={{
-              height: 150,
+              height: cardDimensions.imageHeight,
               width: '100%',
             }}
             resizeMode="cover"
@@ -232,7 +257,7 @@ export const RestaurantCard = ({
           )}
         </View>
 
-        <Card.Content style={{ padding: 16 }}>
+        <Card.Content style={{ padding: cardDimensions.padding }}>
           <View
             style={{ marginBottom: 12 }}
             className="flex-row justify-between items-center"
@@ -240,7 +265,10 @@ export const RestaurantCard = ({
             <Heading4
               color={colors.onSurface}
               weight="bold"
-              style={{ flex: 1 }}
+              style={{ 
+                flex: 1,
+                fontSize: getResponsiveText(isSmallScreen ? 16 : 18),
+              }}
             >
               {name}
             </Heading4>

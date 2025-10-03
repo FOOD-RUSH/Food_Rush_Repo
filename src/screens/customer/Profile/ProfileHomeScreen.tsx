@@ -12,6 +12,7 @@ import { useBottomSheet } from '@/src/components/common/BottomSheet/BottomSheetC
 import LogoutContent from '@/src/components/common/BottomSheet/LogoutContent';
 import Avatar from '@/src/components/common/Avatar';
 import { useTranslation } from 'react-i18next';
+import { useFloatingTabBarHeight } from '@/src/hooks/useFloatingTabBarHeight';
 
 const ProfileHomeScreen = ({
   navigation,
@@ -23,6 +24,7 @@ const ProfileHomeScreen = ({
   const user = useCustomerProfile();
   const { present, dismiss, isPresented } = useBottomSheet();
   const { t } = useTranslation('translation');
+  const tabBarHeight = useFloatingTabBarHeight();
 
   const handleLogout = useCallback(() => {
     try {
@@ -121,6 +123,9 @@ const ProfileHomeScreen = ({
       <ScrollView
         className="flex-1 h-full py-3 px-1"
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingBottom: tabBarHeight,
+        }}
       >
         {/* Profile section */}
         <View className="flex-row justify-between items-center mb-3 px-1">

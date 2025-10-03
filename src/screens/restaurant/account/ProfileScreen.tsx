@@ -110,7 +110,15 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
           ]}
         >
-          {(currentRestaurant?.image && !imageLoadError) ? (
+          {(profileData?.pictureUrl && !imageLoadError) ? (
+            <Avatar.Image 
+              size={80} 
+              source={{ uri: profileData.pictureUrl }} 
+              style={[styles.avatar]}
+              onError={() => setImageLoadError(true)}
+              onLoad={() => setImageLoadError(false)}
+            />
+          ) : (currentRestaurant?.image && !imageLoadError) ? (
             <Avatar.Image 
               size={80} 
               source={{ uri: currentRestaurant.image }} 

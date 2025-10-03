@@ -30,6 +30,7 @@ import {
 } from '@/src/stores/customerStores/cartStore';
 import { useTranslation } from 'react-i18next';
 import { useMenuItemById } from '@/src/hooks/customer/useCustomerApi';
+import { navigate } from '@/src/navigation/navigationHelpers';
 
 const FoodDetailsScreen = ({
   navigation,
@@ -93,6 +94,9 @@ const FoodDetailsScreen = ({
       addItemtoCart(MenuDetails, quantity, instructions);
       // Show success feedback
       // Note: The cart store will handle the duplicate item dialog
+      
+      // Navigate to the home screen after successfully adding to cart
+      navigate('CustomerApp', { screen: 'Home', params: { screen: 'HomeScreen' } });
     } catch (error) {
       Alert.alert(
         t('error') || 'Error',

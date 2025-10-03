@@ -35,6 +35,7 @@ export interface RestaurantProfile {
   status: 'active' | 'inactive' | 'pending_verification' | 'suspended';
   isEmailVerified: boolean;
   isPhoneVerified: boolean;
+  pictureUrl?: string;
   // Restaurant-specific fields
   businessName?: string;
   businessAddress?: string;
@@ -52,6 +53,7 @@ export interface Restaurant {
   longitude?: number;
   verificationStatus: 'PENDING' | 'APPROVED' | 'REJECTED';
   documentUrl?: string;
+  pictureUrl?: string;
   rating?: number;
   ratingCount: number;
   ownerId: string;
@@ -181,8 +183,10 @@ export const useAuthStore = create<AuthState & AuthActions>()(
                     isOpen: defaultRestaurant.isOpen,
                     latitude: defaultRestaurant.latitude,
                     longitude: defaultRestaurant.longitude,
+                    deliveryRadius: null, // Default value for deliveryRadius
                     verificationStatus: defaultRestaurant.verificationStatus,
                     documentUrl: defaultRestaurant.documentUrl,
+                    pictureUrl: defaultRestaurant.pictureUrl, // Include pictureUrl
                     rating: defaultRestaurant.rating,
                     ratingCount: defaultRestaurant.ratingCount,
                     ownerId: defaultRestaurant.ownerId,

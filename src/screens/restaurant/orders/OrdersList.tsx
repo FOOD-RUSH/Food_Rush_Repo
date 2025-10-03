@@ -40,6 +40,7 @@ import {
   ORDER_STATUS_COLORS,
 } from '@/src/utils/orderUtils';
 import { useUnreadNotificationCount } from '@/src/hooks/useNotifications';
+import { useFloatingTabBarHeight } from '@/src/hooks/useFloatingTabBarHeight';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -235,6 +236,7 @@ const OrderTab: React.FC<OrderTabProps> = ({ status, showActions = false }) => {
   const { t } = useTranslation();
   const navigation = useNavigation();
   const [searchQuery, setSearchQuery] = useState('');
+  const tabBarHeight = useFloatingTabBarHeight();
 
   const {
     data: ordersData,
@@ -327,7 +329,7 @@ const OrderTab: React.FC<OrderTabProps> = ({ status, showActions = false }) => {
         windowSize={10}
         initialNumToRender={5}
         updateCellsBatchingPeriod={50}
-        contentContainerStyle={{ padding: 4, paddingTop: 0 }}
+        contentContainerStyle={{ padding: 4, paddingTop: 0, paddingBottom: tabBarHeight }}
         refreshing={isLoading}
         onRefresh={onRefresh}
         showsVerticalScrollIndicator={false}

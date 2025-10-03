@@ -55,6 +55,7 @@ import {
   formatCurrency,
   formatLargeNumber,
 } from '@/src/utils/analyticsUtils';
+import { useFloatingTabBarHeight } from '@/src/hooks/useFloatingTabBarHeight';
 
 // Types for breakdown data
 interface BreakdownItem {
@@ -69,6 +70,7 @@ const AnalyticsOverview: React.FC<
 > = ({ navigation }) => {
   const { colors } = useTheme();
   const { t } = useTranslation();
+  const tabBarHeight = useFloatingTabBarHeight();
 
   const [selectedPeriod, setSelectedPeriod] = useState<AnalyticsPeriodOption>('7days');
   const [refreshing, setRefreshing] = useState(false);
@@ -222,6 +224,9 @@ const AnalyticsOverview: React.FC<
     <CommonView>
       <ScrollView
         showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingBottom: tabBarHeight,
+        }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}

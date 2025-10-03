@@ -25,6 +25,7 @@ import {
   useRestaurantProfile,
   useRestaurantStatus,
 } from '@/src/hooks/restaurant/useRestaurantProfile';
+import { useFloatingTabBarHeight } from '@/src/hooks/useFloatingTabBarHeight';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -135,6 +136,7 @@ const AccountHome: React.FC<
   const { colors } = useTheme();
   const { t } = useTranslation();
   const user = useAuthRestaurantProfile();
+  const tabBarHeight = useFloatingTabBarHeight();
   const { currentRestaurant } = useRestaurantInfo();
   const logout = useLogout();
 
@@ -335,7 +337,7 @@ const AccountHome: React.FC<
     <CommonView style={{ backgroundColor: colors.background }}>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={{ paddingBottom: tabBarHeight }}
       >
         {/* Restaurant Header Card */}
         <Card

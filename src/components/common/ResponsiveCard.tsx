@@ -1,109 +1,66 @@
 import React from 'react';
-import {
-  View,
-  ViewStyle,
-  TouchableOpacity,
-  TouchableOpacityProps,
-} from 'react-native';
-import { Card, CardProps, useTheme } from 'react-native-paper';
-import { useResponsive, useResponsiveSpacing } from '@/src/hooks/useResponsive';
+import { View, ViewStyle, StyleSheet } from 'react-native';
+import { Card as PaperCard, CardProps, useTheme } from 'react-native-paper';
+import { useResponsive } from '@/src/hooks/useResponsive';
 
-interface ResponsiveCardProps extends Omit<CardProps, 'style'> {
-  children: React.ReactNode;
-  padding?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-  margin?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+interface ResponsiveCardProps extends CardProps {
+  radius?: 'small' | 'medium' | 'large' | 'full';
   elevation?: number;
-  borderRadius?: number;
-  onPress?: TouchableOpacityProps['onPress'];
-  style?: ViewStyle | ViewStyle[];
-  contentStyle?: ViewStyle | ViewStyle[];
-  responsive?: boolean;
+  children: React.ReactNode;
+  style?: ViewStyle;
 }
 
-export const ResponsiveCard: React.FC<ResponsiveCardProps> = ({
+const ResponsiveCard: React.FC<ResponsiveCardProps> = ({
+  radius = 'medium',
+  elevation = 2,
   children,
-  padding = 'md',
-  margin = 'sm',
-  elevation,
-  borderRadius,
-  onPress,
   style,
-  contentStyle,
-  responsive = true,
   ...props
 }) => {
   const { colors } = useTheme();
-  const { isSmallScreen, isTablet } = useResponsive();
-  const spacing = useResponsiveSpacing();
-
-  // Calculate responsive values
-  const getElevation = () => {
-    if (elevation !== undefined) return elevation;
-    if (isSmallScreen) return 2;
-    if (isTablet) return 4;
-    return 3;
-  };
-
-  const getBorderRadius = () => {
-    if (borderRadius !== undefined) return borderRadius;
-    if (isSmallScreen) return 12;
-    if (isTablet) return 16;
-    return 14;
-  };
-
-  const getPadding = () => {
-    if (padding === 'none') return 0;
-    return spacing[padding as keyof typeof spacing];
-  };
-
-  const getMargin = () => {
-    if (margin === 'none') return 0;
-    return spacing[margin as keyof typeof spacing];
-  };
-
-  const cardStyle: ViewStyle = {
-    margin: getMargin(),
-    borderRadius: getBorderRadius(),
-    backgroundColor: colors.surface,
-    ...(responsive && {
-      elevation: getElevation(),
-      shadowColor: colors.shadow,
-      shadowOffset: {
-        width: 0,
-        height: getElevation() / 2,
-      },
-      shadowOpacity: 0.1,
-      shadowRadius: getElevation(),
-    }),
-  };
-
-  const innerContentStyle: ViewStyle = {
-    padding: getPadding(),
-  };
-
-  const combinedStyle = Array.isArray(style)
-    ? [cardStyle, ...style]
-    : [cardStyle, style].filter(Boolean);
-
-  const combinedContentStyle = Array.isArray(contentStyle)
-    ? [innerContentStyle, ...contentStyle]
-    : [innerContentStyle, contentStyle].filter(Boolean);
-
-  if (onPress) {
-    return (
-      <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
-        <Card style={combinedStyle} {...props}>
-          <View style={combinedContentStyle}>{children}</View>
-        </Card>
-      </TouchableOpacity>
-    );
-  }
-
+  const { scale } = useResponsive();
+  
+  // Define responsive border radius values
+  const borderRadius = {
+    small: scale(8),
+    medium: scale(16),
+    large: scale(24),
+    full: scale(32),
+  }[radius];
+  
+  // Define responsive elevation values
+  const cardElevation = elevation;
+  
   return (
-    <Card style={combinedStyle} {...props}>
-      <View style={combinedContentStyle}>{children}</View>
-    </Card>
+    <PaperCard
+      style={[
+        styles.card,
+        {
+          backgroundColor: colors.surface,
+          borderRadius,
+          elevation: cardElevation,
+          shadowColor: '#000',
+          shadowOffset: {
+            width: 0,
+            height: StyleSheet.hairlineWidth * cardElevation,
+          },
+          shadowOpacity: 0.1,
+          shadowRadius: scale(cardElevation),
+          overflow: 'hidden',
+        },
+        style,
+      ]}
+      {...props}
+    >
+      {children}
+    </PaperCard>
   );
 };
+
+const styles = StyleSheet.create({
+  card: {
+    borderWidth: 0, // Remove default border if any
+  },
+});
 
 export default ResponsiveCard;

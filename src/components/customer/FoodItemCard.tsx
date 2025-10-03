@@ -8,6 +8,9 @@ import { Card, Text, useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { useResponsive } from '@/src/hooks/useResponsive';
 import { images } from '@/assets/images';
+import { Dimensions } from 'react-native';
+
+const { width: screenWidth } = Dimensions.get('window');
 
 export interface FoodItemCardProps {
   foodId: string;
@@ -49,7 +52,32 @@ const FoodItemCard = ({
     useNavigation<CustomerHomeStackScreenProps<'HomeScreen'>['navigation']>();
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
-  const { isSmallDevice, getResponsiveSpacing, scale } = useResponsive();
+  const { isSmallScreen, isTablet, isLargeScreen, wp, scale, getResponsiveText } = useResponsive();
+  
+  // Calculate responsive dimensions
+  const getCardDimensions = () => {
+    if (isLargeScreen) {
+      return {
+        width: Math.min(wp(45), 380), // Max 380px width
+        height: 140,
+        imageSize: 90,
+      };
+    } else if (isTablet) {
+      return {
+        width: Math.min(wp(48), 320), // Max 320px width
+        height: 130,
+        imageSize: 85,
+      };
+    } else {
+      return {
+        width: Math.min(wp(85), 280), // Max 280px width for phones
+        height: 120,
+        imageSize: 80,
+      };
+    }
+  };
+  
+  const cardDimensions = getCardDimensions();
 
   const primaryColor = colors.primary;
 
@@ -100,19 +128,17 @@ const FoodItemCard = ({
         className="rounded-2xl overflow-hidden shadow-lg"
         style={{
           backgroundColor: colors.surface,
-          borderColor: 'transparent', // Remove border color
-          minWidth: isSmallDevice ? scale(280) : scale(320),
-          maxWidth: isSmallDevice ? scale(360) : scale(520),
-          minHeight: scale(120),
-          maxHeight: scale(180),
-          elevation: 8, // Enhanced elevation
+          borderColor: 'transparent',
+          width: cardDimensions.width,
+          height: cardDimensions.height,
+          elevation: 6,
           shadowColor: '#000',
           shadowOffset: {
             width: 0,
-            height: 4,
+            height: 3,
           },
-          shadowOpacity: 0.2,
-          shadowRadius: 8,
+          shadowOpacity: 0.15,
+          shadowRadius: 6,
         }}
       >
         {/* Card content with horizontal layout */}
@@ -123,8 +149,8 @@ const FoodItemCard = ({
               source={getImageSource()}
               className="rounded-2xl"
               style={{
-                width: isSmallDevice ? 80 : 100,
-                height: isSmallDevice ? 80 : 100,
+                width: cardDimensions.imageSize,
+                height: cardDimensions.imageSize,
               }}
               resizeMode="cover"
             />
@@ -152,20 +178,25 @@ const FoodItemCard = ({
           </TouchableOpacity>
 
           {/* Right side - Food Details */}
-          <View className="flex-1">
+          <View className="flex-1" style={{ minWidth: 0, flexShrink: 1 }}>
             {/* Food Name */}
             <Text
-              className={`${isSmallDevice ? 'text-base' : 'text-lg'} font-bold mb-2 p-1`}
-              style={{ color: colors.onSurface }}
+              className="font-bold mb-2 p-1"
+              style={{ 
+                color: colors.onSurface,
+                fontSize: getResponsiveText(isSmallScreen ? 14 : 16),
+                lineHeight: getResponsiveText(isSmallScreen ? 18 : 20),
+              }}
               numberOfLines={2}
+              ellipsizeMode="tail"
             >
               {FoodName}
             </Text>
 
             {/* Distance */}
-            <View className="flex-row items-center mb-2">
+            <View className="flex-row items-center mb-2 flex-wrap">
               <Text className="text-xs" style={{ color: colors.onSurface }}>
-                {(distanceKm || distanceFromUser).toFixed(1)} km
+                {getDistance().toFixed(1)} km
               </Text>
               {!isAvailable && (
                 <>
@@ -183,13 +214,19 @@ const FoodItemCard = ({
             </View>
 
             {/* Price and Delivery */}
-            <View className="flex-row items-center justify-between">
-              <View className="flex-row items-center">
+            <View className="flex-row items-center justify-between flex-wrap">
+              <View className="flex-row items-center flex-shrink" style={{ minWidth: 0 }}>
                 <Text
-                  className={`${isSmallDevice ? 'text-base' : 'text-lg'} font-bold`}
-                  style={{ color: colors.primary }}
+                  className="font-bold"
+                  style={{ 
+                    color: colors.primary,
+                    fontSize: getResponsiveText(isSmallScreen ? 14 : 16),
+                    flexShrink: 1,
+                  }}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
                 >
-                  {FoodPrice} XAF
+                  {getFormattedPrice()} XAF
                 </Text>
                 <Text
                   className="text-xs ml-1"
@@ -205,8 +242,10 @@ const FoodItemCard = ({
                 <Text
                   className="text-xs ml-1"
                   style={{ color: colors.onSurface }}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
                 >
-                  {DeliveryPrice.toFixed(0)} F
+                  {getDeliveryFee().toFixed(0)} F
                 </Text>
               </View>
             </View>

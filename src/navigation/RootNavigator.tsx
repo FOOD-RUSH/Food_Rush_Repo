@@ -349,11 +349,12 @@ const screenOptions = useMemo(() => {
       backgroundColor: theme.colors.background,
       marginTop: getContentMarginTop(true),
               },
-              headerLeft: () => 
+              headerTitle: '',
+              headerLeft: () => (
                 <TouchableOpacity onPressIn={() => navigationRef.goBack()}>
                   <MaterialIcon name={Platform.OS === 'ios' ? 'arrow-back-ios' : 'arrow-back'} size={24} color={navigationTheme.colors.text} />
                 </TouchableOpacity>
-              
+              ),
             }}
           />
 
@@ -487,7 +488,11 @@ const screenOptions = useMemo(() => {
             <Stack.Screen
               name="RestaurantEditFoodItem"
               component={EditFoodScreen}
-              options={{}}
+              options={{
+                headerTitle: 'Edit Item',
+                headerBackTitleVisible: Platform.OS === 'ios',
+                headerBackTitle: 'Menu',
+              }}
             />
             <Stack.Screen
               name="RestaurantProfile"

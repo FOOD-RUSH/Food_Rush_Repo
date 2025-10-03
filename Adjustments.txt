@@ -1,6 +1,6 @@
 -TabBar
 
--> size and position of tab bar with content overlap
+
 
 - PROFILE DETAILS SCREEN
 -styling

@@ -1,7 +1,10 @@
 import { IoniconsIcon, MaterialIcon } from '@/src/components/common/icons';
-import { TouchableOpacity, View, Text } from 'react-native';
+import { TouchableOpacity, View, Text, Dimensions } from 'react-native';
 import React from 'react';
 import { Card, useTheme } from 'react-native-paper';
+import { useResponsive } from '@/src/hooks/useResponsive';
+
+const { width: screenWidth } = Dimensions.get('window');
 import { images } from '@/assets/images';
 
 import { CustomerHomeStackScreenProps } from '@/src/navigation/types';
@@ -41,6 +44,32 @@ const ClassicFoodCard = ({
     useNavigation<CustomerHomeStackScreenProps<'HomeScreen'>['navigation']>();
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
+  const { isSmallScreen, isTablet, isLargeScreen, wp, getResponsiveText } = useResponsive();
+  
+  // Calculate responsive dimensions
+  const getCardDimensions = () => {
+    if (isLargeScreen) {
+      return {
+        width: Math.min(wp(35), 220), // Max 220px width
+        imageSize: 120,
+        padding: 16,
+      };
+    } else if (isTablet) {
+      return {
+        width: Math.min(wp(40), 200), // Max 200px width
+        imageSize: 110,
+        padding: 14,
+      };
+    } else {
+      return {
+        width: Math.min(wp(50), 180), // Max 180px width for phones
+        imageSize: 100,
+        padding: 12,
+      };
+    }
+  };
+  
+  const cardDimensions = getCardDimensions();
 
   // Helper function to get image source
   const getImageSource = () => {
@@ -65,20 +94,26 @@ const ClassicFoodCard = ({
         mode="outlined"
         className="overflow-hidden rounded-2xl shadow-lg my-3"
         style={{
-          width: 190,
+          width: cardDimensions.width,
           backgroundColor: colors.surface,
-          borderColor: colors.outline,
+          borderColor: colors.outline + '30',
+          borderWidth: 0.5,
+          elevation: 4,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
         }}
       >
-        <View className="p-3">
+        <View style={{ padding: cardDimensions.padding }}>
           {/* Image with heart icon overlay */}
           <View className="relative mb-3">
             <Card.Cover
               source={getImageSource()}
               style={{
-                height: 150,
-                width: 150,
-                borderRadius: 75,
+                height: cardDimensions.imageSize,
+                width: cardDimensions.imageSize,
+                borderRadius: cardDimensions.imageSize / 2,
                 alignSelf: 'center',
               }}
             />
@@ -99,18 +134,28 @@ const ClassicFoodCard = ({
           </View>
 
           {/* Food info */}
-          <View className="mb-2 self-center">
+          <View className="mb-2" style={{ alignItems: 'center', minWidth: 0, width: '100%' }}>
             <Text
-              className="font-semibold mb-1 text-center text-lg"
-              style={{ color: colors.onSurface }}
+              className="font-semibold mb-1 text-center"
+              style={{ 
+                color: colors.onSurface,
+                fontSize: getResponsiveText(isSmallScreen ? 14 : 16),
+                minWidth: 0,
+              }}
               numberOfLines={1}
+              ellipsizeMode="tail"
             >
               {foodName || 'N/A'}
             </Text>
             <Text
-              className="mb-2 text-center text-base"
-              style={{ color: colors.onSurface }}
+              className="mb-2 text-center"
+              style={{ 
+                color: colors.onSurface,
+                fontSize: getResponsiveText(isSmallScreen ? 12 : 14),
+                minWidth: 0,
+              }}
               numberOfLines={1}
+              ellipsizeMode="tail"
             >
               {restaurantName || 'N/A'}
             </Text>
@@ -143,14 +188,16 @@ const ClassicFoodCard = ({
           </View>
 
           {/* Price and delivery info */}
-          <View className="flex-row justify-between items-center">
+          <View className="flex-row justify-between items-center flex-wrap">
             <Text
-              className="font-bold text-base"
-              style={{ color: colors.primary }}
+              className="font-bold text-base mr-2 flex-shrink"
+              style={{ color: colors.primary, minWidth: 0 }}
+              numberOfLines={1}
+              ellipsizeMode="tail"
             >
               {foodPrice ? `${typeof foodPrice === 'string' ? parseFloat(foodPrice) : foodPrice} XAF` : 'N/A'}
             </Text>
-            <View className="flex-row items-center">
+            <View className="flex-row items-center flex-shrink" style={{ minWidth: 0 }}>
               <MaterialIcon
                 name="delivery-dining"
                 color={colors.primary}
@@ -159,6 +206,8 @@ const ClassicFoodCard = ({
               <Text
                 className="ml-1 text-xs"
                 style={{ color: colors.onSurface }}
+                numberOfLines={1}
+                ellipsizeMode="tail"
               >
                 {deliveryFee ? `${deliveryFee} XAF` : 'N/A'}
               </Text>

@@ -14,6 +14,7 @@ export interface Restaurant {
   longitude: number | null;
   verificationStatus: 'PENDING_VERIFICATION' | 'APPROVED' | 'REJECTED';
   documentUrl: string | null;
+  pictureUrl: string | null;
   rating: number | null;
   ratingCount: number;
   ownerId: string;

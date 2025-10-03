@@ -38,7 +38,13 @@ export const Typography: React.FC<TypographyProps> = ({
   // Get typography props with responsive sizing and fallback
   const typographyStyle = React.useMemo(() => {
     try {
-      const style = getTypographyProps(variant, responsive, screen?.width);
+      const style = getTypographyProps(
+        variant, 
+        responsive, 
+        screen?.width, 
+        screen?.height, 
+        screen?.fontScale
+      );
       // Ensure we have all required properties with fallbacks
       return {
         fontSize: style?.fontSize || TYPOGRAPHY_SCALE.body.fontSize,
@@ -57,7 +63,7 @@ export const Typography: React.FC<TypographyProps> = ({
         letterSpacing: TYPOGRAPHY_SCALE.body.letterSpacing,
       };
     }
-  }, [variant, responsive, screen?.width]);
+  }, [variant, responsive, screen?.width, screen?.height, screen?.fontScale]);
 
   // Override font family if weight is specified
   const fontFamily = weight

@@ -184,13 +184,27 @@ export const getUrbanistFont = (
 export const getResponsiveFontSize = (
   baseSize: number,
   screenWidth: number,
+  screenHeight: number,
+  fontScale: number = 1,
 ): number => {
-  // Breakpoints
-  if (screenWidth < 375) return baseSize * 0.9; // Small phones
-  if (screenWidth < 414) return baseSize; // Regular phones
-  if (screenWidth < 768) return baseSize * 1.05; // Large phones
-  if (screenWidth < 1024) return baseSize * 1.1; // Tablets
-  return baseSize * 1.15; // Large tablets/desktop
+  // Calculate scaling factor based on screen size
+  const screenArea = screenWidth * screenHeight;
+  const baseScreenArea = 375 * 812; // iPhone X dimensions as base
+  const screenScaleFactor = Math.sqrt(screenArea / baseScreenArea);
+  
+  // Adjust for different screen sizes
+  let sizeMultiplier = 1;
+  if (screenWidth < 375) sizeMultiplier = 0.85; // Very small screens
+  else if (screenWidth < 414) sizeMultiplier = 0.9; // Small phones
+  else if (screenWidth < 768) sizeMultiplier = 1; // Regular phones
+  else if (screenWidth < 1024) sizeMultiplier = 1.1; // Tablets
+  else sizeMultiplier = 1.2; // Large tablets/desktop
+
+  // Combine screen scaling and font scaling
+  const finalSize = baseSize * sizeMultiplier * fontScale;
+  
+  // Apply screen area scaling to make it more proportional
+  return finalSize * screenScaleFactor;
 };
 
 // Typography component props helper
@@ -198,6 +212,8 @@ export const getTypographyProps = (
   variant: keyof typeof TYPOGRAPHY_SCALE,
   responsive: boolean = true,
   screenWidth?: number,
+  screenHeight?: number,
+  fontScale?: number,
 ) => {
   // Ensure variant exists in TYPOGRAPHY_SCALE
   if (!variant || !TYPOGRAPHY_SCALE[variant]) {
@@ -223,12 +239,18 @@ export const getTypographyProps = (
   }
 
   const fontSize =
-    responsive && screenWidth && screenWidth > 0
-      ? getResponsiveFontSize(baseStyle.fontSize, screenWidth)
+    responsive && screenWidth && screenWidth > 0 && screenHeight
+      ? getResponsiveFontSize(baseStyle.fontSize, screenWidth, screenHeight, fontScale)
       : baseStyle.fontSize;
+
+  // Adjust line height proportionally with font size
+  const lineHeight = responsive && screenWidth && screenWidth > 0 && screenHeight
+    ? Math.round(baseStyle.lineHeight * (fontSize / baseStyle.fontSize))
+    : baseStyle.lineHeight;
 
   return {
     ...baseStyle,
     fontSize,
+    lineHeight,
   };
 };

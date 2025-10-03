@@ -37,6 +37,8 @@ import {
   useToggleMenuItemAvailability,
 } from '@/src/hooks/restaurant/useMenuApi';
 import { useCurrentRestaurant } from '@/src/stores/AuthStore';
+import { useFloatingTabBarHeight } from '@/src/hooks/useFloatingTabBarHeight';
+import { useResponsive } from '@/src/hooks/useResponsive';
 
 const { width: screenWidth } = Dimensions.get('window');
 const isSmallScreen = screenWidth < 375;
@@ -66,6 +68,8 @@ const MenuItemsList: React.FC<
   const navigation = useNavigation();
   const currentRestaurant = useCurrentRestaurant();
   const restaurantId = currentRestaurant?.id;
+  const tabBarHeight = useFloatingTabBarHeight();
+  const { scale, isSmallScreen: responsiveIsSmallScreen } = useResponsive();
 
   const { categories: apiCategories = [] } = useCategories();
 
@@ -128,7 +132,7 @@ const MenuItemsList: React.FC<
   const handleEditItem = (itemId: string) => {
     try {
       Haptics.selectionAsync();
-      navigation.navigate('RestaurantMenuItemForm', { itemId });
+      navigation.navigate('RestaurantEditFoodItem', { menuId: itemId });
     } catch (error) {
       setError({
         hasError: true,
@@ -200,27 +204,27 @@ const MenuItemsList: React.FC<
   const renderMenuItem = ({ item }: { item: MenuItem }) => (
     <Card
       style={{
-        marginBottom: isSmallScreen ? 10 : 12,
+        marginBottom: scale(isSmallScreen ? 10 : 12),
         backgroundColor: colors.surface,
-        borderRadius: 20,
+        borderRadius: scale(20),
         elevation: 4,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 3 },
+        shadowOffset: { width: 0, height: scale(3) },
         shadowOpacity: 0.12,
-        shadowRadius: 6,
+        shadowRadius: scale(6),
       }}
       className="mx-1"
     >
       <View className={`flex-row ${isSmallScreen ? 'p-3' : 'p-4'}`}>
         {/* Enhanced Image Container - Takes more space */}
-        <View className={`${isSmallScreen ? 'w-28 h-28' : 'w-32 h-32'} mr-4`}>
+        <View className={`${isSmallScreen ? 'w-28 h-28' : 'w-32 h-32'} mr-4`} style={{ width: scale(isSmallScreen ? 112 : 128), height: scale(isSmallScreen ? 112 : 128) }}>
           {item.pictureUrl ? (
             <Image
               source={{ uri: item.pictureUrl }}
               style={{
                 width: '100%',
                 height: '100%',
-                borderRadius: 16,
+                borderRadius: scale(16),
                 backgroundColor: colors.surfaceVariant,
               }}
               resizeMode="cover"
@@ -485,7 +489,7 @@ const MenuItemsList: React.FC<
           keyExtractor={(item) => item.id}
           contentContainerStyle={{
             paddingTop: isSmallScreen ? 8 : 12,
-            paddingBottom: 100, // Space for FAB
+            paddingBottom: Math.max(100, tabBarHeight), // Space for FAB and tab bar
           }}
           refreshing={isLoading}
           onRefresh={onRefresh}

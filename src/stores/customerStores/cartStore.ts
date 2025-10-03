@@ -16,6 +16,7 @@ interface CartState {
   items: CartItem[];
   restaurantID: string | null;
   restaurantName: string | null;
+  deliveryPrice: number | null;
   lastActivity: number;
   error: string | null;
   reminderEnabled: boolean;
@@ -33,6 +34,7 @@ interface CartActions {
   clearCart: () => void;
   setError: (error: string | null) => void;
   clearError: () => void;
+  setDeliveryPrice: (price: number | null) => void;
   canAddItem: (item: MenuProps) => boolean;
   isItemInCart: (foodId: string) => boolean;
   getItemQuantityInCart: (foodId: string) => number;
@@ -88,6 +90,7 @@ const clearCartState = (set: any) => {
     items: [],
     restaurantID: null,
     restaurantName: null,
+    deliveryPrice: null,
     lastActivity: Date.now(),
   });
 
@@ -112,6 +115,7 @@ export const useCartStore = create<CartState & CartActions>()(
         items: [],
         restaurantID: null,
         restaurantName: null,
+        deliveryPrice: null,
         lastActivity: Date.now(),
         error: null,
         reminderEnabled: true, // Enable reminders by default
@@ -250,14 +254,17 @@ export const useCartStore = create<CartState & CartActions>()(
                   item.restaurantId || (item as any).restaurant?.id;
                 const restaurantName =
                   (item as any).restaurant?.name || 'Unknown Restaurant';
+                const deliveryPrice = (item as any).restaurant?.deliveryPrice || null;
                 console.log('Setting cart restaurant info:', {
                   restaurantId: itemRestaurantId,
                   restaurantName,
+                  deliveryPrice,
                   menuItem: item,
                 });
                 set({
                   restaurantID: itemRestaurantId || null,
                   restaurantName: restaurantName,
+                  deliveryPrice: deliveryPrice,
                 });
               }
 
@@ -331,6 +338,10 @@ export const useCartStore = create<CartState & CartActions>()(
 
         setError: (error) => {
           set({ error });
+        },
+
+        setDeliveryPrice: (price) => {
+          set({ deliveryPrice: price });
         },
 
         clearError: () => {
@@ -424,6 +435,7 @@ export const useCartStore = create<CartState & CartActions>()(
           items: state.items,
           restaurantID: state.restaurantID,
           restaurantName: state.restaurantName,
+          deliveryPrice: state.deliveryPrice,
           lastActivity: state.lastActivity,
           reminderEnabled: state.reminderEnabled,
         }),
@@ -473,3 +485,9 @@ export const useCartRestaurantName = () =>
 
 export const useCartLastActivity = () =>
   useCartStore((state) => state.lastActivity);
+
+export const useCartDeliveryPrice = () =>
+  useCartStore((state) => state.deliveryPrice);
+
+export const useSetCartDeliveryPrice = () =>
+  useCartStore((state) => state.setDeliveryPrice);

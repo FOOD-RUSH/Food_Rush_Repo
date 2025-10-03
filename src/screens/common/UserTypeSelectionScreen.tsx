@@ -23,6 +23,7 @@ import {
   BodyLarge,
   Label,
 } from '@/src/components/common/Typography';
+import ResponsiveImage from '@/src/components/common/ResponsiveImage';
 // Types
 interface UserType {
   id: 'customer' | 'restaurant';
@@ -166,13 +167,14 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
                   position: 'relative',
                 }}
               >
-                <Image
+                <ResponsiveImage
                   source={type.image}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                  }}
+                  aspectRatio={1.5} // Adjust as needed for your images
                   resizeMode="cover"
+                  containerStyle={{
+                    height: '100%',
+                    width: '100%',
+                  }}
                 />
 
                 {/* Selection indicator */}

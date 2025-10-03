@@ -4,7 +4,6 @@ import { Pressable, ScrollView, FlatList } from 'react-native-gesture-handler';
 import {
   View,
   StatusBar,
-  Dimensions,
   Image,
   Alert,
   RefreshControl,
@@ -34,8 +33,7 @@ import {
 } from '@/src/components/common/Typography';
 import { useResponsive, useResponsiveSpacing } from '@/src/hooks/useResponsive';
 import ProfessionalErrorDisplay from '@/src/components/common/ProfessionalErrorDisplay';
-
-const { width: screenWidth } = Dimensions.get('window');
+import ResponsiveImage from '@/src/components/common/ResponsiveImage';
 
 const RestaurantDetailScreen = ({
   navigation,
@@ -275,17 +273,15 @@ const RestaurantDetailScreen = ({
 
       {/* Header Image with Navigation */}
       <View style={{ position: 'relative' }}>
-        <Image
+        <ResponsiveImage
           source={
             restaurantDetails.image
               ? { uri: restaurantDetails.image }
               : images.onboarding2
           }
-          style={{
-            width: screenWidth,
-            height: isSmallScreen ? hp(25) : hp(30),
-            resizeMode: 'cover',
-          }}
+          width="100%"
+          height={isSmallScreen ? hp(25) : hp(30)}
+          resizeMode="cover"
         />
         {/* Navigation Header */}
         <View
@@ -321,9 +317,7 @@ const RestaurantDetailScreen = ({
               }}
             >
               <MaterialIcon                 name={isFavorite ? 'favorite' : 'favorite-border'}
-                size={scale(24)}
-                color={isFavorite ? '#FF6B6B' : 'white'}
-              />
+                size={scale(24)} color={isFavorite ? '#FF6B6B' : 'white'} />
             </Pressable>
             <Pressable
               onPress={handleShare}
@@ -347,6 +341,8 @@ const RestaurantDetailScreen = ({
             backgroundColor: colors.surface,
             marginBottom: spacing.lg,
             elevation: 2,
+            borderRadius: scale(16),
+            overflow: 'hidden',
           }}
         >
           <Card.Content style={{ padding: spacing.lg }}>
@@ -424,6 +420,8 @@ const RestaurantDetailScreen = ({
             backgroundColor: colors.surface,
             marginBottom: spacing.md,
             elevation: 1,
+            borderRadius: scale(16),
+            overflow: 'hidden',
           }}
         >
           <TouchableRipple onPress={handleViewReviews}>
@@ -526,6 +524,8 @@ const RestaurantDetailScreen = ({
             backgroundColor: colors.surface,
             marginBottom: spacing.md,
             elevation: 1,
+            borderRadius: scale(16),
+            overflow: 'hidden',
           }}
         >
           <TouchableRipple onPress={handleViewLocation}>
@@ -635,6 +635,8 @@ const RestaurantDetailScreen = ({
             backgroundColor: colors.surface,
             marginBottom: spacing.lg,
             elevation: 1,
+            borderRadius: scale(16),
+            overflow: 'hidden',
           }}
         >
           <TouchableRipple onPress={handleViewOffers}>

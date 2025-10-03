@@ -1,133 +1,72 @@
 import React from 'react';
-import { Text, TextStyle } from 'react-native';
+import { Text, TextProps, TextStyle, StyleSheet } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import { useBreakpoint, getResponsiveFontSize } from '@/src/utils/responsive';
+import { useResponsive } from '@/src/hooks/useResponsive';
 
-interface ResponsiveTextProps {
-  children: React.ReactNode;
-  variant?: 'h1' | 'h2' | 'h3' | 'h4' | 'body' | 'caption';
+interface ResponsiveTextProps extends TextProps {
+  size?: 'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl';
+  weight?: 'thin' | 'normal' | 'medium' | 'semibold' | 'bold' | 'extrabold';
   color?: string;
-  weight?:
-    | 'normal'
-    | 'bold'
-    | '100'
-    | '200'
-    | '300'
-    | '400'
-    | '500'
-    | '600'
-    | '700'
-    | '800'
-    | '900';
   align?: 'left' | 'center' | 'right' | 'justify';
-  className?: string;
-  style?: TextStyle;
-  numberOfLines?: number;
-  ellipsizeMode?: 'head' | 'middle' | 'tail' | 'clip';
+  lineHeight?: number;
+  children: React.ReactNode;
 }
 
-export const ResponsiveText: React.FC<ResponsiveTextProps> = ({
-  children,
-  variant = 'body',
-  color,
+const ResponsiveText: React.FC<ResponsiveTextProps> = ({
+  size = 'base',
   weight = 'normal',
+  color,
   align = 'left',
-  className = '',
+  lineHeight,
   style,
-  numberOfLines,
-  ellipsizeMode,
+  children,
+  ...props
 }) => {
   const { colors } = useTheme();
-  const breakpoint = useBreakpoint();
-  const fontSize = getResponsiveFontSize(variant, breakpoint);
-
+  const { scale } = useResponsive();
+  
+  // Define responsive font sizes
+  const fontSize = {
+    xs: scale(12),
+    sm: scale(14),
+    base: scale(16),
+    lg: scale(18),
+    xl: scale(20),
+    '2xl': scale(24),
+    '3xl': scale(30),
+    '4xl': scale(36),
+  }[size];
+  
+  // Define font weights
+  const fontWeight = {
+    thin: '100',
+    normal: '400',
+    medium: '500',
+    semibold: '600',
+    bold: '700',
+    extrabold: '800',
+  }[weight];
+  
+  // Define line heights based on font size
+  const calculatedLineHeight = lineHeight || fontSize * 1.3;
+  
   const textStyle: TextStyle = {
     fontSize,
-    fontWeight: weight,
-    textAlign: align,
+    fontWeight,
     color: color || colors.onSurface,
-    ...style,
+    textAlign: align,
+    lineHeight: calculatedLineHeight,
   };
 
+  const combinedStyle = Array.isArray(style)
+    ? [textStyle, ...style]
+    : [textStyle, style].filter(Boolean);
+
   return (
-    <Text
-      style={textStyle}
-      className={className}
-      numberOfLines={numberOfLines}
-      ellipsizeMode={ellipsizeMode}
-    >
+    <Text style={combinedStyle} {...props}>
       {children}
     </Text>
   );
 };
 
-export const ResponsiveHeading: React.FC<
-  Omit<ResponsiveTextProps, 'variant'> & { level?: 1 | 2 | 3 | 4 }
-> = ({ level = 1, weight = 'bold', ...props }) => {
-  const variant = `h${level}` as 'h1' | 'h2' | 'h3' | 'h4';
-  return <ResponsiveText variant={variant} weight={weight} {...props} />;
-};
-
-export const ResponsiveSubheading: React.FC<
-  Omit<ResponsiveTextProps, 'variant'>
-> = ({ weight = '600', ...props }) => {
-  return <ResponsiveText variant="h4" weight={weight} {...props} />;
-};
-
-export const ResponsiveBody: React.FC<Omit<ResponsiveTextProps, 'variant'>> = (
-  props,
-) => {
-  return <ResponsiveText variant="body" {...props} />;
-};
-
-export const ResponsiveCaption: React.FC<
-  Omit<ResponsiveTextProps, 'variant'>
-> = ({ color, ...props }) => {
-  const { colors } = useTheme();
-  return (
-    <ResponsiveText
-      variant="caption"
-      color={color || colors.onSurfaceVariant}
-      {...props}
-    />
-  );
-};
-
-// Hook for getting typography styles
-export const useTypography = () => {
-  const { colors } = useTheme();
-  const breakpoint = useBreakpoint();
-
-  return {
-    h1: {
-      fontSize: getResponsiveFontSize('h1', breakpoint),
-      fontWeight: 'bold' as const,
-      color: colors.onSurface,
-    },
-    h2: {
-      fontSize: getResponsiveFontSize('h2', breakpoint),
-      fontWeight: 'bold' as const,
-      color: colors.onSurface,
-    },
-    h3: {
-      fontSize: getResponsiveFontSize('h3', breakpoint),
-      fontWeight: '600' as const,
-      color: colors.onSurface,
-    },
-    h4: {
-      fontSize: getResponsiveFontSize('h4', breakpoint),
-      fontWeight: '600' as const,
-      color: colors.onSurface,
-    },
-    body: {
-      fontSize: getResponsiveFontSize('body', breakpoint),
-      fontWeight: 'normal' as const,
-      color: colors.onSurface,
-    },
-    caption: {
-      fontSize: getResponsiveFontSize('caption', breakpoint),
-      fontWeight: 'normal' as const,
-      color: colors.onSurfaceVariant,
-    },
-  };
-};
+export default ResponsiveText;
