@@ -1,11 +1,5 @@
 import React, { useState, useCallback, useLayoutEffect, useMemo } from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  RefreshControl,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, FlatList, RefreshControl, StyleSheet } from 'react-native';
 import { useTheme, ActivityIndicator } from 'react-native-paper';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -38,9 +32,15 @@ const CategoryMenuScreen: React.FC<CategoryMenuScreenProps> = ({
 
   // Fetch menu items for this category using the browse API
   // Convert display title to API category value
-  const categoryValue = categoryInfo?.title || categoryTitle.toLowerCase().replace(/\s+/g, '-');
-  const { data: categoryMenuItems, isLoading, error, refetch } = useBrowseMenuItems(categoryValue);
-  
+  const categoryValue =
+    categoryInfo?.title || categoryTitle.toLowerCase().replace(/\s+/g, '-');
+  const {
+    data: categoryMenuItems,
+    isLoading,
+    error,
+    refetch,
+  } = useBrowseMenuItems(categoryValue);
+
   console.log('Category filtering:', {
     categoryTitle,
     categoryValue,
@@ -50,7 +50,7 @@ const CategoryMenuScreen: React.FC<CategoryMenuScreenProps> = ({
   // Apply client-side filtering as backup if API doesn't filter properly
   const filteredMenuItems = useMemo(() => {
     if (!categoryMenuItems) return [];
-    
+
     // If we have items, check if they're already filtered by the API
     // If not, apply client-side filtering
     const filtered = categoryMenuItems.filter((item) => {
@@ -58,29 +58,29 @@ const CategoryMenuScreen: React.FC<CategoryMenuScreenProps> = ({
       if (item.category) {
         return item.category.toLowerCase() === categoryValue.toLowerCase();
       }
-      
+
       // Fallback to name/description matching
       const itemName = item.name.toLowerCase();
       const itemDescription = item.description?.toLowerCase() || '';
-      
+
       switch (categoryValue) {
         case 'local-dishes':
           return (
-            itemName.includes('local') || 
+            itemName.includes('local') ||
             itemDescription.includes('local') ||
             itemName.includes('traditional') ||
             itemDescription.includes('traditional')
           );
         case 'snacks':
           return (
-            itemName.includes('snack') || 
+            itemName.includes('snack') ||
             itemDescription.includes('snack') ||
             itemName.includes('bite') ||
             itemDescription.includes('bite')
           );
         case 'drinks':
           return (
-            itemName.includes('drink') || 
+            itemName.includes('drink') ||
             itemDescription.includes('drink') ||
             itemName.includes('beverage') ||
             itemDescription.includes('beverage') ||
@@ -97,7 +97,7 @@ const CategoryMenuScreen: React.FC<CategoryMenuScreenProps> = ({
           );
         case 'fast-food':
           return (
-            itemName.includes('burger') || 
+            itemName.includes('burger') ||
             itemName.includes('fast') ||
             itemName.includes('quick') ||
             itemDescription.includes('fast') ||
@@ -110,7 +110,7 @@ const CategoryMenuScreen: React.FC<CategoryMenuScreenProps> = ({
           );
       }
     });
-    
+
     return filtered;
   }, [categoryMenuItems, categoryValue]);
 
@@ -156,20 +156,16 @@ const CategoryMenuScreen: React.FC<CategoryMenuScreenProps> = ({
 
   const keyExtractor = useCallback((item: FoodProps) => item.id, []);
 
- 
   // Loading state
   if (isLoading) {
     return (
       <CommonView>
-
-
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color={colors.primary} />
-            <Text style={[styles.loadingText, { color: colors.onSurface }]}>
-              {t('loading_menu_items')}
-            </Text>
-          </View>
-
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={[styles.loadingText, { color: colors.onSurface }]}>
+            {t('loading_menu_items')}
+          </Text>
+        </View>
       </CommonView>
     );
   }

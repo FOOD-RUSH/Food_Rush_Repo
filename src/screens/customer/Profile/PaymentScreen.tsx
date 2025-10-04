@@ -9,7 +9,6 @@ import CommonView from '@/src/components/common/CommonView';
 import { Card, useTheme } from 'react-native-paper';
 import { images } from '@/assets/images';
 
-
 const PaymentScreen = ({
   navigation,
 }: RootStackScreenProps<'PaymentMethods'>) => {
@@ -67,7 +66,8 @@ const PaymentScreen = ({
                   </Text>
                 </View>
               </View>
-              <MaterialIcon                 name="arrow-forward-ios"
+              <MaterialIcon
+                name="arrow-forward-ios"
                 size={20}
                 color={colors.onSurfaceVariant}
               />
@@ -104,7 +104,8 @@ const PaymentScreen = ({
                   </Text>
                 </View>
               </View>
-              <MaterialIcon                 name="arrow-forward-ios"
+              <MaterialIcon
+                name="arrow-forward-ios"
                 size={20}
                 color={colors.onSurfaceVariant}
               />

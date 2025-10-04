@@ -25,7 +25,6 @@ const CommonView = ({ children, showStatusBar = true }: CommonViewProps) => {
           translucent={false}
         />
       )}
-      
 
       <SafeAreaView
         className={`flex-1 ${dark ? 'dark' : ''}`}

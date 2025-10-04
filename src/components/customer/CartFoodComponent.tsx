@@ -37,7 +37,7 @@ const CartFoodComponent: React.FC<CartFoodComponentProps> = React.memo(
   ({ id, menuItem, quantity, specialInstructions, onDelete }) => {
     const { colors } = useTheme();
     const { t } = useTranslation('translation');
-    const deleteCart = useCartStore((state) => state.deleteCart);
+    const deleteCart = useCartStore((state) => state.removeItem);
 
     // Shared values
     const translateX = useSharedValue(0);
@@ -259,7 +259,8 @@ const CartFoodComponent: React.FC<CartFoodComponentProps> = React.memo(
 
                       {specialInstructions && (
                         <View style={styles.instructionsContainer}>
-                          <MaterialIcon                             name="note"
+                          <MaterialIcon
+                            name="note"
                             size={12}
                             color={colors.onSurfaceVariant}
                             style={styles.noteIcon}

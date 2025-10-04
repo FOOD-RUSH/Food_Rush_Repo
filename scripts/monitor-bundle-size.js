@@ -20,15 +20,15 @@ function formatBytes(bytes, decimals = 2) {
 // Helper function to get directory size
 function getDirectorySize(dirPath) {
   if (!fs.existsSync(dirPath)) return 0;
-  
+
   let totalSize = 0;
   try {
     const files = fs.readdirSync(dirPath);
-    
+
     for (const file of files) {
       const filePath = path.join(dirPath, file);
       const stats = fs.statSync(filePath);
-      
+
       if (stats.isDirectory()) {
         totalSize += getDirectorySize(filePath);
       } else {
@@ -38,7 +38,7 @@ function getDirectorySize(dirPath) {
   } catch (_error) {
     // Ignore permission errors
   }
-  
+
   return totalSize;
 }
 
@@ -73,48 +73,64 @@ function getCurrentMetrics() {
     dist: getDirectorySize('dist'),
     expo: getDirectorySize('.expo'),
   };
-  
+
   // Calculate totals
   metrics.totalSource = metrics.src + metrics.assets;
   metrics.totalBuild = metrics.dist + metrics.expo;
-  metrics.total = metrics.src + metrics.assets + metrics.nodeModules + metrics.dist + metrics.expo;
-  
+  metrics.total =
+    metrics.src +
+    metrics.assets +
+    metrics.nodeModules +
+    metrics.dist +
+    metrics.expo;
+
   // Get package.json info
   try {
     const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
     metrics.dependencies = Object.keys(packageJson.dependencies || {}).length;
-    metrics.devDependencies = Object.keys(packageJson.devDependencies || {}).length;
+    metrics.devDependencies = Object.keys(
+      packageJson.devDependencies || {},
+    ).length;
   } catch (_error) {
     metrics.dependencies = 0;
     metrics.devDependencies = 0;
   }
-  
+
   return metrics;
 }
 
 // Compare metrics with previous
 function compareMetrics(current, previous) {
   if (!previous) return null;
-  
+
   const comparison = {};
-  const keys = ['src', 'assets', 'nodeModules', 'dist', 'expo', 'totalSource', 'totalBuild', 'total'];
-  
-  keys.forEach(key => {
+  const keys = [
+    'src',
+    'assets',
+    'nodeModules',
+    'dist',
+    'expo',
+    'totalSource',
+    'totalBuild',
+    'total',
+  ];
+
+  keys.forEach((key) => {
     const currentVal = current[key] || 0;
     const previousVal = previous[key] || 0;
     const diff = currentVal - previousVal;
-    const percentChange = previousVal > 0 ? ((diff / previousVal) * 100) : 0;
-    
+    const percentChange = previousVal > 0 ? (diff / previousVal) * 100 : 0;
+
     comparison[key] = {
       current: currentVal,
       previous: previousVal,
       diff: diff,
       percentChange: percentChange,
       increased: diff > 0,
-      decreased: diff < 0
+      decreased: diff < 0,
     };
   });
-  
+
   return comparison;
 }
 
@@ -127,31 +143,36 @@ function displayMetrics(metrics, comparison = null) {
   console.log(`Node Modules: ${formatBytes(metrics.nodeModules)}`);
   console.log(`Build Output: ${formatBytes(metrics.totalBuild)}`);
   console.log(`Total Size: ${formatBytes(metrics.total)}`);
-  console.log(`Dependencies: ${metrics.dependencies} prod + ${metrics.devDependencies} dev`);
-  
+  console.log(
+    `Dependencies: ${metrics.dependencies} prod + ${metrics.devDependencies} dev`,
+  );
+
   if (comparison) {
     console.log('\n📈 Changes Since Last Check');
     console.log('---------------------------');
-    
+
     const significantChanges = [];
-    
+
     Object.entries(comparison).forEach(([key, data]) => {
-      if (Math.abs(data.diff) > 1024) { // Only show changes > 1KB
+      if (Math.abs(data.diff) > 1024) {
+        // Only show changes > 1KB
         const arrow = data.increased ? '📈' : data.decreased ? '📉' : '➡️';
         const sign = data.diff > 0 ? '+' : '';
         const label = key.replace(/([A-Z])/g, ' $1').toLowerCase();
-        
-        console.log(`${arrow} ${label}: ${sign}${formatBytes(data.diff)} (${data.percentChange.toFixed(1)}%)`);
-        
+
+        console.log(
+          `${arrow} ${label}: ${sign}${formatBytes(data.diff)} (${data.percentChange.toFixed(1)}%)`,
+        );
+
         if (Math.abs(data.percentChange) > 10) {
           significantChanges.push({ key, ...data });
         }
       }
     });
-    
+
     if (significantChanges.length > 0) {
       console.log('\n⚠️  Significant Changes (>10%):');
-      significantChanges.forEach(change => {
+      significantChanges.forEach((change) => {
         const label = change.key.replace(/([A-Z])/g, ' $1').toLowerCase();
         console.log(`  • ${label}: ${change.percentChange.toFixed(1)}% change`);
       });
@@ -162,35 +183,43 @@ function displayMetrics(metrics, comparison = null) {
 // Check for bundle size warnings
 function checkWarnings(metrics, comparison = null) {
   const warnings = [];
-  
+
   // Size warnings
-  if (metrics.assets > 20 * 1024 * 1024) { // 20MB
+  if (metrics.assets > 20 * 1024 * 1024) {
+    // 20MB
     warnings.push('Assets are very large (>20MB) - consider optimization');
   }
-  
-  if (metrics.src > 5 * 1024 * 1024) { // 5MB
+
+  if (metrics.src > 5 * 1024 * 1024) {
+    // 5MB
     warnings.push('Source code is large (>5MB) - consider code splitting');
   }
-  
+
   if (metrics.dependencies > 100) {
-    warnings.push(`High dependency count (${metrics.dependencies}) - audit for unused packages`);
+    warnings.push(
+      `High dependency count (${metrics.dependencies}) - audit for unused packages`,
+    );
   }
-  
+
   // Change warnings
   if (comparison) {
     if (comparison.assets.percentChange > 50) {
-      warnings.push('Assets size increased significantly - check for new large files');
+      warnings.push(
+        'Assets size increased significantly - check for new large files',
+      );
     }
-    
+
     if (comparison.src.percentChange > 30) {
-      warnings.push('Source code size increased significantly - review recent changes');
+      warnings.push(
+        'Source code size increased significantly - review recent changes',
+      );
     }
-    
+
     if (comparison.nodeModules.percentChange > 20) {
       warnings.push('Node modules size increased - new dependencies added?');
     }
   }
-  
+
   return warnings;
 }
 
@@ -216,27 +245,46 @@ if (warnings.length > 0) {
 console.log('\n🎯 Bundle Size Guidelines');
 console.log('-------------------------');
 const guidelines = [
-  { name: 'Source Code', current: currentMetrics.src, target: 2 * 1024 * 1024, label: '2MB' },
-  { name: 'Assets', current: currentMetrics.assets, target: 10 * 1024 * 1024, label: '10MB' },
-  { name: 'Total Bundle', current: currentMetrics.totalSource, target: 15 * 1024 * 1024, label: '15MB' }
+  {
+    name: 'Source Code',
+    current: currentMetrics.src,
+    target: 2 * 1024 * 1024,
+    label: '2MB',
+  },
+  {
+    name: 'Assets',
+    current: currentMetrics.assets,
+    target: 10 * 1024 * 1024,
+    label: '10MB',
+  },
+  {
+    name: 'Total Bundle',
+    current: currentMetrics.totalSource,
+    target: 15 * 1024 * 1024,
+    label: '15MB',
+  },
 ];
 
-guidelines.forEach(guideline => {
+guidelines.forEach((guideline) => {
   const status = guideline.current <= guideline.target ? '✅' : '❌';
-  const percentage = (guideline.current / guideline.target * 100).toFixed(1);
-  console.log(`${status} ${guideline.name}: ${formatBytes(guideline.current)} / ${guideline.label} (${percentage}%)`);
+  const percentage = ((guideline.current / guideline.target) * 100).toFixed(1);
+  console.log(
+    `${status} ${guideline.name}: ${formatBytes(guideline.current)} / ${guideline.label} (${percentage}%)`,
+  );
 });
 
 // Historical trend
 if (history.entries.length > 1) {
   console.log('\n📊 Historical Trend (Last 5 Entries)');
   console.log('------------------------------------');
-  
+
   const recentEntries = history.entries.slice(-5);
   recentEntries.forEach((entry, index) => {
     const date = new Date(entry.timestamp).toLocaleDateString();
     const time = new Date(entry.timestamp).toLocaleTimeString();
-    console.log(`${index + 1}. ${date} ${time}: ${formatBytes(entry.totalSource)} (src+assets)`);
+    console.log(
+      `${index + 1}. ${date} ${time}: ${formatBytes(entry.totalSource)} (src+assets)`,
+    );
   });
 }
 

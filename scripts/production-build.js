@@ -30,20 +30,23 @@ try {
 // ProGuard enabled for code minification
 
 try {
-  execSync('eas build --platform android --profile production-optimized', { stdio: 'inherit' });
+  execSync('eas build --platform android --profile production-optimized', {
+    stdio: 'inherit',
+  });
   // Build completed successfully!
-  
+
   // Expected size reduction:
   // • Assets: ~70% smaller (5.2MB → ~1.5MB)
   // • Code: ~30% smaller with ProGuard + Hermes
   // • Total: 220MB → ~50-80MB estimated
-  
 } catch (error) {
   console.error('\n❌ Build failed:', error.message);
-  
+
   // Fallback: Building regular production APK...
   try {
-    execSync('eas build --platform android --profile production-apk', { stdio: 'inherit' });
+    execSync('eas build --platform android --profile production-apk', {
+      stdio: 'inherit',
+    });
     // Fallback build completed!
   } catch (fallbackError) {
     console.error('\n❌ Fallback build also failed:', fallbackError.message);

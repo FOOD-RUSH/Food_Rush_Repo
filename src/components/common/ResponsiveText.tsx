@@ -24,7 +24,7 @@ const ResponsiveText: React.FC<ResponsiveTextProps> = ({
 }) => {
   const { colors } = useTheme();
   const { scale } = useResponsive();
-  
+
   // Define responsive font sizes
   const fontSize = {
     xs: scale(12),
@@ -36,7 +36,7 @@ const ResponsiveText: React.FC<ResponsiveTextProps> = ({
     '3xl': scale(30),
     '4xl': scale(36),
   }[size];
-  
+
   // Define font weights
   const fontWeight = {
     thin: '100',
@@ -46,10 +46,10 @@ const ResponsiveText: React.FC<ResponsiveTextProps> = ({
     bold: '700',
     extrabold: '800',
   }[weight];
-  
+
   // Define line heights based on font size
   const calculatedLineHeight = lineHeight || fontSize * 1.3;
-  
+
   const textStyle: TextStyle = {
     fontSize,
     fontWeight,

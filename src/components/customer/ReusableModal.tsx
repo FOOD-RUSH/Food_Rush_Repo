@@ -181,7 +181,8 @@ const ReusableModal: React.FC<ReusableModalProps> = ({
                         }}
                         activeOpacity={0.7}
                       >
-                        <IoniconsIcon                           name="close"
+                        <IoniconsIcon
+                          name="close"
                           size={20}
                           color={colors.onSurfaceVariant}
                         />

@@ -126,7 +126,8 @@ const ApiCategoryDropdown: React.FC<ApiCategoryDropdownProps> = ({
           style,
         ]}
       >
-        <MaterialCommunityIcon           name="alert-circle"
+        <MaterialCommunityIcon
+          name="alert-circle"
           size={20}
           color={colors.error}
           style={{ marginRight: 8 }}
@@ -173,7 +174,8 @@ const ApiCategoryDropdown: React.FC<ApiCategoryDropdownProps> = ({
         {isLoading ? (
           <ActivityIndicator size="small" color={colors.primary} />
         ) : (
-          <MaterialCommunityIcon             name="chevron-down"
+          <MaterialCommunityIcon
+            name="chevron-down"
             size={20}
             color={colors.onSurfaceVariant}
           />
@@ -219,7 +221,8 @@ const ApiCategoryDropdown: React.FC<ApiCategoryDropdownProps> = ({
                 {t('select_category')}
               </Heading5>
               <TouchableOpacity onPress={() => setIsVisible(false)}>
-                <MaterialCommunityIcon                   name="close"
+                <MaterialCommunityIcon
+                  name="close"
                   size={24}
                   color={colors.onSurface}
                 />
@@ -241,7 +244,8 @@ const ApiCategoryDropdown: React.FC<ApiCategoryDropdownProps> = ({
                 showsVerticalScrollIndicator={false}
                 ListEmptyComponent={
                   <View style={{ padding: 32, alignItems: 'center' }}>
-                    <MaterialCommunityIcon                       name="food-off"
+                    <MaterialCommunityIcon
+                      name="food-off"
                       size={48}
                       color={colors.onSurfaceVariant}
                     />

@@ -72,7 +72,14 @@ const ContactUs = () => {
   return (
     <CommonView>
       {/* Header */}
-      <View
+    
+
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        className="flex-1 px-4 py-2"
+        contentContainerStyle={{ paddingBottom: scale(20) }}
+      >
+          <View
         className="px-4 pt-10 border-b"
         style={{ borderBottomColor: colors.outline + '30' }}
       >
@@ -90,12 +97,6 @@ const ContactUs = () => {
           )}
         </Body>
       </View>
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        className="flex-1 px-4 py-2"
-        contentContainerStyle={{ paddingBottom: scale(20) }}
-      >
         {/* Support Hours Info */}
         <View
           className="mb-6 p-4 rounded-xl"
@@ -115,7 +116,7 @@ const ContactUs = () => {
           </Typography>
           <Body
             color={colors.onPrimaryContainer || colors.primary}
-            style={{ lineHeight: 20 }}
+            style={{ lineHeight: 23 }}
           >
             {t('support_schedule', 'Monday - Sunday: 6:00 AM - 11:00 PM (WAT)')}
           </Body>
@@ -147,7 +148,7 @@ const ContactUs = () => {
           </Typography>
           <Body
             color={colors.onErrorContainer || colors.error}
-            style={{ lineHeight: 20 }}
+            style={{ lineHeight: 22 }}
           >
             {t(
               'emergency_info',

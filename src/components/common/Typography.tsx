@@ -39,11 +39,11 @@ export const Typography: React.FC<TypographyProps> = ({
   const typographyStyle = React.useMemo(() => {
     try {
       const style = getTypographyProps(
-        variant, 
-        responsive, 
-        screen?.width, 
-        screen?.height, 
-        screen?.fontScale
+        variant,
+        responsive,
+        screen?.width,
+        screen?.height,
+        screen?.fontScale,
       );
       // Ensure we have all required properties with fallbacks
       return {

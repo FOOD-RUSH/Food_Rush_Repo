@@ -8,25 +8,15 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useTheme, Card } from 'react-native-paper';
-
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
 
 import CommonView from '@/src/components/common/CommonView';
-import {
-  RestaurantAnalyticsStackScreenProps,
-  RootStackParamList,
-} from '@/src/navigation/types';
+import { RestaurantAnalyticsStackScreenProps } from '@/src/navigation/types';
 import { useRestaurantReviewStats } from '@/src/hooks/restaurant/useRestaurantReviews';
 import { useRestaurantProfile } from '@/src/hooks/restaurant/useRestaurantApi';
 import { useRestaurantProfileData } from '@/src/stores/restaurantStores';
-import {
-  useAnalyticsSummary,
-  useRevenueBuckets,
-  useRestaurantBalance,
-  useAnalyticsData,
-  useDoualaDateRange,
-} from '@/src/hooks/restaurant/useAnalytics';
+import { useAnalyticsData, useDoualaDateRange } from '@/src/hooks/restaurant/useAnalytics';
 import {
   Typography,
   Heading1,
@@ -36,7 +26,6 @@ import {
   Caption,
 } from '@/src/components/common/Typography';
 
-// Analytics components
 import MetricCard from '@/src/components/restaurant/analytics/MetricCard';
 import SimpleBarChart from '@/src/components/restaurant/analytics/SimpleBarChart';
 import BreakdownCard from '@/src/components/restaurant/analytics/BreakdownCard';
@@ -44,7 +33,6 @@ import PeriodSelector, {
   AnalyticsPeriodOption,
 } from '@/src/components/restaurant/analytics/PeriodSelector';
 
-// Analytics utilities
 import {
   convertToMetricCards,
   convertToChartData,
@@ -52,12 +40,10 @@ import {
   getPaymentMethodBreakdown,
   getOperatorBreakdown,
   createLoadingMetricCards,
-  formatCurrency,
   formatLargeNumber,
 } from '@/src/utils/analyticsUtils';
 import { useFloatingTabBarHeight } from '@/src/hooks/useFloatingTabBarHeight';
 
-// Types for breakdown data
 interface BreakdownItem {
   label: string;
   count: number;
@@ -75,21 +61,24 @@ const AnalyticsOverview: React.FC<
   const [selectedPeriod, setSelectedPeriod] = useState<AnalyticsPeriodOption>('7days');
   const [refreshing, setRefreshing] = useState(false);
 
-  // Get restaurant profile data
+  // Get restaurant profile
   const restaurantProfileFromStore = useRestaurantProfileData();
   const { data: restaurantProfileFromAPI } = useRestaurantProfile();
   const restaurantProfile = restaurantProfileFromStore || restaurantProfileFromAPI?.data;
   const restaurantId = restaurantProfile?.id;
-  
+
   const { data: reviewStats } = useRestaurantReviewStats(restaurantId || '');
 
   // Calculate days and date range
-  const days = useMemo(() => ({
-    today: 1,
-    yesterday: 1,
-    '7days': 7,
-    '30days': 30,
-  }[selectedPeriod]), [selectedPeriod]);
+  const days = useMemo(() => {
+    const periodMap: Record<AnalyticsPeriodOption, number> = {
+      today: 1,
+      yesterday: 1,
+      '7days': 7,
+      '30days': 30,
+    };
+    return periodMap[selectedPeriod];
+  }, [selectedPeriod]);
 
   const dateRange = useDoualaDateRange(days);
 
@@ -105,95 +94,72 @@ const AnalyticsOverview: React.FC<
     refetch: refetchAll,
   } = useAnalyticsData('daily', dateRange);
 
-  // Simplified data processing
+  // Safe data extraction with null/undefined handling
+  const summaryData = analyticsData?.data ?? null;
+  const balanceInfo = balanceData?.data ?? null;
+  const revenueInfo = revenueData?.data ?? [];
+
+  // Process metric cards
   const metricCards = useMemo(() => {
     if (isLoading) return createLoadingMetricCards();
-    try {
-      return convertToMetricCards(analyticsData?.data || null, null, false);
-    } catch {
-      return convertToMetricCards(null, null, false);
-    }
-  }, [analyticsData, isLoading]);
+    return convertToMetricCards(summaryData, null, false);
+  }, [summaryData, isLoading]);
 
+  // Process chart data
   const chartData = useMemo(() => {
-    try {
-      if (isLoading) return convertToChartData(null, '#007aff', true);
-      return convertToChartData(revenueData?.data || [], '#007aff', false);
-    } catch {
-      return convertToChartData([], '#007aff', false);
-    }
-  }, [revenueData, isLoading]);
+    if (isLoading) return convertToChartData(null, colors.primary, true);
+    return convertToChartData(revenueInfo, colors.primary, false);
+  }, [revenueInfo, isLoading, colors.primary]);
 
+  // Process breakdowns with safe data handling
   const orderStatusBreakdown = useMemo((): BreakdownItem[] => {
-    try {
-      return getOrderStatusBreakdown(analyticsData?.data?.counts, isLoading).map(item => ({
-        label: item.status || 'Unknown',
-        count: item.count || 0,
-        percentage: item.percentage || 0,
-        color: item.color || colors.primary,
-      }));
-    } catch {
-      return getOrderStatusBreakdown(null, false).map(item => ({
-        label: item.status || 'Unknown',
-        count: item.count || 0,
-        percentage: item.percentage || 0,
-        color: item.color || colors.primary,
-      }));
-    }
-  }, [analyticsData, colors.primary, isLoading]);
+    return getOrderStatusBreakdown(summaryData?.counts, isLoading).map((item) => ({
+      label: item.status ?? t('unknown'),
+      count: item.count ?? 0,
+      percentage: item.percentage ?? 0,
+      color: item.color ?? colors.primary,
+    }));
+  }, [summaryData?.counts, isLoading, colors.primary, t]);
 
   const paymentMethodBreakdown = useMemo((): BreakdownItem[] => {
-    try {
-      return getPaymentMethodBreakdown(analyticsData?.data?.paymentMethod, isLoading).map(item => ({
-        label: item.method || 'Unknown',
-        count: item.count || 0,
-        percentage: item.percentage || 0,
-        color: item.color || colors.primary,
-      }));
-    } catch {
-      return getPaymentMethodBreakdown(null, false).map(item => ({
-        label: item.method || 'Unknown',
-        count: item.count || 0,
-        percentage: item.percentage || 0,
-        color: item.color || colors.primary,
-      }));
-    }
-  }, [analyticsData, colors.primary, isLoading]);
+    return getPaymentMethodBreakdown(summaryData?.paymentMethod, isLoading).map((item) => ({
+      label: item.method ?? t('unknown'),
+      count: item.count ?? 0,
+      percentage: item.percentage ?? 0,
+      color: item.color ?? colors.primary,
+    }));
+  }, [summaryData?.paymentMethod, isLoading, colors.primary, t]);
 
   const operatorBreakdown = useMemo((): BreakdownItem[] => {
-    try {
-      return getOperatorBreakdown(analyticsData?.data?.operator, isLoading).map(item => ({
-        label: item.operator || 'Unknown',
-        count: item.count || 0,
-        percentage: item.percentage || 0,
-        color: item.color || colors.primary,
-      }));
-    } catch {
-      return getOperatorBreakdown(null, false).map(item => ({
-        label: item.operator || 'Unknown',
-        count: item.count || 0,
-        percentage: item.percentage || 0,
-        color: item.color || colors.primary,
-      }));
-    }
-  }, [analyticsData, colors.primary, isLoading]);
+    return getOperatorBreakdown(summaryData?.operator, isLoading).map((item) => ({
+      label: item.operator ?? t('unknown'),
+      count: item.count ?? 0,
+      percentage: item.percentage ?? 0,
+      color: item.color ?? colors.primary,
+    }));
+  }, [summaryData?.operator, isLoading, colors.primary, t]);
 
-  const periods = useMemo(() => [
-    { key: 'today', label: t('today') },
-    { key: 'yesterday', label: t('yesterday') },
-    { key: '7days', label: t('7_days') },
-    { key: '30days', label: t('30_days') },
-  ], [t]);
+  // Period options
+  const periods = useMemo(
+    () => [
+      { key: 'today' as const, label: t('today') },
+      { key: 'yesterday' as const, label: t('yesterday') },
+      { key: '7days' as const, label: t('7_days') },
+      { key: '30days' as const, label: t('30_days') },
+    ],
+    [t],
+  );
 
+  // Event handlers
   const handleViewReviews = useCallback(() => {
     Haptics.selectionAsync();
     if (restaurantProfile?.id && navigation) {
       navigation.navigate('RestaurantCustomerReviews', {
         restaurantId: restaurantProfile.id,
-        restaurantName: restaurantProfile.name || 'Restaurant',
+        restaurantName: restaurantProfile.name || t('restaurant'),
       });
     }
-  }, [navigation, restaurantProfile]);
+  }, [navigation, restaurantProfile, t]);
 
   const handleViewTimeHeatmap = useCallback(() => {
     Haptics.selectionAsync();
@@ -202,50 +168,65 @@ const AnalyticsOverview: React.FC<
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await refetchAll();
-    setRefreshing(false);
+    try {
+      await refetchAll();
+    } catch (error) {
+      console.error('Refresh error:', error);
+    } finally {
+      setRefreshing(false);
+    }
   }, [refetchAll]);
 
-  // Simplified metric card rendering
-  const renderMetricCards = (cards: any[], startIndex: number, count: number) => {
-    return cards
-      .slice(startIndex, startIndex + count)
-      .map((card, index) => (
-        <MetricCard key={`${startIndex}-${index}`} {...card} isLoading={isLoading} />
-      ));
-  };
+  // Render metric cards with proper layout
+  const renderMetricCards = useCallback(
+    (cards: typeof metricCards, startIndex: number, count: number) => {
+      return cards
+        .slice(startIndex, startIndex + count)
+        .map((card, index) => (
+          <View key={`${startIndex}-${index}`} style={{ flex: 1, padding: 6 }}>
+            <MetricCard {...card} isLoading={isLoading} />
+          </View>
+        ));
+    },
+    [isLoading],
+  );
 
-  // Simplified balance formatting
-  const formatBalance = (value?: number | null) => {
-    return isLoading ? '---' : formatLargeNumber(value);
-  };
+  // Safe balance formatting
+  const formatBalance = useCallback(
+    (value?: number | null) => {
+      if (isLoading) return '---';
+      if (value === null || value === undefined) return '0';
+      return formatLargeNumber(value);
+    },
+    [isLoading],
+  );
+
+  const currency = balanceInfo?.currency ?? 'XAF';
 
   return (
     <CommonView>
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingBottom: tabBarHeight,
-        }}
+        contentContainerStyle={{ paddingBottom: tabBarHeight + 16 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={['#007aff']}
-            tintColor={'#007aff'}
+            colors={[colors.primary]}
+            tintColor={colors.primary}
           />
         }
       >
-        {/* Header */}
-        <View style={{ padding: 16, paddingBottom: 0 }}>
+        {/* Header Section */}
+        <View style={{ padding: 16, paddingBottom: 8 }}>
           <Heading1 color={colors.onBackground} weight="bold">
             {t('analytics')}
           </Heading1>
           <Body color={colors.onSurfaceVariant} style={{ marginTop: 4 }}>
             {t('track_your_performance')}
           </Body>
-          
-          {/* Show fetching indicator */}
+
+          {/* Fetching Indicator */}
           {isFetching && !refreshing && (
             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
               <ActivityIndicator size="small" color={colors.primary} />
@@ -265,14 +246,15 @@ const AnalyticsOverview: React.FC<
 
         {/* Error State */}
         {hasError && !isLoading && (
-          <View style={{ padding: 16 }}>
+          <View style={{ paddingHorizontal: 16, paddingVertical: 8 }}>
             <Card
               style={{
                 backgroundColor: colors.errorContainer,
-                borderRadius: 16,
+                borderRadius: 12,
+                elevation: 2,
               }}
             >
-              <View style={{ padding: 16, alignItems: 'center' }}>
+              <View style={{ padding: 20, alignItems: 'center' }}>
                 <MaterialCommunityIcon
                   name="alert-circle"
                   size={48}
@@ -281,22 +263,22 @@ const AnalyticsOverview: React.FC<
                 <Heading5
                   color={colors.onErrorContainer}
                   weight="bold"
-                  style={{ marginTop: 8, marginBottom: 4 }}
+                  style={{ marginTop: 12, marginBottom: 6, textAlign: 'center' }}
                 >
                   {t('error_loading_analytics')}
                 </Heading5>
-                <Body color={colors.onErrorContainer} align="center">
+                <Body color={colors.onErrorContainer} align="center" style={{ marginBottom: 16 }}>
                   {combinedError || t('please_try_again_later')}
                 </Body>
                 <TouchableOpacity
                   onPress={onRefresh}
                   style={{
-                    marginTop: 12,
-                    paddingHorizontal: 16,
-                    paddingVertical: 8,
+                    paddingHorizontal: 24,
+                    paddingVertical: 10,
                     backgroundColor: colors.onErrorContainer,
                     borderRadius: 8,
                   }}
+                  activeOpacity={0.8}
                 >
                   <Label color={colors.errorContainer} weight="semibold">
                     {t('retry')}
@@ -307,46 +289,57 @@ const AnalyticsOverview: React.FC<
           </View>
         )}
 
-        {/* Restaurant Balance */}
-        <View style={{ padding: 16 }}>
-          <Card style={{ backgroundColor: colors.surface, borderRadius: 16 }}>
+        {/* Restaurant Balance Card */}
+        <View style={{ paddingHorizontal: 16, paddingVertical: 8 }}>
+          <Card
+            style={{
+              backgroundColor: colors.surface,
+              borderRadius: 12,
+              elevation: 2,
+            }}
+          >
             <View style={{ padding: 16 }}>
               <View
                 style={{
                   flexDirection: 'row',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  marginBottom: 12,
+                  marginBottom: 16,
                 }}
               >
                 <Heading5 color={colors.onSurface} weight="bold">
                   {t('account_balance')}
                 </Heading5>
-                <MaterialCommunityIcon
-                  name="wallet"
-                  size={24}
-                  color={colors.primary}
-                />
+                <View
+                  style={{
+                    backgroundColor: colors.primaryContainer,
+                    borderRadius: 8,
+                    padding: 8,
+                  }}
+                >
+                  <MaterialCommunityIcon
+                    name="wallet"
+                    size={20}
+                    color={colors.primary}
+                  />
+                </View>
               </View>
 
               <View
                 style={{
                   flexDirection: 'row',
                   alignItems: 'baseline',
-                  marginBottom: 8,
+                  marginBottom: 16,
                 }}
               >
                 <Typography
                   variant="h3"
-                  style={{ color: colors.primary, fontWeight: 'bold' }}
+                  style={{ color: colors.primary, fontWeight: '700' }}
                 >
-                  {formatBalance(balanceData?.data?.balance)}
+                  {formatBalance(balanceInfo?.balance)}
                 </Typography>
-                <Caption
-                  color={colors.onSurfaceVariant}
-                  style={{ marginLeft: 4 }}
-                >
-                  {balanceData?.data?.currency || 'XAF'}
+                <Caption color={colors.onSurfaceVariant} style={{ marginLeft: 6 }}>
+                  {currency}
                 </Caption>
               </View>
 
@@ -354,22 +347,25 @@ const AnalyticsOverview: React.FC<
                 style={{
                   flexDirection: 'row',
                   justifyContent: 'space-between',
+                  paddingTop: 12,
+                  borderTopWidth: 1,
+                  borderTopColor: colors.outlineVariant,
                 }}
               >
-                <View>
-                  <Caption color={colors.onSurfaceVariant}>
+                <View style={{ flex: 1 }}>
+                  <Caption color={colors.onSurfaceVariant} style={{ marginBottom: 4 }}>
                     {t('credits')}
                   </Caption>
                   <Label color={colors.onSurface} weight="semibold">
-                    +{formatBalance(balanceData?.data?.credits)} {balanceData?.data?.currency || 'XAF'}
+                    +{formatBalance(balanceInfo?.credits)} {currency}
                   </Label>
                 </View>
-                <View>
-                  <Caption color={colors.onSurfaceVariant}>
+                <View style={{ flex: 1, alignItems: 'flex-end' }}>
+                  <Caption color={colors.onSurfaceVariant} style={{ marginBottom: 4 }}>
                     {t('debits')}
                   </Caption>
                   <Label color={colors.onSurface} weight="semibold">
-                    -{formatBalance(balanceData?.data?.debits)} {balanceData?.data?.currency || 'XAF'}
+                    -{formatBalance(balanceInfo?.debits)} {currency}
                   </Label>
                 </View>
               </View>
@@ -377,9 +373,9 @@ const AnalyticsOverview: React.FC<
           </Card>
         </View>
 
-        {/* Key Metrics */}
-        <View style={{ padding: 10 }}>
-          <View style={{ flexDirection: 'row' }}>
+        {/* Key Metrics Grid */}
+        <View style={{ paddingHorizontal: 10, paddingVertical: 8 }}>
+          <View style={{ flexDirection: 'row', marginBottom: 0 }}>
             {renderMetricCards(metricCards, 0, 2)}
           </View>
           {metricCards.length > 2 && (
@@ -389,9 +385,15 @@ const AnalyticsOverview: React.FC<
           )}
         </View>
 
-        {/* Revenue Chart */}
-        <View style={{ padding: 16 }}>
-          <Card style={{ backgroundColor: colors.surface, borderRadius: 16 }}>
+        {/* Revenue Trend Chart */}
+        <View style={{ paddingHorizontal: 16, paddingVertical: 8 }}>
+          <Card
+            style={{
+              backgroundColor: colors.surface,
+              borderRadius: 12,
+              elevation: 2,
+            }}
+          >
             <View style={{ padding: 16 }}>
               <View
                 style={{
@@ -404,29 +406,43 @@ const AnalyticsOverview: React.FC<
                 <Heading5 color={colors.onSurface} weight="bold">
                   {t('revenue_trend')}
                 </Heading5>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    backgroundColor: colors.surfaceVariant,
+                    paddingHorizontal: 10,
+                    paddingVertical: 4,
+                    borderRadius: 12,
+                  }}
+                >
                   <MaterialCommunityIcon
                     name="chart-line"
-                    size={16}
+                    size={14}
                     color={colors.onSurfaceVariant}
                   />
-                  <Caption
-                    color={colors.onSurfaceVariant}
-                    style={{ marginLeft: 4 }}
-                  >
+                  <Caption color={colors.onSurfaceVariant} style={{ marginLeft: 4 }}>
                     {selectedPeriod === 'today' ? t('hourly') : t('daily')}
                   </Caption>
                 </View>
               </View>
-              
+
               {isLoading ? (
-                <View style={{ height: 120, justifyContent: 'center', alignItems: 'center' }}>
+                <View style={{ height: 140, justifyContent: 'center', alignItems: 'center' }}>
                   <ActivityIndicator size="large" color={colors.primary} />
                 </View>
               ) : chartData.length > 0 ? (
-                <SimpleBarChart data={chartData} maxHeight={120} />
+                <SimpleBarChart data={chartData} maxHeight={140} />
               ) : (
-                <View style={{ height: 120, justifyContent: 'center', alignItems: 'center' }}>
+                <View
+                  style={{
+                    height: 140,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    backgroundColor: colors.surfaceVariant + '30',
+                    borderRadius: 8,
+                  }}
+                >
                   <MaterialCommunityIcon
                     name="chart-line-variant"
                     size={48}
@@ -442,193 +458,172 @@ const AnalyticsOverview: React.FC<
         </View>
 
         {/* Order Status Breakdown */}
-        <View style={{ padding: 16, paddingTop: 0 }}>
-          <BreakdownCard
-            title={t('order_status')}
-            data={orderStatusBreakdown}
-          />
+        <View style={{ paddingHorizontal: 16, paddingTop: 8 }}>
+          <BreakdownCard title={t('order_status')} data={orderStatusBreakdown} />
         </View>
 
-        {/* Payment Methods */}
-        <View style={{ padding: 16, paddingTop: 0 }}>
-          <BreakdownCard
-            title={t('payment_methods')}
-            data={paymentMethodBreakdown}
-          />
+        {/* Payment Methods Breakdown */}
+        <View style={{ paddingHorizontal: 16, paddingTop: 8 }}>
+          <BreakdownCard title={t('payment_methods')} data={paymentMethodBreakdown} />
         </View>
 
-        {/* Mobile Money Operators */}
-        <View style={{ padding: 16, paddingTop: 0 }}>
-          <BreakdownCard
-            title={t('mobile_money_operators')}
-            data={operatorBreakdown}
-          />
+        {/* Mobile Money Operators Breakdown */}
+        <View style={{ paddingHorizontal: 16, paddingTop: 8 }}>
+          <BreakdownCard title={t('mobile_money_operators')} data={operatorBreakdown} />
         </View>
 
-        {/* Quick Actions */}
-        <View style={{ padding: 16 }}>
-          <Heading5
-            color={colors.onSurface}
-            weight="bold"
-            style={{ marginBottom: 12 }}
-          >
+        {/* Detailed Reports Section */}
+        <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
+          <Heading5 color={colors.onSurface} weight="bold" style={{ marginBottom: 12 }}>
             {t('detailed_reports')}
           </Heading5>
 
+          {/* Customer Reviews Card */}
           <Card
             style={{
               marginBottom: 12,
               backgroundColor: colors.surface,
-              borderWidth: reviewStats && reviewStats.totalReviews > 0 ? 1 : 0,
+              borderRadius: 12,
+              borderWidth: reviewStats?.totalReviews && reviewStats.totalReviews > 0 ? 1.5 : 0,
               borderColor:
-                reviewStats && reviewStats.averageRating >= 4
+                reviewStats?.averageRating && reviewStats.averageRating >= 4
                   ? '#00D084'
-                  : reviewStats && reviewStats.averageRating >= 3
+                  : reviewStats?.averageRating && reviewStats.averageRating >= 3
                     ? '#FF9500'
                     : colors.outline,
+              elevation: 2,
             }}
           >
-            <TouchableOpacity
-              onPress={handleViewReviews}
-              style={{ padding: 16 }}
-              activeOpacity={0.7}
-            >
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-                  <View
-                    style={{
-                      backgroundColor: '#FF9500' + '20',
-                      borderRadius: 12,
-                      padding: 8,
-                      marginRight: 12,
-                    }}
-                  >
-                    <MaterialCommunityIcon
-                      name="star-circle"
-                      size={24}
-                      color="#FF9500"
-                    />
-                  </View>
-
-                  <View style={{ flex: 1 }}>
-                    <Label
-                      color={colors.onSurface}
-                      weight="bold"
-                      style={{ marginBottom: 4 }}
-                    >
-                      {t('customer_reviews')}
-                    </Label>
-
-                    {reviewStats && reviewStats.totalReviews > 0 ? (
-                      <View>
-                        <View
-                          style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            marginBottom: 2,
-                          }}
-                        >
-                          <Caption
-                            color={
-                              reviewStats.averageRating >= 4
-                                ? '#00D084'
-                                : reviewStats.averageRating >= 3
-                                  ? '#FF9500'
-                                  : '#FF3B30'
-                            }
-                            weight="bold"
-                            style={{ marginRight: 4 }}
-                          >
-                            {reviewStats.averageRating.toFixed(1)} ⭐
-                          </Caption>
-                          <Caption color={colors.onSurfaceVariant}>
-                            ({reviewStats.totalReviews}{' '}
-                            {reviewStats.totalReviews === 1
-                              ? t('review')
-                              : t('reviews')
-                            })
-                          </Caption>
-                        </View>
-                        <Caption color={colors.onSurfaceVariant}>
-                          {t('tap_to_view_and_manage_reviews')}
-                        </Caption>
-                      </View>
-                    ) : (
-                      <Caption color={colors.onSurfaceVariant}>
-                        {t('no_reviews_yet_tap_to_learn_more')}
-                      </Caption>
-                    )}
-                  </View>
-                </View>
-
-                <View style={{ alignItems: 'center' }}>
-                  <MaterialCommunityIcon
-                    name="chevron-right"
-                    size={24}
-                    color={colors.primary}
-                  />
-                  {reviewStats && reviewStats.totalReviews > 0 && (
+            <TouchableOpacity onPress={handleViewReviews} activeOpacity={0.7}>
+              <View style={{ padding: 16 }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
                     <View
                       style={{
-                        backgroundColor: colors.primary,
-                        borderRadius: 8,
-                        paddingHorizontal: 6,
-                        paddingVertical: 2,
-                        marginTop: 4,
+                        backgroundColor: '#FF9500' + '15',
+                        borderRadius: 12,
+                        padding: 10,
+                        marginRight: 12,
                       }}
                     >
-                      <Caption
-                        color={colors.onPrimary}
-                        weight="bold"
-                        style={{ fontSize: 10 }}
-                      >
-                        {reviewStats.totalReviews}
-                      </Caption>
+                      <MaterialCommunityIcon name="star-circle" size={24} color="#FF9500" />
                     </View>
-                  )}
+
+                    <View style={{ flex: 1 }}>
+                      <Label color={colors.onSurface} weight="bold" style={{ marginBottom: 4 }}>
+                        {t('customer_reviews')}
+                      </Label>
+
+                      {reviewStats?.totalReviews && reviewStats.totalReviews > 0 ? (
+                        <View>
+                          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2 }}>
+                            <Caption
+                              color={
+                                reviewStats.averageRating >= 4
+                                  ? '#00D084'
+                                  : reviewStats.averageRating >= 3
+                                    ? '#FF9500'
+                                    : '#FF3B30'
+                              }
+                              weight="bold"
+                              style={{ marginRight: 4 }}
+                            >
+                              {reviewStats.averageRating.toFixed(1)} ⭐
+                            </Caption>
+                            <Caption color={colors.onSurfaceVariant}>
+                              ({reviewStats.totalReviews}{' '}
+                              {reviewStats.totalReviews === 1 ? t('review') : t('reviews')})
+                            </Caption>
+                          </View>
+                          <Caption color={colors.onSurfaceVariant}>
+                            {t('tap_to_view_and_manage_reviews')}
+                          </Caption>
+                        </View>
+                      ) : (
+                        <Caption color={colors.onSurfaceVariant}>
+                          {t('no_reviews_yet_tap_to_learn_more')}
+                        </Caption>
+                      )}
+                    </View>
+                  </View>
+
+                  <View style={{ alignItems: 'center' }}>
+                    <MaterialCommunityIcon name="chevron-right" size={24} color={colors.primary} />
+                    {reviewStats?.totalReviews && reviewStats.totalReviews > 0 && (
+                      <View
+                        style={{
+                          backgroundColor: colors.primary,
+                          borderRadius: 10,
+                          paddingHorizontal: 8,
+                          paddingVertical: 2,
+                          marginTop: 4,
+                        }}
+                      >
+                        <Caption color={colors.onPrimary} weight="bold" style={{ fontSize: 10 }}>
+                          {reviewStats.totalReviews}
+                        </Caption>
+                      </View>
+                    )}
+                  </View>
                 </View>
               </View>
             </TouchableOpacity>
           </Card>
 
-          <Card style={{ marginBottom: 12, backgroundColor: colors.surface }}>
-            <TouchableOpacity
-              onPress={handleViewTimeHeatmap}
-              style={{ padding: 16 }}
-            >
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <MaterialCommunityIcon
-                    name="chart-timeline-variant"
-                    size={24}
-                    color="#007aff"
-                  />
-                  <View style={{ marginLeft: 12 }}>
-                    <Label color={colors.onSurface} weight="semibold">
-                      {t('time_heatmap')}
-                    </Label>
-                    <Caption color={colors.onSurfaceVariant}>
-                      {t('hourly_order_patterns')}
-                    </Caption>
+          {/* Time Heatmap Card */}
+          <Card
+            style={{
+              marginBottom: 16,
+              backgroundColor: colors.surface,
+              borderRadius: 12,
+              elevation: 2,
+            }}
+          >
+            <TouchableOpacity onPress={handleViewTimeHeatmap} activeOpacity={0.7}>
+              <View style={{ padding: 16 }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                    <View
+                      style={{
+                        backgroundColor: colors.primaryContainer,
+                        borderRadius: 12,
+                        padding: 10,
+                        marginRight: 12,
+                      }}
+                    >
+                      <MaterialCommunityIcon
+                        name="chart-timeline-variant"
+                        size={24}
+                        color={colors.primary}
+                      />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Label color={colors.onSurface} weight="semibold" style={{ marginBottom: 4 }}>
+                        {t('time_heatmap')}
+                      </Label>
+                      <Caption color={colors.onSurfaceVariant}>
+                        {t('hourly_order_patterns')}
+                      </Caption>
+                    </View>
                   </View>
+                  <MaterialCommunityIcon
+                    name="chevron-right"
+                    size={24}
+                    color={colors.onSurfaceVariant}
+                  />
                 </View>
-                <MaterialCommunityIcon
-                  name="chevron-right"
-                  size={24}
-                  color={colors.onSurfaceVariant}
-                />
               </View>
             </TouchableOpacity>
           </Card>

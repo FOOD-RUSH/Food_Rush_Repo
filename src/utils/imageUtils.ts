@@ -11,67 +11,69 @@ export interface SimpleImageResult {
  * Returns properly formatted image object for multipart/form-data upload
  * Follows React Native FormData requirements: { uri, name, type }
  */
-export const pickImageForUpload = async (): Promise<SimpleImageResult | null> => {
-  try {
-    // Request permissions
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      throw new Error('Permission to access media library was denied');
+export const pickImageForUpload =
+  async (): Promise<SimpleImageResult | null> => {
+    try {
+      // Request permissions
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        throw new Error('Permission to access media library was denied');
+      }
+
+      // Launch image picker with optimized configuration for food images
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [4, 3], // Better aspect ratio for food images
+        quality: 0.8, // Good balance between quality and file size
+        allowsMultipleSelection: false,
+      });
+
+      if (result.canceled || !result.assets || result.assets.length === 0) {
+        return null;
+      }
+
+      const asset = result.assets[0];
+
+      // Determine MIME type using multiple methods for accuracy
+      let mimeType = determineMimeType(asset);
+      let fileExtension = getFileExtension(mimeType);
+
+      // Validate that we only accept JPG or PNG
+      if (!isValidImageType(mimeType)) {
+        throw new Error(
+          `Unsupported image type: ${mimeType}. Only JPG and PNG are allowed.`,
+        );
+      }
+
+      // Generate filename with proper extension
+      const fileName =
+        asset.fileName || `menu-item-${Date.now()}.${fileExtension}`;
+
+      // Ensure filename has correct extension
+      const finalFileName = ensureCorrectFileExtension(fileName, mimeType);
+
+      console.log('Image selected for upload:', {
+        uri: asset.uri.substring(0, 50) + '...',
+        type: mimeType,
+        name: finalFileName,
+        width: asset.width,
+        height: asset.height,
+        fileSize: asset.fileSize,
+        originalFileName: asset.fileName,
+      });
+
+      return {
+        uri: asset.uri,
+        type: mimeType,
+        name: finalFileName,
+      };
+    } catch (error) {
+      console.error('Error picking image:', error);
+      throw error;
     }
-
-    // Launch image picker with optimized configuration for food images
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [4, 3], // Better aspect ratio for food images
-      quality: 0.8, // Good balance between quality and file size
-      allowsMultipleSelection: false,
-     
-    });
-
-    if (result.canceled || !result.assets || result.assets.length === 0) {
-      return null;
-    }
-
-    const asset = result.assets[0];
-
-    // Determine MIME type using multiple methods for accuracy
-    let mimeType = determineMimeType(asset);
-    let fileExtension = getFileExtension(mimeType);
-
-    // Validate that we only accept JPG or PNG
-    if (!isValidImageType(mimeType)) {
-      throw new Error(
-        `Unsupported image type: ${mimeType}. Only JPG and PNG are allowed.`,
-      );
-    }
-
-    // Generate filename with proper extension
-    const fileName = asset.fileName || `menu-item-${Date.now()}.${fileExtension}`;
-    
-    // Ensure filename has correct extension
-    const finalFileName = ensureCorrectFileExtension(fileName, mimeType);
-
-    console.log('Image selected for upload:', {
-      uri: asset.uri.substring(0, 50) + '...',
-      type: mimeType,
-      name: finalFileName,
-      width: asset.width,
-      height: asset.height,
-      fileSize: asset.fileSize,
-      originalFileName: asset.fileName,
-    });
-
-    return {
-      uri: asset.uri,
-      type: mimeType,
-      name: finalFileName,
-    };
-  } catch (error) {
-    console.error('Error picking image:', error);
-    throw error;
-  }
-};
+  };
 
 /**
  * Determine MIME type from ImagePicker asset using multiple methods
@@ -149,18 +151,22 @@ export const getFileExtension = (mimeType: string): string => {
 /**
  * Ensure filename has the correct extension based on MIME type
  */
-function ensureCorrectFileExtension(fileName: string, mimeType: string): string {
+function ensureCorrectFileExtension(
+  fileName: string,
+  mimeType: string,
+): string {
   const correctExtension = getFileExtension(mimeType);
   const lowerFileName = fileName.toLowerCase();
-  
+
   // Check if filename already has correct extension
   if (
-    (mimeType === 'image/jpeg' && (lowerFileName.endsWith('.jpg') || lowerFileName.endsWith('.jpeg'))) ||
+    (mimeType === 'image/jpeg' &&
+      (lowerFileName.endsWith('.jpg') || lowerFileName.endsWith('.jpeg'))) ||
     (mimeType === 'image/png' && lowerFileName.endsWith('.png'))
   ) {
     return fileName;
   }
-  
+
   // Remove any existing extension and add the correct one
   const nameWithoutExtension = fileName.replace(/\.[^/.]+$/, '');
   return `${nameWithoutExtension}.${correctExtension}`;

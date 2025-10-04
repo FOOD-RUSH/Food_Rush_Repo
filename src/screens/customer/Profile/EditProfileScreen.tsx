@@ -122,7 +122,8 @@ const EditProfileScreen = ({
               className="absolute bottom-1 right-2 bg-blue-500 rounded-full p-1"
               style={{ backgroundColor: '#007aff' }}
             >
-              <MaterialIcon                 name={isUploadingImage ? 'hourglass-empty' : 'edit'}
+              <MaterialIcon
+                name={isUploadingImage ? 'hourglass-empty' : 'edit'}
                 color="white"
                 size={16}
               />
@@ -140,7 +141,8 @@ const EditProfileScreen = ({
           value={fullName}
           onChangeText={setFullName}
           leftIcon={
-            <IoniconsIcon               size={23}
+            <IoniconsIcon
+              size={23}
               name="person-outline"
               color={colors.onSurface}
             />
@@ -150,7 +152,8 @@ const EditProfileScreen = ({
           leftIcon={
             <View className="flex-row items-center">
               <Text className="text-2xl">🇨🇲</Text>
-              <MaterialIcon                 name="keyboard-arrow-down"
+              <MaterialIcon
+                name="keyboard-arrow-down"
                 size={25}
                 color={colors.onSurface}
               />

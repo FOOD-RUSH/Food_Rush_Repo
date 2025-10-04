@@ -40,7 +40,11 @@ const ProfileLoadingState: React.FC<ProfileLoadingStateProps> = ({
             marginBottom: 24,
           }}
         >
-          <IoniconsIcon name="person" size={32} color={colors.onPrimaryContainer} />
+          <IoniconsIcon
+            name="person"
+            size={32}
+            color={colors.onPrimaryContainer}
+          />
         </View>
       )}
 

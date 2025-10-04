@@ -3,7 +3,6 @@ import React from 'react';
 import { View, Text } from 'react-native';
 import { useTheme } from 'react-native-paper';
 
-
 interface ErrorDisplayProps {
   error: string | null;
   visible?: boolean;
@@ -39,7 +38,8 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
         containerStyle,
       ]}
     >
-      <IoniconsIcon         name="alert-circle"
+      <IoniconsIcon
+        name="alert-circle"
         size={20}
         color={colors.error}
         style={{ marginRight: 12, marginTop: 2 }}

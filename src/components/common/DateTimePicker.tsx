@@ -169,18 +169,18 @@ const CustomDateTimePicker: React.FC<DateTimePickerProps> = ({
         <Typography
           variant="body"
           color={value ? colors.onSurface : colors.onSurfaceVariant}
-          style={{ 
+          style={{
             fontFamily: 'Urbanist-Regular',
             flex: 1,
             flexShrink: 1,
             overflow: 'hidden',
-            paddingRight: 8
+            paddingRight: 8,
           }}
           numberOfLines={1}
         >
           {displayValue}
         </Typography>
-        <MaterialCommunityIcon 
+        <MaterialCommunityIcon
           name={getIcon()}
           size={20}
           color={colors.onSurfaceVariant}

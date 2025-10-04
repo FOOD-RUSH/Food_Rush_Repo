@@ -11,7 +11,8 @@ const PageTitle = () => {
 
   return (
     <View className="flex-row flex-1 justify-between item-center px-2">
-      <MaterialIcon         name="arrow-back-ios-new"
+      <MaterialIcon
+        name="arrow-back-ios-new"
         size={20}
         color={colors.onSurface}
       />

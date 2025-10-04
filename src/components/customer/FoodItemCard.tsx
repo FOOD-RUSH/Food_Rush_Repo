@@ -52,8 +52,15 @@ const FoodItemCard = ({
     useNavigation<CustomerHomeStackScreenProps<'HomeScreen'>['navigation']>();
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
-  const { isSmallScreen, isTablet, isLargeScreen, wp, scale, getResponsiveText } = useResponsive();
-  
+  const {
+    isSmallScreen,
+    isTablet,
+    isLargeScreen,
+    wp,
+    scale,
+    getResponsiveText,
+  } = useResponsive();
+
   // Calculate responsive dimensions
   const getCardDimensions = () => {
     if (isLargeScreen) {
@@ -76,7 +83,7 @@ const FoodItemCard = ({
       };
     }
   };
-  
+
   const cardDimensions = getCardDimensions();
 
   const primaryColor = colors.primary;
@@ -86,7 +93,11 @@ const FoodItemCard = ({
     if (pictureUrl) {
       // Handle backend image URL
       const baseUrl = 'https://your-api-base-url.com'; // Replace with actual API base URL
-      return { uri: pictureUrl.startsWith('http') ? pictureUrl : `${baseUrl}${pictureUrl}` };
+      return {
+        uri: pictureUrl.startsWith('http')
+          ? pictureUrl
+          : `${baseUrl}${pictureUrl}`,
+      };
     }
     if (FoodImage) {
       return FoodImage;
@@ -95,7 +106,8 @@ const FoodItemCard = ({
   };
 
   const getFormattedPrice = () => {
-    const price = typeof FoodPrice === 'string' ? parseFloat(FoodPrice) : FoodPrice;
+    const price =
+      typeof FoodPrice === 'string' ? parseFloat(FoodPrice) : FoodPrice;
     return isNaN(price) ? 'N/A' : price.toLocaleString();
   };
 
@@ -171,7 +183,8 @@ const FoodItemCard = ({
             style={{ backgroundColor: colors.surface }}
             activeOpacity={0.7}
           >
-            <IoniconsIcon               name={loved ? 'heart' : 'heart-outline'}
+            <IoniconsIcon
+              name={loved ? 'heart' : 'heart-outline'}
               size={18}
               color={loved ? '#e0245e' : colors.onSurface}
             />
@@ -182,7 +195,7 @@ const FoodItemCard = ({
             {/* Food Name */}
             <Text
               className="font-bold mb-2 p-1"
-              style={{ 
+              style={{
                 color: colors.onSurface,
                 fontSize: getResponsiveText(isSmallScreen ? 14 : 16),
                 lineHeight: getResponsiveText(isSmallScreen ? 18 : 20),
@@ -215,10 +228,13 @@ const FoodItemCard = ({
 
             {/* Price and Delivery */}
             <View className="flex-row items-center justify-between flex-wrap">
-              <View className="flex-row items-center flex-shrink" style={{ minWidth: 0 }}>
+              <View
+                className="flex-row items-center flex-shrink"
+                style={{ minWidth: 0 }}
+              >
                 <Text
                   className="font-bold"
-                  style={{ 
+                  style={{
                     color: colors.primary,
                     fontSize: getResponsiveText(isSmallScreen ? 14 : 16),
                     flexShrink: 1,
@@ -234,7 +250,8 @@ const FoodItemCard = ({
                 >
                   |
                 </Text>
-                <IoniconsIcon                   name="car-sharp"
+                <IoniconsIcon
+                  name="car-sharp"
                   size={12}
                   color={primaryColor}
                   className="ml-1"

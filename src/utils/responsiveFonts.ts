@@ -3,31 +3,31 @@ import { useResponsiveFontSize } from '@/src/hooks/useResponsive';
 // Responsive font size utility
 export const useResponsiveFonts = () => {
   const fontSize = useResponsiveFontSize();
-  
+
   return {
     // Standard text sizes
-    caption: fontSize.xs,      // 12px responsive
-    body: fontSize.sm,         // 14px responsive
-    bodyLarge: fontSize.base,  // 16px responsive
-    label: fontSize.lg,        // 18px responsive
-    title: fontSize.xl,        // 20px responsive
+    caption: fontSize.xs, // 12px responsive
+    body: fontSize.sm, // 14px responsive
+    bodyLarge: fontSize.base, // 16px responsive
+    label: fontSize.lg, // 18px responsive
+    title: fontSize.xl, // 20px responsive
     headline: fontSize['2xl'], // 24px responsive
-    display: fontSize['3xl'],  // 30px responsive
-    
+    display: fontSize['3xl'], // 30px responsive
+
     // Custom sizes
     getSize: fontSize.getSize,
-    
+
     // Common UI element sizes
     button: fontSize.getSize(16),
     input: fontSize.getSize(16),
     placeholder: fontSize.getSize(14),
     helper: fontSize.getSize(12),
     badge: fontSize.getSize(10),
-    
+
     // Navigation sizes
     tabLabel: fontSize.getSize(12),
     headerTitle: fontSize.getSize(18),
-    
+
     // Card sizes
     cardTitle: fontSize.getSize(16),
     cardSubtitle: fontSize.getSize(14),
@@ -36,7 +36,10 @@ export const useResponsiveFonts = () => {
 };
 
 // Static responsive font utility (for use outside components)
-export const getResponsiveFontSize = (baseSize: number, screenWidth: number = 375) => {
+export const getResponsiveFontSize = (
+  baseSize: number,
+  screenWidth: number = 375,
+) => {
   const scaleFactor = screenWidth / 375; // iPhone X width as base
   return Math.round(baseSize * scaleFactor);
 };

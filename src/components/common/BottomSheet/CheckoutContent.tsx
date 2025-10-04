@@ -44,7 +44,8 @@ const CheckoutContent: React.FC<CheckoutContentProps> = ({
             backgroundColor: colors.primaryContainer,
           }}
         >
-          <MaterialIcon             name="shopping-cart-checkout"
+          <MaterialIcon
+            name="shopping-cart-checkout"
             size={24}
             color={colors.onPrimaryContainer}
           />

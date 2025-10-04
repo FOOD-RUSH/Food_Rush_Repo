@@ -1,6 +1,11 @@
 import { View, Text, TouchableOpacity } from 'react-native';
 import React from 'react';
-import { IoniconsIcon, MaterialIcon, type IoniconsName, type MaterialIconsName } from './icons';
+import {
+  IoniconsIcon,
+  MaterialIcon,
+  type IoniconsName,
+  type MaterialIconsName,
+} from './icons';
 import { useTheme } from 'react-native-paper';
 
 interface rowView {
@@ -38,7 +43,11 @@ const RowView = ({
               justifyContent: 'center',
             }}
           >
-            <IoniconsIcon name={leftIconName} size={22} color={finalIconColor} />
+            <IoniconsIcon
+              name={leftIconName}
+              size={22}
+              color={finalIconColor}
+            />
           </View>
         ) : (
           <IoniconsIcon name={leftIconName} size={22} color={finalIconColor} />
@@ -61,11 +70,7 @@ const RowView = ({
           )}
         </View>
 
-        <MaterialIcon
-          name={rightIconName}
-          size={18}
-          color={colors.onSurface}
-        />
+        <MaterialIcon name={rightIconName} size={18} color={colors.onSurface} />
       </View>
     </TouchableOpacity>
   );

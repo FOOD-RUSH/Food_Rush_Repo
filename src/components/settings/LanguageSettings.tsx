@@ -5,7 +5,6 @@ import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/src/contexts/LanguageContext';
 import { LanguageSelector } from '@/src/components/common/LanguageSelector';
 
-
 interface LanguageSettingsProps {
   style?: any;
 }
@@ -42,7 +41,11 @@ export const LanguageSettings: React.FC<LanguageSettingsProps> = ({
                 <Text style={styles.languageName}>{language.name}</Text>
               </View>
               {code === currentLanguage && (
-                <IoniconsIcon name="checkmark-circle" size={20} color="#007AFF" />
+                <IoniconsIcon
+                  name="checkmark-circle"
+                  size={20}
+                  color="#007AFF"
+                />
               )}
             </View>
           ))}

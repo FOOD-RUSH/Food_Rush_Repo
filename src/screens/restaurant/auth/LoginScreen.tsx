@@ -145,7 +145,11 @@ const RestaurantLoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
               onPress={() => navigation.goBack()}
               style={styles.backButton}
             >
-              <IoniconsIcon name="arrow-back" size={24} color={colors.primary} />
+              <IoniconsIcon
+                name="arrow-back"
+                size={24}
+                color={colors.primary}
+              />
             </TouchableOpacity>
           </Animated.View>
 
@@ -344,7 +348,8 @@ const RestaurantLoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                 onPress={handleGoogleSignIn}
                 disabled={loginMutation.isPending}
               >
-                <IoniconsIcon                   name="logo-google"
+                <IoniconsIcon
+                  name="logo-google"
                   size={20}
                   color={colors.onSurfaceVariant}
                 />
@@ -364,7 +369,8 @@ const RestaurantLoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                 onPress={handleAppleSignIn}
                 disabled={loginMutation.isPending}
               >
-                <IoniconsIcon                   name="logo-apple"
+                <IoniconsIcon
+                  name="logo-apple"
                   size={20}
                   color={colors.onSurfaceVariant}
                 />

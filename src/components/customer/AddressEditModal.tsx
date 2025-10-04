@@ -192,7 +192,8 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
               }}
               activeOpacity={0.7}
             >
-              <IoniconsIcon                 name={isProcessing ? 'hourglass-outline' : 'location'}
+              <IoniconsIcon
+                name={isProcessing ? 'hourglass-outline' : 'location'}
                 size={14}
                 color="white"
               />
@@ -240,7 +241,9 @@ const AddressEditModal: React.FC<AddressEditModalProps> = ({
               backgroundColor: isDefault ? '#007aff' : 'transparent',
             }}
           >
-            {isDefault && <IoniconsIcon name="checkmark" size={16} color="white" />}
+            {isDefault && (
+              <IoniconsIcon name="checkmark" size={16} color="white" />
+            )}
           </View>
         </TouchableOpacity>
 

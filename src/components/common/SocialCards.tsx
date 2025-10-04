@@ -99,7 +99,8 @@ const SocialCards = ({
             )}
           </View>
 
-          <IoniconsIcon             name="chevron-forward"
+          <IoniconsIcon
+            name="chevron-forward"
             size={20}
             color={colors.onSurfaceVariant}
           />

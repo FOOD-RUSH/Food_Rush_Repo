@@ -226,7 +226,10 @@ const ResetPasswordScreen = ({
                   secureTextEntry={!showPassword}
                   autoCapitalize="none"
                   autoComplete="new-password"
-                  style={{ backgroundColor: colors.surfaceVariant, borderRadius: 16 }}
+                  style={{
+                    backgroundColor: colors.surfaceVariant,
+                    borderRadius: 16,
+                  }}
                   outlineStyle={{
                     borderRadius: 16,
                     borderWidth: 0,
@@ -284,7 +287,10 @@ const ResetPasswordScreen = ({
                   secureTextEntry={!showConfirmPassword}
                   autoCapitalize="none"
                   autoComplete="new-password"
-                  style={{ backgroundColor: colors.surfaceVariant, borderRadius: 16 }}
+                  style={{
+                    backgroundColor: colors.surfaceVariant,
+                    borderRadius: 16,
+                  }}
                   outlineStyle={{
                     borderRadius: 16,
                     borderWidth: 0,

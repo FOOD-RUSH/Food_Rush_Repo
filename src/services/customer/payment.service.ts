@@ -94,7 +94,7 @@ class PaymentService {
   async initializePayment(request: PaymentInitRequest): Promise<PaymentResult> {
     try {
       console.log('🚀 Initializing payment with request:', request);
-      
+
       // Validate phone number
       if (!this.validatePhoneNumber(request.phone, request.medium)) {
         return {

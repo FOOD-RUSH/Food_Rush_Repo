@@ -236,7 +236,8 @@ const FilterModal: React.FC<FilterModalProps> = ({
             {filterSections.map((section) => (
               <View key={section.key} style={styles.section}>
                 <View style={styles.sectionHeader}>
-                  <MaterialIcon                     name={section.icon as any}
+                  <MaterialIcon
+                    name={section.icon as any}
                     size={20}
                     color={colors.primary}
                   />
@@ -270,7 +271,8 @@ const FilterModal: React.FC<FilterModalProps> = ({
                         }
                       >
                         <View style={styles.optionContent}>
-                          <MaterialIcon                             name={option.icon as any}
+                          <MaterialIcon
+                            name={option.icon as any}
                             size={18}
                             color={
                               isSelected
@@ -306,7 +308,8 @@ const FilterModal: React.FC<FilterModalProps> = ({
                           </View>
                         </View>
                         {isSelected && (
-                          <MaterialIcon                             name="check-circle"
+                          <MaterialIcon
+                            name="check-circle"
                             size={20}
                             color={colors.primary}
                           />

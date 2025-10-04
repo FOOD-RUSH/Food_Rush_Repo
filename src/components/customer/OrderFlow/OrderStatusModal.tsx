@@ -48,15 +48,21 @@ const OrderStatusModal: React.FC<OrderStatusModalProps> = ({
       case 'pending_restaurant_confirmation':
         return <ActivityIndicator size={48} color={colors.primary} />;
       case 'ready_for_customer_confirmation':
-        return <IoniconsIcon name="checkmark-circle" size={48} color="#4CAF50" />;
+        return (
+          <IoniconsIcon name="checkmark-circle" size={48} color="#4CAF50" />
+        );
       case 'customer_confirming':
         return <ActivityIndicator size={48} color={colors.primary} />;
       case 'payment_processing':
         return <IoniconsIcon name="card" size={48} color={colors.primary} />;
       case 'completed':
-        return <IoniconsIcon name="checkmark-circle" size={48} color="#4CAF50" />;
+        return (
+          <IoniconsIcon name="checkmark-circle" size={48} color="#4CAF50" />
+        );
       case 'failed':
-        return <IoniconsIcon name="close-circle" size={48} color={colors.error} />;
+        return (
+          <IoniconsIcon name="close-circle" size={48} color={colors.error} />
+        );
       default:
         return <ActivityIndicator size={48} color={colors.primary} />;
     }

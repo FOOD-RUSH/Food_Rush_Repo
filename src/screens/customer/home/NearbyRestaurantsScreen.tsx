@@ -60,7 +60,8 @@ const NearbyRestaurantsScreen = ({
 
   const renderEmptyState = () => (
     <View className="flex-1 justify-center items-center px-6">
-      <IoniconsIcon         name="restaurant-outline"
+      <IoniconsIcon
+        name="restaurant-outline"
         size={64}
         color={colors.onSurfaceVariant}
         style={{ marginBottom: 16 }}
@@ -82,7 +83,8 @@ const NearbyRestaurantsScreen = ({
 
   const renderErrorState = () => (
     <View className="flex-1 justify-center items-center px-6">
-      <IoniconsIcon         name="alert-circle-outline"
+      <IoniconsIcon
+        name="alert-circle-outline"
         size={64}
         color={colors.error}
         style={{ marginBottom: 16 }}

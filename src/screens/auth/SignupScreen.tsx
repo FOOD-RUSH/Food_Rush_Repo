@@ -339,7 +339,8 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                   navigation.goBack();
                 }}
               >
-                <IoniconsIcon                   name="arrow-back"
+                <IoniconsIcon
+                  name="arrow-back"
                   size={24}
                   color={colors.onSurface}
                 />
@@ -386,7 +387,8 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                         >
                           {selectedCountryCode.code}
                         </Label>
-                        <IoniconsIcon                           name="chevron-down"
+                        <IoniconsIcon
+                          name="chevron-down"
                           size={16}
                           color={colors.onSurface}
                         />

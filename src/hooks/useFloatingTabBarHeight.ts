@@ -14,7 +14,7 @@ export const useFloatingTabBarHeight = () => {
     const TAB_BAR_HEIGHT = 70; // Height of the tab bar itself
     const BOTTOM_MARGIN = Platform.OS === 'ios' ? insets.bottom : 35; // Bottom margin from screen edge
     const ADDITIONAL_PADDING = 20; // Extra padding for better UX
-    
+
     return TAB_BAR_HEIGHT + BOTTOM_MARGIN + ADDITIONAL_PADDING;
   }, [insets.bottom]);
 

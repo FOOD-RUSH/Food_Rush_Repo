@@ -1,4 +1,7 @@
-import { MaterialCommunityIcon, FeatherIcon } from '@/src/components/common/icons';
+import {
+  MaterialCommunityIcon,
+  FeatherIcon,
+} from '@/src/components/common/icons';
 import { View, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import React, { useCallback, useMemo } from 'react';
 import {
@@ -74,7 +77,6 @@ const ProfileDetailsScreen = ({
         icon: 'check-circle',
         iconSet: 'MaterialCommunityIcons' as const,
       },
-     
     ],
     [user, t],
   );
@@ -100,7 +102,7 @@ const ProfileDetailsScreen = ({
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
-        //  paddingBottom: insets.bottom + 40,
+          //  paddingBottom: insets.bottom + 40,
           alignItems: isTablet ? 'center' : 'stretch',
         }}
       >
@@ -172,7 +174,8 @@ const ProfileDetailsScreen = ({
                       <View
                         style={{ flexDirection: 'row', alignItems: 'center' }}
                       >
-                        <MaterialCommunityIcon                           name="phone"
+                        <MaterialCommunityIcon
+                          name="phone"
                           size={16}
                           color={colors.primary}
                         />
@@ -187,7 +190,8 @@ const ProfileDetailsScreen = ({
                       <View
                         style={{ flexDirection: 'row', alignItems: 'center' }}
                       >
-                        <MaterialCommunityIcon                           name="email"
+                        <MaterialCommunityIcon
+                          name="email"
                           size={16}
                           color={colors.primary}
                         />
@@ -238,7 +242,8 @@ const ProfileDetailsScreen = ({
                   opacity: isLoading ? 0.6 : 1,
                 }}
               >
-                <MaterialCommunityIcon                   name="refresh"
+                <MaterialCommunityIcon
+                  name="refresh"
                   size={20}
                   color={colors.primary}
                 />
@@ -264,7 +269,8 @@ const ProfileDetailsScreen = ({
                       marginRight: 16,
                     }}
                   >
-                    <MaterialCommunityIcon                       name={item.icon}
+                    <MaterialCommunityIcon
+                      name={item.icon}
                       size={20}
                       color={colors.primary}
                     />

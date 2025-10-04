@@ -269,7 +269,8 @@ const ProfileHomeScreen = ({
               alignItems: 'center',
             }}
           >
-            <MaterialIcon               name={isDarkMode ? 'dark-mode' : 'light-mode'}
+            <MaterialIcon
+              name={isDarkMode ? 'dark-mode' : 'light-mode'}
               size={22}
               color={isDarkMode ? '#1a1a1a' : '#ffffff'}
             />

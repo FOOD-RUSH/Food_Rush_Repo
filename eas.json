@@ -75,7 +75,7 @@
       }
     },
     "store-ios": {
-      "extends": "production", 
+      "extends": "production",
       "ios": {
         "buildConfiguration": "Release"
       },

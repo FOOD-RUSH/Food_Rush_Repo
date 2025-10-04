@@ -10,7 +10,7 @@ export interface AppLoadingState {
 
 export const useAppLoading = () => {
   const { fontsLoaded, fontError } = useFonts();
-  
+
   const [showCustomSplash, setShowCustomSplash] = useState(false); // Don't show until fonts are loaded
   const [appReady, setAppReady] = useState(false);
   const [error, setError] = useState<string | null>(null);

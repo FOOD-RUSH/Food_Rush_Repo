@@ -189,7 +189,10 @@ class NotificationService {
       );
 
       // Handle cart reminder notifications
-      if (data?.type === 'cart_reminder' || data?.deepLink === 'foodrush://cart') {
+      if (
+        data?.type === 'cart_reminder' ||
+        data?.deepLink === 'foodrush://cart'
+      ) {
         // Navigating to cart from reminder
         ServiceNavigation.goToCart();
         return;
@@ -222,7 +225,10 @@ class NotificationService {
       }
 
       // Handle general notifications - navigate to notifications screen
-      if (data?.type && ['system', 'promotion', 'alert', 'reminder'].includes(data.type)) {
+      if (
+        data?.type &&
+        ['system', 'promotion', 'alert', 'reminder'].includes(data.type)
+      ) {
         // Navigating to notifications screen
         ServiceNavigation.goToNotifications();
         return;
@@ -412,9 +418,10 @@ class NotificationService {
         useNotificationStore,
       } = require('../stores/shared/notificationStore');
       const { unreadCount } = useNotificationStore.getState();
-      
+
       // Ensure badge count is a valid number
-      const badgeCount = typeof unreadCount === 'number' ? Math.max(0, unreadCount) : 0;
+      const badgeCount =
+        typeof unreadCount === 'number' ? Math.max(0, unreadCount) : 0;
       await Notifications.setBadgeCountAsync(badgeCount);
     } catch (error) {
       console.warn('Could not update badge count:', error);

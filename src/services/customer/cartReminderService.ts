@@ -103,13 +103,13 @@ class CartReminderService {
     lastActivity?: number,
   ): Promise<void> {
     const now = Date.now();
-    
+
     // Debounce rapid successive calls
     if (now - this.lastScheduleTime < this.SCHEDULE_DEBOUNCE_MS) {
       console.log('Cart reminder scheduling debounced');
       return;
     }
-    
+
     // Prevent duplicate scheduling
     if (this.isScheduling) {
       console.log('Cart reminder scheduling already in progress');
@@ -215,9 +215,10 @@ class CartReminderService {
     restaurantName?: string,
   ): { title: string; body: string } {
     const itemText = cartItemCount === 1 ? 'item' : 'items';
-    const restaurantText = restaurantName && restaurantName !== 'Unknown Restaurant' 
-      ? ` from ${restaurantName}` 
-      : '';
+    const restaurantText =
+      restaurantName && restaurantName !== 'Unknown Restaurant'
+        ? ` from ${restaurantName}`
+        : '';
 
     if (type === 'first') {
       return {

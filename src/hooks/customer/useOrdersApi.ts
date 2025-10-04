@@ -40,17 +40,17 @@ export const useActiveOrders = () => {
       // Filter for active orders (all statuses except delivered and cancelled)
       const activeStatuses = [
         'pending',
-        'confirmed', 
+        'confirmed',
         'preparing',
         'ready',
         'ready_for_pickup',
         'picked_up',
         'out_for_delivery',
         'payment_pending',
-        'payment_confirmed'
+        'payment_confirmed',
       ];
-      return allOrders.filter((order) => 
-        !['delivered', 'cancelled'].includes(order.status)
+      return allOrders.filter(
+        (order) => !['delivered', 'cancelled'].includes(order.status),
       );
     },
     staleTime: 15 * 1000, // 15 seconds for active orders
@@ -261,7 +261,7 @@ export const useOrderStatus = (status: Order['status']) => {
       showConfirm: false,
       showTrack: false,
       showConfirmDelivery: false,
-      buttonText: 'Cancel Order'
+      buttonText: 'Cancel Order',
     },
     confirmed: {
       label: 'Confirmed',
@@ -272,7 +272,7 @@ export const useOrderStatus = (status: Order['status']) => {
       showConfirm: true,
       showTrack: false,
       showConfirmDelivery: false,
-      buttonText: 'Confirm & Pay'
+      buttonText: 'Confirm & Pay',
     },
     payment_pending: {
       label: 'Payment Pending',
@@ -283,7 +283,7 @@ export const useOrderStatus = (status: Order['status']) => {
       showConfirm: false,
       showTrack: false,
       showConfirmDelivery: false,
-      buttonText: 'Complete Payment'
+      buttonText: 'Complete Payment',
     },
     payment_confirmed: {
       label: 'Payment Confirmed',
@@ -294,7 +294,7 @@ export const useOrderStatus = (status: Order['status']) => {
       showConfirm: false,
       showTrack: true,
       showConfirmDelivery: false,
-      buttonText: 'Track Order'
+      buttonText: 'Track Order',
     },
     preparing: {
       label: 'Preparing',
@@ -305,7 +305,7 @@ export const useOrderStatus = (status: Order['status']) => {
       showConfirm: false,
       showTrack: true,
       showConfirmDelivery: false,
-      buttonText: 'Track Order'
+      buttonText: 'Track Order',
     },
     ready: {
       label: 'Ready for Pickup',
@@ -316,7 +316,7 @@ export const useOrderStatus = (status: Order['status']) => {
       showConfirm: false,
       showTrack: true,
       showConfirmDelivery: false,
-      buttonText: 'Track Order'
+      buttonText: 'Track Order',
     },
     ready_for_pickup: {
       label: 'Ready for Pickup',
@@ -327,7 +327,7 @@ export const useOrderStatus = (status: Order['status']) => {
       showConfirm: false,
       showTrack: true,
       showConfirmDelivery: false,
-      buttonText: 'Track Order'
+      buttonText: 'Track Order',
     },
     picked_up: {
       label: 'Out for Delivery',
@@ -338,7 +338,7 @@ export const useOrderStatus = (status: Order['status']) => {
       showConfirm: false,
       showTrack: true,
       showConfirmDelivery: false,
-      buttonText: 'Track Order'
+      buttonText: 'Track Order',
     },
     out_for_delivery: {
       label: 'Out for Delivery',
@@ -349,7 +349,7 @@ export const useOrderStatus = (status: Order['status']) => {
       showConfirm: false,
       showTrack: true,
       showConfirmDelivery: false,
-      buttonText: 'Track Order'
+      buttonText: 'Track Order',
     },
     delivered: {
       label: 'Delivered',
@@ -360,7 +360,7 @@ export const useOrderStatus = (status: Order['status']) => {
       showConfirm: false,
       showTrack: false,
       showConfirmDelivery: true,
-      buttonText: 'Confirm Delivery'
+      buttonText: 'Confirm Delivery',
     },
     cancelled: {
       label: 'Cancelled',
@@ -371,7 +371,7 @@ export const useOrderStatus = (status: Order['status']) => {
       showConfirm: false,
       showTrack: false,
       showConfirmDelivery: false,
-      buttonText: ''
+      buttonText: '',
     },
   };
 

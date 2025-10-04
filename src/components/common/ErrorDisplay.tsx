@@ -192,7 +192,8 @@ export const InlineErrorDisplay: React.FC<{
       ]}
       testID={testID}
     >
-      <IoniconsIcon         name="alert-circle"
+      <IoniconsIcon
+        name="alert-circle"
         size={16}
         color={colors.error}
         style={{ marginRight: 8 }}

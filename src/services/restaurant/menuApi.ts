@@ -141,7 +141,7 @@ export const restaurantMenuApi = {
           name: data.picture.name,
           type: data.picture.type,
         };
-        
+
         // Use 'picture' as the field name to match backend API
         formData.append('picture', imageFile as any);
       }
@@ -159,12 +159,14 @@ export const restaurantMenuApi = {
           startAt: data.startAt || null,
           endAt: data.endAt || null,
           hasPicture: !!data.picture,
-          pictureDetails: data.picture ? {
-            name: data.picture.name,
-            type: data.picture.type,
-            uri: data.picture.uri.substring(0, 50) + '...'
-          } : null
-        }
+          pictureDetails: data.picture
+            ? {
+                name: data.picture.name,
+                type: data.picture.type,
+                uri: data.picture.uri.substring(0, 50) + '...',
+              }
+            : null,
+        },
       });
 
       const response = await apiClient.post<ApiResponse<MenuItem>>(
@@ -177,7 +179,7 @@ export const restaurantMenuApi = {
             Accept: 'application/json',
           },
           timeout: 30000, // 30 seconds timeout for file upload
-        }
+        },
       );
 
       // Log successful response
@@ -185,11 +187,10 @@ export const restaurantMenuApi = {
         status: response.status,
         statusText: response.statusText,
         data: response.data,
-        headers: response.headers
+        headers: response.headers,
       });
 
       return response;
-
     } catch (error: any) {
       // Log error response from backend
       console.log('ERROR RESPONSE FROM BACKEND:', error);
@@ -198,14 +199,99 @@ export const restaurantMenuApi = {
     }
   },
 
-  updateMenuItem: (
+  updateMenuItem: async (
     restaurantId: string,
     itemId: string,
     data: UpdateMenuItemRequest,
   ) => {
-    return apiClient.patch(`/restaurants/${restaurantId}/menu/${itemId}`, {
-      ...data,
-    });
+    try {
+      // Check if we have a picture to upload
+      if (data.picture && data.picture.uri && data.picture.name && data.picture.type) {
+        // Use FormData for requests with image uploads
+        const formData = new FormData();
+
+        // Append text fields
+        if (data.name !== undefined) {
+          formData.append('name', data.name);
+        }
+        if (data.description !== undefined) {
+          formData.append('description', data.description);
+        }
+        if (data.price !== undefined) {
+          formData.append('price', data.price.toString());
+        }
+        if (data.category !== undefined) {
+          formData.append('category', data.category);
+        }
+        if (data.isAvailable !== undefined) {
+          formData.append('isAvailable', data.isAvailable.toString());
+        }
+        if (data.startAt !== undefined) {
+          formData.append('startAt', data.startAt);
+        }
+        if (data.endAt !== undefined) {
+          formData.append('endAt', data.endAt);
+        }
+
+        // Add the image file
+        const imageFile = {
+          uri: data.picture.uri,
+          name: data.picture.name,
+          type: data.picture.type,
+        };
+        formData.append('picture', imageFile as any);
+
+        console.log('🔄 Updating menu item with image:', {
+          restaurantId,
+          itemId,
+          url: `/restaurants/${restaurantId}/menu/${itemId}`,
+          hasPicture: true,
+          pictureDetails: {
+            name: data.picture.name,
+            type: data.picture.type,
+            uri: data.picture.uri.substring(0, 50) + '...',
+          },
+        });
+
+        return await apiClient.patch(
+          `/restaurants/${restaurantId}/menu/${itemId}`,
+          formData,
+          {
+            headers: {
+              Accept: 'application/json',
+            },
+            timeout: 30000, // 30 seconds timeout for file upload
+          },
+        );
+      } else {
+        // Use JSON for requests without image uploads
+        const jsonData: any = {};
+        
+        // Only include fields that are defined (not undefined)
+        if (data.name !== undefined) jsonData.name = data.name;
+        if (data.description !== undefined) jsonData.description = data.description;
+        if (data.price !== undefined) jsonData.price = data.price;
+        if (data.category !== undefined) jsonData.category = data.category;
+        if (data.isAvailable !== undefined) jsonData.isAvailable = data.isAvailable;
+        if (data.startAt !== undefined) jsonData.startAt = data.startAt;
+        if (data.endAt !== undefined) jsonData.endAt = data.endAt;
+
+        console.log('🔄 Updating menu item without image:', {
+          restaurantId,
+          itemId,
+          url: `/restaurants/${restaurantId}/menu/${itemId}`,
+          data: jsonData,
+        });
+
+        return await apiClient.patch(
+          `/restaurants/${restaurantId}/menu/${itemId}`,
+          jsonData,
+        );
+      }
+    } catch (error: any) {
+      console.error('❌ Error updating menu item:', error);
+      throw error;
+    }
   },
 
   deleteMenuItem: (restaurantId: string, itemId: string) => {

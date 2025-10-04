@@ -151,7 +151,8 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
                 alignItems: 'center',
               }}
             >
-              <MaterialIcon                 name="restaurant"
+              <MaterialIcon
+                name="restaurant"
                 size={20}
                 color={colors.onSurfaceVariant}
               />

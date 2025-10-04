@@ -86,7 +86,8 @@ const CartReminderSettings: React.FC<CartReminderSettingsProps> = ({
       <Dialog visible={visible} onDismiss={onDismiss}>
         <Dialog.Title>
           <View className="flex-row items-center">
-            <IoniconsIcon               name="notifications-outline"
+            <IoniconsIcon
+              name="notifications-outline"
               size={24}
               color={colors.primary}
               style={{ marginRight: 8 }}
@@ -216,7 +217,8 @@ const CartReminderSettings: React.FC<CartReminderSettingsProps> = ({
                 >
                   {t('advanced_settings', 'Advanced Settings')}
                 </Text>
-                <IoniconsIcon                   name={showAdvanced ? 'chevron-up' : 'chevron-down'}
+                <IoniconsIcon
+                  name={showAdvanced ? 'chevron-up' : 'chevron-down'}
                   size={20}
                   color={colors.primary}
                 />

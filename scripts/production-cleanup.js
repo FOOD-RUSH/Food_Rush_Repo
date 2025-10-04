@@ -12,7 +12,7 @@ const cleanupTargets = [
   '.expo/web',
   '.expo/types',
   'node_modules/.cache',
-  
+
   // Test files (if any)
   '**/*.test.js',
   '**/*.test.ts',
@@ -20,7 +20,7 @@ const cleanupTargets = [
   '**/*.spec.js',
   '**/*.spec.ts',
   '**/*.spec.tsx',
-  
+
   // Development documentation
   'AGENTS.md',
   'QODO_SETUP.md',
@@ -30,22 +30,23 @@ const cleanupTargets = [
   'RESTAURANT_2STEP_SIGNUP_IMPLEMENTATION.md',
   'RESTAURANT_FEATURES_USAGE_ANALYSIS.md',
   'RESTAURANT_LOCATION_IMPLEMENTATION.md',
-  
+
   // Original large files we backed up
   'assets/images/*_original.*',
 ];
 
 // Environment variables to check
-const requiredEnvVars = [
-  'API_BASE_URL',
-  'EXPO_PROJECT_ID',
-];
+const requiredEnvVars = ['API_BASE_URL', 'EXPO_PROJECT_ID'];
 
 // Check environment variables
 // Checking environment variables...
-const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
+const missingEnvVars = requiredEnvVars.filter(
+  (varName) => !process.env[varName],
+);
 if (missingEnvVars.length > 0) {
-  console.warn(`⚠️  Missing environment variables: ${missingEnvVars.join(', ')}`);
+  console.warn(
+    `⚠️  Missing environment variables: ${missingEnvVars.join(', ')}`,
+  );
   console.warn('   Make sure to set these before building for production');
 } else {
   // All required environment variables are set
@@ -53,7 +54,7 @@ if (missingEnvVars.length > 0) {
 
 // Clean up development files
 // Cleaning up development files...
-cleanupTargets.forEach(target => {
+cleanupTargets.forEach((target) => {
   try {
     if (fs.existsSync(target)) {
       if (fs.statSync(target).isDirectory()) {
@@ -76,14 +77,14 @@ cleanupTargets.forEach(target => {
 try {
   const imagesDir = 'assets/images';
   const files = fs.readdirSync(imagesDir);
-  const originalFiles = files.filter(file => file.includes('_original.'));
-  
-  originalFiles.forEach(file => {
+  const originalFiles = files.filter((file) => file.includes('_original.'));
+
+  originalFiles.forEach((file) => {
     const filePath = path.join(imagesDir, file);
     fs.unlinkSync(filePath);
     // Removed backup: ${file}
   });
-  
+
   if (originalFiles.length === 0) {
     // No backup files found to remove
   }
@@ -114,16 +115,22 @@ try {
 // Verifying optimizations...
 
 // Check asset sizes
-const assetsSize = execSync('du -sh assets', { encoding: 'utf8' }).trim().split('\t')[0];
+const assetsSize = execSync('du -sh assets', { encoding: 'utf8' })
+  .trim()
+  .split('\t')[0];
 // Assets size: ${assetsSize}
 
 // Check for large files
 try {
-  const largeFiles = execSync('find assets -type f -size +500k', { encoding: 'utf8' }).trim();
+  const largeFiles = execSync('find assets -type f -size +500k', {
+    encoding: 'utf8',
+  }).trim();
   if (largeFiles) {
     // Large files still found:
-    largeFiles.split('\n').forEach(file => {
-      const size = execSync(`du -h "${file}"`, { encoding: 'utf8' }).trim().split('\t')[0];
+    largeFiles.split('\n').forEach((file) => {
+      const size = execSync(`du -h "${file}"`, { encoding: 'utf8' })
+        .trim()
+        .split('\t')[0];
       // ${file}: ${size}
     });
   } else {
@@ -134,7 +141,9 @@ try {
 }
 
 // Check font count
-const fontFiles = fs.readdirSync('assets/fonts').filter(f => f.endsWith('.ttf'));
+const fontFiles = fs
+  .readdirSync('assets/fonts')
+  .filter((f) => f.endsWith('.ttf'));
 // Font files: ${fontFiles.length} (optimized from 19)
 
 // Production optimization summary:

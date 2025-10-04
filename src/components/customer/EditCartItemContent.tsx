@@ -23,9 +23,9 @@ const EditCartItemContent: React.FC<CartItemProps> = ({
   const [instructions, setInstructions] = useState(specialInstructions || '');
 
   // Cart actions
-  const updateItemQuantity = useCartStore((state) => state.modifyCart);
-  const removeItem = useCartStore((state) => state.deleteCart);
-  const addtoCart = useCartStore((state) => state.addtoCart);
+  const updateItemQuantity = useCartStore((state) => state.updateItemQuantity);
+  const removeItem = useCartStore((state) => state.removeItem);
+  const addtoCart = useCartStore((state) => state.addItemtoCart);
 
   // Handle quantity changes
   const handleIncrease = useCallback(() => {
@@ -129,7 +129,8 @@ const EditCartItemContent: React.FC<CartItemProps> = ({
             }}
             activeOpacity={0.7}
           >
-            <MaterialIcon               name="remove"
+            <MaterialIcon
+              name="remove"
               size={20}
               color={pquantity > 1 ? colors.onPrimary : colors.onSurfaceVariant}
             />

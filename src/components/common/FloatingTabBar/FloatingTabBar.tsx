@@ -33,7 +33,7 @@ const FloatingTabBar: React.FC<FloatingTabBarProps> = ({
   // Calculate tab bar dimensions
   const tabBarWidth = screenWidth * 0.9; // 90% of screen width for better coverage
   const tabBarHeight = 70; // Slightly taller for better touch targets
-const bottomMargin = Platform.OS === 'ios' ? insets.bottom  : 35; // More space from bottom
+  const bottomMargin = Platform.OS === 'ios' ? insets.bottom : 35; // More space from bottom
 
   const getIconName = (routeName: string, focused: boolean): IoniconsName => {
     if (userType === 'customer') {
@@ -67,11 +67,11 @@ const bottomMargin = Platform.OS === 'ios' ? insets.bottom  : 35; // More space 
   const getTabLabel = (routeName: string): string => {
     const descriptor = descriptors[state.routes[state.index].key];
     const label = descriptor.options.tabBarLabel;
-    
+
     if (typeof label === 'string') {
       return label;
     }
-    
+
     return routeName;
   };
 
@@ -86,7 +86,9 @@ const bottomMargin = Platform.OS === 'ios' ? insets.bottom  : 35; // More space 
             backgroundColor: navigationTheme.colors.card,
             shadowColor: navigationTheme.dark ? '#000' : '#000',
             borderWidth: navigationTheme.dark ? 0 : 0.5,
-            borderColor: navigationTheme.dark ? 'transparent' : colors.outline + '20',
+            borderColor: navigationTheme.dark
+              ? 'transparent'
+              : colors.outline + '20',
           },
         ]}
       >

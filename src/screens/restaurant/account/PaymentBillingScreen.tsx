@@ -238,7 +238,8 @@ const PaymentBillingScreen: React.FC = () => {
                       marginRight: 12,
                     }}
                   >
-                    <MaterialCommunityIcon                       name={getPaymentIcon(method.type) as any}
+                    <MaterialCommunityIcon
+                      name={getPaymentIcon(method.type) as any}
                       size={20}
                       color={colors.primary}
                     />
@@ -335,7 +336,8 @@ const PaymentBillingScreen: React.FC = () => {
                   >
                     {t('weekly')}
                   </Body>
-                  <MaterialCommunityIcon                     name="chevron-right"
+                  <MaterialCommunityIcon
+                    name="chevron-right"
                     size={20}
                     color={colors.onSurfaceVariant}
                   />
@@ -367,7 +369,8 @@ const PaymentBillingScreen: React.FC = () => {
                 <Label color={colors.onSurface}>
                   {t('view_all_transactions')}
                 </Label>
-                <MaterialCommunityIcon                   name="chevron-right"
+                <MaterialCommunityIcon
+                  name="chevron-right"
                   size={20}
                   color={colors.onSurfaceVariant}
                 />

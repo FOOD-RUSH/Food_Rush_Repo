@@ -1,18 +1,15 @@
 import { MaterialIcon } from '@/src/components/common/icons';
 import { useTranslation } from 'react-i18next';
-import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { View, ScrollView, TouchableOpacity } from 'react-native';
 import React, { useState } from 'react';
 import CommonView from '@/src/components/common/CommonView';
 import { Card, useTheme } from 'react-native-paper';
 import Seperator from '@/src/components/common/Seperator';
 
 import {
-  Typography,
   Heading4,
-  Heading5,
   Body,
   Label,
-  Caption,
 } from '@/src/components/common/Typography';
 import { useResponsive } from '@/src/hooks/useResponsive';
 
@@ -116,7 +113,14 @@ const FAQ = () => {
 
   return (
     <CommonView>
-      {/* Header */}
+   
+
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        className="flex-1 px-4 py-2"
+        contentContainerStyle={{ paddingBottom: scale(20) }}
+      >
+           {/* Header */}
       <View
         className="px-4 pt-10 border-b"
         style={{ borderBottomColor: colors.outline + '30' }}
@@ -135,12 +139,6 @@ const FAQ = () => {
           )}
         </Body>
       </View>
-
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        className="flex-1 px-4 py-2"
-        contentContainerStyle={{ paddingBottom: scale(20) }}
-      >
         {faqData.map((item) => (
           <QuestionCard
             key={item.id}
@@ -161,7 +159,8 @@ const FAQ = () => {
         >
           <View className="p-5">
             <View className="flex-row items-center mb-3">
-              <MaterialIcon                 name="support-agent"
+              <MaterialIcon
+                name="support-agent"
                 size={24}
                 color={colors.primary}
               />
@@ -216,11 +215,12 @@ const QuestionCard = ({ item, isExpanded, onToggle }: QuestionCardProps) => {
           <Label
             color={colors.onSurface}
             weight="semibold"
-            style={{ flex: 1, paddingRight: 12, fontSize: scale(16) }}
+            style={{ flex: 1, paddingRight: 12, fontSize: scale(16),  }}
           >
             {item.title}
           </Label>
-          <MaterialIcon             name={isExpanded ? 'keyboard-arrow-up' : 'keyboard-arrow-down'}
+          <MaterialIcon
+            name={isExpanded ? 'keyboard-arrow-up' : 'keyboard-arrow-down'}
             size={scale(24)}
             color={colors.primary}
           />

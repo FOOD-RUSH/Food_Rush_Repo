@@ -291,7 +291,11 @@ const OnboardingSlide = memo(
                     >
                       {isLastSlide ? t('next') : t('next')}
                     </Label>
-                    <IoniconsIcon name="arrow-forward" size={16} color="white" />
+                    <IoniconsIcon
+                      name="arrow-forward"
+                      size={16}
+                      color="white"
+                    />
                   </TouchableOpacity>
                 </View>
 

@@ -1,5 +1,5 @@
 import { IoniconsIcon, MaterialIcon } from '@/src/components/common/icons';
-import React, { useMemo, useCallback, useEffect } from 'react';
+import React, { useMemo, useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -17,19 +17,23 @@ import Seperator from '@/src/components/common/Seperator';
 import CheckOutItem from '@/src/components/customer/CheckOutItem';
 import {
   useCartStore,
+  useCartItems,
+  useCartSubtotal,
+  useCartDeliveryFee,
+  useCartServiceFee,
   useCartTotal,
+  useCartItemCount,
   CartItem,
 } from '@/src/stores/customerStores/cartStore';
 import { useAuthUser } from '@/src/stores/customerStores';
-import CheckoutContent from '@/src/components/common/BottomSheet/CheckoutContent';
-import { useBottomSheet } from '@/src/components/common/BottomSheet/BottomSheetContext';
 import { useDefaultAddress } from '@/src/location/store';
 import {
   useSelectedPaymentMethod,
   useSelectedProvider,
 } from '@/src/stores/customerStores/paymentStore';
 import { useOrderFlow } from '@/src/hooks/customer/useOrderFlow';
-
+import { useLocationForQueries } from '@/src/hooks/customer/useLocationService';
+import OrderValidationModal from '@/src/components/customer/OrderValidationModal';
 
 import { useTranslation } from 'react-i18next';
 
@@ -39,14 +43,26 @@ const CheckOutScreen = ({
 }: RootStackScreenProps<'Checkout'>) => {
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
+  
+  // Modal state
+  const [showOrderModal, setShowOrderModal] = useState(false);
+  
   // Subscribe to specific store slices
-  const cartItems = useCartStore((state) => state.items);
-  const totalPrice = useCartTotal();
+  const cartItems = useCartItems();
+  const subtotal = useCartSubtotal();
+  const deliveryFee = useCartDeliveryFee();
+  const serviceFee = useCartServiceFee();
+  const total = useCartTotal();
+  const itemCount = useCartItemCount();
   const clearCart = useCartStore((state) => state.clearCart);
+  
   const defaultAddress = useDefaultAddress();
   const selectedPaymentMethod = useSelectedPaymentMethod();
   const selectedProvider = useSelectedProvider();
   const user = useAuthUser();
+
+  // Get live location for order creation
+  const { nearLat, nearLng } = useLocationForQueries();
 
   // Order flow hook
   const {
@@ -57,10 +73,6 @@ const CheckOutScreen = ({
     isCreatingOrder,
   } = useOrderFlow();
 
-  // Constants for fees
-  const DELIVERY_FEE = 2300;
-  const DISCOUNT = 0; // Could be dynamic based on promo codes
-
   // Navigate to order tracking when order is created
   useEffect(() => {
     if (isOrderCreated && flowState.orderId) {
@@ -69,45 +81,30 @@ const CheckOutScreen = ({
       navigation.navigate('OrderTracking', { orderId: flowState.orderId });
       // Reset the flow state
       resetFlow();
+      setShowOrderModal(false);
     }
   }, [isOrderCreated, flowState.orderId, clearCart, navigation, resetFlow]);
 
-  // helper functions for bottom modal
-  const { present, dismiss } = useBottomSheet();
-
-  // Memoized calculations
-  const calculations = useMemo(() => {
-    const subtotal = totalPrice || 0;
-    const deliveryFee = DELIVERY_FEE;
-    const discount = DISCOUNT;
-    const finalTotal = subtotal + deliveryFee - discount;
-
-    return {
-      subtotal: subtotal.toLocaleString('fr-FR', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2,
-      }),
-      deliveryFee: deliveryFee.toLocaleString('fr-FR', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2,
-      }),
-      discount: discount.toLocaleString('fr-FR', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2,
-      }),
-      finalTotal: finalTotal.toLocaleString('fr-FR', {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2,
-      }),
-      finalTotalRaw: finalTotal,
-    };
-  }, [totalPrice]);
-
-  // Memoize total items count
-  const totalItems = useMemo(
-    () => cartItems.reduce((sum, item) => sum + item.quantity, 0),
-    [cartItems],
-  );
+  // Memoized calculations for display
+  const calculations = useMemo(() => ({
+    subtotal: subtotal.toLocaleString('fr-FR', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }),
+    deliveryFee: deliveryFee.toLocaleString('fr-FR', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }),
+    serviceFee: serviceFee.toLocaleString('fr-FR', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }),
+    total: total.toLocaleString('fr-FR', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }),
+    totalRaw: total,
+  }), [subtotal, deliveryFee, serviceFee, total]);
 
   // Handle navigation back to menu
   const handleAddItems = useCallback(() => {
@@ -116,13 +113,11 @@ const CheckOutScreen = ({
 
   // Handle address selection
   const handleAddressPress = useCallback(() => {
-    // Navigate to address selection screen
     navigation.navigate('AddressScreen');
   }, [navigation]);
 
   // Handle payment method selection
   const handlePaymentPress = useCallback(() => {
-    // Navigate to payment methods screen
     navigation.navigate('PaymentMethods');
   }, [navigation]);
 
@@ -153,16 +148,21 @@ const CheckOutScreen = ({
       }
 
       console.log('🚀 Creating order for restaurant:', restaurantId);
-      await createOrderFromCart(restaurantId);
+      console.log('📍 Using live coordinates:', { lat: nearLat, lng: nearLng });
+      
+      // Create order with live coordinates for delivery fee calculation
+      await createOrderFromCart(restaurantId, {
+        latitude: nearLat,
+        longitude: nearLng,
+      });
     } catch (error) {
       Alert.alert(t('error'), t('failed_to_place_order'));
       console.error('Order placement error:', error);
+      setShowOrderModal(false);
     }
-  }, [createOrderFromCart, route.params, cartItems, t]);
+  }, [createOrderFromCart, route.params, cartItems, t, nearLat, nearLng]);
 
-
-
-  // Handle place order - show bottom sheet
+  // Handle place order - show validation modal
   const handlePlaceOrder = useCallback(() => {
     if (cartItems.length === 0) {
       Alert.alert(t('error'), t('your_cart_is_empty'));
@@ -181,30 +181,9 @@ const CheckOutScreen = ({
       return;
     }
 
-    // Payment method is always mobile_money, no need to check
-    // if (!selectedPaymentMethod) {
-    //   Alert.alert(t('error'), t('please_select_payment_method'), [
-    //     {
-    //       text: t('select_payment'),
-    //       onPress: () => navigation.navigate('PaymentMethods'),
-    //     },
-    //     { text: t('cancel'), style: 'cancel' },
-    //   ]);
-    //   return;
-    // }
-
-    // Present the enhanced checkout content with cart management
-    present(
-      <CheckoutContent onConfirm={handleConfirmOrder} onDismiss={dismiss} />,
-      {
-        snapPoints: ['40%'], // Allow for more content
-        enablePanDownToClose: true,
-        title: t('confirm_your_order'),
-        showHandle: true,
-        backdropOpacity: 0.5,
-      },
-    );
-  }, [cartItems.length, defaultAddress, present, handleConfirmOrder, dismiss, navigation, t]);
+    // Show order validation modal
+    setShowOrderModal(true);
+  }, [cartItems.length, defaultAddress, navigation, t]);
 
   // Optimized render item
   const renderCheckoutItem: ListRenderItem<CartItem> = useCallback(
@@ -249,7 +228,8 @@ const CheckOutScreen = ({
     return (
       <CommonView>
         <View className="flex-1 items-center justify-center px-6">
-          <MaterialIcon             name="shopping-cart"
+          <MaterialIcon
+            name="shopping-cart"
             size={80}
             color={colors.onSurfaceVariant}
           />
@@ -311,7 +291,11 @@ const CheckOutScreen = ({
               activeOpacity={0.7}
             >
               <View className="flex-row items-center flex-1">
-                <IoniconsIcon name="location" color={colors.primary} size={28} />
+                <IoniconsIcon
+                  name="location"
+                  color={colors.primary}
+                  size={28}
+                />
 
                 <View className="flex-col mx-3 flex-1">
                   <View className="flex-row mb-1 items-center">
@@ -345,7 +329,8 @@ const CheckOutScreen = ({
                 </View>
               </View>
 
-              <MaterialIcon                 name="arrow-forward-ios"
+              <MaterialIcon
+                name="arrow-forward-ios"
                 size={20}
                 color={colors.onSurfaceVariant}
               />
@@ -361,7 +346,7 @@ const CheckOutScreen = ({
                 className="font-semibold text-lg"
                 style={{ color: colors.onSurface }}
               >
-                {t('order_summary')} ({totalItems} {t('items')})
+                {t('order_summary')} ({itemCount} {t('items')})
               </Text>
 
               <TouchableOpacity
@@ -403,7 +388,8 @@ const CheckOutScreen = ({
               activeOpacity={0.7}
             >
               <View className="flex-row items-center">
-                <IoniconsIcon                   name="card-outline"
+                <IoniconsIcon
+                  name="card-outline"
                   color={colors.primary}
                   size={26}
                 />
@@ -426,7 +412,8 @@ const CheckOutScreen = ({
                       ? 'Orange Money'
                       : 'Mobile Money'}
                 </Text>
-                <MaterialIcon                   name="arrow-forward-ios"
+                <MaterialIcon
+                  name="arrow-forward-ios"
                   size={18}
                   color={colors.onSurfaceVariant}
                 />
@@ -444,7 +431,8 @@ const CheckOutScreen = ({
               activeOpacity={0.7}
             >
               <View className="flex-row items-center">
-                <MaterialIcon                   name="local-offer"
+                <MaterialIcon
+                  name="local-offer"
                   color={colors.primary}
                   size={26}
                 />
@@ -463,7 +451,8 @@ const CheckOutScreen = ({
                 >
                   {t('add_code')}
                 </Text>
-                <MaterialIcon                   name="arrow-forward-ios"
+                <MaterialIcon
+                  name="arrow-forward-ios"
                   size={18}
                   color={colors.onSurfaceVariant}
                 />
@@ -499,7 +488,7 @@ const CheckOutScreen = ({
                   className="font-semibold text-base"
                   style={{ color: colors.onSurface }}
                 >
-                  {calculations.subtotal} FCFA
+                  {calculations.subtotal} XAF
                 </Text>
               </View>
 
@@ -514,26 +503,24 @@ const CheckOutScreen = ({
                   className="font-semibold text-base"
                   style={{ color: colors.onSurface }}
                 >
-                  {calculations.deliveryFee}FCFA
+                  {calculations.deliveryFee} XAF
                 </Text>
               </View>
 
-              {DISCOUNT > 0 && (
-                <>
-                  <Seperator />
-                  <View className="flex-row justify-between items-center">
-                    <Text style={{ color: colors.primary }}>
-                      {t('discount')}:
-                    </Text>
-                    <Text
-                      className="font-semibold"
-                      style={{ color: colors.primary }}
-                    >
-                      -{calculations.discount} FCFA
-                    </Text>
-                  </View>
-                </>
-              )}
+              <View className="flex-row justify-between items-center">
+                <Text
+                  className="text-base"
+                  style={{ color: colors.onSurfaceVariant }}
+                >
+                  {t('service_fee')}:
+                </Text>
+                <Text
+                  className="font-semibold text-base"
+                  style={{ color: colors.onSurface }}
+                >
+                  {calculations.serviceFee} XAF
+                </Text>
+              </View>
 
               <View
                 className={`h-px my-2`}
@@ -551,7 +538,7 @@ const CheckOutScreen = ({
                   className="font-bold text-lg"
                   style={{ color: colors.primary }}
                 >
-                  {calculations.finalTotal} FCFA
+                  {calculations.total} XAF
                 </Text>
               </View>
             </View>
@@ -576,12 +563,18 @@ const CheckOutScreen = ({
             className="text-lg font-bold text-center"
             style={{ color: colors.onPrimary }}
           >
-            {t('review_order')} - {calculations.finalTotal} FCFA
+            {t('review_order')} - {calculations.total} XAF
           </Text>
         </TouchableOpacity>
       </View>
 
-
+      {/* Order Validation Modal */}
+      <OrderValidationModal
+        visible={showOrderModal}
+        onDismiss={() => setShowOrderModal(false)}
+        onConfirm={handleConfirmOrder}
+        isLoading={isCreatingOrder}
+      />
     </CommonView>
   );
 };

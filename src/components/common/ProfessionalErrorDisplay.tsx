@@ -7,7 +7,12 @@ import { useTranslation } from 'react-i18next';
 import { images } from '@/assets/images';
 
 export interface ProfessionalErrorDisplayProps {
-  type?: 'no_menu' | 'no_items' | 'network_error' | 'not_found' | 'general_error';
+  type?:
+    | 'no_menu'
+    | 'no_items'
+    | 'network_error'
+    | 'not_found'
+    | 'general_error';
   title?: string;
   message?: string;
   onRefresh?: () => void;
@@ -63,7 +68,8 @@ const ProfessionalErrorDisplay: React.FC<ProfessionalErrorDisplayProps> = ({
         return {
           image: imageSource || images.not_found,
           title: title || t('not_found'),
-          message: message || t('the_content_you_are_looking_for_was_not_found'),
+          message:
+            message || t('the_content_you_are_looking_for_was_not_found'),
           buttonText: refreshButtonText || t('go_back'),
           icon: 'search-off',
         };
@@ -114,7 +120,8 @@ const ProfessionalErrorDisplay: React.FC<ProfessionalErrorDisplayProps> = ({
           marginBottom: 16,
         }}
       >
-        <MaterialIcon           name={config.icon as any}
+        <MaterialIcon
+          name={config.icon as any}
           size={24}
           color={colors.onErrorContainer}
         />
@@ -168,10 +175,7 @@ const ProfessionalErrorDisplay: React.FC<ProfessionalErrorDisplayProps> = ({
             onPress={handleAction}
             activeOpacity={0.8}
           >
-            <MaterialIcon               name="refresh"
-              size={20}
-              color={colors.onPrimary}
-            />
+            <MaterialIcon name="refresh" size={20} color={colors.onPrimary} />
             <Text
               style={{
                 color: colors.onPrimary,

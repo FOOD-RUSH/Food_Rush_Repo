@@ -1,7 +1,9 @@
 # APK Size Optimization Guide
 
 ## 🎯 **Current Issue**
+
 Your APK is **220+ MB** due to:
+
 - **5.2MB of assets** (mostly large, unoptimized images)
 - **All assets being bundled** regardless of usage
 - **APK format** instead of AAB (Android App Bundle)
@@ -10,6 +12,7 @@ Your APK is **220+ MB** due to:
 ## 🛠️ **Immediate Solutions**
 
 ### 1. **Use Optimized Build Command**
+
 ```bash
 # New optimized build (recommended)
 npm run production:build:optimized
@@ -19,12 +22,14 @@ eas build --platform android --profile production-optimized
 ```
 
 ### 2. **Asset Optimizations Applied**
+
 - ✅ **Reduced asset bundle** from 5.2MB to ~1.5MB
 - ✅ **Removed duplicate files** (PNG/SVG duplicates)
 - ✅ **Limited food emojis** from 24 to 5 most common
 - ✅ **SVG preference** over PNG where possible
 
 ### 3. **Build Optimizations Applied**
+
 - ✅ **AAB format** instead of APK (30-50% smaller downloads)
 - ✅ **Hermes engine** enabled for better performance
 - ✅ **ProGuard enabled** for code minification
@@ -32,10 +37,10 @@ eas build --platform android --profile production-optimized
 
 ## 📊 **Expected Results**
 
-| Component | Before | After | Reduction |
-|-----------|--------|-------|-----------|
-| Assets | 5.2MB | ~1.5MB | ~70% |
-| Code Bundle | ~50MB | ~35MB | ~30% |
+| Component     | Before    | After       | Reduction  |
+| ------------- | --------- | ----------- | ---------- |
+| Assets        | 5.2MB     | ~1.5MB      | ~70%       |
+| Code Bundle   | ~50MB     | ~35MB       | ~30%       |
 | **Total APK** | **220MB** | **50-80MB** | **60-75%** |
 
 ## 🔧 **Additional Optimizations**
@@ -43,6 +48,7 @@ eas build --platform android --profile production-optimized
 ### **For Even Smaller Size:**
 
 1. **Lazy Load Food Images**
+
 ```typescript
 // Instead of bundling all food images, load them dynamically
 const loadFoodImage = (id: string) => {
@@ -51,12 +57,14 @@ const loadFoodImage = (id: string) => {
 ```
 
 2. **Use WebP Format**
+
 ```bash
 # Convert PNG to WebP (80% smaller)
 cwebp -q 80 input.png -o output.webp
 ```
 
 3. **Enable Play Asset Delivery**
+
 ```json
 // In app.json
 "android": {
@@ -80,16 +88,19 @@ eas build --platform android --profile development
 ## 📋 **Verification Steps**
 
 1. **Check asset size:**
+
 ```bash
 npm run bundle:size
 ```
 
 2. **Analyze bundle:**
+
 ```bash
 npm run analyze:bundle
 ```
 
 3. **Monitor dependencies:**
+
 ```bash
 npm run deps:analyze
 ```

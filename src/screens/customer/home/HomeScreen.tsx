@@ -12,7 +12,7 @@ import {
   RefreshControl,
   FlatList,
   ListRenderItem,
-  TouchableOpacity
+  TouchableOpacity,
 } from 'react-native';
 import { CustomerHomeStackScreenProps } from '@/src/navigation/types';
 import { RestaurantCard } from '@/src/components/customer/RestaurantCard';
@@ -483,37 +483,34 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
 
         case 'search':
           return (
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={handleSearchPress}
-            >
-            <View
-              className="px-4 py-3"
-              style={{ backgroundColor: colors.background }}
-            >
-              <TextInput
-                placeholder={t('search_your_craving')}
-                left={
-                  <TextInput.Icon
-                    icon="magnify"
-                    size={30}
-                    color={colors.onSurfaceVariant}
-                  />
-                }
-                mode="outlined"
-                outlineStyle={{
-                  borderColor: colors.surfaceVariant,
-                  borderWidth: 1,
-                  borderRadius: 20,
-                  backgroundColor: colors.surfaceVariant,
-                }}
-                style={{ backgroundColor: colors.surfaceVariant }}
-                className="py-1 px-3 rounded-2xl"
-                placeholderTextColor={colors.onBackground}
-                onPressIn={handleSearchPress}
-                pointerEvents="none"
-              />
-            </View>
+            <TouchableOpacity activeOpacity={0.8} onPress={handleSearchPress}>
+              <View
+                className="px-4 py-3"
+                style={{ backgroundColor: colors.background }}
+              >
+                <TextInput
+                  placeholder={t('search_your_craving')}
+                  left={
+                    <TextInput.Icon
+                      icon="magnify"
+                      size={30}
+                      color={colors.onSurfaceVariant}
+                    />
+                  }
+                  mode="outlined"
+                  outlineStyle={{
+                    borderColor: colors.surfaceVariant,
+                    borderWidth: 1,
+                    borderRadius: 20,
+                    backgroundColor: colors.surfaceVariant,
+                  }}
+                  style={{ backgroundColor: colors.surfaceVariant }}
+                  className="py-1 px-3 rounded-2xl"
+                  placeholderTextColor={colors.onBackground}
+                  onPressIn={handleSearchPress}
+                  pointerEvents="none"
+                />
+              </View>
             </TouchableOpacity>
           );
 

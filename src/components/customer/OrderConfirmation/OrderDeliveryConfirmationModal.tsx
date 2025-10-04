@@ -1,4 +1,7 @@
-import { IoniconsIcon, MaterialCommunityIcon } from '@/src/components/common/icons';
+import {
+  IoniconsIcon,
+  MaterialCommunityIcon,
+} from '@/src/components/common/icons';
 import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
@@ -309,7 +312,8 @@ const OrderDeliveryConfirmationModal: React.FC<
                     alignItems: 'center',
                   }}
                 >
-                  <MaterialCommunityIcon                     name="bike"
+                  <MaterialCommunityIcon
+                    name="bike"
                     size={40}
                     color={colors.primary}
                   />
@@ -320,7 +324,11 @@ const OrderDeliveryConfirmationModal: React.FC<
                       left: 15,
                     }}
                   >
-                    <IoniconsIcon name="person" size={20} color={colors.primary} />
+                    <IoniconsIcon
+                      name="person"
+                      size={20}
+                      color={colors.primary}
+                    />
                   </View>
                 </Animated.View>
 
@@ -333,7 +341,8 @@ const OrderDeliveryConfirmationModal: React.FC<
                     transform: [{ translateY: foodBoxTranslateY }],
                   }}
                 >
-                  <MaterialCommunityIcon                     name="food-takeout-box"
+                  <MaterialCommunityIcon
+                    name="food-takeout-box"
                     size={24}
                     color={colors.primary}
                   />
@@ -350,7 +359,8 @@ const OrderDeliveryConfirmationModal: React.FC<
                       transform: [{ rotate: sparkleRotation }],
                     }}
                   >
-                    <IoniconsIcon                       name="sparkles"
+                    <IoniconsIcon
+                      name="sparkles"
                       size={12}
                       color={colors.primary + '60'}
                     />
@@ -437,7 +447,11 @@ const OrderDeliveryConfirmationModal: React.FC<
                 <View
                   style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
                 >
-                  <IoniconsIcon name="checkmark-circle" size={24} color="white" />
+                  <IoniconsIcon
+                    name="checkmark-circle"
+                    size={24}
+                    color="white"
+                  />
                   <Text
                     style={{
                       fontSize: 18,
@@ -467,7 +481,8 @@ const OrderDeliveryConfirmationModal: React.FC<
                 <View
                   style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}
                 >
-                  <IoniconsIcon                     name="time-outline"
+                  <IoniconsIcon
+                    name="time-outline"
                     size={24}
                     color={colors.onSurfaceVariant}
                   />

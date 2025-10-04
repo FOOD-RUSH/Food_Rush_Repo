@@ -1,11 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  restaurantOrderApi,
-} from '@/src/services/restaurant/orderApi';
+import { restaurantOrderApi } from '@/src/services/restaurant/orderApi';
 
-export const useGetOrders = (params?: {
-  status?: string;
-}) => {
+export const useGetOrders = (params?: { status?: string }) => {
   return useQuery({
     queryKey: ['restaurant-orders', params],
     queryFn: async () => {
@@ -14,12 +10,13 @@ export const useGetOrders = (params?: {
       console.log('📊 [HOOK] useGetOrders result:', {
         ordersCount: result?.length || 0,
         statusFilter: params?.status || 'all',
-        orders: result?.map(order => ({
-          id: order.id,
-          status: order.status,
-          customer: order.customer?.fullName || order.customerName,
-          total: order.total
-        })) || []
+        orders:
+          result?.map((order) => ({
+            id: order.id,
+            status: order.status,
+            customer: order.customer?.fullName || order.customerName,
+            total: order.total,
+          })) || [],
       });
       return result;
     },
@@ -36,9 +33,10 @@ export const useGetOrderById = (orderId: string) => {
       console.log(`📊 [HOOK] useGetOrderById result for ${orderId}:`, {
         orderId: res.data.data.id,
         status: res.data.data.status,
-        customer: res.data.data.customer?.fullName || res.data.data.customerName,
+        customer:
+          res.data.data.customer?.fullName || res.data.data.customerName,
         total: res.data.data.total,
-        itemsCount: res.data.data.items?.length || 0
+        itemsCount: res.data.data.items?.length || 0,
       });
       return res.data.data;
     },
@@ -53,13 +51,20 @@ export const useConfirmOrder = () => {
     mutationFn: async (orderId: string) => {
       console.log(`🔄 [HOOK] useConfirmOrder called for order: ${orderId}`);
       const result = await restaurantOrderApi.confirmOrder(orderId);
-      console.log(`✅ [HOOK] useConfirmOrder success for ${orderId}:`, result.data);
+      console.log(
+        `✅ [HOOK] useConfirmOrder success for ${orderId}:`,
+        result.data,
+      );
       return result;
     },
     onSuccess: (data, orderId) => {
-      console.log(`🔄 [HOOK] useConfirmOrder onSuccess - invalidating queries for order: ${orderId}`);
+      console.log(
+        `🔄 [HOOK] useConfirmOrder onSuccess - invalidating queries for order: ${orderId}`,
+      );
       queryClient.invalidateQueries({ queryKey: ['restaurant-orders'] });
-      queryClient.invalidateQueries({ queryKey: ['restaurant-order', orderId] });
+      queryClient.invalidateQueries({
+        queryKey: ['restaurant-order', orderId],
+      });
     },
     onError: (error: any, orderId) => {
       console.error(`❌ [HOOK] useConfirmOrder error for ${orderId}:`, error);
@@ -85,13 +90,20 @@ export const useRejectOrder = () => {
     mutationFn: async (orderId: string) => {
       console.log(`🔄 [HOOK] useRejectOrder called for order: ${orderId}`);
       const result = await restaurantOrderApi.rejectOrder(orderId);
-      console.log(`✅ [HOOK] useRejectOrder success for ${orderId}:`, result.data);
+      console.log(
+        `✅ [HOOK] useRejectOrder success for ${orderId}:`,
+        result.data,
+      );
       return result;
     },
     onSuccess: (data, orderId) => {
-      console.log(`🔄 [HOOK] useRejectOrder onSuccess - invalidating queries for order: ${orderId}`);
+      console.log(
+        `🔄 [HOOK] useRejectOrder onSuccess - invalidating queries for order: ${orderId}`,
+      );
       queryClient.invalidateQueries({ queryKey: ['restaurant-orders'] });
-      queryClient.invalidateQueries({ queryKey: ['restaurant-order', orderId] });
+      queryClient.invalidateQueries({
+        queryKey: ['restaurant-order', orderId],
+      });
     },
     onError: (error: any, orderId) => {
       console.error(`❌ [HOOK] useRejectOrder error for ${orderId}:`, error);

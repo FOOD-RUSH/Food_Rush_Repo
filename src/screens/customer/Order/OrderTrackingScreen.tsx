@@ -126,7 +126,8 @@ const OrderStatusStep: React.FC<OrderStatusStepProps> = ({
         {isCompleted ? (
           <IoniconsIcon name="checkmark" size={24} color="white" />
         ) : (
-          <IoniconsIcon             name={step.icon as any}
+          <IoniconsIcon
+            name={step.icon as any}
             size={24}
             color={isActive ? 'white' : '#666'}
           />
@@ -244,7 +245,7 @@ const OrderTrackingScreen = ({
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
   const [refreshing, setRefreshing] = useState(false);
-  
+
   // Order flow for customer confirmation
   const { confirmOrder, isConfirmingOrder } = useOrderFlow();
   const selectedPaymentMethod = useSelectedPaymentMethod();
@@ -291,7 +292,13 @@ const OrderTrackingScreen = ({
     } catch (error) {
       console.error('Failed to confirm order:', error);
     }
-  }, [confirmOrder, order, navigation, selectedPaymentMethod, selectedProvider]);
+  }, [
+    confirmOrder,
+    order,
+    navigation,
+    selectedPaymentMethod,
+    selectedProvider,
+  ]);
 
   if (isLoading) {
     return (
@@ -313,7 +320,8 @@ const OrderTrackingScreen = ({
           className="flex-1 items-center justify-center"
           style={{ backgroundColor: colors.background }}
         >
-          <IoniconsIcon             name="alert-circle-outline"
+          <IoniconsIcon
+            name="alert-circle-outline"
             size={48}
             color={colors.error}
           />
@@ -447,7 +455,8 @@ const OrderTrackingScreen = ({
               }}
               disabled={isConfirming}
             >
-              <IoniconsIcon                 name="checkmark-circle-outline"
+              <IoniconsIcon
+                name="checkmark-circle-outline"
                 size={20}
                 color="white"
               />
@@ -472,7 +481,8 @@ const OrderTrackingScreen = ({
               });
             }}
           >
-            <IoniconsIcon               name="chatbubble-ellipses-outline"
+            <IoniconsIcon
+              name="chatbubble-ellipses-outline"
               size={20}
               color={colors.primary}
             />

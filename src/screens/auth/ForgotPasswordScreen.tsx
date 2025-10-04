@@ -139,7 +139,10 @@ const ForgotPasswordScreen = ({
                 autoCapitalize="none"
                 autoComplete="email"
                 autoCorrect={false}
-                style={{ backgroundColor: colors.surfaceVariant, borderRadius: 16 }}
+                style={{
+                  backgroundColor: colors.surfaceVariant,
+                  borderRadius: 16,
+                }}
                 outlineStyle={{
                   borderRadius: 16,
                   borderWidth: 0,

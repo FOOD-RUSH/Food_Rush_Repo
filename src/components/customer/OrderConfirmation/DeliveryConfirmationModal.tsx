@@ -1,4 +1,7 @@
-import { MaterialCommunityIcon, IoniconsIcon } from '@/src/components/common/icons';
+import {
+  MaterialCommunityIcon,
+  IoniconsIcon,
+} from '@/src/components/common/icons';
 import React, { useState, useCallback } from 'react';
 import {
   View,
@@ -148,7 +151,8 @@ const DeliveryConfirmationModal: React.FC<DeliveryConfirmationModalProps> = ({
               },
             ]}
           >
-            <MaterialCommunityIcon               name="package-variant-closed"
+            <MaterialCommunityIcon
+              name="package-variant-closed"
               size={64}
               color={colors.primary}
             />
@@ -178,7 +182,8 @@ const DeliveryConfirmationModal: React.FC<DeliveryConfirmationModalProps> = ({
           <Card style={[styles.orderCard, { backgroundColor: colors.surface }]}>
             <View style={styles.orderCardContent}>
               <View style={styles.orderDetailRow}>
-                <MaterialCommunityIcon                   name="store"
+                <MaterialCommunityIcon
+                  name="store"
                   size={20}
                   color={colors.onSurfaceVariant}
                 />
@@ -194,7 +199,8 @@ const DeliveryConfirmationModal: React.FC<DeliveryConfirmationModalProps> = ({
 
               {deliveryAddress && (
                 <View style={styles.orderDetailRow}>
-                  <MaterialCommunityIcon                     name="map-marker"
+                  <MaterialCommunityIcon
+                    name="map-marker"
                     size={20}
                     color={colors.onSurfaceVariant}
                   />
@@ -210,7 +216,8 @@ const DeliveryConfirmationModal: React.FC<DeliveryConfirmationModalProps> = ({
               )}
 
               <View style={styles.orderDetailRow}>
-                <MaterialCommunityIcon                   name="clock-outline"
+                <MaterialCommunityIcon
+                  name="clock-outline"
                   size={20}
                   color={colors.onSurfaceVariant}
                 />
@@ -237,7 +244,8 @@ const DeliveryConfirmationModal: React.FC<DeliveryConfirmationModalProps> = ({
             ]}
           >
             <View style={styles.infoCardContent}>
-              <MaterialCommunityIcon                 name="information"
+              <MaterialCommunityIcon
+                name="information"
                 size={20}
                 color={colors.primary}
               />

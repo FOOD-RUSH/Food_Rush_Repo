@@ -1,4 +1,7 @@
-import { MaterialCommunityIcon, IoniconsIcon } from '@/src/components/common/icons';
+import {
+  MaterialCommunityIcon,
+  IoniconsIcon,
+} from '@/src/components/common/icons';
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   View,
@@ -245,7 +248,8 @@ const RestaurantLocationScreen: React.FC = () => {
     return (
       <CommonView>
         <View style={styles.centerContainer}>
-          <MaterialCommunityIcon             name="loading"
+          <MaterialCommunityIcon
+            name="loading"
             size={48}
             color={colors.primary}
           />
@@ -262,7 +266,8 @@ const RestaurantLocationScreen: React.FC = () => {
     return (
       <CommonView>
         <View style={styles.centerContainer}>
-          <MaterialCommunityIcon             name="alert-circle"
+          <MaterialCommunityIcon
+            name="alert-circle"
             size={48}
             color={colors.error}
           />
@@ -296,7 +301,8 @@ const RestaurantLocationScreen: React.FC = () => {
     return (
       <CommonView>
         <View style={styles.centerContainer}>
-          <MaterialCommunityIcon             name="store-off"
+          <MaterialCommunityIcon
+            name="store-off"
             size={48}
             color={colors.onSurfaceVariant}
           />
@@ -359,7 +365,8 @@ const RestaurantLocationScreen: React.FC = () => {
                   zIndex: 1,
                 }}
               >
-                <MaterialCommunityIcon                   name="loading"
+                <MaterialCommunityIcon
+                  name="loading"
                   size={24}
                   color={colors.primary}
                 />
@@ -374,7 +381,8 @@ const RestaurantLocationScreen: React.FC = () => {
                     { backgroundColor: colors.primary + '20' },
                   ]}
                 >
-                  <MaterialCommunityIcon                     name="store-marker"
+                  <MaterialCommunityIcon
+                    name="store-marker"
                     size={24}
                     color={colors.primary}
                   />
@@ -408,7 +416,8 @@ const RestaurantLocationScreen: React.FC = () => {
                 {/* Coordinates */}
                 {restaurant.latitude && restaurant.longitude && (
                   <View style={styles.coordinatesContainer}>
-                    <MaterialCommunityIcon                       name="map-marker"
+                    <MaterialCommunityIcon
+                      name="map-marker"
                       size={16}
                       color={colors.onSurfaceVariant}
                     />
@@ -425,7 +434,8 @@ const RestaurantLocationScreen: React.FC = () => {
                 {/* Delivery Radius */}
                 {restaurant.deliveryRadius && (
                   <View style={[styles.coordinatesContainer, { marginTop: 4 }]}>
-                    <MaterialCommunityIcon                       name="map-marker-radius"
+                    <MaterialCommunityIcon
+                      name="map-marker-radius"
                       size={16}
                       color={colors.onSurfaceVariant}
                     />
@@ -452,7 +462,8 @@ const RestaurantLocationScreen: React.FC = () => {
             style={{ borderRadius: 12 }}
             labelStyle={{ fontSize: 16, fontWeight: '600' }}
             icon={() => (
-              <MaterialCommunityIcon                 name="crosshairs-gps"
+              <MaterialCommunityIcon
+                name="crosshairs-gps"
                 size={20}
                 color="white"
               />
@@ -472,7 +483,8 @@ const RestaurantLocationScreen: React.FC = () => {
           >
             <View style={{ padding: 16 }}>
               <View style={styles.infoHeader}>
-                <MaterialCommunityIcon                   name="information"
+                <MaterialCommunityIcon
+                  name="information"
                   size={20}
                   color={colors.primary}
                 />
@@ -574,7 +586,8 @@ const RestaurantLocationScreen: React.FC = () => {
               >
                 <View style={{ padding: 16 }}>
                   <View style={styles.selectedLocationHeader}>
-                    <MaterialCommunityIcon                       name="map-marker-check"
+                    <MaterialCommunityIcon
+                      name="map-marker-check"
                       size={24}
                       color={colors.primary}
                     />
@@ -614,7 +627,8 @@ const RestaurantLocationScreen: React.FC = () => {
               </Label>
 
               <View style={styles.instructionItem}>
-                <IoniconsIcon                   name="checkmark-circle"
+                <IoniconsIcon
+                  name="checkmark-circle"
                   size={20}
                   color={colors.primary}
                 />
@@ -627,7 +641,8 @@ const RestaurantLocationScreen: React.FC = () => {
               </View>
 
               <View style={styles.instructionItem}>
-                <IoniconsIcon                   name="checkmark-circle"
+                <IoniconsIcon
+                  name="checkmark-circle"
                   size={20}
                   color={colors.primary}
                 />
@@ -640,7 +655,8 @@ const RestaurantLocationScreen: React.FC = () => {
               </View>
 
               <View style={styles.instructionItem}>
-                <IoniconsIcon                   name="checkmark-circle"
+                <IoniconsIcon
+                  name="checkmark-circle"
                   size={20}
                   color={colors.primary}
                 />
@@ -695,7 +711,8 @@ const RestaurantLocationScreen: React.FC = () => {
                         ],
                       }}
                     >
-                      <MaterialCommunityIcon                         name={isGettingLocation ? 'loading' : 'crosshairs-gps'}
+                      <MaterialCommunityIcon
+                        name={isGettingLocation ? 'loading' : 'crosshairs-gps'}
                         size={20}
                         color="white"
                       />

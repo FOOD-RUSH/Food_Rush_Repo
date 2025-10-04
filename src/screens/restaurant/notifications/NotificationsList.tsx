@@ -220,7 +220,8 @@ const RestaurantNotificationScreen = () => {
               marginRight: 12,
             }}
           >
-            <MaterialCommunityIcon               name={iconName as any}
+            <MaterialCommunityIcon
+              name={iconName as any}
               size={20}
               color={iconColor}
             />
@@ -414,7 +415,8 @@ const RestaurantNotificationScreen = () => {
         paddingHorizontal: 24,
       }}
     >
-      <MaterialCommunityIcon         name="bell-outline"
+      <MaterialCommunityIcon
+        name="bell-outline"
         size={64}
         color={colors.onSurfaceVariant}
         style={{ marginBottom: 16 }}

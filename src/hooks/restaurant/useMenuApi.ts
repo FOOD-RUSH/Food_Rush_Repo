@@ -45,7 +45,7 @@ export const useMenuItem = (itemId: string) => {
     queryFn: async () => {
       const response = await restaurantMenuApi.getMenuItemById(itemId);
       // Extract the data from the API response
-      return response.data;
+      return response;
     },
     enabled: !!itemId,
     staleTime: 5 * 60 * 1000, // 5 minutes

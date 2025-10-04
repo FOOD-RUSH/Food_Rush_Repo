@@ -23,25 +23,28 @@ const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
   const screenWidth = screen.width;
 
   // Calculate responsive dimensions
-  const responsiveWidth = typeof width === 'number' 
-    ? width 
-    : width === '100%' 
-      ? screenWidth * 0.9  // Default to 90% of screen width
-      : width;
+  const responsiveWidth =
+    typeof width === 'number'
+      ? width
+      : width === '100%'
+        ? screenWidth * 0.9 // Default to 90% of screen width
+        : width;
 
-  const calculatedHeight = aspectRatio 
-    ? typeof responsiveWidth === 'number' ? responsiveWidth / aspectRatio : height
+  const calculatedHeight = aspectRatio
+    ? typeof responsiveWidth === 'number'
+      ? responsiveWidth / aspectRatio
+      : height
     : height;
 
   return (
-    <View 
+    <View
       style={[
-        styles.container, 
-        { 
-          width: typeof width === 'string' ? width : responsiveWidth, 
-          height: calculatedHeight 
+        styles.container,
+        {
+          width: typeof width === 'string' ? width : responsiveWidth,
+          height: calculatedHeight,
         },
-        containerStyle
+        containerStyle,
       ]}
     >
       <Image
@@ -53,7 +56,7 @@ const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
             height: '100%',
             resizeMode,
           },
-          style
+          style,
         ]}
       />
     </View>

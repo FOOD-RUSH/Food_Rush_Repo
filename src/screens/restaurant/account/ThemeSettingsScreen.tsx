@@ -1,4 +1,7 @@
-import { MaterialCommunityIcon, IoniconsIcon } from '@/src/components/common/icons';
+import {
+  MaterialCommunityIcon,
+  IoniconsIcon,
+} from '@/src/components/common/icons';
 import React, { useState } from 'react';
 import {
   View,
@@ -147,7 +150,8 @@ const ThemeSettingsScreen: React.FC = () => {
                 marginRight: 12,
               }}
             >
-              <MaterialCommunityIcon                 name={option.icon as any}
+              <MaterialCommunityIcon
+                name={option.icon as any}
                 size={20}
                 color={option.color}
               />
@@ -228,7 +232,8 @@ const ThemeSettingsScreen: React.FC = () => {
           </View>
         </View>
 
-        <IoniconsIcon           name="chevron-down"
+        <IoniconsIcon
+          name="chevron-down"
           size={20}
           color={colors.onSurfaceVariant}
         />
@@ -378,10 +383,7 @@ const ThemeSettingsScreen: React.FC = () => {
                     marginRight: 12,
                   }}
                 >
-                  <MaterialCommunityIcon                     name="store"
-                    size={16}
-                    color="white"
-                  />
+                  <MaterialCommunityIcon name="store" size={16} color="white" />
                 </View>
                 <View>
                   <Label color={colors.onSurface} weight="semibold">

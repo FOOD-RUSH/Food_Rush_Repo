@@ -110,7 +110,11 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
             style={styles.headerButton}
             activeOpacity={0.7}
           >
-            <IoniconsIcon name="arrow-back" size={24} color={colors.onSurface} />
+            <IoniconsIcon
+              name="arrow-back"
+              size={24}
+              color={colors.onSurface}
+            />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -118,7 +122,8 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
             style={styles.headerButton}
             activeOpacity={0.7}
           >
-            <IoniconsIcon               name="log-out-outline"
+            <IoniconsIcon
+              name="log-out-outline"
               size={24}
               color={colors.onSurface}
             />
@@ -204,7 +209,8 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
 
             <View style={styles.step}>
               <View style={[styles.stepIcon, styles.stepPending]}>
-                <IoniconsIcon                   name="mail"
+                <IoniconsIcon
+                  name="mail"
                   size={20}
                   color={colors.onSurfaceVariant}
                 />
@@ -240,7 +246,11 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
               </Heading2>
               {restaurantId && (
                 <View style={styles.infoRow}>
-                  <IoniconsIcon name="business" size={18} color={colors.primary} />
+                  <IoniconsIcon
+                    name="business"
+                    size={18}
+                    color={colors.primary}
+                  />
                   <Label
                     color={colors.onSurfaceVariant}
                     weight="medium"
@@ -259,7 +269,11 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
               )}
               {userId && (
                 <View style={styles.infoRow}>
-                  <IoniconsIcon name="person" size={18} color={colors.primary} />
+                  <IoniconsIcon
+                    name="person"
+                    size={18}
+                    color={colors.primary}
+                  />
                   <Label
                     color={colors.onSurfaceVariant}
                     weight="medium"
@@ -282,7 +296,11 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
           {/* Expected Timeline */}
           <View style={styles.timelineCard}>
             <View style={styles.timelineHeader}>
-              <IoniconsIcon name="time-outline" size={24} color={colors.primary} />
+              <IoniconsIcon
+                name="time-outline"
+                size={24}
+                color={colors.primary}
+              />
               <Label
                 color={colors.onPrimaryContainer}
                 weight="semibold"
@@ -317,7 +335,8 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
               onPress={handleContactSupport}
               activeOpacity={0.8}
             >
-              <IoniconsIcon                 name="chatbubble-outline"
+              <IoniconsIcon
+                name="chatbubble-outline"
                 size={20}
                 color={colors.primary}
               />

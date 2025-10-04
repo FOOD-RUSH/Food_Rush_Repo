@@ -318,7 +318,7 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={{ flex: 1 }}
         >
-          <ScrollView 
+          <ScrollView
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ flexGrow: 1 }}
           >

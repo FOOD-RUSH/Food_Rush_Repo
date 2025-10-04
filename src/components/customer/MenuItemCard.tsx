@@ -1,7 +1,7 @@
 import { MaterialIcon } from '@/src/components/common/icons';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import React, { useState } from 'react';
-import { Card, useTheme } from 'react-native-paper';
+import { View, TouchableOpacity, StyleSheet, Image, Dimensions } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { Card, useTheme, Text } from 'react-native-paper';
 import { FoodProps } from '@/src/types';
 import { images } from '@/assets/images';
 import { useNavigation } from '@react-navigation/native';
@@ -12,33 +12,76 @@ import {
   useItemQuantityInCart,
 } from '@/src/stores/customerStores/cartStore';
 import { useTranslation } from 'react-i18next';
-import { useResponsive } from '@/src/hooks/useResponsive';
-import ResponsiveImage from '@/src/components/common/ResponsiveImage';
 
+const { width: screenWidth } = Dimensions.get('window');
 
 const MenuItemCard = ({ item }: { item: FoodProps }) => {
-  const addToCart = useCartStore((state) => state.addtoCart);
-  const removeFromCart = useCartStore((state) => state.deleteCartByFoodId);
+  const addToCart = useCartStore((state) => state.addItemtoCart);
+  const removeFromCart = useCartStore((state) => state.removeItemByFoodId);
   const isInCart = useIsItemInCart(item.id);
   const quantityInCart = useItemQuantityInCart(item.id);
   const [isSelect, setIsSelected] = useState(false);
   const { t } = useTranslation('translation');
-
-  const { screen, scale } = useResponsive();
   const { colors } = useTheme();
-  
-  // Responsive dimensions
-  const imageSize = scale(90); // Responsive image size based on screen
-  const borderWidth = StyleSheet.hairlineWidth;
-  const padding = scale(12);
-  const margin = scale(10);
-  
+
+  // Responsive dimensions based on screen width
+  const cardDimensions = useMemo(() => {
+    const isTablet = screenWidth >= 768;
+    const isDesktop = screenWidth >= 1024;
+    
+    if (isDesktop) {
+      return {
+        imageSize: 120,
+        padding: 20,
+        margin: 16,
+        borderRadius: 20,
+        minHeight: 140,
+        fontSize: {
+          name: 18,
+          price: 16,
+          cart: 12,
+        },
+        iconSize: 24,
+      };
+    } else if (isTablet) {
+      return {
+        imageSize: 100,
+        padding: 16,
+        margin: 12,
+        borderRadius: 18,
+        minHeight: 120,
+        fontSize: {
+          name: 16,
+          price: 15,
+          cart: 11,
+        },
+        iconSize: 22,
+      };
+    } else {
+      return {
+        imageSize: 80,
+        padding: 14,
+        margin: 8,
+        borderRadius: 16,
+        minHeight: 100,
+        fontSize: {
+          name: 14,
+          price: 14,
+          cart: 10,
+        },
+        iconSize: 20,
+      };
+    }
+  }, []);
+
   // Helper function to get image source
   const getImageSource = () => {
     if (item.pictureUrl) {
-      // Handle backend image URL
-      const baseUrl = 'https://your-api-base-url.com'; // Replace with actual API base URL
-      return { uri: item.pictureUrl.startsWith('http') ? item.pictureUrl : `${baseUrl}${item.pictureUrl}` };
+      return {
+        uri: item.pictureUrl.startsWith('http')
+          ? item.pictureUrl
+          : item.pictureUrl,
+      };
     }
     return images.onboarding2;
   };
@@ -51,8 +94,10 @@ const MenuItemCard = ({ item }: { item: FoodProps }) => {
       removeFromCart(item.id);
     }
   };
+
   const navigation =
     useNavigation<RootStackScreenProps<'RestaurantDetails'>['navigation']>();
+  
   const borderColor = isSelect
     ? colors.primary
     : isInCart
@@ -64,22 +109,23 @@ const MenuItemCard = ({ item }: { item: FoodProps }) => {
       <Card
         mode="outlined"
         style={[
+          styles.card,
           {
             backgroundColor: colors.surface,
             borderColor: borderColor,
-            borderRadius: scale(16),
-            marginHorizontal: margin,
-            marginVertical: margin / 2,
-            padding: padding,
-            overflow: 'hidden',
+            borderRadius: cardDimensions.borderRadius,
+            marginHorizontal: cardDimensions.margin,
+            marginVertical: cardDimensions.margin / 2,
+            padding: cardDimensions.padding,
+            minHeight: cardDimensions.minHeight,
             shadowColor: '#000',
             shadowOffset: {
               width: 0,
-              height: StyleSheet.hairlineWidth,
+              height: 2,
             },
             shadowOpacity: 0.1,
-            shadowRadius: scale(2),
-            elevation: 1,
+            shadowRadius: 4,
+            elevation: 3,
           },
         ]}
         key={item.id}
@@ -92,38 +138,50 @@ const MenuItemCard = ({ item }: { item: FoodProps }) => {
       >
         <View style={styles.rowContainer}>
           <View style={styles.imageContainer}>
-            <ResponsiveImage
+            <Image
               source={getImageSource()}
-              width={imageSize}
-              height={imageSize}
-              aspectRatio={1}
+              style={[
+                styles.image,
+                {
+                  width: cardDimensions.imageSize,
+                  height: cardDimensions.imageSize,
+                  borderRadius: cardDimensions.borderRadius * 0.8,
+                },
+              ]}
               resizeMode="cover"
-              containerStyle={styles.image}
             />
             {/* Cart indicator */}
             {isInCart && (
               <View
                 style={[
                   styles.cartIndicator,
-                  { backgroundColor: colors.primary }
+                  { backgroundColor: colors.primary },
                 ]}
               >
-                <Text style={[styles.cartIndicatorText, { color: 'white' }]}>
+                <Text
+                  style={[
+                    styles.cartIndicatorText,
+                    {
+                      color: colors.onPrimary,
+                      fontSize: cardDimensions.fontSize.cart,
+                    },
+                  ]}
+                >
                   {quantityInCart}
                 </Text>
               </View>
             )}
           </View>
+          
           <View style={styles.textContainer}>
             <View style={styles.nameContainer}>
               <Text
                 style={[
                   styles.nameText,
-                  { 
+                  {
                     color: colors.onSurface,
-                    fontSize: scale(16),
-                    lineHeight: scale(22),
-                  }
+                    fontSize: cardDimensions.fontSize.name,
+                  },
                 ]}
                 numberOfLines={1}
                 ellipsizeMode="tail"
@@ -132,42 +190,41 @@ const MenuItemCard = ({ item }: { item: FoodProps }) => {
               </Text>
               {isInCart && (
                 <View style={styles.cartIconContainer}>
-                  <MaterialIcon 
+                  <MaterialIcon
                     name="shopping-cart"
-                    size={scale(20)}
+                    size={cardDimensions.iconSize}
                     color={colors.primary}
                   />
                 </View>
               )}
             </View>
+            
             <Text
               style={[
                 styles.priceText,
                 {
                   color: colors.primary,
-                  fontSize: scale(16),
-                  lineHeight: scale(22),
-                  flexShrink: 1,
-                }
+                  fontSize: cardDimensions.fontSize.price,
+                },
               ]}
               numberOfLines={1}
               ellipsizeMode="tail"
             >
               {item.price} XAF
             </Text>
+            
             {isInCart && (
               <Text
                 style={[
                   styles.cartText,
                   {
                     color: colors.onSurfaceVariant,
-                    fontSize: scale(12),
-                    lineHeight: scale(16),
-                  }
+                    fontSize: cardDimensions.fontSize.cart,
+                  },
                 ]}
                 numberOfLines={1}
               >
-                {quantityInCart} in cart
+                {quantityInCart} {t('in_cart') || 'in cart'}
               </Text>
             )}
           </View>
@@ -178,62 +235,70 @@ const MenuItemCard = ({ item }: { item: FoodProps }) => {
 };
 
 const styles = StyleSheet.create({
+  card: {
+    overflow: 'hidden',
+  },
   rowContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    flex: 1,
   },
   imageContainer: {
     position: 'relative',
-    flexShrink: 0, // Prevent image container from shrinking
+    flexShrink: 0,
   },
   image: {
-    borderRadius: 16,
+    backgroundColor: '#f5f5f5',
   },
   cartIndicator: {
     position: 'absolute',
-    top: -4,
-    right: -4,
-    width: 24,
-    height: 24,
+    top: -6,
+    right: -6,
+    minWidth: 24,
+    minHeight: 24,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 4,
+    paddingVertical: 2,
   },
   cartIndicatorText: {
-    fontSize: 12,
+    textAlign: 'center',
     fontWeight: 'bold',
   },
   textContainer: {
     flex: 1,
-    marginLeft: 12,
-    minWidth: 0, // This allows flex items to shrink below their content size
+    marginLeft: 16,
+    minWidth: 0,
+    justifyContent: 'center',
   },
   nameContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   nameText: {
     flex: 1,
+    minWidth: 0,
     fontWeight: '600',
-    minWidth: 0, // Allow text to shrink
   },
   cartIconContainer: {
-    marginLeft: 8,
-    flexShrink: 0, // Prevent cart icon from shrinking
+    marginLeft: 12,
+    flexShrink: 0,
   },
   priceText: {
-    fontWeight: '600',
     marginTop: 4,
     flexShrink: 1,
-    minWidth: 0, // Allow price text to shrink
+    minWidth: 0,
+    fontWeight: '700',
   },
   cartText: {
-    marginTop: 4,
+    marginTop: 6,
     flexShrink: 1,
-    minWidth: 0, // Allow cart text to shrink
+    minWidth: 0,
+    fontStyle: 'italic',
   },
 });
 

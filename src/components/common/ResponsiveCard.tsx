@@ -19,7 +19,7 @@ const ResponsiveCard: React.FC<ResponsiveCardProps> = ({
 }) => {
   const { colors } = useTheme();
   const { scale } = useResponsive();
-  
+
   // Define responsive border radius values
   const borderRadius = {
     small: scale(8),
@@ -27,10 +27,10 @@ const ResponsiveCard: React.FC<ResponsiveCardProps> = ({
     large: scale(24),
     full: scale(32),
   }[radius];
-  
+
   // Define responsive elevation values
   const cardElevation = elevation;
-  
+
   return (
     <PaperCard
       style={[

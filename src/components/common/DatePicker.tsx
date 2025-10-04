@@ -88,7 +88,8 @@ const DatePicker: React.FC<DatePickerProps> = ({
         >
           {displayValue}
         </Text>
-        <MaterialCommunityIcon           name="calendar-outline"
+        <MaterialCommunityIcon
+          name="calendar-outline"
           size={20}
           color={colors.onSurfaceVariant}
         />

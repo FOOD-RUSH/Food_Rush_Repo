@@ -52,7 +52,8 @@ const PaymentsScreen: React.FC = () => {
                   marginBottom: 24,
                 }}
               >
-                <MaterialCommunityIcon                   name="credit-card-clock"
+                <MaterialCommunityIcon
+                  name="credit-card-clock"
                   size={40}
                   color={colors.primary}
                 />
@@ -86,7 +87,8 @@ const PaymentsScreen: React.FC = () => {
                     marginBottom: 12,
                   }}
                 >
-                  <MaterialCommunityIcon                     name="check-circle"
+                  <MaterialCommunityIcon
+                    name="check-circle"
                     size={20}
                     color={colors.primary}
                   />
@@ -102,7 +104,8 @@ const PaymentsScreen: React.FC = () => {
                     marginBottom: 12,
                   }}
                 >
-                  <MaterialCommunityIcon                     name="check-circle"
+                  <MaterialCommunityIcon
+                    name="check-circle"
                     size={20}
                     color={colors.primary}
                   />
@@ -118,7 +121,8 @@ const PaymentsScreen: React.FC = () => {
                     marginBottom: 12,
                   }}
                 >
-                  <MaterialCommunityIcon                     name="check-circle"
+                  <MaterialCommunityIcon
+                    name="check-circle"
                     size={20}
                     color={colors.primary}
                   />
@@ -128,7 +132,8 @@ const PaymentsScreen: React.FC = () => {
                 </View>
 
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <MaterialCommunityIcon                     name="check-circle"
+                  <MaterialCommunityIcon
+                    name="check-circle"
                     size={20}
                     color={colors.primary}
                   />
@@ -154,7 +159,8 @@ const PaymentsScreen: React.FC = () => {
                   marginBottom: 8,
                 }}
               >
-                <MaterialCommunityIcon                   name="information"
+                <MaterialCommunityIcon
+                  name="information"
                   size={20}
                   color={colors.primary}
                 />

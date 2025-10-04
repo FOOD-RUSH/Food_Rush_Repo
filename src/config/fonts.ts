@@ -191,18 +191,22 @@ export const getResponsiveFontSize = (
   const screenArea = screenWidth * screenHeight;
   const baseScreenArea = 375 * 812; // iPhone X dimensions as base
   const screenScaleFactor = Math.sqrt(screenArea / baseScreenArea);
-  
+
   // Adjust for different screen sizes
   let sizeMultiplier = 1;
-  if (screenWidth < 375) sizeMultiplier = 0.85; // Very small screens
-  else if (screenWidth < 414) sizeMultiplier = 0.9; // Small phones
-  else if (screenWidth < 768) sizeMultiplier = 1; // Regular phones
-  else if (screenWidth < 1024) sizeMultiplier = 1.1; // Tablets
+  if (screenWidth < 375)
+    sizeMultiplier = 0.85; // Very small screens
+  else if (screenWidth < 414)
+    sizeMultiplier = 0.9; // Small phones
+  else if (screenWidth < 768)
+    sizeMultiplier = 1; // Regular phones
+  else if (screenWidth < 1024)
+    sizeMultiplier = 1.1; // Tablets
   else sizeMultiplier = 1.2; // Large tablets/desktop
 
   // Combine screen scaling and font scaling
   const finalSize = baseSize * sizeMultiplier * fontScale;
-  
+
   // Apply screen area scaling to make it more proportional
   return finalSize * screenScaleFactor;
 };
@@ -240,13 +244,19 @@ export const getTypographyProps = (
 
   const fontSize =
     responsive && screenWidth && screenWidth > 0 && screenHeight
-      ? getResponsiveFontSize(baseStyle.fontSize, screenWidth, screenHeight, fontScale)
+      ? getResponsiveFontSize(
+          baseStyle.fontSize,
+          screenWidth,
+          screenHeight,
+          fontScale,
+        )
       : baseStyle.fontSize;
 
   // Adjust line height proportionally with font size
-  const lineHeight = responsive && screenWidth && screenWidth > 0 && screenHeight
-    ? Math.round(baseStyle.lineHeight * (fontSize / baseStyle.fontSize))
-    : baseStyle.lineHeight;
+  const lineHeight =
+    responsive && screenWidth && screenWidth > 0 && screenHeight
+      ? Math.round(baseStyle.lineHeight * (fontSize / baseStyle.fontSize))
+      : baseStyle.lineHeight;
 
   return {
     ...baseStyle,

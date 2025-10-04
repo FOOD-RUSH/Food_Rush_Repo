@@ -19,13 +19,13 @@ const safeNumber = (value?: number | null): number => {
  * Format currency value for display with loading state handling
  */
 export const formatCurrency = (
-  value?: number | null, 
-  currency = 'XAF', 
-  isLoading = false
+  value?: number | null,
+  currency = 'XAF',
+  isLoading = false,
 ): string => {
   if (isLoading) return '---';
   const safeValue = safeNumber(value);
-  
+
   try {
     return new Intl.NumberFormat('fr-CM', {
       style: 'currency',
@@ -42,12 +42,12 @@ export const formatCurrency = (
  * Format large numbers with K/M suffixes with loading state handling
  */
 export const formatLargeNumber = (
-  value?: number | null, 
-  isLoading = false
+  value?: number | null,
+  isLoading = false,
 ): string => {
   if (isLoading) return '---';
   const safeValue = safeNumber(value);
-  
+
   if (safeValue >= 1000000) {
     return `${(safeValue / 1000000).toFixed(1)}M`;
   }
@@ -66,7 +66,7 @@ export const calculatePercentageChange = (
 ): number => {
   const currentSafe = safeNumber(current);
   const previousSafe = safeNumber(previous);
-  
+
   if (previousSafe === 0) return currentSafe > 0 ? 100 : 0;
   return ((currentSafe - previousSafe) / previousSafe) * 100;
 };
@@ -75,8 +75,8 @@ export const calculatePercentageChange = (
  * Format percentage change for display with loading state handling
  */
 export const formatPercentageChange = (
-  change?: number | null, 
-  isLoading = false
+  change?: number | null,
+  isLoading = false,
 ): string => {
   if (isLoading) return '---';
   const safeChange = safeNumber(change);
@@ -102,7 +102,7 @@ export const getChangeType = (
 export const formatPercentage = (
   value?: number | null,
   isLoading = false,
-  decimals = 1
+  decimals = 1,
 ): string => {
   if (isLoading) return '---';
   const safeValue = safeNumber(value);
@@ -120,76 +120,86 @@ export const convertToMetricCards = (
   const cards: MetricCardData[] = [];
 
   // Revenue card
-  const revenueChange = data && previousData
-    ? calculatePercentageChange(data.revenueCollected, previousData.revenueCollected)
-    : 0;
+  const revenueChange =
+    data && previousData
+      ? calculatePercentageChange(
+          data.revenueCollected,
+          previousData.revenueCollected,
+        )
+      : 0;
 
   cards.push({
     title: 'Revenue',
     value: isLoading ? '---' : formatLargeNumber(data?.revenueCollected),
-    change: data && previousData && !isLoading 
-      ? formatPercentageChange(revenueChange) 
-      : undefined,
-    changeType: data && previousData 
-      ? getChangeType(revenueChange) 
-      : 'neutral',
+    change:
+      data && previousData && !isLoading
+        ? formatPercentageChange(revenueChange)
+        : undefined,
+    changeType: data && previousData ? getChangeType(revenueChange) : 'neutral',
     icon: 'cash',
     color: '#007aff',
     subtitle: 'XAF',
   });
 
   // Total orders card
-  const ordersChange = data && previousData
-    ? calculatePercentageChange(data.counts?.total, previousData.counts?.total)
-    : 0;
+  const ordersChange =
+    data && previousData
+      ? calculatePercentageChange(
+          data.counts?.total,
+          previousData.counts?.total,
+        )
+      : 0;
 
   cards.push({
     title: 'Total Orders',
-    value: isLoading ? '---' : (data?.counts?.total?.toString() || '0'),
-    change: data && previousData && !isLoading 
-      ? formatPercentageChange(ordersChange) 
-      : undefined,
-    changeType: data && previousData 
-      ? getChangeType(ordersChange) 
-      : 'neutral',
+    value: isLoading ? '---' : data?.counts?.total?.toString() || '0',
+    change:
+      data && previousData && !isLoading
+        ? formatPercentageChange(ordersChange)
+        : undefined,
+    changeType: data && previousData ? getChangeType(ordersChange) : 'neutral',
     icon: 'receipt',
     color: '#00D084',
     subtitle: 'orders',
   });
 
   // Average Order Value card
-  const aovChange = data && previousData
-    ? calculatePercentageChange(data.aov, previousData.aov)
-    : 0;
+  const aovChange =
+    data && previousData
+      ? calculatePercentageChange(data.aov, previousData.aov)
+      : 0;
 
   cards.push({
     title: 'Avg Order Value',
     value: isLoading ? '---' : formatLargeNumber(data?.aov),
-    change: data && previousData && !isLoading 
-      ? formatPercentageChange(aovChange) 
-      : undefined,
-    changeType: data && previousData 
-      ? getChangeType(aovChange) 
-      : 'neutral',
+    change:
+      data && previousData && !isLoading
+        ? formatPercentageChange(aovChange)
+        : undefined,
+    changeType: data && previousData ? getChangeType(aovChange) : 'neutral',
     icon: 'calculator',
     color: '#FF9500',
     subtitle: 'XAF',
   });
 
   // Acceptance Rate card
-  const acceptanceChange = data && previousData
-    ? calculatePercentageChange(data.acceptanceRate, previousData.acceptanceRate)
-    : 0;
+  const acceptanceChange =
+    data && previousData
+      ? calculatePercentageChange(
+          data.acceptanceRate,
+          previousData.acceptanceRate,
+        )
+      : 0;
 
   cards.push({
     title: 'Acceptance Rate',
     value: isLoading ? '---' : formatPercentage(data?.acceptanceRate),
-    change: data && previousData && !isLoading 
-      ? formatPercentageChange(acceptanceChange) 
-      : undefined,
-    changeType: data && previousData 
-      ? getChangeType(acceptanceChange) 
-      : 'neutral',
+    change:
+      data && previousData && !isLoading
+        ? formatPercentageChange(acceptanceChange)
+        : undefined,
+    changeType:
+      data && previousData ? getChangeType(acceptanceChange) : 'neutral',
     icon: 'check-circle',
     color: '#8B5CF6',
     subtitle: 'of orders',
@@ -215,7 +225,7 @@ export const convertToChartData = (
       date: new Date().toISOString(),
     }));
   }
-  
+
   if (!buckets || buckets.length === 0) {
     return [];
   }
@@ -233,7 +243,7 @@ export const convertToChartData = (
  */
 export const formatDateLabel = (dateString?: string): string => {
   if (!dateString) return 'N/A';
-  
+
   try {
     const date = new Date(dateString);
     const now = new Date();
@@ -247,11 +257,17 @@ export const formatDateLabel = (dateString?: string): string => {
 
     // If within last 30 days, show month/day
     if (diffDays <= 30) {
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+      });
     }
 
     // Otherwise show month/year
-    return date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      year: '2-digit',
+    });
   } catch (error) {
     return 'N/A';
   }
@@ -274,7 +290,7 @@ export const getOrderStatusBreakdown = (
       },
     ];
   }
-  
+
   if (!counts) {
     return [
       {
@@ -286,7 +302,10 @@ export const getOrderStatusBreakdown = (
     ];
   }
 
-  const total = Object.values(counts).reduce((sum, count) => sum + safeNumber(count), 0);
+  const total = Object.values(counts).reduce(
+    (sum, count) => sum + safeNumber(count),
+    0,
+  );
 
   const breakdown = [
     {
@@ -298,7 +317,8 @@ export const getOrderStatusBreakdown = (
     {
       status: 'Out for Delivery',
       count: safeNumber(counts.outForDelivery),
-      percentage: total > 0 ? (safeNumber(counts.outForDelivery) / total) * 100 : 0,
+      percentage:
+        total > 0 ? (safeNumber(counts.outForDelivery) / total) * 100 : 0,
       color: '#007aff',
     },
     {
@@ -323,15 +343,17 @@ export const getOrderStatusBreakdown = (
 
   // Filter out zero counts, but if all are zero, show "No orders"
   const filteredBreakdown = breakdown.filter((item) => item.count > 0);
-  
-  return filteredBreakdown.length > 0 ? filteredBreakdown : [
-    {
-      status: 'No Orders',
-      count: 0,
-      percentage: 0,
-      color: '#E0E0E0',
-    },
-  ];
+
+  return filteredBreakdown.length > 0
+    ? filteredBreakdown
+    : [
+        {
+          status: 'No Orders',
+          count: 0,
+          percentage: 0,
+          color: '#E0E0E0',
+        },
+      ];
 };
 
 /**
@@ -351,7 +373,7 @@ export const getPaymentMethodBreakdown = (
       },
     ];
   }
-  
+
   if (!paymentMethods) {
     return [
       {
@@ -363,33 +385,41 @@ export const getPaymentMethodBreakdown = (
     ];
   }
 
-  const total = safeNumber(paymentMethods.mobile_money) + safeNumber(paymentMethods.cash_on_delivery);
+  const total =
+    safeNumber(paymentMethods.mobile_money) +
+    safeNumber(paymentMethods.cash_on_delivery);
 
   const breakdown = [
     {
       method: 'Mobile Money',
       count: safeNumber(paymentMethods.mobile_money),
-      percentage: total > 0 ? (safeNumber(paymentMethods.mobile_money) / total) * 100 : 0,
+      percentage:
+        total > 0 ? (safeNumber(paymentMethods.mobile_money) / total) * 100 : 0,
       color: '#FF9500',
     },
     {
       method: 'Cash on Delivery',
       count: safeNumber(paymentMethods.cash_on_delivery),
-      percentage: total > 0 ? (safeNumber(paymentMethods.cash_on_delivery) / total) * 100 : 0,
+      percentage:
+        total > 0
+          ? (safeNumber(paymentMethods.cash_on_delivery) / total) * 100
+          : 0,
       color: '#00D084',
     },
   ];
 
   const filteredBreakdown = breakdown.filter((item) => item.count > 0);
-  
-  return filteredBreakdown.length > 0 ? filteredBreakdown : [
-    {
-      method: 'No Payments',
-      count: 0,
-      percentage: 0,
-      color: '#E0E0E0',
-    },
-  ];
+
+  return filteredBreakdown.length > 0
+    ? filteredBreakdown
+    : [
+        {
+          method: 'No Payments',
+          count: 0,
+          percentage: 0,
+          color: '#E0E0E0',
+        },
+      ];
 };
 
 /**
@@ -409,7 +439,7 @@ export const getOperatorBreakdown = (
       },
     ];
   }
-  
+
   if (!operators) {
     return [
       {
@@ -439,15 +469,17 @@ export const getOperatorBreakdown = (
   ];
 
   const filteredBreakdown = breakdown.filter((item) => item.count > 0);
-  
-  return filteredBreakdown.length > 0 ? filteredBreakdown : [
-    {
-      operator: 'No Data',
-      count: 0,
-      percentage: 0,
-      color: '#E0E0E0',
-    },
-  ];
+
+  return filteredBreakdown.length > 0
+    ? filteredBreakdown
+    : [
+        {
+          operator: 'No Data',
+          count: 0,
+          percentage: 0,
+          color: '#E0E0E0',
+        },
+      ];
 };
 
 /**

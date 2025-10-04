@@ -147,7 +147,8 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
               marginRight: 12,
             }}
           >
-            <MaterialCommunityIcon               name={getLocationIcon() as any}
+            <MaterialCommunityIcon
+              name={getLocationIcon() as any}
               size={20}
               color={getLocationColor()}
             />
@@ -193,12 +194,14 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
 
           <View style={{ alignItems: 'center' }}>
             {isLoading || isPickingLocation ? (
-              <MaterialCommunityIcon                 name="loading"
+              <MaterialCommunityIcon
+                name="loading"
                 size={24}
                 color={colors.primary}
               />
             ) : (
-              <MaterialCommunityIcon                 name="chevron-right"
+              <MaterialCommunityIcon
+                name="chevron-right"
                 size={24}
                 color={colors.onSurfaceVariant}
               />

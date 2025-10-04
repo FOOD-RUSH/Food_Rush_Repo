@@ -1,13 +1,7 @@
 import { IoniconsIcon, MaterialIcon } from '@/src/components/common/icons';
 import React, { useState, useMemo } from 'react';
 import { Pressable, ScrollView, FlatList } from 'react-native-gesture-handler';
-import {
-  View,
-  StatusBar,
-  Image,
-  Alert,
-  RefreshControl,
-} from 'react-native';
+import { View, StatusBar, Alert, RefreshControl } from 'react-native';
 
 import {
   TouchableRipple,
@@ -19,7 +13,6 @@ import {
 } from 'react-native-paper';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import MenuItemCard from '@/src/components/customer/MenuItemCard';
-import ClassicFoodCard from '@/src/components/customer/ClassicFoodCard';
 import { useRestaurantDetails } from '@/src/hooks/customer/useCustomerApi';
 import { useTranslation } from 'react-i18next';
 import { images } from '@/assets/images';
@@ -102,8 +95,8 @@ const RestaurantDetailScreen = ({
     navigation.navigate('RestaurantReview', {
       restaurantId,
       restaurantName: restaurantDetails?.name || 'Restaurant',
-      restaurantImage: restaurantDetails?.image,
-    });
+      restaurantImage: restaurantDetails?.image  ,
+    })
   };
 
   const handleViewLocation = () => {
@@ -221,7 +214,8 @@ const RestaurantDetailScreen = ({
           padding: spacing.lg,
         }}
       >
-        <IoniconsIcon           name="restaurant-outline"
+        <IoniconsIcon
+          name="restaurant-outline"
           size={scale(64)}
           color={colors.onSurfaceVariant}
           style={{ marginBottom: spacing.md }}
@@ -252,10 +246,7 @@ const RestaurantDetailScreen = ({
       </View>
     );
   }
-  const seperator = () => {
-    return <View style={{ width: spacing.sm }} />;
-  };
-
+ 
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: colors.background }}
@@ -316,8 +307,11 @@ const RestaurantDetailScreen = ({
                 padding: spacing.sm,
               }}
             >
-              <MaterialIcon                 name={isFavorite ? 'favorite' : 'favorite-border'}
-                size={scale(24)} color={isFavorite ? '#FF6B6B' : 'white'} />
+              <MaterialIcon
+                name={isFavorite ? 'favorite' : 'favorite-border'}
+                size={scale(24)}
+                color={isFavorite ? '#FF6B6B' : 'white'}
+              />
             </Pressable>
             <Pressable
               onPress={handleShare}
@@ -369,7 +363,8 @@ const RestaurantDetailScreen = ({
                     marginBottom: spacing.sm,
                   }}
                 >
-                  <IoniconsIcon                     name="location-outline"
+                  <IoniconsIcon
+                    name="location-outline"
                     size={scale(16)}
                     color={colors.primary}
                   />
@@ -467,7 +462,8 @@ const RestaurantDetailScreen = ({
                   </Caption>
                 </View>
               </View>
-              <MaterialIcon                 name="arrow-forward-ios"
+              <MaterialIcon
+                name="arrow-forward-ios"
                 size={scale(16)}
                 color={colors.onSurfaceVariant}
               />
@@ -496,7 +492,8 @@ const RestaurantDetailScreen = ({
                     marginRight: spacing.sm,
                   }}
                 >
-                  <IoniconsIcon                     name="create-outline"
+                  <IoniconsIcon
+                    name="create-outline"
                     color={colors.onPrimaryContainer}
                     size={scale(16)}
                   />
@@ -510,7 +507,8 @@ const RestaurantDetailScreen = ({
                   </Caption>
                 </View>
               </View>
-              <MaterialIcon                 name="arrow-forward-ios"
+              <MaterialIcon
+                name="arrow-forward-ios"
                 size={scale(16)}
                 color={colors.onSurfaceVariant}
               />
@@ -548,7 +546,8 @@ const RestaurantDetailScreen = ({
                     marginRight: spacing.sm,
                   }}
                 >
-                  <IoniconsIcon                     name="location-outline"
+                  <IoniconsIcon
+                    name="location-outline"
                     color={colors.onPrimaryContainer}
                     size={scale(16)}
                   />
@@ -572,7 +571,8 @@ const RestaurantDetailScreen = ({
                         marginRight: spacing.sm,
                       }}
                     >
-                      <IoniconsIcon                         name="time-outline"
+                      <IoniconsIcon
+                        name="time-outline"
                         size={scale(12)}
                         color={colors.primary}
                       />
@@ -591,7 +591,8 @@ const RestaurantDetailScreen = ({
                         marginRight: spacing.sm,
                       }}
                     >
-                      <IoniconsIcon                         name="car-outline"
+                      <IoniconsIcon
+                        name="car-outline"
                         size={scale(12)}
                         color={colors.primary}
                       />
@@ -605,7 +606,8 @@ const RestaurantDetailScreen = ({
                     <View
                       style={{ flexDirection: 'row', alignItems: 'center' }}
                     >
-                      <IoniconsIcon                         name="location"
+                      <IoniconsIcon
+                        name="location"
                         size={scale(12)}
                         color={colors.primary}
                       />
@@ -621,7 +623,8 @@ const RestaurantDetailScreen = ({
                   </View>
                 </View>
               </View>
-              <MaterialIcon                 name="arrow-forward-ios"
+              <MaterialIcon
+                name="arrow-forward-ios"
                 size={scale(16)}
                 color={colors.onSurfaceVariant}
               />
@@ -659,7 +662,8 @@ const RestaurantDetailScreen = ({
                     marginRight: spacing.sm,
                   }}
                 >
-                  <MaterialIcon                     name="local-offer"
+                  <MaterialIcon
+                    name="local-offer"
                     color={colors.onSecondaryContainer}
                     size={scale(16)}
                   />
@@ -683,7 +687,8 @@ const RestaurantDetailScreen = ({
                   {t('new')}
                 </Chip>
               </View>
-              <MaterialIcon                 name="arrow-forward-ios"
+              <MaterialIcon
+                name="arrow-forward-ios"
                 size={scale(16)}
                 color={colors.onSurfaceVariant}
                 style={{ marginLeft: spacing.sm }}
@@ -691,8 +696,6 @@ const RestaurantDetailScreen = ({
             </Card.Content>
           </TouchableRipple>
         </Card>
-
-      
 
         {/* Menu Section */}
         <View style={{ marginTop: spacing.xl }}>
@@ -760,7 +763,8 @@ const RestaurantDetailScreen = ({
                   {filteredMenuItems.length} {t('items_found')}
                 </Body>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <IoniconsIcon                     name="filter-outline"
+                  <IoniconsIcon
+                    name="filter-outline"
                     size={scale(16)}
                     color={colors.onSurfaceVariant}
                   />

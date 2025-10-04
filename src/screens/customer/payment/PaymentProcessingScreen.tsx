@@ -18,7 +18,10 @@ import PaymentService from '@/src/services/customer/payment.service';
 import { useCartStore } from '@/src/stores/customerStores/cartStore';
 import { useOrderFlow } from '@/src/hooks/customer/useOrderFlow';
 import { useAuthUser } from '@/src/stores/customerStores';
-import { useInitializePayment, useCreatePaymentRequest } from '@/src/hooks/customer/usePayment';
+import {
+  useInitializePayment,
+  useCreatePaymentRequest,
+} from '@/src/hooks/customer/usePayment';
 
 type PaymentStep =
   | 'phone_input'
@@ -39,7 +42,8 @@ const PaymentProcessingScreen = ({
   const { completePayment } = useOrderFlow();
   const user = useAuthUser();
   const createPaymentRequest = useCreatePaymentRequest();
-  const { mutate: initializePayment, isPending: isInitializingPayment } = useInitializePayment();
+  const { mutate: initializePayment, isPending: isInitializingPayment } =
+    useInitializePayment();
 
   // State management
   const [currentStep, setCurrentStep] = useState<PaymentStep>('phone_input');
@@ -109,17 +113,20 @@ const PaymentProcessingScreen = ({
       if (paymentMethod === 'mobile_money' && provider) {
         // Convert provider to the new medium format
         const medium = provider === 'orange' ? 'orange_money' : 'mtn';
-        
+
         // Create payment request using the new API structure
         const paymentRequest = createPaymentRequest(
           orderId,
           phoneNumber,
           medium,
           user.fullName,
-          user.email
+          user.email,
         );
 
-        console.log('🚀 Initializing payment with new API structure:', paymentRequest);
+        console.log(
+          '🚀 Initializing payment with new API structure:',
+          paymentRequest,
+        );
 
         // Use the new payment hook
         initializePayment(paymentRequest, {
@@ -250,7 +257,8 @@ const PaymentProcessingScreen = ({
             className="w-16 h-16 rounded-full items-center justify-center mb-4"
             style={{ backgroundColor: getProviderColor() + '20' }}
           >
-            <IoniconsIcon               name="phone-portrait"
+            <IoniconsIcon
+              name="phone-portrait"
               size={32}
               color={getProviderColor()}
             />
@@ -303,7 +311,7 @@ const PaymentProcessingScreen = ({
           onPress={handleInitializePayment}
           disabled={isLoading || isInitializingPayment || !phoneNumber}
         >
-          {(isLoading || isInitializingPayment) ? (
+          {isLoading || isInitializingPayment ? (
             <ActivityIndicator color={colors.onPrimary} />
           ) : (
             <Text
@@ -526,7 +534,11 @@ const PaymentProcessingScreen = ({
             onPress={() => navigation.goBack()}
             className="mr-3"
           >
-            <IoniconsIcon name="arrow-back" size={24} color={colors.onSurface} />
+            <IoniconsIcon
+              name="arrow-back"
+              size={24}
+              color={colors.onSurface}
+            />
           </TouchableOpacity>
           <Text
             className="text-lg font-semibold"

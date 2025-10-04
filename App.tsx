@@ -69,11 +69,7 @@ export default function App() {
 
   // Show loading fallback while fonts are loading
   if (!fontsLoaded || error) {
-    return (
-      <LoadingFallback
-        message={error || 'Loading fonts...'}
-      />
-    );
+    return <LoadingFallback message={error || 'Loading fonts...'} />;
   }
 
   // Show custom splash screen after fonts are loaded
@@ -88,11 +84,7 @@ export default function App() {
 
   // Show loading fallback if app isn't ready after splash
   if (!appReady) {
-    return (
-      <LoadingFallback
-        message="Loading app..."
-      />
-    );
+    return <LoadingFallback message="Loading app..." />;
   }
 
   return (

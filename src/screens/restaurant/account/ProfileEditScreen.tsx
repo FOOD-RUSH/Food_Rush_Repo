@@ -163,7 +163,8 @@ const ProfileEditScreen: React.FC<ProfileEditScreenProps> = ({
                 padding: 6,
               }}
             >
-              <MaterialCommunityIcon                 name={isUploadingImage ? 'loading' : 'camera'}
+              <MaterialCommunityIcon
+                name={isUploadingImage ? 'loading' : 'camera'}
                 size={18}
                 color="white"
               />

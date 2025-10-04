@@ -1,4 +1,7 @@
-import { IoniconsIcon, MaterialCommunityIcon } from '@/src/components/common/icons';
+import {
+  IoniconsIcon,
+  MaterialCommunityIcon,
+} from '@/src/components/common/icons';
 import React, { useRef, useEffect, useState } from 'react';
 import {
   View,
@@ -78,7 +81,8 @@ const SupportScreen = ({ navigation }: Props) => {
                 onPress={() => setExpanded(expanded === idx ? null : idx)}
                 style={styles.faqQuestionRow}
               >
-                <MaterialCommunityIcon                   name={expanded === idx ? 'chevron-up' : 'chevron-down'}
+                <MaterialCommunityIcon
+                  name={expanded === idx ? 'chevron-up' : 'chevron-down'}
                   size={22}
                   color={RESTAURANT_COLORS.PRIMARY}
                 />
@@ -96,7 +100,8 @@ const SupportScreen = ({ navigation }: Props) => {
             style={styles.contactBtn}
             onPress={() => Linking.openURL('mailto:support@restaurant.com')}
           >
-            <MaterialCommunityIcon               name="email-outline"
+            <MaterialCommunityIcon
+              name="email-outline"
               size={22}
               color="#fff"
             />
@@ -106,10 +111,7 @@ const SupportScreen = ({ navigation }: Props) => {
             style={styles.contactBtn}
             onPress={() => Linking.openURL('https://wa.me/650979844')}
           >
-            <MaterialCommunityIcon               name="chat-outline"
-              size={22}
-              color="#fff"
-            />
+            <MaterialCommunityIcon name="chat-outline" size={22} color="#fff" />
             <Text style={styles.contactBtnText}>{t('chat_on_whatsapp')}</Text>
           </TouchableOpacity>
         </Animated.View>

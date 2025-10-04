@@ -148,9 +148,8 @@ const GlobalBottomSheet = forwardRef<
   }, [detached, insets.bottom]);
 
   // Calculate top inset for Android status bar
-  const topInset = Platform.OS === 'android' 
-    ? StatusBar.currentHeight || 0 
-    : insets.top;
+  const topInset =
+    Platform.OS === 'android' ? StatusBar.currentHeight || 0 : insets.top;
 
   return (
     <BottomSheetModal
@@ -191,10 +190,11 @@ const GlobalBottomSheet = forwardRef<
         style={{
           flex: 1,
           paddingHorizontal: Platform.OS === 'ios' ? 20 : 24,
-          paddingTop: title ? 8 : (Platform.OS === 'ios' ? 16 : 20),
-          paddingBottom: Platform.OS === 'android' 
-            ? Math.max(16, insets.bottom) 
-            : 16 + insets.bottom,
+          paddingTop: title ? 8 : Platform.OS === 'ios' ? 16 : 20,
+          paddingBottom:
+            Platform.OS === 'android'
+              ? Math.max(16, insets.bottom)
+              : 16 + insets.bottom,
           // Ensure content is interactive
           pointerEvents: 'auto',
         }}

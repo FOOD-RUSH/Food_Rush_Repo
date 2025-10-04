@@ -3,7 +3,7 @@ import { Alert } from 'react-native';
 import { create } from 'zustand';
 import { createJSONStorage, devtools, persist } from 'zustand/middleware';
 import { MenuProps } from '../../types';
-import { calculateServiceFee } from '@/src/utils/ServiceFee';
+import { navigate, navigationRef } from '@/src/navigation/navigationHelpers';
 
 export interface CartItem {
   id: string;
@@ -11,38 +11,34 @@ export interface CartItem {
   quantity: number;
   specialInstructions?: string;
   addedAt: number;
-  deliveryFee?: number; // Store delivery fee from when item was added
 }
 
 interface CartState {
   items: CartItem[];
   restaurantID: string | null;
   restaurantName: string | null;
+  deliveryPrice: number | null;
   lastActivity: number;
   error: string | null;
   reminderEnabled: boolean;
 }
 
 interface CartActions {
-  addItemtoCart: (
+  addtoCart: (
     item: MenuProps,
     quantity: number,
     specialInstructions?: string,
   ) => void;
-  updateItemQuantity: (itemId: string, quantity: number) => void;
-  removeItem: (itemId: string) => void;
-  removeItemByFoodId: (foodId: string) => void;
+  modifyCart: (itemId: string, quantity: number) => void;
+  deleteCart: (itemId: string) => void;
+  deleteCartByFoodId: (foodId: string) => void;
   clearCart: () => void;
   setError: (error: string | null) => void;
   clearError: () => void;
+  setDeliveryPrice: (price: number | null) => void;
   canAddItem: (item: MenuProps) => boolean;
   isItemInCart: (foodId: string) => boolean;
   getItemQuantityInCart: (foodId: string) => number;
-  // Cart calculations
-  getSubtotal: () => number;
-  getDeliveryFee: () => number;
-  getServiceFee: () => number;
-  getTotal: () => number;
   // Cart reminder actions
   enableReminders: () => void;
   disableReminders: () => void;
@@ -58,6 +54,10 @@ const calculateItemTotal = (item: CartItem): number => {
   return item.quantity * parseFloat(item.menuItem.price || '0');
 };
 
+const calculateCartTotal = (items: CartItem[]): number => {
+  return items.reduce((sum, item) => sum + calculateItemTotal(item), 0);
+};
+
 const updateActivity = (set: any, get: any) => {
   const now = Date.now();
   set({ lastActivity: now });
@@ -65,6 +65,7 @@ const updateActivity = (set: any, get: any) => {
   // Schedule cart reminders when activity is updated (lazy load service)
   const state = get();
   if (state.reminderEnabled && state.items.length > 0) {
+    // Use setTimeout to avoid blocking the UI
     setTimeout(async () => {
       try {
         const { cartReminderService } = await import(
@@ -90,10 +91,11 @@ const clearCartState = (set: any) => {
     items: [],
     restaurantID: null,
     restaurantName: null,
+    deliveryPrice: null,
     lastActivity: Date.now(),
   });
 
-  // Cancel cart reminders when cart is cleared
+  // Cancel cart reminders when cart is cleared (lazy load service)
   setTimeout(async () => {
     try {
       const { cartReminderService } = await import(
@@ -114,14 +116,15 @@ export const useCartStore = create<CartState & CartActions>()(
         items: [],
         restaurantID: null,
         restaurantName: null,
+        deliveryPrice: null,
         lastActivity: Date.now(),
         error: null,
-        reminderEnabled: true,
+        reminderEnabled: true, // Enable reminders by default
 
         canAddItem: (item) => {
           const { restaurantID, items } = get();
           if (items.length === 0) return true;
-          
+          // Check if the item has a restaurantId field (for menu items)
           const itemRestaurantId =
             item.restaurantId || (item as any).restaurant?.id;
           if (!itemRestaurantId) {
@@ -131,7 +134,7 @@ export const useCartStore = create<CartState & CartActions>()(
           return itemRestaurantId === restaurantID;
         },
 
-        addItemtoCart: (item, quantity, specialInstructions = '') => {
+        addtoCart: (item, quantity, specialInstructions = '') => {
           try {
             const { items } = get();
 
@@ -147,7 +150,7 @@ export const useCartStore = create<CartState & CartActions>()(
                       clearCartState(set);
                       setTimeout(
                         () =>
-                          get().addItemtoCart(item, quantity, specialInstructions),
+                          get().addtoCart(item, quantity, specialInstructions),
                         100,
                       );
                     },
@@ -161,23 +164,32 @@ export const useCartStore = create<CartState & CartActions>()(
               (cartItem) => cartItem.menuItem.id === item.id,
             );
 
+            let newItems: CartItem[];
+
             if (existingItemIndex >= 0) {
-              // Item already exists - show options
+              // Item already exists in cart - show options to user
               const existingItem = items[existingItemIndex];
               const currentQuantity = existingItem.quantity;
               const newTotalQuantity = currentQuantity + quantity;
 
               Alert.alert(
                 'Item Already in Cart',
-                `"${item.name}" is already in your cart (${currentQuantity} item${currentQuantity > 1 ? 's' : ''}).\n\nWould you like to add ${quantity} more item${quantity > 1 ? 's' : ''} (total: ${newTotalQuantity}) or replace the current quantity?`,
+                `"${item.name}" is already in your cart (${currentQuantity} item${currentQuantity > 1 ? 's' : ''}).\n\nWould you like to add ${quantity} more item${quantity > 1 ? 's' : ''} (total: ${newTotalQuantity}) or keep the current quantity?`,
                 [
                   {
                     text: 'Keep Current',
                     style: 'cancel',
+                    onPress: () => {
+                      // Do nothing - keep current quantity
+                      Alert.alert('No Changes', 'Cart remains unchanged', [
+                        { text: 'OK' },
+                      ]);
+                    },
                   },
                   {
                     text: `Add ${quantity} More`,
                     onPress: () => {
+                      // Add to existing quantity
                       const updatedItems = items.map((cartItem, index) =>
                         index === existingItemIndex
                           ? {
@@ -191,11 +203,17 @@ export const useCartStore = create<CartState & CartActions>()(
                       );
                       set({ items: updatedItems });
                       updateActivity(set, get);
+                      Alert.alert(
+                        'Updated Successfully',
+                        `Added ${quantity} more "${item.name}" to your cart. Total quantity: ${newTotalQuantity}`,
+                        [{ text: 'OK' }],
+                      );
                     },
                   },
                   {
                     text: `Replace with ${quantity}`,
                     onPress: () => {
+                      // Replace with new quantity
                       const updatedItems = items.map((cartItem, index) =>
                         index === existingItemIndex
                           ? {
@@ -209,58 +227,64 @@ export const useCartStore = create<CartState & CartActions>()(
                       );
                       set({ items: updatedItems });
                       updateActivity(set, get);
+                      Alert.alert(
+                        'Updated Successfully',
+                        `Updated "${item.name}" quantity to ${quantity} in your cart`,
+                        [{ text: 'OK', onPress: () => navigationRef.goBack() }],
+                      );
                     },
                   },
                 ],
                 { cancelable: true },
               );
-              return;
+              return; // Exit early since we're handling this with user choice
+            } else {
+              // Add new item
+              const newItem: CartItem = {
+                id: generateCartItemId(item.id),
+                menuItem: item,
+                quantity,
+                specialInstructions,
+                addedAt: Date.now(),
+              };
+              newItems = [...items, newItem];
+
+              // Set restaurant ID and name if first item
+              if (items.length === 0) {
+                const itemRestaurantId =
+                  item.restaurantId || (item as any).restaurant?.id;
+                const restaurantName =
+                  (item as any).restaurant?.name || 'Unknown Restaurant';
+                const deliveryPrice =
+                  (item as any).restaurant?.deliveryPrice || null;
+                console.log('Setting cart restaurant info:', {
+                  restaurantId: itemRestaurantId,
+                  restaurantName,
+                  deliveryPrice,
+                  menuItem: item,
+                });
+                set({
+                  restaurantID: itemRestaurantId || null,
+                  restaurantName: restaurantName,
+                  deliveryPrice: deliveryPrice,
+                });
+              }
+
+              set({ items: newItems });
+              updateActivity(set, get);
+              Alert.alert('Success', 'Successfully added item to cart', [
+                { text: 'OK' },
+              ]);
             }
-
-            // Add new item
-            const deliveryFee = (item as any).restaurant?.deliveryPrice || 
-                              (item as any).deliveryPrice || 
-                              0;
-
-            const newItem: CartItem = {
-              id: generateCartItemId(item.id),
-              menuItem: item,
-              quantity,
-              specialInstructions,
-              addedAt: Date.now(),
-              deliveryFee, // Store delivery fee from food details
-            };
-
-            const newItems = [...items, newItem];
-
-            // Set restaurant info if first item
-            if (items.length === 0) {
-              const itemRestaurantId =
-                item.restaurantId || (item as any).restaurant?.id;
-              const restaurantName =
-                (item as any).restaurant?.name || 'Unknown Restaurant';
-              
-              set({
-                restaurantID: itemRestaurantId || null,
-                restaurantName: restaurantName,
-              });
-            }
-
-            set({ items: newItems });
-            updateActivity(set, get);
-            
-            Alert.alert('Success', 'Successfully added item to cart', [
-              { text: 'OK' },
-            ]);
           } catch (error: any) {
             set({ error: error.message || 'Failed to add item to cart' });
           }
         },
 
-        updateItemQuantity: (itemId, quantity) => {
+        modifyCart: (itemId, quantity) => {
           try {
             if (quantity <= 0) {
-              get().removeItem(itemId);
+              get().deleteCart(itemId);
               return;
             }
 
@@ -272,11 +296,11 @@ export const useCartStore = create<CartState & CartActions>()(
             set({ items: newItems });
             updateActivity(set, get);
           } catch (error: any) {
-            set({ error: error.message || 'Failed to update cart item' });
+            set({ error: error.message || 'Failed to modify cart item' });
           }
         },
 
-        removeItem: (itemId) => {
+        deleteCart: (itemId) => {
           try {
             const { items } = get();
             const filteredItems = items.filter((item) => item.id !== itemId);
@@ -288,11 +312,11 @@ export const useCartStore = create<CartState & CartActions>()(
               updateActivity(set, get);
             }
           } catch (error: any) {
-            set({ error: error.message || 'Failed to remove item from cart' });
+            set({ error: error.message || 'Failed to delete item from cart' });
           }
         },
 
-        removeItemByFoodId: (foodId) => {
+        deleteCartByFoodId: (foodId) => {
           try {
             const { items } = get();
             const filteredItems = items.filter(
@@ -306,7 +330,7 @@ export const useCartStore = create<CartState & CartActions>()(
               updateActivity(set, get);
             }
           } catch (error: any) {
-            set({ error: error.message || 'Failed to remove item from cart' });
+            set({ error: error.message || 'Failed to delete item from cart' });
           }
         },
 
@@ -316,6 +340,10 @@ export const useCartStore = create<CartState & CartActions>()(
 
         setError: (error) => {
           set({ error });
+        },
+
+        setDeliveryPrice: (price) => {
+          set({ deliveryPrice: price });
         },
 
         clearError: () => {
@@ -333,36 +361,10 @@ export const useCartStore = create<CartState & CartActions>()(
           return item ? item.quantity : 0;
         },
 
-        // Cart calculations
-        getSubtotal: () => {
-          const { items } = get();
-          return items.reduce((sum, item) => sum + calculateItemTotal(item), 0);
-        },
-
-        getDeliveryFee: () => {
-          const { items } = get();
-          if (items.length === 0) return 0;
-          
-          // Use the delivery fee from the first item (all items should be from same restaurant)
-          // This is the fee that was captured when the item was added to cart
-          return items[0].deliveryFee || 0;
-        },
-
-        getServiceFee: () => {
-          const subtotal = get().getSubtotal();
-          return calculateServiceFee(subtotal);
-        },
-
-        getTotal: () => {
-          const subtotal = get().getSubtotal();
-          const deliveryFee = get().getDeliveryFee();
-          const serviceFee = get().getServiceFee();
-          return subtotal + deliveryFee + serviceFee;
-        },
-
         // Cart reminder actions
         enableReminders: () => {
           set({ reminderEnabled: true });
+          // Schedule reminders for current cart if it has items
           const state = get();
           if (state.items.length > 0) {
             setTimeout(async () => {
@@ -384,6 +386,7 @@ export const useCartStore = create<CartState & CartActions>()(
 
         disableReminders: () => {
           set({ reminderEnabled: false });
+          // Cancel all existing reminders
           setTimeout(async () => {
             try {
               const { cartReminderService } = await import(
@@ -434,6 +437,7 @@ export const useCartStore = create<CartState & CartActions>()(
           items: state.items,
           restaurantID: state.restaurantID,
           restaurantName: state.restaurantName,
+          deliveryPrice: state.deliveryPrice,
           lastActivity: state.lastActivity,
           reminderEnabled: state.reminderEnabled,
         }),
@@ -444,11 +448,10 @@ export const useCartStore = create<CartState & CartActions>()(
 
 // Selector hooks for better performance
 export const useCartItems = () => useCartStore((state) => state.items);
-export const useCartSubtotal = () => useCartStore((state) => state.getSubtotal());
-export const useCartDeliveryFee = () => useCartStore((state) => state.getDeliveryFee());
-export const useCartServiceFee = () => useCartStore((state) => state.getServiceFee());
-export const useCartTotal = () => useCartStore((state) => state.getTotal());
-export const useCartRestaurantID = () => useCartStore((state) => state.restaurantID);
+export const useCartTotal = () =>
+  useCartStore((state) => calculateCartTotal(state.items));
+export const useCartRestaurantID = () =>
+  useCartStore((state) => state.restaurantID);
 export const useCartError = () => useCartStore((state) => state.error);
 export const useCanAddToCart = () => useCartStore((state) => state.canAddItem);
 
@@ -485,15 +488,8 @@ export const useCartRestaurantName = () =>
 export const useCartLastActivity = () =>
   useCartStore((state) => state.lastActivity);
 
-// Legacy compatibility - keep old function names
-export const addItemtoCart = (item: MenuProps, quantity: number, specialInstructions?: string) =>
-  useCartStore.getState().addItemtoCart(item, quantity, specialInstructions);
+export const useCartDeliveryPrice = () =>
+  useCartStore((state) => state.deliveryPrice);
 
-export const modifyCart = (itemId: string, quantity: number) =>
-  useCartStore.getState().updateItemQuantity(itemId, quantity);
-
-export const deleteCart = (itemId: string) =>
-  useCartStore.getState().removeItem(itemId);
-
-export const deleteCartByFoodId = (foodId: string) =>
-  useCartStore.getState().removeItemByFoodId(foodId);
+export const useSetCartDeliveryPrice = () =>
+  useCartStore((state) => state.setDeliveryPrice);

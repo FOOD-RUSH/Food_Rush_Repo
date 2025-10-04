@@ -41,7 +41,8 @@ const ReviewItem: React.FC<ReviewItemProps> = ({ review }) => {
     const stars = [];
     for (let i = 1; i <= 5; i++) {
       stars.push(
-        <IoniconsIcon           key={i}
+        <IoniconsIcon
+          key={i}
           name={i <= score ? 'star' : 'star-outline'}
           size={16}
           color={i <= score ? '#FFD700' : colors.onSurfaceVariant}
@@ -155,7 +156,8 @@ const RestaurantReviewsScreen: React.FC<
           </Text>
           <View className="flex-row mb-2">
             {[1, 2, 3, 4, 5].map((star) => (
-              <IoniconsIcon                 key={star}
+              <IoniconsIcon
+                key={star}
                 name={
                   star <= reviewStats.averageRating ? 'star' : 'star-outline'
                 }
@@ -193,7 +195,8 @@ const RestaurantReviewsScreen: React.FC<
                 >
                   {rating}
                 </Text>
-                <IoniconsIcon                   name="star"
+                <IoniconsIcon
+                  name="star"
                   size={16}
                   color="#FFD700"
                   style={{ marginLeft: 4, marginRight: 8 }}
@@ -234,7 +237,8 @@ const RestaurantReviewsScreen: React.FC<
 
   const renderEmptyState = () => (
     <View className="flex-1 justify-center items-center py-12">
-      <MaterialIcon         name="rate-review"
+      <MaterialIcon
+        name="rate-review"
         size={64}
         color={colors.onSurfaceVariant}
       />
@@ -274,7 +278,8 @@ const RestaurantReviewsScreen: React.FC<
         {/* Header */}
         <View className="flex-row items-center px-4 py-3 border-b border-gray-200">
           <TouchableOpacity onPress={handleGoBack} className="mr-4">
-            <MaterialIcon               name="arrow-back"
+            <MaterialIcon
+              name="arrow-back"
               size={24}
               color={colors.onSurface}
             />

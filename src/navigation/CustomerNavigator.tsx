@@ -7,7 +7,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image, Platform, TouchableOpacity } from 'react-native';
 import { FloatingTabBar } from '../components/common/FloatingTabBar';
 
-
 import { useTranslation } from 'react-i18next';
 import { useTheme } from 'react-native-paper';
 import { useAppNavigationTheme } from '../config/theme';
@@ -79,7 +78,7 @@ function CustomerOrderStackScreen() {
           backgroundColor: navigationTheme.colors.card,
           borderTopColor: navigationTheme.colors.card,
           // Platform-specific margin adjustment
-         // marginBottom: Platform.OS === 'ios' ? -50 : -50,
+          // marginBottom: Platform.OS === 'ios' ? -50 : -50,
         },
         tabBarIndicatorStyle: {
           backgroundColor: navigationTheme.colors.primary,
@@ -139,8 +138,8 @@ export function CustomerHelpCenterStackScreen() {
         lazy: true,
       }}
     >
-      <CustomerHelpStack.Screen 
-        name="FAQ" 
+      <CustomerHelpStack.Screen
+        name="FAQ"
         component={FAQ}
         options={{ title: t('faq') }}
       />
@@ -198,7 +197,8 @@ function CustomerProfileStackScreen() {
           headerTitleAlign: 'left',
           headerRight: () => (
             <TouchableOpacity onPress={() => {}} style={{ marginRight: 8 }}>
-              <IoniconsIcon                 name="settings-outline"
+              <IoniconsIcon
+                name="settings-outline"
                 size={25}
                 color={navigationTheme.colors.text}
               />
@@ -257,10 +257,8 @@ export default function CustomerNavigator() {
   );
 
   return (
-   <CustomerTab.Navigator
-      tabBar={(props) => (
-        <FloatingTabBar {...props} userType="customer" />
-      )}
+    <CustomerTab.Navigator
+      tabBar={(props) => <FloatingTabBar {...props} userType="customer" />}
       screenOptions={({ route }) => ({
         tabBarLabel: () => {
           let label = '';
@@ -312,7 +310,8 @@ export default function CustomerNavigator() {
               }}
               style={{ marginRight: 20 }}
             >
-              <IoniconsIcon                 name="search-outline"
+              <IoniconsIcon
+                name="search-outline"
                 size={25}
                 color={navigationTheme.colors.primary}
               />

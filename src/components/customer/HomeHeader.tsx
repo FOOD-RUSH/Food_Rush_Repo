@@ -196,7 +196,7 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
       {/* Left Section - Avatar and Location */}
       <View className="flex-row items-center flex-1">
         <Avatar
-          profilePicture={user?.profilePicture}
+          profilePicture={user?.pictureUrl}
           fullName={user?.fullName || 'User'}
           size={70}
         />
@@ -248,7 +248,8 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
                 style={{ marginLeft: 4 }}
               />
             ) : (
-              <IoniconsIcon                 name={getLocationIcon()}
+              <IoniconsIcon
+                name={getLocationIcon()}
                 size={16}
                 color={getLocationIconColor()}
                 style={{ marginLeft: 4 }}
@@ -274,7 +275,8 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
               borderColor: colors.outline,
             }}
           >
-            <IoniconsIcon               name="notifications-outline"
+            <IoniconsIcon
+              name="notifications-outline"
               size={22}
               color={colors.onSurface}
             />
@@ -308,7 +310,11 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
               borderColor: colors.outline,
             }}
           >
-            <IoniconsIcon name="bag-outline" size={22} color={colors.onSurface} />
+            <IoniconsIcon
+              name="bag-outline"
+              size={22}
+              color={colors.onSurface}
+            />
           </View>
           {cartItemCount > 0 && (
             <Badge

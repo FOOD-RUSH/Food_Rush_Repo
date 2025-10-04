@@ -91,7 +91,8 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
 
   return (
     <View style={[styles.errorDisplay, compact && styles.errorDisplayCompact]}>
-      <IoniconsIcon         name={getErrorIcon()}
+      <IoniconsIcon
+        name={getErrorIcon()}
         size={compact ? 24 : 32}
         color="#FF6B6B"
         style={styles.errorIcon}

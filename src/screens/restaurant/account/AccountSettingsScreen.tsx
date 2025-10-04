@@ -1,4 +1,7 @@
-import { IoniconsIcon, MaterialCommunityIcon } from '@/src/components/common/icons';
+import {
+  IoniconsIcon,
+  MaterialCommunityIcon,
+} from '@/src/components/common/icons';
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import {
   View,
@@ -106,7 +109,11 @@ const AccountSettingsScreen = ({ navigation }: Props) => {
                   {availableLanguages[currentLanguage].name}
                 </Text>
               </View>
-              <IoniconsIcon name="chevron-down" size={16} color={colors.outline} />
+              <IoniconsIcon
+                name="chevron-down"
+                size={16}
+                color={colors.outline}
+              />
             </TouchableOpacity>
           </View>
         </Animated.View>

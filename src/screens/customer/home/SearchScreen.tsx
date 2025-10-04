@@ -61,7 +61,7 @@ const useSearchFood = (query: string, filters: GeneralFilterOptions) => {
         if (item.category) {
           return item.category.toLowerCase() === filters.category.toLowerCase();
         }
-        
+
         // Fallback to name/description matching for backward compatibility
         const itemName = item.name.toLowerCase();
         const itemDescription = item.description?.toLowerCase() || '';
@@ -69,21 +69,21 @@ const useSearchFood = (query: string, filters: GeneralFilterOptions) => {
         switch (filters.category) {
           case 'local-dishes':
             return (
-              itemName.includes('local') || 
+              itemName.includes('local') ||
               itemDescription.includes('local') ||
               itemName.includes('traditional') ||
               itemDescription.includes('traditional')
             );
           case 'snacks':
             return (
-              itemName.includes('snack') || 
+              itemName.includes('snack') ||
               itemDescription.includes('snack') ||
               itemName.includes('bite') ||
               itemDescription.includes('bite')
             );
           case 'drinks':
             return (
-              itemName.includes('drink') || 
+              itemName.includes('drink') ||
               itemDescription.includes('drink') ||
               itemName.includes('beverage') ||
               itemDescription.includes('beverage') ||
@@ -100,7 +100,7 @@ const useSearchFood = (query: string, filters: GeneralFilterOptions) => {
             );
           case 'fast-food':
             return (
-              itemName.includes('burger') || 
+              itemName.includes('burger') ||
               itemName.includes('fast') ||
               itemName.includes('quick') ||
               itemDescription.includes('fast') ||
@@ -336,7 +336,8 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
         ]}
         onPress={() => setIsFilterModalVisible(true)}
       >
-        <MaterialIcon           name="tune"
+        <MaterialIcon
+          name="tune"
           size={20}
           color={
             hasActiveFilters
@@ -381,7 +382,8 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
             });
           }}
         >
-          <MaterialIcon             name="clear"
+          <MaterialIcon
+            name="clear"
             size={16}
             color={colors.onErrorContainer}
           />
@@ -469,7 +471,8 @@ const SearchScreen: React.FC<SearchScreenProps> = ({ navigation, route }) => {
           />
         ) : (
           <View style={styles.emptyState}>
-            <MaterialIcon               name="search-off"
+            <MaterialIcon
+              name="search-off"
               size={64}
               color={colors.onSurfaceVariant}
             />

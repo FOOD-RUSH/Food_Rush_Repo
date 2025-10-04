@@ -1,5 +1,5 @@
 import { IoniconsIcon } from '@/src/components/common/icons';
-import React, {useMemo} from 'react';
+import React, { useMemo } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
@@ -99,14 +99,11 @@ function RestaurantAccountStackScreen() {
 }
 
 export default function RestaurantNavigator() {
- 
   const { t } = useTranslation('translation');
-  
+
   return (
-   <RestaurantTab.Navigator
-      tabBar={(props) => (
-        <FloatingTabBar {...props} userType="restaurant" />
-      )}
+    <RestaurantTab.Navigator
+      tabBar={(props) => <FloatingTabBar {...props} userType="restaurant" />}
       screenOptions={({ route }) => ({
         tabBarLabel: () => {
           let label = '';

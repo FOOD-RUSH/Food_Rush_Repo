@@ -5,7 +5,6 @@
 - PROFILE DETAILS SCREEN
 -styling
 -OrderDetails styling of restaurant App
-- editing menu item in restaurant App
 - Payment logic adjustment based on backend
 
 

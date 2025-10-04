@@ -40,7 +40,8 @@ const ProfileErrorState: React.FC<ProfileErrorStateProps> = ({
           marginBottom: 24,
         }}
       >
-        <IoniconsIcon           name="alert-circle"
+        <IoniconsIcon
+          name="alert-circle"
           size={32}
           color={colors.onErrorContainer}
         />

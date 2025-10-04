@@ -1,4 +1,8 @@
-import { IoniconsIcon, MaterialIcon, FontAwesome5Icon } from '@/src/components/common/icons';
+import {
+  IoniconsIcon,
+  MaterialIcon,
+  FontAwesome5Icon,
+} from '@/src/components/common/icons';
 import React from 'react';
 import {
   View,
@@ -68,7 +72,8 @@ const OrderReceiptScreen = ({
     return (
       <CommonView>
         <View className="flex-1 justify-center items-center p-6">
-          <IoniconsIcon             name="alert-circle-outline"
+          <IoniconsIcon
+            name="alert-circle-outline"
             size={64}
             color={colors.error}
           />
@@ -181,7 +186,8 @@ const OrderReceiptScreen = ({
               </Caption>
             </View>
             <View className="flex-row items-center">
-              <IoniconsIcon                 name={getStatusIcon(order.status)}
+              <IoniconsIcon
+                name={getStatusIcon(order.status)}
                 size={16}
                 color={getStatusColor(order.status)}
               />
@@ -228,7 +234,11 @@ const OrderReceiptScreen = ({
                     className="p-2 rounded-full ml-2"
                     style={{ backgroundColor: colors.primary + '20' }}
                   >
-                    <IoniconsIcon name="call" size={20} color={colors.primary} />
+                    <IoniconsIcon
+                      name="call"
+                      size={20}
+                      color={colors.primary}
+                    />
                   </TouchableOpacity>
                 )}
               </View>
@@ -377,7 +387,8 @@ const OrderReceiptScreen = ({
               {t('payment_information')}
             </Heading5>
             <View className="flex-row items-center">
-              <FontAwesome5Icon                 name={
+              <FontAwesome5Icon
+                name={
                   order.paymentMethod === 'mtn_mobile_money'
                     ? 'mobile-alt'
                     : order.paymentMethod === 'orange_money'
@@ -412,7 +423,8 @@ const OrderReceiptScreen = ({
               className="flex-1 border rounded-xl py-4 items-center mr-2"
               style={{ borderColor: colors.primary }}
             >
-              <IoniconsIcon                 name="share-outline"
+              <IoniconsIcon
+                name="share-outline"
                 size={20}
                 color={colors.primary}
                 style={{ marginBottom: 4 }}
@@ -427,7 +439,8 @@ const OrderReceiptScreen = ({
               className="flex-1 rounded-xl py-4 items-center ml-2"
               style={{ backgroundColor: colors.primary }}
             >
-              <MaterialIcon                 name="replay"
+              <MaterialIcon
+                name="replay"
                 size={20}
                 color="white"
                 style={{ marginBottom: 4 }}

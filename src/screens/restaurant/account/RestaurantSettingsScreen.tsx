@@ -1,4 +1,7 @@
-import { IoniconsIcon, MaterialCommunityIcon } from '@/src/components/common/icons';
+import {
+  IoniconsIcon,
+  MaterialCommunityIcon,
+} from '@/src/components/common/icons';
 import React, { useRef, useEffect, useState } from 'react';
 import {
   View,
@@ -113,7 +116,8 @@ const RestaurantSettingsScreen = ({ navigation }: Props) => {
             <IoniconsIcon name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>{t('restaurant_settings')}</Text>
-          <MaterialCommunityIcon             name="store-cog-outline"
+          <MaterialCommunityIcon
+            name="store-cog-outline"
             size={32}
             color="#fff"
             style={{ marginLeft: 10 }}
@@ -197,7 +201,8 @@ const RestaurantSettingsScreen = ({ navigation }: Props) => {
 
           {/* Accepting Orders Toggle */}
           <View className="flex-row justify-between mb-4 items-center px-2 py-2">
-            <MaterialCommunityIcon               name="store-check"
+            <MaterialCommunityIcon
+              name="store-check"
               size={22}
               color={colors.onSurface}
             />
@@ -225,7 +230,8 @@ const RestaurantSettingsScreen = ({ navigation }: Props) => {
 
           {/* Show on Map Toggle */}
           <View className="flex-row justify-between mb-4 items-center px-2 py-2">
-            <MaterialCommunityIcon               name="map-marker-check"
+            <MaterialCommunityIcon
+              name="map-marker-check"
               size={22}
               color={colors.onSurface}
             />

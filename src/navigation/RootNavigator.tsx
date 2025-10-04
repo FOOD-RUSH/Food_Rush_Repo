@@ -3,7 +3,12 @@ import React, { useMemo, useCallback, useRef } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
-import { TouchableOpacity, Linking, DeviceEventEmitter, Platform } from 'react-native';
+import {
+  TouchableOpacity,
+  Linking,
+  DeviceEventEmitter,
+  Platform,
+} from 'react-native';
 
 import Toast from 'react-native-toast-message';
 import { useTranslation } from 'react-i18next';
@@ -36,7 +41,6 @@ import {
   getPlatformAnimation,
   getContentMarginTop,
 } from './platformNavigation';
-
 
 // Components and screens
 import LoadingScreen from '../components/common/LoadingScreen';
@@ -89,7 +93,6 @@ import OrderHistoryScreen from '../screens/restaurant/orders/OrderHistoryScreen'
 import ProfileDetailsScreen from '../screens/customer/Profile/ProfileDetailsScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
-
 
 const RootNavigator: React.FC = () => {
   // Store hooks with performance-optimized selectors
@@ -205,9 +208,9 @@ const RootNavigator: React.FC = () => {
 
   // Memoized screen options
   // Then in your RootNavigator component, replace the screenOptions useMemo with:
-const screenOptions = useMemo(() => {
-  return createPlatformScreenOptions(theme.colors, navigationTheme.colors, t);
-}, [theme.colors, navigationTheme.colors, t]);
+  const screenOptions = useMemo(() => {
+    return createPlatformScreenOptions(theme.colors, navigationTheme.colors, t);
+  }, [theme.colors, navigationTheme.colors, t]);
 
   // Memoized cart screen options
   const cartScreenOptions = useMemo(
@@ -216,7 +219,8 @@ const screenOptions = useMemo(() => {
       headerBackTitleVisible: false,
       headerRight: () => (
         <TouchableOpacity onPress={handleClearCart} style={{ marginRight: 16 }}>
-          <MaterialIcon             name="delete-forever"
+          <MaterialIcon
+            name="delete-forever"
             size={24}
             color={navigationTheme.colors.notification}
           />
@@ -342,17 +346,23 @@ const screenOptions = useMemo(() => {
             component={CategoryMenuScreen}
             options={{
               presentation: 'fullScreenModal',
-    headerShown: true,
-    gestureEnabled: true,
-    animation: getPlatformAnimation('modal'),
-    contentStyle: {
-      backgroundColor: theme.colors.background,
-      marginTop: getContentMarginTop(true),
+              headerShown: true,
+              gestureEnabled: true,
+              animation: getPlatformAnimation('modal'),
+              contentStyle: {
+                backgroundColor: theme.colors.background,
+                marginTop: getContentMarginTop(true),
               },
               headerTitle: '',
               headerLeft: () => (
                 <TouchableOpacity onPressIn={() => navigationRef.goBack()}>
-                  <MaterialIcon name={Platform.OS === 'ios' ? 'arrow-back-ios' : 'arrow-back'} size={24} color={navigationTheme.colors.text} />
+                  <MaterialIcon
+                    name={
+                      Platform.OS === 'ios' ? 'arrow-back-ios' : 'arrow-back'
+                    }
+                    size={24}
+                    color={navigationTheme.colors.text}
+                  />
                 </TouchableOpacity>
               ),
             }}
@@ -370,15 +380,15 @@ const screenOptions = useMemo(() => {
               component={FoodDetailsScreen}
               options={{
                 ...screenOptions.transparentHeader,
-    headerTitle: '',
+                headerTitle: '',
               }}
             />
             <Stack.Screen
               name="RestaurantDetails"
               component={RestaurantDetailScreen}
               options={{
-              ...screenOptions.transparentHeader,
-    headerTitle: '',
+                ...screenOptions.transparentHeader,
+                headerTitle: '',
               }}
             />
             <Stack.Screen

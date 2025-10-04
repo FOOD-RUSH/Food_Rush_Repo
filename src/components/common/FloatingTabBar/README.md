@@ -38,11 +38,13 @@ The floating tab bar includes:
 ## Platform Differences
 
 ### iOS
+
 - Larger bottom margin to account for home indicator
 - Uses shadow with higher opacity and radius
 - Slightly different padding adjustments
 
 ### Android
+
 - Uses elevation instead of shadow
 - Optimized touch targets for Android guidelines
 - Material Design compliant spacing
@@ -50,6 +52,7 @@ The floating tab bar includes:
 ## Customization
 
 The component automatically adapts to:
+
 - Light/dark themes
 - Different user types (customer/restaurant)
 - Safe area insets
@@ -58,11 +61,13 @@ The component automatically adapts to:
 ## Icons
 
 ### Customer Mode
+
 - Home: `home` / `home-outline`
 - Orders: `bookmark` / `bookmark-outline`
 - Profile: `person` / `person-outline`
 
 ### Restaurant Mode
+
 - Orders: `receipt` / `receipt-outline`
 - Menu: `restaurant` / `restaurant-outline`
 - Analytics: `bar-chart` / `bar-chart-outline`

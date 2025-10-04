@@ -92,9 +92,10 @@ export const isOrderOverdue = (order: Order): boolean => {
 export const sortOrdersByPriority = (orders: Order[]): Order[] => {
   return [...orders].sort((a, b) => {
     // First sort by status priority
-    const priorityDiff = ORDER_STATUS_PRIORITY[a.status] - ORDER_STATUS_PRIORITY[b.status];
+    const priorityDiff =
+      ORDER_STATUS_PRIORITY[a.status] - ORDER_STATUS_PRIORITY[b.status];
     if (priorityDiff !== 0) return priorityDiff;
-    
+
     // Then sort by creation time (newest first)
     const timeA = new Date(a.createdAt || a.time).getTime();
     const timeB = new Date(b.createdAt || b.time).getTime();
@@ -105,7 +106,10 @@ export const sortOrdersByPriority = (orders: Order[]): Order[] => {
 /**
  * Format order total with currency
  */
-export const formatOrderTotal = (total: number, currency: string = 'XAF'): string => {
+export const formatOrderTotal = (
+  total: number,
+  currency: string = 'XAF',
+): string => {
   return `${total.toLocaleString()} ${currency}`;
 };
 
@@ -114,11 +118,11 @@ export const formatOrderTotal = (total: number, currency: string = 'XAF'): strin
  */
 export const getOrderItemsSummary = (order: Order): string => {
   if (!order.items || order.items.length === 0) return 'No items';
-  
+
   const summary = order.items
     .map((item) => `${item.quantity}x ${item.name}`)
     .join(', ');
-    
+
   // Truncate if too long
   return summary.length > 100 ? `${summary.substring(0, 97)}...` : summary;
 };
@@ -154,7 +158,9 @@ export const canMarkAsReady = (order: Order): boolean => {
 /**
  * Get next possible status for an order
  */
-export const getNextOrderStatus = (currentStatus: Order['status']): Order['status'] | null => {
+export const getNextOrderStatus = (
+  currentStatus: Order['status'],
+): Order['status'] | null => {
   const statusFlow: Record<Order['status'], Order['status'] | null> = {
     pending: 'confirmed',
     confirmed: 'preparing',
@@ -164,7 +170,7 @@ export const getNextOrderStatus = (currentStatus: Order['status']): Order['statu
     delivered: null,
     cancelled: null,
   };
-  
+
   return statusFlow[currentStatus];
 };
 
@@ -200,10 +206,13 @@ export const logOrderData = (order: Order, context: string = ''): void => {
  * Create order summary for logging
  */
 export const createOrderSummary = (orders: Order[]): object => {
-  const statusCounts = orders.reduce((acc, order) => {
-    acc[order.status] = (acc[order.status] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const statusCounts = orders.reduce(
+    (acc, order) => {
+      acc[order.status] = (acc[order.status] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
 
   const totalValue = orders.reduce((sum, order) => sum + order.total, 0);
   const overdueCount = orders.filter(isOrderOverdue).length;
@@ -213,6 +222,9 @@ export const createOrderSummary = (orders: Order[]): object => {
     statusBreakdown: statusCounts,
     totalValue: formatOrderTotal(totalValue),
     overdueOrders: overdueCount,
-    averageOrderValue: orders.length > 0 ? formatOrderTotal(totalValue / orders.length) : '0 XAF',
+    averageOrderValue:
+      orders.length > 0
+        ? formatOrderTotal(totalValue / orders.length)
+        : '0 XAF',
   };
 };

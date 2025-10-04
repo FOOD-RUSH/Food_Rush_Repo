@@ -68,7 +68,8 @@ const MenuItem: React.FC<MenuItemProps> = React.memo(
             marginRight: 16,
           }}
         >
-          <MaterialCommunityIcon             name={icon as any}
+          <MaterialCommunityIcon
+            name={icon as any}
             size={22}
             color={iconColor}
           />
@@ -120,7 +121,8 @@ const MenuItem: React.FC<MenuItemProps> = React.memo(
           </Text>
         </View>
 
-        <MaterialCommunityIcon           name="chevron-right"
+        <MaterialCommunityIcon
+          name="chevron-right"
           size={20}
           color={colors.onSurfaceVariant}
           style={{ marginLeft: 12 }}

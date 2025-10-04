@@ -30,7 +30,6 @@ import {
 } from '@/src/stores/customerStores/cartStore';
 import { useTranslation } from 'react-i18next';
 import { useMenuItemById } from '@/src/hooks/customer/useCustomerApi';
-import { navigate } from '@/src/navigation/navigationHelpers';
 
 const FoodDetailsScreen = ({
   navigation,
@@ -56,7 +55,7 @@ const FoodDetailsScreen = ({
     refetch,
     error,
   } = useMenuItemById(foodId);
-  const addItemtoCart = useCartStore().addtoCart;
+  const addItemtoCart = useCartStore().addItemtoCart;
 
   // Initialize quantity based on cart state
   useEffect(() => {
@@ -94,9 +93,8 @@ const FoodDetailsScreen = ({
       addItemtoCart(MenuDetails, quantity, instructions);
       // Show success feedback
       // Note: The cart store will handle the duplicate item dialog
-      
-      // Navigate to the home screen after successfully adding to cart
-      navigate('CustomerApp', { screen: 'Home', params: { screen: 'HomeScreen' } });
+
+    
     } catch (error) {
       Alert.alert(
         t('error') || 'Error',
@@ -105,10 +103,6 @@ const FoodDetailsScreen = ({
       );
     }
   }, [MenuDetails, quantity, instructions, addItemtoCart, t]);
-
-  const handleGoBack = useCallback(() => {
-    navigation.goBack();
-  }, [navigation]);
 
   // Loading state
   if (isLoading) {
@@ -132,7 +126,8 @@ const FoodDetailsScreen = ({
         className="flex-1 justify-center items-center px-6"
         style={{ backgroundColor: colors.background }}
       >
-        <MaterialIcon           name="error-outline"
+        <MaterialIcon
+          name="error-outline"
           size={80}
           color={colors.onSurfaceVariant}
         />
@@ -183,9 +178,6 @@ const FoodDetailsScreen = ({
             resizeMode="cover"
             onError={() => console.log('Image load error')}
           />
-
-
-         
 
           {/* Cart Status Badge */}
           {isInCart && (
@@ -279,7 +271,8 @@ const FoodDetailsScreen = ({
                     quantity > 1 ? colors.primary : colors.surface,
                 }}
               >
-                <IoniconsIcon                   name="remove"
+                <IoniconsIcon
+                  name="remove"
                   size={24}
                   color={quantity > 1 ? 'white' : colors.onSurfaceVariant}
                 />

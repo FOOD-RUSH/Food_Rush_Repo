@@ -213,7 +213,8 @@ const FavoriteRestaurants = ({
                   marginBottom: 4,
                 }}
               >
-                <IoniconsIcon                   name="heart"
+                <IoniconsIcon
+                  name="heart"
                   size={20}
                   color={colors.primary}
                   style={{ marginRight: 8 }}

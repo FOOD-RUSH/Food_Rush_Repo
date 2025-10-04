@@ -32,7 +32,11 @@ config.serializer = {
   ...config.serializer,
   createModuleIdFactory: () => (path) => {
     // Use shorter, consistent IDs for better caching
-    return require('crypto').createHash('sha1').update(path).digest('hex').substr(0, 8);
+    return require('crypto')
+      .createHash('sha1')
+      .update(path)
+      .digest('hex')
+      .substr(0, 8);
   },
   // Optimize output for production
   ...(isProduction && {
@@ -54,7 +58,7 @@ config.resolver = {
   assetExts: [
     ...config.resolver.assetExts,
     // Remove unused extensions to speed up resolution
-  ].filter(ext => !['gif'].includes(ext)), // Remove gif since we converted to png
+  ].filter((ext) => !['gif'].includes(ext)), // Remove gif since we converted to png
   // Source extensions optimization
   sourceExts: [
     ...config.resolver.sourceExts,

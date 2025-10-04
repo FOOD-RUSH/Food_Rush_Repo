@@ -41,7 +41,7 @@ export const BottomSheetProvider: React.FC<BottomSheetProviderProps> = ({
       setContent(newContent);
       setConfig(newConfig || {});
       setIsPresented(true);
-      
+
       // Small delay to ensure state is set before presenting
       // This helps on Android especially
       if (Platform.OS === 'android') {
@@ -73,14 +73,14 @@ export const BottomSheetProvider: React.FC<BottomSheetProviderProps> = ({
 
   return (
     <BottomSheetContext.Provider value={value}>
-        {children}
-        {/* GlobalBottomSheet is rendered at root level to ensure it's always on top */}
-        <GlobalBottomSheet
-          ref={bottomSheetRef}
-          content={content}
-          config={config}
-          onDismiss={handleDismiss}
-        />
+      {children}
+      {/* GlobalBottomSheet is rendered at root level to ensure it's always on top */}
+      <GlobalBottomSheet
+        ref={bottomSheetRef}
+        content={content}
+        config={config}
+        onDismiss={handleDismiss}
+      />
     </BottomSheetContext.Provider>
   );
 };

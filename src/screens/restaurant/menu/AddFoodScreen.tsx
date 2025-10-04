@@ -110,7 +110,7 @@ const ImageUploadSection = React.memo<{
             <ActivityIndicator size="large" color={colors.primary} />
           ) : (
             <>
-              <MaterialCommunityIcon 
+              <MaterialCommunityIcon
                 name="camera-plus"
                 size={48}
                 color={colors.primary}
@@ -239,86 +239,95 @@ export const AddFoodScreen = () => {
     setFormData((prev) => ({ ...prev, ...updates }));
   }, []);
 
- // Enhanced validation with detailed error checking - ADD THIS TO YOUR AddFoodScreen.tsx
-const validation = useMemo(() => {
-  const { foodName, price, category, startTime, endTime, picture } = formData;
-  const priceValue = parseFloat(price);
+  // Enhanced validation with detailed error checking - ADD THIS TO YOUR AddFoodScreen.tsx
+  const validation = useMemo(() => {
+    const { foodName, price, category, startTime, endTime, picture } = formData;
+    const priceValue = parseFloat(price);
 
-  const errors: string[] = [];
+    const errors: string[] = [];
 
-  // Required field validation
-  if (!foodName.trim()) {
-    errors.push(
-      t('validation.food_name_required') || 'Food name is required',
-    );
-  } else if (foodName.trim().length < 2) {
-    errors.push(
-      t('validation.food_name_too_short') || 'Food name is too short',
-    );
-  }
-
-  if (!category) {
-    errors.push(t('validation.category_required') || 'Category is required');
-  } else {
-    // Validate category is one of the accepted values
-    const validCategories = ['local-dishes', 'breakfast', 'fastfood', 'desserts', 'snacks', 'drinks'];
-    if (!validCategories.includes(category)) {
-      errors.push(`Category must be one of: ${validCategories.join(', ')}`);
+    // Required field validation
+    if (!foodName.trim()) {
+      errors.push(
+        t('validation.food_name_required') || 'Food name is required',
+      );
+    } else if (foodName.trim().length < 2) {
+      errors.push(
+        t('validation.food_name_too_short') || 'Food name is too short',
+      );
     }
-  }
 
-  if (!price.trim()) {
-    errors.push(t('validation.price_required') || 'Price is required');
-  } else if (isNaN(priceValue) || priceValue <= 0) {
-    errors.push(
-      t('validation.price_must_be_positive') ||
-        'Price must be a positive number',
-    );
-  } else if (priceValue > 1000000) {
-    errors.push(t('validation.price_too_high') || 'Price is too high');
-  }
-
-  // CRITICAL: Picture is required according to API documentation
-  if (!picture) {
-    errors.push('Picture is required - please select an image');
-  } else {
-    // Validate picture format
-    if (!picture.uri) {
-      errors.push('Picture URI is missing');
+    if (!category) {
+      errors.push(t('validation.category_required') || 'Category is required');
+    } else {
+      // Validate category is one of the accepted values
+      const validCategories = [
+        'local-dishes',
+        'breakfast',
+        'fastfood',
+        'desserts',
+        'snacks',
+        'drinks',
+      ];
+      if (!validCategories.includes(category)) {
+        errors.push(`Category must be one of: ${validCategories.join(', ')}`);
+      }
     }
-    if (!picture.name) {
-      errors.push('Picture name is missing');  
-    }
-    if (!picture.type) {
-      errors.push('Picture type is missing');
-    }
-    if (picture.type && !isValidImageType(picture.type)) {
-      errors.push(`Invalid image type: ${picture.type}. Only JPG and PNG are allowed.`);
-    }
-  }
 
-  // Time validation - both times must be provided if one is provided
-  if ((startTime && !endTime) || (!startTime && endTime)) {
-    errors.push(
-      t('both_times_required_if_one_selected') ||
-        'Both start and end times are required if scheduling is used',
-    );
-  }
+    if (!price.trim()) {
+      errors.push(t('validation.price_required') || 'Price is required');
+    } else if (isNaN(priceValue) || priceValue <= 0) {
+      errors.push(
+        t('validation.price_must_be_positive') ||
+          'Price must be a positive number',
+      );
+    } else if (priceValue > 1000000) {
+      errors.push(t('validation.price_too_high') || 'Price is too high');
+    }
 
-  // Time validation - start time must be before end time
-  if (startTime && endTime && startTime >= endTime) {
-    errors.push(
-      t('start_time_must_be_before_end_time') ||
-        'Start time must be before end time',
-    );
-  }
+    // CRITICAL: Picture is required according to API documentation
+    if (!picture) {
+      errors.push('Picture is required - please select an image');
+    } else {
+      // Validate picture format
+      if (!picture.uri) {
+        errors.push('Picture URI is missing');
+      }
+      if (!picture.name) {
+        errors.push('Picture name is missing');
+      }
+      if (!picture.type) {
+        errors.push('Picture type is missing');
+      }
+      if (picture.type && !isValidImageType(picture.type)) {
+        errors.push(
+          `Invalid image type: ${picture.type}. Only JPG and PNG are allowed.`,
+        );
+      }
+    }
 
-  return {
-    isValid: errors.length === 0,
-    errors,
-    hasErrors: errors.length > 0,
-  };
-}, [formData, t]);
+    // Time validation - both times must be provided if one is provided
+    if ((startTime && !endTime) || (!startTime && endTime)) {
+      errors.push(
+        t('both_times_required_if_one_selected') ||
+          'Both start and end times are required if scheduling is used',
+      );
+    }
+
+    // Time validation - start time must be before end time
+    if (startTime && endTime && startTime >= endTime) {
+      errors.push(
+        t('start_time_must_be_before_end_time') ||
+          'Start time must be before end time',
+      );
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors,
+      hasErrors: errors.length > 0,
+    };
+  }, [formData, t]);
   // Fixed image picker that properly validates JPG/PNG and returns correct format
   const handleImagePick = useCallback(async () => {
     try {
@@ -327,7 +336,7 @@ const validation = useMemo(() => {
 
       // Use the utility function for proper image picking and validation
       const imageResult = await pickImageForUpload();
-      
+
       if (imageResult) {
         // Validate image type (JPG/PNG only)
         if (!isValidImageType(imageResult.type)) {
@@ -340,7 +349,7 @@ const validation = useMemo(() => {
 
         // Update form data with validated image
         updateFormData({
-          picture: imageResult // This now has proper { uri, type, name } format
+          picture: imageResult, // This now has proper { uri, type, name } format
         });
 
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -432,11 +441,13 @@ const validation = useMemo(() => {
         price: menuItemData.price,
         category: menuItemData.category,
         hasImage: !!menuItemData.picture,
-        imageDetails: menuItemData.picture ? {
-          name: menuItemData.picture.name,
-          type: menuItemData.picture.type,
-          uri: menuItemData.picture.uri.substring(0, 50) + '...'
-        } : null,
+        imageDetails: menuItemData.picture
+          ? {
+              name: menuItemData.picture.name,
+              type: menuItemData.picture.type,
+              uri: menuItemData.picture.uri.substring(0, 50) + '...',
+            }
+          : null,
         hasSchedule: !!(menuItemData.startAt && menuItemData.endAt),
       });
 
@@ -670,7 +681,7 @@ const validation = useMemo(() => {
               style={{ backgroundColor: colors.errorContainer }}
             >
               <View className="flex-row items-center mb-2">
-                <MaterialCommunityIcon 
+                <MaterialCommunityIcon
                   name="alert-circle"
                   size={20}
                   color={colors.error}

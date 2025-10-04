@@ -47,7 +47,10 @@ import {
   Body,
   Label,
 } from '@/src/components/common/Typography';
-import { useResponsive, useResponsiveFontSize } from '@/src/hooks/useResponsive';
+import {
+  useResponsive,
+  useResponsiveFontSize,
+} from '@/src/hooks/useResponsive';
 import * as yup from 'yup';
 
 interface Step2FormData {
@@ -251,9 +254,7 @@ const RestaurantSignupStep2: React.FC<
         Toast.show({
           type: 'error',
           text1: t('location_error'),
-          text2:
-            locationResult.error ||
-            t('could_not_get_exact_location'),
+          text2: locationResult.error || t('could_not_get_exact_location'),
           position: 'top',
         });
       }
@@ -541,7 +542,8 @@ const RestaurantSignupStep2: React.FC<
                 backdropFilter: 'blur(10px)',
               }}
             >
-              <IoniconsIcon                 name="camera-outline"
+              <IoniconsIcon
+                name="camera-outline"
                 size={36}
                 color="rgba(255, 255, 255, 0.8)"
               />
@@ -683,7 +685,8 @@ const RestaurantSignupStep2: React.FC<
                 onPress={() => setShowLocationModal(true)}
                 activeOpacity={0.7}
               >
-                <IoniconsIcon                   name="location-outline"
+                <IoniconsIcon
+                  name="location-outline"
                   size={24}
                   color={
                     selectedLocation ? colors.primary : colors.onSurfaceVariant
@@ -738,10 +741,15 @@ const RestaurantSignupStep2: React.FC<
                       ],
                     }}
                   >
-                    <IoniconsIcon name="refresh" size={20} color={colors.primary} />
+                    <IoniconsIcon
+                      name="refresh"
+                      size={20}
+                      color={colors.primary}
+                    />
                   </Animated.View>
                 ) : (
-                  <IoniconsIcon                     name="chevron-forward"
+                  <IoniconsIcon
+                    name="chevron-forward"
                     size={20}
                     color={colors.onSurfaceVariant}
                   />
@@ -764,7 +772,8 @@ const RestaurantSignupStep2: React.FC<
               onPress={pickDocument}
               activeOpacity={0.7}
             >
-              <IoniconsIcon                 name="document-attach-outline"
+              <IoniconsIcon
+                name="document-attach-outline"
                 size={24}
                 color={colors.primary}
               />
@@ -778,7 +787,8 @@ const RestaurantSignupStep2: React.FC<
               >
                 {documentName || t('upload_document_optional')}
               </Body>
-              <IoniconsIcon                 name="cloud-upload-outline"
+              <IoniconsIcon
+                name="cloud-upload-outline"
                 size={20}
                 color={colors.onSurfaceVariant}
               />
@@ -807,7 +817,11 @@ const RestaurantSignupStep2: React.FC<
                   }}
                 >
                   {t('i_agree_to_the')}{' '}
-                  <TextButton onPress={openTerms} text={t('terms_of_service')} /> {t('and')}{' '}
+                  <TextButton
+                    onPress={openTerms}
+                    text={t('terms_of_service')}
+                  />{' '}
+                  {t('and')}{' '}
                   <TextButton
                     onPress={openPrivacyPolicy}
                     text={t('privacy_policy')}
@@ -896,7 +910,8 @@ const RestaurantSignupStep2: React.FC<
                 alignItems: 'center',
               }}
             >
-              <IoniconsIcon                 name="location"
+              <IoniconsIcon
+                name="location"
                 size={64}
                 color={colors.primary}
                 style={{ marginBottom: 20 }}
@@ -923,7 +938,8 @@ const RestaurantSignupStep2: React.FC<
                     key={index}
                     style={{ flexDirection: 'row', alignItems: 'flex-start' }}
                   >
-                    <IoniconsIcon                       name="checkmark-circle"
+                    <IoniconsIcon
+                      name="checkmark-circle"
                       size={24}
                       color={colors.primary}
                     />

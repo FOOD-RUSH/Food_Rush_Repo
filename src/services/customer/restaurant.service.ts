@@ -96,17 +96,17 @@ export const restaurantApi = {
         params: query,
         coordinates: { lat: query.nearLat, lng: query.nearLng },
       });
-      
+
       const response = await apiClient.get<FoodItems>('/menu/all/nearby', {
         params: query,
       });
-      
+
       console.log('🍽️ Get All Menu Items API Response:', {
         status: response.status,
         dataCount: response.data.data?.length || 0,
         firstItem: response.data.data?.[0] || null,
       });
-      
+
       return response.data.data;
     } catch (error) {
       console.error('❌ Get All Menu Items API Error:', error);
@@ -124,22 +124,23 @@ export const restaurantApi = {
         coordinates: { lat: query.nearLat, lng: query.nearLng },
         category: query.category,
       });
-      
+
       const response = await apiClient.get<FoodItems>('/menu/browse', {
         params: query,
       });
-      
+
       console.log('🍽️ Browse Menu Items API Response:', {
         status: response.status,
         dataCount: response.data.data?.length || 0,
         category: query.category,
         firstItem: response.data.data?.[0] || null,
-        sampleCategories: response.data.data?.slice(0, 3).map(item => ({
-          name: item.name,
-          category: item.category
-        })) || [],
+        sampleCategories:
+          response.data.data?.slice(0, 3).map((item) => ({
+            name: item.name,
+            category: item.category,
+          })) || [],
       });
-      
+
       return response.data.data;
     } catch (error) {
       console.error('❌ Browse Menu Items API Error:', error);

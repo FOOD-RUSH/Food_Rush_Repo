@@ -20,35 +20,35 @@ function formatBytes(bytes, decimals = 2) {
 // Helper function to get directory size
 function getDirectorySize(dirPath) {
   if (!fs.existsSync(dirPath)) return 0;
-  
+
   let totalSize = 0;
   const files = fs.readdirSync(dirPath);
-  
+
   for (const file of files) {
     const filePath = path.join(dirPath, file);
     const stats = fs.statSync(filePath);
-    
+
     if (stats.isDirectory()) {
       totalSize += getDirectorySize(filePath);
     } else {
       totalSize += stats.size;
     }
   }
-  
+
   return totalSize;
 }
 
 // Helper function to analyze file types in directory
 function analyzeFileTypes(dirPath, extensions = []) {
   if (!fs.existsSync(dirPath)) return {};
-  
+
   const analysis = {};
   const files = fs.readdirSync(dirPath);
-  
+
   for (const file of files) {
     const filePath = path.join(dirPath, file);
     const stats = fs.statSync(filePath);
-    
+
     if (stats.isDirectory()) {
       const subAnalysis = analyzeFileTypes(filePath, extensions);
       for (const [ext, data] of Object.entries(subAnalysis)) {
@@ -65,7 +65,7 @@ function analyzeFileTypes(dirPath, extensions = []) {
       }
     }
   }
-  
+
   return analysis;
 }
 
@@ -79,16 +79,18 @@ const devDependencies = Object.keys(packageJson.devDependencies || {});
 
 console.log(`Production Dependencies: ${dependencies.length}`);
 console.log(`Development Dependencies: ${devDependencies.length}`);
-console.log(`Total Dependencies: ${dependencies.length + devDependencies.length}\n`);
+console.log(
+  `Total Dependencies: ${dependencies.length + devDependencies.length}\n`,
+);
 
 // Top dependencies by name length (potential bundle impact indicators)
 const largeDeps = dependencies
-  .filter(dep => dep.length > 15 || dep.includes('react-native'))
+  .filter((dep) => dep.length > 15 || dep.includes('react-native'))
   .sort((a, b) => b.length - a.length);
 
 if (largeDeps.length > 0) {
   console.log('🔍 Notable Dependencies:');
-  largeDeps.slice(0, 10).forEach(dep => {
+  largeDeps.slice(0, 10).forEach((dep) => {
     console.log(`  • ${dep}`);
   });
   console.log();
@@ -111,12 +113,20 @@ for (const [ext, data] of Object.entries(codeAnalysis)) {
 // Count components, screens, stores
 const componentDirs = ['src/components', 'src/screens', 'src/stores'];
 console.log('\nCode Organization:');
-componentDirs.forEach(dir => {
+componentDirs.forEach((dir) => {
   if (fs.existsSync(dir)) {
     const analysis = analyzeFileTypes(dir, ['.ts', '.tsx', '.js', '.jsx']);
-    const totalFiles = Object.values(analysis).reduce((sum, data) => sum + data.count, 0);
-    const totalSize = Object.values(analysis).reduce((sum, data) => sum + data.size, 0);
-    console.log(`  ${path.basename(dir)}: ${totalFiles} files (${formatBytes(totalSize)})`);
+    const totalFiles = Object.values(analysis).reduce(
+      (sum, data) => sum + data.count,
+      0,
+    );
+    const totalSize = Object.values(analysis).reduce(
+      (sum, data) => sum + data.size,
+      0,
+    );
+    console.log(
+      `  ${path.basename(dir)}: ${totalFiles} files (${formatBytes(totalSize)})`,
+    );
   }
 });
 
@@ -128,7 +138,17 @@ const assetsSize = getDirectorySize('assets');
 console.log(`Total Assets Size: ${formatBytes(assetsSize)}`);
 
 // Analyze different asset types
-const assetTypes = ['.png', '.jpg', '.jpeg', '.gif', '.svg', '.ttf', '.otf', '.mp3', '.wav'];
+const assetTypes = [
+  '.png',
+  '.jpg',
+  '.jpeg',
+  '.gif',
+  '.svg',
+  '.ttf',
+  '.otf',
+  '.mp3',
+  '.wav',
+];
 const assetAnalysis = analyzeFileTypes('assets', assetTypes);
 
 console.log('\nAssets Breakdown:');
@@ -140,25 +160,25 @@ for (const [ext, data] of Object.entries(assetAnalysis)) {
 console.log('\n🔍 Large Asset Files (>100KB):');
 function findLargeFiles(dirPath, threshold = 100 * 1024) {
   if (!fs.existsSync(dirPath)) return [];
-  
+
   const largeFiles = [];
   const files = fs.readdirSync(dirPath);
-  
+
   for (const file of files) {
     const filePath = path.join(dirPath, file);
     const stats = fs.statSync(filePath);
-    
+
     if (stats.isDirectory()) {
       largeFiles.push(...findLargeFiles(filePath, threshold));
     } else if (stats.size > threshold) {
       largeFiles.push({
         path: filePath,
         size: stats.size,
-        name: file
+        name: file,
       });
     }
   }
-  
+
   return largeFiles;
 }
 
@@ -166,7 +186,7 @@ const largeAssets = findLargeFiles('assets');
 largeAssets
   .sort((a, b) => b.size - a.size)
   .slice(0, 10)
-  .forEach(file => {
+  .forEach((file) => {
     console.log(`  ${file.path}: ${formatBytes(file.size)}`);
   });
 
@@ -185,22 +205,23 @@ console.log(`Node Modules Size: ${formatBytes(nodeModulesSize)}`);
 try {
   const nodeModulesContents = fs.readdirSync('node_modules');
   const packageSizes = [];
-  
-  for (const item of nodeModulesContents.slice(0, 20)) { // Limit to avoid long execution
+
+  for (const item of nodeModulesContents.slice(0, 20)) {
+    // Limit to avoid long execution
     if (item.startsWith('.') || item === '.bin') continue;
-    
+
     const packagePath = path.join('node_modules', item);
     if (fs.statSync(packagePath).isDirectory()) {
       const size = getDirectorySize(packagePath);
       packageSizes.push({ name: item, size });
     }
   }
-  
+
   console.log('\nLargest Packages (top 10):');
   packageSizes
     .sort((a, b) => b.size - a.size)
     .slice(0, 10)
-    .forEach(pkg => {
+    .forEach((pkg) => {
       console.log(`  ${pkg.name}: ${formatBytes(pkg.size)}`);
     });
 } catch (error) {
@@ -214,7 +235,7 @@ console.log('-------------------------');
 const buildDirs = ['dist', '.expo', 'build'];
 let totalBuildSize = 0;
 
-buildDirs.forEach(dir => {
+buildDirs.forEach((dir) => {
   if (fs.existsSync(dir)) {
     const size = getDirectorySize(dir);
     totalBuildSize += size;
@@ -223,7 +244,9 @@ buildDirs.forEach(dir => {
 });
 
 if (totalBuildSize === 0) {
-  console.log('No build output found. Run a build first to analyze output size.');
+  console.log(
+    'No build output found. Run a build first to analyze output size.',
+  );
 } else {
   console.log(`Total Build Output: ${formatBytes(totalBuildSize)}`);
 }
@@ -232,7 +255,7 @@ if (totalBuildSize === 0) {
 console.log('\n📊 Bundle Size Estimation');
 console.log('-------------------------');
 
-const estimatedJSBundle = srcSize + (nodeModulesSize * 0.1); // Rough estimate
+const estimatedJSBundle = srcSize + nodeModulesSize * 0.1; // Rough estimate
 const estimatedAssetBundle = assetsSize;
 const estimatedTotal = estimatedJSBundle + estimatedAssetBundle;
 
@@ -246,21 +269,34 @@ console.log('-------------------------------');
 
 const recommendations = [];
 
-if (assetsSize > 10 * 1024 * 1024) { // 10MB
-  recommendations.push('Consider optimizing large assets (current: ' + formatBytes(assetsSize) + ')');
+if (assetsSize > 10 * 1024 * 1024) {
+  // 10MB
+  recommendations.push(
+    'Consider optimizing large assets (current: ' +
+      formatBytes(assetsSize) +
+      ')',
+  );
 }
 
 if (largeAssets.length > 5) {
-  recommendations.push(`Found ${largeAssets.length} large asset files - consider compression`);
+  recommendations.push(
+    `Found ${largeAssets.length} large asset files - consider compression`,
+  );
 }
 
 if (dependencies.length > 50) {
-  recommendations.push(`High dependency count (${dependencies.length}) - audit for unused packages`);
+  recommendations.push(
+    `High dependency count (${dependencies.length}) - audit for unused packages`,
+  );
 }
 
-const reactNativeDeps = dependencies.filter(dep => dep.includes('react-native')).length;
+const reactNativeDeps = dependencies.filter((dep) =>
+  dep.includes('react-native'),
+).length;
 if (reactNativeDeps > 15) {
-  recommendations.push(`Many React Native packages (${reactNativeDeps}) - ensure all are necessary`);
+  recommendations.push(
+    `Many React Native packages (${reactNativeDeps}) - ensure all are necessary`,
+  );
 }
 
 if (recommendations.length === 0) {
@@ -273,8 +309,12 @@ if (recommendations.length === 0) {
 
 console.log('\n🎯 Next Steps:');
 console.log('1. Run `npm run deps:analyze` to check for unused dependencies');
-console.log('2. Run `npm run bundle:export` to create actual bundle for analysis');
-console.log('3. Use `npm run bundle:web-analyze` for detailed web bundle analysis');
+console.log(
+  '2. Run `npm run bundle:export` to create actual bundle for analysis',
+);
+console.log(
+  '3. Use `npm run bundle:web-analyze` for detailed web bundle analysis',
+);
 console.log('4. Consider lazy loading for large components');
 
 console.log('\n✅ Bundle analysis complete!');

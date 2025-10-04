@@ -23,7 +23,8 @@ export type IconSet = keyof typeof ICON_SETS;
 // Common icon names for better type safety
 export type IoniconsName = keyof typeof Ionicons.glyphMap;
 export type MaterialIconsName = keyof typeof MaterialIcons.glyphMap;
-export type MaterialCommunityIconsName = keyof typeof MaterialCommunityIcons.glyphMap;
+export type MaterialCommunityIconsName =
+  keyof typeof MaterialCommunityIcons.glyphMap;
 export type AntDesignName = keyof typeof AntDesign.glyphMap;
 export type FontAwesome5Name = keyof typeof FontAwesome5.glyphMap;
 export type FeatherName = keyof typeof Feather.glyphMap;
@@ -65,29 +66,29 @@ export const OptimizedIcon: React.FC<IconProps> = ({
 };
 
 // Typed convenience components for commonly used icon sets
-export const IoniconsIcon: React.FC<BaseIconProps & { name: IoniconsName }> = (props) => (
-  <OptimizedIcon {...props} set="ionicons" />
-);
-
-export const MaterialIcon: React.FC<BaseIconProps & { name: MaterialIconsName }> = (props) => (
-  <OptimizedIcon {...props} set="material" />
-);
-
-export const MaterialCommunityIcon: React.FC<BaseIconProps & { name: MaterialCommunityIconsName }> = (
+export const IoniconsIcon: React.FC<BaseIconProps & { name: IoniconsName }> = (
   props,
-) => <OptimizedIcon {...props} set="materialCommunity" />;
+) => <OptimizedIcon {...props} set="ionicons" />;
 
-export const AntDesignIcon: React.FC<BaseIconProps & { name: AntDesignName }> = (props) => (
-  <OptimizedIcon {...props} set="antDesign" />
-);
+export const MaterialIcon: React.FC<
+  BaseIconProps & { name: MaterialIconsName }
+> = (props) => <OptimizedIcon {...props} set="material" />;
 
-export const FontAwesome5Icon: React.FC<BaseIconProps & { name: FontAwesome5Name }> = (props) => (
-  <OptimizedIcon {...props} set="fontAwesome5" />
-);
+export const MaterialCommunityIcon: React.FC<
+  BaseIconProps & { name: MaterialCommunityIconsName }
+> = (props) => <OptimizedIcon {...props} set="materialCommunity" />;
 
-export const FeatherIcon: React.FC<BaseIconProps & { name: FeatherName }> = (props) => (
-  <OptimizedIcon {...props} set="feather" />
-);
+export const AntDesignIcon: React.FC<
+  BaseIconProps & { name: AntDesignName }
+> = (props) => <OptimizedIcon {...props} set="antDesign" />;
+
+export const FontAwesome5Icon: React.FC<
+  BaseIconProps & { name: FontAwesome5Name }
+> = (props) => <OptimizedIcon {...props} set="fontAwesome5" />;
+
+export const FeatherIcon: React.FC<BaseIconProps & { name: FeatherName }> = (
+  props,
+) => <OptimizedIcon {...props} set="feather" />;
 
 // Export the icon sets for backward compatibility
 export {

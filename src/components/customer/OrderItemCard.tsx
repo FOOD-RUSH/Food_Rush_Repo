@@ -1,5 +1,12 @@
 import { IoniconsIcon } from '@/src/components/common/icons';
-import { View, Text, TouchableOpacity, Image, Linking, Dimensions } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  Linking,
+  Dimensions,
+} from 'react-native';
 import React, { useCallback, useState } from 'react';
 import { useTheme, Card } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
@@ -40,8 +47,7 @@ const OrderItemCard = ({
     useConfirmOrderReceived();
   const { mutate: confirmOrder, isPending: isConfirmingOrder } =
     useConfirmOrder();
-  const { mutate: cancelOrder, isPending: isCancelling } =
-    useCancelOrder();
+  const { mutate: cancelOrder, isPending: isCancelling } = useCancelOrder();
 
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
 
@@ -91,14 +97,17 @@ const OrderItemCard = ({
   }, [confirmOrder, order.id]);
 
   const handleCancelOrder = useCallback(() => {
-    cancelOrder({ orderId: order.id, reason: 'Customer cancelled' }, {
-      onSuccess: () => {
-        console.log('Order cancelled successfully');
+    cancelOrder(
+      { orderId: order.id, reason: 'Customer cancelled' },
+      {
+        onSuccess: () => {
+          console.log('Order cancelled successfully');
+        },
+        onError: (error) => {
+          console.error('Failed to cancel order:', error);
+        },
       },
-      onError: (error) => {
-        console.error('Failed to cancel order:', error);
-      },
-    });
+    );
   }, [cancelOrder, order.id]);
 
   const handleCallRider = useCallback(() => {
@@ -150,7 +159,13 @@ const OrderItemCard = ({
                 resizeMode="cover"
               />
             ) : (
-              <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <View
+                style={{
+                  flex: 1,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
                 <Image
                   source={placeholderImage}
                   style={{ width: 40, height: 40 }}
@@ -163,7 +178,14 @@ const OrderItemCard = ({
           {/* Order Info */}
           <View style={{ flex: 1 }}>
             {/* Order Number & Status */}
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+                marginBottom: 6,
+              }}
+            >
               <Text
                 style={{
                   fontSize: 16,
@@ -211,7 +233,13 @@ const OrderItemCard = ({
             </Text>
 
             {/* Items count and Total */}
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
               <Text
                 style={{
                   fontSize: 13,
@@ -258,7 +286,9 @@ const OrderItemCard = ({
               marginBottom: 12,
             }}
           >
-            <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+            <View
+              style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}
+            >
               <IoniconsIcon name="bicycle" size={18} color={colors.primary} />
               <Text
                 numberOfLines={1}
@@ -316,7 +346,9 @@ const OrderItemCard = ({
                       color: '#F44336',
                     }}
                   >
-                    {isCancelling ? t('cancelling', 'Cancelling...') : t('cancel_order')}
+                    {isCancelling
+                      ? t('cancelling', 'Cancelling...')
+                      : t('cancel_order')}
                   </Text>
                 </TouchableOpacity>
               )}
@@ -364,13 +396,22 @@ const OrderItemCard = ({
                         color: 'white',
                       }}
                     >
-                      {isConfirmingOrder ? t('confirming') : t('confirm_pay', 'Confirm & Pay')}
+                      {isConfirmingOrder
+                        ? t('confirming')
+                        : t('confirm_pay', 'Confirm & Pay')}
                     </Text>
                   </TouchableOpacity>
                 </>
               )}
 
-              {['payment_confirmed', 'preparing', 'ready', 'ready_for_pickup', 'picked_up', 'out_for_delivery'].includes(order.status) && (
+              {[
+                'payment_confirmed',
+                'preparing',
+                'ready',
+                'ready_for_pickup',
+                'picked_up',
+                'out_for_delivery',
+              ].includes(order.status) && (
                 <TouchableOpacity
                   style={{
                     flex: 1,
@@ -396,8 +437,8 @@ const OrderItemCard = ({
             </>
           ) : (
             <>
-              {order.status === 'delivered' && (
-                order.delivery?.customerConfirmed ? (
+              {order.status === 'delivered' &&
+                (order.delivery?.customerConfirmed ? (
                   <>
                     <TouchableOpacity
                       style={{
@@ -464,8 +505,7 @@ const OrderItemCard = ({
                       {isConfirming ? t('confirming') : t('confirm_delivery')}
                     </Text>
                   </TouchableOpacity>
-                )
-              )}
+                ))}
 
               {order.status === 'cancelled' && (
                 <TouchableOpacity

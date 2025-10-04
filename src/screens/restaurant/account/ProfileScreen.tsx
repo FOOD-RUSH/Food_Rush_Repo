@@ -33,7 +33,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(30)).current;
-  
+
   // State to track image loading failure
   const [imageLoadError, setImageLoadError] = React.useState(false);
 
@@ -88,7 +88,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
       Animated.spring(slideAnim, { toValue: 0, useNativeDriver: true }),
     ]).start();
   }, [fadeAnim, slideAnim]);
-  
+
   // Reset image error when restaurant changes
   useEffect(() => {
     setImageLoadError(false);
@@ -110,18 +110,18 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
           ]}
         >
-          {(profileData?.pictureUrl && !imageLoadError) ? (
-            <Avatar.Image 
-              size={80} 
-              source={{ uri: profileData.pictureUrl }} 
+          {profileData?.pictureUrl && !imageLoadError ? (
+            <Avatar.Image
+              size={80}
+              source={{ uri: profileData.pictureUrl }}
               style={[styles.avatar]}
               onError={() => setImageLoadError(true)}
               onLoad={() => setImageLoadError(false)}
             />
-          ) : (currentRestaurant?.image && !imageLoadError) ? (
-            <Avatar.Image 
-              size={80} 
-              source={{ uri: currentRestaurant.image }} 
+          ) : currentRestaurant?.image && !imageLoadError ? (
+            <Avatar.Image
+              size={80}
+              source={{ uri: currentRestaurant.image }}
               style={[styles.avatar]}
               onError={() => setImageLoadError(true)}
               onLoad={() => setImageLoadError(false)}
@@ -135,7 +135,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                       .split(' ')
                       .map((n) => n[0])
                       .join('')
-                      : 'R'
+                  : 'R'
               }
               style={[styles.avatar]}
             />
@@ -190,10 +190,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
           )}
           {profileData?.businessAddress && (
             <View style={styles.infoRow}>
-              <MaterialCommunityIcon                 name="map-marker"
-                size={20}
-                color="#666"
-              />
+              <MaterialCommunityIcon name="map-marker" size={20} color="#666" />
               <Text style={[styles.infoText, { color: colors.onSurface }]}>
                 {profileData.businessAddress}
               </Text>
@@ -230,7 +227,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
               onPress={option.onPress}
             >
               <View style={styles.optionLeft}>
-                <MaterialCommunityIcon                   name={option.icon}
+                <MaterialCommunityIcon
+                  name={option.icon}
                   size={24}
                   color={option.iconColor ?? '#007AFF'}
                   style={styles.optionIcon}
@@ -248,7 +246,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
                   </Text>
                 </View>
               </View>
-              <MaterialCommunityIcon                 name="chevron-right"
+              <MaterialCommunityIcon
+                name="chevron-right"
                 size={20}
                 color="#ccc"
               />

@@ -1,14 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, Animated, Dimensions, StyleSheet, useWindowDimensions } from 'react-native';
+import {
+  View,
+  Text,
+  Animated,
+  Dimensions,
+  StyleSheet,
+  useWindowDimensions,
+} from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 
 interface CustomSplashScreenProps {
-    onAnimationComplete: () => void;
+  onAnimationComplete: () => void;
 }
 
-const CustomSplashScreen: React.FC<CustomSplashScreenProps> = ({ 
-     onAnimationComplete
+const CustomSplashScreen: React.FC<CustomSplashScreenProps> = ({
+  onAnimationComplete,
 }) => {
   // Animation values for each letter in "Food"
   const letterAnimations = useRef([
@@ -17,17 +24,19 @@ const CustomSplashScreen: React.FC<CustomSplashScreenProps> = ({
     new Animated.Value(0), // o
     new Animated.Value(0), // d
   ]).current;
-  
+
   // Animation values for "Rush"
   const rushSlideAnim = useRef(new Animated.Value(width)).current;
   const rushOpacityAnim = useRef(new Animated.Value(0)).current;
-  
-  const [animationPhase, setAnimationPhase] = useState<'food' | 'rush' | 'complete'>('food');
-  
+
+  const [animationPhase, setAnimationPhase] = useState<
+    'food' | 'rush' | 'complete'
+  >('food');
+
   useEffect(() => {
     startFoodAnimation();
   }, []);
-  
+
   useEffect(() => {
     // When animations are complete, call onAnimationComplete after a delay
     if (animationPhase === 'complete') {
@@ -37,18 +46,18 @@ const CustomSplashScreen: React.FC<CustomSplashScreenProps> = ({
       return () => clearTimeout(timer);
     }
   }, [animationPhase, onAnimationComplete]);
-  
+
   const startFoodAnimation = () => {
     // Animate each letter of "Food" one by one
-    const letterAnimationsList = letterAnimations.map((anim, index) => 
+    const letterAnimationsList = letterAnimations.map((anim, index) =>
       Animated.timing(anim, {
         toValue: 1,
         duration: 400,
         delay: index * 150, // 150ms delay between each letter
         useNativeDriver: true,
-      })
+      }),
     );
-    
+
     Animated.sequence([
       Animated.stagger(150, letterAnimationsList),
       Animated.delay(300), // Wait 300ms after "Food" completes
@@ -56,10 +65,10 @@ const CustomSplashScreen: React.FC<CustomSplashScreenProps> = ({
       startRushAnimation();
     });
   };
-  
+
   const startRushAnimation = () => {
     setAnimationPhase('rush');
-    
+
     // Rush slides in from the right
     Animated.parallel([
       Animated.timing(rushSlideAnim, {
@@ -77,19 +86,19 @@ const CustomSplashScreen: React.FC<CustomSplashScreenProps> = ({
       setAnimationPhase('complete');
     });
   };
-  
+
   const renderLetter = (letter: string, index: number) => {
     const translateY = letterAnimations[index].interpolate({
       inputRange: [0, 1],
       outputRange: [50, 0],
     });
-    
+
     const opacity = letterAnimations[index];
     const scale = letterAnimations[index].interpolate({
       inputRange: [0, 1],
       outputRange: [0.3, 1],
     });
-    
+
     return (
       <Animated.Text
         key={index}
@@ -105,14 +114,16 @@ const CustomSplashScreen: React.FC<CustomSplashScreenProps> = ({
       </Animated.Text>
     );
   };
-  
+
   return (
     <View style={styles.container}>
       {/* Food Text */}
       <View style={styles.foodContainer}>
-        {['F', 'o', 'o', 'd'].map((letter, index) => renderLetter(letter, index))}
+        {['F', 'o', 'o', 'd'].map((letter, index) =>
+          renderLetter(letter, index),
+        )}
       </View>
-      
+
       {/* Rush Text */}
       {animationPhase !== 'food' && (
         <Animated.View

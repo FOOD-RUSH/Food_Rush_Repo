@@ -55,7 +55,8 @@ const OrderCard: React.FC<OrderCardProps> = ({
   const statusConfig = ORDER_STATUS[order.status] || ORDER_STATUS.pending;
 
   // Calculate total items in order
-  const totalItems = order.items?.reduce((sum, orderItem) => sum + orderItem.quantity, 0) || 0;
+  const totalItems =
+    order.items?.reduce((sum, orderItem) => sum + orderItem.quantity, 0) || 0;
 
   return (
     <TouchableOpacity
@@ -67,18 +68,22 @@ const OrderCard: React.FC<OrderCardProps> = ({
         <Text style={[styles.orderNumber, { fontSize: 16, fontWeight: '600' }]}>
           {order.customer?.fullName || 'Customer'}
         </Text>
-        <View style={{ 
-          backgroundColor: statusConfig.color,
-          paddingHorizontal: 8,
-          paddingVertical: 4,
-          borderRadius: 12,
-        }}>
-          <Text style={{ 
-            color: 'white', 
-            fontSize: 10, 
-            fontWeight: 'bold',
-            textTransform: 'uppercase'
-          }}>
+        <View
+          style={{
+            backgroundColor: statusConfig.color,
+            paddingHorizontal: 8,
+            paddingVertical: 4,
+            borderRadius: 12,
+          }}
+        >
+          <Text
+            style={{
+              color: 'white',
+              fontSize: 10,
+              fontWeight: 'bold',
+              textTransform: 'uppercase',
+            }}
+          >
             {statusConfig.label}
           </Text>
         </View>
@@ -87,12 +92,16 @@ const OrderCard: React.FC<OrderCardProps> = ({
       {/* Order Details */}
       <View style={styles.detailsContainer}>
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-          <MaterialCommunityIcon name="food" size={14} color={colors.onSurfaceVariant} />
+          <MaterialCommunityIcon
+            name="food"
+            size={14}
+            color={colors.onSurfaceVariant}
+          />
           <Text style={[styles.timeText, { marginLeft: 6, fontSize: 14 }]}>
             {totalItems} {totalItems === 1 ? 'item' : 'items'}
           </Text>
         </View>
-        
+
         <Text style={[styles.amountText, { fontSize: 16, fontWeight: 'bold' }]}>
           ${order.total}
         </Text>
@@ -222,7 +231,8 @@ const SimpleOrdersList: React.FC = () => {
           <TouchableOpacity
             onPress={() => navigation.navigate('Notifications')}
           >
-            <MaterialCommunityIcon               name="bell-outline"
+            <MaterialCommunityIcon
+              name="bell-outline"
               size={24}
               color={colors.onSurface}
             />
@@ -256,7 +266,8 @@ const SimpleOrdersList: React.FC = () => {
           )}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <MaterialCommunityIcon                 name="clipboard-text-outline"
+              <MaterialCommunityIcon
+                name="clipboard-text-outline"
                 size={48}
                 color={colors.onSurfaceDisabled}
               />

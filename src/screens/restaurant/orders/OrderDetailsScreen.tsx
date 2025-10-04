@@ -1,15 +1,8 @@
 import { MaterialCommunityIcon } from '@/src/components/common/icons';
-import React, { useState, useRef, useEffect } from 'react';
-import { View, ScrollView, Animated, TouchableOpacity } from 'react-native';
-import {
-  Button,
-  Badge,
-  Divider,
-  ProgressBar,
-  useTheme,
-} from 'react-native-paper';
+import React, { useState } from 'react';
+import { View, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { Button, useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
-
 import * as Haptics from 'expo-haptics';
 
 import CommonView from '@/src/components/common/CommonView';
@@ -21,9 +14,8 @@ import {
 } from '@/src/hooks/restaurant/useOrderApi';
 import { OrderItem } from '@/src/services/restaurant/orderApi';
 import {
-  Typography,
-  Heading2,
-  Heading5,
+  Heading1,
+  Heading3,
   Body,
   Label,
   Caption,
@@ -31,12 +23,9 @@ import {
 import {
   getCustomerName,
   getCustomerPhone,
-  getCustomerEmail,
   formatOrderTotal,
   ORDER_STATUS_COLORS,
-  logOrderData,
 } from '@/src/utils/orderUtils';
-import { formatDate } from '@/src/utils/dateUtils';
 
 const OrderDetailsScreen: React.FC<
   RootStackScreenProps<'RestaurantOrderDetails'>
@@ -45,135 +34,80 @@ const OrderDetailsScreen: React.FC<
   const { colors } = useTheme();
   const { orderId } = route.params;
 
-  // Animations
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(50)).current;
-
-  // API hooks
-  const { data: orderData, isLoading, error, refetch } = useGetOrderById(orderId);
+  const {
+    data: orderData,
+    isLoading,
+    error,
+    refetch,
+  } = useGetOrderById(orderId);
   const confirmOrderMutation = useConfirmOrder();
   const rejectOrderMutation = useRejectOrder();
-  
-  // Log order data for debugging
-  console.log(`📊 [OrderDetailsScreen] Order ${orderId} data:`, {
-    orderData,
-    isLoading,
-    error
-  });
-  
-  // Log detailed order information if data is available
-  if (orderData) {
-    logOrderData(orderData, `DETAILS-${orderId}`);
-  }
 
-  // State
-  const [status, setStatus] = useState(orderData?.status || 'pending');
-  const [prepProgress, setPrepProgress] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  // Responsive utilities
-  const buttonHeight = 48;
-  const fontSize = 16;
+  const getStatusColor = (status: string) => {
+    return (
+      ORDER_STATUS_COLORS[status as keyof typeof ORDER_STATUS_COLORS] ||
+      colors.onSurfaceVariant
+    );
+  };
 
-  useEffect(() => {
-    if (orderData) {
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-        Animated.spring(slideAnim, {
-          toValue: 0,
-          speed: 1,
-          bounciness: 10,
-          useNativeDriver: true,
-        }),
-      ]).start();
-
-      // Simulate preparation progress
-      if (status === 'preparing') {
-        const interval = setInterval(() => {
-          setPrepProgress((prev) => {
-            if (prev >= 1) {
-              clearInterval(interval);
-              return 1;
-            }
-            return prev + 0.05;
-          });
-        }, 1000);
-        return () => clearInterval(interval);
-      }
+  const handleConfirm = async () => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+    try {
+      await confirmOrderMutation.mutateAsync(orderId);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (error) {
+      console.error('Error confirming order:', error);
+    } finally {
+      setIsProcessing(false);
     }
-  }, [status, orderData, fadeAnim, slideAnim]);
+  };
 
-  // Handle loading state
+  const handleReject = async () => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+    try {
+      await rejectOrderMutation.mutateAsync(orderId);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (error) {
+      console.error('Error rejecting order:', error);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Loading state
   if (isLoading && !orderData) {
     return (
-      <CommonView>
-        <View className="flex-1 justify-center items-center p-6">
-          <MaterialCommunityIcon 
-            name="loading"
-            size={48}
-            color={colors.primary}
-            animation="spin"
-          />
-          <Heading5
-            color={colors.onSurface}
-            weight="bold"
-            align="center"
-            style={{ marginTop: 16 }}
-          >
+      <CommonView style={{ backgroundColor: colors.background }}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Body style={{ marginTop: 16, color: colors.onSurfaceVariant }}>
             {t('loading_order_details')}
-          </Heading5>
-          <Body
-            color={colors.onSurfaceVariant}
-            align="center"
-            style={{ marginTop: 8 }}
-          >
-            {t('please_wait')}
           </Body>
         </View>
       </CommonView>
     );
   }
 
-  // Handle error state
+  // Error state
   if (error) {
     return (
-      <CommonView>
-        <View className="flex-1 justify-center items-center p-6">
-          <MaterialCommunityIcon 
-            name="alert-circle"
-            size={48}
-            color={colors.error}
-          />
-          <Heading5
-            color={colors.onSurface}
-            weight="bold"
-            align="center"
-            style={{ marginTop: 16 }}
-          >
+      <CommonView style={{ backgroundColor: colors.background }}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+          <MaterialCommunityIcon name="alert-circle-outline" size={72} color={colors.error} />
+          <Heading3 style={{ marginTop: 24, marginBottom: 12, color: colors.onSurface }} align="center">
             {t('error_loading_order')}
-          </Heading5>
-          <Body
-            color={colors.onSurfaceVariant}
-            align="center"
-            style={{ marginTop: 8 }}
-          >
+          </Heading3>
+          <Body style={{ marginBottom: 32, color: colors.onSurfaceVariant }} align="center">
             {error.message || t('failed_to_load_order_details')}
           </Body>
-          <Button
-            mode="contained"
-            onPress={() => refetch()}
-            style={{ marginTop: 16 }}
-          >
+          <Button mode="contained" onPress={() => refetch()} style={{ marginBottom: 12 }}>
             {t('retry')}
           </Button>
-          <Button
-            mode="outlined"
-            onPress={() => navigation.goBack()}
-            style={{ marginTop: 8 }}
-          >
+          <Button mode="text" onPress={() => navigation.goBack()}>
             {t('go_back')}
           </Button>
         </View>
@@ -181,481 +115,408 @@ const OrderDetailsScreen: React.FC<
     );
   }
 
-  // Handle order not found
+  // Order not found
   if (!orderData) {
     return (
-      <CommonView>
-        <View className="flex-1 justify-center items-center p-6">
-          <MaterialCommunityIcon 
-            name="alert-circle"
-            size={48}
-            color={colors.error}
-          />
-          <Heading5
-            color={colors.onSurface}
-            weight="bold"
-            align="center"
-            style={{ marginTop: 16 }}
-          >
+      <CommonView style={{ backgroundColor: colors.background }}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+          <MaterialCommunityIcon name="file-document-outline" size={72} color={colors.onSurfaceVariant} />
+          <Heading3 style={{ marginTop: 24, marginBottom: 12, color: colors.onSurface }} align="center">
             {t('order_not_found')}
-          </Heading5>
-          <Body
-            color={colors.onSurfaceVariant}
-            align="center"
-            style={{ marginTop: 8 }}
-          >
+          </Heading3>
+          <Body style={{ marginBottom: 32, color: colors.onSurfaceVariant }} align="center">
             {t('order_could_not_be_found')}
           </Body>
-          <Button
-            mode="contained"
-            onPress={() => navigation.goBack()}
-            style={{ marginTop: 16 }}
-          >
-            {t('go_back')}
+          <Button mode="contained" onPress={() => navigation.goBack()}>
+            {t('back_to_orders')}
           </Button>
         </View>
       </CommonView>
     );
   }
 
-  const getStatusColor = () => {
-    return ORDER_STATUS_COLORS[status as keyof typeof ORDER_STATUS_COLORS] || colors.onSurfaceVariant;
-  };
-
-  const handleStatusChange = async (newStatus: typeof status) => {
-    if (!orderData) return;
-
-    try {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      setStatus(newStatus);
-
-      if (newStatus === 'preparing') {
-        await confirmOrderMutation.mutateAsync(orderId);
-        setPrepProgress(0);
-      } else if (newStatus === 'cancelled') {
-        await rejectOrderMutation.mutateAsync(orderId);
-      }
-    } catch (error: any) {
-      // Handle session expired errors gracefully
-      if (
-        error?.code === 'SESSION_EXPIRED' ||
-        error?.message?.includes('session has expired')
-      ) {
-        // Don't show error to user, let the app handle logout
-        return;
-      }
-
-      // For other errors, revert status and could show user-friendly message
-      setStatus(orderData.status);
-    }
-  };
-
-  const getEstimatedTimeLeft = () => {
-    const totalTime = orderData.estimatedPrepTime;
-    const timeLeft = Math.ceil(totalTime * (1 - prepProgress));
-    return timeLeft > 0 ? timeLeft : 0;
-  };
+  const totalItems = orderData.items.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <CommonView>
+    <CommonView style={{ backgroundColor: colors.background }}>
       <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: 24 }}
         showsVerticalScrollIndicator={false}
-        className="flex-1"
-        contentContainerStyle={{ paddingBottom: 30 }}
       >
-        <Animated.View
+        {/* Header Section */}
+        <View
           style={{
-            opacity: fadeAnim,
-            transform: [{ translateY: slideAnim }],
+            backgroundColor: colors.surface,
+            paddingHorizontal: 20,
+            paddingTop: 24,
+            paddingBottom: 20,
+            borderBottomWidth: 1,
+            borderBottomColor: colors.outlineVariant,
           }}
         >
-          {/* Order Header */}
-          <View
-            className="p-4 rounded-xl mb-4"
-            style={{ backgroundColor: colors.surface }}
-          >
-            <View className="flex-row justify-between items-start">
-              <View className="flex-1">
-                <Heading2 color={colors.onSurface} weight="bold">
-                  {t('order_prefix')}
-                  {orderId.length > 9 ? orderId.substring(0, 9) + '...' : orderId}
-                </Heading2>
-                <View className="flex-row items-center mt-1">
-                  <MaterialCommunityIcon                     name="clock-outline"
-                    size={18}
-                    color={colors.onSurfaceVariant}
-                  />
-                  <Body
-                    color={colors.onSurfaceVariant}
-                    style={{ marginLeft: 8 }}
-                  >
-                    {orderData.time}
-                  </Body>
-                </View>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <View style={{ flex: 1 }}>
+              <Caption style={{ color: colors.onSurfaceVariant, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                {t('order_id')}
+              </Caption>
+              <Heading1 style={{ color: colors.onSurface, marginBottom: 8 }} weight="bold">
+                #{orderId.slice(0, 8)}
+              </Heading1>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <MaterialCommunityIcon name="clock-outline" size={16} color={colors.onSurfaceVariant} />
+                <Caption style={{ marginLeft: 6, color: colors.onSurfaceVariant }}>
+                  {orderData.time}
+                </Caption>
               </View>
-              <Badge size={24} style={{ backgroundColor: getStatusColor() }}>
-                <Label color="white" weight="medium">
-                  {t(status)}
-                </Label>
-              </Badge>
             </View>
-
-            {status === 'preparing' && (
-              <View className="mt-4">
-                <View className="flex-row justify-between mb-1">
-                  <Body color={colors.onSurfaceVariant}>
-                    {t('preparation_progress')}
-                  </Body>
-                  <Body color={colors.onSurfaceVariant}>
-                    {getEstimatedTimeLeft()} {t('min_left')}
-                  </Body>
-                </View>
-                <ProgressBar
-                  progress={prepProgress}
-                  color={colors.primary}
-                  className="h-2 rounded-full"
-                />
-              </View>
-            )}
+            <View
+              style={{
+                backgroundColor: getStatusColor(orderData.status),
+                paddingHorizontal: 16,
+                paddingVertical: 8,
+                borderRadius: 6,
+              }}
+            >
+              <Label style={{ color: 'white', textTransform: 'uppercase', letterSpacing: 0.5 }} weight="bold">
+                {t(orderData.status)}
+              </Label>
+            </View>
           </View>
+        </View>
 
-          {/* Customer Details */}
-          <View
-            className="p-5 rounded-xl mb-4"
-            style={{ backgroundColor: colors.surface }}
-          >
-            <View className="flex-row items-center mb-3">
-              <MaterialCommunityIcon                 name="account-circle"
-                size={24}
-                color={colors.onSurfaceVariant}
-              />
-              <Heading5
-                color={colors.onSurface}
-                weight="semibold"
-                style={{ marginLeft: 8 }}
+        {/* Customer Information */}
+        <View style={{ backgroundColor: colors.surface, marginTop: 12, paddingHorizontal: 20, paddingVertical: 20 }}>
+          <Label style={{ color: colors.onSurface, marginBottom: 16, fontSize: 15 }} weight="semibold">
+            {t('customer_information')}
+          </Label>
+          
+          <View style={{ gap: 14 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  backgroundColor: colors.primaryContainer,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
               >
-                {t('customer_details')}
-              </Heading5>
-            </View>
-
-            <View className="space-y-3">
-              <View className="flex-row items-center mb-3">
-                <MaterialCommunityIcon                   name="account"
-                  size={18}
-                  color={colors.onSurfaceVariant}
-                />
-                <Body color={colors.onSurface} style={{ marginLeft: 12 }}>
+                <MaterialCommunityIcon name="account" size={20} color={colors.onPrimaryContainer} />
+              </View>
+              <View style={{ marginLeft: 14, flex: 1 }}>
+                <Caption style={{ color: colors.onSurfaceVariant, marginBottom: 2 }}>
+                  {t('customer_name')}
+                </Caption>
+                <Body style={{ color: colors.onSurface }} weight="medium">
                   {getCustomerName(orderData)}
                 </Body>
               </View>
+            </View>
 
-              <View className="flex-row items-center mb-3">
-                <MaterialCommunityIcon                   name="phone"
-                  size={18}
-                  color={colors.onSurfaceVariant}
-                />
-                <Body color={colors.onSurface} style={{ marginLeft: 12 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  backgroundColor: colors.primaryContainer,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <MaterialCommunityIcon name="phone" size={20} color={colors.onPrimaryContainer} />
+              </View>
+              <View style={{ marginLeft: 14, flex: 1 }}>
+                <Caption style={{ color: colors.onSurfaceVariant, marginBottom: 2 }}>
+                  {t('phone_number')}
+                </Caption>
+                <Body style={{ color: colors.onSurface }} weight="medium">
                   {getCustomerPhone(orderData)}
                 </Body>
               </View>
-
-              <View className="flex-row items-start">
-                <MaterialCommunityIcon                   name="map-marker"
-                  size={18}
-                  color={colors.onSurfaceVariant}
-                  style={{ marginTop: 2 }}
-                />
-                <Body
-                  color={colors.onSurface}
-                  style={{ marginLeft: 12, flex: 1 }}
-                >
-                  {orderData.customerAddress || 'No address provided'}
-                </Body>
-              </View>
             </View>
 
-            {orderData.specialInstructions && (
-              <View
-                className="mt-4 p-3 rounded-lg border"
-                style={{
-                  backgroundColor: colors.warningContainer || '#FEF3C7',
-                  borderColor: colors.warning || '#F59E0B',
-                }}
-              >
-                <View className="flex-row items-center">
-                  <MaterialCommunityIcon                     name="alert-circle"
-                    size={18}
-                    color={colors.warning || '#D97706'}
-                  />
-                  <Label
-                    color={colors.onWarningContainer || '#92400E'}
-                    weight="medium"
-                    style={{ marginLeft: 8 }}
-                  >
-                    {t('special_instructions')}
-                  </Label>
-                </View>
-                <Body
-                  color={colors.onWarningContainer || '#92400E'}
-                  style={{ marginTop: 4 }}
+            {orderData.customerAddress && (
+              <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
+                <View
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 20,
+                    backgroundColor: colors.primaryContainer,
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}
                 >
-                  {orderData.specialInstructions}
-                </Body>
+                  <MaterialCommunityIcon name="map-marker" size={20} color={colors.onPrimaryContainer} />
+                </View>
+                <View style={{ marginLeft: 14, flex: 1 }}>
+                  <Caption style={{ color: colors.onSurfaceVariant, marginBottom: 2 }}>
+                    {t('delivery_address')}
+                  </Caption>
+                  <Body style={{ color: colors.onSurface }} weight="medium">
+                    {orderData.customerAddress}
+                  </Body>
+                </View>
               </View>
             )}
           </View>
 
-          {/* Order Items */}
-          <View
-            className="p-5 rounded-xl mb-4"
-            style={{ backgroundColor: colors.surface }}
-          >
-            <View className="flex-row items-center mb-3">
-              <MaterialCommunityIcon                 name="food"
-                size={24}
-                color={colors.onSurfaceVariant}
-              />
-              <Heading5
-                color={colors.onSurface}
-                weight="semibold"
-                style={{ marginLeft: 8 }}
-              >
-                {t('order_items')}
-              </Heading5>
+          {orderData.specialInstructions && (
+            <View
+              style={{
+                marginTop: 20,
+                padding: 16,
+                borderRadius: 8,
+                backgroundColor: colors.errorContainer,
+                borderLeftWidth: 4,
+                borderLeftColor: colors.error,
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                <MaterialCommunityIcon name="alert-circle" size={20} color={colors.error} />
+                <Label style={{ marginLeft: 8, color: colors.error }} weight="semibold">
+                  {t('special_instructions')}
+                </Label>
+              </View>
+              <Body style={{ color: colors.onErrorContainer, lineHeight: 20 }}>
+                {orderData.specialInstructions}
+              </Body>
             </View>
+          )}
+        </View>
 
+        {/* Order Items */}
+        <View style={{ backgroundColor: colors.surface, marginTop: 12, paddingHorizontal: 20, paddingVertical: 20 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <Label style={{ color: colors.onSurface, fontSize: 15 }} weight="semibold">
+              {t('order_items')}
+            </Label>
+            <Caption style={{ color: colors.onSurfaceVariant }}>
+              {totalItems} {totalItems === 1 ? 'item' : 'items'}
+            </Caption>
+          </View>
+
+          <View style={{ gap: 16 }}>
             {orderData.items.map((item: OrderItem, index: number) => (
               <View
                 key={item.id}
-                className={index !== 0 ? 'pt-3 pb-2' : 'pb-2'}
                 style={{
-                  borderTopWidth: index !== 0 ? 1 : 0,
-                  borderTopColor: colors.outline,
+                  paddingTop: index === 0 ? 0 : 16,
+                  borderTopWidth: index === 0 ? 0 : 1,
+                  borderTopColor: colors.outlineVariant,
                 }}
               >
-                <View className="flex-row justify-between">
-                  <View className="flex-row items-center flex-1">
-                    <Caption
-                      color={colors.onSurfaceVariant}
-                      style={{ width: 32 }}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <View style={{ flex: 1, flexDirection: 'row' }}>
+                    <View
+                      style={{
+                        minWidth: 28,
+                        height: 28,
+                        borderRadius: 14,
+                        backgroundColor: colors.primaryContainer,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        marginRight: 12,
+                      }}
                     >
-                      {item.quantity}x
-                    </Caption>
+                      <Caption style={{ color: colors.onPrimaryContainer }} weight="bold">
+                        {item.quantity}
+                      </Caption>
+                    </View>
                     <View style={{ flex: 1 }}>
-                      <Label
-                        color={colors.onSurface}
-                        weight="medium"
-                      >
+                      <Body style={{ color: colors.onSurface, marginBottom: 4 }} weight="semibold">
                         {item.name}
-                      </Label>
+                      </Body>
                       {item.description && (
-                        <Caption
-                          color={colors.onSurfaceVariant}
-                          style={{ marginTop: 2 }}
-                        >
+                        <Caption style={{ color: colors.onSurfaceVariant, lineHeight: 18 }}>
                           {item.description}
                         </Caption>
                       )}
+                      {item.modifications && item.modifications.length > 0 && (
+                        <View style={{ marginTop: 8, gap: 4 }}>
+                          {item.modifications.map((mod: string, modIndex: number) => (
+                            <View key={modIndex} style={{ flexDirection: 'row', alignItems: 'center' }}>
+                              <View
+                                style={{
+                                  width: 6,
+                                  height: 6,
+                                  borderRadius: 3,
+                                  backgroundColor: colors.primary,
+                                  marginRight: 8,
+                                }}
+                              />
+                              <Caption style={{ color: colors.onSurfaceVariant, fontStyle: 'italic' }}>
+                                {mod}
+                              </Caption>
+                            </View>
+                          ))}
+                        </View>
+                      )}
                     </View>
                   </View>
-                  <Label color={colors.primary} weight="semibold">
-                    {(item.price * item.quantity).toLocaleString()}{' '}
-                    {t('currency_xaf')}
-                  </Label>
+                  <Body style={{ color: colors.primary, marginLeft: 16 }} weight="bold">
+                    {formatOrderTotal(item.price * item.quantity)}
+                  </Body>
                 </View>
-
-                {item.modifications && item.modifications.length > 0 && (
-                  <View className="ml-8 mt-1">
-                    {item.modifications.map((mod: string, modIndex: number) => (
-                      <View key={modIndex} className="flex-row items-center">
-                        <MaterialCommunityIcon                           name="circle-small"
-                          size={20}
-                          color={colors.onSurfaceVariant}
-                        />
-                        <Caption color={colors.onSurfaceVariant}>{mod}</Caption>
-                      </View>
-                    ))}
-                  </View>
-                )}
               </View>
             ))}
+          </View>
+        </View>
 
-            <Divider className="my-3" />
+        {/* Payment Summary */}
+        <View style={{ backgroundColor: colors.surface, marginTop: 12, paddingHorizontal: 20, paddingVertical: 20 }}>
+          <Label style={{ color: colors.onSurface, marginBottom: 16, fontSize: 15 }} weight="semibold">
+            {t('payment_summary')}
+          </Label>
 
-            <View className="space-y-2">
-              <View className="flex-row justify-between mb-2">
-                <Body color={colors.onSurfaceVariant}>{t('subtotal')}</Body>
-                <Body color={colors.onSurface}>
-                  {formatOrderTotal(orderData.subtotal)}
-                </Body>
-              </View>
-
-              {orderData.tax && (
-                <View className="flex-row justify-between mb-2">
-                  <Body color={colors.onSurfaceVariant}>{t('tax')}</Body>
-                  <Body color={colors.onSurface}>
-                    {formatOrderTotal(orderData.tax)}
-                  </Body>
-                </View>
-              )}
-
-              {(orderData.deliveryFee || orderData.deliveryPrice) && (
-                <View className="flex-row justify-between mb-2">
-                  <Body color={colors.onSurfaceVariant}>
-                    {t('delivery_fee')}
-                  </Body>
-                  <Body color={colors.onSurface}>
-                    {formatOrderTotal(orderData.deliveryFee || orderData.deliveryPrice)}
-                  </Body>
-                </View>
-              )}
-
-              <View
-                className="flex-row justify-between mt-2 pt-2"
-                style={{
-                  borderTopWidth: 1,
-                  borderTopColor: colors.outline,
-                }}
-              >
-                <Heading5 color={colors.onSurface} weight="bold">
-                  {t('total')}
-                </Heading5>
-                <Heading5 color={colors.primary} weight="bold">
-                  {formatOrderTotal(orderData.total)}
-                </Heading5>
-              </View>
-            </View>
-
-            <View className="mt-4 flex-row items-center">
-              <MaterialCommunityIcon                 name={
-                  orderData.paymentMethod === 'credit_card'
-                    ? 'credit-card'
-                    : orderData.paymentMethod === 'cash'
-                      ? 'cash'
-                      : 'cellphone'
-                }
-                size={20}
-                color={colors.onSurfaceVariant}
-              />
-              <Body color={colors.onSurface} style={{ marginLeft: 8 }}>
-                {t('paid_with')}{' '}
-                {orderData.paymentMethod === 'credit_card'
-                  ? t('credit_card')
-                  : orderData.paymentMethod === 'cash'
-                    ? t('cash')
-                    : t('mobile_payment')}
+          <View style={{ gap: 12 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Body style={{ color: colors.onSurfaceVariant }}>{t('subtotal')}</Body>
+              <Body style={{ color: colors.onSurface }} weight="medium">
+                {formatOrderTotal(orderData.subtotal)}
               </Body>
             </View>
-          </View>
 
-          {/* Order Actions */}
-          <View className="px-4 pb-4">
-            {status === 'pending' && (
-              <View className="flex-row space-x-3">
-                <TouchableOpacity
-                  className="flex-1 rounded-xl p-4"
-                  style={{
-                    backgroundColor: colors.error,
-                  }}
-                  onPress={() => handleStatusChange('cancelled')}
-                >
-                  <View className="flex items-center">
-                    <MaterialCommunityIcon
-                      name="close"
-                      size={24}
-                      color="white"
-                    />
-                    <Body
-                      color="white"
-                      weight="bold"
-                      className="mt-1"
-                      align="center"
-                    >
-                      {t('reject_order')}
-                    </Body>
-                  </View>
-                </TouchableOpacity>
-                
-                <TouchableOpacity
-                  className="flex-1 rounded-xl p-4"
-                  style={{
-                    backgroundColor: '#4CAF50',
-                  }}
-                  onPress={() => handleStatusChange('preparing')}
-                >
-                  <View className="flex items-center">
-                    <MaterialCommunityIcon
-                      name="check"
-                      size={24}
-                      color="white"
-                    />
-                    <Body
-                      color="white"
-                      weight="bold"
-                      className="mt-1"
-                      align="center"
-                    >
-                      {t('accept_order')}
-                    </Body>
-                  </View>
-                </TouchableOpacity>
+            {orderData.tax && (
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Body style={{ color: colors.onSurfaceVariant }}>{t('tax')}</Body>
+                <Body style={{ color: colors.onSurface }} weight="medium">
+                  {formatOrderTotal(orderData.tax)}
+                </Body>
               </View>
             )}
 
-            {status === 'preparing' && (
-              <TouchableOpacity
-                className="rounded-xl p-4 mt-2"
-                style={{
-                  backgroundColor: colors.primary,
-                }}
-                onPress={() => handleStatusChange('ready')}
-                disabled={prepProgress < 1}
-              >
-                <View className="flex-row items-center justify-center">
-                  <MaterialCommunityIcon
-                    name="check-all"
-                    size={24}
-                    color="white"
-                  />
-                  <Body
-                    color="white"
-                    weight="bold"
-                    className="ml-2"
-                    align="center"
-                  >
-                    {t('mark_as_ready')}
-                  </Body>
-                </View>
-              </TouchableOpacity>
+            {(orderData.deliveryFee || orderData.deliveryPrice) && (
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Body style={{ color: colors.onSurfaceVariant }}>{t('delivery_fee')}</Body>
+                <Body style={{ color: colors.onSurface }} weight="medium">
+                  {formatOrderTotal(orderData.deliveryFee || orderData.deliveryPrice)}
+                </Body>
+              </View>
             )}
 
-            {(status === 'ready' || status === 'cancelled') && (
-              <TouchableOpacity
-                className="rounded-xl p-4 mt-2"
+            <View
+              style={{
+                height: 1,
+                backgroundColor: colors.outlineVariant,
+                marginVertical: 4,
+              }}
+            />
+
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Heading3 style={{ color: colors.onSurface }} weight="bold">
+                {t('total')}
+              </Heading3>
+              <Heading3 style={{ color: colors.primary }} weight="bold">
+                {formatOrderTotal(orderData.total)}
+              </Heading3>
+            </View>
+
+            <View
+              style={{
+                marginTop: 8,
+                paddingTop: 16,
+                borderTopWidth: 1,
+                borderTopColor: colors.outlineVariant,
+                flexDirection: 'row',
+                alignItems: 'center',
+              }}
+            >
+              <View
                 style={{
-                  backgroundColor: colors.primary,
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  backgroundColor: colors.secondaryContainer,
+                  justifyContent: 'center',
+                  alignItems: 'center',
                 }}
-                onPress={() => navigation.goBack()}
               >
-                <View className="flex-row items-center justify-center">
-                  <MaterialCommunityIcon
-                    name="arrow-left"
-                    size={24}
-                    color="white"
-                  />
-                  <Body
-                    color="white"
-                    weight="bold"
-                    className="ml-2"
-                    align="center"
-                  >
-                    {t('back_to_orders')}
-                  </Body>
-                </View>
-              </TouchableOpacity>
-            )}
+                <MaterialCommunityIcon
+                  name={
+                    orderData.paymentMethod === 'credit_card'
+                      ? 'credit-card'
+                      : orderData.paymentMethod === 'cash'
+                        ? 'cash'
+                        : 'cellphone'
+                  }
+                  size={20}
+                  color={colors.onSecondaryContainer}
+                />
+              </View>
+              <View style={{ marginLeft: 12, flex: 1 }}>
+                <Caption style={{ color: colors.onSurfaceVariant, marginBottom: 2 }}>
+                  {t('payment_method')}
+                </Caption>
+                <Body style={{ color: colors.onSurface }} weight="medium">
+                  {orderData.paymentMethod === 'credit_card'
+                    ? t('credit_card')
+                    : orderData.paymentMethod === 'cash'
+                      ? t('cash')
+                      : t('mobile_payment')}
+                </Body>
+              </View>
+            </View>
           </View>
-        </Animated.View>
+        </View>
+
+        {/* Action Buttons */}
+        <View style={{ padding: 20 }}>
+          {orderData.status === 'pending' ? (
+            <View style={{ gap: 12 }}>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: '#10B981',
+                  paddingVertical: 16,
+                  borderRadius: 8,
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+                onPress={handleConfirm}
+                disabled={isProcessing}
+                activeOpacity={0.8}
+              >
+                <MaterialCommunityIcon name="check-circle" size={20} color="white" />
+                <Label style={{ marginLeft: 10, color: 'white' }} weight="bold">
+                  {t('accept_order')}
+                </Label>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={{
+                  backgroundColor: colors.errorContainer,
+                  paddingVertical: 16,
+                  borderRadius: 8,
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  borderWidth: 1,
+                  borderColor: colors.error,
+                }}
+                onPress={handleReject}
+                disabled={isProcessing}
+                activeOpacity={0.8}
+              >
+                <MaterialCommunityIcon name="close-circle" size={20} color={colors.error} />
+                <Label style={{ marginLeft: 10, color: colors.error }} weight="bold">
+                  {t('reject_order')}
+                </Label>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <Button
+              mode="outlined"
+              onPress={() => navigation.goBack()}
+              contentStyle={{ height: 48 }}
+            >
+              {t('back_to_orders')}
+            </Button>
+          )}
+        </View>
       </ScrollView>
     </CommonView>
   );

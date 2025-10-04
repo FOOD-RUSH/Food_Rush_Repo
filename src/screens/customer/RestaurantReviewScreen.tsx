@@ -16,8 +16,7 @@ import { useCreateRestaurantReview } from '@/src/hooks/customer/useCustomerApi';
 import { getUserFriendlyErrorMessage } from '@/src/utils/errorHandler';
 import Toast from 'react-native-toast-message';
 
-interface RestaurantReviewScreenProps
-  extends RootStackScreenProps<'RestaurantReview'> {}
+type RestaurantReviewScreenProps = RootStackScreenProps<'RestaurantReview'>
 
 const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
   navigation,
@@ -25,7 +24,7 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
 }) => {
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
-  const { isSmallDevice, getResponsiveSpacing } = useResponsive();
+  const { isSmallScreen, getResponsiveSpacing } = useResponsive();
 
   // Get restaurant data from route params
   const { restaurantId, restaurantName, restaurantImage } = route.params || {};
@@ -100,8 +99,9 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
             }}
             activeOpacity={0.7}
           >
-            <IoniconsIcon               name={star <= score ? 'star' : 'star-outline'}
-              size={isSmallDevice ? 32 : 40}
+            <IoniconsIcon
+              name={star <= score ? 'star' : 'star-outline'}
+              size={isSmallScreen ? 32 : 40}
               color={star <= score ? '#FFD700' : colors.onSurfaceVariant}
             />
           </TouchableOpacity>
@@ -140,7 +140,11 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
             }}
             activeOpacity={0.7}
           >
-            <IoniconsIcon name="arrow-back" size={24} color={colors.onSurface} />
+            <IoniconsIcon
+              name="arrow-back"
+              size={24}
+              color={colors.onSurface}
+            />
           </TouchableOpacity>
         </View>
 
@@ -154,8 +158,8 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
           >
             <View
               style={{
-                width: isSmallDevice ? 120 : 150,
-                height: isSmallDevice ? 120 : 150,
+                width: isSmallScreen ? 120 : 150,
+                height: isSmallScreen ? 120 : 150,
                 borderRadius: 16,
                 overflow: 'hidden',
                 backgroundColor: colors.surfaceVariant,
@@ -182,7 +186,7 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
             }}
           >
             <ResponsiveText
-              size={isSmallDevice ? 'xl' : '2xl'}
+              size={isSmallScreen ? 'xl' : '2xl'}
               weight="bold"
               style={{
                 textAlign: 'center',

@@ -46,7 +46,8 @@ const NotificationSetting: React.FC<NotificationSettingProps> = ({
           className="w-12 h-12 rounded-full items-center justify-center mr-4"
           style={{ backgroundColor: colors.primaryContainer }}
         >
-          <MaterialCommunityIcon             name={icon as any}
+          <MaterialCommunityIcon
+            name={icon as any}
             size={24}
             color={colors.primary}
           />

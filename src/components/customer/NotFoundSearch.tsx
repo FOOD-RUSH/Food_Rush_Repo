@@ -93,7 +93,8 @@ const NotFoundSearch: React.FC<NotFoundSearchProps> = ({
             marginBottom: 24,
           }}
         >
-          <MaterialCommunityIcon             name={content.icon as any}
+          <MaterialCommunityIcon
+            name={content.icon as any}
             size={60}
             color={colors.onSurfaceVariant}
           />

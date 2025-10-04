@@ -12,7 +12,7 @@ npm start
 
 # Run on specific platforms
 npm run android          # Android emulator/device
-npm run ios             # iOS simulator/device  
+npm run ios             # iOS simulator/device
 npm run web             # Web browser
 
 # Code quality and testing
@@ -60,6 +60,7 @@ npm run production:build:ios      # iOS production build
 Food Rush is a comprehensive React Native food delivery application that connects customers with restaurants for seamless food ordering and delivery services, featuring dual user interfaces, real-time order tracking, and multi-language support.
 
 **Key responsibilities:**
+
 - Customer food ordering and delivery tracking
 - Restaurant order management and menu administration
 - Real-time notifications and location services
@@ -69,6 +70,7 @@ Food Rush is a comprehensive React Native food delivery application that connect
 ## 🏗️ Architecture Overview
 
 ### System Context
+
 ```
 [Customers] → [Food Rush App] → [Backend API]
                     ↓
@@ -78,6 +80,7 @@ Food Rush is a comprehensive React Native food delivery application that connect
 ```
 
 ### Key Components
+
 - **Dual Navigation System** - Separate customer and restaurant app flows with React Navigation
 - **State Management** - Zustand stores with AsyncStorage persistence for offline support
 - **Real-time Features** - TanStack Query for server state with push notifications via Expo
@@ -85,6 +88,7 @@ Food Rush is a comprehensive React Native food delivery application that connect
 - **Internationalization** - i18next with English and French support
 
 ### Data Flow
+
 1. User selects customer or restaurant mode during onboarding
 2. Authentication flow determines user type and permissions
 3. Type-specific navigation and state management activated
@@ -128,30 +132,32 @@ food-rush/
 
 ### Key Files to Know
 
-| File | Purpose | When You'd Touch It |
-|------|---------|---------------------|
-| `App.tsx` | Application entry point with providers | Adding global providers or app-level logic |
-| `src/navigation/RootNavigator.tsx` | Main navigation configuration | Adding new screens or navigation flows |
-| `src/stores/index.ts` | Store exports and organization | Adding new stores or state management |
-| `package.json` | Dependencies and scripts | Adding libraries or build commands |
-| `app.json` | Expo configuration | Changing app metadata or permissions |
-| `src/config/theme.ts` | Theme and styling configuration | Updating colors or design tokens |
-| `src/locales/i18n.ts` | Internationalization setup | Adding new languages or translation logic |
-| `src/services/shared/apiClient.ts` | API client configuration | Modifying API endpoints or authentication |
-| `babel.config.js` | Babel and NativeWind configuration | Changing build optimizations |
-| `metro.config.js` | Metro bundler configuration | Bundle optimization and asset handling |
+| File                               | Purpose                                | When You'd Touch It                        |
+| ---------------------------------- | -------------------------------------- | ------------------------------------------ |
+| `App.tsx`                          | Application entry point with providers | Adding global providers or app-level logic |
+| `src/navigation/RootNavigator.tsx` | Main navigation configuration          | Adding new screens or navigation flows     |
+| `src/stores/index.ts`              | Store exports and organization         | Adding new stores or state management      |
+| `package.json`                     | Dependencies and scripts               | Adding libraries or build commands         |
+| `app.json`                         | Expo configuration                     | Changing app metadata or permissions       |
+| `src/config/theme.ts`              | Theme and styling configuration        | Updating colors or design tokens           |
+| `src/locales/i18n.ts`              | Internationalization setup             | Adding new languages or translation logic  |
+| `src/services/shared/apiClient.ts` | API client configuration               | Modifying API endpoints or authentication  |
+| `babel.config.js`                  | Babel and NativeWind configuration     | Changing build optimizations               |
+| `metro.config.js`                  | Metro bundler configuration            | Bundle optimization and asset handling     |
 
 ---
 
 ## 🔧 Technology Stack
 
 ### Core Technologies
+
 - **Language:** TypeScript 5.9.2 - Strict type safety with comprehensive type definitions
 - **Framework:** React Native 0.81.4 with Expo 54.0.8 - Cross-platform mobile development
 - **State Management:** Zustand 5.0.7 - Lightweight state management with persistence
 - **Server State:** TanStack Query 5.85.0 - Data fetching, caching, and synchronization
 
 ### Key Libraries
+
 - **Navigation:** React Navigation 7.x - Type-safe navigation with stack, tab, and modal support
 - **Styling:** NativeWind 4.1.23 - Tailwind CSS utilities for React Native
 - **UI Components:** React Native Paper 5.14.5 - Material Design components
@@ -160,6 +166,7 @@ food-rush/
 - **Animations:** React Native Reanimated 4.1.0 - High-performance animations
 
 ### Development Tools
+
 - **Testing:** Jest with React Native Testing Library - Unit and integration testing
 - **Linting:** ESLint with Expo configuration and Prettier - Code quality and formatting
 - **Build:** EAS Build - Cloud-based builds for iOS and Android
@@ -170,11 +177,13 @@ food-rush/
 ## 🌐 External Dependencies
 
 ### Required Services
+
 - **Backend API** - RESTful API for user management, orders, and restaurant data
 - **Push Notifications** - Expo Push Notifications for real-time order updates
 - **Location Services** - Expo Location for GPS tracking and delivery routing
 
 ### Optional Integrations
+
 - **Image Storage** - AsyncStorage with optimization for menu item photos
 - **Analytics** - Custom analytics utilities for restaurant performance tracking
 - **Error Tracking** - Production-safe error handling with user-friendly messages
@@ -196,6 +205,7 @@ SENTRY_DSN=               # Error tracking (if implemented)
 ## 🔄 Common Workflows
 
 ### Customer Order Flow
+
 1. Browse restaurants and menu items on home screen
 2. Add items to cart with special instructions and quantity
 3. Proceed to checkout with address and payment selection
@@ -205,6 +215,7 @@ SENTRY_DSN=               # Error tracking (if implemented)
 **Code path:** `HomeScreen` → `CartStore` → `CheckOutScreen` → `OrdersAPI` → `OrderTrackingScreen`
 
 ### Restaurant Order Management
+
 1. Receive new order notifications via push notifications
 2. View order details and customer information
 3. Accept or reject orders with optional reason
@@ -218,12 +229,14 @@ SENTRY_DSN=               # Error tracking (if implemented)
 ## 📈 Performance & Scale
 
 ### Performance Considerations
+
 - **Bundle Optimization:** Metro configuration with production minification and tree shaking
 - **Image Optimization:** Automatic image compression and caching with AsyncStorage
 - **State Management:** Selective store subscriptions to minimize re-renders
 - **Navigation:** Lazy loading of screens and components where appropriate
 
 ### Monitoring
+
 - **Bundle Size:** Automated scripts track bundle size and warn on increases
 - **Dependencies:** Regular analysis of unused dependencies with depcheck
 - **Error Handling:** Production-safe error messages with development logging
@@ -233,15 +246,17 @@ SENTRY_DSN=               # Error tracking (if implemented)
 ## 🚨 Things to Be Careful About
 
 ### 🔒 Security Considerations
+
 - **Error Handling:** Production builds sanitize error messages to prevent information disclosure
 - **Authentication:** JWT tokens with automatic refresh and secure storage via Expo SecureStore
 - **Data Validation:** Client and server-side validation with Yup schemas
 - **API Security:** HTTPS-only communication with proper error handling
 
 ### Development Considerations
+
 - **State Persistence:** Zustand stores automatically persist to AsyncStorage - be mindful of sensitive data
 - **Navigation Types:** Strict TypeScript navigation types prevent runtime navigation errors
 - **Bundle Size:** Monitor bundle size with provided scripts - large increases affect app performance
 - **Platform Differences:** Test on both iOS and Android as some features have platform-specific behavior
 
-*Updated at: 2025-01-27 15:30:00 UTC*
+_Updated at: 2025-01-27 15:30:00 UTC_

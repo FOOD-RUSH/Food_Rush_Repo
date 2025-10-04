@@ -44,7 +44,8 @@ const LogoutContent: React.FC<LogoutContentProps> = ({
             backgroundColor: colors.errorContainer,
           }}
         >
-          <MaterialIcon             name="logout"
+          <MaterialIcon
+            name="logout"
             size={32}
             color={colors.onErrorContainer}
           />

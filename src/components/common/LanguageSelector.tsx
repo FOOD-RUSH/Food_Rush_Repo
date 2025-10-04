@@ -13,7 +13,6 @@ import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/src/contexts/LanguageContext';
 import { SupportedLanguage } from '@/src/locales/i18n';
 
-
 interface LanguageSelectorProps {
   style?: any;
   showLabel?: boolean;
@@ -49,7 +48,9 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
             {language.name}
           </Text>
         </View>
-        {isSelected && <IoniconsIcon name="checkmark" size={20} color="#007AFF" />}
+        {isSelected && (
+          <IoniconsIcon name="checkmark" size={20} color="#007AFF" />
+        )}
       </TouchableOpacity>
     );
   };

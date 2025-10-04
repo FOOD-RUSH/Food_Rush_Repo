@@ -1,4 +1,7 @@
-import { MaterialCommunityIcon, IoniconsIcon } from '@/src/components/common/icons';
+import {
+  MaterialCommunityIcon,
+  IoniconsIcon,
+} from '@/src/components/common/icons';
 import React, { useMemo, useState } from 'react';
 import {
   View,
@@ -52,7 +55,8 @@ const ReviewItem: React.FC<ReviewItemProps> = ({ review }) => {
     const stars = [];
     for (let i = 1; i <= 5; i++) {
       stars.push(
-        <IoniconsIcon           key={i}
+        <IoniconsIcon
+          key={i}
           name={i <= score ? 'star' : 'star-outline'}
           size={16}
           color={i <= score ? '#FFD700' : colors.onSurfaceVariant}
@@ -267,7 +271,8 @@ const RestaurantReviewsScreen: React.FC<
                 style={{ flexDirection: 'row', marginTop: 4, marginBottom: 8 }}
               >
                 {[1, 2, 3, 4, 5].map((star) => (
-                  <IoniconsIcon                     key={star}
+                  <IoniconsIcon
+                    key={star}
                     name={
                       star <= reviewStats.averageRating
                         ? 'star'
@@ -289,7 +294,8 @@ const RestaurantReviewsScreen: React.FC<
 
             {/* Trend Indicator */}
             <View style={{ alignItems: 'center' }}>
-              <MaterialCommunityIcon                 name={
+              <MaterialCommunityIcon
+                name={
                   reviewStats.recentTrend === 'up'
                     ? 'trending-up'
                     : reviewStats.recentTrend === 'down'
@@ -356,7 +362,8 @@ const RestaurantReviewsScreen: React.FC<
                   <Caption color={colors.onSurface} style={{ width: 12 }}>
                     {rating}
                   </Caption>
-                  <IoniconsIcon                     name="star"
+                  <IoniconsIcon
+                    name="star"
                     size={14}
                     color="#FFD700"
                     style={{ marginLeft: 4, marginRight: 8 }}
@@ -410,7 +417,8 @@ const RestaurantReviewsScreen: React.FC<
               onPress={() => handleRatingFilter(rating)}
               style={{ marginRight: 8, marginBottom: 8 }}
               icon={() => (
-                <IoniconsIcon                   name="star"
+                <IoniconsIcon
+                  name="star"
                   size={14}
                   color={
                     selectedRating === rating
@@ -457,7 +465,8 @@ const RestaurantReviewsScreen: React.FC<
         paddingVertical: 48,
       }}
     >
-      <MaterialCommunityIcon         name="star-outline"
+      <MaterialCommunityIcon
+        name="star-outline"
         size={64}
         color={colors.onSurfaceVariant}
       />

@@ -42,7 +42,6 @@ import { useResponsive } from '@/src/hooks/useResponsive';
 
 const { width: screenWidth } = Dimensions.get('window');
 const isSmallScreen = screenWidth < 375;
-const isMediumScreen = screenWidth >= 375 && screenWidth < 414;
 
 interface MenuItem {
   id: string;
@@ -217,7 +216,13 @@ const MenuItemsList: React.FC<
     >
       <View className={`flex-row ${isSmallScreen ? 'p-3' : 'p-4'}`}>
         {/* Enhanced Image Container - Takes more space */}
-        <View className={`${isSmallScreen ? 'w-28 h-28' : 'w-32 h-32'} mr-4`} style={{ width: scale(isSmallScreen ? 112 : 128), height: scale(isSmallScreen ? 112 : 128) }}>
+        <View
+          className={`${isSmallScreen ? 'w-28 h-28' : 'w-32 h-32'} mr-4`}
+          style={{
+            width: scale(isSmallScreen ? 112 : 128),
+            height: scale(isSmallScreen ? 112 : 128),
+          }}
+        >
           {item.pictureUrl ? (
             <Image
               source={{ uri: item.pictureUrl }}
@@ -240,7 +245,8 @@ const MenuItemsList: React.FC<
                 alignItems: 'center',
               }}
             >
-              <MaterialCommunityIcon                 name="food"
+              <MaterialCommunityIcon
+                name="food"
                 size={isSmallScreen ? 36 : 40}
                 color={colors.onSurfaceVariant}
               />
@@ -323,7 +329,8 @@ const MenuItemsList: React.FC<
                 }}
                 className="items-center justify-center"
               >
-                <MaterialCommunityIcon                   name="pencil"
+                <MaterialCommunityIcon
+                  name="pencil"
                   size={isSmallScreen ? 16 : 18}
                   color="#007aff"
                 />
@@ -338,7 +345,8 @@ const MenuItemsList: React.FC<
                 }}
                 className="items-center justify-center"
               >
-                <MaterialCommunityIcon                   name="delete"
+                <MaterialCommunityIcon
+                  name="delete"
                   size={isSmallScreen ? 16 : 18}
                   color="#FF4444"
                 />
@@ -365,7 +373,8 @@ const MenuItemsList: React.FC<
               marginBottom: 24,
             }}
           >
-            <MaterialCommunityIcon               name="alert-circle"
+            <MaterialCommunityIcon
+              name="alert-circle"
               size={48}
               color="#FF4444"
             />
@@ -398,7 +407,8 @@ const MenuItemsList: React.FC<
               alignItems: 'center',
             }}
           >
-            <MaterialCommunityIcon               name="refresh"
+            <MaterialCommunityIcon
+              name="refresh"
               size={20}
               color="white"
               style={{ marginRight: 8 }}
@@ -507,7 +517,8 @@ const MenuItemsList: React.FC<
                   marginBottom: 24,
                 }}
               >
-                <MaterialCommunityIcon                   name="food-off"
+                <MaterialCommunityIcon
+                  name="food-off"
                   size={48}
                   color={colors.onSurfaceVariant}
                 />
@@ -539,7 +550,8 @@ const MenuItemsList: React.FC<
                   alignItems: 'center',
                 }}
               >
-                <MaterialCommunityIcon                   name="plus"
+                <MaterialCommunityIcon
+                  name="plus"
                   size={20}
                   color="white"
                   style={{ marginRight: 8 }}
@@ -559,7 +571,7 @@ const MenuItemsList: React.FC<
             position: 'absolute',
             margin: 20,
             right: 0,
-            bottom: 0,
+            bottom: 50,
             backgroundColor: '#007aff',
             borderRadius: 16,
           }}

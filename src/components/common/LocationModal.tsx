@@ -229,7 +229,8 @@ const LocationModal: React.FC<LocationModalProps> = ({
           }}
           activeOpacity={0.7}
         >
-          <MaterialCommunityIcon             name="close"
+          <MaterialCommunityIcon
+            name="close"
             size={20}
             color={colors.onSurfaceVariant}
           />
@@ -256,7 +257,8 @@ const LocationModal: React.FC<LocationModalProps> = ({
               marginBottom: spacing.lg,
             }}
           >
-            <MaterialCommunityIcon               name="map-marker"
+            <MaterialCommunityIcon
+              name="map-marker"
               size={wp(8)}
               color={colors.primary}
             />
@@ -295,7 +297,8 @@ const LocationModal: React.FC<LocationModalProps> = ({
             }}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <MaterialCommunityIcon                 name="map-marker-check"
+              <MaterialCommunityIcon
+                name="map-marker-check"
                 size={20}
                 color={colors.primary}
                 style={{ marginRight: spacing.sm }}
@@ -357,7 +360,8 @@ const LocationModal: React.FC<LocationModalProps> = ({
               isLocationLoading ? (
                 <ActivityIndicator size={size} color={color} />
               ) : (
-                <MaterialCommunityIcon                   name="crosshairs-gps"
+                <MaterialCommunityIcon
+                  name="crosshairs-gps"
                   size={size}
                   color={color}
                 />

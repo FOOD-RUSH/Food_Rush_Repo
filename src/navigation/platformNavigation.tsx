@@ -15,14 +15,14 @@ const ANDROID_STATUS_BAR_HEIGHT = StatusBar.currentHeight || 0;
  */
 export const getContentMarginTop = (hasHeader: boolean = true): number => {
   if (!hasHeader) return 0;
-  
+
   // iOS automatically handles safe area and header positioning
   if (Platform.OS === 'ios') {
     return 0;
   }
-  
+
   // Android needs negative margin to position content under transparent/translucent headers
-  return -34;
+  return -40;
 };
 
 /**
@@ -30,11 +30,11 @@ export const getContentMarginTop = (hasHeader: boolean = true): number => {
  */
 export const useHeaderHeight = (): number => {
   const insets = useSafeAreaInsets();
-  
+
   if (Platform.OS === 'ios') {
     return 44 + insets.top; // Standard iOS nav bar height + safe area
   }
-  
+
   return 56; // Standard Android app bar height
 };
 
@@ -43,10 +43,10 @@ export const useHeaderHeight = (): number => {
  */
 export const useTabBarHeight = (): number => {
   const insets = useSafeAreaInsets();
-  
+
   const baseHeight = Platform.OS === 'ios' ? 0 : 60;
   const bottomPadding = Platform.OS === 'ios' ? 0 : 10;
-  
+
   return baseHeight + bottomPadding + insets.bottom;
 };
 
@@ -78,7 +78,7 @@ export const createPlatformScreenOptions = (
       headerShown: false,
       gestureEnabled: true,
       animation: 'slide_from_right' as const,
-      contentStyle: { 
+      contentStyle: {
         backgroundColor: colors.background,
         marginTop: 0, // No margin needed for default screens
       },
@@ -86,13 +86,16 @@ export const createPlatformScreenOptions = (
       headerTintColor: navigationColors.text,
       headerTitleStyle: commonHeaderTitleStyle,
     },
-    
+
     modal: {
       presentation: 'modal' as const,
       headerShown: true,
-      animation: Platform.OS === 'ios' ? 'slide_from_bottom' as const : 'fade_from_bottom' as const,
+      animation:
+        Platform.OS === 'ios'
+          ? ('slide_from_bottom' as const)
+          : ('fade_from_bottom' as const),
       gestureDirection: 'vertical' as const,
-      contentStyle: { 
+      contentStyle: {
         backgroundColor: colors.background,
         marginTop: getContentMarginTop(true),
       },
@@ -100,13 +103,13 @@ export const createPlatformScreenOptions = (
       headerTintColor: navigationColors.text,
       headerTitleStyle: commonHeaderTitleStyle,
     },
-    
+
     card: {
       presentation: 'card' as const,
       headerShown: true,
       headerBackTitleVisible: false,
       animation: 'slide_from_right' as const,
-      contentStyle: { 
+      contentStyle: {
         backgroundColor: colors.background,
         marginTop: getContentMarginTop(true),
       },
@@ -114,14 +117,14 @@ export const createPlatformScreenOptions = (
       headerTintColor: navigationColors.text,
       headerTitleStyle: commonHeaderTitleStyle,
     },
-    
+
     profileCard: {
       presentation: 'card' as const,
       headerShown: true,
       headerTitleAlign: 'center' as const,
       animation: 'slide_from_right' as const,
       headerShadowVisible: Platform.OS === 'android',
-      contentStyle: { 
+      contentStyle: {
         backgroundColor: colors.background,
         marginTop: getContentMarginTop(true),
       },
@@ -129,12 +132,12 @@ export const createPlatformScreenOptions = (
       headerTintColor: navigationColors.text,
       headerTitleStyle: commonHeaderTitleStyle,
     },
-    
+
     checkout: {
       headerShown: true,
       headerTitleAlign: 'center' as const,
       animation: 'slide_from_right' as const,
-      contentStyle: { 
+      contentStyle: {
         backgroundColor: colors.background,
         marginTop: getContentMarginTop(true),
       },
@@ -142,18 +145,24 @@ export const createPlatformScreenOptions = (
       headerTintColor: navigationColors.text,
       headerTitleStyle: commonHeaderTitleStyle,
     },
-    
+
     fullScreen: {
-      presentation: Platform.OS === 'ios' ? 'fullScreenModal' as const : 'modal' as const,
+      presentation:
+        Platform.OS === 'ios'
+          ? ('fullScreenModal' as const)
+          : ('modal' as const),
       headerShown: false,
       gestureEnabled: true,
-      animation: Platform.OS === 'ios' ? 'slide_from_bottom' as const : 'fade_from_bottom' as const,
-      contentStyle: { 
+      animation:
+        Platform.OS === 'ios'
+          ? ('slide_from_bottom' as const)
+          : ('fade_from_bottom' as const),
+      contentStyle: {
         backgroundColor: colors.background,
         marginTop: 0, // Full screen takes entire space
       },
     },
-    
+
     transparentHeader: {
       headerShown: true,
       headerTransparent: true,
@@ -164,7 +173,7 @@ export const createPlatformScreenOptions = (
       },
       headerTintColor: navigationColors.text,
       headerTitleStyle: commonHeaderTitleStyle,
-      contentStyle: { 
+      contentStyle: {
         backgroundColor: colors.background,
         marginTop: 0, // Transparent header overlays content
       },
@@ -193,14 +202,16 @@ export const getPlatformTabBarStyle = (
     paddingTop: 10,
     borderTopWidth: 0,
     // Platform-specific shadows
-    ...(Platform.OS === 'android' ? {
-      elevation: 20,
-    } : {
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: -4 },
-      shadowOpacity: 0.1,
-      shadowRadius: 8,
-    }),
+    ...(Platform.OS === 'android'
+      ? {
+          elevation: 20,
+        }
+      : {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.1,
+          shadowRadius: 8,
+        }),
   };
 };
 
@@ -250,7 +261,10 @@ export const getPlatformAnimation = (type: 'push' | 'modal' | 'fade') => {
 /**
  * Get safe content insets for scrollable content
  */
-export const useContentInsets = (hasHeader: boolean = true, hasTabBar: boolean = false) => {
+export const useContentInsets = (
+  hasHeader: boolean = true,
+  hasTabBar: boolean = false,
+) => {
   const insets = useSafeAreaInsets();
   const headerHeight = useHeaderHeight();
   const tabBarHeight = useTabBarHeight();
@@ -265,7 +279,7 @@ export const useContentInsets = (hasHeader: boolean = true, hasTabBar: boolean =
 
 /**
  * Updated RootNavigator Integration
- * 
+ *
  * In your RootNavigator.tsx, replace the createScreenOptions function with:
  */
 export const integrateIntoRootNavigator = () => {

@@ -63,8 +63,9 @@ export const RestaurantCard = ({
     useNavigation<CustomerHomeStackScreenProps<'HomeScreen'>['navigation']>();
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
-  const { isSmallScreen, isTablet, isLargeScreen, wp, getResponsiveText } = useResponsive();
-  
+  const { isSmallScreen, isTablet, isLargeScreen, wp, getResponsiveText } =
+    useResponsive();
+
   // Calculate responsive dimensions
   const getCardDimensions = () => {
     if (isLargeScreen) {
@@ -87,7 +88,7 @@ export const RestaurantCard = ({
       };
     }
   };
-  
+
   const cardDimensions = getCardDimensions();
 
   const { hasRealLocation, isUsingFallback, locationSource } =
@@ -194,7 +195,11 @@ export const RestaurantCard = ({
             }}
             activeOpacity={0.7}
           >
-            <IoniconsIcon name="heart-outline" size={20} color={colors.onSurface} />
+            <IoniconsIcon
+              name="heart-outline"
+              size={20}
+              color={colors.onSurface}
+            />
           </TouchableOpacity>
 
           {/* Rating badge */}
@@ -217,7 +222,8 @@ export const RestaurantCard = ({
                 alignItems: 'center',
               }}
             >
-              <IoniconsIcon                 name="star"
+              <IoniconsIcon
+                name="star"
                 size={12}
                 color={rating !== null ? 'yellow' : colors.onSurfaceVariant}
               />
@@ -265,7 +271,7 @@ export const RestaurantCard = ({
             <Heading4
               color={colors.onSurface}
               weight="bold"
-              style={{ 
+              style={{
                 flex: 1,
                 fontSize: getResponsiveText(isSmallScreen ? 16 : 18),
               }}

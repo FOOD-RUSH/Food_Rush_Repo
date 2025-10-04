@@ -1,4 +1,8 @@
-import { AntDesignIcon, IoniconsIcon, MaterialIcon } from '@/src/components/common/icons';
+import {
+  AntDesignIcon,
+  IoniconsIcon,
+  MaterialIcon,
+} from '@/src/components/common/icons';
 import { useTranslation } from 'react-i18next';
 import {
   View,
@@ -260,7 +264,8 @@ const AddressScreen = ({
                   style={{ backgroundColor: colors.surfaceVariant }}
                   activeOpacity={0.7}
                 >
-                  <MaterialIcon                     name="delete-outline"
+                  <MaterialIcon
+                    name="delete-outline"
                     size={18}
                     color="#ff4444"
                   />
@@ -338,7 +343,8 @@ const AddressScreen = ({
   const EmptyState = () => {
     return (
       <View className="flex-1 items-center justify-center px-6">
-        <IoniconsIcon           name="location-outline"
+        <IoniconsIcon
+          name="location-outline"
           size={80}
           color={colors.onSurfaceVariant}
         />

@@ -40,13 +40,15 @@ const CancelledOrderScreen = () => {
   const keyExtractor = useCallback((item: Order) => item.id, []);
 
   const renderEmptyComponent = () => (
-    <View style={{ 
-      flex: 1, 
-      alignItems: 'center', 
-      justifyContent: 'center', 
-      paddingHorizontal: 32, 
-      paddingVertical: 48 
-    }}>
+    <View
+      style={{
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: 32,
+        paddingVertical: 48,
+      }}
+    >
       <Image
         source={require('@/assets/images/NoOrdersLight.png')}
         style={{ width: 200, height: 200, marginBottom: 16 }}
@@ -84,10 +86,10 @@ const CancelledOrderScreen = () => {
   return (
     <CommonView>
       <View
-        style={{ 
-          flex: 1, 
+        style={{
+          flex: 1,
           height: '100%',
-          backgroundColor: colors.background 
+          backgroundColor: colors.background,
         }}
       >
         <FlatList

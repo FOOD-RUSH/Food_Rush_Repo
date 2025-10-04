@@ -1,4 +1,7 @@
-import { IoniconsIcon, MaterialCommunityIcon } from '@/src/components/common/icons';
+import {
+  IoniconsIcon,
+  MaterialCommunityIcon,
+} from '@/src/components/common/icons';
 import React, { useRef, useEffect } from 'react';
 import {
   View,
@@ -63,7 +66,8 @@ const AboutScreen = ({ navigation }: Props) => {
               ]}
               style={styles.logoBg}
             >
-              <MaterialCommunityIcon                 name="silverware-fork-knife"
+              <MaterialCommunityIcon
+                name="silverware-fork-knife"
                 size={48}
                 color="#fff"
               />

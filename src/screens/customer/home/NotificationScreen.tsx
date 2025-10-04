@@ -286,7 +286,8 @@ const NotificationScreen = () => {
   // Render empty state
   const renderEmptyState = () => (
     <View className="justify-center items-center flex-1 px-6 py-12">
-      <IoniconsIcon         name="notifications-outline"
+      <IoniconsIcon
+        name="notifications-outline"
         size={64}
         color={colors.onSurfaceVariant}
         style={{ marginBottom: 16 }}
