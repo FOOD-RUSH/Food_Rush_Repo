@@ -57,15 +57,6 @@ export const useLocationForQueries = () => {
       (Math.abs(currentCoords.lat - previousCoords.lat) > 0.001 ||
         Math.abs(currentCoords.lng - previousCoords.lng) > 0.001)
     ) {
-      console.log(
-        '🔄 Location changed, invalidating location-dependent queries:',
-        {
-          from: previousCoords,
-          to: currentCoords,
-          source: locationSource,
-          distance: calculateDistance(previousCoords, currentCoords),
-        },
-      );
 
       // Invalidate all location-dependent queries
       queryClient.invalidateQueries({ queryKey: ['browse-restaurants'] });
@@ -83,30 +74,6 @@ export const useLocationForQueries = () => {
   ]);
 
   // Enhanced logging for debugging
-  console.log('📍 Location Service Debug:', {
-    coordinates: {
-      lat: coordinates.latitude,
-      lng: coordinates.longitude,
-      formatted: `${coordinates.latitude.toFixed(4)}, ${coordinates.longitude.toFixed(4)}`,
-    },
-    locationSource,
-    hasRealLocation,
-    hasAddressLocation,
-    isUsingFallback,
-    locationData: location
-      ? {
-          address: location.formattedAddress,
-          isFallback: location.isFallback,
-          timestamp: new Date(location.timestamp).toLocaleTimeString(),
-        }
-      : null,
-    defaultAddress: defaultAddress
-      ? {
-          address: defaultAddress.address,
-          label: defaultAddress.label,
-        }
-      : null,
-  });
 
   return {
     nearLat: coordinates.latitude,

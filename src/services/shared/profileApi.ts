@@ -31,13 +31,6 @@ export const profileApi = {
    * }
    */
   updateProfile: (data: UpdateProfileRequest) => {
-    console.log('🔄 Updating profile with data:', {
-      fullName: data.fullName,
-      phoneNumber: data.phoneNumber,
-      hasProfilePicture: !!data.profilePicture,
-      profilePictureUrl:
-        data.profilePicture?.substring(0, 50) + '...' || 'none',
-    });
 
     return apiClient.patch<ProfileUpdateResponse>('/auth/profile', data);
   },

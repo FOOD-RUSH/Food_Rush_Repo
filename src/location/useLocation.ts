@@ -64,7 +64,6 @@ export const useLocation = (options: UseLocationOptions = {}) => {
           await requestPermissionWithLocation();
         }
       } catch (error) {
-        console.warn('Error initializing location:', error);
         // Use fallback location on initialization error
         const fallback = await LocationService.getCurrentLocation();
         if (fallback.location) {

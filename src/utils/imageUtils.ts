@@ -54,16 +54,6 @@ export const pickImageForUpload =
       // Ensure filename has correct extension
       const finalFileName = ensureCorrectFileExtension(fileName, mimeType);
 
-      console.log('Image selected for upload:', {
-        uri: asset.uri.substring(0, 50) + '...',
-        type: mimeType,
-        name: finalFileName,
-        width: asset.width,
-        height: asset.height,
-        fileSize: asset.fileSize,
-        originalFileName: asset.fileName,
-      });
-
       return {
         uri: asset.uri,
         type: mimeType,

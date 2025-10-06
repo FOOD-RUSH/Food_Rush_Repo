@@ -142,7 +142,6 @@ const ResetPasswordScreen = ({
 
   const goBack = useCallback(() => {
     // Handle navigation back
-    console.log('Go back');
   }, []);
 
   return (

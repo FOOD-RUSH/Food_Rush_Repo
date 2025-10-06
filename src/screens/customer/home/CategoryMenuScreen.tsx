@@ -41,12 +41,6 @@ const CategoryMenuScreen: React.FC<CategoryMenuScreenProps> = ({
     refetch,
   } = useBrowseMenuItems(categoryValue);
 
-  console.log('Category filtering:', {
-    categoryTitle,
-    categoryValue,
-    categoryInfo,
-  });
-
   // Apply client-side filtering as backup if API doesn't filter properly
   const filteredMenuItems = useMemo(() => {
     if (!categoryMenuItems) return [];
@@ -113,14 +107,6 @@ const CategoryMenuScreen: React.FC<CategoryMenuScreenProps> = ({
 
     return filtered;
   }, [categoryMenuItems, categoryValue]);
-
-  console.log('CategoryMenuScreen:', {
-    categoryTitle,
-    categoryValue,
-    totalItems: categoryMenuItems?.length || 0,
-    filteredItems: filteredMenuItems?.length || 0,
-    items: filteredMenuItems,
-  });
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);

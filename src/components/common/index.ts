@@ -48,7 +48,6 @@ export { default as ErrorDisplay } from './ErrorDisplay';
 export { default as LanguageSelector } from './LanguageSelector';
 export { default as LoadingScreen } from './LoadingScreen';
 export { default as OpacityButton } from './OpacityButton';
-export { default as OptimizedImage } from './OptimizedImage';
 export { default as PageTitle } from './PageTitle';
 export { default as RowView } from './RowView';
 export { default as Seperator } from './Seperator';

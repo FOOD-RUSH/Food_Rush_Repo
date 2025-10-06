@@ -54,9 +54,6 @@ export const OptimizedIcon: React.FC<IconProps> = ({
   const IconComponent = ICON_SETS[set];
 
   if (!IconComponent) {
-    console.warn(
-      `Icon set "${set}" not found. Available sets: ${Object.keys(ICON_SETS).join(', ')}`,
-    );
     return null;
   }
 

@@ -13,7 +13,6 @@ import { ScrollView } from 'react-native-gesture-handler';
 
 import { RootStackScreenProps } from '@/src/navigation/types';
 import { Card, useTheme } from 'react-native-paper';
-import Seperator from '@/src/components/common/Seperator';
 import CheckOutItem from '@/src/components/customer/CheckOutItem';
 import {
   useCartStore,
@@ -27,10 +26,6 @@ import {
 } from '@/src/stores/customerStores/cartStore';
 import { useAuthUser } from '@/src/stores/customerStores';
 import { useDefaultAddress } from '@/src/location/store';
-import {
-  useSelectedPaymentMethod,
-  useSelectedProvider,
-} from '@/src/stores/customerStores/paymentStore';
 import { useOrderFlow } from '@/src/hooks/customer/useOrderFlow';
 import { useLocationForQueries } from '@/src/hooks/customer/useLocationService';
 import OrderValidationModal from '@/src/components/customer/OrderValidationModal';
@@ -57,9 +52,7 @@ const CheckOutScreen = ({
   const clearCart = useCartStore((state) => state.clearCart);
   
   const defaultAddress = useDefaultAddress();
-  const selectedPaymentMethod = useSelectedPaymentMethod();
-  const selectedProvider = useSelectedProvider();
-  const user = useAuthUser();
+
 
   // Get live location for order creation
   const { nearLat, nearLng } = useLocationForQueries();
@@ -116,10 +109,14 @@ const CheckOutScreen = ({
     navigation.navigate('AddressScreen');
   }, [navigation]);
 
-  // Handle payment method selection
+  // Handle payment info press (informational only)
   const handlePaymentPress = useCallback(() => {
-    navigation.navigate('PaymentMethods');
-  }, [navigation]);
+    Alert.alert(
+      t('payment_info'),
+      t('payment_after_restaurant_confirmation'),
+      [{ text: t('ok') }]
+    );
+  }, [t]);
 
   // Handle promo code
   const handlePromoPress = useCallback(() => {
@@ -146,9 +143,6 @@ const CheckOutScreen = ({
         });
         return;
       }
-
-      console.log('🚀 Creating order for restaurant:', restaurantId);
-      console.log('📍 Using live coordinates:', { lat: nearLat, lng: nearLng });
       
       // Create order with live coordinates for delivery fee calculation
       await createOrderFromCart(restaurantId, {
@@ -379,7 +373,7 @@ const CheckOutScreen = ({
           </Card.Content>
         </Card>
 
-        {/* Payment & Promo Card */}
+        {/* Payment Info & Promo Card */}
         <Card mode="outlined" style={cardStyle}>
           <Card.Content className="py-4">
             <TouchableOpacity
@@ -389,7 +383,7 @@ const CheckOutScreen = ({
             >
               <View className="flex-row items-center">
                 <IoniconsIcon
-                  name="card-outline"
+                  name="information-circle-outline"
                   color={colors.primary}
                   size={26}
                 />
@@ -397,7 +391,7 @@ const CheckOutScreen = ({
                   className="text-base ml-3 font-medium"
                   style={{ color: colors.onSurface }}
                 >
-                  {t('payment_method')}
+                  {t('payment_info')}
                 </Text>
               </View>
 
@@ -406,16 +400,12 @@ const CheckOutScreen = ({
                   className="text-sm mr-2"
                   style={{ color: colors.onSurfaceVariant }}
                 >
-                  {selectedProvider === 'mtn'
-                    ? 'MTN Mobile Money'
-                    : selectedProvider === 'orange'
-                      ? 'Orange Money'
-                      : 'Mobile Money'}
+                  {t('pay_after_confirmation')}
                 </Text>
                 <MaterialIcon
-                  name="arrow-forward-ios"
+                  name="info"
                   size={18}
-                  color={colors.onSurfaceVariant}
+                  color={colors.primary}
                 />
               </View>
             </TouchableOpacity>
@@ -563,7 +553,7 @@ const CheckOutScreen = ({
             className="text-lg font-bold text-center"
             style={{ color: colors.onPrimary }}
           >
-            {t('review_order')} - {calculations.total} XAF
+            {t('place_order')} - {calculations.total} XAF
           </Text>
         </TouchableOpacity>
       </View>
@@ -575,6 +565,8 @@ const CheckOutScreen = ({
         onConfirm={handleConfirmOrder}
         isLoading={isCreatingOrder}
       />
+
+
     </CommonView>
   );
 };

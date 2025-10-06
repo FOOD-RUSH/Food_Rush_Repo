@@ -221,9 +221,6 @@ export const getTypographyProps = (
 ) => {
   // Ensure variant exists in TYPOGRAPHY_SCALE
   if (!variant || !TYPOGRAPHY_SCALE[variant]) {
-    console.warn(
-      `Typography variant '${variant}' not found, falling back to 'body'`,
-    );
     variant = 'body';
   }
 
@@ -231,9 +228,6 @@ export const getTypographyProps = (
 
   // Ensure baseStyle exists and has required properties
   if (!baseStyle || typeof baseStyle.fontSize !== 'number') {
-    console.warn(
-      `Invalid typography style for variant '${variant}', using fallback`,
-    );
     return {
       fontSize: 16,
       lineHeight: 24,

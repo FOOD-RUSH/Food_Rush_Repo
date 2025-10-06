@@ -50,15 +50,11 @@ export const useI18nPerformance = () => {
       // Track slow translations (>1ms)
       if (duration > 1) {
         metrics.slowTranslations++;
-        console.warn(
-          `Slow translation detected: "${String(key)}" took ${duration.toFixed(2)}ms`,
-        );
       }
 
       // Track missing keys
       if (result === key && typeof key === 'string') {
         metrics.missingKeys.add(key);
-        console.warn(`Missing translation key: "${key}"`);
       }
 
       return result;
@@ -71,13 +67,6 @@ export const useI18nPerformance = () => {
         metrics.translationCount > 0 &&
         metrics.translationCount % 100 === 0
       ) {
-        console.log('📊 i18n Performance Summary:', {
-          totalTranslations: metrics.translationCount,
-          averageTime: `${metrics.averageTime.toFixed(3)}ms`,
-          slowTranslations: metrics.slowTranslations,
-          missingKeys: Array.from(metrics.missingKeys),
-          currentLanguage: i18n.language,
-        });
       }
     }, 5000);
 

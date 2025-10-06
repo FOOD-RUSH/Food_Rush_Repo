@@ -4,7 +4,6 @@ import {
   View,
   Text,
   TouchableOpacity,
-  TextInput,
   Alert,
   ActivityIndicator,
   Clipboard,
@@ -22,14 +21,16 @@ import {
   useInitializePayment,
   useCreatePaymentRequest,
 } from '@/src/hooks/customer/usePayment';
+import PaymentMethodModal from '@/src/components/customer/PaymentMethodModal';
+import { PaymentMethodSelection } from '@/src/types/transaction';
 
 type PaymentStep =
-  | 'phone_input'
-  | 'processing'
-  | 'ussd_display'
-  | 'confirmation'
-  | 'success'
-  | 'failed';
+  | 'method_selection'    // Select payment method (MTN/Orange)
+  | 'processing'          // Processing payment
+  | 'ussd_display'        // Show USSD code
+  | 'confirmation'        // Waiting for confirmation
+  | 'success'             // Payment successful
+  | 'failed';             // Payment failed
 
 const PaymentProcessingScreen = ({
   navigation,
@@ -37,18 +38,22 @@ const PaymentProcessingScreen = ({
 }: RootStackScreenProps<'PaymentProcessing'>) => {
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
-  const { orderId, amount, paymentMethod, provider } = route.params;
+  const { orderId, amount, provider } = route.params;
   const clearCart = useCartStore((state) => state.clearCart);
   const { completePayment } = useOrderFlow();
   const user = useAuthUser();
   const createPaymentRequest = useCreatePaymentRequest();
-  const { mutate: initializePayment, isPending: isInitializingPayment } =
-    useInitializePayment();
+  const { mutate: initializePayment } = useInitializePayment();
 
   // State management
-  const [currentStep, setCurrentStep] = useState<PaymentStep>('phone_input');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [currentStep, setCurrentStep] = useState<PaymentStep>('method_selection');
+  const [selectedPayment, setSelectedPayment] = useState<PaymentMethodSelection>({
+    method: 'mobile_money',
+    provider: provider || 'mtn',
+    phoneNumber: '',
+  });
+  const [showPaymentModal, setShowPaymentModal] = useState(true);
+
   const [transactionId, setTransactionId] = useState<string>('');
   const [ussdCode, setUssdCode] = useState<string>('');
   const [error, setError] = useState<string>('');
@@ -62,100 +67,88 @@ const PaymentProcessingScreen = ({
 
   // Get provider name for display
   const getProviderName = () => {
-    if (paymentMethod === 'mobile_money') {
-      return provider === 'mtn' ? 'MTN Mobile Money' : 'Orange Money';
-    }
-    return 'Cash on Delivery';
+    return selectedPayment.provider === 'mtn' ? 'MTN Mobile Money' : 'Orange Money';
   };
 
-  // Get provider color
-  const getProviderColor = () => {
-    if (provider === 'mtn') return '#FFCC00';
-    if (provider === 'orange') return '#FF6600';
-    return colors.primary;
-  };
+
+
+  // Handle payment method confirmation
+  const handlePaymentConfirm = useCallback((selection: PaymentMethodSelection) => {
+    setSelectedPayment(selection);
+    setShowPaymentModal(false);
+    setCurrentStep('processing');
+    // Start payment initialization
+    initializePaymentWithSelection(selection);
+  }, []);
 
   // Validate phone number
   const validatePhoneNumber = useCallback(
-    (phone: string) => {
-      if (!provider) return false;
+    (phone: string, provider: string) => {
       // Convert provider to medium format for validation
       const medium = provider === 'orange' ? 'orange_money' : 'mtn';
       return PaymentService.validatePhoneNumber(phone, medium);
     },
-    [provider],
+    [],
   );
 
-  // Handle phone number input
-  const handlePhoneNumberChange = (text: string) => {
-    // Remove non-numeric characters except +
-    const cleaned = text.replace(/[^\d+]/g, '');
-    setPhoneNumber(cleaned);
-    setError('');
-  };
-
-  // Initialize payment
-  const handleInitializePayment = async () => {
-    if (!validatePhoneNumber(phoneNumber)) {
-      setError(`Please enter a valid ${provider?.toUpperCase()} phone number`);
+  // Initialize payment with selected method
+  const initializePaymentWithSelection = async (selection: PaymentMethodSelection) => {
+    if (!validatePhoneNumber(selection.phoneNumber, selection.provider)) {
+      setError(`Please enter a valid ${selection.provider.toUpperCase()} phone number`);
+      setCurrentStep('method_selection');
+      setShowPaymentModal(true);
       return;
     }
 
     if (!user?.fullName || !user?.email) {
       setError('User information is missing. Please log in again.');
+      setCurrentStep('failed');
       return;
     }
 
-    setIsLoading(true);
+
     setError('');
 
     try {
-      if (paymentMethod === 'mobile_money' && provider) {
-        // Convert provider to the new medium format
-        const medium = provider === 'orange' ? 'orange_money' : 'mtn';
+      // Convert provider to the new medium format
+      const medium = selection.provider === 'orange' ? 'orange_money' : 'mtn';
 
-        // Create payment request using the new API structure
-        const paymentRequest = createPaymentRequest(
-          orderId,
-          phoneNumber,
-          medium,
-          user.fullName,
-          user.email,
-        );
+      // Create payment request using the new API structure
+      const paymentRequest = createPaymentRequest(
+        orderId,
+        selection.phoneNumber,
+        medium,
+        user.fullName,
+        user.email,
+      );
 
-        console.log(
-          '🚀 Initializing payment with new API structure:',
-          paymentRequest,
-        );
+      // Use the new payment hook
+      initializePayment(paymentRequest, {
+        onSuccess: (result) => {
+          if (result.success && result.transactionId) {
+            setTransactionId(result.transactionId);
+            setUssdCode(result.ussdCode || '');
+            setCurrentStep(result.ussdCode ? 'ussd_display' : 'confirmation');
 
-        // Use the new payment hook
-        initializePayment(paymentRequest, {
-          onSuccess: (result) => {
-            if (result.success && result.transactionId) {
-              setTransactionId(result.transactionId);
-              setUssdCode(result.ussdCode || '');
-              setCurrentStep(result.ussdCode ? 'ussd_display' : 'confirmation');
-
-              // Start polling for payment status
-              startPaymentStatusPolling(result.transactionId);
-            } else {
-              setError(result.error || 'Failed to initialize payment');
-            }
-          },
-          onError: (error) => {
-            console.error('Payment initialization error:', error);
-            setError('Failed to initialize payment. Please try again.');
-          },
-        });
-      } else {
-        // Handle cash payment
-        setCurrentStep('success');
-      }
+            // Start polling for payment status
+            startPaymentStatusPolling(result.transactionId);
+          } else {
+            setError(result.error || 'Failed to initialize payment');
+            setCurrentStep('failed');
+          }
+        },
+        onError: (error) => {
+          console.error('Payment initialization error:', error);
+          setError('Failed to initialize payment. Please try again.');
+          setCurrentStep('failed');
+        },
+      });
     } catch (error) {
       console.error('Payment initialization error:', error);
       setError('Failed to initialize payment. Please try again.');
+      setCurrentStep('failed');
     } finally {
-      setIsLoading(false);
+      // Payment initialization complete
     }
   };
 
@@ -241,86 +234,54 @@ const PaymentProcessingScreen = ({
 
   // Handle retry
   const handleRetry = () => {
-    setCurrentStep('phone_input');
+    setCurrentStep('method_selection');
+    setShowPaymentModal(true);
     setError('');
     setCountdown(300);
     setTransactionId('');
     setUssdCode('');
   };
 
-  // Render phone input step
-  const renderPhoneInput = () => (
+  // Render method selection step
+  const renderMethodSelection = () => (
     <Card mode="outlined" className="mx-4 mt-6">
       <Card.Content className="p-6">
         <View className="items-center mb-6">
           <View
             className="w-16 h-16 rounded-full items-center justify-center mb-4"
-            style={{ backgroundColor: getProviderColor() + '20' }}
+            style={{ backgroundColor: colors.primary + '20' }}
           >
             <IoniconsIcon
-              name="phone-portrait"
+              name="card-outline"
               size={32}
-              color={getProviderColor()}
+              color={colors.primary}
             />
           </View>
           <Text
             className="text-xl font-bold text-center"
             style={{ color: colors.onSurface }}
           >
-            {getProviderName()}
+            {t('select_payment_method')}
           </Text>
           <Text
             className="text-base text-center mt-2"
             style={{ color: colors.onSurfaceVariant }}
           >
-            Enter your phone number to pay {formattedAmount} FCFA
+            Choose your payment method to pay {formattedAmount} FCFA
           </Text>
-        </View>
-
-        <View className="mb-4">
-          <Text
-            className="text-sm font-medium mb-2"
-            style={{ color: colors.onSurface }}
-          >
-            Phone Number
-          </Text>
-          <TextInput
-            className="border rounded-lg px-4 py-3 text-base"
-            style={{
-              borderColor: error ? colors.error : colors.outline,
-              color: colors.onSurface,
-              backgroundColor: colors.surface,
-            }}
-            value={phoneNumber}
-            onChangeText={handlePhoneNumberChange}
-            placeholder={t('phone_number_placeholder')}
-            placeholderTextColor={colors.onSurfaceVariant}
-            keyboardType="phone-pad"
-            maxLength={15}
-          />
-          {error ? (
-            <Text className="text-sm mt-1" style={{ color: colors.error }}>
-              {error}
-            </Text>
-          ) : null}
         </View>
 
         <TouchableOpacity
           className="rounded-lg py-4 items-center"
           style={{ backgroundColor: colors.primary }}
-          onPress={handleInitializePayment}
-          disabled={isLoading || isInitializingPayment || !phoneNumber}
+          onPress={() => setShowPaymentModal(true)}
         >
-          {isLoading || isInitializingPayment ? (
-            <ActivityIndicator color={colors.onPrimary} />
-          ) : (
-            <Text
-              className="text-base font-semibold"
-              style={{ color: colors.onPrimary }}
-            >
-              Continue Payment
-            </Text>
-          )}
+          <Text
+            className="text-base font-semibold"
+            style={{ color: colors.onPrimary }}
+          >
+            {t('select_payment_method')}
+          </Text>
         </TouchableOpacity>
       </Card.Content>
     </Card>
@@ -505,11 +466,36 @@ const PaymentProcessingScreen = ({
     </Card>
   );
 
+  // Render processing step
+  const renderProcessing = () => (
+    <Card mode="outlined" className="mx-4 mt-6">
+      <Card.Content className="p-6">
+        <View className="items-center">
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text
+            className="text-lg font-semibold mt-4"
+            style={{ color: colors.onSurface }}
+          >
+            {t('processing_payment')}
+          </Text>
+          <Text
+            className="text-base text-center mt-2"
+            style={{ color: colors.onSurfaceVariant }}
+          >
+            Please wait while we process your payment...
+          </Text>
+        </View>
+      </Card.Content>
+    </Card>
+  );
+
   // Render current step
   const renderCurrentStep = () => {
     switch (currentStep) {
-      case 'phone_input':
-        return renderPhoneInput();
+      case 'method_selection':
+        return renderMethodSelection();
+      case 'processing':
+        return renderProcessing();
       case 'ussd_display':
       case 'confirmation':
         return renderUssdDisplay();
@@ -518,7 +504,7 @@ const PaymentProcessingScreen = ({
       case 'failed':
         return renderFailed();
       default:
-        return renderPhoneInput();
+        return renderMethodSelection();
     }
   };
 
@@ -569,6 +555,19 @@ const PaymentProcessingScreen = ({
 
         {/* Payment Step Content */}
         {renderCurrentStep()}
+
+        {/* Payment Method Modal */}
+        <PaymentMethodModal
+          visible={showPaymentModal}
+          onDismiss={() => {
+            setShowPaymentModal(false);
+            if (currentStep === 'method_selection') {
+              navigation.goBack();
+            }
+          }}
+          onConfirm={handlePaymentConfirm}
+          currentSelection={selectedPayment}
+        />
       </View>
     </CommonView>
   );

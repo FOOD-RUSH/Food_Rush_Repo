@@ -125,7 +125,6 @@ export const useCartStore = create<CartState & CartActions>()(
           const itemRestaurantId =
             item.restaurantId || (item as any).restaurant?.id;
           if (!itemRestaurantId) {
-            console.warn('Menu item missing restaurantId:', item);
             return false;
           }
           return itemRestaurantId === restaurantID;

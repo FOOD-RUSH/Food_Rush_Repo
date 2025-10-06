@@ -22,7 +22,6 @@ export const loadFonts = async (): Promise<void> => {
   try {
     await fontLoadingPromise;
     fontsLoaded = true;
-    console.log('✅ Urbanist fonts loaded successfully');
   } catch (error) {
     console.error('❌ Error loading Urbanist fonts:', error);
     throw error;

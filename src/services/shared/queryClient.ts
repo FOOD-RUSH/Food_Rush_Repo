@@ -9,7 +9,6 @@ export const queryClient = new QueryClient({
           error?.code === 'SESSION_EXPIRED' ||
           error?.message?.includes('session has expired')
         ) {
-          console.log('Session expired - handled globally');
           // Don't show error to user, let the app handle logout
           return;
         }

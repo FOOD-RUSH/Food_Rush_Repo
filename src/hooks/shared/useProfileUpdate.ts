@@ -23,13 +23,6 @@ export const useUpdateProfile = () => {
       clearError();
     },
     onSuccess: (updatedUser: User) => {
-      console.log('✅ Profile updated successfully:', {
-        userId: updatedUser.id,
-        fullName: updatedUser.fullName,
-        phoneNumber: updatedUser.phoneNumber,
-        role: updatedUser.role,
-        hasProfilePicture: !!updatedUser.profilePicture,
-      });
 
       // Update user in auth store
       setUser(updatedUser);
@@ -72,11 +65,6 @@ export const useGetProfile = () => {
       return response.data.data;
     },
     onSuccess: (userData: User) => {
-      console.log('✅ Profile fetched successfully:', {
-        userId: userData.id,
-        fullName: userData.fullName,
-        role: userData.role,
-      });
 
       // Update user in auth store
       setUser(userData);

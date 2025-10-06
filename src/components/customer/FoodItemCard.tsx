@@ -3,7 +3,7 @@ import { CustomerHomeStackScreenProps } from '@/src/navigation/types';
 
 import { useNavigation } from '@react-navigation/native';
 import React from 'react';
-import { View, TouchableOpacity, Image } from 'react-native';
+import { View, TouchableOpacity, Image, Platform } from 'react-native';
 import { Card, Text, useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { useResponsive } from '@/src/hooks/useResponsive';
@@ -61,25 +61,49 @@ const FoodItemCard = ({
     getResponsiveText,
   } = useResponsive();
 
-  // Calculate responsive dimensions
+  // Calculate responsive dimensions and text sizes like RestaurantCard
   const getCardDimensions = () => {
     if (isLargeScreen) {
       return {
-        width: Math.min(wp(45), 380), // Max 380px width
-        height: 140,
-        imageSize: 90,
+        width: Math.min(wp(45), 400), // Max 400px width
+        height: 160,
+        imageSize: 100,
+        padding: 16,
+        borderRadius: 20,
+        // Text sizes (increased by 2px)
+        foodNameSize: getResponsiveText(19), // Increased by 2
+        priceSize: getResponsiveText(18), // Increased by 2
+        distanceSize: getResponsiveText(14), // Increased by 2
+        deliverySize: getResponsiveText(13), // Increased by 2
+        badgeSize: getResponsiveText(12), // Increased by 2
       };
     } else if (isTablet) {
       return {
-        width: Math.min(wp(48), 320), // Max 320px width
-        height: 130,
-        imageSize: 85,
+        width: Math.min(wp(48), 340), // Max 340px width
+        height: 150,
+        imageSize: 95,
+        padding: 14,
+        borderRadius: 18,
+        // Text sizes (increased by 2px)
+        foodNameSize: getResponsiveText(18), // Increased by 2
+        priceSize: getResponsiveText(17), // Increased by 2
+        distanceSize: getResponsiveText(13), // Increased by 2
+        deliverySize: getResponsiveText(12), // Increased by 2
+        badgeSize: getResponsiveText(11), // Increased by 2
       };
     } else {
       return {
-        width: Math.min(wp(85), 280), // Max 280px width for phones
-        height: 120,
-        imageSize: 80,
+        width: Math.min(wp(85), 300), // Max 300px width for phones
+        height: 140,
+        imageSize: 85,
+        padding: 12,
+        borderRadius: 16,
+        // Text sizes (increased by 2px)
+        foodNameSize: getResponsiveText(17), // Increased by 2
+        priceSize: getResponsiveText(16), // Increased by 2
+        distanceSize: getResponsiveText(12), // Increased by 2
+        deliverySize: getResponsiveText(11), // Increased by 2
+        badgeSize: getResponsiveText(10), // Increased by 2
       };
     }
   };
@@ -136,33 +160,39 @@ const FoodItemCard = ({
       className="m-2"
     >
       <Card
-        mode="elevated"
-        className="rounded-2xl overflow-hidden shadow-lg"
+        mode="outlined"
         style={{
           backgroundColor: colors.surface,
-          borderColor: 'transparent',
+          borderWidth: 1,
+          borderColor: colors.outline + '30',
+          borderRadius: cardDimensions.borderRadius,
           width: cardDimensions.width,
           height: cardDimensions.height,
-          elevation: 6,
+          alignSelf: 'center',
+          overflow: 'hidden',
+          // Enhanced shadow like RestaurantCard
           shadowColor: '#000',
-          shadowOffset: {
-            width: 0,
-            height: 3,
-          },
-          shadowOpacity: 0.15,
+          shadowOffset: { width: 0, height: 3 },
+          shadowOpacity: 0.12,
           shadowRadius: 6,
+          elevation: 6,
+          // Add opacity for unavailable items
+          opacity: isAvailable ? 1 : 0.7,
         }}
       >
         {/* Card content with horizontal layout */}
-        <View className="flex-row p-4 items-center relative">
+        <View 
+          className="flex-row items-center relative"
+          style={{ padding: cardDimensions.padding }}
+        >
           {/* Left side - Food Image with PROMO badge */}
           <View className="relative mr-4">
             <Image
               source={getImageSource()}
-              className="rounded-2xl"
               style={{
                 width: cardDimensions.imageSize,
                 height: cardDimensions.imageSize,
+                borderRadius: cardDimensions.borderRadius * 0.6, // Proportional to card border radius
               }}
               resizeMode="cover"
             />
@@ -172,7 +202,12 @@ const FoodItemCard = ({
                 className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md"
                 style={{ backgroundColor: colors.primary }}
               >
-                <Text className="text-white text-xs font-bold">PROMO</Text>
+                <Text 
+                  className="text-white font-bold"
+                  style={{ fontSize: cardDimensions.badgeSize }}
+                >
+                  PROMO
+                </Text>
               </View>
             )}
           </View>
@@ -197,8 +232,8 @@ const FoodItemCard = ({
               className="font-bold mb-2 p-1"
               style={{
                 color: colors.onSurface,
-                fontSize: getResponsiveText(isSmallScreen ? 14 : 16),
-                lineHeight: getResponsiveText(isSmallScreen ? 18 : 20),
+                fontSize: cardDimensions.foodNameSize,
+                lineHeight: cardDimensions.foodNameSize * 1.2,
               }}
               numberOfLines={2}
               ellipsizeMode="tail"
@@ -208,18 +243,29 @@ const FoodItemCard = ({
 
             {/* Distance */}
             <View className="flex-row items-center mb-2 flex-wrap">
-              <Text className="text-xs" style={{ color: colors.onSurface }}>
+              <Text 
+                style={{ 
+                  color: colors.onSurface,
+                  fontSize: cardDimensions.distanceSize,
+                }}
+              >
                 {getDistance().toFixed(1)} km
               </Text>
               {!isAvailable && (
                 <>
                   <Text
-                    className="text-xs mx-1"
-                    style={{ color: colors.onSurface }}
+                    className="mx-1"
+                    style={{ 
+                      color: colors.onSurface,
+                      fontSize: cardDimensions.distanceSize,
+                    }}
                   >
                     |
                   </Text>
-                  <Text className="text-xs font-bold text-red-500">
+                  <Text 
+                    className="font-bold text-red-500"
+                    style={{ fontSize: cardDimensions.distanceSize }}
+                  >
                     UNAVAILABLE
                   </Text>
                 </>
@@ -236,7 +282,7 @@ const FoodItemCard = ({
                   className="font-bold"
                   style={{
                     color: colors.primary,
-                    fontSize: getResponsiveText(isSmallScreen ? 14 : 16),
+                    fontSize: cardDimensions.priceSize,
                     flexShrink: 1,
                   }}
                   numberOfLines={1}
@@ -245,20 +291,26 @@ const FoodItemCard = ({
                   {getFormattedPrice()} XAF
                 </Text>
                 <Text
-                  className="text-xs ml-1"
-                  style={{ color: colors.onSurface }}
+                  className="ml-1"
+                  style={{ 
+                    color: colors.onSurface,
+                    fontSize: cardDimensions.deliverySize,
+                  }}
                 >
                   |
                 </Text>
                 <IoniconsIcon
                   name="car-sharp"
-                  size={12}
+                  size={cardDimensions.deliverySize}
                   color={primaryColor}
                   className="ml-1"
                 />
                 <Text
-                  className="text-xs ml-1"
-                  style={{ color: colors.onSurface }}
+                  className="ml-1"
+                  style={{ 
+                    color: colors.onSurface,
+                    fontSize: cardDimensions.deliverySize,
+                  }}
                   numberOfLines={1}
                   ellipsizeMode="tail"
                 >

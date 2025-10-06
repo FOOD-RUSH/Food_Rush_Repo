@@ -33,7 +33,7 @@ export const useCurrentUser = () => {
     queryFn: async () => {
       try {
         const response = await authApi.getProfile();
-        return response.data;
+        return response.data.data; // Extract the actual user data from the nested response
       } catch (error: any) {
         console.error('Failed to fetch user profile:', error);
         throw error;
@@ -73,8 +73,8 @@ export const useProfileManager = () => {
     try {
       const { data } = await refetch();
       if (data) {
-        setUser(data);
-        console.log(data);
+        // Update the user in the auth store with the fetched profile data
+        setUser(data as CustomerProfile);
       }
       return data;
     } catch (error) {
@@ -88,16 +88,16 @@ export const useProfileManager = () => {
   }, [queryClient]);
 
   const updateLocalProfile = useCallback(
-    (updatedData: Partial<any>) => {
+    (updatedData: Partial<CustomerProfile>) => {
       queryClient.setQueryData(['auth', 'me'], (oldData: any) => ({
         ...oldData,
         ...updatedData,
       }));
 
       // Also update the auth store
-      const currentUser = queryClient.getQueryData(['auth', 'me']);
+      const currentUser = queryClient.getQueryData(['auth', 'me']) as CustomerProfile;
       if (currentUser) {
-        setUser({ currentUser });
+        setUser(currentUser);
       }
     },
     [queryClient, setUser],
@@ -130,7 +130,6 @@ export const useLogin = () => {
       clearError();
     },
     onSuccess: async (data) => {
-      console.log('Customer login successful, processing response...');
 
       const { user, accessToken, refreshToken } = data;
 
@@ -152,8 +151,6 @@ export const useLogin = () => {
       queryClient.invalidateQueries({ queryKey: ['addresses'] });
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
-
-      console.log('Customer login process completed successfully');
     },
     onError: (error: any) => {
       console.error('Customer login failed:', error);
@@ -175,7 +172,6 @@ export const useRegister = () => {
       clearError();
     },
     onSuccess: (data) => {
-      console.log('Customer registration successful:', data);
       // Registration data can be handled locally in components if needed
     },
   });
@@ -196,7 +192,6 @@ export const useVerifyOTP = () => {
     },
     onSuccess: async (data) => {
       const { user, accessToken, refreshToken } = data;
-      console.log('Customer OTP verification successful');
 
       if (!accessToken || !refreshToken || !user) {
         throw new Error('Invalid verification response: missing required data');
@@ -236,7 +231,6 @@ export const useUpdateProfile = () => {
       clearError();
     },
     onSuccess: (updatedUser: CustomerProfile) => {
-      console.log('Customer profile updated successfully (legacy hook)');
       // Update user in store
       setUser(updatedUser);
 
@@ -257,7 +251,6 @@ export const useCustomerLogout = () => {
       return Promise.resolve();
     },
     onSuccess: () => {
-      console.log('Customer logout completed successfully');
       // Clear all cached data
       queryClient.clear();
     },
@@ -281,7 +274,6 @@ export const useResendOTP = () => {
       clearError();
     },
     onSuccess: () => {
-      console.log('Customer OTP resent successfully');
     },
   });
 };
@@ -298,10 +290,6 @@ export const useResetPassword = () => {
       clearError();
     },
     onSuccess: (response) => {
-      console.log(
-        'Customer password reset successful:',
-        response?.message || 'Password reset successfully',
-      );
     },
   });
 };
@@ -318,7 +306,6 @@ export const useRequestPasswordReset = () => {
       clearError();
     },
     onSuccess: () => {
-      console.log('Customer password reset request sent successfully');
     },
   });
 };

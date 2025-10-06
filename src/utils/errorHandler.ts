@@ -101,7 +101,6 @@ export const getUserFriendlyErrorMessage = (error: any): string => {
     }
   } catch (i18nError) {
     // Fallback if i18n is not available or fails
-    console.warn('i18n failed, using fallback error message:', i18nError);
 
     // Provide fallback messages without i18n
     switch (status) {

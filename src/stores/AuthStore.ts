@@ -7,15 +7,16 @@ import TokenManager from '../services/shared/tokenManager';
 
 // User profiles for different user types
 export interface CustomerProfile {
+  sub?: string;
   id: string;
   email: string;
   fullName: string;
   phoneNumber?: string;
   role: 'customer';
   status: 'active' | 'inactive' | 'suspended';
-  isEmailVerified: boolean;
-  isPhoneVerified: boolean;
-  pictureUrl?: string;
+  isEmailVerified?: boolean;
+  isPhoneVerified?: boolean;
+  profilePicture?: string | null;
   // Customer-specific fields
   address?: string;
   dateOfBirth?: string;
@@ -27,15 +28,16 @@ export interface CustomerProfile {
 }
 
 export interface RestaurantProfile {
+  sub?: string;
   id: string;
   email: string;
   fullName: string;
   phoneNumber?: string;
   role: 'restaurant';
   status: 'active' | 'inactive' | 'pending_verification' | 'suspended';
-  isEmailVerified: boolean;
-  isPhoneVerified: boolean;
-  pictureUrl?: string;
+  isEmailVerified?: boolean;
+  isPhoneVerified?: boolean;
+  profilePicture?: string | null;
   // Restaurant-specific fields
   businessName?: string;
   businessAddress?: string;
@@ -241,12 +243,10 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
         // Prevent multiple logout calls
         if (!currentState.isAuthenticated && !currentState.user) {
-          console.log('Already logged out, skipping logout process');
           return;
         }
 
         try {
-          console.log('Starting logout process...');
           set({ isLoading: true });
 
           // Clear authentication tokens
@@ -265,8 +265,6 @@ export const useAuthStore = create<AuthState & AuthActions>()(
             // Clear cart and user type only
             cartStore.clearCart();
             appStore.clearSelectedUserType();
-
-            console.log('Stores cleared successfully');
           } catch (storeError) {
             console.error('Error clearing stores:', storeError);
           }
@@ -275,7 +273,6 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           set({ ...initialState, isLoading: false });
 
           // Emit logout event only once
-          console.log('Emitting logout event');
           DeviceEventEmitter.emit('user-logout');
         } catch (error) {
           console.error('Logout error:', error);

@@ -24,7 +24,6 @@ export const useRegisterRestaurant = () => {
       clearError();
     },
     onSuccess: (data) => {
-      console.log('Restaurant registration successful:', data);
       // Registration data can be handled locally in components if needed
     },
   });
@@ -44,7 +43,6 @@ export const useLoginRestaurant = () => {
       clearError();
     },
     onSuccess: async (data) => {
-      console.log('🍽️ Restaurant Login Success - Processing response...');
 
       const {
         user,
@@ -75,8 +73,6 @@ export const useLoginRestaurant = () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       queryClient.invalidateQueries({ queryKey: ['menu'] });
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
-
-      console.log('🍽️ Restaurant login process completed successfully');
     },
     onError: (error: any) => {
       console.error('🍽️ Restaurant login failed:', error);
@@ -104,7 +100,6 @@ export const useVerifyRestaurantOTP = () => {
       clearError();
     },
     onSuccess: async (data: any) => {
-      console.log('Restaurant OTP verification successful');
 
       // Store tokens if provided
       if (data.accessToken && data.refreshToken && data.user) {
@@ -142,7 +137,6 @@ export const useRestaurantLogout = () => {
       return Promise.resolve();
     },
     onSuccess: () => {
-      console.log('🍽️ Restaurant logout completed successfully');
       // Clear all cached data
       queryClient.clear();
     },
@@ -169,7 +163,6 @@ export const useUpdateRestaurantProfile = () => {
       clearError();
     },
     onSuccess: (updatedUser: User) => {
-      console.log('Restaurant profile updated successfully (legacy hook)');
       // Update user in store
       setUser(updatedUser);
 
@@ -196,10 +189,6 @@ export const useResetRestaurantPassword = () => {
       clearError();
     },
     onSuccess: (response) => {
-      console.log(
-        'Restaurant password reset successful:',
-        response?.message || 'Password reset successfully',
-      );
     },
   });
 };
@@ -216,7 +205,6 @@ export const useRequestRestaurantPasswordReset = () => {
       clearError();
     },
     onSuccess: () => {
-      console.log('Restaurant password reset request sent successfully');
     },
   });
 };

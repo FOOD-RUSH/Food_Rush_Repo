@@ -191,15 +191,6 @@ export const validateOrderData = (order: any): order is Order => {
  * Log order data for debugging
  */
 export const logOrderData = (order: Order, context: string = ''): void => {
-  console.log(`📋 [ORDER ${context}]`, {
-    id: order.id,
-    status: order.status,
-    customer: getCustomerName(order),
-    total: formatOrderTotal(order.total),
-    itemsCount: order.items?.length || 0,
-    timeSince: getTimeSinceOrder(order),
-    isOverdue: isOrderOverdue(order),
-  });
 };
 
 /**

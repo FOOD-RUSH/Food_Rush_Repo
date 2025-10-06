@@ -65,9 +65,7 @@ export const SimpleNotificationProvider: React.FC<
       initializeNotifications(userType, user.id)
         .then((success) => {
           if (success) {
-            console.log('✅ Notification service initialized successfully');
           } else {
-            console.warn('⚠️ Failed to initialize notification service');
           }
         })
         .catch((error) => {
@@ -101,7 +99,6 @@ export const SimpleNotificationProvider: React.FC<
       },
       cancelCartReminders: async () => {
         // This would need to be implemented in the notification service
-        console.log('Cancel cart reminders not implemented yet');
       },
       sendNewOrder: async (orderId: string, customerName?: string) => {
         await notifications.sendOrderNotification(orderId, 'pending', {

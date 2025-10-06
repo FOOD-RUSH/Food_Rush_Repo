@@ -169,7 +169,6 @@ const AccountHome: React.FC<
   }, [statusIsOpen]);
 
   const handleLogout = useCallback(() => {
-    console.log('Logout button pressed');
     Alert.alert(t('logout'), t('are_you_sure_logout'), [
       { text: t('cancel'), style: 'cancel' },
       {
@@ -177,11 +176,8 @@ const AccountHome: React.FC<
         style: 'destructive',
         onPress: async () => {
           try {
-            console.log('User confirmed logout, starting logout process...');
             Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            console.log('Calling logout function...');
             await logout();
-            console.log('Logout function completed successfully');
           } catch (error) {
             console.error('Logout error in AccountHome:', error);
             Alert.alert(
@@ -213,7 +209,6 @@ const AccountHome: React.FC<
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
                 setIsRestaurantOpen(false);
                 await toggleStatus(false);
-                console.log('Restaurant closed successfully');
                 Haptics.notificationAsync(
                   Haptics.NotificationFeedbackType.Success,
                 );
@@ -231,7 +226,6 @@ const AccountHome: React.FC<
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         setIsRestaurantOpen(true);
         await toggleStatus(true);
-        console.log('Restaurant opened successfully');
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       } catch (error) {
         console.error('Failed to open restaurant:', error);

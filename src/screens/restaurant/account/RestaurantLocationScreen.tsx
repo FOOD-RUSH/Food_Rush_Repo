@@ -60,32 +60,18 @@ const RestaurantLocationScreen: React.FC = () => {
 
   // Load profile on mount
   useEffect(() => {
-    console.log('🏪 RestaurantLocationScreen: Loading profile on mount');
     loadProfileIfNeeded();
   }, [loadProfileIfNeeded]);
 
   // Debug restaurant data
   useEffect(() => {
     if (restaurant) {
-      console.log('🏪 Restaurant data loaded:', {
-        id: restaurant.id,
-        name: restaurant.name,
-        address: restaurant.address,
-        latitude: restaurant.latitude,
-        longitude: restaurant.longitude,
-        deliveryRadius: restaurant.deliveryRadius,
-      });
     } else {
-      console.log('🏪 No restaurant data available');
     }
   }, [restaurant]);
 
   // Debug loading and error states
   useEffect(() => {
-    console.log('🏪 Location screen state:', {
-      isLoading,
-      error: error || 'none',
-    });
   }, [isLoading, error]);
 
   // Animation for loading indicator
@@ -124,7 +110,6 @@ const RestaurantLocationScreen: React.FC = () => {
   const getExactLocation = useCallback(async () => {
     setIsGettingLocation(true);
     try {
-      console.log('📍 Getting exact GPS location for restaurant...');
 
       const servicesEnabled = await LocationService.isLocationEnabled();
       if (!servicesEnabled) {
@@ -157,10 +142,6 @@ const RestaurantLocationScreen: React.FC = () => {
         locationResult.location &&
         !locationResult.location.isFallback
       ) {
-        console.log('✅ Exact GPS location obtained:');
-        console.log('Latitude:', locationResult.location.latitude);
-        console.log('Longitude:', locationResult.location.longitude);
-        console.log('Address:', locationResult.location.formattedAddress);
 
         setSelectedLocation(locationResult.location);
         Toast.show({
@@ -170,7 +151,6 @@ const RestaurantLocationScreen: React.FC = () => {
           position: 'top',
         });
       } else {
-        console.log('❌ Failed to get exact location, result:', locationResult);
         Toast.show({
           type: 'error',
           text1: 'Location Error',
@@ -206,7 +186,6 @@ const RestaurantLocationScreen: React.FC = () => {
     }
 
     try {
-      console.log('🚀 Updating restaurant location via API...');
 
       await updateLocationMutation.mutateAsync({
         latitude: selectedLocation.latitude,

@@ -104,7 +104,6 @@ class SecurityLogger {
 
       // Log to console in development
       if (__DEV__) {
-        console.log(`[SECURITY] ${type}:`, event);
       }
 
       // Check if we should sync with server
@@ -310,7 +309,6 @@ class SecurityLogger {
   private async syncWithServer(): Promise<void> {
     // Implementation for syncing events with server
     // This would typically involve sending events to a security monitoring service
-    console.log('Syncing security events with server...');
   }
 }
 

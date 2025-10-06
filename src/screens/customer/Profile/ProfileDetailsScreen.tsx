@@ -3,7 +3,7 @@ import {
   FeatherIcon,
 } from '@/src/components/common/icons';
 import { View, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useEffect } from 'react';
 import {
   useTheme,
   Divider,
@@ -61,7 +61,7 @@ const ProfileDetailsScreen = ({
       },
       {
         label: t('phone_number'),
-        value: user?.phoneNumber,
+        value: user?.phoneNumber && user.phoneNumber.trim() !== '' ? user.phoneNumber : undefined,
         icon: 'phone',
         iconSet: 'MaterialCommunityIcons' as const,
       },
@@ -96,6 +96,13 @@ const ProfileDetailsScreen = ({
   }, [navigation]);
 
   const isLoading = isAuthLoading || isRefetching;
+
+  // Automatically fetch profile when screen loads
+  useEffect(() => {
+    if (!user && !isLoading) {
+      handleRefresh();
+    }
+  }, [user, isLoading, handleRefresh]);
 
   return (
     <CommonView>
@@ -183,7 +190,7 @@ const ProfileDetailsScreen = ({
                           color={colors.onSurfaceVariant}
                           style={{ marginLeft: 6 }}
                         >
-                          {user?.phoneNumber || t('not_provided')}
+                          {user?.phoneNumber && user.phoneNumber.trim() !== '' ? user.phoneNumber : t('not_provided')}
                         </Body>
                       </View>
 

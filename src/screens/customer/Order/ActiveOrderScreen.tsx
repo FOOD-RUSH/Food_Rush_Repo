@@ -30,12 +30,10 @@ const ActiveOrderScreen = () => {
 
   const handleTrackOrder = useCallback((orderId: string) => {
     // Handle order tracking navigation
-    console.log('Track order:', orderId);
   }, []);
 
   const handleReorder = useCallback((order: Order) => {
     // Handle reorder logic
-    console.log('Reorder:', order);
   }, []);
 
   const renderOrderItem = useCallback(

@@ -55,7 +55,8 @@
       "allowBackup": false,
       "compileSdkVersion": 34,
       "targetSdkVersion": 34,
-      "minSdkVersion": 23
+      "minSdkVersion": 23,
+      "proguardFiles": ["proguard-rules.pro"]
     },
     "assetBundlePatterns": [
       "assets/fonts/*.ttf",

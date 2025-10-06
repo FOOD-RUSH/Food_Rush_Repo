@@ -62,8 +62,6 @@ export const PerformanceProvider: React.FC<PerformanceProviderProps> = ({
         renderTimesRef.current.reduce((a, b) => a + b, 0) /
         renderTimesRef.current.length;
       metricsRef.current.averageRenderTime = average;
-
-      console.log(`[Performance] ${componentName} rendered in ${startTime}ms`);
     }
   }, []);
 
@@ -71,7 +69,6 @@ export const PerformanceProvider: React.FC<PerformanceProviderProps> = ({
   const trackInteraction = useCallback(
     async (interactionName: string): Promise<void> => {
       if (__DEV__) {
-        console.log(`[Performance] Starting interaction: ${interactionName}`);
       }
 
       isInteractionCompleteRef.current = false;
@@ -80,9 +77,6 @@ export const PerformanceProvider: React.FC<PerformanceProviderProps> = ({
         InteractionManager.runAfterInteractions(() => {
           isInteractionCompleteRef.current = true;
           if (__DEV__) {
-            console.log(
-              `[Performance] Completed interaction: ${interactionName}`,
-            );
           }
           resolve();
         });

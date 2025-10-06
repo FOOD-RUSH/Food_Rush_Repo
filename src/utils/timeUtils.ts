@@ -17,9 +17,6 @@ export const getCurrentCameroonTime = (): Date => {
 
     // Validate the created date
     if (isNaN(cameroonTime.getTime())) {
-      console.warn(
-        'Invalid Cameroon time created, falling back to current time',
-      );
       return now;
     }
 
@@ -74,10 +71,6 @@ export const formatCameroonTime = (
   try {
     return new Intl.DateTimeFormat('fr-CM', formatOptions).format(date);
   } catch (error) {
-    console.warn(
-      'Error formatting Cameroon time, falling back to default:',
-      error,
-    );
     // Fallback to basic formatting
     return date.toLocaleString('fr-FR', formatOptions);
   }

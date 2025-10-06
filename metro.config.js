@@ -45,6 +45,13 @@ config.serializer = {
       if (module.path.includes('__DEV__')) return false;
       if (module.path.includes('.test.')) return false;
       if (module.path.includes('.spec.')) return false;
+      if (module.path.includes('__tests__')) return false;
+      if (module.path.includes('__mocks__')) return false;
+      if (module.path.includes('.old.')) return false;
+      if (module.path.includes('.backup.')) return false;
+      if (module.path.includes('.tmp.')) return false;
+      if (module.path.includes('debug-')) return false;
+      if (module.path.includes('scripts/')) return false;
       return true;
     },
   }),

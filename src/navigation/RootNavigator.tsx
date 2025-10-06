@@ -80,7 +80,7 @@ import ThemeSettingsScreen from '../screens/restaurant/account/ThemeSettingsScre
 // Profile screens
 import EditProfileScreen from '../screens/customer/Profile/EditProfileScreen';
 import FavoriteRestaurants from '../screens/customer/Profile/FavoriteRestaurants';
-import PaymentScreen from '../screens/customer/Profile/PaymentScreen';
+import TransactionHistoryScreen from '../screens/customer/Profile/TransactionHistoryScreen';
 import LanguageScreen from '../screens/customer/Profile/LanguageScreen';
 import ProfileEditScreen from '../screens/restaurant/account/ProfileEditScreen';
 import AddressScreen from '../screens/customer/Profile/AddressScreen';
@@ -477,9 +477,9 @@ const RootNavigator: React.FC = () => {
               options={{ headerTitle: t('favorite_restaurants') }}
             />
             <Stack.Screen
-              name="PaymentMethods"
-              component={PaymentScreen}
-              options={{ headerTitle: t('payment_methods') }}
+              name="TransactionHistory"
+              component={TransactionHistoryScreen}
+              options={{ headerTitle: t('transaction_history') }}
             />
             <Stack.Screen
               name="LanguageScreen"

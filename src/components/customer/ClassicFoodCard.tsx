@@ -1,5 +1,5 @@
 import { IoniconsIcon, MaterialIcon } from '@/src/components/common/icons';
-import { TouchableOpacity, View, Text } from 'react-native';
+import { TouchableOpacity, View, Text, Platform } from 'react-native';
 import React from 'react';
 import { Card, useTheme } from 'react-native-paper';
 import { useResponsive } from '@/src/hooks/useResponsive';
@@ -44,25 +44,55 @@ const ClassicFoodCard = ({
   const { isSmallScreen, isTablet, isLargeScreen, wp, getResponsiveText } =
     useResponsive();
 
-  // Calculate responsive dimensions
+  // Calculate responsive dimensions and text sizes like RestaurantCard
   const getCardDimensions = () => {
     if (isLargeScreen) {
       return {
-        width: Math.min(wp(35), 220),
-        imageSize: 120,
+        width: Math.min(wp(35), 240), // Increased max width
+        imageSize: 130,
         padding: 16,
+        borderRadius: 20,
+        heartIconSize: 22,
+        // Text sizes (increased by 2px)
+        foodNameSize: getResponsiveText(19), // Increased by 2
+        restaurantNameSize: getResponsiveText(17), // Increased by 2
+        ratingSize: getResponsiveText(15), // Increased by 2
+        distanceSize: getResponsiveText(15), // Increased by 2
+        priceSize: getResponsiveText(18), // Increased by 2
+        deliverySize: getResponsiveText(15), // Increased by 2
+        badgeSize: getResponsiveText(12), // Increased by 2
       };
     } else if (isTablet) {
       return {
-        width: Math.min(wp(40), 200),
-        imageSize: 110,
+        width: Math.min(wp(40), 210), // Increased max width
+        imageSize: 120,
         padding: 14,
+        borderRadius: 18,
+        heartIconSize: 20,
+        // Text sizes (increased by 2px)
+        foodNameSize: getResponsiveText(18), // Increased by 2
+        restaurantNameSize: getResponsiveText(16), // Increased by 2
+        ratingSize: getResponsiveText(14), // Increased by 2
+        distanceSize: getResponsiveText(14), // Increased by 2
+        priceSize: getResponsiveText(17), // Increased by 2
+        deliverySize: getResponsiveText(14), // Increased by 2
+        badgeSize: getResponsiveText(11), // Increased by 2
       };
     } else {
       return {
-        width: Math.min(wp(50), 180),
-        imageSize: 100,
+        width: Math.min(wp(50), 190), // Increased max width
+        imageSize: 110,
         padding: 12,
+        borderRadius: 16,
+        heartIconSize: 18,
+        // Text sizes (increased by 2px)
+        foodNameSize: getResponsiveText(17), // Increased by 2
+        restaurantNameSize: getResponsiveText(15), // Increased by 2
+        ratingSize: getResponsiveText(13), // Increased by 2
+        distanceSize: getResponsiveText(13), // Increased by 2
+        priceSize: getResponsiveText(16), // Increased by 2
+        deliverySize: getResponsiveText(13), // Increased by 2
+        badgeSize: getResponsiveText(10), // Increased by 2
       };
     }
   };
@@ -98,17 +128,22 @@ const ClassicFoodCard = ({
     >
       <Card
         mode="outlined"
-        className="overflow-hidden rounded-2xl"
         style={{
-          width: cardDimensions.width,
           backgroundColor: colors.surface,
+          borderWidth: 1,
           borderColor: colors.outline + '30',
-          borderWidth: 0.5,
-          elevation: 4,
+          borderRadius: cardDimensions.borderRadius,
+          width: cardDimensions.width,
+          alignSelf: 'center',
+          overflow: 'hidden',
+          // Enhanced shadow like RestaurantCard
           shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 4,
+          shadowOffset: { width: 0, height: 3 },
+          shadowOpacity: 0.12,
+          shadowRadius: 6,
+          elevation: 6,
+          // Add opacity for unavailable items
+          opacity: isAvailable ? 1 : 0.7,
         }}
       >
         <View style={{ padding: cardDimensions.padding }}>
@@ -122,12 +157,30 @@ const ClassicFoodCard = ({
                 borderRadius: cardDimensions.imageSize / 2,
                 alignSelf: 'center',
               }}
+              resizeMode="cover"
             />
             <TouchableOpacity 
               className="absolute top-2 right-2 bg-white rounded-full shadow-sm"
-              style={{ padding: 6 }}
+              style={{ 
+                padding: cardDimensions.padding * 0.4,
+                ...Platform.select({
+                  ios: {
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                  },
+                  android: {
+                    elevation: 3,
+                  },
+                }),
+              }}
             >
-              <IoniconsIcon name="heart-outline" color={'#ff6b6b'} size={20} />
+              <IoniconsIcon 
+                name="heart-outline" 
+                color={'#ff6b6b'} 
+                size={cardDimensions.heartIconSize} 
+              />
             </TouchableOpacity>
 
             {/* Status badge */}
@@ -137,7 +190,10 @@ const ClassicFoodCard = ({
                   !isAvailable ? 'bg-red-500' : 'bg-blue-500'
                 }`}
               >
-                <Text className="text-white font-bold text-center" style={{ fontSize: 10 }}>
+                <Text 
+                  className="text-white font-bold text-center" 
+                  style={{ fontSize: cardDimensions.badgeSize }}
+                >
                   {!isAvailable ? t('sold_out') : status || 'AVAILABLE'}
                 </Text>
               </View>
@@ -150,7 +206,8 @@ const ClassicFoodCard = ({
               className="font-semibold mb-1 text-center w-full"
               style={{
                 color: colors.onSurface,
-                fontSize: getResponsiveText(isSmallScreen ? 14 : 16),
+                fontSize: cardDimensions.foodNameSize,
+                lineHeight: cardDimensions.foodNameSize * 1.2,
               }}
               numberOfLines={1}
               ellipsizeMode="tail"
@@ -161,7 +218,8 @@ const ClassicFoodCard = ({
               className="mb-2 text-center w-full"
               style={{
                 color: colors.onSurfaceVariant,
-                fontSize: getResponsiveText(isSmallScreen ? 12 : 14),
+                fontSize: cardDimensions.restaurantNameSize,
+                lineHeight: cardDimensions.restaurantNameSize * 1.2,
               }}
               numberOfLines={1}
               ellipsizeMode="tail"
@@ -173,12 +231,12 @@ const ClassicFoodCard = ({
           {/* Rating and distance */}
           <View className="flex-row justify-between items-center mb-3">
             <View className="flex-row items-center">
-              <IoniconsIcon name="star" size={16} color={'#ffbb00'} />
+              <IoniconsIcon name="star" size={cardDimensions.ratingSize} color={'#ffbb00'} />
               <Text
                 className="ml-1"
                 style={{ 
                   color: colors.onSurface,
-                  fontSize: getResponsiveText(12)
+                  fontSize: cardDimensions.ratingSize
                 }}
               >
                 {rating ? rating.toFixed(1) : 'N/A'}
@@ -187,14 +245,14 @@ const ClassicFoodCard = ({
             <View className="flex-row items-center">
               <IoniconsIcon
                 name="location-outline"
-                size={16}
+                size={cardDimensions.distanceSize}
                 color={colors.primary}
               />
               <Text
                 className="ml-1"
                 style={{ 
                   color: colors.onSurface,
-                  fontSize: getResponsiveText(12)
+                  fontSize: cardDimensions.distanceSize
                 }}
               >
                 {distance ? `${distance.toFixed(1)}km` : 'N/A'}
@@ -208,7 +266,7 @@ const ClassicFoodCard = ({
               className="font-bold flex-shrink"
               style={{ 
                 color: colors.primary,
-                fontSize: getResponsiveText(isSmallScreen ? 14 : 16),
+                fontSize: cardDimensions.priceSize,
               }}
               numberOfLines={1}
               ellipsizeMode="tail"
@@ -219,13 +277,13 @@ const ClassicFoodCard = ({
               <MaterialIcon
                 name="delivery-dining"
                 color={colors.primary}
-                size={18}
+                size={cardDimensions.deliverySize}
               />
               <Text
                 className="ml-1"
                 style={{ 
                   color: colors.onSurface,
-                  fontSize: getResponsiveText(12)
+                  fontSize: cardDimensions.deliverySize
                 }}
                 numberOfLines={1}
               >

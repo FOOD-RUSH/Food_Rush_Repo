@@ -46,7 +46,6 @@ class NotificationService {
     try {
       const hasPermission = await this.requestPermissions();
       if (!hasPermission) {
-        console.warn('Notification permissions denied');
         return false;
       }
 
@@ -65,7 +64,6 @@ class NotificationService {
   // Request notification permissions
   async requestPermissions(): Promise<boolean> {
     if (!Device.isDevice) {
-      console.warn('Push notifications only work on physical devices');
       return false;
     }
 
@@ -174,7 +172,6 @@ class NotificationService {
       addNotification(notificationData);
       this.updateBadgeCount();
     } catch (error) {
-      console.warn('Could not add notification to store:', error);
     }
   }
 
@@ -424,7 +421,6 @@ class NotificationService {
         typeof unreadCount === 'number' ? Math.max(0, unreadCount) : 0;
       await Notifications.setBadgeCountAsync(badgeCount);
     } catch (error) {
-      console.warn('Could not update badge count:', error);
     }
   }
 

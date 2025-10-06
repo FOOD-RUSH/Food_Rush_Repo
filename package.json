@@ -19,11 +19,13 @@
     "deps:analyze": "npx depcheck",
     "deps:unused": "npx depcheck --json | jq '.dependencies'",
     "production:cleanup": "node scripts/production-cleanup.js",
-    "production:prepare": "npm run production:cleanup && npm run bundle:size",
+    "production:prepare": "npm run production:cleanup && npm run lint && npm run bundle:size",
     "production:build:android": "NODE_ENV=production eas build --platform android --profile production",
-    "production:build:optimized": "node scripts/production-build.js",
     "production:build:ios": "NODE_ENV=production eas build --platform ios --profile production",
-    "production:build:all": "npm run production:prepare && npm run production:build:android && npm run production:build:ios"
+    "production:build:all": "npm run production:prepare && npm run production:build:android && npm run production:build:ios",
+    "production:test": "npm run lint && npm run format && npm run production:cleanup",
+    "clean": "rm -rf node_modules/.cache dist .expo/web-build production-cleanup-report.json",
+    "clean:all": "npm run clean && rm -rf node_modules && npm install"
   },
   "jest": {
     "preset": "jest-expo"

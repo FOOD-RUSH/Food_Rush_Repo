@@ -42,7 +42,6 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({
           setCurrentLanguage(i18n.language as SupportedLanguage);
         }
       } catch (error) {
-        console.warn('Language initialization failed:', error);
         setCurrentLanguage('en');
       } finally {
         setIsLoading(false);

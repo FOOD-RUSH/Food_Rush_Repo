@@ -148,7 +148,6 @@ const LocationModal: React.FC<LocationModalProps> = ({
               result.street || result.district || result.subregion || 'Yaoundé';
           }
         } catch (geocodeError) {
-          console.warn('Geocoding failed:', geocodeError);
           // Continue with coordinates even if geocoding fails
         }
 

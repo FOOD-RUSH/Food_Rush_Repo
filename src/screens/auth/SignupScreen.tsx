@@ -171,7 +171,6 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
               text2: t('account_created_successfully'),
               position: 'top',
             });
-            console.log(response.data.userId);
 
             // Navigate to OTP verification screen with the response data
             navigation.navigate('OTPVerification', {

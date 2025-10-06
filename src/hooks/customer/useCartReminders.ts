@@ -27,7 +27,6 @@ export const useCartReminders = () => {
     const initializeService = async () => {
       try {
         await cartReminderService.initialize();
-        console.log('Cart reminder service initialized');
       } catch (error) {
         console.error('Failed to initialize cart reminder service:', error);
       }

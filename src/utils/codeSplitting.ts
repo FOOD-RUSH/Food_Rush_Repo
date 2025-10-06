@@ -186,7 +186,6 @@ export const FEATURE_FLAGS = {
  */
 export const trackComponentLoad = (componentName: string, loadTime: number) => {
   if (__DEV__) {
-    console.log(`Component ${componentName} loaded in ${loadTime}ms`);
   }
 
   // In production, you might send this to analytics

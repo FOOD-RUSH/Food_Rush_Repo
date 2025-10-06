@@ -35,9 +35,9 @@ export interface User {
   id: string;
   email: string;
   fullName: string;
-  phoneNumber: string; // Made required since it's always present in API responses
+  phoneNumber?: string; // Optional since it can be empty string from API
   role: 'customer' | 'restaurant';
-  isEmailVerified: boolean;
+  isEmailVerified?: boolean;
   isPhoneVerified?: boolean;
   profilePicture?: string | null;
   status?: 'active' | 'pending_verification' | 'suspended' | 'inactive';
@@ -195,7 +195,7 @@ export interface AuthState {
   defaultRestaurantId?: string;
 }
 
-// Order Types from backend
+// Order Types from backend (matches API response exactly)
 export interface Order {
   id: string;
   userId: string;
@@ -214,19 +214,23 @@ export interface Order {
   status: OrderStatus;
   paymentMethod: string;
   createdAt: string;
-  delivery: {
+  // Optional delivery info (only present when order has delivery)
+  delivery?: {
     id: string;
     status: string;
-    deliveredAt: string | null;
-    customerConfirmed: boolean;
-    customerConfirmedAt: string | null;
-    rider: {
+    deliveredAt?: string | null;
+    customerConfirmed?: boolean;
+    customerConfirmedAt?: string | null;
+    rider?: {
       id: string;
       fullName: string;
-      email: string;
+      email?: string;
       phoneNumber: string;
     };
   };
+  // Additional fields that might be present
+  restaurantName?: string;
+  deliveryAddress?: string;
 }
 
 // Order item
@@ -258,13 +262,13 @@ export declare interface InputFieldProps extends TextInputProps {
 }
 
 export type OrderStatus =
-  | 'pending'
-  | 'confirmed'
-  | 'preparing'
-  | 'ready_for_pickup'
-  | 'out_for_delivery'
-  | 'delivered'
-  | 'cancelled';
+  | 'pending'                    // Order placed, waiting for restaurant confirmation (2-15 min)
+  | 'confirmed'                  // Restaurant confirmed, customer needs to pay
+  | 'preparing'                  // Restaurant is preparing the order (after payment)
+  | 'ready_for_pickup'           // Order ready for pickup
+  | 'out_for_delivery'           // Order is being delivered
+  | 'delivered'                  // Order delivered
+  | 'cancelled';                 // Order cancelled (any reason)
 
 // Location Types
 export interface Location {

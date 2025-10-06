@@ -17,7 +17,7 @@ export interface CreateOrderRequest {
   paymentMethod: 'mobile_money'; // Only mobile money is supported
 }
 
-// Order creation response (matches API docs)
+// Order creation response (matches API docs exactly)
 export interface CreateOrderResponse {
   status_code: number;
   message: string;
@@ -36,13 +36,7 @@ export interface CreateOrderResponse {
     subtotal: number;
     deliveryPrice: number;
     total: number;
-    status:
-      | 'pending'
-      | 'confirmed'
-      | 'preparing'
-      | 'ready'
-      | 'delivered'
-      | 'cancelled';
+    status: 'pending' | 'confirmed' | 'preparing' | 'ready_for_pickup' | 'out_for_delivery' | 'delivered' | 'cancelled';
     paymentMethod: string;
     createdAt: string;
   };
@@ -64,12 +58,10 @@ export const OrderApi = {
     orderData: CreateOrderRequest,
   ): Promise<CreateOrderResponse> => {
     try {
-      console.log('🚀 Creating order with data:', orderData);
       const response = await apiClient.post<CreateOrderResponse>(
         '/orders',
         orderData,
       );
-      console.log('✅ Order created successfully:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ Error creating order:', error);
@@ -81,8 +73,10 @@ export const OrderApi = {
   getOrderById: async (orderId: string) => {
     try {
       const response = await apiClient.get<{
+        status_code: number;
+        message: string;
         data: Order;
-      }>(`orders/${orderId}`);
+      }>(`/orders/${orderId}`);
       return response.data.data;
     } catch (error) {
       console.error(`Error fetching order ${orderId}:`, error);
@@ -90,14 +84,16 @@ export const OrderApi = {
     }
   },
 
-  // Get user orders with optional filters
+  // Get user orders with optional filters (matches API docs)
   getUserOrders: async (params?: {
-    status?: string;
+    status?: 'pending' | 'confirmed' | 'preparing' | 'ready_for_pickup' | 'out_for_delivery' | 'delivered' | 'cancelled';
     limit?: number;
     offset?: number;
   }) => {
     try {
       const response = await apiClient.get<{
+        status_code: number;
+        message: string;
         data: Order[];
       }>('/orders/my', { params });
       return response.data.data;
@@ -109,7 +105,7 @@ export const OrderApi = {
 
   // Get my orders (alias for getUserOrders for consistency)
   getMyOrders: async (params?: {
-    status?: string;
+    status?: 'pending' | 'confirmed' | 'preparing' | 'ready_for_pickup' | 'out_for_delivery' | 'delivered' | 'cancelled';
     limit?: number;
     offset?: number;
   }) => {
@@ -119,11 +115,9 @@ export const OrderApi = {
   // Customer confirms order to lock delivery fee and proceed to payment
   customerConfirmOrder: async (orderId: string) => {
     try {
-      console.log('🚀 Customer confirming order:', orderId);
       const response = await apiClient.post(
         `/orders/${orderId}/customer-confirm`,
       );
-      console.log('✅ Customer order confirmation successful:', response.data);
       return response.data;
     } catch (error) {
       console.error(`❌ Error confirming order ${orderId}:`, error);
@@ -131,10 +125,12 @@ export const OrderApi = {
     }
   },
 
-  // Check if order is ready for customer confirmation (status = 'confirmed')
+  // Check order status (uses same endpoint as getOrderById)
   checkOrderStatus: async (orderId: string) => {
     try {
       const response = await apiClient.get<{
+        status_code: number;
+        message: string;
         data: Order;
       }>(`/orders/${orderId}`);
       return response.data.data;
@@ -144,14 +140,12 @@ export const OrderApi = {
     }
   },
 
-  // Customer confirms they have received the delivery
+  // Customer confirms they have received the delivery (matches API docs)
   confirmOrderReceived: async (orderId: string) => {
     try {
-      console.log('🚀 Confirming delivery received for order:', orderId);
       const response = await apiClient.post(
-        `orders/${orderId}/confirm-received`,
+        `/orders/${orderId}/confirm-received`,
       );
-      console.log('✅ Delivery confirmation response:', response.data);
       return response.data;
     } catch (error) {
       console.error(
@@ -165,11 +159,9 @@ export const OrderApi = {
   // Cancel order (customer cancels their own order)
   cancelOrder: async (orderId: string, reason?: string) => {
     try {
-      console.log('🚀 Cancelling order:', orderId, 'Reason:', reason);
       const response = await apiClient.post(`/orders/${orderId}/cancel`, {
         reason: reason || 'Customer cancelled',
       });
-      console.log('✅ Order cancellation response:', response.data);
       return response.data;
     } catch (error) {
       console.error(`❌ Error cancelling order ${orderId}:`, error);

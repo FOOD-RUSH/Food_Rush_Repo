@@ -8,16 +8,17 @@ import {
 import { useCartStore } from '@/src/stores/customerStores/cartStore';
 import { useAuthUser } from '@/src/stores/customerStores';
 import { useDefaultAddress } from '@/src/location/store';
-import { useSelectedPaymentMethod } from '@/src/stores/customerStores/paymentStore';
+// Payment method now handled in checkout component
 
 export type OrderFlowStep =
-  | 'creating'
-  | 'pending_restaurant_confirmation'
-  | 'ready_for_customer_confirmation'
-  | 'customer_confirming'
-  | 'payment_processing'
-  | 'completed'
-  | 'failed';
+  | 'creating'                    // Creating the order
+  | 'pending'                     // Waiting for restaurant confirmation (2-15 min)
+  | 'confirmed'                   // Restaurant confirmed, ready for payment
+  | 'payment_processing'          // Payment in progress
+  | 'preparing'                   // Payment successful, restaurant preparing
+  | 'completed'                   // Order flow completed
+  | 'cancelled'                   // Order cancelled
+  | 'failed';                     // Generic failure
 
 export interface OrderFlowState {
   step: OrderFlowStep;
@@ -35,16 +36,15 @@ export const useOrderFlow = () => {
   const clearCart = useCartStore((state) => state.clearCart);
   const user = useAuthUser();
   const defaultAddress = useDefaultAddress();
-  const selectedPaymentMethod = useSelectedPaymentMethod();
+  // Payment method now handled in checkout component
 
   // Create order mutation
   const createOrderMutation = useMutation({
     mutationFn: (orderData: CreateOrderRequest) =>
       OrderApi.createOrder(orderData),
     onSuccess: (response) => {
-      console.log('✅ Order created successfully:', response);
       setFlowState({
-        step: 'pending_restaurant_confirmation',
+        step: 'pending',
         orderId: response.data.id,
         orderData: response.data,
       });
@@ -58,50 +58,49 @@ export const useOrderFlow = () => {
     },
   });
 
-  // Customer confirm order mutation
-  const customerConfirmMutation = useMutation({
-    mutationFn: (orderId: string) => OrderApi.customerConfirmOrder(orderId),
+  // Cancel order mutation (before restaurant confirmation)
+  const cancelOrderMutation = useMutation({
+    mutationFn: (orderId: string) => OrderApi.cancelOrder(orderId),
     onSuccess: () => {
-      console.log('✅ Customer confirmation successful');
       setFlowState((prev) => ({
         ...prev,
-        step: 'payment_processing',
+        step: 'cancelled',
       }));
     },
     onError: (error) => {
-      console.error('❌ Customer confirmation failed:', error);
+      console.error('❌ Order cancellation failed:', error);
       setFlowState((prev) => ({
         ...prev,
-        step: 'failed',
-        error: 'Failed to confirm order. Please try again.',
+        error: 'Failed to cancel order. Please try again.',
       }));
     },
   });
 
-  // Poll order status to check if restaurant confirmed
+  // Poll order status to check restaurant response
   const { data: orderStatus, refetch: refetchOrderStatus } = useQuery({
     queryKey: ['orderStatus', flowState.orderId],
     queryFn: () =>
       flowState.orderId ? OrderApi.checkOrderStatus(flowState.orderId) : null,
     enabled:
       !!flowState.orderId &&
-      flowState.step === 'pending_restaurant_confirmation',
+      (flowState.step === 'pending' || flowState.step === 'confirmed'),
     refetchInterval: 3000, // Poll every 3 seconds
     onSuccess: (data) => {
-      if (data?.status === 'confirmed') {
-        console.log(
-          '✅ Restaurant confirmed order, ready for customer confirmation',
-        );
+      if (data?.status === 'confirmed' && flowState.step === 'pending') {
         setFlowState((prev) => ({
           ...prev,
-          step: 'ready_for_customer_confirmation',
+          step: 'confirmed',
         }));
       } else if (data?.status === 'cancelled') {
-        console.log('❌ Restaurant cancelled order');
         setFlowState((prev) => ({
           ...prev,
-          step: 'failed',
-          error: 'Restaurant cancelled your order. Please try again.',
+          step: 'cancelled',
+          error: 'Order was cancelled.',
+        }));
+      } else if (data?.status === 'preparing') {
+        setFlowState((prev) => ({
+          ...prev,
+          step: 'preparing',
         }));
       }
     },
@@ -109,11 +108,10 @@ export const useOrderFlow = () => {
 
   // Create order from cart
   const createOrderFromCart = useCallback(
-    async (restaurantId: string) => {
+    async (restaurantId: string, coordinates?: { latitude: number; longitude: number }) => {
       if (
         !user?.id ||
         !defaultAddress ||
-        !selectedPaymentMethod ||
         cartItems.length === 0
       ) {
         throw new Error('Missing required information for order creation');
@@ -128,8 +126,8 @@ export const useOrderFlow = () => {
           specialInstructions: item.specialInstructions || undefined,
         })),
         deliveryAddress: defaultAddress.fullAddress,
-        deliveryLatitude: defaultAddress.latitude || 0,
-        deliveryLongitude: defaultAddress.longitude || 0,
+        deliveryLatitude: coordinates?.latitude || defaultAddress.latitude || 0,
+        deliveryLongitude: coordinates?.longitude || defaultAddress.longitude || 0,
         paymentMethod: 'mobile_money', // Only mobile money is supported
       };
 
@@ -139,56 +137,60 @@ export const useOrderFlow = () => {
     [
       user,
       defaultAddress,
-      selectedPaymentMethod,
       cartItems,
       createOrderMutation,
     ],
   );
 
-  // Customer confirms order (after restaurant confirmation)
-  const confirmOrder = useCallback(() => {
+  // Cancel order (before restaurant confirmation)
+  const cancelOrder = useCallback(() => {
     if (!flowState.orderId) {
-      throw new Error('No order ID available for confirmation');
+      throw new Error('No order ID available for cancellation');
     }
 
+    cancelOrderMutation.mutate(flowState.orderId);
+  }, [flowState.orderId, cancelOrderMutation]);
+
+  // Proceed to payment (after restaurant confirmation)
+  const proceedToPayment = useCallback(() => {
     setFlowState((prev) => ({
       ...prev,
-      step: 'customer_confirming',
+      step: 'payment_processing',
     }));
-
-    customerConfirmMutation.mutate(flowState.orderId);
-  }, [flowState.orderId, customerConfirmMutation]);
+  }, []);
 
   // Mark payment as completed
   const completePayment = useCallback(() => {
     setFlowState((prev) => ({
       ...prev,
-      step: 'completed',
+      step: 'preparing',
     }));
     clearCart();
   }, [clearCart]);
+
+  // Mark payment as failed
+  const failPayment = useCallback((error: string) => {
+    setFlowState((prev) => ({
+      ...prev,
+      step: 'failed',
+      error,
+    }));
+  }, []);
 
   // Reset flow state
   const resetFlow = useCallback(() => {
     setFlowState({ step: 'creating' });
   }, []);
 
-  // Check if order is ready for customer confirmation
-  const isReadyForCustomerConfirmation =
-    flowState.step === 'ready_for_customer_confirmation';
-
-  // Check if order is waiting for restaurant confirmation
-  const isWaitingForRestaurant =
-    flowState.step === 'pending_restaurant_confirmation';
-
-  // Check if payment is in progress
-  const isPaymentInProgress = flowState.step === 'payment_processing';
-
-  // Check if order flow is completed
+  // Status checks
+  const isPending = flowState.step === 'pending';
+  const isConfirmed = flowState.step === 'confirmed';
+  const isPaymentProcessing = flowState.step === 'payment_processing';
+  const isPreparing = flowState.step === 'preparing';
   const isCompleted = flowState.step === 'completed';
-
-  // Check if order flow failed
+  const isCancelled = flowState.step === 'cancelled';
   const isFailed = flowState.step === 'failed';
+  const canCancel = isPending; // Can only cancel before restaurant confirmation
 
   return {
     // State
@@ -197,20 +199,25 @@ export const useOrderFlow = () => {
 
     // Actions
     createOrderFromCart,
-    confirmOrder,
+    cancelOrder,
+    proceedToPayment,
     completePayment,
+    failPayment,
     resetFlow,
     refetchOrderStatus,
 
     // Status checks
-    isReadyForCustomerConfirmation,
-    isWaitingForRestaurant,
-    isPaymentInProgress,
+    isPending,
+    isConfirmed,
+    isPaymentProcessing,
+    isPreparing,
     isCompleted,
+    isCancelled,
     isFailed,
+    canCancel,
 
     // Loading states
     isCreatingOrder: createOrderMutation.isPending,
-    isConfirmingOrder: customerConfirmMutation.isPending,
+    isCancellingOrder: cancelOrderMutation.isPending,
   };
 };

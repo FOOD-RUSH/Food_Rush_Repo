@@ -28,7 +28,6 @@ class LocationService {
     try {
       return await ExpoLocation.hasServicesEnabledAsync();
     } catch (error) {
-      console.warn('Error checking location services:', error);
       return false;
     }
   }
@@ -45,7 +44,6 @@ class LocationService {
           return PermissionStatus.NOT_REQUESTED;
       }
     } catch (error) {
-      console.warn('Error getting permission status:', error);
       return PermissionStatus.NOT_REQUESTED;
     }
   }
@@ -84,7 +82,6 @@ class LocationService {
         shouldShowRationale: result.canAskAgain === false,
       };
     } catch (error) {
-      console.warn('Error requesting permission:', error);
       return {
         granted: false,
         status: PermissionStatus.DENIED,
@@ -166,7 +163,6 @@ class LocationService {
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Failed to get location';
-      console.warn('Error getting current location:', errorMessage);
       return this.getFallbackLocation(errorMessage);
     }
   }
@@ -208,7 +204,6 @@ class LocationService {
         formattedAddress: addressParts.join(', '),
       };
     } catch (error) {
-      console.warn('Reverse geocoding failed:', error);
       return {
         exactLocation: 'Yaoundé',
         formattedAddress: 'Yaoundé, Cameroun',

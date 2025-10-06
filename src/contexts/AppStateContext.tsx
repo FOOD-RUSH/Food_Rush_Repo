@@ -58,10 +58,8 @@ export const AppStateProvider: React.FC<AppStateProviderProps> = ({
       // Handle app state transitions
       if (nextAppState === 'background') {
         // App went to background - save any pending data
-        console.log('App went to background');
       } else if (nextAppState === 'active') {
         // App became active - refresh data if needed
-        console.log('App became active');
       }
     },
     [updateLastActive],

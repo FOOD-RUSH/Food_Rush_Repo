@@ -27,7 +27,6 @@ const CompletedOrderScreen = () => {
 
   const handleReorder = useCallback((order: Order) => {
     // Handle reorder logic
-    console.log('Reorder:', order);
   }, []);
 
   const renderOrderItem = useCallback(

@@ -69,10 +69,6 @@ class ApiClient {
             // API Request: method, url, hasAuth, contentType
           } else if (config.url && !config.url.includes('/auth/')) {
             // Warn if no token is available for protected routes
-            console.warn(
-              '⚠️ No auth token available for protected route:',
-              config.url,
-            );
           }
           return config;
         } catch (error) {
@@ -186,7 +182,6 @@ class ApiClient {
       // Attempting token refresh for request: originalRequest.url
 
       if (!refreshToken) {
-        console.warn('⚠️ No refresh token available, logging out');
         await TokenManager.clearAllTokens();
         // Trigger full logout when no refresh token
         this.triggerLogout();

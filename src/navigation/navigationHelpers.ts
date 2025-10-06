@@ -34,23 +34,18 @@ export function reset<T extends keyof RootStackParamList>(
   name: T,
   params?: RootStackParamList[T],
 ) {
-  console.log('Reset function called with:', { name, params });
   if (navigationRef.isReady()) {
-    console.log('Navigation is ready, performing reset...');
     try {
       navigationRef.reset({
         index: 0,
         routes: [{ name, params }],
       });
-      console.log('Navigation reset completed successfully');
       return true;
     } catch (error) {
       console.error('Error during navigation reset:', error);
       // Fallback: try simple navigate
       try {
-        console.log('Attempting fallback navigation...');
         navigationRef.navigate(name as any, params);
-        console.log('Fallback navigation completed');
         return true;
       } catch (fallbackError) {
         console.error('Fallback navigation also failed:', fallbackError);
@@ -58,17 +53,14 @@ export function reset<T extends keyof RootStackParamList>(
       }
     }
   } else {
-    console.warn('Navigation is not ready for reset');
     // Retry after a short delay
     setTimeout(() => {
-      console.log('Retrying navigation reset...');
       if (navigationRef.isReady()) {
         try {
           navigationRef.reset({
             index: 0,
             routes: [{ name, params }],
           });
-          console.log('Delayed navigation reset completed');
         } catch (error) {
           console.error('Delayed navigation reset failed:', error);
         }
@@ -107,16 +99,12 @@ export function navigateFromService<T extends keyof RootStackParamList>(
       navigationRef.navigate(name as any);
     }
   } else {
-    console.warn(
-      'Navigation not ready. This should only be called from services/utils.',
-    );
   }
 }
 
 // For push notifications, deep links, etc.
 export function handleDeepLink(url: string) {
   // Parse URL and navigate accordingly
-  console.log('Handling deep link:', url);
 
   try {
     const parsedUrl = new URL(url);
@@ -185,8 +173,6 @@ export function handleDeepLink(url: string) {
       navigateFromService('Auth');
       return;
     }
-
-    console.warn('Unhandled deep link path:', path);
   } catch (error) {
     console.error('Error parsing deep link:', error);
     // Fallback to home
@@ -228,7 +214,6 @@ export const ServiceNavigation = {
 
   // App switching
   logout: () => {
-    console.log('ServiceNavigation.logout called');
     // Dispatch a custom event that RootNavigator can listen to
     DeviceEventEmitter.emit('user-logout');
   },
@@ -247,7 +232,6 @@ export const ServiceNavigation = {
   },
 
   resetToUserTypeSelection: () => {
-    console.log('ServiceNavigation.resetToUserTypeSelection called');
     // Dispatch a custom event that RootNavigator can listen to
     DeviceEventEmitter.emit('user-logout');
   },

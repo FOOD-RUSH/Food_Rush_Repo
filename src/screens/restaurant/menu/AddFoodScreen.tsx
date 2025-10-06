@@ -353,14 +353,6 @@ export const AddFoodScreen = () => {
         });
 
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-
-        console.log('✅ Image validated and selected for menu item:', {
-          type: imageResult.type,
-          name: imageResult.name,
-          uri: imageResult.uri.substring(0, 50) + '...',
-          isValidType: isValidImageType(imageResult.type),
-          formDataReady: true,
-        });
       }
     } catch (error: any) {
       console.error('❌ Error picking image:', error);
@@ -414,13 +406,6 @@ export const AddFoodScreen = () => {
       if (formData.startTime && formData.endTime) {
         startAtISO = formatDateTimeToISO(formData.startTime);
         endAtISO = formatDateTimeToISO(formData.endTime);
-
-        console.log('Time scheduling enabled:', {
-          startTime: formData.startTime,
-          endTime: formData.endTime,
-          startAtISO,
-          endAtISO,
-        });
       }
 
       // Prepare menu item data according to API interface
@@ -435,29 +420,11 @@ export const AddFoodScreen = () => {
         endAt: endAtISO,
       };
 
-      console.log('Sending menu item data to backend:', {
-        restaurantId,
-        name: menuItemData.name,
-        price: menuItemData.price,
-        category: menuItemData.category,
-        hasImage: !!menuItemData.picture,
-        imageDetails: menuItemData.picture
-          ? {
-              name: menuItemData.picture.name,
-              type: menuItemData.picture.type,
-              uri: menuItemData.picture.uri.substring(0, 50) + '...',
-            }
-          : null,
-        hasSchedule: !!(menuItemData.startAt && menuItemData.endAt),
-      });
-
       // Use the React Query mutation
       const response = await createMenuItemMutation.mutateAsync({
         restaurantId,
         data: menuItemData,
       });
-
-      console.log('Menu item created successfully:', response);
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Alert.alert(

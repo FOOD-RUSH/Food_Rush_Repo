@@ -56,11 +56,9 @@ const DeliveryConfirmationModal: React.FC<DeliveryConfirmationModalProps> = ({
       setIsConfirming(true);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-      console.log('🚀 Confirming delivery for order:', orderId);
-
-      // API call to confirm delivery received
+      // API call to confirm delivery received (matches API docs)
       const response = await apiClient.post(
-        `/api/v1/orders/${orderId}/confirm-received`,
+        `/orders/${orderId}/confirm-received`,
       );
 
       if (response.status === 200) {

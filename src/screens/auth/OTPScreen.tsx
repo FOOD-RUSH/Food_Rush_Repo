@@ -109,9 +109,6 @@ const OTPScreen: React.FC<AuthStackScreenProps<'OTPVerification'>> = ({
     clearError();
 
     try {
-      console.log(
-        `data: \n otp: ${otpString} type: ${'email'}, userId: ${data.userId}`,
-      );
       verifyOTPMutation(
         {
           otp: otpString,
@@ -126,7 +123,6 @@ const OTPScreen: React.FC<AuthStackScreenProps<'OTPVerification'>> = ({
               text2: 'OTP verified successfully!',
               position: 'top',
             });
-            console.log(response.data);
 
             // Navigate to main app and reset navigation stack to prevent going back to login
             navigation.reset({
@@ -167,9 +163,6 @@ const OTPScreen: React.FC<AuthStackScreenProps<'OTPVerification'>> = ({
         },
       );
     } catch (error: any) {
-      console.log(
-        `data: \n otp: ${otpString} type: ${'email'}, userId: ${data.userId}`,
-      );
       const errorMessage =
         error?.message || 'OTP verification failed. Please try again.';
       setError(errorMessage);

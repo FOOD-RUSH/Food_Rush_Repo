@@ -9,14 +9,13 @@ module.exports = function (api) {
     ...(isProduction
       ? [
           // Remove console.log statements in production
-          ['transform-remove-console', { exclude: ['error', 'warn'] }],
+          ['babel-plugin-transform-remove-console', { exclude: ['error', 'warn'] }],
           // Optimize React components
-          ['@babel/plugin-transform-react-inline-elements'],
-          // Dead code elimination
           ['@babel/plugin-transform-react-constant-elements'],
+          ['@babel/plugin-transform-react-inline-elements'],
         ]
       : []),
-  ];
+  ].filter(Boolean);
 
   return {
     presets: [

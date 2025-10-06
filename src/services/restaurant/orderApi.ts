@@ -81,19 +81,10 @@ export const ORDER_STATUSES = {
 export const restaurantOrderApi = {
   // Get all orders for the restaurant
   getOrders: (params?: { status?: string }) => {
-    console.log(
-      '🔍 [ORDER API] Fetching restaurant orders with params:',
-      params,
-    );
 
     return apiClient
       .get<OrderResponse>('/orders/my-restaurant', { params })
       .then((res) => {
-        console.log(
-          '✅ [ORDER API] Raw backend response:',
-          JSON.stringify(res.data, null, 2),
-        );
-        console.log('📊 [ORDER API] Orders count:', res.data.data?.length || 0);
 
         return res.data.data;
       })
@@ -110,16 +101,9 @@ export const restaurantOrderApi = {
 
   // Get orders for a specific restaurant
   getOrdersByRestaurantId: (restaurantId: string) => {
-    console.log(
-      `🔍 [ORDER API] Fetching orders for restaurant ID: ${restaurantId}`,
-    );
     return apiClient
       .get<OrderResponse>(`/orders/restaurant/${restaurantId}`)
       .then((res) => {
-        console.log(
-          `✅ [ORDER API] Restaurant ${restaurantId} orders response:`,
-          JSON.stringify(res.data, null, 2),
-        );
         return res;
       })
       .catch((error) => {
@@ -133,16 +117,11 @@ export const restaurantOrderApi = {
 
   // Get order by ID
   getOrderById: (orderId: string) => {
-    console.log(`🔍 [ORDER API] Fetching order details for ID: ${orderId}`);
     return apiClient
       .get<{ status_code: number; message: string; data: Order }>(
         `/orders/${orderId}`,
       )
       .then((res) => {
-        console.log(
-          `✅ [ORDER API] Order ${orderId} details:`,
-          JSON.stringify(res.data, null, 2),
-        );
         return res;
       })
       .catch((error) => {
@@ -153,14 +132,9 @@ export const restaurantOrderApi = {
 
   // Confirm order
   confirmOrder: (orderId: string) => {
-    console.log(`🔄 [ORDER API] Confirming order: ${orderId}`);
     return apiClient
       .post(`/orders/${orderId}/confirm`)
       .then((res) => {
-        console.log(
-          `✅ [ORDER API] Order ${orderId} confirmed successfully:`,
-          JSON.stringify(res.data, null, 2),
-        );
         return res;
       })
       .catch((error) => {
@@ -174,14 +148,9 @@ export const restaurantOrderApi = {
 
   // Reject order
   rejectOrder: (orderId: string) => {
-    console.log(`🔄 [ORDER API] Rejecting order: ${orderId}`);
     return apiClient
       .post(`/orders/${orderId}/reject`)
       .then((res) => {
-        console.log(
-          `✅ [ORDER API] Order ${orderId} rejected successfully:`,
-          JSON.stringify(res.data, null, 2),
-        );
         return res;
       })
       .catch((error) => {

@@ -54,7 +54,6 @@ export const Typography: React.FC<TypographyProps> = ({
           style?.letterSpacing || TYPOGRAPHY_SCALE.body.letterSpacing,
       };
     } catch (error) {
-      console.warn('Typography error with variant:', variant, error);
       // Return fallback style
       return {
         fontSize: TYPOGRAPHY_SCALE.body.fontSize,

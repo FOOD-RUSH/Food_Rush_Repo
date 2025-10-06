@@ -32,7 +32,6 @@ export const useDeliveryConfirmation = () => {
   // Mutation for confirming delivery
   const confirmDeliveryMutation = useMutation({
     mutationFn: async ({ orderId }: ConfirmDeliveryParams) => {
-      console.log('🚀 Confirming delivery for order:', orderId);
       const response = await apiClient.post(`//${orderId}/confirm-received`);
       return response.data;
     },
@@ -48,8 +47,6 @@ export const useDeliveryConfirmation = () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
       queryClient.invalidateQueries({ queryKey: ['order', variables.orderId] });
       queryClient.invalidateQueries({ queryKey: ['customer', 'orders'] });
-
-      console.log('✅ Delivery confirmed successfully:', data);
     },
     onError: (error: any) => {
       console.error('❌ Error confirming delivery:', error);

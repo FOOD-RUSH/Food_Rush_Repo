@@ -59,7 +59,6 @@ const ForgotPasswordScreen = ({
   const handleForgotPassword = useCallback(
     async (data: ForgotPasswordForm) => {
       try {
-        console.log('Password reset requested for:', data.email);
         // Add your password reset API call here
         requestPasswordMutation(
           { email: data.email },

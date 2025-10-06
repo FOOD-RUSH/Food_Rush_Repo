@@ -37,7 +37,6 @@ export const CartReminderProvider: React.FC<CartReminderProviderProps> = memo(
         try {
           await cartReminderService.initialize();
           setIsInitialized(true);
-          console.log('Cart reminder service initialized successfully');
         } catch (error) {
           console.error('Failed to initialize cart reminder service:', error);
           // Don't block the app if reminder service fails

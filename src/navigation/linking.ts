@@ -61,7 +61,7 @@ export const linking: LinkingOptions<RootStackParamList> = {
               ProfileHome: 'profile',
               EditProfile: 'profile/edit',
               AddressScreen: 'profile/addresses',
-              PaymentMethods: 'profile/payments',
+              TransactionHistory: 'profile/transactions',
               AddPayment: 'profile/payment/add',
               Settings: 'profile/settings',
               Help: {

@@ -188,7 +188,7 @@ const OrderReceiptScreen = ({
             <View className="flex-row items-center">
               <IoniconsIcon
                 name={getStatusIcon(order.status)}
-                size={16}
+                size={20}
                 color={getStatusColor(order.status)}
               />
               <Caption
@@ -200,6 +200,229 @@ const OrderReceiptScreen = ({
               </Caption>
             </View>
           </View>
+
+          {/* Enhanced Status Card */}
+          <Card
+            mode="outlined"
+            style={{
+              backgroundColor: getStatusColor(order.status) + '10',
+              borderColor: getStatusColor(order.status) + '30',
+              marginBottom: 16,
+            }}
+          >
+            <Card.Content>
+              <View className="flex-row items-center">
+                <View
+                  className="w-12 h-12 rounded-full items-center justify-center mr-4"
+                  style={{ backgroundColor: getStatusColor(order.status) + '20' }}
+                >
+                  <IoniconsIcon
+                    name={getStatusIcon(order.status)}
+                    size={24}
+                    color={getStatusColor(order.status)}
+                  />
+                </View>
+                <View className="flex-1">
+                  <Label
+                    color={getStatusColor(order.status)}
+                    weight="semibold"
+                    style={{ fontSize: 16 }}
+                  >
+                    {orderStatus.label}
+                  </Label>
+                  <Caption
+                    color={colors.onSurfaceVariant}
+                    style={{ marginTop: 2 }}
+                  >
+                    {orderStatus.description}
+                  </Caption>
+                </View>
+                {/* Status-specific action icon */}
+                {order.status === 'delivered' && (
+                  <IoniconsIcon
+                    name="checkmark-done-circle"
+                    size={28}
+                    color={colors.primary}
+                  />
+                )}
+                {order.status === 'cancelled' && (
+                  <IoniconsIcon
+                    name="close-circle"
+                    size={28}
+                    color={colors.error}
+                  />
+                )}
+                {['preparing', 'ready_for_pickup', 'out_for_delivery'].includes(order.status) && (
+                  <View className="flex-row items-center">
+                    <IoniconsIcon
+                      name="time-outline"
+                      size={16}
+                      color={colors.onSurfaceVariant}
+                    />
+                    <Caption
+                      color={colors.onSurfaceVariant}
+                      style={{ marginLeft: 4 }}
+                    >
+                      In Progress
+                    </Caption>
+                  </View>
+                )}
+              </View>
+            </Card.Content>
+          </Card>
+
+          {/* Order Progress Indicator for Active Orders */}
+          {['pending', 'confirmed', 'preparing', 'ready_for_pickup', 'out_for_delivery'].includes(order.status) && (
+            <Card
+              mode="outlined"
+              style={{
+                backgroundColor: colors.surfaceVariant,
+                borderColor: colors.outline + '30',
+                marginBottom: 16,
+              }}
+            >
+              <Card.Content>
+                <Label
+                  color={colors.onSurface}
+                  weight="semibold"
+                  style={{ marginBottom: 12 }}
+                >
+                  {t('order_progress')}
+                </Label>
+                <View className="flex-row justify-between items-center">
+                  {/* Order Placed */}
+                  <View className="items-center flex-1">
+                    <View
+                      className="w-8 h-8 rounded-full items-center justify-center mb-2"
+                      style={{
+                        backgroundColor: ['pending', 'confirmed', 'preparing', 'ready_for_pickup', 'out_for_delivery'].includes(order.status)
+                          ? colors.primary
+                          : colors.outline,
+                      }}
+                    >
+                      <IoniconsIcon
+                        name="receipt-outline"
+                        size={16}
+                        color={['pending', 'confirmed', 'preparing', 'ready_for_pickup', 'out_for_delivery'].includes(order.status) ? 'white' : colors.onSurfaceVariant}
+                      />
+                    </View>
+                    <Caption
+                      color={['pending', 'confirmed', 'preparing', 'ready_for_pickup', 'out_for_delivery'].includes(order.status) ? colors.primary : colors.onSurfaceVariant}
+                      weight="medium"
+                      align="center"
+                    >
+                      {t('placed')}
+                    </Caption>
+                  </View>
+
+                  {/* Connecting Line */}
+                  <View
+                    className="h-0.5 flex-1 mx-2"
+                    style={{
+                      backgroundColor: ['confirmed', 'preparing', 'ready_for_pickup', 'out_for_delivery'].includes(order.status)
+                        ? colors.primary
+                        : colors.outline,
+                    }}
+                  />
+
+                  {/* Confirmed */}
+                  <View className="items-center flex-1">
+                    <View
+                      className="w-8 h-8 rounded-full items-center justify-center mb-2"
+                      style={{
+                        backgroundColor: ['confirmed', 'preparing', 'ready_for_pickup', 'out_for_delivery'].includes(order.status)
+                          ? colors.primary
+                          : colors.outline,
+                      }}
+                    >
+                      <IoniconsIcon
+                        name="checkmark-circle-outline"
+                        size={16}
+                        color={['confirmed', 'preparing', 'ready_for_pickup', 'out_for_delivery'].includes(order.status) ? 'white' : colors.onSurfaceVariant}
+                      />
+                    </View>
+                    <Caption
+                      color={['confirmed', 'preparing', 'ready_for_pickup', 'out_for_delivery'].includes(order.status) ? colors.primary : colors.onSurfaceVariant}
+                      weight="medium"
+                      align="center"
+                    >
+                      {t('confirmed')}
+                    </Caption>
+                  </View>
+
+                  {/* Connecting Line */}
+                  <View
+                    className="h-0.5 flex-1 mx-2"
+                    style={{
+                      backgroundColor: ['preparing', 'ready_for_pickup', 'out_for_delivery'].includes(order.status)
+                        ? colors.primary
+                        : colors.outline,
+                    }}
+                  />
+
+                  {/* Preparing */}
+                  <View className="items-center flex-1">
+                    <View
+                      className="w-8 h-8 rounded-full items-center justify-center mb-2"
+                      style={{
+                        backgroundColor: ['preparing', 'ready_for_pickup', 'out_for_delivery'].includes(order.status)
+                          ? colors.primary
+                          : colors.outline,
+                      }}
+                    >
+                      <IoniconsIcon
+                        name="restaurant-outline"
+                        size={16}
+                        color={['preparing', 'ready_for_pickup', 'out_for_delivery'].includes(order.status) ? 'white' : colors.onSurfaceVariant}
+                      />
+                    </View>
+                    <Caption
+                      color={['preparing', 'ready_for_pickup', 'out_for_delivery'].includes(order.status) ? colors.primary : colors.onSurfaceVariant}
+                      weight="medium"
+                      align="center"
+                    >
+                      {t('preparing')}
+                    </Caption>
+                  </View>
+
+                  {/* Connecting Line */}
+                  <View
+                    className="h-0.5 flex-1 mx-2"
+                    style={{
+                      backgroundColor: ['out_for_delivery'].includes(order.status)
+                        ? colors.primary
+                        : colors.outline,
+                    }}
+                  />
+
+                  {/* Delivery */}
+                  <View className="items-center flex-1">
+                    <View
+                      className="w-8 h-8 rounded-full items-center justify-center mb-2"
+                      style={{
+                        backgroundColor: ['out_for_delivery'].includes(order.status)
+                          ? colors.primary
+                          : colors.outline,
+                      }}
+                    >
+                      <IoniconsIcon
+                        name="car-outline"
+                        size={16}
+                        color={['out_for_delivery'].includes(order.status) ? 'white' : colors.onSurfaceVariant}
+                      />
+                    </View>
+                    <Caption
+                      color={['out_for_delivery'].includes(order.status) ? colors.primary : colors.onSurfaceVariant}
+                      weight="medium"
+                      align="center"
+                    >
+                      {t('delivery')}
+                    </Caption>
+                  </View>
+                </View>
+              </Card.Content>
+            </Card>
+          )}
 
           {/* Restaurant Info - Placeholder until backend provides restaurant details */}
           <Card
@@ -386,32 +609,59 @@ const OrderReceiptScreen = ({
             >
               {t('payment_information')}
             </Heading5>
-            <View className="flex-row items-center">
-              <FontAwesome5Icon
-                name={
-                  order.paymentMethod === 'mtn_mobile_money'
-                    ? 'mobile-alt'
-                    : order.paymentMethod === 'orange_money'
-                      ? 'mobile-alt'
-                      : 'money-bill-wave'
-                }
-                size={20}
-                color={colors.primary}
-                style={{ marginRight: 12 }}
-              />
-              <View>
-                <Caption color={colors.onSurface} weight="medium">
-                  {order.paymentMethod === 'mtn_mobile_money'
-                    ? 'MTN Mobile Money'
-                    : order.paymentMethod === 'orange_money'
-                      ? 'Orange Money'
-                      : order.paymentMethod}
-                </Caption>
-                <Caption color={colors.onSurfaceVariant}>
-                  {t('payment_completed')}
-                </Caption>
-              </View>
-            </View>
+            <Card
+              mode="outlined"
+              style={{
+                backgroundColor: colors.primaryContainer + '20',
+                borderColor: colors.primary + '30',
+              }}
+            >
+              <Card.Content>
+                <View className="flex-row items-center">
+                  <View
+                    className="w-10 h-10 rounded-full items-center justify-center mr-3"
+                    style={{ backgroundColor: colors.primary + '20' }}
+                  >
+                    {order.paymentMethod === 'mtn_mobile_money' ? (
+                      <FontAwesome5Icon
+                        name="mobile-alt"
+                        size={18}
+                        color="#FFCC00"
+                      />
+                    ) : order.paymentMethod === 'orange_money' ? (
+                      <FontAwesome5Icon
+                        name="mobile-alt"
+                        size={18}
+                        color="#FF6600"
+                      />
+                    ) : (
+                      <IoniconsIcon
+                        name="card-outline"
+                        size={18}
+                        color={colors.primary}
+                      />
+                    )}
+                  </View>
+                  <View className="flex-1">
+                    <Label color={colors.onSurface} weight="semibold">
+                      {order.paymentMethod === 'mtn_mobile_money'
+                        ? 'MTN Mobile Money'
+                        : order.paymentMethod === 'orange_money'
+                          ? 'Orange Money'
+                          : order.paymentMethod}
+                    </Label>
+                    <Caption color={colors.onSurfaceVariant}>
+                      {t('payment_completed')}
+                    </Caption>
+                  </View>
+                  <IoniconsIcon
+                    name="checkmark-circle"
+                    size={24}
+                    color={colors.primary}
+                  />
+                </View>
+              </Card.Content>
+            </Card>
           </View>
         </View>
 
@@ -434,21 +684,72 @@ const OrderReceiptScreen = ({
               </Label>
             </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={handleOrderAgain}
-              className="flex-1 rounded-xl py-4 items-center ml-2"
-              style={{ backgroundColor: colors.primary }}
-            >
-              <MaterialIcon
-                name="replay"
-                size={20}
-                color="white"
-                style={{ marginBottom: 4 }}
-              />
-              <Label color="white" weight="semibold">
-                {t('order_again')}
-              </Label>
-            </TouchableOpacity>
+            {/* Conditional action button based on order status */}
+            {order.status === 'delivered' ? (
+              <TouchableOpacity
+                onPress={handleOrderAgain}
+                className="flex-1 rounded-xl py-4 items-center ml-2"
+                style={{ backgroundColor: colors.primary }}
+              >
+                <IoniconsIcon
+                  name="repeat-outline"
+                  size={20}
+                  color="white"
+                  style={{ marginBottom: 4 }}
+                />
+                <Label color="white" weight="semibold">
+                  {t('order_again')}
+                </Label>
+              </TouchableOpacity>
+            ) : order.status === 'cancelled' ? (
+              <TouchableOpacity
+                onPress={() => navigation.navigate('HomeScreen')}
+                className="flex-1 rounded-xl py-4 items-center ml-2"
+                style={{ backgroundColor: colors.primary }}
+              >
+                <IoniconsIcon
+                  name="home-outline"
+                  size={20}
+                  color="white"
+                  style={{ marginBottom: 4 }}
+                />
+                <Label color="white" weight="semibold">
+                  {t('browse_menu')}
+                </Label>
+              </TouchableOpacity>
+            ) : ['preparing', 'ready_for_pickup', 'out_for_delivery'].includes(order.status) ? (
+              <TouchableOpacity
+                onPress={() => navigation.navigate('OrderTracking', { orderId: order.id })}
+                className="flex-1 rounded-xl py-4 items-center ml-2"
+                style={{ backgroundColor: colors.primary }}
+              >
+                <IoniconsIcon
+                  name="location-outline"
+                  size={20}
+                  color="white"
+                  style={{ marginBottom: 4 }}
+                />
+                <Label color="white" weight="semibold">
+                  {t('track_order')}
+                </Label>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                onPress={handleOrderAgain}
+                className="flex-1 rounded-xl py-4 items-center ml-2"
+                style={{ backgroundColor: colors.primary }}
+              >
+                <IoniconsIcon
+                  name="repeat-outline"
+                  size={20}
+                  color="white"
+                  style={{ marginBottom: 4 }}
+                />
+                <Label color="white" weight="semibold">
+                  {t('order_again')}
+                </Label>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </ScrollView>

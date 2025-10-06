@@ -59,8 +59,6 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
       navigation.navigate('CategoryMenu', {
         categoryTitle: title,
       });
-
-      console.log('Navigating to category:', { title, categoryId });
     } catch (error) {
       console.error('Error navigating to category:', error);
       Alert.alert(t('navigation_error'), t('unable_to_open_category'), [

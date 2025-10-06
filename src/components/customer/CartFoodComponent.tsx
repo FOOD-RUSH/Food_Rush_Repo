@@ -59,7 +59,6 @@ const CartFoodComponent: React.FC<CartFoodComponentProps> = React.memo(
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       } catch (error) {
         // Haptics might not be available on all devices
-        console.log(error);
       }
     }, []);
 

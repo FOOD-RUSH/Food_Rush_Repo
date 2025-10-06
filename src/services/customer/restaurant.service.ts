@@ -63,22 +63,11 @@ export const restaurantApi = {
   // Get restaurants using browse endpoint (replaces nearby)
   getBrowseRestaurants: async (query: RestaurantQuery) => {
     try {
-      console.log('🍽️ Browse Restaurants API Call:', {
-        endpoint: '/restaurants/browse',
-        params: query,
-        coordinates: { lat: query.nearLat, lng: query.nearLng },
-      });
 
       const response = await apiClient.get<RestaurantItems>(
         '/restaurants/browse',
         { params: query },
       );
-
-      console.log('🍽️ Browse Restaurants API Response:', {
-        status: response.status,
-        dataCount: response.data.data?.length || 0,
-        firstItem: response.data.data?.[0] || null,
-      });
 
       return response.data.data;
     } catch (error) {
@@ -91,20 +80,9 @@ export const restaurantApi = {
   // Get all nearby menu items with coordinates
   getAllMenuItems: async (query: FoodQuery) => {
     try {
-      console.log('🍽️ Get All Menu Items API Call:', {
-        endpoint: '/menu/all/nearby',
-        params: query,
-        coordinates: { lat: query.nearLat, lng: query.nearLng },
-      });
 
       const response = await apiClient.get<FoodItems>('/menu/all/nearby', {
         params: query,
-      });
-
-      console.log('🍽️ Get All Menu Items API Response:', {
-        status: response.status,
-        dataCount: response.data.data?.length || 0,
-        firstItem: response.data.data?.[0] || null,
       });
 
       return response.data.data;
@@ -118,27 +96,9 @@ export const restaurantApi = {
   // Browse menu items with category filtering
   browseMenuItems: async (query: FoodQuery) => {
     try {
-      console.log('🍽️ Browse Menu Items API Call:', {
-        endpoint: '/menu/browse',
-        params: query,
-        coordinates: { lat: query.nearLat, lng: query.nearLng },
-        category: query.category,
-      });
 
       const response = await apiClient.get<FoodItems>('/menu/browse', {
         params: query,
-      });
-
-      console.log('🍽️ Browse Menu Items API Response:', {
-        status: response.status,
-        dataCount: response.data.data?.length || 0,
-        category: query.category,
-        firstItem: response.data.data?.[0] || null,
-        sampleCategories:
-          response.data.data?.slice(0, 3).map((item) => ({
-            name: item.name,
-            category: item.category,
-          })) || [],
       });
 
       return response.data.data;
@@ -179,21 +139,11 @@ export const restaurantApi = {
     nearLng?: number,
   ) => {
     try {
-      console.log('🍽️ Restaurant Details API Call:', {
-        endpoint: `/restaurants/${id}/detail`,
-        params: { nearLat, nearLng },
-        coordinates: { lat: nearLat, lng: nearLng },
-      });
 
       const response = await apiClient.get<RestaurantReturn>(
         `/restaurants/${id}/detail`,
         { params: { nearLat, nearLng } },
       );
-
-      console.log('🍽️ Restaurant Details API Response:', {
-        status: response.status,
-        data: response.data.data,
-      });
 
       return response.data.data;
     } catch (error) {
@@ -229,9 +179,7 @@ export const restaurantApi = {
   // Like restaurant (new endpoint from API docs)
   likeRestaurant: async (id: string) => {
     try {
-      console.log('💖 Liking restaurant:', id);
       const response = await apiClient.post(`/restaurants/${id}/like`);
-      console.log('✅ Like restaurant response:', response.data);
       return response.data;
     } catch (error) {
       console.error(`❌ Error liking restaurant ${id}:`, error);
@@ -243,9 +191,7 @@ export const restaurantApi = {
   // Unlike restaurant (new endpoint from API docs)
   unlikeRestaurant: async (id: string) => {
     try {
-      console.log('💔 Unliking restaurant:', id);
       const response = await apiClient.delete(`/restaurants/${id}/like`);
-      console.log('✅ Unlike restaurant response:', response.data);
       return response.data;
     } catch (error) {
       console.error(`❌ Error unliking restaurant ${id}:`, error);
@@ -257,15 +203,9 @@ export const restaurantApi = {
   // Get liked restaurants (new endpoint from API docs)
   getLikedRestaurants: async () => {
     try {
-      console.log('📜 Fetching liked restaurants...');
       const response = await apiClient.get<RestaurantItems>(
         '/restaurants/me/liked',
       );
-      console.log('✅ Liked restaurants response:', {
-        status: response.status,
-        dataCount: response.data.data?.length || 0,
-        firstItem: response.data.data?.[0] || null,
-      });
       return response.data.data || [];
     } catch (error) {
       console.error('❌ Error fetching liked restaurants:', error);
@@ -280,7 +220,6 @@ export const restaurantApi = {
       const response = await apiClient.get<RestaurantReviewsResponse>(
         `/restaurants/${id}/reviews`,
       );
-      console.log('Restaurant Reviews API Response:', response.data);
       return response.data.data;
     } catch (error) {
       console.error(`Error fetching reviews for restaurant ${id}:`, error);
@@ -298,7 +237,6 @@ export const restaurantApi = {
         `/restaurants/${id}/reviews`,
         reviewData,
       );
-      console.log('Create Review API Response:', response.data);
       return response.data;
     } catch (error) {
       console.error(`Error creating review for restaurant ${id}:`, error);

@@ -84,7 +84,6 @@ class CartReminderService {
             reminder.notificationId,
           );
         } catch (error) {
-          console.warn('Failed to cancel expired notification:', error);
         }
       }
     }
@@ -106,13 +105,11 @@ class CartReminderService {
 
     // Debounce rapid successive calls
     if (now - this.lastScheduleTime < this.SCHEDULE_DEBOUNCE_MS) {
-      console.log('Cart reminder scheduling debounced');
       return;
     }
 
     // Prevent duplicate scheduling
     if (this.isScheduling) {
-      console.log('Cart reminder scheduling already in progress');
       return;
     }
 
@@ -199,10 +196,6 @@ class CartReminderService {
         cartItemCount,
         restaurantName,
       });
-
-      console.log(
-        `Scheduled ${type} cart reminder for ${minutesFromNow} minutes from now`,
-      );
     } catch (error) {
       console.error(`Failed to schedule ${type} cart reminder:`, error);
     }
@@ -239,7 +232,6 @@ class CartReminderService {
   async cancelAllCartReminders(): Promise<void> {
     // Prevent multiple simultaneous cancellation calls
     if (this.isCancelling) {
-      console.log('Cart reminder cancellation already in progress');
       return;
     }
 
@@ -259,7 +251,6 @@ class CartReminderService {
               reminder.notificationId,
             );
           } catch (error) {
-            console.warn('Failed to cancel notification:', error);
           }
         },
       );
@@ -269,8 +260,6 @@ class CartReminderService {
       // Clear the reminders map
       this.activeReminders.clear();
       await this.saveActiveReminders();
-
-      console.log('All cart reminders cancelled');
     } catch (error) {
       console.error('Failed to cancel cart reminders:', error);
     } finally {
@@ -293,15 +282,12 @@ class CartReminderService {
             );
             toRemove.push(key);
           } catch (error) {
-            console.warn('Failed to cancel notification:', error);
           }
         }
       }
 
       toRemove.forEach((key) => this.activeReminders.delete(key));
       await this.saveActiveReminders();
-
-      console.log(`Cancelled ${type} cart reminders`);
     } catch (error) {
       console.error(`Failed to cancel ${type} cart reminders:`, error);
     }
@@ -327,7 +313,6 @@ class CartReminderService {
     try {
       await customerNotificationService.initialize();
       await this.loadActiveReminders();
-      console.log('Cart reminder service initialized');
     } catch (error) {
       console.error('Failed to initialize cart reminder service:', error);
     }

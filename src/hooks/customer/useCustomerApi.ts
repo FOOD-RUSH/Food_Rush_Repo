@@ -22,30 +22,13 @@ export const useBrowseMenuItems = (
   const { nearLat, nearLng, locationQueryKey, locationSource } =
     useLocationForQueries();
 
-  console.log('🍽️ useBrowseMenuItems Hook:', {
-    nearLat,
-    nearLng,
-    category,
-    locationSource,
-    enabled: (options.enabled ?? true) && !!(nearLat && nearLng),
-  });
-
   return useQuery({
     queryKey: ['menu', 'browse', category || 'all', ...locationQueryKey],
     queryFn: async () => {
       try {
-        console.log('🔄 Fetching menu items with category filter:', {
-          nearLat,
-          nearLng,
-          category,
-        });
         const result = await restaurantApi.browseMenuItems({
           nearLat,
           nearLng,
-          category,
-        });
-        console.log('✅ Menu items fetched:', {
-          count: result?.length || 0,
           category,
         });
         return result;
@@ -66,27 +49,13 @@ export const useGetAllMenu = (options: { enabled?: boolean } = {}) => {
   const { nearLat, nearLng, locationQueryKey, locationSource } =
     useLocationForQueries();
 
-  console.log('🍽️ useGetAllMenu Hook:', {
-    nearLat,
-    nearLng,
-    locationSource,
-    enabled: (options.enabled ?? true) && !!(nearLat && nearLng),
-  });
-
   return useQuery({
     queryKey: ['menu', 'all', 'nearby', ...locationQueryKey],
     queryFn: async () => {
       try {
-        console.log('🔄 Fetching nearby menu items with coordinates:', {
-          nearLat,
-          nearLng,
-        });
         const result = await restaurantApi.getAllMenuItems({
           nearLat,
           nearLng,
-        });
-        console.log('✅ Nearby menu items fetched:', {
-          count: result?.length || 0,
         });
         return result;
       } catch (error) {
@@ -105,20 +74,11 @@ export const useGetAllMenu = (options: { enabled?: boolean } = {}) => {
 export const useGetAllMenuItem = (options: { enabled?: boolean } = {}) => {
   const { nearLat, nearLng, locationQueryKey } = useLocationForQueries();
 
-  console.log('🍽️ useGetAllMenuItem Hook (fallback):', {
-    enabled: options.enabled ?? true,
-    hasCoordinates: !!(nearLat && nearLng),
-  });
-
   return useQuery({
     queryKey: ['menu', 'all', 'fallback', ...locationQueryKey],
     queryFn: async () => {
       try {
-        console.log('🔄 Fetching all menu items (fallback)');
         const result = await restaurantApi.getAllMenu2();
-        console.log('✅ All menu items fetched (fallback):', {
-          count: result?.length || 0,
-        });
         return result;
       } catch (error) {
         console.error('❌ Error fetching all menu (fallback):', error);
@@ -140,22 +100,9 @@ export const useRestaurantDetails = (
   const { nearLat, nearLng, locationQueryKey, locationSource } =
     useLocationForQueries();
 
-  console.log('🏪 useRestaurantDetails Hook:', {
-    restaurantId: id,
-    nearLat,
-    nearLng,
-    locationSource,
-    enabled: (options.enabled ?? true) && !!id && !!(nearLat && nearLng),
-  });
-
   return useQuery({
     queryKey: ['restaurant-details', id, ...locationQueryKey],
     queryFn: () => {
-      console.log('🔄 Fetching restaurant details with coordinates:', {
-        id,
-        nearLat,
-        nearLng,
-      });
       return restaurantApi.getRestaurantDetails(id, nearLat, nearLng);
     },
     enabled: (options.enabled ?? true) && !!id && !!(nearLat && nearLng),
@@ -182,21 +129,9 @@ export const useBrowseRestaurants = (
     ...options, // Allow overriding default options
   };
 
-  console.log('🏦 useBrowseRestaurants Hook:', {
-    nearLat,
-    nearLng,
-    locationSource,
-    queryParams,
-    enabled: !!(nearLat && nearLng),
-  });
-
   return useQuery({
     queryKey: ['browse-restaurants', ...locationQueryKey, queryParams],
     queryFn: () => {
-      console.log(
-        '🔄 Fetching browse restaurants with coordinates:',
-        queryParams,
-      );
       return restaurantApi.getBrowseRestaurants(queryParams);
     },
     enabled: !!(nearLat && nearLng),
@@ -227,26 +162,11 @@ export const useAllRestaurants = (query: RestaurantQuery = {}) => {
     sortDir: query.sortDir || 'ASC', // Default sort direction
   };
 
-  console.log('🏦 useAllRestaurants Hook:', {
-    nearLat,
-    nearLng,
-    locationSource,
-    queryParams,
-    enabled: !!(nearLat && nearLng),
-  });
-
   return useQuery({
     queryKey: ['restaurants', 'all', ...locationQueryKey, queryParams],
     queryFn: async () => {
       try {
-        console.log(
-          '🔄 Fetching all restaurants with coordinates:',
-          queryParams,
-        );
         const result = await restaurantApi.getBrowseRestaurants(queryParams);
-        console.log('✅ All restaurants fetched:', {
-          count: result?.length || 0,
-        });
         return result;
       } catch (error) {
         console.error('❌ Error fetching all restaurants:', error);
@@ -268,22 +188,9 @@ export const useMenuItemById = (
   const { nearLat, nearLng, locationQueryKey, locationSource } =
     useLocationForQueries();
 
-  console.log('🍽️ useMenuItemById Hook:', {
-    menuItemId: id,
-    nearLat,
-    nearLng,
-    locationSource,
-    enabled: (options.enabled ?? true) && !!id && !!(nearLat && nearLng),
-  });
-
   return useQuery({
     queryKey: ['menu-item', id, ...locationQueryKey],
     queryFn: () => {
-      console.log('🔄 Fetching menu item details with coordinates:', {
-        id,
-        nearLat,
-        nearLng,
-      });
       return restaurantApi.getMenuItemById(id, nearLat, nearLng);
     },
     enabled: (options.enabled ?? true) && !!id && !!(nearLat && nearLng),

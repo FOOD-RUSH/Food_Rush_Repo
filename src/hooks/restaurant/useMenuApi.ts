@@ -72,7 +72,6 @@ export const useCreateMenuItem = () => {
 
       // Optionally, you can also update the cache optimistically
       // if you want immediate UI updates
-      console.log('✅ Menu item created successfully in hook:', response.data);
     },
     onError: (error) => {
       console.error('Failed to create menu item:', error);
@@ -102,8 +101,6 @@ export const useUpdateMenuItem = () => {
       queryClient.invalidateQueries({
         queryKey: menuQueryKeys.menuItem(itemId),
       });
-
-      console.log('Menu item updated successfully:', response);
     },
     onError: (error) => {
       console.error('Failed to update menu item:', error);
@@ -133,8 +130,6 @@ export const useDeleteMenuItem = () => {
       queryClient.invalidateQueries({
         queryKey: menuQueryKeys.restaurant(restaurantId),
       });
-
-      console.log('Menu item deleted successfully:', response);
     },
     onError: (error) => {
       console.error('Failed to delete menu item:', error);

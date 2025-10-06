@@ -53,16 +53,6 @@ const RestaurantDetailScreen = ({
   // Debug: Log restaurant details when they change
   React.useEffect(() => {
     if (restaurantDetails) {
-      console.log('🍽️ Restaurant Details Received:', {
-        id: restaurantDetails.id,
-        name: restaurantDetails.name,
-        distance: restaurantDetails.distance,
-        deliveryPrice: restaurantDetails.deliveryPrice,
-        estimatedDeliveryTime: restaurantDetails.estimatedDeliveryTime,
-        hasDistance: !!restaurantDetails.distance,
-        hasDeliveryPrice: !!restaurantDetails.deliveryPrice,
-        hasEstimatedTime: !!restaurantDetails.estimatedDeliveryTime,
-      });
     }
   }, [restaurantDetails]);
 

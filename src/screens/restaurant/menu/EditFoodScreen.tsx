@@ -93,11 +93,6 @@ export const EditFoodScreen = ({
         setPicture(createImageFormDataObject(imageResult));
 
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-
-        console.log('✅ Image selected:', {
-          type: imageResult.type,
-          name: imageResult.name,
-        });
       }
     } catch (error: any) {
       console.error('❌ Error picking image:', error);
@@ -195,18 +190,7 @@ export const EditFoodScreen = ({
       // Only include picture if user selected a new image
       if (picture?.uri && picture?.name && picture?.type) {
         updateData.picture = createImageFormDataObject(picture);
-
-        console.log('Updating menu item with new image:', {
-          itemId: menuId,
-          name: updateData.name,
-          hasNewImage: true,
-          imageType: picture.type,
-        });
       } else {
-        console.log('Updating menu item without image change:', {
-          itemId: menuId,
-          name: updateData.name,
-        });
       }
 
       await updateMenuItemMutation.mutateAsync({

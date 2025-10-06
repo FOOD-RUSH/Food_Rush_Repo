@@ -63,7 +63,6 @@ const CartReminderSettings: React.FC<CartReminderSettingsProps> = ({
           text: t('send_test', 'Send Test'),
           onPress: () => {
             // This would trigger a test notification
-            console.log('Test reminder scheduled');
           },
         },
       ],

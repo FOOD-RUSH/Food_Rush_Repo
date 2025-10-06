@@ -28,7 +28,6 @@ const ProfileHomeScreen = ({
 
   const handleLogout = useCallback(() => {
     try {
-      console.log('Logging out user');
       logout();
     } catch (error) {
       console.error('Logout error:', error);
@@ -43,7 +42,6 @@ const ProfileHomeScreen = ({
     }
 
     try {
-      console.log('Attempting to show logout modal...');
 
       present(
         <LogoutContent onDismiss={dismiss} onConfirmLogout={handleLogout} />,
@@ -88,8 +86,8 @@ const ProfileHomeScreen = ({
     navigation.navigate('FavoriteRestaurantScreen');
   }, [navigation]);
 
-  const navigateToPaymentMethods = useCallback(() => {
-    navigation.navigate('PaymentMethods');
+  const navigateToTransactionHistory = useCallback(() => {
+    navigation.navigate('TransactionHistory');
   }, [navigation]);
 
   const navigateToAddress = useCallback(() => {
@@ -211,10 +209,10 @@ const ProfileHomeScreen = ({
           showIconBackground={true}
         />
         <RowView
-          title={t('payment_method')}
-          subtitle={t('manage_your_payment_options')}
-          onPress={navigateToPaymentMethods}
-          leftIconName="card-outline"
+          title={t('transaction_history')}
+          subtitle={t('view_payment_information')}
+          onPress={navigateToTransactionHistory}
+          leftIconName="receipt-outline"
           iconColor="#8B5CF6"
           showIconBackground={true}
         />

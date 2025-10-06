@@ -18,10 +18,7 @@ import {
   useConfirmOrderReceived,
 } from '@/src/hooks/customer/useOrdersApi';
 import { useOrderFlow } from '@/src/hooks/customer/useOrderFlow';
-import {
-  useSelectedPaymentMethod,
-  useSelectedProvider,
-} from '@/src/stores/customerStores/paymentStore';
+// Payment method now handled in checkout component
 import {
   Typography,
   Heading5,
@@ -42,13 +39,13 @@ const ORDER_STATUS_STEPS: {
   {
     status: 'pending',
     title: 'Order Placed',
-    description: 'We have received your order',
+    description: 'Waiting for restaurant confirmation (2-15 min)',
     icon: 'receipt-outline',
   },
   {
     status: 'confirmed',
-    title: 'Order Confirmed',
-    description: 'Restaurant is preparing your food',
+    title: 'Restaurant Confirmed',
+    description: 'Please complete payment to proceed',
     icon: 'checkmark-circle-outline',
   },
   {
@@ -58,13 +55,13 @@ const ORDER_STATUS_STEPS: {
     icon: 'restaurant-outline',
   },
   {
-    status: 'ready',
+    status: 'ready_for_pickup',
     title: 'Ready for Pickup',
     description: 'Your order is ready for pickup',
     icon: 'checkmark-done-circle-outline',
   },
   {
-    status: 'picked_up',
+    status: 'out_for_delivery',
     title: 'Out for Delivery',
     description: 'Your order is on the way',
     icon: 'bicycle-outline',
@@ -80,11 +77,11 @@ const ORDER_STATUS_STEPS: {
 // Map order status to a more user-friendly display
 const getStatusDisplayText = (status: OrderStatus): string => {
   const statusMap: Record<OrderStatus, string> = {
-    pending: 'Order Placed',
-    confirmed: 'Order Confirmed',
+    pending: 'Waiting for Restaurant',
+    confirmed: 'Payment Required',
     preparing: 'Preparing',
-    ready: 'Ready for Pickup',
-    picked_up: 'Out for Delivery',
+    ready_for_pickup: 'Ready for Pickup',
+    out_for_delivery: 'Out for Delivery',
     delivered: 'Delivered',
     cancelled: 'Cancelled',
   };
@@ -246,10 +243,14 @@ const OrderTrackingScreen = ({
   const { t } = useTranslation('translation');
   const [refreshing, setRefreshing] = useState(false);
 
-  // Order flow for customer confirmation
-  const { confirmOrder, isConfirmingOrder } = useOrderFlow();
-  const selectedPaymentMethod = useSelectedPaymentMethod();
-  const selectedProvider = useSelectedProvider();
+  // Order flow for payment and cancellation
+  const { 
+    proceedToPayment, 
+    cancelOrder, 
+    canCancel,
+    isCancellingOrder,
+    isConfirmed 
+  } = useOrderFlow();
 
   // Use our custom hook for order tracking with polling
   const {
@@ -276,29 +277,42 @@ const OrderTrackingScreen = ({
     setRefreshing(false);
   }, [refetch]);
 
-  // Handle customer order confirmation
-  const handleCustomerConfirmOrder = useCallback(async () => {
-    try {
-      await confirmOrder();
-      // Navigate to payment after successful confirmation
-      if (order) {
-        navigation.navigate('PaymentProcessing', {
-          orderId: order.id,
-          amount: order.total,
-          paymentMethod: selectedPaymentMethod || 'mobile_money',
-          provider: selectedProvider || 'mtn',
-        });
-      }
-    } catch (error) {
-      console.error('Failed to confirm order:', error);
+  // Handle payment navigation
+  const handleProceedToPayment = useCallback(() => {
+    if (order) {
+      proceedToPayment();
+      navigation.navigate('PaymentProcessing', {
+        orderId: order.id,
+        amount: order.total,
+        paymentMethod: 'mobile_money',
+        provider: 'mtn', // Default provider
+      });
     }
-  }, [
-    confirmOrder,
-    order,
-    navigation,
-    selectedPaymentMethod,
-    selectedProvider,
-  ]);
+  }, [proceedToPayment, order, navigation]);
+
+  // Handle order cancellation
+  const handleCancelOrder = useCallback(() => {
+    Alert.alert(
+      t('cancel_order'),
+      t('cancel_order_confirmation'),
+      [
+        { text: t('no'), style: 'cancel' },
+        {
+          text: t('yes_cancel'),
+          style: 'destructive',
+          onPress: () => {
+            cancelOrder();
+            Toast.show({
+              type: 'success',
+              text1: t('order_cancelled'),
+              text2: t('order_cancelled_successfully'),
+            });
+            navigation.goBack();
+          },
+        },
+      ]
+    );
+  }, [cancelOrder, navigation, t]);
 
   if (isLoading) {
     return (
@@ -420,25 +434,93 @@ const OrderTrackingScreen = ({
             )}
           </View>
 
-          {/* Customer Order Confirmation Button - Only show when order is confirmed by restaurant */}
+          {/* Payment Button - Show when restaurant confirmed */}
           {order.status === 'confirmed' && (
             <TouchableOpacity
               className="flex-row items-center justify-center py-4 rounded-xl mb-4"
               style={{ backgroundColor: colors.primary }}
-              onPress={handleCustomerConfirmOrder}
-              disabled={isConfirmingOrder}
+              onPress={handleProceedToPayment}
             >
               <IoniconsIcon
-                name="checkmark-circle-outline"
+                name="card-outline"
                 size={20}
                 color="white"
               />
               <Label color="white" weight="medium" style={{ marginLeft: 8 }}>
-                {isConfirmingOrder
-                  ? t('confirming_order')
-                  : t('confirm_order_and_proceed_to_payment')}
+                {t('proceed_to_payment')}
               </Label>
             </TouchableOpacity>
+          )}
+
+          {/* Cancel Order Button - Only show when cancellation is allowed */}
+          {canCancel && order.status === 'pending' && (
+            <TouchableOpacity
+              className="flex-row items-center justify-center py-4 rounded-xl mb-4"
+              style={{ backgroundColor: colors.error }}
+              onPress={handleCancelOrder}
+              disabled={isCancellingOrder}
+            >
+              <IoniconsIcon
+                name="close-circle-outline"
+                size={20}
+                color="white"
+              />
+              <Label color="white" weight="medium" style={{ marginLeft: 8 }}>
+                {isCancellingOrder ? t('cancelling_order') : t('cancel_order')}
+              </Label>
+            </TouchableOpacity>
+          )}
+
+          {/* Waiting Message for Pending Confirmation */}
+          {order.status === 'pending' && (
+            <View
+              className="p-4 rounded-xl mb-4"
+              style={{ backgroundColor: colors.surfaceVariant }}
+            >
+              <View className="flex-row items-center justify-center mb-2">
+                <IoniconsIcon
+                  name="time-outline"
+                  size={20}
+                  color={colors.primary}
+                />
+                <Label
+                  color={colors.onSurface}
+                  weight="medium"
+                  style={{ marginLeft: 8 }}
+                >
+                  {t('waiting_for_restaurant')}
+                </Label>
+              </View>
+              <Caption color={colors.onSurfaceVariant} align="center">
+                {t('restaurant_confirmation_time')}
+              </Caption>
+            </View>
+          )}
+
+          {/* Cancelled Status Messages */}
+          {order.status === 'cancelled' && (
+            <View
+              className="p-4 rounded-xl mb-4"
+              style={{ backgroundColor: colors.errorContainer }}
+            >
+              <View className="flex-row items-center justify-center mb-2">
+                <IoniconsIcon
+                  name="close-circle-outline"
+                  size={20}
+                  color={colors.error}
+                />
+                <Label
+                  color={colors.error}
+                  weight="medium"
+                  style={{ marginLeft: 8 }}
+                >
+                  {getStatusDisplayText(order.status)}
+                </Label>
+              </View>
+              <Caption color={colors.onErrorContainer} align="center">
+                {t('order_was_cancelled')}
+              </Caption>
+            </View>
           )}
 
           {/* Delivery Confirmation Button - Only show when order is delivered */}
@@ -450,7 +532,7 @@ const OrderTrackingScreen = ({
                 showConfirmationModal(orderId, {
                   orderNumber: order.id.substring(0, 8),
                   restaurantName: order.restaurantName || 'Restaurant',
-                  deliveryAddress: order.deliveryAddress,
+                  deliveryAddress: order.deliveryAddress || 'Delivery address',
                 });
               }}
               disabled={isConfirming}

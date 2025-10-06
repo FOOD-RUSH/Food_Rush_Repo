@@ -64,32 +64,26 @@ const RestaurantSettingsScreen = ({ navigation }: Props) => {
   // Navigation handlers
   const navigateToRestaurantInfo = () => {
     // Navigate to restaurant info edit screen
-    console.log('Navigate to restaurant info');
   };
 
   const navigateToBusinessHours = () => {
     // Navigate to business hours screen
-    console.log('Navigate to business hours');
   };
 
   const navigateToDeliverySettings = () => {
     // Navigate to delivery settings screen
-    console.log('Navigate to delivery settings');
   };
 
   const navigateToPaymentSettings = () => {
     // Navigate to payment settings screen
-    console.log('Navigate to payment settings');
   };
 
   const navigateToNotificationSettings = () => {
     // Navigate to notification settings screen
-    console.log('Navigate to notification settings');
   };
 
   const navigateToPrivacySettings = () => {
     // Navigate to privacy settings screen
-    console.log('Navigate to privacy settings');
   };
 
   return (

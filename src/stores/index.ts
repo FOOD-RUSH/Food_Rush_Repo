@@ -11,7 +11,7 @@ export * from './shared';
 // Customer-specific stores
 export * from './customerStores/cartStore';
 export * from './customerStores/addressStore';
-export * from './customerStores/paymentStore';
+// Payment store removed - using React Query for transaction history
 
 // Restaurant-specific stores (excluding notification store to avoid duplicates)
 export { useRestaurantProfileStore } from './restaurantStores/restaurantProfileStore';

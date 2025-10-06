@@ -93,7 +93,6 @@ class PaymentService {
    */
   async initializePayment(request: PaymentInitRequest): Promise<PaymentResult> {
     try {
-      console.log('🚀 Initializing payment with request:', request);
 
       // Validate phone number
       if (!this.validatePhoneNumber(request.phone, request.medium)) {
@@ -124,14 +123,10 @@ class PaymentService {
         email: request.email,
       };
 
-      console.log('📤 Sending payment request:', paymentData);
-
       const response = await apiClient.post<PaymentInitResponse>(
         '/payments/init',
         paymentData,
       );
-
-      console.log('📥 Payment response:', response.data);
 
       if (response.data.success) {
         return {
@@ -188,7 +183,6 @@ class PaymentService {
     orderId: string,
   ): Promise<PaymentResult> {
     try {
-      console.log('Processing payment:', { amount, method, orderId });
 
       // For Mobile Money, we need phone number - this should be handled by the UI
       if (method.type === 'mobile_money') {

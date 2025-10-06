@@ -183,7 +183,6 @@ export const useNotificationStore = create<
               set({ unreadCount: response.data });
             }
           } catch (error: any) {
-            console.warn('Failed to update unread count:', error);
           }
         },
 

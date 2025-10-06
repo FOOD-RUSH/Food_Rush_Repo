@@ -66,25 +66,49 @@ export const RestaurantCard = ({
   const { isSmallScreen, isTablet, isLargeScreen, wp, getResponsiveText } =
     useResponsive();
 
-  // Calculate responsive dimensions
+  // Calculate responsive dimensions and text sizes
   const getCardDimensions = () => {
     if (isLargeScreen) {
       return {
         width: Math.min(wp(90), 500), // Max 500px width
         imageHeight: 180,
         padding: 16,
+        // Text sizes (increased by 2px)
+        restaurantNameSize: getResponsiveText(24), // Increased by 2
+        addressSize: getResponsiveText(15), // Increased by 2
+        deliveryPriceSize: getResponsiveText(18), // Increased by 2
+        deliveryTimeSize: getResponsiveText(16), // Increased by 2
+        distanceSize: getResponsiveText(14), // Increased by 2
+        captionSize: getResponsiveText(13), // Increased by 2
+        badgeSize: getResponsiveText(12), // Increased by 2
       };
     } else if (isTablet) {
       return {
         width: Math.min(wp(95), 400), // Max 400px width
         imageHeight: 160,
         padding: 14,
+        // Text sizes (increased by 2px)
+        restaurantNameSize: getResponsiveText(22), // Increased by 2
+        addressSize: getResponsiveText(14), // Increased by 2
+        deliveryPriceSize: getResponsiveText(17), // Increased by 2
+        deliveryTimeSize: getResponsiveText(15), // Increased by 2
+        distanceSize: getResponsiveText(13), // Increased by 2
+        captionSize: getResponsiveText(12), // Increased by 2
+        badgeSize: getResponsiveText(11), // Increased by 2
       };
     } else {
       return {
         width: wp(90), // 90% of screen width for phones
         imageHeight: 140,
         padding: 12,
+        // Text sizes (increased by 2px)
+        restaurantNameSize: getResponsiveText(20), // Increased by 2
+        addressSize: getResponsiveText(13), // Increased by 2
+        deliveryPriceSize: getResponsiveText(16), // Increased by 2
+        deliveryTimeSize: getResponsiveText(14), // Increased by 2
+        distanceSize: getResponsiveText(12), // Increased by 2
+        captionSize: getResponsiveText(11), // Increased by 2
+        badgeSize: getResponsiveText(10), // Increased by 2
       };
     }
   };
@@ -127,17 +151,19 @@ export const RestaurantCard = ({
         mode="outlined"
         style={{
           margin: 8,
+          backgroundColor: colors.surface,
+          borderWidth: 1,
+          borderColor: colors.outline + '30',
           borderRadius: 16,
+          width: cardDimensions.width,
+          alignSelf: 'center',
           overflow: 'hidden',
+          // Enhanced shadow
           shadowColor: '#000',
           shadowOffset: { width: 0, height: 3 },
           shadowOpacity: 0.12,
           shadowRadius: 6,
-          backgroundColor: colors.surface,
-          borderWidth: 0.5,
-          borderColor: colors.outline + '20',
-          width: cardDimensions.width,
-          alignSelf: 'center',
+          elevation: 6,
           // Add opacity for closed restaurants
           opacity: isOpen ? 1 : 0.7,
         }}
@@ -167,8 +193,8 @@ export const RestaurantCard = ({
                 alignItems: 'center',
               }}
             >
-              <IoniconsIcon name="checkmark-circle" size={12} color="white" />
-              <Caption color="white" style={{ marginLeft: 4, fontSize: 10 }}>
+              <IoniconsIcon name="checkmark-circle" size={cardDimensions.badgeSize} color="white" />
+              <Caption color="white" style={{ marginLeft: 4, fontSize: cardDimensions.badgeSize }}>
                 Verified
               </Caption>
             </View>
@@ -224,10 +250,10 @@ export const RestaurantCard = ({
             >
               <IoniconsIcon
                 name="star"
-                size={12}
+                size={cardDimensions.badgeSize}
                 color={rating !== null ? 'yellow' : colors.onSurfaceVariant}
               />
-              <Caption color="white" style={{ marginLeft: 4 }}>
+              <Caption color="white" style={{ marginLeft: 4, fontSize: cardDimensions.badgeSize }}>
                 {getRatingDisplay()} ({ratingCount})
               </Caption>
             </View>
@@ -273,7 +299,8 @@ export const RestaurantCard = ({
               weight="bold"
               style={{
                 flex: 1,
-                fontSize: getResponsiveText(isSmallScreen ? 16 : 18),
+                fontSize: cardDimensions.restaurantNameSize,
+                lineHeight: cardDimensions.restaurantNameSize * 1.2,
               }}
             >
               {name}
@@ -296,6 +323,7 @@ export const RestaurantCard = ({
                   isOpen ? colors.onPrimaryContainer : colors.onErrorContainer
                 }
                 weight="medium"
+                style={{ fontSize: cardDimensions.captionSize }}
               >
                 {isOpen ? t('open') : t('closed')}
               </Caption>
@@ -304,7 +332,14 @@ export const RestaurantCard = ({
 
           {/* Address display */}
           <View style={{ marginBottom: 8 }}>
-            <Body color={colors.onSurfaceVariant} numberOfLines={1}>
+            <Body 
+              color={colors.onSurfaceVariant} 
+              numberOfLines={1}
+              style={{ 
+                fontSize: cardDimensions.addressSize,
+                lineHeight: cardDimensions.addressSize * 1.3,
+              }}
+            >
               📍 {address}
             </Body>
           </View>
@@ -317,31 +352,51 @@ export const RestaurantCard = ({
             }}
           >
             <View style={{ flex: 1 }}>
-              <Label color={colors.primary} weight="semibold">
+              <Label 
+                color={colors.primary} 
+                weight="semibold"
+                style={{ fontSize: cardDimensions.deliveryPriceSize }}
+              >
                 {displayDeliveryPrice} XAF delivery
               </Label>
 
               {/* Menu mode indicator */}
-              <Caption color={colors.onSurfaceVariant} style={{ marginTop: 2 }}>
+              <Caption 
+                color={colors.onSurfaceVariant} 
+                style={{ 
+                  marginTop: 2,
+                  fontSize: cardDimensions.captionSize,
+                }}
+              >
                 {menuMode === 'FIXED' ? 'Fixed menu' : 'Custom menu'}
               </Caption>
             </View>
 
             <View style={{ alignItems: 'flex-end' }}>
-              <Label color={colors.onSurface} weight="medium">
+              <Label 
+                color={colors.onSurface} 
+                weight="medium"
+                style={{ fontSize: cardDimensions.deliveryTimeSize }}
+              >
                 {displayEstimatedDeliveryTime}
               </Label>
               <View style={{ alignItems: 'flex-end' }}>
                 <Caption
                   color={colors.onSurfaceVariant}
-                  style={{ marginTop: 2 }}
+                  style={{ 
+                    marginTop: 2,
+                    fontSize: cardDimensions.distanceSize,
+                  }}
                 >
                   {getDistanceDisplay()}
                 </Caption>
                 {isUsingFallback && (
                   <Caption
                     color={colors.primary}
-                    style={{ marginTop: 1, fontSize: 10 }}
+                    style={{ 
+                      marginTop: 1, 
+                      fontSize: cardDimensions.badgeSize,
+                    }}
                   >
                     📍 Enable location for accuracy
                   </Caption>

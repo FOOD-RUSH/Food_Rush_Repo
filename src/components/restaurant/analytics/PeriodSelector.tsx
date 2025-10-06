@@ -28,7 +28,6 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
     try {
       await Haptics.selectionAsync();
     } catch (error) {
-      console.warn('Haptics not available:', error);
     }
     onPeriodChange(period);
   };

@@ -73,9 +73,6 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
           const success = await requestPermissionWithLocation();
           if (success) {
             // Permission granted and location obtained - refresh nearby data
-            console.log(
-              '📍 Permission granted, refreshing location-based data',
-            );
             queryClient.invalidateQueries({ queryKey: ['browse-restaurants'] });
             queryClient.invalidateQueries({ queryKey: ['restaurants'] });
             queryClient.invalidateQueries({ queryKey: ['menu'] });
@@ -93,7 +90,6 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
         },
         () => {
           // User cancelled - they can still use the app with fallback location
-          console.log('User cancelled location permission');
         },
       );
     } else {
@@ -125,9 +121,6 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
         const success = await refreshLocation();
         if (success) {
           // Manually trigger query invalidation to ensure fresh data
-          console.log(
-            '🔄 Location refreshed successfully, invalidating queries',
-          );
           queryClient.invalidateQueries({ queryKey: ['browse-restaurants'] });
           queryClient.invalidateQueries({ queryKey: ['restaurants'] });
           queryClient.invalidateQueries({ queryKey: ['menu'] });

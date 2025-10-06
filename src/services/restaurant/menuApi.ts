@@ -147,27 +147,6 @@ export const restaurantMenuApi = {
       }
 
       // Log what we're sending
-      console.log('Sending to backend:', {
-        restaurantId,
-        url: `/restaurants/${restaurantId}/menu`,
-        fields: {
-          name: data.name,
-          description: data.description || null,
-          price: data.price.toString(),
-          category: data.category,
-          isAvailable: data.isAvailable.toString(),
-          startAt: data.startAt || null,
-          endAt: data.endAt || null,
-          hasPicture: !!data.picture,
-          pictureDetails: data.picture
-            ? {
-                name: data.picture.name,
-                type: data.picture.type,
-                uri: data.picture.uri.substring(0, 50) + '...',
-              }
-            : null,
-        },
-      });
 
       const response = await apiClient.post<ApiResponse<MenuItem>>(
         `/restaurants/${restaurantId}/menu`,
@@ -183,17 +162,10 @@ export const restaurantMenuApi = {
       );
 
       // Log successful response
-      console.log('SUCCESS RESPONSE FROM BACKEND:', {
-        status: response.status,
-        statusText: response.statusText,
-        data: response.data,
-        headers: response.headers,
-      });
 
       return response;
     } catch (error: any) {
       // Log error response from backend
-      console.log('ERROR RESPONSE FROM BACKEND:', error);
 
       throw error;
     }
@@ -241,18 +213,6 @@ export const restaurantMenuApi = {
         };
         formData.append('picture', imageFile as any);
 
-        console.log('🔄 Updating menu item with image:', {
-          restaurantId,
-          itemId,
-          url: `/restaurants/${restaurantId}/menu/${itemId}`,
-          hasPicture: true,
-          pictureDetails: {
-            name: data.picture.name,
-            type: data.picture.type,
-            uri: data.picture.uri.substring(0, 50) + '...',
-          },
-        });
-
         return await apiClient.patch(
           `/restaurants/${restaurantId}/menu/${itemId}`,
           formData,
@@ -275,13 +235,6 @@ export const restaurantMenuApi = {
         if (data.isAvailable !== undefined) jsonData.isAvailable = data.isAvailable;
         if (data.startAt !== undefined) jsonData.startAt = data.startAt;
         if (data.endAt !== undefined) jsonData.endAt = data.endAt;
-
-        console.log('🔄 Updating menu item without image:', {
-          restaurantId,
-          itemId,
-          url: `/restaurants/${restaurantId}/menu/${itemId}`,
-          data: jsonData,
-        });
 
         return await apiClient.patch(
           `/restaurants/${restaurantId}/menu/${itemId}`,

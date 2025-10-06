@@ -61,10 +61,6 @@ const ApiCategoryDropdown: React.FC<ApiCategoryDropdownProps> = ({
   }, [categoriesArray, selectedValue]);
 
   const handleSelect = (category: { value: string; label: string }) => {
-    console.log('Category selected:', {
-      value: category.value,
-      label: category.label,
-    });
     onValueChange(category.value, category.label);
     setIsVisible(false);
   };

@@ -38,29 +38,21 @@ export const useRestaurantProfile = () => {
    */
   const loadProfileIfNeeded = useCallback(async () => {
     if (!currentRestaurant?.id || !user?.id) {
-      console.log('No restaurant or user ID available');
       return;
     }
 
     // Check if we already have the profile loaded
     if (hasLoadedProfile && restaurantProfile) {
-      console.log('Profile already loaded for this session');
       return;
     }
 
     // Prevent multiple simultaneous requests
     if (isLoading) {
-      console.log('Profile fetch already in progress');
       return;
     }
 
     try {
-      console.log(
-        'Fetching restaurant profile for restaurant:',
-        currentRestaurant.id,
-      );
       await fetchRestaurantProfile(currentRestaurant.id);
-      console.log('Restaurant profile loaded successfully');
     } catch (error) {
       console.error('Failed to load restaurant profile:', error);
     }

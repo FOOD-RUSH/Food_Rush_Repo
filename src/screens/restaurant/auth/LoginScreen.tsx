@@ -102,8 +102,6 @@ const RestaurantLoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
           email: data.email.trim().toLowerCase(),
           password: data.password,
         });
-
-        console.log('Restaurant login successful');
         navigation.getParent()?.navigate('RestaurantApp');
       } catch (error: any) {
         console.error('Restaurant login failed:', error);
@@ -113,11 +111,9 @@ const RestaurantLoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
   );
 
   const handleGoogleSignIn = useCallback(() => {
-    console.log('Google login pressed');
   }, []);
 
   const handleAppleSignIn = useCallback(() => {
-    console.log('Apple login pressed');
   }, []);
 
   const togglePassword = useCallback(() => {

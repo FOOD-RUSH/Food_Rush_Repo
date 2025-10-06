@@ -4,7 +4,7 @@
 // Customer-specific stores
 export * from './cartStore';
 export * from './notificationStore';
-export * from './paymentStore';
+// Payment store removed - using React Query for transaction history
 export * from './addressStore';
 
 // Re-export commonly used auth hooks for convenience

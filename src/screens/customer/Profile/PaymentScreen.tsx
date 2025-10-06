@@ -3,8 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import React from 'react';
 import { RootStackScreenProps } from '@/src/navigation/types';
-import { usePaymentStore } from '@/src/stores/customerStores/paymentStore';
-import { PaymentMethod } from '@/src/types';
 import CommonView from '@/src/components/common/CommonView';
 import { Card, useTheme } from 'react-native-paper';
 import { images } from '@/assets/images';
@@ -12,14 +10,12 @@ import { images } from '@/assets/images';
 const PaymentScreen = ({
   navigation,
 }: RootStackScreenProps<'PaymentMethods'>) => {
-  const { t } = useTranslation('translation');
+  const { } = useTranslation('translation');
   const { colors } = useTheme();
-  const setSelectedPaymentMethod = usePaymentStore(
-    (state) => state.setSelectedPaymentMethod,
-  );
 
-  const handleSelectPaymentMethod = (method: PaymentMethod) => {
-    setSelectedPaymentMethod(method);
+  const handleSelectPaymentMethod = (method: string) => {
+    // Handle payment method selection
+    console.log('Selected payment method:', method);
     navigation.goBack(); // Navigate back to the checkout screen
   };
 
