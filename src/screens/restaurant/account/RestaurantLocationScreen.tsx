@@ -185,9 +185,19 @@ const RestaurantLocationScreen: React.FC = () => {
       return;
     }
 
-    try {
+    if (!restaurant?.id) {
+      Toast.show({
+        type: 'error',
+        text1: 'Restaurant ID Missing',
+        text2: 'Unable to update location without restaurant ID',
+        position: 'top',
+      });
+      return;
+    }
 
+    try {
       await updateLocationMutation.mutateAsync({
+        restaurantId: restaurant.id,
         latitude: selectedLocation.latitude,
         longitude: selectedLocation.longitude,
       });
@@ -203,7 +213,7 @@ const RestaurantLocationScreen: React.FC = () => {
       console.error('Error updating restaurant location:', error);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
-  }, [selectedLocation, updateLocationMutation, loadProfileIfNeeded]);
+  }, [selectedLocation, restaurant?.id, updateLocationMutation, loadProfileIfNeeded]);
 
   // Show update modal
   const showLocationUpdateModal = useCallback(() => {
@@ -383,17 +393,17 @@ const RestaurantLocationScreen: React.FC = () => {
                   weight="semibold"
                   style={{ marginBottom: 4 }}
                 >
-                  {restaurant.name}
+                  {restaurant?.name}
                 </Label>
                 <Body
                   color={colors.onSurfaceVariant}
                   style={{ lineHeight: 20, marginBottom: 12 }}
                 >
-                  {restaurant.address}
+                  {restaurant?.address}
                 </Body>
 
                 {/* Coordinates */}
-                {restaurant.latitude && restaurant.longitude && (
+                {restaurant?.latitude && restaurant?.longitude && (
                   <View style={styles.coordinatesContainer}>
                     <MaterialCommunityIcon
                       name="map-marker"
@@ -404,14 +414,14 @@ const RestaurantLocationScreen: React.FC = () => {
                       color={colors.onSurfaceVariant}
                       style={{ marginLeft: 4 }}
                     >
-                      {restaurant.latitude.toFixed(6)},{' '}
-                      {restaurant.longitude.toFixed(6)}
+                      {restaurant?.latitude.toFixed(6)},{' '}
+                      {restaurant?.longitude.toFixed(6)}
                     </Caption>
                   </View>
                 )}
 
                 {/* Delivery Radius */}
-                {restaurant.deliveryRadius && (
+                {restaurant?.deliveryRadius && (
                   <View style={[styles.coordinatesContainer, { marginTop: 4 }]}>
                     <MaterialCommunityIcon
                       name="map-marker-radius"
@@ -422,7 +432,7 @@ const RestaurantLocationScreen: React.FC = () => {
                       color={colors.onSurfaceVariant}
                       style={{ marginLeft: 4 }}
                     >
-                      Delivery radius: {restaurant.deliveryRadius} km
+                      Delivery radius: {restaurant?.deliveryRadius} km
                     </Caption>
                   </View>
                 )}

@@ -1,22 +1,23 @@
-import { IoniconsIcon } from '@/src/components/common/icons';
 import React, { useState } from 'react';
-import { View, TouchableOpacity, ScrollView, Alert } from 'react-native';
-import { useTheme, Button, TextInput } from 'react-native-paper';
-
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  Image,
+  TextInput,
+  StyleSheet,
+  SafeAreaView,
+} from 'react-native';
+import { useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { RootStackScreenProps } from '@/src/navigation/types';
-import CommonView from '@/src/components/common/CommonView';
-import {
-  ResponsiveContainer,
-  ResponsiveImage,
-  ResponsiveText,
-} from '@/src/components/common';
-import { useResponsive } from '@/src/hooks/useResponsive';
 import { useCreateRestaurantReview } from '@/src/hooks/customer/useCustomerApi';
 import { getUserFriendlyErrorMessage } from '@/src/utils/errorHandler';
 import Toast from 'react-native-toast-message';
 
-type RestaurantReviewScreenProps = RootStackScreenProps<'RestaurantReview'>
+type RestaurantReviewScreenProps = RootStackScreenProps<'RestaurantReview'>;
 
 const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
   navigation,
@@ -24,10 +25,11 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
 }) => {
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
-  const { isSmallScreen, getResponsiveSpacing } = useResponsive();
 
-  // Get restaurant data from route params
-  const { restaurantId, restaurantName, restaurantImage } = route.params || {};
+  // Get restaurant data from route params with safe defaults
+  const params = route.params || {};
+  const restaurantId = params.restaurantId;
+  const restaurantName = params.restaurantName || 'Restaurant';
 
   const [score, setScore] = useState(0);
   const [review, setReview] = useState('');
@@ -41,12 +43,12 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
 
   const handleSubmit = async () => {
     if (score === 0) {
-      Alert.alert(t('error'), t('please_select_rating'));
+      Alert.alert('Error', 'Please select a rating');
       return;
     }
 
     if (!restaurantId) {
-      Alert.alert(t('error'), 'Restaurant ID is missing');
+      Alert.alert('Error', 'Restaurant ID is missing');
       return;
     }
 
@@ -61,8 +63,8 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
 
       Toast.show({
         type: 'success',
-        text1: t('success'),
-        text2: t('review_submitted_successfully'),
+        text1: 'Success',
+        text2: 'Review submitted successfully',
       });
 
       navigation.goBack();
@@ -70,7 +72,7 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
       const errorMessage = getUserFriendlyErrorMessage(error);
       Toast.show({
         type: 'error',
-        text1: t('error'),
+        text1: 'Error',
         text2: errorMessage,
       });
     }
@@ -82,28 +84,22 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
 
   const renderStars = () => {
     return (
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'center',
-          marginVertical: getResponsiveSpacing(16),
-        }}
-      >
+      <View style={styles.starsContainer}>
         {[1, 2, 3, 4, 5].map((star) => (
           <TouchableOpacity
             key={star}
             onPress={() => handleStarPress(star)}
-            style={{
-              padding: getResponsiveSpacing(8),
-              marginHorizontal: getResponsiveSpacing(4),
-            }}
+            style={styles.starButton}
             activeOpacity={0.7}
           >
-            <IoniconsIcon
-              name={star <= score ? 'star' : 'star-outline'}
-              size={isSmallScreen ? 32 : 40}
-              color={star <= score ? '#FFD700' : colors.onSurfaceVariant}
-            />
+            <Text
+              style={[
+                styles.starText,
+                { color: star <= score ? '#FFD700' : colors.onSurfaceVariant },
+              ]}
+            >
+              ★
+            </Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -111,113 +107,70 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
   };
 
   return (
-    <CommonView>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView
-        style={{ flex: 1, backgroundColor: colors.background }}
+        style={styles.scrollView}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          flexGrow: 1,
-          paddingBottom: getResponsiveSpacing(32),
-        }}
+        contentContainerStyle={styles.scrollContent}
       >
         {/* Back Button */}
-        <View
-          style={{
-            paddingHorizontal: getResponsiveSpacing(16),
-            paddingTop: getResponsiveSpacing(16),
-            paddingBottom: getResponsiveSpacing(8),
-          }}
-        >
+        <View style={styles.header}>
           <TouchableOpacity
             onPress={handleCancel}
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 20,
-              backgroundColor: colors.surfaceVariant,
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}
+            style={[styles.backButton, { backgroundColor: colors.surfaceVariant }]}
             activeOpacity={0.7}
           >
-            <IoniconsIcon
-              name="arrow-back"
-              size={24}
-              color={colors.onSurface}
-            />
+            <Text style={[styles.backButtonText, { color: colors.onSurface }]}>
+              ←
+            </Text>
           </TouchableOpacity>
         </View>
 
-        <ResponsiveContainer padding="lg">
+        <View style={styles.content}>
           {/* Restaurant Image */}
-          <View
-            style={{
-              alignItems: 'center',
-              marginBottom: getResponsiveSpacing(24),
-            }}
-          >
+          <View style={styles.imageContainer}>
             <View
-              style={{
-                width: isSmallScreen ? 120 : 150,
-                height: isSmallScreen ? 120 : 150,
-                borderRadius: 16,
-                overflow: 'hidden',
-                backgroundColor: colors.surfaceVariant,
-              }}
+              style={[
+                styles.imageWrapper,
+                { backgroundColor: colors.surfaceVariant },
+              ]}
             >
-              <ResponsiveImage
-                source={
-                  restaurantImage || require('@/assets/images/R-Logo.png')
-                }
-                size="xl"
-                aspectRatio={1}
-                style={{
-                  borderRadius: 16,
-                }}
+              <Image
+                source={require('@/assets/images/R-Logo.png')}
+                style={styles.restaurantImage}
+                resizeMode="cover"
               />
             </View>
           </View>
 
           {/* Main Question */}
-          <View
-            style={{
-              alignItems: 'center',
-              marginBottom: getResponsiveSpacing(16),
-            }}
-          >
-            <ResponsiveText
-              size={isSmallScreen ? 'xl' : '2xl'}
-              weight="bold"
-              style={{
-                textAlign: 'center',
-                color: colors.onSurface,
-                marginBottom: getResponsiveSpacing(8),
-              }}
+          <View style={styles.questionContainer}>
+            <Text
+              style={[
+                styles.mainQuestion,
+                { color: colors.onSurface },
+              ]}
             >
-              {t('how_was_delivery_order')}
-            </ResponsiveText>
+              How was your delivery order?
+            </Text>
 
-            <ResponsiveText
-              size="base"
-              style={{
-                textAlign: 'center',
-                color: colors.onSurfaceVariant,
-                lineHeight: 24,
-              }}
+            <Text
+              style={[
+                styles.subQuestion,
+                { color: colors.onSurfaceVariant },
+              ]}
             >
-              {t('enjoyed_food_rate_restaurant')}
-            </ResponsiveText>
+              Enjoyed the food? Rate the restaurant.
+            </Text>
 
-            <ResponsiveText
-              size="sm"
-              style={{
-                textAlign: 'center',
-                color: colors.onSurfaceVariant,
-                marginTop: getResponsiveSpacing(4),
-              }}
+            <Text
+              style={[
+                styles.feedbackText,
+                { color: colors.onSurfaceVariant },
+              ]}
             >
-              {t('your_feedback_matters')}
-            </ResponsiveText>
+              Your feedback matters.
+            </Text>
           </View>
 
           {/* Star Rating */}
@@ -225,99 +178,202 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
 
           {/* Rating Display */}
           {score > 0 && (
-            <View
-              style={{
-                alignItems: 'center',
-                marginBottom: getResponsiveSpacing(24),
-              }}
-            >
-              <ResponsiveText
-                size="lg"
-                weight="semibold"
-                style={{
-                  color: colors.primary,
-                }}
+            <View style={styles.ratingDisplay}>
+              <Text
+                style={[
+                  styles.ratingText,
+                  { color: colors.primary },
+                ]}
               >
-                {score} {score === 1 ? t('star') : t('stars')}
-              </ResponsiveText>
+                {score} {score === 1 ? 'star' : 'stars'}
+              </Text>
             </View>
           )}
 
           {/* Review Text Input */}
-          <View style={{ marginBottom: getResponsiveSpacing(32) }}>
+          <View style={styles.inputContainer}>
             <TextInput
-              placeholder={t('add_optional_description')}
+              placeholder="Add an optional description..."
               value={review}
               onChangeText={setReview}
-              mode="outlined"
               multiline
               numberOfLines={4}
-              outlineStyle={{
-                borderRadius: 12,
-                borderColor: colors.surfaceVariant,
-              }}
-              style={{
-                backgroundColor: colors.surfaceVariant,
-                minHeight: 100,
-              }}
-              contentStyle={{
-                paddingHorizontal: getResponsiveSpacing(16),
-                paddingVertical: 12,
-                color: colors.onSurfaceVariant,
-              }}
+              style={[
+                styles.textInput,
+                {
+                  backgroundColor: colors.surfaceVariant,
+                  color: colors.onSurface,
+                  borderColor: colors.outline,
+                },
+              ]}
+              placeholderTextColor={colors.onSurfaceVariant}
               textAlignVertical="top"
             />
           </View>
 
           {/* Action Buttons */}
-          <View
-            style={{
-              flexDirection: 'row',
-              gap: getResponsiveSpacing(12),
-            }}
-          >
-            <Button
-              mode="outlined"
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
               onPress={handleCancel}
-              style={{
-                flex: 1,
-                borderColor: colors.outline,
-                borderRadius: 25,
-              }}
-              contentStyle={{ paddingVertical: getResponsiveSpacing(12) }}
-              labelStyle={{
-                fontSize: 16,
-                fontWeight: '600',
-                color: colors.onSurface,
-              }}
+              style={[
+                styles.button,
+                styles.cancelButton,
+                { borderColor: colors.outline },
+              ]}
             >
-              {t('cancel')}
-            </Button>
+              <Text style={[styles.buttonText, { color: colors.onSurface }]}>
+                Cancel
+              </Text>
+            </TouchableOpacity>
 
-            <Button
-              mode="contained"
+            <TouchableOpacity
               onPress={handleSubmit}
               disabled={score === 0 || createReviewMutation.isPending}
-              style={{
-                flex: 1,
-                borderRadius: 25,
-                backgroundColor:
-                  score === 0 ? colors.surfaceVariant : colors.primary,
-              }}
-              contentStyle={{ paddingVertical: getResponsiveSpacing(12) }}
-              labelStyle={{
-                fontSize: 16,
-                fontWeight: '600',
-                color: score === 0 ? colors.onSurfaceVariant : colors.onPrimary,
-              }}
+              style={[
+                styles.button,
+                styles.submitButton,
+                {
+                  backgroundColor:
+                    score === 0 ? colors.surfaceVariant : colors.primary,
+                },
+              ]}
             >
-              {createReviewMutation.isPending ? t('submitting') : t('submit')}
-            </Button>
+              <Text
+                style={[
+                  styles.buttonText,
+                  {
+                    color: score === 0 ? colors.onSurfaceVariant : colors.onPrimary,
+                  },
+                ]}
+              >
+                {createReviewMutation.isPending ? 'Submitting...' : 'Submit'}
+              </Text>
+            </TouchableOpacity>
           </View>
-        </ResponsiveContainer>
+        </View>
       </ScrollView>
-    </CommonView>
+    </SafeAreaView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 32,
+  },
+  header: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  backButtonText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  content: {
+    padding: 24,
+  },
+  imageContainer: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  imageWrapper: {
+    width: 120,
+    height: 120,
+    borderRadius: 16,
+    overflow: 'hidden',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  restaurantImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 16,
+  },
+  questionContainer: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  mainQuestion: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  subQuestion: {
+    fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  feedbackText: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 4,
+  },
+  starsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginVertical: 16,
+  },
+  starButton: {
+    padding: 8,
+    marginHorizontal: 4,
+  },
+  starText: {
+    fontSize: 40,
+  },
+  ratingDisplay: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  ratingText: {
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  inputContainer: {
+    marginBottom: 32,
+  },
+  textInput: {
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 16,
+    minHeight: 100,
+    fontSize: 16,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  button: {
+    flex: 1,
+    paddingVertical: 16,
+    borderRadius: 25,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cancelButton: {
+    borderWidth: 1,
+  },
+  submitButton: {
+    // backgroundColor will be set dynamically
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+});
 
 export default RestaurantReviewScreen;

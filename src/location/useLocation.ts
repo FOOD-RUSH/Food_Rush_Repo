@@ -73,7 +73,7 @@ export const useLocation = (options: UseLocationOptions = {}) => {
     };
 
     initialize();
-  }, [autoRequest, requestOnMount]);
+  }, [autoRequest, getCurrentLocation, requestOnMount, requestPermissionWithLocation, setLocation, setPermission, storedLocation]);
 
   const getCurrentLocation = useCallback(
     async (forceRefresh = false): Promise<boolean> => {

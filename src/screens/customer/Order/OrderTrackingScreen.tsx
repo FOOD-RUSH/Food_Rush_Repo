@@ -1,296 +1,179 @@
-import { IoniconsIcon } from '@/src/components/common/icons';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
+  Text,
+  TouchableOpacity,
+  Alert,
   ScrollView,
   RefreshControl,
-  TouchableOpacity,
 } from 'react-native';
-import { useTheme } from 'react-native-paper';
-
+import { useTheme, Card, ActivityIndicator, ProgressBar } from 'react-native-paper';
+import { IoniconsIcon, MaterialIcon } from '@/src/components/common/icons';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import CommonView from '@/src/components/common/CommonView';
 import { RootStackScreenProps } from '@/src/navigation/types';
-import { Order, OrderStatus } from '@/src/types';
-import Toast from 'react-native-toast-message';
-import {
-  useOrderById,
-  useConfirmOrderReceived,
-} from '@/src/hooks/customer/useOrdersApi';
-import { useOrderFlow } from '@/src/hooks/customer/useOrderFlow';
-// Payment method now handled in checkout component
-import {
-  Typography,
-  Heading5,
-  Body,
-  Label,
-  Caption,
-} from '@/src/components/common/Typography';
-import DeliveryConfirmationModal from '@/src/components/customer/OrderConfirmation/DeliveryConfirmationModal';
-import { useDeliveryConfirmation } from '@/src/hooks/customer/useDeliveryConfirmation';
+import { useOrderById, useCancelOrder } from '@/src/hooks/customer/useOrdersApi';
+import { useAuthUser } from '@/src/stores/customerStores';
+import EnhancedPaymentService from '@/src/services/customer/enhancedPayment.service';
+import PaymentMethodModal from '@/src/components/customer/PaymentMethodModal';
+import { PaymentMethodSelection } from '@/src/types/transaction';
 
-// Define order status steps for the timeline
-const ORDER_STATUS_STEPS: {
-  status: OrderStatus;
-  title: string;
-  description: string;
-  icon: string;
-}[] = [
-  {
-    status: 'pending',
-    title: 'Order Placed',
-    description: 'Waiting for restaurant confirmation (2-15 min)',
-    icon: 'receipt-outline',
-  },
-  {
-    status: 'confirmed',
-    title: 'Restaurant Confirmed',
-    description: 'Please complete payment to proceed',
-    icon: 'checkmark-circle-outline',
-  },
-  {
-    status: 'preparing',
-    title: 'Preparing',
-    description: 'Your food is being prepared',
-    icon: 'restaurant-outline',
-  },
-  {
-    status: 'ready_for_pickup',
-    title: 'Ready for Pickup',
-    description: 'Your order is ready for pickup',
-    icon: 'checkmark-done-circle-outline',
-  },
-  {
-    status: 'out_for_delivery',
-    title: 'Out for Delivery',
-    description: 'Your order is on the way',
-    icon: 'bicycle-outline',
-  },
-  {
-    status: 'delivered',
-    title: 'Delivered',
-    description: 'Your order has been delivered',
-    icon: 'home-outline',
-  },
-];
+type OrderStatus = 
+  | 'pending'
+  | 'confirmed'
+  | 'payment_required'
+  | 'payment_processing'
+  | 'preparing'
+  | 'ready_for_pickup'
+  | 'out_for_delivery'
+  | 'delivered'
+  | 'cancelled';
 
-// Map order status to a more user-friendly display
-const getStatusDisplayText = (status: OrderStatus): string => {
-  const statusMap: Record<OrderStatus, string> = {
-    pending: 'Waiting for Restaurant',
-    confirmed: 'Payment Required',
-    preparing: 'Preparing',
-    ready_for_pickup: 'Ready for Pickup',
-    out_for_delivery: 'Out for Delivery',
-    delivered: 'Delivered',
-    cancelled: 'Cancelled',
-  };
-  return statusMap[status] || status;
-};
-
-// Get the current step index based on order status
-const getCurrentStepIndex = (status: OrderStatus): number => {
-  return ORDER_STATUS_STEPS.findIndex((step) => step.status === status);
-};
-
-// Horizontal status step component (icons only)
-interface OrderStatusStepProps {
-  step: (typeof ORDER_STATUS_STEPS)[0];
-  isActive: boolean;
-  isCompleted: boolean;
-  isFirst: boolean;
-  isLast: boolean;
-}
-
-const OrderStatusStep: React.FC<OrderStatusStepProps> = ({
-  step,
-  isActive,
-  isCompleted,
-  isFirst,
-  isLast,
-}) => {
-  const { colors } = useTheme();
-
-  return (
-    <View className="flex-1 items-center">
-      {/* Status indicator circle - icons only */}
-      <View
-        className="w-12 h-12 rounded-full items-center justify-center"
-        style={{
-          backgroundColor: isCompleted || isActive ? '#007aff' : '#e0e0e0',
-        }}
-      >
-        {isCompleted ? (
-          <IoniconsIcon name="checkmark" size={24} color="white" />
-        ) : (
-          <IoniconsIcon
-            name={step.icon as any}
-            size={24}
-            color={isActive ? 'white' : '#666'}
-          />
-        )}
-      </View>
-    </View>
-  );
-};
-
-// Horizontal progress line component - centered to circle radius
-interface ProgressLineProps {
-  isCompleted: boolean;
-}
-
-const ProgressLine: React.FC<ProgressLineProps> = ({ isCompleted }) => {
-  return (
-    <View
-      className="flex-1 mx-2"
-      style={{
-        height: 2,
-        marginTop: 23, // Half of circle height (48/2 = 24) - 1 for line thickness
-        backgroundColor: isCompleted ? '#007aff' : '#e0e0e0',
-      }}
-    />
-  );
-};
-
-// Order details component
-interface OrderDetailsProps {
-  order: Order;
-}
-
-const OrderDetails: React.FC<OrderDetailsProps> = ({ order }) => {
-  const { colors } = useTheme();
-  const { t } = useTranslation('translation');
-
-  return (
-    <View
-      className="rounded-xl p-4 mb-6"
-      style={{ backgroundColor: colors.surfaceVariant }}
-    >
-      <View className="flex-row justify-between items-center mb-3">
-        <Label color={colors.onSurface} weight="semibold">
-          {t('order_details')}
-        </Label>
-        <Label color={colors.primary} weight="medium">
-          #{order.id.substring(0, 8)}
-        </Label>
-      </View>
-
-      <View className="border-t border-gray-200 pt-3">
-        <View className="flex-row justify-between mb-2">
-          <Body color={colors.onSurfaceVariant}>{t('restaurant')}</Body>
-          <Body color={colors.onSurface}>Restaurant Name</Body>
-        </View>
-        <View className="flex-row justify-between mb-2">
-          <Body color={colors.onSurfaceVariant}>{t('total')}</Body>
-          <Body color={colors.onSurface}>
-            {order.total.toLocaleString()} XAF
-          </Body>
-        </View>
-        <View className="flex-row justify-between">
-          <Body color={colors.onSurfaceVariant}>{t('status')}</Body>
-          <Body color={colors.primary}>
-            {getStatusDisplayText(order.status)}
-          </Body>
-        </View>
-      </View>
-    </View>
-  );
-};
-
-// ETA component
-interface ETAComponentProps {
-  order: Order;
-}
-
-const ETAComponent: React.FC<ETAComponentProps> = ({ order }) => {
-  const { colors } = useTheme();
-  const { t } = useTranslation('translation');
-
-  // Calculate estimated time (this is a placeholder - in a real app you'd have actual ETA)
-  const getETA = () => {
-    const statusIndex = getCurrentStepIndex(order.status);
-    const minutesRemaining = (ORDER_STATUS_STEPS.length - statusIndex - 1) * 10;
-    return minutesRemaining > 0 ? `${minutesRemaining} min` : 'Soon';
-  };
-
-  // Only show ETA if order is not yet delivered
-  if (order.status === 'delivered' || order.status === 'cancelled') {
-    return null;
-  }
-
-  return (
-    <View
-      className="rounded-xl p-4 mb-6 flex-row items-center"
-      style={{ backgroundColor: colors.surfaceVariant }}
-    >
-      <IoniconsIcon name="time-outline" size={24} color="#007aff" />
-      <View className="ml-3">
-        <Label color={colors.onSurface} weight="semibold">
-          {t('estimated_arrival')}
-        </Label>
-        <Body color={colors.primary}>{getETA()}</Body>
-      </View>
-    </View>
-  );
-};
+type PaymentStep = 
+  | 'idle'
+  | 'method_selection'
+  | 'processing'
+  | 'polling'
+  | 'success'
+  | 'failed';
 
 const OrderTrackingScreen = ({
-  route,
   navigation,
+  route,
 }: RootStackScreenProps<'OrderTracking'>) => {
-  const { orderId } = route.params;
   const { colors } = useTheme();
-  const { t } = useTranslation('translation');
-  const [refreshing, setRefreshing] = useState(false);
+  const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
+  const { orderId } = route.params;
+  const user = useAuthUser();
 
-  // Order flow for payment and cancellation
-  const { 
-    proceedToPayment, 
-    cancelOrder, 
-    canCancel,
-    isCancellingOrder,
-    isConfirmed 
-  } = useOrderFlow();
+  // State management
+  const [paymentStep, setPaymentStep] = useState<PaymentStep>('idle');
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedPayment, setSelectedPayment] = useState<PaymentMethodSelection>({
+    method: 'mobile_money',
+    provider: 'mtn',
+    phoneNumber: '',
+  });
+  const [transactionId, setTransactionId] = useState<string>('');
+  const [paymentError, setPaymentError] = useState<string>('');
+  const [paymentProgress, setPaymentProgress] = useState(0);
+  const [timeRemaining, setTimeRemaining] = useState(300);
 
-  // Use our custom hook for order tracking with polling
+  // Fetch order details
   const {
     data: order,
     isLoading,
     error,
     refetch,
-    isRefetching,
   } = useOrderById(orderId);
 
-  // Delivery confirmation hook
-  const {
-    isModalVisible,
-    showConfirmationModal,
-    hideConfirmationModal,
-    confirmDelivery,
-    isConfirming,
-  } = useDeliveryConfirmation();
+  // Cancel order mutation
+  const cancelOrderMutation = useCancelOrder();
 
-  // Refresh handler
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await refetch();
-    setRefreshing(false);
-  }, [refetch]);
+  // Timer for payment timeout
+  useEffect(() => {
+    if (paymentStep === 'polling' && timeRemaining > 0) {
+      const timer = setInterval(() => {
+        setTimeRemaining((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            setPaymentStep('failed');
+            setPaymentError('Payment session expired. Please try again.');
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
 
-  // Handle payment navigation
-  const handleProceedToPayment = useCallback(() => {
-    if (order) {
-      proceedToPayment();
-      navigation.navigate('PaymentProcessing', {
-        orderId: order.id,
-        amount: order.total,
-        paymentMethod: 'mobile_money',
-        provider: 'mtn', // Default provider
-      });
+      return () => clearInterval(timer);
     }
-  }, [proceedToPayment, order, navigation]);
+  }, [paymentStep, timeRemaining]);
 
-  // Handle order cancellation
+  // Format time remaining
+  const formatTimeRemaining = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Handle payment method selection
+  const handlePaymentConfirm = useCallback(async (selection: PaymentMethodSelection) => {
+    if (!user?.fullName || !user?.email) {
+      Alert.alert(t('error'), 'User information is missing. Please log in again.');
+      return;
+    }
+
+    setSelectedPayment(selection);
+    setShowPaymentModal(false);
+    setPaymentStep('processing');
+    setPaymentError('');
+    setTimeRemaining(300);
+
+    try {
+      // Validate phone number
+      if (!EnhancedPaymentService.validatePhoneNumber(selection.phoneNumber, selection.provider)) {
+        setPaymentError(`Please enter a valid ${selection.provider.toUpperCase()} phone number`);
+        setPaymentStep('failed');
+        return;
+      }
+
+      // Initialize payment
+      const paymentRequest = {
+        orderId,
+        method: 'mobile_money' as const,
+        phone: selection.phoneNumber,
+        medium: selection.provider,
+        name: user.fullName,
+        email: user.email,
+      };
+
+      setPaymentStep('polling');
+      setPaymentProgress(0.1);
+
+      // Process payment with polling
+      const result = await EnhancedPaymentService.processPaymentWithRetry(
+        paymentRequest,
+        (status) => {
+          if (status.status === 'PENDING') {
+            setPaymentProgress(0.5);
+          }
+        },
+      );
+
+      if (result.success) {
+        setPaymentStep('success');
+        setPaymentProgress(1);
+        setTransactionId(result.transactionId);
+        
+        setTimeout(() => {
+          refetch();
+        }, 2000);
+      } else {
+        setPaymentStep('failed');
+        setPaymentError(result.error || 'Payment failed');
+        setPaymentProgress(0);
+      }
+    } catch (error: any) {
+      console.error('Payment error:', error);
+      setPaymentStep('failed');
+      setPaymentError(error.message || 'Payment processing failed');
+      setPaymentProgress(0);
+    }
+  }, [user, orderId, t, refetch]);
+
+  // Handle payment retry
+  const handlePaymentRetry = useCallback(() => {
+    setPaymentStep('method_selection');
+    setShowPaymentModal(true);
+    setPaymentError('');
+    setPaymentProgress(0);
+    setTimeRemaining(300);
+  }, []);
+
+  // Handle cancel order
   const handleCancelOrder = useCallback(() => {
     Alert.alert(
       t('cancel_order'),
@@ -300,28 +183,340 @@ const OrderTrackingScreen = ({
         {
           text: t('yes_cancel'),
           style: 'destructive',
-          onPress: () => {
-            cancelOrder();
-            Toast.show({
-              type: 'success',
-              text1: t('order_cancelled'),
-              text2: t('order_cancelled_successfully'),
-            });
-            navigation.goBack();
+          onPress: async () => {
+            try {
+              await cancelOrderMutation.mutateAsync({
+                orderId,
+                reason: 'Customer cancellation',
+              });
+              navigation.goBack();
+            } catch (error) {
+              Alert.alert(t('error'), 'Failed to cancel order');
+            }
           },
         },
-      ]
+      ],
     );
-  }, [cancelOrder, navigation, t]);
+  }, [t, navigation, cancelOrderMutation, orderId]);
+
+  // Get order status info
+  const getOrderStatusInfo = (status: string) => {
+    const statusMap: Record<string, {
+      title: string;
+      subtitle: string;
+      icon: string;
+      color: string;
+      progress: number;
+    }> = {
+      pending: {
+        title: t('waiting_for_restaurant'),
+        subtitle: t('restaurant_confirmation_time'),
+        icon: 'time-outline',
+        color: colors.primary,
+        progress: 0.2,
+      },
+      confirmed: {
+        title: t('order_confirmed'),
+        subtitle: t('proceed_to_payment'),
+        icon: 'checkmark-circle',
+        color: '#4CAF50',
+        progress: 0.4,
+      },
+      preparing: {
+        title: t('preparing'),
+        subtitle: t('order_preparing'),
+        icon: 'restaurant',
+        color: '#FF9800',
+        progress: 0.6,
+      },
+      ready_for_pickup: {
+        title: t('ready_for_pickup'),
+        subtitle: t('order_ready'),
+        icon: 'bag-check',
+        color: '#2196F3',
+        progress: 0.8,
+      },
+      out_for_delivery: {
+        title: t('out_for_delivery'),
+        subtitle: t('order_delivering'),
+        icon: 'bicycle',
+        color: '#9C27B0',
+        progress: 0.9,
+      },
+      delivered: {
+        title: t('delivered'),
+        subtitle: t('order_completed'),
+        icon: 'checkmark-done-circle',
+        color: '#4CAF50',
+        progress: 1.0,
+      },
+      cancelled: {
+        title: t('cancelled'),
+        subtitle: t('order_was_cancelled'),
+        icon: 'close-circle',
+        color: colors.error,
+        progress: 0,
+      },
+    };
+
+    return statusMap[status] || {
+      title: 'Unknown Status',
+      subtitle: '',
+      icon: 'help-circle',
+      color: colors.onSurfaceVariant,
+      progress: 0,
+    };
+  };
+
+  // Render payment section
+  const renderPaymentSection = () => {
+    if (!order || order.status !== 'confirmed') return null;
+
+    return (
+      <Card style={{ margin: 16, marginBottom: 8 }}>
+        <Card.Content style={{ padding: 20 }}>
+          <View style={{ alignItems: 'center' }}>
+            <View
+              style={{
+                width: 60,
+                height: 60,
+                borderRadius: 30,
+                backgroundColor: colors.primaryContainer,
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: 16,
+              }}
+            >
+              <IoniconsIcon
+                name="card-outline"
+                size={28}
+                color={colors.primary}
+              />
+            </View>
+            
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: '600',
+                color: colors.onSurface,
+                marginBottom: 8,
+              }}
+            >
+              {t('payment_required')}
+            </Text>
+            
+            <Text
+              style={{
+                fontSize: 14,
+                color: colors.onSurfaceVariant,
+                textAlign: 'center',
+                marginBottom: 20,
+              }}
+            >
+              {t('payment_after_restaurant_confirmation')}
+            </Text>
+
+            <TouchableOpacity
+              style={{
+                backgroundColor: colors.primary,
+                paddingHorizontal: 32,
+                paddingVertical: 12,
+                borderRadius: 24,
+              }}
+              onPress={() => {
+                setPaymentStep('method_selection');
+                setShowPaymentModal(true);
+              }}
+            >
+              <Text
+                style={{
+                  color: colors.onPrimary,
+                  fontSize: 16,
+                  fontWeight: '600',
+                }}
+              >
+                {t('proceed_to_payment')}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </Card.Content>
+      </Card>
+    );
+  };
+
+  // Render payment progress
+  const renderPaymentProgress = () => {
+    if (paymentStep === 'idle') return null;
+
+    return (
+      <Card style={{ margin: 16, marginBottom: 8 }}>
+        <Card.Content style={{ padding: 20 }}>
+          {paymentStep === 'processing' && (
+            <View style={{ alignItems: 'center' }}>
+              <ActivityIndicator size="large" color={colors.primary} />
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: '600',
+                  color: colors.onSurface,
+                  marginTop: 16,
+                }}
+              >
+                {t('processing_payment')}
+              </Text>
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: colors.onSurfaceVariant,
+                  textAlign: 'center',
+                  marginTop: 8,
+                }}
+              >
+                {t('please_wait')}
+              </Text>
+            </View>
+          )}
+
+          {paymentStep === 'polling' && (
+            <View>
+              <View style={{ alignItems: 'center', marginBottom: 20 }}>
+                <Text
+                  style={{
+                    fontSize: 18,
+                    fontWeight: '600',
+                    color: colors.onSurface,
+                    marginBottom: 8,
+                  }}
+                >
+                  {t('processing_payment')}
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    color: colors.onSurfaceVariant,
+                    textAlign: 'center',
+                  }}
+                >
+                  Check your {EnhancedPaymentService.getProviderDisplayName(selectedPayment.provider)} phone and enter your PIN
+                </Text>
+              </View>
+
+              <ProgressBar
+                progress={paymentProgress}
+                color={colors.primary}
+                style={{ height: 8, borderRadius: 4, marginBottom: 16 }}
+              />
+
+              <View style={{ alignItems: 'center' }}>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    color: colors.onSurfaceVariant,
+                  }}
+                >
+                  Time remaining: {formatTimeRemaining(timeRemaining)}
+                </Text>
+              </View>
+            </View>
+          )}
+
+          {paymentStep === 'success' && (
+            <View style={{ alignItems: 'center' }}>
+              <IoniconsIcon
+                name="checkmark-circle"
+                size={48}
+                color="#4CAF50"
+                style={{ marginBottom: 16 }}
+              />
+              <Text
+                style={{
+                  fontSize: 18,
+                  fontWeight: '600',
+                  color: colors.onSurface,
+                  marginBottom: 8,
+                }}
+              >
+                {t('payment_successful')}
+              </Text>
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: colors.onSurfaceVariant,
+                  textAlign: 'center',
+                }}
+              >
+                {t('payment_completed')}
+              </Text>
+            </View>
+          )}
+
+          {paymentStep === 'failed' && (
+            <View style={{ alignItems: 'center' }}>
+              <IoniconsIcon
+                name="close-circle"
+                size={48}
+                color={colors.error}
+                style={{ marginBottom: 16 }}
+              />
+              <Text
+                style={{
+                  fontSize: 18,
+                  fontWeight: '600',
+                  color: colors.onSurface,
+                  marginBottom: 8,
+                }}
+              >
+                {t('payment_failed')}
+              </Text>
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: colors.onSurfaceVariant,
+                  textAlign: 'center',
+                  marginBottom: 20,
+                }}
+              >
+                {paymentError}
+              </Text>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: colors.primary,
+                  paddingHorizontal: 24,
+                  paddingVertical: 12,
+                  borderRadius: 20,
+                }}
+                onPress={handlePaymentRetry}
+              >
+                <Text
+                  style={{
+                    color: colors.onPrimary,
+                  fontWeight: '600',
+                }}
+              >
+                {t('retry')}
+              </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </Card.Content>
+      </Card>
+    );
+  };
 
   if (isLoading) {
     return (
       <CommonView>
-        <View
-          className="flex-1 items-center justify-center"
-          style={{ backgroundColor: colors.background }}
-        >
-          <Body>{t('loading')}</Body>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text
+            style={{
+              marginTop: 16,
+              fontSize: 16,
+              color: colors.onSurfaceVariant,
+            }}
+          >
+            {t('loading_order_details')}
+          </Text>
         </View>
       </CommonView>
     );
@@ -330,267 +525,276 @@ const OrderTrackingScreen = ({
   if (error || !order) {
     return (
       <CommonView>
-        <View
-          className="flex-1 items-center justify-center"
-          style={{ backgroundColor: colors.background }}
-        >
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
           <IoniconsIcon
-            name="alert-circle-outline"
-            size={48}
+            name="alert-circle"
+            size={64}
             color={colors.error}
+            style={{ marginBottom: 16 }}
           />
-          <Heading5
-            color={colors.onSurface}
-            weight="semibold"
-            style={{ marginTop: 16 }}
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: '600',
+              color: colors.onSurface,
+              marginBottom: 8,
+              textAlign: 'center',
+            }}
           >
-            {error ? t('error_loading_order') : t('order_not_found')}
-          </Heading5>
-          <Body
-            color={colors.onSurfaceVariant}
-            align="center"
-            style={{ marginTop: 8, paddingHorizontal: 32 }}
-          >
-            {error
-              ? t('failed_to_load_order_details')
-              : t('could_not_find_order_details')}
-          </Body>
+            {t('could_not_find_order_details')}
+          </Text>
           <TouchableOpacity
-            className="mt-6 px-6 py-3 rounded-xl"
-            style={{ backgroundColor: colors.primary }}
+            style={{
+              backgroundColor: colors.primary,
+              paddingHorizontal: 24,
+              paddingVertical: 12,
+              borderRadius: 20,
+              marginTop: 16,
+            }}
             onPress={() => navigation.goBack()}
           >
-            <Label color="white" weight="medium">
+            <Text
+              style={{
+                color: colors.onPrimary,
+                fontSize: 14,
+                fontWeight: '600',
+              }}
+            >
               {t('go_back')}
-            </Label>
+            </Text>
           </TouchableOpacity>
         </View>
       </CommonView>
     );
   }
 
-  const currentStepIndex = getCurrentStepIndex(order.status);
+  const statusInfo = getOrderStatusInfo(order.status);
 
   return (
     <CommonView>
       <ScrollView
-        style={{ backgroundColor: colors.background }}
+        style={{ flex: 1 }}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl
+            refreshing={isLoading}
+            onRefresh={refetch}
+            colors={[colors.primary]}
+            tintColor={colors.primary}
+          />
         }
+        contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
       >
-        <View className="px-4 py-6">
-          {/* ETA Component */}
-          <ETAComponent order={order} />
-
-          {/* Order Details */}
-          <OrderDetails order={order} />
-
-          {/* Progress Timeline */}
-          <View className="mb-6">
-            <Heading5
-              color={colors.onSurface}
-              weight="bold"
-              style={{ marginBottom: 16 }}
-            >
-              {t('order_status')}
-            </Heading5>
-
-            {/* Horizontal Status Steps */}
-            <View className="flex-row items-center mb-6">
-              {ORDER_STATUS_STEPS.map((step, index) => (
-                <React.Fragment key={step.status}>
-                  <OrderStatusStep
-                    step={step}
-                    isActive={index === currentStepIndex}
-                    isCompleted={index < currentStepIndex}
-                    isFirst={index === 0}
-                    isLast={index === ORDER_STATUS_STEPS.length - 1}
-                  />
-                  {index < ORDER_STATUS_STEPS.length - 1 && (
-                    <ProgressLine isCompleted={index < currentStepIndex} />
-                  )}
-                </React.Fragment>
-              ))}
-            </View>
-
-            {/* Current Status Description */}
-            {currentStepIndex >= 0 && (
-              <View
-                className="p-4 rounded-xl"
-                style={{ backgroundColor: colors.surfaceVariant }}
-              >
-                <Label
-                  color={colors.onSurface}
-                  weight="semibold"
-                  style={{ marginBottom: 8 }}
-                >
-                  {ORDER_STATUS_STEPS[currentStepIndex]?.title}
-                </Label>
-                <Caption color={colors.onSurfaceVariant}>
-                  {ORDER_STATUS_STEPS[currentStepIndex]?.description}
-                </Caption>
-              </View>
-            )}
-          </View>
-
-          {/* Payment Button - Show when restaurant confirmed */}
-          {order.status === 'confirmed' && (
-            <TouchableOpacity
-              className="flex-row items-center justify-center py-4 rounded-xl mb-4"
-              style={{ backgroundColor: colors.primary }}
-              onPress={handleProceedToPayment}
-            >
-              <IoniconsIcon
-                name="card-outline"
-                size={20}
-                color="white"
-              />
-              <Label color="white" weight="medium" style={{ marginLeft: 8 }}>
-                {t('proceed_to_payment')}
-              </Label>
-            </TouchableOpacity>
-          )}
-
-          {/* Cancel Order Button - Only show when cancellation is allowed */}
-          {canCancel && order.status === 'pending' && (
-            <TouchableOpacity
-              className="flex-row items-center justify-center py-4 rounded-xl mb-4"
-              style={{ backgroundColor: colors.error }}
-              onPress={handleCancelOrder}
-              disabled={isCancellingOrder}
-            >
-              <IoniconsIcon
-                name="close-circle-outline"
-                size={20}
-                color="white"
-              />
-              <Label color="white" weight="medium" style={{ marginLeft: 8 }}>
-                {isCancellingOrder ? t('cancelling_order') : t('cancel_order')}
-              </Label>
-            </TouchableOpacity>
-          )}
-
-          {/* Waiting Message for Pending Confirmation */}
-          {order.status === 'pending' && (
-            <View
-              className="p-4 rounded-xl mb-4"
-              style={{ backgroundColor: colors.surfaceVariant }}
-            >
-              <View className="flex-row items-center justify-center mb-2">
-                <IoniconsIcon
-                  name="time-outline"
-                  size={20}
-                  color={colors.primary}
-                />
-                <Label
-                  color={colors.onSurface}
-                  weight="medium"
-                  style={{ marginLeft: 8 }}
-                >
-                  {t('waiting_for_restaurant')}
-                </Label>
-              </View>
-              <Caption color={colors.onSurfaceVariant} align="center">
-                {t('restaurant_confirmation_time')}
-              </Caption>
-            </View>
-          )}
-
-          {/* Cancelled Status Messages */}
-          {order.status === 'cancelled' && (
-            <View
-              className="p-4 rounded-xl mb-4"
-              style={{ backgroundColor: colors.errorContainer }}
-            >
-              <View className="flex-row items-center justify-center mb-2">
-                <IoniconsIcon
-                  name="close-circle-outline"
-                  size={20}
-                  color={colors.error}
-                />
-                <Label
-                  color={colors.error}
-                  weight="medium"
-                  style={{ marginLeft: 8 }}
-                >
-                  {getStatusDisplayText(order.status)}
-                </Label>
-              </View>
-              <Caption color={colors.onErrorContainer} align="center">
-                {t('order_was_cancelled')}
-              </Caption>
-            </View>
-          )}
-
-          {/* Delivery Confirmation Button - Only show when order is delivered */}
-          {order.status === 'delivered' && (
-            <TouchableOpacity
-              className="flex-row items-center justify-center py-4 rounded-xl mb-4"
-              style={{ backgroundColor: colors.primary }}
-              onPress={() => {
-                showConfirmationModal(orderId, {
-                  orderNumber: order.id.substring(0, 8),
-                  restaurantName: order.restaurantName || 'Restaurant',
-                  deliveryAddress: order.deliveryAddress || 'Delivery address',
-                });
-              }}
-              disabled={isConfirming}
-            >
-              <IoniconsIcon
-                name="checkmark-circle-outline"
-                size={20}
-                color="white"
-              />
-              <Label color="white" weight="medium" style={{ marginLeft: 8 }}>
-                {isConfirming
-                  ? t('confirming_delivery')
-                  : t('confirm_delivery_received')}
-              </Label>
-            </TouchableOpacity>
-          )}
-
-          {/* Support Button */}
+        {/* Header */}
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            padding: 16,
+            borderBottomWidth: 1,
+            borderBottomColor: colors.outline + '30',
+          }}
+        >
           <TouchableOpacity
-            className="flex-row items-center justify-center py-4 rounded-xl mb-4"
-            style={{ backgroundColor: colors.surfaceVariant }}
-            onPress={() => {
-              // Contact support functionality to be implemented
-              Toast.show({
-                type: 'info',
-                text1: t('info'),
-                text2: t('contact_support_functionality_not_implemented'),
-              });
-            }}
+            onPress={() => navigation.goBack()}
+            style={{ marginRight: 16 }}
           >
             <IoniconsIcon
-              name="chatbubble-ellipses-outline"
-              size={20}
-              color={colors.primary}
+              name="arrow-back"
+              size={24}
+              color={colors.onSurface}
             />
-            <Label
-              color={colors.primary}
-              weight="medium"
-              style={{ marginLeft: 8 }}
-            >
-              {t('contact_support')}
-            </Label>
           </TouchableOpacity>
+          <View style={{ flex: 1 }}>
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: '600',
+                color: colors.onSurface,
+              }}
+            >
+              {t('track_order')}
+            </Text>
+            <Text
+              style={{
+                fontSize: 14,
+                color: colors.onSurfaceVariant,
+              }}
+            >
+              Order #{orderId}
+            </Text>
+          </View>
         </View>
+
+        {/* Order Status */}
+        <Card style={{ margin: 16, marginBottom: 8 }}>
+          <Card.Content style={{ padding: 20 }}>
+            <View style={{ alignItems: 'center', marginBottom: 20 }}>
+              <View
+                style={{
+                  width: 80,
+                  height: 80,
+                  borderRadius: 40,
+                  backgroundColor: statusInfo.color + '20',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: 16,
+                }}
+              >
+                <IoniconsIcon
+                  name={statusInfo.icon as any}
+                  size={40}
+                  color={statusInfo.color}
+                />
+              </View>
+              
+              <Text
+                style={{
+                  fontSize: 20,
+                  fontWeight: '700',
+                  color: colors.onSurface,
+                  marginBottom: 8,
+                }}
+              >
+                {statusInfo.title}
+              </Text>
+              
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: colors.onSurfaceVariant,
+                  textAlign: 'center',
+                }}
+              >
+                {statusInfo.subtitle}
+              </Text>
+            </View>
+
+            <ProgressBar
+              progress={statusInfo.progress}
+              color={statusInfo.color}
+              style={{ height: 6, borderRadius: 3 }}
+            />
+          </Card.Content>
+        </Card>
+
+        {/* Payment Section */}
+        {renderPaymentSection()}
+        {renderPaymentProgress()}
+
+        {/* Order Details */}
+        <Card style={{ margin: 16, marginBottom: 8 }}>
+          <Card.Content style={{ padding: 20 }}>
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: '600',
+                color: colors.onSurface,
+                marginBottom: 16,
+              }}
+            >
+              {t('order_details')}
+            </Text>
+
+            <View style={{ marginBottom: 12 }}>
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: colors.onSurfaceVariant,
+                  marginBottom: 4,
+                }}
+              >
+                {t('total')}:
+              </Text>
+              <Text
+                style={{
+                  fontSize: 18,
+                  fontWeight: '600',
+                  color: colors.primary,
+                }}
+              >
+                {EnhancedPaymentService.formatAmount(order.total)} XAF
+              </Text>
+            </View>
+
+            <View style={{ marginBottom: 12 }}>
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: colors.onSurfaceVariant,
+                  marginBottom: 4,
+                }}
+              >
+                {t('payment_method')}:
+              </Text>
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: '500',
+                  color: colors.onSurface,
+                }}
+              >
+                {order.paymentMethod === 'mobile_money' ? 'Mobile Money' : order.paymentMethod}
+              </Text>
+            </View>
+
+            <View>
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: colors.onSurfaceVariant,
+                  marginBottom: 4,
+                }}
+              >
+                {t('order_placed')}:
+              </Text>
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: '500',
+                  color: colors.onSurface,
+                }}
+              >
+                {new Date(order.createdAt).toLocaleString()}
+              </Text>
+            </View>
+          </Card.Content>
+        </Card>
+
+        {/* Cancel Order Button */}
+        {(order.status === 'pending' || order.status === 'confirmed') && (
+          <View style={{ margin: 16 }}>
+            <TouchableOpacity
+              style={{
+                backgroundColor: colors.errorContainer,
+                paddingVertical: 12,
+                borderRadius: 8,
+                alignItems: 'center',
+              }}
+              onPress={handleCancelOrder}
+            >
+              <Text
+                style={{
+                  color: colors.onErrorContainer,
+                  fontSize: 16,
+                  fontWeight: '600',
+                }}
+              >
+                {t('cancel_order')}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </ScrollView>
 
-      {/* Delivery Confirmation Modal */}
-      <DeliveryConfirmationModal
-        visible={isModalVisible}
-        onClose={hideConfirmationModal}
-        orderId={orderId}
-        orderNumber={order?.id.substring(0, 8)}
-        restaurantName={order?.restaurantName || 'Restaurant'}
-        deliveryAddress={order?.deliveryAddress}
-        onConfirmSuccess={() => {
-          // Refresh order data after confirmation
-          refetch();
+      {/* Payment Method Modal */}
+      <PaymentMethodModal
+        visible={showPaymentModal}
+        onDismiss={() => {
+          setShowPaymentModal(false);
+          setPaymentStep('idle');
         }}
+        onConfirm={handlePaymentConfirm}
+        currentSelection={selectedPayment}
       />
     </CommonView>
   );

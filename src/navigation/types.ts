@@ -37,6 +37,7 @@ export type RootStackParamList = {
   ProfileDetails: undefined;
   AddressScreen: undefined;
   TransactionHistory: undefined;
+  TransactionDetails: { transactionId: string };
   AddPayment: { paymentId?: string };
   PaymentProcessing: {
     orderId: string;

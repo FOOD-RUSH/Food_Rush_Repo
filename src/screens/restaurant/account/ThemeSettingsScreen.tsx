@@ -14,8 +14,7 @@ import {
   useTheme,
   Card,
   RadioButton,
-  Switch,
-  Divider,
+ 
 } from 'react-native-paper';
 
 import { useTranslation } from 'react-i18next';
@@ -24,9 +23,7 @@ import CommonView from '@/src/components/common/CommonView';
 import { useAppStore } from '@/src/stores/AppStore';
 import {
   Typography,
-  Heading4,
   Heading5,
-  Body,
   Label,
   Caption,
 } from '@/src/components/common/Typography';
@@ -353,94 +350,6 @@ const ThemeSettingsScreen: React.FC = () => {
           {renderLanguageDropdown()}
         </View>
 
-        {/* Theme Preview */}
-        <View style={{ padding: 16, paddingTop: 0 }}>
-          <Heading5
-            color={colors.onSurface}
-            weight="bold"
-            style={{ marginBottom: 16 }}
-          >
-            {t('preview')}
-          </Heading5>
-
-          <Card style={{ backgroundColor: colors.surface }}>
-            <View style={{ padding: 16 }}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginBottom: 12,
-                }}
-              >
-                <View
-                  style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 16,
-                    backgroundColor: '#007aff',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginRight: 12,
-                  }}
-                >
-                  <MaterialCommunityIcon name="store" size={16} color="white" />
-                </View>
-                <View>
-                  <Label color={colors.onSurface} weight="semibold">
-                    {t('sample_restaurant')}
-                  </Label>
-                  <Caption color={colors.onSurfaceVariant}>
-                    {t('theme_preview_description')}
-                  </Caption>
-                </View>
-              </View>
-
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                }}
-              >
-                <View
-                  style={{
-                    backgroundColor: '#007aff20',
-                    paddingHorizontal: 12,
-                    paddingVertical: 6,
-                    borderRadius: 16,
-                  }}
-                >
-                  <Caption color="#007aff" weight="semibold">
-                    {t('primary_color')}
-                  </Caption>
-                </View>
-                <View
-                  style={{
-                    backgroundColor: '#00C85120',
-                    paddingHorizontal: 12,
-                    paddingVertical: 6,
-                    borderRadius: 16,
-                  }}
-                >
-                  <Caption color="#00C851" weight="semibold">
-                    {t('success_color')}
-                  </Caption>
-                </View>
-                <View
-                  style={{
-                    backgroundColor: '#FF880020',
-                    paddingHorizontal: 12,
-                    paddingVertical: 6,
-                    borderRadius: 16,
-                  }}
-                >
-                  <Caption color="#FF8800" weight="semibold">
-                    {t('warning_color')}
-                  </Caption>
-                </View>
-              </View>
-            </View>
-          </Card>
-        </View>
 
         {/* Bottom Spacing */}
         <View style={{ height: 20 }} />

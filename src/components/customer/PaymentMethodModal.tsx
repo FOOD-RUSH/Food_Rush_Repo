@@ -15,6 +15,7 @@ import { IoniconsIcon } from '@/src/components/common/icons';
 import { images } from '@/assets/images';
 import { PaymentProvider, PaymentMethodSelection } from '@/src/types/transaction';
 import { useResponsive } from '@/src/hooks/useResponsive';
+import EnhancedPaymentService from '@/src/services/customer/enhancedPayment.service';
 
 interface PaymentMethodModalProps {
   visible: boolean;
@@ -77,15 +78,9 @@ const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
 
   const modalDimensions = getModalDimensions();
 
-  // Validate phone number
+  // Validate phone number using enhanced service
   const validatePhoneNumber = (number: string, provider: 'mtn' | 'orange'): boolean => {
-    const cleanNumber = number.replace(/\D/g, '');
-    
-    if (provider === 'mtn') {
-      return /^(237)?(6[5-8])\d{7}$/.test(cleanNumber);
-    } else {
-      return /^(237)?(6[5-6,9])\d{7}$/.test(cleanNumber);
-    }
+    return EnhancedPaymentService.validatePhoneNumber(number, provider);
   };
 
   // Handle confirm

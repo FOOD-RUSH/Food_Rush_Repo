@@ -94,8 +94,8 @@ export const restaurantApi = {
     return apiClient.get(`/restaurants/${restaurantId}`);
   },
 
-  updateLocation: (data: { latitude?: number; longitude?: number }) => {
-    return apiClient.patch('/restaurants/location', { ...data });
+  updateLocation: (restaurantId: string, data: { latitude?: number; longitude?: number }) => {
+    return apiClient.patch(`/restaurants/${restaurantId}/location`, { ...data });
   },
 
   toggleStatus: (isOpen: boolean, restaurantId: string) => {

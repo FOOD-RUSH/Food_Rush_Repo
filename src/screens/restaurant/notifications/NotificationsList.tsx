@@ -321,7 +321,7 @@ const RestaurantNotificationScreen = () => {
                       fontWeight: '600',
                     }}
                   >
-                    HIGH
+                    {t('high').toUpperCase()}
                   </Text>
                 </View>
               )}
@@ -430,7 +430,7 @@ const RestaurantNotificationScreen = () => {
           marginBottom: 8,
         }}
       >
-        {selectedFilter === 'unread' ? 'All Caught Up!' : 'No Notifications'}
+        {selectedFilter === 'unread' ? t('youre_all_caught_up') : t('no_notifications')}
       </Text>
       <Text
         style={{
@@ -440,8 +440,8 @@ const RestaurantNotificationScreen = () => {
         }}
       >
         {selectedFilter === 'unread'
-          ? "You've read all your notifications"
-          : 'New orders and updates will appear here'}
+          ? t('youve_read_all_notifications')
+          : t('new_orders_updates_appear_here')}
       </Text>
     </View>
   );
@@ -465,7 +465,7 @@ const RestaurantNotificationScreen = () => {
               color: colors.onSurfaceVariant,
             }}
           >
-            Loading notifications...
+            {t('loading_notifications')}
           </Text>
         </View>
       </CommonView>
@@ -502,7 +502,7 @@ const RestaurantNotificationScreen = () => {
                   fontSize: 14,
                 }}
               >
-                Mark All Read ({unreadCount})
+                {t('mark_all_read_count', { count: unreadCount })}
               </Text>
             </TouchableOpacity>
           </View>
@@ -560,7 +560,7 @@ const RestaurantNotificationScreen = () => {
                     color: colors.onSurfaceVariant,
                   }}
                 >
-                  Loading more...
+                  {t('loading_more')}
                 </Text>
               </View>
             ) : null

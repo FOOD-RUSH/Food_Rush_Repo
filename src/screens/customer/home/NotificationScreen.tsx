@@ -220,7 +220,7 @@ const NotificationScreen = () => {
                     color: 'white',
                   }}
                 >
-                  High Priority
+                  {t('high_priority')}
                 </Text>
               )}
             </View>
@@ -232,12 +232,12 @@ const NotificationScreen = () => {
 
   // Filter options
   const filters = [
-    { key: 'all', label: 'All', count: notificationCounts.all },
-    { key: 'unread', label: 'Unread', count: notificationCounts.unread },
-    { key: 'order', label: 'Orders', count: notificationCounts.order },
-    { key: 'system', label: 'System', count: notificationCounts.system },
-    { key: 'promotion', label: 'Promos', count: notificationCounts.promotion },
-    { key: 'alert', label: 'Alerts', count: notificationCounts.alert },
+    { key: 'all', label: t('all'), count: notificationCounts.all },
+    { key: 'unread', label: t('unread'), count: notificationCounts.unread },
+    { key: 'order', label: t('orders'), count: notificationCounts.order },
+    { key: 'system', label: t('system'), count: notificationCounts.system },
+    { key: 'promotion', label: t('promos'), count: notificationCounts.promotion },
+    { key: 'alert', label: t('alerts'), count: notificationCounts.alert },
   ];
 
   // Render filter item
@@ -297,16 +297,16 @@ const NotificationScreen = () => {
         style={{ color: colors.onSurface }}
       >
         {selectedFilter === 'unread'
-          ? 'No Unread Notifications'
-          : 'No Notifications'}
+          ? t('no_unread_notifications')
+          : t('no_notifications')}
       </Text>
       <Text
         className="text-center text-base"
         style={{ color: colors.onSurfaceVariant }}
       >
         {selectedFilter === 'unread'
-          ? "You're all caught up!"
-          : "We'll notify you when something new happens."}
+          ? t('youre_all_caught_up')
+          : t('well_notify_when_something_happens')}
       </Text>
     </View>
   );
@@ -321,7 +321,7 @@ const NotificationScreen = () => {
             className="mt-4 text-base"
             style={{ color: colors.onSurfaceVariant }}
           >
-            Loading notifications...
+            {t('loading_notifications')}
           </Text>
         </View>
       </CommonView>
@@ -338,11 +338,14 @@ const NotificationScreen = () => {
             style={{ borderBottomColor: colors.outline }}
           >
             <Text style={{ color: colors.onSurfaceVariant }}>
-              {unreadCount} unread notification{unreadCount !== 1 ? 's' : ''}
+              {unreadCount === 1 
+                ? t('unread_notification_count', { count: unreadCount })
+                : t('unread_notification_count_plural', { count: unreadCount })
+              }
             </Text>
             <TouchableOpacity onPress={handleMarkAllAsRead}>
               <Text className="font-semibold" style={{ color: colors.primary }}>
-                Mark All Read
+                {t('mark_all_read')}
               </Text>
             </TouchableOpacity>
           </View>

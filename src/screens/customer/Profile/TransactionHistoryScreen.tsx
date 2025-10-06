@@ -161,8 +161,8 @@ const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
         <TouchableOpacity
           style={{ padding: cardDimensions.padding }}
           onPress={() => {
-            // Navigate to transaction details if needed
-
+            // Navigate to transaction details
+            navigation.navigate('TransactionDetails', { transactionId: item.id });
           }}
           activeOpacity={0.7}
         >
@@ -215,6 +215,19 @@ const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
               >
                 {item.description}
               </Text>
+              
+              {/* Show payer name if available */}
+              {item.payerName && (
+                <Text
+                  style={{
+                    fontSize: getResponsiveText(12),
+                    color: colors.onSurfaceVariant,
+                    marginTop: 2,
+                  }}
+                >
+                  {t('payer')}: {item.payerName}
+                </Text>
+              )}
               
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
                 <Text
