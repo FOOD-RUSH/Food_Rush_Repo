@@ -575,7 +575,7 @@ const MenuItemsList: React.FC<
             backgroundColor: '#007aff',
             borderRadius: 16,
           }}
-          size={isSmallScreen ? 'medium' : 'large'}
+          size={isSmallScreen ? 'meduim' : 'medium'}
           onPress={handleAddItem}
         />
       </View>

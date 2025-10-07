@@ -85,7 +85,8 @@ const PaymentProcessingScreen = ({
   const validatePhoneNumber = useCallback(
     (phone: string, provider: string) => {
       // Convert provider to medium format for validation
-      const medium = provider === 'orange' ? 'orange_money' : 'mtn';
+    // Convert provider to medium format for validation
+    const medium = provider === 'orange' ? 'orange_money' : 'mtn';
       return PaymentService.validatePhoneNumber(phone, medium);
     },
     [],
@@ -163,6 +164,11 @@ const PaymentProcessingScreen = ({
           setCurrentStep('success');
           // Mark payment as completed in order flow
           completePayment();
+          
+          // Auto-navigate to success after a short delay
+          setTimeout(() => {
+            handleSuccess();
+          }, 2000);
         } else if (status.status === 'failed' || status.status === 'expired') {
           clearInterval(pollInterval);
           setCurrentStep('failed');
@@ -221,12 +227,14 @@ const PaymentProcessingScreen = ({
   const handleSuccess = () => {
     clearCart();
     completePayment();
+    
+    // Navigate to order tracking after successful payment
     navigation.reset({
       index: 0,
       routes: [
         {
-          name: 'CustomerApp',
-          params: { screen: 'Orders' },
+          name: 'OrderTracking',
+          params: { orderId },
         },
       ],
     });

@@ -1271,5 +1271,6 @@
   "order_ready": "La nourriture est prête pour le ramassage",
   "order_delivering": "Votre commande est en route",
   "order_completed": "La commande a été livrée",
+  "payment_after_order_creation_info": "Après avoir passé votre commande, vous serez redirigé vers le paiement. Vous pouvez payer en utilisant MTN Mobile Money ou Orange Money.",
   "/": "/"
 }

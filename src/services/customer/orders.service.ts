@@ -159,7 +159,7 @@ export const OrderApi = {
   // Cancel order (customer cancels their own order)
   cancelOrder: async (orderId: string, reason?: string) => {
     try {
-      const response = await apiClient.post(`/orders/${orderId}/cancel`, {
+      const response = await apiClient.patch(`/orders/${orderId}/cancel`, {
         reason: reason || 'Customer cancelled',
       });
       return response.data;

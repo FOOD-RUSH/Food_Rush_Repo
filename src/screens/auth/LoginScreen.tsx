@@ -19,7 +19,6 @@ import {
 import {
   TextInput,
   HelperText,
-  Checkbox,
   useTheme,
   Button,
 } from 'react-native-paper';
@@ -35,6 +34,7 @@ import { useTranslation } from 'react-i18next';
 import ErrorDisplay from '@/src/components/auth/ErrorDisplay';
 import { Heading1, Body, Label } from '@/src/components/common/Typography';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import CustomCheckbox from '@/src/components/common/CustomCheckbox';
 
 interface LoginFormData {
   email: string;
@@ -409,9 +409,11 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                 onPress={toggleRememberMe}
                 style={{ flexDirection: 'row', alignItems: 'center' }}
               >
-                <Checkbox
+                <CustomCheckbox
                   status={rememberMe ? 'checked' : 'unchecked'}
                   onPress={toggleRememberMe}
+                  uncheckedColor={colors.onSurfaceVariant}
+                  color={colors.primary}
                 />
                 <Body style={{ marginLeft: 4 }}>Remember me</Body>
               </TouchableOpacity>

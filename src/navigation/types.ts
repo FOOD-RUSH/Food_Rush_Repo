@@ -42,7 +42,6 @@ export type RootStackParamList = {
   PaymentProcessing: {
     orderId: string;
     amount: number;
-    paymentMethod: 'mobile_money' | 'cash';
     provider?: 'mtn' | 'orange';
   };
   Settings: undefined;

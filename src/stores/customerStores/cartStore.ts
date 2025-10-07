@@ -28,6 +28,7 @@ interface CartActions {
     item: MenuProps,
     quantity: number,
     specialInstructions?: string,
+    onSuccess?: () => void,
   ) => void;
   updateItemQuantity: (itemId: string, quantity: number) => void;
   removeItem: (itemId: string) => void;
@@ -130,7 +131,7 @@ export const useCartStore = create<CartState & CartActions>()(
           return itemRestaurantId === restaurantID;
         },
 
-        addItemtoCart: (item, quantity, specialInstructions = '') => {
+        addItemtoCart: (item, quantity, specialInstructions = '', onSuccess) => {
           try {
             const { items } = get();
 
@@ -146,7 +147,7 @@ export const useCartStore = create<CartState & CartActions>()(
                       clearCartState(set);
                       setTimeout(
                         () =>
-                          get().addItemtoCart(item, quantity, specialInstructions),
+                          get().addItemtoCart(item, quantity, specialInstructions, onSuccess),
                         100,
                       );
                     },
@@ -190,6 +191,9 @@ export const useCartStore = create<CartState & CartActions>()(
                       );
                       set({ items: updatedItems });
                       updateActivity(set, get);
+                      if (onSuccess) {
+                        onSuccess();
+                      }
                     },
                   },
                   {
@@ -208,6 +212,9 @@ export const useCartStore = create<CartState & CartActions>()(
                       );
                       set({ items: updatedItems });
                       updateActivity(set, get);
+                      if (onSuccess) {
+                        onSuccess();
+                      }
                     },
                   },
                 ],
@@ -249,7 +256,14 @@ export const useCartStore = create<CartState & CartActions>()(
             updateActivity(set, get);
             
             Alert.alert('Success', 'Successfully added item to cart', [
-              { text: 'OK' },
+              { 
+                text: 'OK',
+                onPress: () => {
+                  if (onSuccess) {
+                    onSuccess();
+                  }
+                }
+              },
             ]);
           } catch (error: any) {
             set({ error: error.message || 'Failed to add item to cart' });
@@ -485,8 +499,8 @@ export const useCartLastActivity = () =>
   useCartStore((state) => state.lastActivity);
 
 // Legacy compatibility - keep old function names
-export const addItemtoCart = (item: MenuProps, quantity: number, specialInstructions?: string) =>
-  useCartStore.getState().addItemtoCart(item, quantity, specialInstructions);
+export const addItemtoCart = (item: MenuProps, quantity: number, specialInstructions?: string, onSuccess?: () => void) =>
+  useCartStore.getState().addItemtoCart(item, quantity, specialInstructions, onSuccess);
 
 export const modifyCart = (itemId: string, quantity: number) =>
   useCartStore.getState().updateItemQuantity(itemId, quantity);

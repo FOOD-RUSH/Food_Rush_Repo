@@ -21,11 +21,15 @@ export interface PaymentInitRequest {
 }
 
 export interface PaymentInitResponse {
-  success: boolean;
-  transactionId: string;
-  ussdCode?: string;
+  status_code: number;
   message: string;
-  expiresAt?: string;
+  data: {
+    transId: string;
+    status: 'PENDING';
+    amount: number;
+    message: string;
+    ussdCode?: string;
+  };
 }
 
 export interface PaymentStatusResponse {
@@ -123,22 +127,23 @@ class PaymentService {
         email: request.email,
       };
 
-      const response = await apiClient.post<PaymentInitResponse>(
+      const response = await apiClient.post(
         '/payments/init',
         paymentData,
       );
 
-      if (response.data.success) {
+      // Handle API response according to documentation format
+      if (response.data.status_code === 200 && response.data.data) {
         return {
           success: true,
-          transactionId: response.data.transactionId,
-          ussdCode: response.data.ussdCode,
-          message: response.data.message,
+          transactionId: response.data.data.transId,
+          ussdCode: response.data.data.ussdCode,
+          message: response.data.data.message || response.data.message,
         };
       } else {
         return {
           success: false,
-          error: response.data.message,
+          error: response.data.message || 'Failed to initialize payment',
         };
       }
     } catch (error: any) {
@@ -151,17 +156,27 @@ class PaymentService {
   }
 
   /**
-   * Check payment status
+   * Check payment status using the verify endpoint as per API documentation
    */
   async checkPaymentStatus(
     transactionId: string,
   ): Promise<PaymentStatusResponse> {
     try {
-      const response = await apiClient.get<PaymentStatusResponse>(
-        `/payments/status/${transactionId}`,
+      // Use the verify endpoint as specified in the API documentation
+      const response = await apiClient.get(
+        `/payments/verify?transId=${transactionId}`,
       );
 
-      return response.data;
+      // Transform the API response to match our interface
+      const apiData = response.data;
+      return {
+        success: apiData.status === 'SUCCESSFUL',
+        status: apiData.status === 'SUCCESSFUL' ? 'completed' : 
+                apiData.status === 'FAILED' ? 'failed' : 'pending',
+        transactionId: apiData.transId,
+        message: apiData.status === 'SUCCESSFUL' ? 'Payment completed successfully' :
+                 apiData.status === 'FAILED' ? 'Payment failed' : 'Payment is pending',
+      };
     } catch (error: any) {
       console.error('Payment status check error:', error);
       return {

@@ -1,7 +1,7 @@
 import { MaterialCommunityIcon } from '@/src/components/common/icons';
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Platform } from 'react-native';
-import { useTheme } from 'react-native-paper';
+import React, { useState, useCallback } from 'react';
+import { View, Text, TouchableOpacity, Platform, Modal } from 'react-native';
+import { useTheme, Button } from 'react-native-paper';
 
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { formatDateOnly } from '../../utils/timeUtils';
@@ -29,18 +29,45 @@ const DatePicker: React.FC<DatePickerProps> = ({
 }) => {
   const { colors } = useTheme();
   const [show, setShow] = useState(false);
+  const [tempValue, setTempValue] = useState<Date | null>(null);
 
-  const onChange = (event: any, selectedDate?: Date) => {
+  const onChange = useCallback((event: any, selectedDate?: Date) => {
     const currentDate = selectedDate || value || new Date();
-    setShow(Platform.OS === 'ios'); // Keep open on iOS, close on Android
-    onDateChange(currentDate);
-  };
+    
+    if (event.type === 'dismissed') {
+      setShow(false);
+      setTempValue(null);
+      return;
+    }
 
-  const showDatePicker = () => {
+    if (Platform.OS === 'android') {
+      setShow(false);
+      onDateChange(currentDate);
+    } else {
+      // iOS: store temporary value for modal confirmation
+      setTempValue(currentDate);
+    }
+  }, [value, onDateChange]);
+
+  const handleConfirm = useCallback(() => {
+    if (tempValue) {
+      onDateChange(tempValue);
+    }
+    setShow(false);
+    setTempValue(null);
+  }, [tempValue, onDateChange]);
+
+  const handleCancel = useCallback(() => {
+    setShow(false);
+    setTempValue(null);
+  }, []);
+
+  const showDatePicker = useCallback(() => {
     if (!disabled) {
+      setTempValue(value);
       setShow(true);
     }
-  };
+  }, [disabled, value]);
 
   const displayValue = value ? formatDateOnly(value) : placeholder;
 
@@ -95,16 +122,97 @@ const DatePicker: React.FC<DatePickerProps> = ({
         />
       </TouchableOpacity>
 
-      {show && (
+      {/* iOS Modal Picker */}
+      {Platform.OS === 'ios' && show && (
+        <Modal
+          visible={show}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={handleCancel}
+        >
+          <View
+            style={{
+              flex: 1,
+              justifyContent: 'flex-end',
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            }}
+          >
+            <View
+              style={{
+                backgroundColor: colors.surface,
+                borderTopLeftRadius: 20,
+                borderTopRightRadius: 20,
+                paddingBottom: 34,
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  paddingHorizontal: 20,
+                  paddingVertical: 16,
+                  borderBottomWidth: 1,
+                  borderBottomColor: colors.outline,
+                }}
+              >
+                <Button
+                  mode="text"
+                  onPress={handleCancel}
+                  textColor={colors.primary}
+                >
+                  Cancel
+                </Button>
+                
+                <Text
+                  style={{
+                    fontSize: 17,
+                    fontWeight: '600',
+                    color: colors.onSurface,
+                  }}
+                >
+                  Select Date
+                </Text>
+                
+                <Button
+                  mode="text"
+                  onPress={handleConfirm}
+                  textColor={colors.primary}
+                >
+                  Done
+                </Button>
+              </View>
+
+              <DateTimePicker
+                testID="datePicker"
+                value={tempValue || value || new Date()}
+                mode="date"
+                display="spinner"
+                onChange={onChange}
+                minimumDate={minimumDate}
+                maximumDate={maximumDate}
+                style={{
+                  backgroundColor: colors.surface,
+                  height: 200,
+                }}
+                textColor={colors.onSurface}
+                accentColor={colors.primary}
+              />
+            </View>
+          </View>
+        </Modal>
+      )}
+
+      {/* Android Inline Picker */}
+      {Platform.OS === 'android' && show && (
         <DateTimePicker
           testID="datePicker"
           value={value || new Date()}
           mode="date"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          display="default"
           onChange={onChange}
           minimumDate={minimumDate}
           maximumDate={maximumDate}
-          locale="fr-FR" // French locale for Cameroon
         />
       )}
     </View>

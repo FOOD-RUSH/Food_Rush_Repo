@@ -13,7 +13,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Button,
-  Checkbox,
   HelperText,
   TextInput,
   useTheme,
@@ -29,6 +28,7 @@ import { TextButton } from '@/src/components/common/TextButton';
 import Toast from 'react-native-toast-message';
 import { useNetwork } from '@/src/contexts/NetworkContext';
 import { useTranslation } from 'react-i18next';
+import CustomCheckbox from '@/src/components/common/CustomCheckbox';
 import { useRegister } from '@/src/hooks/customer/useAuthhooks';
 import ErrorDisplay from '@/src/components/auth/ErrorDisplay';
 import {
@@ -575,10 +575,10 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
               {/* Terms and Privacy */}
               <View style={styles.termsContainer}>
                 <View style={styles.termsRow}>
-                  <Checkbox
+                  <CustomCheckbox
                     status={termsAccepted ? 'checked' : 'unchecked'}
                     onPress={toggleTerms}
-                    uncheckedColor={colors.onSurface}
+                    uncheckedColor={colors.onSurfaceVariant}
                     color={colors.primary}
                   />
                   <View style={styles.termsTextContainer}>

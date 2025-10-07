@@ -90,7 +90,15 @@ const FoodDetailsScreen = ({
     if (!MenuDetails) return;
 
     try {
-      addItemtoCart(MenuDetails, quantity, instructions);
+      addItemtoCart(MenuDetails, quantity, instructions, () => {
+        // Navigate back to home screen after successful addition
+        navigation.navigate('CustomerApp', {
+          screen: 'Home',
+          params: {
+            screen: 'HomeScreen'
+          }
+        });
+      });
       // Show success feedback
       // Note: The cart store will handle the duplicate item dialog
 
@@ -102,7 +110,7 @@ const FoodDetailsScreen = ({
         [{ text: 'OK' }],
       );
     }
-  }, [MenuDetails, quantity, instructions, addItemtoCart, t]);
+  }, [MenuDetails, quantity, instructions, addItemtoCart, navigation, t]);
 
   // Loading state
   if (isLoading) {

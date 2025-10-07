@@ -21,7 +21,7 @@ import {
 } from 'react-native';
 import {
   Button,
-  Checkbox,
+
   HelperText,
   TextInput,
   useTheme,
@@ -36,6 +36,7 @@ import Toast from 'react-native-toast-message';
 import { useNetwork } from '@/src/contexts/NetworkContext';
 import { useTranslation } from 'react-i18next';
 import { useRegisterRestaurant } from '@/src/hooks/restaurant/useAuthhooks';
+import CustomCheckbox from '@/src/components/common/CustomCheckbox';
 import ErrorDisplay from '@/src/components/auth/ErrorDisplay';
 import * as ImagePicker from 'expo-image-picker';
 import { Location } from '@/src/location/types';
@@ -802,9 +803,10 @@ const RestaurantSignupStep2: React.FC<
                 marginBottom: 24,
               }}
             >
-              <Checkbox
+              <CustomCheckbox
                 status={termsAccepted ? 'checked' : 'unchecked'}
                 onPress={toggleTerms}
+                uncheckedColor={colors.onSurfaceVariant}
                 color={colors.primary}
               />
               <View style={{ flex: 1, marginLeft: 8 }}>

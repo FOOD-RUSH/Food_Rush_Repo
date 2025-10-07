@@ -114,7 +114,8 @@ class TransactionService {
       const response = await apiClient.get<PaymentTransactionApiResponse[]>(
         `/payments/transactions/${userId}`
       );
-
+      // CONSOLE LOG
+      console.log('transaction gotten: ', response.data)
       // Transform API response to expected format
       let transactions = response.data.map(apiTransaction => 
         this.transformApiResponseToTransaction(apiTransaction)

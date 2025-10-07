@@ -17,7 +17,8 @@ import {
   Dimensions,
   Text,
 } from 'react-native';
-import { Checkbox, HelperText, TextInput, useTheme } from 'react-native-paper';
+import { HelperText, TextInput, useTheme } from 'react-native-paper';
+import CustomCheckbox from '@/src/components/common/CustomCheckbox';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { loginSchema } from '@/src/utils/validation';
@@ -267,10 +268,10 @@ const RestaurantLoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                 style={styles.rememberContainer}
                 onPress={toggleRememberMe}
               >
-                <Checkbox
+                <CustomCheckbox
                   status={rememberMe ? 'checked' : 'unchecked'}
                   onPress={toggleRememberMe}
-                  uncheckedColor={colors.outline}
+                  uncheckedColor={colors.onSurfaceVariant}
                   color={colors.primary}
                 />
                 <Label

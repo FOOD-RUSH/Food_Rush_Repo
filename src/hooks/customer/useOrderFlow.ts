@@ -12,6 +12,7 @@ import { useDefaultAddress } from '@/src/location/store';
 
 export type OrderFlowStep =
   | 'creating'                    // Creating the order
+  | 'created'                     // Order created successfully, ready for payment
   | 'pending'                     // Waiting for restaurant confirmation (2-15 min)
   | 'confirmed'                   // Restaurant confirmed, ready for payment
   | 'payment_processing'          // Payment in progress
@@ -25,6 +26,7 @@ export interface OrderFlowState {
   orderId?: string;
   orderData?: CreateOrderResponse['data'];
   error?: string;
+  shouldProceedToPayment?: boolean;
 }
 
 export const useOrderFlow = () => {
@@ -43,10 +45,12 @@ export const useOrderFlow = () => {
     mutationFn: (orderData: CreateOrderRequest) =>
       OrderApi.createOrder(orderData),
     onSuccess: (response) => {
+      // Order created successfully, proceed to payment immediately
       setFlowState({
-        step: 'pending',
+        step: 'created',
         orderId: response.data.id,
         orderData: response.data,
+        shouldProceedToPayment: true,
       });
     },
     onError: (error) => {
@@ -182,7 +186,17 @@ export const useOrderFlow = () => {
     setFlowState({ step: 'creating' });
   }, []);
 
+  // Mark payment as started (when navigating to payment screen)
+  const startPaymentFlow = useCallback(() => {
+    setFlowState((prev) => ({
+      ...prev,
+      step: 'payment_processing',
+      shouldProceedToPayment: false,
+    }));
+  }, []);
+
   // Status checks
+  const isCreated = flowState.step === 'created';
   const isPending = flowState.step === 'pending';
   const isConfirmed = flowState.step === 'confirmed';
   const isPaymentProcessing = flowState.step === 'payment_processing';
@@ -191,6 +205,7 @@ export const useOrderFlow = () => {
   const isCancelled = flowState.step === 'cancelled';
   const isFailed = flowState.step === 'failed';
   const canCancel = isPending; // Can only cancel before restaurant confirmation
+  const shouldProceedToPayment = flowState.shouldProceedToPayment === true;
 
   return {
     // State
@@ -201,12 +216,14 @@ export const useOrderFlow = () => {
     createOrderFromCart,
     cancelOrder,
     proceedToPayment,
+    startPaymentFlow,
     completePayment,
     failPayment,
     resetFlow,
     refetchOrderStatus,
 
     // Status checks
+    isCreated,
     isPending,
     isConfirmed,
     isPaymentProcessing,
@@ -215,9 +232,11 @@ export const useOrderFlow = () => {
     isCancelled,
     isFailed,
     canCancel,
+    shouldProceedToPayment,
 
     // Loading states
     isCreatingOrder: createOrderMutation.isPending,
     isCancellingOrder: cancelOrderMutation.isPending,
+    isOrderCreated: isCreated,
   };
 };

@@ -17,16 +17,16 @@ import { useTransactionHistory, useTransactionStats } from '@/src/hooks/customer
 import { Transaction } from '@/src/types/transaction';
 import { images } from '@/assets/images';
 import { useResponsive } from '@/src/hooks/useResponsive';
-import { parseISOToDate } from '@/src/utils/dateUtils';
+import { formatDate } from '@/src/utils/dateUtils';
 import { formatCameroonTime } from '@/src/utils/timeUtils';
 
-type TransactionHistoryScreenProps = RootStackScreenProps<'PaymentMethods'>;
+type TransactionHistoryScreenProps = RootStackScreenProps<'TransactionHistory'>;
 
 const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
   navigation,
 }) => {
   const { colors } = useTheme();
-  const { t, i18n } = useTranslation('translation');
+  const { t } = useTranslation('translation');
   const { isTablet, getResponsiveText } = useResponsive();
   
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'completed' | 'pending' | 'failed'>('all');
@@ -74,7 +74,7 @@ const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
   // Format date based on locale using custom utils
   const formatTransactionDate = (dateString: string) => {
     try {
-      const date = parseISOToDate(dateString);
+      const date = formatDate(dateString);
       // Use custom formatCameroonTime with appropriate options
       return formatCameroonTime(date, {
         year: 'numeric',

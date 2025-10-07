@@ -89,7 +89,15 @@ const MenuItemCard = ({ item }: { item: FoodProps }) => {
   const longPress = () => {
     setIsSelected(!isSelect);
     if (isSelect) {
-      addToCart(item, 1, '');
+      addToCart(item, 1, '', () => {
+        // Navigate back to home screen after successful addition
+        navigation.navigate('CustomerApp', {
+          screen: 'Home',
+          params: {
+            screen: 'HomeScreen'
+          }
+        });
+      });
     } else {
       removeFromCart(item.id);
     }
@@ -113,6 +121,7 @@ const MenuItemCard = ({ item }: { item: FoodProps }) => {
           {
             backgroundColor: colors.surface,
             borderColor: borderColor,
+            borderWidth: 2,
             borderRadius: cardDimensions.borderRadius,
             marginHorizontal: cardDimensions.margin,
             marginVertical: cardDimensions.margin / 2,
@@ -128,7 +137,6 @@ const MenuItemCard = ({ item }: { item: FoodProps }) => {
             elevation: 3,
           },
         ]}
-        key={item.id}
         onPress={() => {
           navigation.navigate('FoodDetails', {
             foodId: item.id,

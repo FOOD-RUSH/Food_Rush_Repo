@@ -8,7 +8,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { useTheme, Card, ActivityIndicator, ProgressBar } from 'react-native-paper';
-import { IoniconsIcon, MaterialIcon } from '@/src/components/common/icons';
+import { IoniconsIcon } from '@/src/components/common/icons';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 

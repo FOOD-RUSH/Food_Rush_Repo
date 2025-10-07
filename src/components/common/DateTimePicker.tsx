@@ -1,7 +1,7 @@
 import { MaterialCommunityIcon } from '@/src/components/common/icons';
-import React, { useState } from 'react';
-import { View, TouchableOpacity, Platform } from 'react-native';
-import { useTheme } from 'react-native-paper';
+import React, { useState, useCallback } from 'react';
+import { View, TouchableOpacity, Platform, Modal, Alert } from 'react-native';
+import { useTheme, Button } from 'react-native-paper';
 
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useTranslation } from 'react-i18next';
@@ -36,56 +36,122 @@ const CustomDateTimePicker: React.FC<DateTimePickerProps> = ({
   const [show, setShow] = useState(false);
   const [currentMode, setCurrentMode] = useState<'date' | 'time'>('date');
   const [tempDate, setTempDate] = useState<Date | null>(null);
+  const [tempValue, setTempValue] = useState<Date | null>(null);
 
-  const onChange = (event: any, selectedDate?: Date) => {
+  // iOS-optimized onChange handler
+  const onChange = useCallback((event: any, selectedDate?: Date) => {
     const currentDate = selectedDate || value || new Date();
 
-    if (Platform.OS === 'android') {
+    // Handle different event types
+    if (event.type === 'dismissed') {
+      // User cancelled the picker
       setShow(false);
+      setTempValue(null);
+      setTempDate(null);
+      setCurrentMode('date');
+      return;
     }
 
-    if (mode === 'datetime') {
-      if (currentMode === 'date') {
-        // Store the selected date and switch to time picker
-        setTempDate(currentDate);
-        setCurrentMode('time');
-        if (Platform.OS === 'ios') {
-          setShow(true);
+    if (Platform.OS === 'android') {
+      // Android: immediately apply changes and close
+      if (mode === 'datetime') {
+        if (currentMode === 'date') {
+          setTempDate(currentDate);
+          setCurrentMode('time');
+          setTimeout(() => setShow(true), 100);
         } else {
-          // On Android, show time picker immediately
-          setTimeout(() => {
-            setShow(true);
-          }, 100);
+          const finalDate = tempDate ? new Date(tempDate) : new Date();
+          finalDate.setHours(currentDate.getHours());
+          finalDate.setMinutes(currentDate.getMinutes());
+          finalDate.setSeconds(0);
+          finalDate.setMilliseconds(0);
+          onDateTimeChange(finalDate);
+          setShow(false);
+          setTempDate(null);
+          setCurrentMode('date');
         }
       } else {
-        // Combine the stored date with the selected time
-        const finalDate = tempDate ? new Date(tempDate) : new Date();
-        finalDate.setHours(currentDate.getHours());
-        finalDate.setMinutes(currentDate.getMinutes());
-        finalDate.setSeconds(0);
-        finalDate.setMilliseconds(0);
-
-        onDateTimeChange(finalDate);
-        setTempDate(null);
-        setCurrentMode('date');
-        if (Platform.OS === 'ios') {
-          setShow(false);
-        }
-      }
-    } else {
-      onDateTimeChange(currentDate);
-      if (Platform.OS === 'ios') {
+        onDateTimeChange(currentDate);
         setShow(false);
       }
+    } else {
+      // iOS: store temporary value for modal confirmation
+      if (mode === 'datetime') {
+        if (currentMode === 'date') {
+          // Store the selected date and prepare for time selection
+          setTempDate(currentDate);
+          // Don't switch mode here - let the Next button handle it
+        } else {
+          // Time selection - combine with previously selected date
+          const finalDate = tempDate ? new Date(tempDate) : new Date();
+          finalDate.setHours(currentDate.getHours());
+          finalDate.setMinutes(currentDate.getMinutes());
+          finalDate.setSeconds(0);
+          finalDate.setMilliseconds(0);
+          setTempValue(finalDate);
+        }
+      } else {
+        setTempValue(currentDate);
+      }
     }
-  };
+  }, [value, mode, currentMode, tempDate, onDateTimeChange]);
 
-  const showPicker = () => {
+  // iOS modal handlers
+  const handleConfirm = useCallback(() => {
+    if (mode === 'datetime' && currentMode === 'date') {
+      // Check if user has selected a date
+      if (!tempDate) {
+        // No date selected yet, use current picker value
+        const currentPickerDate = value || new Date();
+        setTempDate(currentPickerDate);
+      }
+      // Switch to time picker for datetime mode
+      setCurrentMode('time');
+      return;
+    }
+    
+    // Final confirmation - apply the selected date/time
+    if (mode === 'datetime' && currentMode === 'time') {
+      // Combine date and time
+      if (tempValue) {
+        onDateTimeChange(tempValue);
+      } else if (tempDate) {
+        // Fallback: use tempDate with current time if tempValue is not set
+        const fallbackDate = new Date(tempDate);
+        const currentTime = value || new Date();
+        fallbackDate.setHours(currentTime.getHours());
+        fallbackDate.setMinutes(currentTime.getMinutes());
+        fallbackDate.setSeconds(0);
+        fallbackDate.setMilliseconds(0);
+        onDateTimeChange(fallbackDate);
+      }
+    } else if (tempValue) {
+      // Single mode (date or time only)
+      onDateTimeChange(tempValue);
+    }
+    
+    // Reset state
+    setShow(false);
+    setTempValue(null);
+    setTempDate(null);
+    setCurrentMode('date');
+  }, [mode, currentMode, tempDate, tempValue, onDateTimeChange, value]);
+
+  const handleCancel = useCallback(() => {
+    setShow(false);
+    setTempValue(null);
+    setTempDate(null);
+    setCurrentMode('date');
+  }, []);
+
+  const showPicker = useCallback(() => {
     if (!disabled) {
       setCurrentMode(mode === 'datetime' ? 'date' : (mode as 'date' | 'time'));
+      setTempValue(value); // Initialize with current value
+      setTempDate(null); // Reset temp date
       setShow(true);
     }
-  };
+  }, [disabled, mode, value]);
 
   const formatDisplayValue = () => {
     if (!value) {
@@ -187,33 +253,124 @@ const CustomDateTimePicker: React.FC<DateTimePickerProps> = ({
         />
       </TouchableOpacity>
 
-      {/* Show current step for datetime mode */}
-      {mode === 'datetime' && show && (
-        <Caption
-          color={colors.onSurfaceVariant}
-          style={{
-            marginTop: 8,
-            textAlign: 'center',
-            fontFamily: 'Urbanist-Regular',
-          }}
+      {/* iOS Modal Picker */}
+      {Platform.OS === 'ios' && show && (
+        <Modal
+          visible={show}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={handleCancel}
         >
-          {currentMode === 'date'
-            ? t('select_date_first') || 'Step 1: Select date'
-            : t('select_time_second') || 'Step 2: Select time'}
-        </Caption>
+          <View
+            style={{
+              flex: 1,
+              justifyContent: 'flex-end',
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            }}
+          >
+            <View
+              style={{
+                backgroundColor: colors.surface,
+                borderTopLeftRadius: 20,
+                borderTopRightRadius: 20,
+                paddingBottom: 34,
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  paddingHorizontal: 20,
+                  paddingVertical: 16,
+                  borderBottomWidth: 1,
+                  borderBottomColor: colors.outline,
+                }}
+              >
+                <Button
+                  mode="text"
+                  onPress={handleCancel}
+                  textColor={colors.primary}
+                >
+                  {t('cancel') || 'Cancel'}
+                </Button>
+                
+                <Label
+                  color={colors.onSurface}
+                  weight="semibold"
+                  style={{ fontSize: 17 }}
+                >
+                  {mode === 'datetime' && currentMode === 'date'
+                    ? t('select_date') || 'Select Date'
+                    : mode === 'datetime' && currentMode === 'time'
+                    ? t('select_time') || 'Select Time'
+                    : mode === 'date'
+                    ? t('select_date') || 'Select Date'
+                    : t('select_time') || 'Select Time'}
+                </Label>
+                
+                <Button
+                  mode="text"
+                  onPress={handleConfirm}
+                  textColor={colors.primary}
+                >
+                  {mode === 'datetime' && currentMode === 'date'
+                    ? t('next') || 'Next'
+                    : t('done') || 'Done'}
+                </Button>
+              </View>
+
+              {mode === 'datetime' && (
+                <View
+                  style={{
+                    paddingHorizontal: 20,
+                    paddingVertical: 12,
+                    backgroundColor: colors.surfaceVariant,
+                  }}
+                >
+                  <Caption
+                    color={colors.onSurfaceVariant}
+                    align="center"
+                    style={{ fontFamily: 'Urbanist-Medium' }}
+                  >
+                    {currentMode === 'date'
+                      ? `${t('step') || 'Step'} 1 ${t('of') || 'of'} 2: ${t('select_date') || 'Select date'}`
+                      : `${t('step') || 'Step'} 2 ${t('of') || 'of'} 2: ${t('select_time') || 'Select time'}`}
+                  </Caption>
+                </View>
+              )}
+
+              <DateTimePicker
+                testID="dateTimePicker"
+                value={tempValue || tempDate || value || new Date()}
+                mode={currentMode}
+                is24Hour={true}
+                display="spinner"
+                onChange={onChange}
+                minimumDate={minimumDate}
+                maximumDate={maximumDate}
+                style={{
+                  backgroundColor: colors.surface,
+                  height: 200,
+                }}
+                textColor={colors.onSurface}
+                accentColor={colors.primary}
+              />
+            </View>
+          </View>
+        </Modal>
       )}
 
-      {show && (
+      {Platform.OS === 'android' && show && (
         <DateTimePicker
           testID="dateTimePicker"
           value={tempDate || value || new Date()}
           mode={currentMode}
           is24Hour={true}
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          display="default"
           onChange={onChange}
           minimumDate={minimumDate}
           maximumDate={maximumDate}
-          locale="fr-FR" // French locale for Cameroon
         />
       )}
     </View>

@@ -28,7 +28,7 @@ import { useAuthUser } from '@/src/stores/customerStores';
 import { useDefaultAddress } from '@/src/location/store';
 import { useOrderFlow } from '@/src/hooks/customer/useOrderFlow';
 import { useLocationForQueries } from '@/src/hooks/customer/useLocationService';
-import OrderValidationModal from '@/src/components/customer/OrderValidationModal';
+import CustomOrderConfirmationModal from '@/src/components/customer/CustomOrderConfirmationModal';
 
 import { useTranslation } from 'react-i18next';
 
@@ -64,19 +64,27 @@ const CheckOutScreen = ({
     resetFlow,
     isOrderCreated,
     isCreatingOrder,
+    shouldProceedToPayment,
+    startPaymentFlow,
   } = useOrderFlow();
 
-  // Navigate to order tracking when order is created
+  // Navigate to payment when order is created successfully
   useEffect(() => {
-    if (isOrderCreated && flowState.orderId) {
-      // Clear cart and navigate to order tracking
-      clearCart();
-      navigation.navigate('OrderTracking', { orderId: flowState.orderId });
-      // Reset the flow state
-      resetFlow();
+    if (shouldProceedToPayment && flowState.orderId && flowState.orderData) {
+      // Mark payment flow as started
+      startPaymentFlow();
+      
+      // Navigate to payment processing with order details
+      navigation.navigate('PaymentProcessing', {
+        orderId: flowState.orderId,
+        amount: flowState.orderData.total,
+        provider: 'mtn', // Default provider, user can change in payment screen
+      });
+      
+      // Close the order modal
       setShowOrderModal(false);
     }
-  }, [isOrderCreated, flowState.orderId, clearCart, navigation, resetFlow]);
+  }, [shouldProceedToPayment, flowState.orderId, flowState.orderData, startPaymentFlow, navigation]);
 
   // Memoized calculations for display
   const calculations = useMemo(() => ({
@@ -558,8 +566,8 @@ const CheckOutScreen = ({
         </TouchableOpacity>
       </View>
 
-      {/* Order Validation Modal */}
-      <OrderValidationModal
+      {/* Custom Order Confirmation Modal */}
+      <CustomOrderConfirmationModal
         visible={showOrderModal}
         onDismiss={() => setShowOrderModal(false)}
         onConfirm={handleConfirmOrder}
