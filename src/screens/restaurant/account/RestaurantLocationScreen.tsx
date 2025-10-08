@@ -243,7 +243,7 @@ const RestaurantLocationScreen: React.FC = () => {
             color={colors.primary}
           />
           <Body color={colors.onSurfaceVariant} style={{ marginTop: 16 }}>
-            Loading restaurant location...
+            {t('loading_restaurant_location')}
           </Body>
         </View>
       </CommonView>
@@ -264,13 +264,13 @@ const RestaurantLocationScreen: React.FC = () => {
             color={colors.onSurface}
             style={{ marginTop: 16, textAlign: 'center' }}
           >
-            Failed to Load Location
+            {t('failed_to_load_location')}
           </Heading4>
           <Body
             color={colors.onSurfaceVariant}
             style={{ marginTop: 8, textAlign: 'center' }}
           >
-            {error || 'Unable to fetch restaurant location data'}
+            {error || t('unable_to_fetch_restaurant_location_data')}
           </Body>
           <Button
             mode="contained"
@@ -278,7 +278,7 @@ const RestaurantLocationScreen: React.FC = () => {
             style={{ marginTop: 16 }}
             buttonColor={colors.primary}
           >
-            Try Again
+            {t('try_again')}
           </Button>
         </View>
       </CommonView>
@@ -299,13 +299,13 @@ const RestaurantLocationScreen: React.FC = () => {
             color={colors.onSurface}
             style={{ marginTop: 16, textAlign: 'center' }}
           >
-            No Restaurant Data
+            {t('no_restaurant_data')}
           </Heading4>
           <Body
             color={colors.onSurfaceVariant}
             style={{ marginTop: 8, textAlign: 'center' }}
           >
-            Restaurant information is not available
+            {t('restaurant_information_not_available')}
           </Body>
           <Button
             mode="contained"
@@ -313,7 +313,7 @@ const RestaurantLocationScreen: React.FC = () => {
             style={{ marginTop: 16 }}
             buttonColor={colors.primary}
           >
-            Reload
+            {t('reload')}
           </Button>
         </View>
       </CommonView>
@@ -378,10 +378,10 @@ const RestaurantLocationScreen: React.FC = () => {
                 </View>
                 <View style={{ flex: 1, marginLeft: 16 }}>
                   <Heading4 color={colors.onSurface} weight="bold">
-                    Restaurant Location
+                    {t('restaurant_location')}
                   </Heading4>
                   <Caption color={colors.onSurfaceVariant}>
-                    Your registered business address
+                    {t('your_registered_business_address')}
                   </Caption>
                 </View>
               </View>
@@ -414,8 +414,8 @@ const RestaurantLocationScreen: React.FC = () => {
                       color={colors.onSurfaceVariant}
                       style={{ marginLeft: 4 }}
                     >
-                      {restaurant?.latitude.toFixed(6)},{' '}
-                      {restaurant?.longitude.toFixed(6)}
+                      {typeof restaurant.latitude === 'number' ? restaurant.latitude.toFixed(6) : restaurant.latitude},{' '}
+                      {typeof restaurant.longitude === 'number' ? restaurant.longitude.toFixed(6) : restaurant.longitude}
                     </Caption>
                   </View>
                 )}
@@ -432,7 +432,7 @@ const RestaurantLocationScreen: React.FC = () => {
                       color={colors.onSurfaceVariant}
                       style={{ marginLeft: 4 }}
                     >
-                      Delivery radius: {restaurant?.deliveryRadius} km
+                      {t('delivery_radius')}: {restaurant?.deliveryRadius} km
                     </Caption>
                   </View>
                 )}
@@ -457,9 +457,9 @@ const RestaurantLocationScreen: React.FC = () => {
                 color="white"
               />
             )}
-          >
-            Update Location
-          </Button>
+            >
+              {t('update_location')}
+            </Button>
         </View>
 
         {/* Info Card */}
@@ -482,16 +482,14 @@ const RestaurantLocationScreen: React.FC = () => {
                   weight="semibold"
                   style={{ marginLeft: 8 }}
                 >
-                  Location Information
+                  {t('location_information')}
                 </Label>
               </View>
               <Body
                 color={colors.onSurfaceVariant}
                 style={{ marginTop: 8, lineHeight: 20 }}
               >
-                Your restaurant location is used for customer discovery,
-                delivery calculations, and order routing. Make sure it&apos;s
-                accurate for the best service experience.
+                {t('location_information_description')}
               </Body>
             </View>
           </Card>
@@ -522,7 +520,7 @@ const RestaurantLocationScreen: React.FC = () => {
             ]}
           >
             <Heading4 color={colors.onSurface} weight="bold">
-              Update Restaurant Location
+              {t('update_restaurant_location')}
             </Heading4>
             <TouchableOpacity onPress={closeUpdateModal}>
               <IoniconsIcon name="close" size={24} color={colors.onSurface} />
@@ -548,16 +546,14 @@ const RestaurantLocationScreen: React.FC = () => {
                     weight="semibold"
                     style={{ marginLeft: 8 }}
                   >
-                    Important Notice
+                    {t('important_notice')}
                   </Label>
                 </View>
                 <Body
                   color={colors.onErrorContainer || colors.error}
                   style={{ marginTop: 8, lineHeight: 20 }}
                 >
-                  Updating your location will affect customer discovery and
-                  delivery zones. Please ensure you are physically at your
-                  restaurant before proceeding.
+                  {t('location_update_warning')}
                 </Body>
               </View>
             </Card>
@@ -585,7 +581,7 @@ const RestaurantLocationScreen: React.FC = () => {
                       weight="semibold"
                       style={{ marginLeft: 8 }}
                     >
-                      New Location Selected
+                      {t('new_location_selected')}
                     </Label>
                   </View>
                   <Body
@@ -612,7 +608,7 @@ const RestaurantLocationScreen: React.FC = () => {
                 weight="semibold"
                 style={{ marginBottom: 12 }}
               >
-                Before You Continue:
+                {t('before_you_continue')}
               </Label>
 
               <View style={styles.instructionItem}>
@@ -625,7 +621,7 @@ const RestaurantLocationScreen: React.FC = () => {
                   color={colors.onSurface}
                   style={{ flex: 1, marginLeft: 12 }}
                 >
-                  Be physically present at your restaurant location
+                  {t('be_physically_present_at_restaurant')}
                 </Body>
               </View>
 
@@ -639,7 +635,7 @@ const RestaurantLocationScreen: React.FC = () => {
                   color={colors.onSurface}
                   style={{ flex: 1, marginLeft: 12 }}
                 >
-                  Ensure GPS and location services are enabled
+                  {t('ensure_gps_location_enabled')}
                 </Body>
               </View>
 
@@ -653,7 +649,7 @@ const RestaurantLocationScreen: React.FC = () => {
                   color={colors.onSurface}
                   style={{ flex: 1, marginLeft: 12 }}
                 >
-                  Verify this will be your official delivery address
+                  {t('verify_official_delivery_address')}
                 </Body>
               </View>
             </View>
@@ -677,7 +673,7 @@ const RestaurantLocationScreen: React.FC = () => {
                   style={styles.modalButton}
                   labelStyle={{ color: colors.onSurface }}
                 >
-                  Cancel
+                  {t('cancel')}
                 </Button>
 
                 <Button
@@ -709,8 +705,8 @@ const RestaurantLocationScreen: React.FC = () => {
                   )}
                 >
                   {isGettingLocation
-                    ? 'Getting Location...'
-                    : 'Get My Location'}
+                    ? t('getting_location')
+                    : t('get_my_location')}
                 </Button>
               </>
             ) : (
@@ -721,7 +717,7 @@ const RestaurantLocationScreen: React.FC = () => {
                   style={styles.modalButton}
                   labelStyle={{ color: colors.onSurface }}
                 >
-                  Get Different Location
+                  {t('get_different_location')}
                 </Button>
 
                 <Button
@@ -733,8 +729,8 @@ const RestaurantLocationScreen: React.FC = () => {
                   style={styles.modalButton}
                 >
                   {updateLocationMutation.isPending
-                    ? 'Updating...'
-                    : 'Update Location'}
+                    ? t('updating')
+                    : t('update_location')}
                 </Button>
               </>
             )}

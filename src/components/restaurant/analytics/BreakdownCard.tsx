@@ -1,6 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import { useTheme, Card } from 'react-native-paper';
+import { useTranslation } from 'react-i18next';
 import {
   Typography,
   Heading5,
@@ -27,6 +28,7 @@ const BreakdownCard: React.FC<BreakdownCardProps> = ({
   showCounts = true,
 }) => {
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   if (!data || data.length === 0) {
     return (
@@ -39,7 +41,7 @@ const BreakdownCard: React.FC<BreakdownCardProps> = ({
           >
             {title}
           </Heading5>
-          <Caption color={colors.onSurfaceVariant}>No data available</Caption>
+          <Caption color={colors.onSurfaceVariant}>{t('no_data_available')}</Caption>
         </View>
       </Card>
     );
@@ -82,7 +84,7 @@ const BreakdownCard: React.FC<BreakdownCardProps> = ({
                 }}
               />
               <Body color={colors.onSurface} numberOfLines={2}>
-                {item.label || 'Unknown'}
+                {item.label || t('unknown')}
               </Body>
             </View>
             <View style={{ alignItems: 'flex-end' }}>

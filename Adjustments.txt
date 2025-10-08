@@ -1,6 +1,5 @@
-- remove voir plus buttons on categories, pour nous and add navigation to search dcreen when the voir plus of restuarant is pressed
+
 - payment logic
-- check button not visible on ios in authentication forms
 - date time picker adaptability compatibility in ios
 - images of restaurant card, profile details needs to updated; loaded from backend
 - terms and conditions of applications

@@ -1,5 +1,5 @@
 // Cart Reminder Service - Manages cart abandonment notifications
-import { customerNotificationService } from '../../notifications';
+import pushNotificationService from '@/src/services/shared/pushNotificationService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface CartReminderConfig {
@@ -80,7 +80,7 @@ class CartReminderService {
       if (now - reminder.scheduledAt > 2 * 60 * 60 * 1000) {
         expiredKeys.push(key);
         try {
-          await customerNotificationService.cancelNotification(
+          await pushNotificationService.cancelNotification(
             reminder.notificationId,
           );
         } catch (error) {
@@ -175,7 +175,7 @@ class CartReminderService {
     );
 
     try {
-      const notificationId = await customerNotificationService.scheduleReminder(
+      const notificationId = await pushNotificationService.scheduleReminder(
         reminderMessages.title,
         reminderMessages.body,
         minutesFromNow,
@@ -247,7 +247,7 @@ class CartReminderService {
       const cancelPromises = Array.from(this.activeReminders.values()).map(
         async (reminder) => {
           try {
-            await customerNotificationService.cancelNotification(
+            await pushNotificationService.cancelNotification(
               reminder.notificationId,
             );
           } catch (error) {
@@ -277,7 +277,7 @@ class CartReminderService {
       )) {
         if (reminder.reminderType === type) {
           try {
-            await customerNotificationService.cancelNotification(
+            await pushNotificationService.cancelNotification(
               reminder.notificationId,
             );
             toRemove.push(key);
@@ -311,7 +311,7 @@ class CartReminderService {
   // Initialize the service (call this when app starts)
   async initialize(): Promise<void> {
     try {
-      await customerNotificationService.initialize();
+      // Push notification service is initialized elsewhere
       await this.loadActiveReminders();
     } catch (error) {
       console.error('Failed to initialize cart reminder service:', error);

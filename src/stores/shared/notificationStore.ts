@@ -51,7 +51,7 @@ interface NotificationActions {
     platform: string,
     role: 'customer' | 'restaurant',
   ) => Promise<void>;
-  unregisterPushToken: (token?: string) => Promise<void>;
+  unregisterPushToken: (expoToken: string) => Promise<void>;
 }
 
 const initialState: NotificationState = {
@@ -232,9 +232,9 @@ export const useNotificationStore = create<
           }
         },
 
-        unregisterPushToken: async (token) => {
+        unregisterPushToken: async (expoToken) => {
           try {
-            const response = await notificationApi.unregisterDevice(token);
+            const response = await notificationApi.unregisterDevice(expoToken);
             if (response.status_code !== 200) {
               throw new Error(
                 response.message || 'Failed to unregister push token',
@@ -272,5 +272,50 @@ export const useUnreadCount = () =>
   useNotificationStore((state) => state.unreadCount);
 export const useNotificationLoading = () =>
   useNotificationStore((state) => state.isLoading);
+export const useNotificationLoadingMore = () =>
+  useNotificationStore((state) => state.isLoadingMore);
 export const useNotificationError = () =>
   useNotificationStore((state) => state.error);
+export const useNotificationHasNextPage = () =>
+  useNotificationStore((state) => state.hasNextPage);
+export const useNotificationTotal = () =>
+  useNotificationStore((state) => state.total);
+export const useNotificationFilter = () =>
+  useNotificationStore((state) => state.selectedFilter);
+
+// Computed selectors
+export const useHasNotifications = () => 
+  useNotificationStore((state) => state.notifications.length > 0);
+export const useFilteredNotifications = () => 
+  useNotificationStore((state) => state.getFilteredNotifications());
+
+// Notification counts by type
+export const useNotificationCounts = () => 
+  useNotificationStore((state) => {
+    const { notifications } = state;
+    return {
+      total: notifications.length,
+      unread: notifications.filter(n => !n.readAt).length,
+      system: notifications.filter(n => n.type === 'system').length,
+      order: notifications.filter(n => n.type === 'order').length,
+      promotion: notifications.filter(n => n.type === 'promotion').length,
+      alert: notifications.filter(n => n.type === 'alert').length,
+    };
+  });
+
+// Action hooks for easier access
+export const useNotificationActions = () => 
+  useNotificationStore((state) => ({
+    fetchNotifications: state.fetchNotifications,
+    loadMoreNotifications: state.loadMoreNotifications,
+    refreshNotifications: state.refreshNotifications,
+    markAsRead: state.markAsRead,
+    markAllAsRead: state.markAllAsRead,
+    updateUnreadCount: state.updateUnreadCount,
+    addNotification: state.addNotification,
+    setFilter: state.setFilter,
+    clearError: state.clearError,
+    reset: state.reset,
+    registerPushToken: state.registerPushToken,
+    unregisterPushToken: state.unregisterPushToken,
+  }));

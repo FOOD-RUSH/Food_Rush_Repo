@@ -1,8 +1,10 @@
+import { FoodCategory } from '@/assets/images';
+
 export interface Category {
   value: string;
   label: string;
   emoji: string;
-  image?: string;
+  image: any;
   color: string;
   description?: string;
 }
@@ -12,6 +14,7 @@ export const FOOD_CATEGORIES: Category[] = [
     value: 'local-dishes',
     label: 'Local Dishes',
     emoji: '🍲',
+    image: FoodCategory.localdish,
     color: '#FF6B35',
     description: 'Traditional and regional cuisine',
   },
@@ -19,6 +22,7 @@ export const FOOD_CATEGORIES: Category[] = [
     value: 'breakfast',
     label: 'Breakfast',
     emoji: '🥞',
+    image: FoodCategory.breakfast,
     color: '#FFD93D',
     description: 'Morning meals and breakfast items',
   },
@@ -26,6 +30,7 @@ export const FOOD_CATEGORIES: Category[] = [
     value: 'fastfood',
     label: 'Fast Food',
     emoji: '🍔',
+    image: FoodCategory.fastfood,
     color: '#FF3B30',
     description: 'Quick service meals and burgers',
   },
@@ -33,20 +38,15 @@ export const FOOD_CATEGORIES: Category[] = [
     value: 'desserts',
     label: 'Desserts',
     emoji: '🍰',
+    image: FoodCategory.dessert,
     color: '#FF69B4',
     description: 'Sweet treats and desserts',
-  },
-  {
-    value: 'snacks',
-    label: 'Snacks',
-    emoji: '🍿',
-    color: '#FF9500',
-    description: 'Light bites and snack foods',
   },
   {
     value: 'drinks',
     label: 'Drinks',
     emoji: '🥤',
+    image: FoodCategory.drinks,
     color: '#007AFF',
     description: 'Beverages and refreshments',
   },
@@ -54,6 +54,7 @@ export const FOOD_CATEGORIES: Category[] = [
     value: 'vegetarian',
     label: 'Vegetarian',
     emoji: '🥗',
+    image: FoodCategory.vegetarian,
     color: '#34C759',
     description: 'Plant-based and vegetarian options',
   },
@@ -95,7 +96,6 @@ export const CATEGORY_TRANSLATION_MAP: Record<string, string> = {
   breakfast: 'category_breakfast',
   fastfood: 'category_fast_food',
   desserts: 'category_desserts',
-  snacks: 'category_snacks',
   drinks: 'category_drinks',
   vegetarian: 'category_vegetarian',
 };

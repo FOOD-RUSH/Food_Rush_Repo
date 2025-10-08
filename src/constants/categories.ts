@@ -14,79 +14,51 @@ export interface FoodCategoryProps {
 export const CategoryFilters: FoodCategoryProps[] = [
   {
     id: 1,
-    image: FoodCategory.bread,
+    image: FoodCategory.localdish,
     title: 'local-dishes',
     displayName: 'Local Dishes',
     description: 'Traditional local cuisine',
   },
   {
     id: 2,
-    image: FoodCategory.french_fries,
-    title: 'snacks',
-    displayName: 'Snacks',
-    description: 'Quick bites and finger foods',
-  },
-  {
-    id: 3,
-    image: FoodCategory.drink,
-    title: 'drinks',
-    displayName: 'Drinks',
-    description: 'Beverages and refreshments',
-  },
-  {
-    id: 4,
-    image: FoodCategory.pancakes,
+    image: FoodCategory.breakfast,
     title: 'breakfast',
     displayName: 'Breakfast',
     description: 'Morning meals and breakfast items',
   },
   {
-    id: 5,
-    image: FoodCategory.burger,
+    id: 3,
+    image: FoodCategory.fastfood,
     title: 'fast-food',
     displayName: 'Fast Food',
     description: 'Quick service meals',
   },
-];
-
-// Extended categories for filtering (includes all original categories)
-export const AllCategories: FoodCategoryProps[] = [
-  ...CategoryFilters,
   {
-    id: 6,
-    image: FoodCategory.vegetable,
-    title: 'vegetable',
-    displayName: 'Vegetables',
-    description: 'Fresh vegetables and salads',
+    id: 4,
+    image: FoodCategory.vegetarian,
+    title: 'vegetarian',
+    displayName: 'Vegetarian',
+    description: 'Plant-based dishes',
   },
   {
-    id: 7,
-    image: FoodCategory.pizza,
-    title: 'pizza',
-    displayName: 'Pizza',
-    description: 'Italian pizza varieties',
-  },
-  {
-    id: 8,
-    image: FoodCategory.desert,
-    title: 'dessert',
+    id: 5,
+    image: FoodCategory.dessert,
+    title: 'desserts',
     displayName: 'Desserts',
     description: 'Sweet treats and desserts',
   },
   {
-    id: 9,
-    image: FoodCategory.meat,
-    title: 'meat',
-    displayName: 'Meat',
-    description: 'Meat dishes and proteins',
+    id: 6,
+    image: FoodCategory.drinks,
+    title: 'drinks',
+    displayName: 'Drinks',
+    description: 'Beverages and refreshments',
   },
-  {
-    id: 10,
-    image: FoodCategory.noodles,
-    title: 'noodles',
-    displayName: 'Noodles',
-    description: 'Pasta and noodle dishes',
-  },
+];
+
+// Extended categories for filtering (same as main categories for now)
+export const AllCategories: FoodCategoryProps[] = [
+  ...CategoryFilters,
 ];
 
 // Helper function to get category by title
@@ -108,23 +80,13 @@ export const getAllCategories = (): FoodCategoryProps[] => {
 
 // Icon mapping for API categories
 const categoryIconMap: Record<string, any> = {
-  'local-dishes': FoodCategory.bread,
-  breakfast: FoodCategory.pancakes,
-  fastfood: FoodCategory.burger,
-  'fast-food': FoodCategory.burger,
-  vegetarian: FoodCategory.vegetable,
-  desserts: FoodCategory.desert,
-  snacks: FoodCategory.french_fries,
-  drinks: FoodCategory.drink,
-  pizza: FoodCategory.pizza,
-  meat: FoodCategory.meat,
-  noodles: FoodCategory.noodles,
-  salad: FoodCategory.salad,
-  sandwich: FoodCategory.sandwich,
-  taco: FoodCategory.taco,
-  'ice-cream': FoodCategory.ice_cream,
-  cheese: FoodCategory.cheese,
-  croissant: FoodCategory.croissant,
+  'local-dishes': FoodCategory.localdish,
+  breakfast: FoodCategory.breakfast,
+  fastfood: FoodCategory.fastfood,
+  'fast-food': FoodCategory.fastfood,
+  vegetarian: FoodCategory.vegetarian,
+  desserts: FoodCategory.dessert,
+  drinks: FoodCategory.drinks,
 };
 
 // Function to map API categories to UI categories with icons
@@ -143,5 +105,5 @@ export const mapApiCategoriesToUI = (
 
 // Function to get icon for a specific category value
 export const getCategoryIcon = (categoryValue: string): any => {
-  return categoryIconMap[categoryValue] || FoodCategory.others;
+  return categoryIconMap[categoryValue] || FoodCategory.localdish;
 };

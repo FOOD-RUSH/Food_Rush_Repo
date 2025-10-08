@@ -205,7 +205,8 @@ const AnalyticsOverview: React.FC<
 
   return (
     <CommonView>
-      <ScrollView
+      <View style={{ flex: 1, overflow: 'hidden' }}>
+        <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: tabBarHeight + 16 }}
         refreshControl={
@@ -628,7 +629,8 @@ const AnalyticsOverview: React.FC<
             </TouchableOpacity>
           </Card>
         </View>
-      </ScrollView>
+        </ScrollView>
+      </View>
     </CommonView>
   );
 };

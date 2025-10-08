@@ -127,7 +127,7 @@ export const notificationSettingsSchema = yup.object().shape({
     .required(),
 });
 
-// Profile update validation schema
+// Profile update validation schema - matches API documentation
 export const profileUpdateSchema = yup.object().shape({
   fullName: yup
     .string()
@@ -136,9 +136,12 @@ export const profileUpdateSchema = yup.object().shape({
     .optional(),
   phoneNumber: yup
     .string()
-    .matches(/^[0-9]{9}$/, 'Invalid Phone number (9 numbers required)')
+    .matches(/^\+?[0-9]{9,15}$/, 'Invalid phone number format (e.g., +237612345678)')
     .optional(),
-  email: yup.string().email('Invalid email format').optional(),
+  profilePicture: yup
+    .string()
+    .url('Profile picture must be a valid URL')
+    .optional(),
 });
 
 // Password change validation schema

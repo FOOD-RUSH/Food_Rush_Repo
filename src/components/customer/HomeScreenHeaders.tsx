@@ -6,7 +6,7 @@ import { useResponsive } from '@/src/hooks/useResponsive';
 
 interface HeaderProps {
   title: string;
-  onPress: () => void;
+  onPress: (() => void) | null;
 }
 
 const HomeScreenHeaders = ({ onPress, title }: HeaderProps) => {
@@ -44,22 +44,24 @@ const HomeScreenHeaders = ({ onPress, title }: HeaderProps) => {
         {title}
       </Text>
 
-      {/* See More Button */}
-      <Button 
-        onPress={onPress}
-        mode="text"
-        compact={isSmallScreen}
-        contentStyle={{
-          paddingHorizontal: scale(isSmallScreen ? 4 : 8),
-        }}
-        labelStyle={{
-          fontSize: getResponsiveText(isSmallScreen ? 13 : 14),
-          color: colors.primary,
-          fontWeight: '600',
-        }}
-      >
-        {t('see_more')}
-      </Button>
+      {/* See More Button - Only show if onPress is provided */}
+      {onPress && (
+        <Button 
+          onPress={onPress}
+          mode="text"
+          compact={isSmallScreen}
+          contentStyle={{
+            paddingHorizontal: scale(isSmallScreen ? 4 : 8),
+          }}
+          labelStyle={{
+            fontSize: getResponsiveText(isSmallScreen ? 13 : 14),
+            color: colors.primary,
+            fontWeight: '600',
+          }}
+        >
+          {t('see_more')}
+        </Button>
+      )}
     </View>
   );
 };

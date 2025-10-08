@@ -1,19 +1,18 @@
 // src/hooks/useNotifications.ts
-import { useEffect, useCallback, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useNotificationStore } from '@/src/stores/shared/notificationStore';
 import { useAuthStore } from '@/src/stores/AuthStore';
-import {
-  getNotificationService,
-  initializeNotifications,
-} from '@/src/notifications';
+import { usePushNotifications } from '@/src/hooks/shared/usePushNotifications';
+import pushNotificationService from '@/src/services/shared/pushNotificationService';
 
 /**
  * Unified notification hook for both customer and restaurant users
  * Automatically initializes the correct notification service based on user type
+ * Includes push notification management
  */
 export const useNotifications = () => {
-  const user = useAuthStore((state) => state.user);
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const { isAuthenticated, user } = useAuthStore();
+  const userType = user?.role?.toLowerCase() === 'restaurant' ? 'restaurant' : 'customer';
 
   const {
     notifications,
@@ -22,6 +21,8 @@ export const useNotifications = () => {
     isLoadingMore,
     error,
     hasNextPage,
+    currentPage,
+    totalPages,
     total,
     selectedFilter,
     fetchNotifications,
@@ -37,232 +38,135 @@ export const useNotifications = () => {
     reset,
   } = useNotificationStore();
 
-  // Get the appropriate notification service
-  const notificationService = useMemo(() => {
-    if (!user) return null;
-    return getNotificationService(user.role, user.id);
-  }, [user]);
+  // Push notification management
+  const pushNotifications = usePushNotifications(true);
 
   // Initialize notifications when user is authenticated
   useEffect(() => {
     if (isAuthenticated && user) {
-      // Initialize the notification service
-      initializeNotifications(user.role, user.id);
+      // The push notification service is already initialized via usePushNotifications hook
+      console.log(`✅ ${userType} notification service ready`);
+    }
+  }, [isAuthenticated, user, userType]);
 
-      // Fetch server notifications
+  // Auto-fetch notifications when authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
       fetchNotifications();
       updateUnreadCount();
-    } else {
-      reset();
     }
-  }, [isAuthenticated, user, fetchNotifications, updateUnreadCount, reset]);
+  }, [isAuthenticated, fetchNotifications, updateUnreadCount]);
 
-  // Filtered notifications based on current filter
-  const filteredNotifications = useMemo(() => {
-    return getFilteredNotifications();
-  }, [getFilteredNotifications]);
-
+  // Computed values
+  const filteredNotifications = getFilteredNotifications();
+  const hasNotifications = notifications.length > 0;
+  
   // Notification counts by type
-  const notificationCounts = useMemo(() => {
-    return {
-      all: notifications.length,
-      unread: notifications.filter((n) => !n.readAt).length,
-      order: notifications.filter((n) => n.type === 'order').length,
-      system: notifications.filter((n) => n.type === 'system').length,
-      promotion: notifications.filter((n) => n.type === 'promotion').length,
-      alert: notifications.filter((n) => n.type === 'alert').length,
-    };
-  }, [notifications]);
+  const notificationCounts = useMemo(() => ({
+    all: notifications.length,
+    unread: notifications.filter(n => !n.readAt).length,
+    order: notifications.filter(n => n.type === 'order').length,
+    system: notifications.filter(n => n.type === 'system').length,
+    promotion: notifications.filter(n => n.type === 'promotion').length,
+    alert: notifications.filter(n => n.type === 'alert').length,
+  }), [notifications]);
 
-  // Refresh notifications
-  const refresh = useCallback(async () => {
+  // Refresh function
+  const refresh = async () => {
     await refreshNotifications();
     await updateUnreadCount();
-  }, [refreshNotifications, updateUnreadCount]);
+  };
 
-  // Load more notifications
-  const loadMore = useCallback(async () => {
+  // Load more function
+  const loadMore = async () => {
     if (hasNextPage && !isLoadingMore) {
-      try {
-        await loadMoreNotifications();
-        return true;
-      } catch (error) {
-        console.error('Failed to load more notifications:', error);
-        return false;
-      }
+      await loadMoreNotifications();
     }
-    return false;
-  }, [hasNextPage, isLoadingMore, loadMoreNotifications]);
+  };
 
-  // Mark notification as read with error handling
-  const markNotificationAsRead = useCallback(
-    async (notificationId: string) => {
-      try {
-        await markAsRead(notificationId);
-        return true;
-      } catch (error) {
-        console.error('Failed to mark notification as read:', error);
-        return false;
-      }
-    },
-    [markAsRead],
-  );
-
-  // Mark all notifications as read with error handling
-  const markAllNotificationsAsRead = useCallback(async () => {
+  // Send local notification (for testing)
+  const sendLocalNotification = async (
+    title: string,
+    body: string,
+    data?: any,
+  ) => {
     try {
-      await markAllAsRead();
+      // Use the push notification service directly
+      await pushNotificationService.sendLocalNotification({
+        title,
+        body,
+        data,
+      });
+    } catch (error) {
+      console.error('Error sending local notification:', error);
+    }
+  };
+
+  // Enhanced mark as read with optimistic updates
+  const markAsReadOptimistic = async (notificationId: string) => {
+    try {
+      await markAsRead(notificationId);
+      // Update unread count after marking as read
+      await updateUnreadCount();
       return true;
     } catch (error) {
-      console.error('Failed to mark all notifications as read:', error);
+      console.error('Error marking notification as read:', error);
       return false;
     }
-  }, [markAllAsRead]);
+  };
 
-  // Local notification methods (using the service)
-  const sendLocalNotification = useCallback(
-    async (title: string, body: string, data?: any) => {
-      if (!notificationService) return null;
-
-      try {
-        return await notificationService.sendLocalNotification({
-          title,
-          body,
-          data,
-        });
-      } catch (error) {
-        console.error('Failed to send local notification:', error);
-        return null;
-      }
-    },
-    [notificationService],
-  );
-
-  const sendOrderNotification = useCallback(
-    async (orderId: string, status: string, details?: any) => {
-      if (!notificationService) return null;
-
-      try {
-        return await notificationService.sendOrderNotification(
-          orderId,
-          status,
-          details,
-        );
-      } catch (error) {
-        console.error('Failed to send order notification:', error);
-        return null;
-      }
-    },
-    [notificationService],
-  );
-
-  const sendPromotionNotification = useCallback(
-    async (title: string, message: string, data?: any) => {
-      if (!notificationService) return null;
-
-      try {
-        return await notificationService.sendPromotionNotification(
-          title,
-          message,
-          data,
-        );
-      } catch (error) {
-        console.error('Failed to send promotion notification:', error);
-        return null;
-      }
-    },
-    [notificationService],
-  );
-
-  const scheduleReminder = useCallback(
-    async (
-      title: string,
-      message: string,
-      minutesFromNow: number,
-      data?: any,
-    ) => {
-      if (!notificationService) return null;
-
-      try {
-        return await notificationService.scheduleReminder(
-          title,
-          message,
-          minutesFromNow,
-          data,
-        );
-      } catch (error) {
-        console.error('Failed to schedule reminder:', error);
-        return null;
-      }
-    },
-    [notificationService],
-  );
-
-  const clearBadge = useCallback(async () => {
-    if (notificationService) {
-      await notificationService.clearBadge();
+  // Enhanced mark all as read
+  const markAllAsReadOptimistic = async () => {
+    try {
+      await markAllAsRead();
+      // Update unread count after marking all as read
+      await updateUnreadCount();
+      return true;
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+      return false;
     }
-  }, [notificationService]);
+  };
 
   return {
-    // State
+    // Data
     notifications: filteredNotifications,
     allNotifications: notifications,
     unreadCount,
+    notificationCounts,
+    
+    // State
     isLoading,
     isLoadingMore,
     error,
     hasNextPage,
+    currentPage,
+    totalPages,
     total,
     selectedFilter,
-    notificationCounts,
-
-    // Server notification actions
+    hasNotifications,
+    userType,
+    
+    // Actions
+    fetchNotifications,
     refresh,
     loadMore,
-    markAsRead: markNotificationAsRead,
-    markAllAsRead: markAllNotificationsAsRead,
+    markAsRead: markAsReadOptimistic,
+    markAllAsRead: markAllAsReadOptimistic,
+    updateUnreadCount,
     addNotification,
     setFilter,
     clearError,
-
-    // Local notification actions
+    reset,
     sendLocalNotification,
-    sendOrderNotification,
-    sendPromotionNotification,
-    scheduleReminder,
-    clearBadge,
-
-    // Computed
-    hasNotifications: filteredNotifications.length > 0,
-    hasUnreadNotifications: unreadCount > 0,
-
-    // User context
-    userType: user?.role || null,
-    isCustomer: user?.role === 'customer',
-    isRestaurant: user?.role === 'restaurant',
+    
+    // Push notifications
+    pushNotifications,
   };
 };
 
-/**
- * Lightweight hook for just unread count (for badges)
- */
-export const useUnreadNotificationCount = () => {
-  const unreadCount = useNotificationStore((state) => state.unreadCount);
-  const updateUnreadCount = useNotificationStore(
-    (state) => state.updateUnreadCount,
-  );
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+// Export individual hooks for specific use cases
+export { useUnreadNotificationCount } from '@/src/hooks/shared/useUnreadNotificationCount';
+export { usePushNotifications } from '@/src/hooks/shared/usePushNotifications';
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      updateUnreadCount();
-    }
-  }, [isAuthenticated, updateUnreadCount]);
-
-  return {
-    unreadCount,
-    hasUnreadNotifications: unreadCount > 0,
-    updateUnreadCount,
-  };
-};
+export default useNotifications;

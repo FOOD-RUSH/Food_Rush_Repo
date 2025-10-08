@@ -1,1 +1,462 @@
-import { useState, useCallback, useEffect } from 'react';\nimport { useMutation, useQuery } from '@tanstack/react-query';\nimport {\n  OrderApi,\n  CreateOrderRequest,\n  CreateOrderResponse,\n} from '@/src/services/customer/orders.service';\nimport { useCartStore } from '@/src/stores/customerStores/cartStore';\nimport { useAuthUser } from '@/src/stores/customerStores';\nimport { useDefaultAddress } from '@/src/location/store';\nimport EnhancedPaymentService, {\n  PaymentInitRequest,\n  PaymentPollingResult,\n} from '@/src/services/customer/enhancedPayment.service';\nimport Toast from 'react-native-toast-message';\n\nexport type EnhancedOrderFlowStep =\n  | 'idle'                        // Initial state\n  | 'creating_order'              // Creating the order\n  | 'waiting_restaurant'          // Waiting for restaurant confirmation (2-15 min)\n  | 'payment_required'            // Restaurant confirmed, payment needed\n  | 'payment_processing'          // Payment in progress\n  | 'payment_polling'             // Polling payment status\n  | 'payment_success'             // Payment successful\n  | 'order_preparing'             // Payment successful, restaurant preparing\n  | 'order_ready'                 // Order ready for pickup/delivery\n  | 'order_delivering'            // Out for delivery\n  | 'order_completed'             // Order completed\n  | 'order_cancelled'             // Order cancelled\n  | 'payment_failed'              // Payment failed\n  | 'order_failed';               // Order creation failed\n\nexport interface EnhancedOrderFlowState {\n  step: EnhancedOrderFlowStep;\n  orderId?: string;\n  orderData?: CreateOrderResponse['data'];\n  transactionId?: string;\n  paymentAmount?: number;\n  error?: string;\n  canCancel: boolean;\n  canRetryPayment: boolean;\n  timeRemaining?: number; // For payment timeout\n}\n\nexport interface PaymentDetails {\n  provider: 'mtn' | 'orange';\n  phoneNumber: string;\n}\n\nconst RESTAURANT_CONFIRMATION_TIMEOUT = 15 * 60 * 1000; // 15 minutes\nconst PAYMENT_TIMEOUT = 5 * 60 * 1000; // 5 minutes\n\nexport const useEnhancedOrderFlow = () => {\n  const [flowState, setFlowState] = useState<EnhancedOrderFlowState>({\n    step: 'idle',\n    canCancel: false,\n    canRetryPayment: false,\n  });\n\n  const cartItems = useCartStore((state) => state.items);\n  const clearCart = useCartStore((state) => state.clearCart);\n  const user = useAuthUser();\n  const defaultAddress = useDefaultAddress();\n\n  // Create order mutation\n  const createOrderMutation = useMutation({\n    mutationFn: (orderData: CreateOrderRequest) =>\n      OrderApi.createOrder(orderData),\n    onSuccess: (response) => {\n      console.log('✅ Order created successfully:', response.data.id);\n      setFlowState({\n        step: 'waiting_restaurant',\n        orderId: response.data.id,\n        orderData: response.data,\n        paymentAmount: response.data.total,\n        canCancel: true,\n        canRetryPayment: false,\n        timeRemaining: RESTAURANT_CONFIRMATION_TIMEOUT / 1000,\n      });\n      \n      Toast.show({\n        type: 'success',\n        text1: 'Order Created',\n        text2: 'Waiting for restaurant confirmation...',\n        position: 'top',\n      });\n    },\n    onError: (error: any) => {\n      console.error('❌ Order creation failed:', error);\n      setFlowState({\n        step: 'order_failed',\n        error: error.response?.data?.message || 'Failed to create order. Please try again.',\n        canCancel: false,\n        canRetryPayment: false,\n      });\n      \n      Toast.show({\n        type: 'error',\n        text1: 'Order Failed',\n        text2: 'Failed to create order. Please try again.',\n        position: 'top',\n      });\n    },\n  });\n\n  // Cancel order mutation\n  const cancelOrderMutation = useMutation({\n    mutationFn: (orderId: string) => OrderApi.cancelOrder(orderId),\n    onSuccess: () => {\n      console.log('✅ Order cancelled successfully');\n      setFlowState((prev) => ({\n        ...prev,\n        step: 'order_cancelled',\n        canCancel: false,\n        canRetryPayment: false,\n      }));\n      \n      Toast.show({\n        type: 'info',\n        text1: 'Order Cancelled',\n        text2: 'Your order has been cancelled successfully.',\n        position: 'top',\n      });\n    },\n    onError: (error: any) => {\n      console.error('❌ Order cancellation failed:', error);\n      setFlowState((prev) => ({\n        ...prev,\n        error: error.response?.data?.message || 'Failed to cancel order.',\n      }));\n    },\n  });\n\n  // Poll order status to check restaurant response\n  const { data: orderStatus, refetch: refetchOrderStatus } = useQuery({\n    queryKey: ['orderStatus', flowState.orderId],\n    queryFn: () =>\n      flowState.orderId ? OrderApi.checkOrderStatus(flowState.orderId) : null,\n    enabled:\n      !!flowState.orderId &&\n      (flowState.step === 'waiting_restaurant' || \n       flowState.step === 'order_preparing' ||\n       flowState.step === 'order_ready' ||\n       flowState.step === 'order_delivering'),\n    refetchInterval: 3000, // Poll every 3 seconds\n    onSuccess: (data) => {\n      if (!data) return;\n\n      const currentStep = flowState.step;\n      \n      // Handle restaurant confirmation\n      if (data.status === 'confirmed' && currentStep === 'waiting_restaurant') {\n        console.log('✅ Restaurant confirmed order');\n        setFlowState((prev) => ({\n          ...prev,\n          step: 'payment_required',\n          canCancel: false, // Can't cancel after restaurant confirmation\n          canRetryPayment: true,\n          timeRemaining: undefined,\n        }));\n        \n        Toast.show({\n          type: 'success',\n          text1: 'Order Confirmed',\n          text2: 'Restaurant confirmed your order. Please proceed with payment.',\n          position: 'top',\n        });\n      }\n      \n      // Handle restaurant rejection/cancellation\n      else if (data.status === 'cancelled') {\n        console.log('❌ Restaurant cancelled order');\n        setFlowState((prev) => ({\n          ...prev,\n          step: 'order_cancelled',\n          error: data.cancellationReason || 'Restaurant cancelled your order.',\n          canCancel: false,\n          canRetryPayment: false,\n        }));\n        \n        Toast.show({\n          type: 'error',\n          text1: 'Order Cancelled',\n          text2: 'Restaurant cancelled your order.',\n          position: 'top',\n        });\n      }\n      \n      // Handle order status updates after payment\n      else if (data.status === 'preparing' && currentStep !== 'order_preparing') {\n        setFlowState((prev) => ({\n          ...prev,\n          step: 'order_preparing',\n          canCancel: false,\n          canRetryPayment: false,\n        }));\n      }\n      else if (data.status === 'ready_for_pickup' && currentStep !== 'order_ready') {\n        setFlowState((prev) => ({\n          ...prev,\n          step: 'order_ready',\n        }));\n        \n        Toast.show({\n          type: 'success',\n          text1: 'Order Ready',\n          text2: 'Your order is ready for pickup!',\n          position: 'top',\n        });\n      }\n      else if (data.status === 'out_for_delivery' && currentStep !== 'order_delivering') {\n        setFlowState((prev) => ({\n          ...prev,\n          step: 'order_delivering',\n        }));\n        \n        Toast.show({\n          type: 'info',\n          text1: 'Out for Delivery',\n          text2: 'Your order is on the way!',\n          position: 'top',\n        });\n      }\n      else if (data.status === 'delivered') {\n        setFlowState((prev) => ({\n          ...prev,\n          step: 'order_completed',\n        }));\n        \n        Toast.show({\n          type: 'success',\n          text1: 'Order Delivered',\n          text2: 'Enjoy your meal!',\n          position: 'top',\n        });\n      }\n    },\n  });\n\n  // Timer for restaurant confirmation timeout\n  useEffect(() => {\n    if (flowState.step === 'waiting_restaurant' && flowState.timeRemaining) {\n      const timer = setInterval(() => {\n        setFlowState((prev) => {\n          if (!prev.timeRemaining || prev.timeRemaining <= 1) {\n            clearInterval(timer);\n            return {\n              ...prev,\n              step: 'order_cancelled',\n              error: 'Restaurant did not respond within the time limit.',\n              canCancel: false,\n              canRetryPayment: false,\n              timeRemaining: undefined,\n            };\n          }\n          return {\n            ...prev,\n            timeRemaining: prev.timeRemaining - 1,\n          };\n        });\n      }, 1000);\n\n      return () => clearInterval(timer);\n    }\n  }, [flowState.step, flowState.timeRemaining]);\n\n  // Create order from cart\n  const createOrderFromCart = useCallback(\n    async (restaurantId: string, coordinates?: { latitude: number; longitude: number }) => {\n      if (!user?.id || !defaultAddress || cartItems.length === 0) {\n        throw new Error('Missing required information for order creation');\n      }\n\n      const orderData: CreateOrderRequest = {\n        customerId: user.id,\n        restaurantId,\n        items: cartItems.map((item) => ({\n          menuItemId: item.menuItem.id,\n          quantity: item.quantity,\n          specialInstructions: item.specialInstructions || undefined,\n        })),\n        deliveryAddress: defaultAddress.fullAddress,\n        deliveryLatitude: coordinates?.latitude || defaultAddress.latitude || 0,\n        deliveryLongitude: coordinates?.longitude || defaultAddress.longitude || 0,\n        paymentMethod: 'mobile_money',\n      };\n\n      setFlowState({ \n        step: 'creating_order',\n        canCancel: false,\n        canRetryPayment: false,\n      });\n      \n      createOrderMutation.mutate(orderData);\n    },\n    [user, defaultAddress, cartItems, createOrderMutation],\n  );\n\n  // Process payment\n  const processPayment = useCallback(\n    async (paymentDetails: PaymentDetails) => {\n      if (!flowState.orderId || !user?.fullName || !user?.email) {\n        throw new Error('Missing required information for payment');\n      }\n\n      setFlowState((prev) => ({\n        ...prev,\n        step: 'payment_processing',\n        error: undefined,\n        timeRemaining: PAYMENT_TIMEOUT / 1000,\n      }));\n\n      try {\n        const paymentRequest: PaymentInitRequest = {\n          orderId: flowState.orderId,\n          method: 'mobile_money',\n          phone: paymentDetails.phoneNumber,\n          medium: paymentDetails.provider,\n          name: user.fullName,\n          email: user.email,\n        };\n\n        setFlowState((prev) => ({\n          ...prev,\n          step: 'payment_polling',\n        }));\n\n        // Process payment with polling\n        const result: PaymentPollingResult = await EnhancedPaymentService.processPaymentWithRetry(\n          paymentRequest,\n          (status) => {\n            console.log('Payment status update:', status.status);\n          },\n        );\n\n        if (result.success) {\n          console.log('✅ Payment successful:', result.transactionId);\n          setFlowState((prev) => ({\n            ...prev,\n            step: 'payment_success',\n            transactionId: result.transactionId,\n            canRetryPayment: false,\n            timeRemaining: undefined,\n          }));\n          \n          // Clear cart after successful payment\n          clearCart();\n          \n          Toast.show({\n            type: 'success',\n            text1: 'Payment Successful',\n            text2: 'Your payment has been confirmed!',\n            position: 'top',\n          });\n          \n          // Refresh order status to get updated state\n          setTimeout(() => {\n            refetchOrderStatus();\n          }, 2000);\n        } else {\n          console.error('❌ Payment failed:', result.error);\n          setFlowState((prev) => ({\n            ...prev,\n            step: 'payment_failed',\n            error: result.error,\n            canRetryPayment: true,\n            timeRemaining: undefined,\n          }));\n          \n          Toast.show({\n            type: 'error',\n            text1: 'Payment Failed',\n            text2: result.error || 'Payment processing failed',\n            position: 'top',\n          });\n        }\n      } catch (error: any) {\n        console.error('❌ Payment processing error:', error);\n        setFlowState((prev) => ({\n          ...prev,\n          step: 'payment_failed',\n          error: error.message || 'Payment processing failed',\n          canRetryPayment: true,\n          timeRemaining: undefined,\n        }));\n      }\n    },\n    [flowState.orderId, user, clearCart, refetchOrderStatus],\n  );\n\n  // Cancel order\n  const cancelOrder = useCallback(() => {\n    if (!flowState.orderId || !flowState.canCancel) {\n      throw new Error('Cannot cancel order at this time');\n    }\n\n    cancelOrderMutation.mutate(flowState.orderId);\n  }, [flowState.orderId, flowState.canCancel, cancelOrderMutation]);\n\n  // Retry payment\n  const retryPayment = useCallback(() => {\n    if (!flowState.canRetryPayment) {\n      throw new Error('Cannot retry payment at this time');\n    }\n\n    setFlowState((prev) => ({\n      ...prev,\n      step: 'payment_required',\n      error: undefined,\n      timeRemaining: undefined,\n    }));\n  }, [flowState.canRetryPayment]);\n\n  // Reset flow\n  const resetFlow = useCallback(() => {\n    setFlowState({\n      step: 'idle',\n      canCancel: false,\n      canRetryPayment: false,\n    });\n  }, []);\n\n  // Format time remaining\n  const formatTimeRemaining = useCallback((seconds?: number) => {\n    if (!seconds) return '';\n    const mins = Math.floor(seconds / 60);\n    const secs = seconds % 60;\n    return `${mins}:${secs.toString().padStart(2, '0')}`;\n  }, []);\n\n  return {\n    // State\n    flowState,\n    orderStatus,\n    \n    // Actions\n    createOrderFromCart,\n    processPayment,\n    cancelOrder,\n    retryPayment,\n    resetFlow,\n    refetchOrderStatus,\n    \n    // Utilities\n    formatTimeRemaining,\n    \n    // Loading states\n    isCreatingOrder: createOrderMutation.isPending,\n    isCancellingOrder: cancelOrderMutation.isPending,\n    \n    // Status checks\n    isWaitingRestaurant: flowState.step === 'waiting_restaurant',\n    isPaymentRequired: flowState.step === 'payment_required',\n    isPaymentProcessing: flowState.step === 'payment_processing' || flowState.step === 'payment_polling',\n    isPaymentSuccess: flowState.step === 'payment_success',\n    isPaymentFailed: flowState.step === 'payment_failed',\n    isOrderPreparing: flowState.step === 'order_preparing',\n    isOrderCompleted: flowState.step === 'order_completed',\n    isOrderCancelled: flowState.step === 'order_cancelled',\n    isOrderFailed: flowState.step === 'order_failed',\n  };\n};
+import { useState, useCallback, useEffect } from 'react';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import {
+  OrderApi,
+  CreateOrderRequest,
+  CreateOrderResponse,
+} from '@/src/services/customer/orders.service';
+import { useCartStore } from '@/src/stores/customerStores/cartStore';
+import { useAuthUser } from '@/src/stores/customerStores';
+import { useDefaultAddress } from '@/src/location/store';
+import EnhancedPaymentService, {
+  PaymentInitRequest,
+  PaymentPollingResult,
+} from '@/src/services/customer/enhancedPayment.service';
+import Toast from 'react-native-toast-message';
+
+export type EnhancedOrderFlowStep =
+  | 'idle'                        // Initial state
+  | 'creating_order'              // Creating the order
+  | 'waiting_restaurant'          // Waiting for restaurant confirmation (2-15 min)
+  | 'payment_required'            // Restaurant confirmed, payment needed
+  | 'payment_processing'          // Payment in progress
+  | 'payment_polling'             // Polling payment status
+  | 'payment_success'             // Payment successful
+  | 'order_preparing'             // Payment successful, restaurant preparing
+  | 'order_ready'                 // Order ready for pickup/delivery
+  | 'order_delivering'            // Out for delivery
+  | 'order_completed'             // Order completed
+  | 'order_cancelled'             // Order cancelled
+  | 'payment_failed'              // Payment failed
+  | 'order_failed';               // Order creation failed
+
+export interface EnhancedOrderFlowState {
+  step: EnhancedOrderFlowStep;
+  orderId?: string;
+  orderData?: CreateOrderResponse['data'];
+  transactionId?: string;
+  paymentAmount?: number;
+  error?: string;
+  canCancel: boolean;
+  canRetryPayment: boolean;
+  timeRemaining?: number; // For payment timeout
+}
+
+export interface PaymentDetails {
+  provider: 'mtn' | 'orange';
+  phoneNumber: string;
+}
+
+const RESTAURANT_CONFIRMATION_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+const PAYMENT_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+
+export const useEnhancedOrderFlow = () => {
+  const [flowState, setFlowState] = useState<EnhancedOrderFlowState>({
+    step: 'idle',
+    canCancel: false,
+    canRetryPayment: false,
+  });
+
+  const cartItems = useCartStore((state) => state.items);
+  const clearCart = useCartStore((state) => state.clearCart);
+  const user = useAuthUser();
+  const defaultAddress = useDefaultAddress();
+
+  // Create order mutation
+  const createOrderMutation = useMutation({
+    mutationFn: (orderData: CreateOrderRequest) =>
+      OrderApi.createOrder(orderData),
+    onSuccess: (response) => {
+      console.log('✅ Order created successfully:', response.data.id);
+      setFlowState({
+        step: 'waiting_restaurant',
+        orderId: response.data.id,
+        orderData: response.data,
+        paymentAmount: response.data.total,
+        canCancel: true,
+        canRetryPayment: false,
+        timeRemaining: RESTAURANT_CONFIRMATION_TIMEOUT / 1000,
+      });
+      
+      Toast.show({
+        type: 'success',
+        text1: 'Order Created',
+        text2: 'Waiting for restaurant confirmation...',
+        position: 'top',
+      });
+    },
+    onError: (error: any) => {
+      console.error('❌ Order creation failed:', error);
+      setFlowState({
+        step: 'order_failed',
+        error: error.response?.data?.message || 'Failed to create order. Please try again.',
+        canCancel: false,
+        canRetryPayment: false,
+      });
+      
+      Toast.show({
+        type: 'error',
+        text1: 'Order Failed',
+        text2: 'Failed to create order. Please try again.',
+        position: 'top',
+      });
+    },
+  });
+
+  // Cancel order mutation
+  const cancelOrderMutation = useMutation({
+    mutationFn: (orderId: string) => OrderApi.cancelOrder(orderId),
+    onSuccess: () => {
+      console.log('✅ Order cancelled successfully');
+      setFlowState((prev) => ({
+        ...prev,
+        step: 'order_cancelled',
+        canCancel: false,
+        canRetryPayment: false,
+      }));
+      
+      Toast.show({
+        type: 'info',
+        text1: 'Order Cancelled',
+        text2: 'Your order has been cancelled successfully.',
+        position: 'top',
+      });
+    },
+    onError: (error: any) => {
+      console.error('❌ Order cancellation failed:', error);
+      setFlowState((prev) => ({
+        ...prev,
+        error: error.response?.data?.message || 'Failed to cancel order.',
+      }));
+    },
+  });
+
+  // Poll order status to check restaurant response
+  const { data: orderStatus, refetch: refetchOrderStatus } = useQuery({
+    queryKey: ['orderStatus', flowState.orderId],
+    queryFn: () =>
+      flowState.orderId ? OrderApi.checkOrderStatus(flowState.orderId) : null,
+    enabled:
+      !!flowState.orderId &&
+      (flowState.step === 'waiting_restaurant' || 
+       flowState.step === 'order_preparing' ||
+       flowState.step === 'order_ready' ||
+       flowState.step === 'order_delivering'),
+    refetchInterval: 3000, // Poll every 3 seconds
+    onSuccess: (data) => {
+      if (!data) return;
+
+      const currentStep = flowState.step;
+      
+      // Handle restaurant confirmation
+      if (data.status === 'confirmed' && currentStep === 'waiting_restaurant') {
+        console.log('✅ Restaurant confirmed order');
+        setFlowState((prev) => ({
+          ...prev,
+          step: 'payment_required',
+          canCancel: false, // Can't cancel after restaurant confirmation
+          canRetryPayment: true,
+          timeRemaining: undefined,
+        }));
+        
+        Toast.show({
+          type: 'success',
+          text1: 'Order Confirmed',
+          text2: 'Restaurant confirmed your order. Please proceed with payment.',
+          position: 'top',
+        });
+      }
+      
+      // Handle restaurant rejection/cancellation
+      else if (data.status === 'cancelled') {
+        console.log('❌ Restaurant cancelled order');
+        setFlowState((prev) => ({
+          ...prev,
+          step: 'order_cancelled',
+          error: data.cancellationReason || 'Restaurant cancelled your order.',
+          canCancel: false,
+          canRetryPayment: false,
+        }));
+        
+        Toast.show({
+          type: 'error',
+          text1: 'Order Cancelled',
+          text2: 'Restaurant cancelled your order.',
+          position: 'top',
+        });
+      }
+      
+      // Handle order status updates after payment
+      else if (data.status === 'preparing' && currentStep !== 'order_preparing') {
+        setFlowState((prev) => ({
+          ...prev,
+          step: 'order_preparing',
+          canCancel: false,
+          canRetryPayment: false,
+        }));
+      }
+      else if (data.status === 'ready_for_pickup' && currentStep !== 'order_ready') {
+        setFlowState((prev) => ({
+          ...prev,
+          step: 'order_ready',
+        }));
+        
+        Toast.show({
+          type: 'success',
+          text1: 'Order Ready',
+          text2: 'Your order is ready for pickup!',
+          position: 'top',
+        });
+      }
+      else if (data.status === 'out_for_delivery' && currentStep !== 'order_delivering') {
+        setFlowState((prev) => ({
+          ...prev,
+          step: 'order_delivering',
+        }));
+        
+        Toast.show({
+          type: 'info',
+          text1: 'Out for Delivery',
+          text2: 'Your order is on the way!',
+          position: 'top',
+        });
+      }
+      else if (data.status === 'delivered') {
+        setFlowState((prev) => ({
+          ...prev,
+          step: 'order_completed',
+        }));
+        
+        Toast.show({
+          type: 'success',
+          text1: 'Order Delivered',
+          text2: 'Enjoy your meal!',
+          position: 'top',
+        });
+      }
+    },
+  });
+
+  // Timer for restaurant confirmation timeout
+  useEffect(() => {
+    if (flowState.step === 'waiting_restaurant' && flowState.timeRemaining) {
+      const timer = setInterval(() => {
+        setFlowState((prev) => {
+          if (!prev.timeRemaining || prev.timeRemaining <= 1) {
+            clearInterval(timer);
+            return {
+              ...prev,
+              step: 'order_cancelled',
+              error: 'Restaurant did not respond within the time limit.',
+              canCancel: false,
+              canRetryPayment: false,
+              timeRemaining: undefined,
+            };
+          }
+          return {
+            ...prev,
+            timeRemaining: prev.timeRemaining - 1,
+          };
+        });
+      }, 1000);
+
+      return () => clearInterval(timer);
+    }
+  }, [flowState.step, flowState.timeRemaining]);
+
+  // Create order from cart
+  const createOrderFromCart = useCallback(
+    async (restaurantId: string, coordinates?: { latitude: number; longitude: number }) => {
+      if (!user?.id || !defaultAddress || cartItems.length === 0) {
+        throw new Error('Missing required information for order creation');
+      }
+
+      const orderData: CreateOrderRequest = {
+        customerId: user.id,
+        restaurantId,
+        items: cartItems.map((item) => ({
+          menuItemId: item.menuItem.id,
+          quantity: item.quantity,
+          specialInstructions: item.specialInstructions || undefined,
+        })),
+        deliveryAddress: defaultAddress.fullAddress,
+        deliveryLatitude: coordinates?.latitude || defaultAddress.latitude || 0,
+        deliveryLongitude: coordinates?.longitude || defaultAddress.longitude || 0,
+        paymentMethod: 'mobile_money',
+      };
+
+      setFlowState({ 
+        step: 'creating_order',
+        canCancel: false,
+        canRetryPayment: false,
+      });
+      
+      createOrderMutation.mutate(orderData);
+    },
+    [user, defaultAddress, cartItems, createOrderMutation],
+  );
+
+  // Process payment
+  const processPayment = useCallback(
+    async (paymentDetails: PaymentDetails) => {
+      if (!flowState.orderId || !user?.fullName || !user?.email) {
+        throw new Error('Missing required information for payment');
+      }
+
+      setFlowState((prev) => ({
+        ...prev,
+        step: 'payment_processing',
+        error: undefined,
+        timeRemaining: PAYMENT_TIMEOUT / 1000,
+      }));
+
+      try {
+        const paymentRequest: PaymentInitRequest = {
+          orderId: flowState.orderId,
+          method: 'mobile_money',
+          phone: paymentDetails.phoneNumber,
+          medium: paymentDetails.provider,
+          name: user.fullName,
+          email: user.email,
+        };
+
+        setFlowState((prev) => ({
+          ...prev,
+          step: 'payment_polling',
+        }));
+
+        // Process payment with polling
+        const result: PaymentPollingResult = await EnhancedPaymentService.processPaymentWithRetry(
+          paymentRequest,
+          (status) => {
+            console.log('Payment status update:', status.status);
+          },
+        );
+
+        if (result.success) {
+          console.log('✅ Payment successful:', result.transactionId);
+          setFlowState((prev) => ({
+            ...prev,
+            step: 'payment_success',
+            transactionId: result.transactionId,
+            canRetryPayment: false,
+            timeRemaining: undefined,
+          }));
+          
+          // Clear cart after successful payment
+          clearCart();
+          
+          Toast.show({
+            type: 'success',
+            text1: 'Payment Successful',
+            text2: 'Your payment has been confirmed!',
+            position: 'top',
+          });
+          
+          // Refresh order status to get updated state
+          setTimeout(() => {
+            refetchOrderStatus();
+          }, 2000);
+        } else {
+          console.error('❌ Payment failed:', result.error);
+          setFlowState((prev) => ({
+            ...prev,
+            step: 'payment_failed',
+            error: result.error,
+            canRetryPayment: true,
+            timeRemaining: undefined,
+          }));
+          
+          Toast.show({
+            type: 'error',
+            text1: 'Payment Failed',
+            text2: result.error || 'Payment processing failed',
+            position: 'top',
+          });
+        }
+      } catch (error: any) {
+        console.error('❌ Payment processing error:', error);
+        setFlowState((prev) => ({
+          ...prev,
+          step: 'payment_failed',
+          error: error.message || 'Payment processing failed',
+          canRetryPayment: true,
+          timeRemaining: undefined,
+        }));
+      }
+    },
+    [flowState.orderId, user, clearCart, refetchOrderStatus],
+  );
+
+  // Cancel order
+  const cancelOrder = useCallback(() => {
+    if (!flowState.orderId || !flowState.canCancel) {
+      throw new Error('Cannot cancel order at this time');
+    }
+
+    cancelOrderMutation.mutate(flowState.orderId);
+  }, [flowState.orderId, flowState.canCancel, cancelOrderMutation]);
+
+  // Retry payment
+  const retryPayment = useCallback(() => {
+    if (!flowState.canRetryPayment) {
+      throw new Error('Cannot retry payment at this time');
+    }
+
+    setFlowState((prev) => ({
+      ...prev,
+      step: 'payment_required',
+      error: undefined,
+      timeRemaining: undefined,
+    }));
+  }, [flowState.canRetryPayment]);
+
+  // Reset flow
+  const resetFlow = useCallback(() => {
+    setFlowState({
+      step: 'idle',
+      canCancel: false,
+      canRetryPayment: false,
+    });
+  }, []);
+
+  // Format time remaining
+  const formatTimeRemaining = useCallback((seconds?: number) => {
+    if (!seconds) return '';
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }, []);
+
+  return {
+    // State
+    flowState,
+    orderStatus,
+    
+    // Actions
+    createOrderFromCart,
+    processPayment,
+    cancelOrder,
+    retryPayment,
+    resetFlow,
+    refetchOrderStatus,
+    
+    // Utilities
+    formatTimeRemaining,
+    
+    // Loading states
+    isCreatingOrder: createOrderMutation.isPending,
+    isCancellingOrder: cancelOrderMutation.isPending,
+    
+    // Status checks
+    isWaitingRestaurant: flowState.step === 'waiting_restaurant',
+    isPaymentRequired: flowState.step === 'payment_required',
+    isPaymentProcessing: flowState.step === 'payment_processing' || flowState.step === 'payment_polling',
+    isPaymentSuccess: flowState.step === 'payment_success',
+    isPaymentFailed: flowState.step === 'payment_failed',
+    isOrderPreparing: flowState.step === 'order_preparing',
+    isOrderCompleted: flowState.step === 'order_completed',
+    isOrderCancelled: flowState.step === 'order_cancelled',
+    isOrderFailed: flowState.step === 'order_failed',
+  };
+};

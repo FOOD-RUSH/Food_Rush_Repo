@@ -28,10 +28,51 @@ export type {
 
 export const restaurantAuthApi = {
   register: (data: RestaurantRegisterRequest) => {
-    return apiClient.post<RestaurantRegisterResponse>(
-      '/restaurants/auth/register-and-create',
-      { ...data },
-    );
+    // Check if we have a picture to upload
+    if (data.picture && data.picture.uri && data.picture.name && data.picture.type) {
+      // Use FormData for requests with image uploads
+      const formData = new FormData();
+
+      // Append text fields
+      formData.append('fullName', data.fullName);
+      formData.append('email', data.email);
+      formData.append('phoneNumber', data.phoneNumber);
+      formData.append('password', data.password);
+      formData.append('name', data.name);
+      formData.append('address', data.address);
+      formData.append('phone', data.phone);
+      formData.append('nearLat', data.nearLat.toString());
+      formData.append('nearLng', data.nearLng.toString());
+      
+      if (data.document) {
+        formData.append('document', data.document);
+      }
+
+      // Add the picture file
+      const imageFile = {
+        uri: data.picture.uri,
+        name: data.picture.name,
+        type: data.picture.type,
+      };
+      formData.append('picture', imageFile as any);
+
+      return apiClient.post<RestaurantRegisterResponse>(
+        '/restaurants/auth/register-and-create',
+        formData,
+        {
+          headers: {
+            Accept: 'application/json',
+          },
+          timeout: 30000, // 30 seconds timeout for file upload
+        },
+      );
+    } else {
+      // Use JSON for requests without image uploads
+      return apiClient.post<RestaurantRegisterResponse>(
+        '/restaurants/auth/register-and-create',
+        { ...data },
+      );
+    }
   },
 
   login: (credentials: { email: string; password: string }) => {

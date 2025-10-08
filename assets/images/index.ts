@@ -1,20 +1,10 @@
-import burger from '@/assets/images/Food Emojies/🍔01.png';
-import pizza from '@/assets/images/Food Emojies/🍔02.png';
-import noodles from '@/assets/images/Food Emojies/🍔03.png';
-import meat from '@/assets/images/Food Emojies/🍔04.png';
-import vegetable from '@/assets/images/Food Emojies/🍔05.png';
-import desert from '@/assets/images/Food Emojies/🍔06.png';
-import drink from '@/assets/images/Food Emojies/🍔07.png';
-import bread from '@/assets/images/Food Emojies/🍔08.png';
-import croissant from '@/assets/images/Food Emojies/🍔09.png';
-import pancakes from '@/assets/images/Food Emojies/🍔10.png';
-import cheese from '@/assets/images/Food Emojies/🍔11.png';
-import french_fries from '@/assets/images/Food Emojies/🍔12.png';
-import sandwich from '@/assets/images/Food Emojies/🍔13.png';
-import taco from '@/assets/images/Food Emojies/🍔14.png';
-import ice_cream from '@/assets/images/Food Emojies/🍔21.png';
-import salad from '@/assets/images/Food Emojies/🍔16.png';
-import others from '@/assets/images/Food Emojies/🍔24.png';
+// New food category images with transparent backgrounds
+import breakfast from '@/assets/images/breakfast.png';
+import dessert from '@/assets/images/dessert.png';
+import vegetarian from '@/assets/images/vegetarian.png';
+import fastfood from '@/assets/images/fastfood.png';
+import drinks from '@/assets/images/dirnks.png';
+import localdish from '@/assets/images/localdish.png';
 import R_logo from '@/assets/images/R-Logo.png';
 import deliveryGif from '@/assets/images/Delivery_static.png';
 import onboarding1 from '@/assets/images/background.png';
@@ -67,72 +57,56 @@ export const icons = {
 };
 
 export const FoodCategory = {
-  appleIcon,
-  bread,
-  pizza,
-  croissant,
-  vegetable,
-  drink,
-  desert,
-  taco,
-  sandwich,
-  burger,
-  ice_cream,
-  noodles,
-  meat,
-  salad,
-  french_fries,
-  others,
-  pancakes,
-  cheese,
+  breakfast,
+  dessert,
+  vegetarian,
+  fastfood,
+  drinks,
+  localdish,
 };
 
 export interface FoodCategoryProps {
   image: any;
   title: string;
+  description: string;
   id: number;
 }
 
 export const CategoryFilters = [
   {
     id: 1,
-    image: FoodCategory.burger,
-    title: 'Burger',
+    image: FoodCategory.localdish,
+    title: 'Local Dishes',
+    description: 'Traditional local cuisine',
   },
   {
     id: 2,
-    image: FoodCategory.vegetable,
-    title: 'Vegetable',
+    image: FoodCategory.breakfast,
+    title: 'Breakfast',
+    description: 'Morning meals and breakfast items',
   },
   {
     id: 3,
-    image: FoodCategory.pizza,
-    title: 'Pizza',
+    image: FoodCategory.fastfood,
+    title: 'Fast Food',
+    description: 'Quick service meals',
   },
-
   {
     id: 4,
-    image: FoodCategory.desert,
-    title: 'desert',
+    image: FoodCategory.vegetarian,
+    title: 'Vegetarian',
+    description: 'Plant-based dishes',
   },
   {
     id: 5,
-    image: FoodCategory.meat,
-    title: 'Meat',
+    image: FoodCategory.dessert,
+    title: 'Desserts',
+    description: 'Sweet treats and desserts',
   },
   {
     id: 6,
-    image: FoodCategory.drink,
+    image: FoodCategory.drinks,
     title: 'Drinks',
-  },
-  {
-    id: 7,
-    image: FoodCategory.noodles,
-    title: 'Noodles',
-  },
-  {
-    id: 8,
-    image: FoodCategory.others,
-    title: 'More',
+    description: 'Beverages and refreshments',
   },
 ];

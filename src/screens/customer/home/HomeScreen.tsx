@@ -117,7 +117,7 @@ CarouselItem.displayName = 'CarouselItem';
 
 // Section types for FlatList
 type HomeSectionItem =
-  | { type: 'header'; title: string; onPress: () => void }
+  | { type: 'header'; title: string; onPress: (() => void) | null }
   | { type: 'search' }
   | { type: 'category'; data: any[] }
   | { type: 'carousel'; data: FoodProps[] }
@@ -216,9 +216,10 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
       id: category.value,
       value: category.value,
       label: category.label,
+      description: category.description || 'Delicious food items',
       emoji: category.emoji,
       color: category.color,
-      image: images.onboarding1, // Default image
+      image: category.image || images.onboarding1, // Use category image
     }));
   }, [categoriesData]);
 
@@ -317,6 +318,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
         id: string;
         value: string;
         label: string;
+        description: string;
         emoji: string;
         color: string;
         image: any;
@@ -326,6 +328,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
         key={item.value}
         image={item.image}
         title={item.label}
+        description={item.description}
         emoji={item.emoji}
         color={item.color}
       />
@@ -350,14 +353,14 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
       { type: 'search' },
 
       // Quick Filters Section
-      { type: 'header', title: t('categories'), onPress: () => {} },
+      { type: 'header', title: t('categories'), onPress: null },
       {
         type: 'category',
         data: categoriesForDisplay,
       },
 
       // Discounts Guaranteed - Carousel Section
-      { type: 'header', title: t('discount_guaranteed'), onPress: () => {} },
+      { type: 'header', title: t('discount_guaranteed'), onPress: null },
     ];
 
     // Add carousel content
@@ -391,7 +394,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
     data.push({
       type: 'header',
       title: t('recommended_for_you'),
-      onPress: () => {},
+      onPress: () => navigation.navigate('SearchScreen', { type: 'search' }),
     });
 
     if (isLoading) {

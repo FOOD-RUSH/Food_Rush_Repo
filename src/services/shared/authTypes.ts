@@ -84,6 +84,11 @@ export interface RestaurantRegisterRequest {
   nearLat: number; // Exact GPS latitude
   nearLng: number; // Exact GPS longitude
   document?: string; // Optional document URI
+  picture?: {
+    uri: string; // File URI from image picker
+    type: string; // MIME type: 'image/jpeg' or 'image/png'
+    name: string; // Filename with proper extension
+  }; // Optional restaurant profile picture
 }
 
 export interface RestaurantAuthResponse extends BaseAuthResponse {

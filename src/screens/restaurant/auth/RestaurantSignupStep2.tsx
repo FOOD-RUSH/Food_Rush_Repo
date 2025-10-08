@@ -39,6 +39,11 @@ import { useRegisterRestaurant } from '@/src/hooks/restaurant/useAuthhooks';
 import CustomCheckbox from '@/src/components/common/CustomCheckbox';
 import ErrorDisplay from '@/src/components/auth/ErrorDisplay';
 import * as ImagePicker from 'expo-image-picker';
+import {
+  pickImageForUpload,
+  isValidImageType,
+  SimpleImageResult,
+} from '@/src/utils/imageUtils';
 import { Location } from '@/src/location/types';
 import { useLocation } from '@/src/location/useLocation';
 import LocationService from '@/src/location/LocationService';
@@ -103,7 +108,7 @@ const RestaurantSignupStep2: React.FC<
   );
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
-  const [profileImageUri, setProfileImageUri] = useState<string | null>(null);
+  const [profileImage, setProfileImage] = useState<SimpleImageResult | null>(null);
 
   // Animations
   const overlayAnim = useRef(new Animated.Value(1)).current;
@@ -309,6 +314,7 @@ const RestaurantSignupStep2: React.FC<
           nearLat: selectedLocation.latitude,
           nearLng: selectedLocation.longitude,
           ...(documentUri && { document: documentUri }),
+          ...(profileImage && { picture: profileImage }),
         };
 
         registerRestaurantMutation(registrationData, {
@@ -354,6 +360,7 @@ const RestaurantSignupStep2: React.FC<
       navigation,
       step1Data,
       documentUri,
+      profileImage,
       t,
     ],
   );
@@ -411,17 +418,22 @@ const RestaurantSignupStep2: React.FC<
 
   const pickProfileImage = useCallback(async () => {
     try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions?.Images || 'images',
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-        allowsMultipleSelection: false,
-      });
+      // Use the utility function for proper image picking and validation
+      const imageResult = await pickImageForUpload();
 
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        const asset = result.assets[0];
-        setProfileImageUri(asset.uri);
+      if (imageResult) {
+        // Validate image type (JPG/PNG only)
+        if (!isValidImageType(imageResult.type)) {
+          Toast.show({
+            type: 'error',
+            text1: t('invalid_image_type') || 'Invalid Image Type',
+            text2: `Please select a JPG or PNG image only. Selected type: ${imageResult.type}`,
+            position: 'top',
+          });
+          return;
+        }
+
+        setProfileImage(imageResult);
         Toast.show({
           type: 'success',
           text1: t('success'),
@@ -429,15 +441,28 @@ const RestaurantSignupStep2: React.FC<
           position: 'top',
         });
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error('❌ Error picking profile image:', error);
+      
+      let errorMessage = t('failed_to_pick_image') || 'Failed to pick image';
+      
+      // Handle specific error types
+      if (error?.message?.includes('Permission')) {
+        errorMessage = t('camera_permission_denied') || 'Camera permission was denied. Please enable it in settings.';
+      } else if (error?.message?.includes('Unsupported image type')) {
+        errorMessage = error.message;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
       Toast.show({
         type: 'error',
         text1: t('error'),
-        text2: t('failed_to_pick_image'),
+        text2: errorMessage,
         position: 'top',
       });
     }
-  }, []);
+  }, [t]);
 
   // Redirect if no step 1 data
   if (!step1Data) {
@@ -516,9 +541,9 @@ const RestaurantSignupStep2: React.FC<
             marginBottom: 20,
           }}
         >
-          {profileImageUri ? (
+          {profileImage?.uri ? (
             <Image
-              source={{ uri: profileImageUri }}
+              source={{ uri: profileImage.uri }}
               style={{
                 width: 100,
                 height: 100,

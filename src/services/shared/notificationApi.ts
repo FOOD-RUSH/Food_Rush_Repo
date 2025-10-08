@@ -70,24 +70,24 @@ export const notificationApi = {
   },
 
   // POST /api/v1/notifications/device - Register or update Expo push token for the authenticated user
-  registerDevice: async (token: string, deviceInfo?: any) => {
+  registerDevice: async (expoToken: string, platform: string, role: string) => {
     const response = await apiClient.post<NotificationApiResponse>(
       '/notifications/device',
       {
-        token,
-        deviceInfo,
-        platform: 'mobile',
+        expoToken,
+        platform,
+        role,
       },
     );
     return response.data;
   },
 
   // DELETE /api/v1/notifications/device - Unregister Expo push token for the authenticated user
-  unregisterDevice: async (token?: string) => {
+  unregisterDevice: async (expoToken: string) => {
     const response = await apiClient.delete<NotificationApiResponse>(
       '/notifications/device',
       {
-        data: token ? { token } : undefined,
+        data: { expoToken },
       },
     );
     return response.data;

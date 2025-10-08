@@ -2,6 +2,7 @@ import { MaterialCommunityIcon } from '@/src/components/common/icons';
 import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { useTheme, Card } from 'react-native-paper';
+import { useTranslation } from 'react-i18next';
 
 import { MetricCardData } from '@/src/types/analytics';
 import {
@@ -29,6 +30,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
   isLoading = false,
 }) => {
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   const getChangeColor = () => {
     switch (changeType) {
@@ -119,7 +121,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
           {isLoading ? '---' : value || '0'}
         </Heading1>
         <Body color={colors.onSurfaceVariant} weight="medium" numberOfLines={2}>
-          {title || 'Untitled'}
+          {title || t('untitled')}
         </Body>
         {subtitle && (
           <Caption
@@ -127,7 +129,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
             style={{ marginTop: 2 }}
             numberOfLines={1}
           >
-            {isLoading ? 'Loading...' : subtitle}
+            {isLoading ? t('loading') : subtitle}
           </Caption>
         )}
       </CardComponent>

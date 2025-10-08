@@ -216,30 +216,7 @@ export const useVerifyOTP = () => {
   });
 };
 
-// Deprecated: Use useUpdateProfile from '@/src/hooks/shared/useProfileUpdate' instead
-// This hook is kept for backward compatibility
-export const useUpdateProfile = () => {
-  const queryClient = useQueryClient();
-  const { setUser, clearError } = useAuthStore();
 
-  return useMutation({
-    mutationFn: async (userData: UpdateProfileRequest) => {
-      const response = await authApi.updateProfile(userData);
-      return response.data.data;
-    },
-    onMutate: () => {
-      clearError();
-    },
-    onSuccess: (updatedUser: CustomerProfile) => {
-      // Update user in store
-      setUser(updatedUser);
-
-      // Update cached data
-      queryClient.setQueryData(['auth', 'me'], updatedUser);
-      queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
-    },
-  });
-};
 
 export const useCustomerLogout = () => {
   const queryClient = useQueryClient();

@@ -221,20 +221,7 @@ const MenuItemCard = ({ item }: { item: FoodProps }) => {
               {item.price} XAF
             </Text>
             
-            {isInCart && (
-              <Text
-                style={[
-                  styles.cartText,
-                  {
-                    color: colors.onSurfaceVariant,
-                    fontSize: cardDimensions.fontSize.cart,
-                  },
-                ]}
-                numberOfLines={1}
-              >
-                {quantityInCart} {t('in_cart') || 'in cart'}
-              </Text>
-            )}
+            
           </View>
         </View>
       </Card>

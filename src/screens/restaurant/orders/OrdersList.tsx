@@ -28,7 +28,8 @@ import {
   createOrderSummary,
   ORDER_STATUS_COLORS,
 } from '@/src/utils/orderUtils';
-import { useUnreadNotificationCount } from '@/src/hooks/useNotifications';
+import { useUnreadNotificationCount } from '@/src/hooks/shared/useUnreadNotificationCount';
+import NotificationBadge from '@/src/components/common/NotificationBadge';
 import { useFloatingTabBarHeight } from '@/src/hooks/useFloatingTabBarHeight';
 
 const Tab = createMaterialTopTabNavigator();
@@ -341,26 +342,11 @@ const OrdersList: React.FC<RestaurantOrdersStackScreenProps<'OrdersList'>> = () 
               activeOpacity={0.7}
             >
               <MaterialCommunityIcon name="bell-outline" size={24} color={colors.onSurface} />
-              {notificationCount > 0 && (
-                <View
-                  style={{
-                    position: 'absolute',
-                    top: -4,
-                    right: -4,
-                    backgroundColor: colors.error,
-                    borderRadius: 10,
-                    minWidth: 20,
-                    height: 20,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    paddingHorizontal: 4,
-                  }}
-                >
-                  <Caption style={{ color: 'white', fontWeight: '700', fontSize: 10 }}>
-                    {notificationCount > 99 ? '99+' : notificationCount}
-                  </Caption>
-                </View>
-              )}
+              <NotificationBadge
+                count={notificationCount}
+                position="top-right"
+                offset={{ x: 6, y: 6 }}
+              />
             </TouchableOpacity>
           </View>
         </View>

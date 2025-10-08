@@ -61,15 +61,15 @@ const FoodItemCard = ({
     getResponsiveText,
   } = useResponsive();
 
-  // Calculate responsive dimensions and text sizes like RestaurantCard
+  // Calculate responsive dimensions and text sizes with increased image and card sizes
   const getCardDimensions = () => {
     if (isLargeScreen) {
       return {
-        width: Math.min(wp(45), 400), // Max 400px width
-        height: 160,
-        imageSize: 100,
-        padding: 16,
-        borderRadius: 20,
+        width: Math.min(wp(50), 480), // Increased max width from 400px to 480px
+        height: 200, // Increased height from 160 to 200
+        imageSize: 140, // Increased image size from 100 to 140
+        padding: 18, // Increased padding
+        borderRadius: 22, // Increased border radius
         // Text sizes (increased by 2px)
         foodNameSize: getResponsiveText(19), // Increased by 2
         priceSize: getResponsiveText(18), // Increased by 2
@@ -79,11 +79,11 @@ const FoodItemCard = ({
       };
     } else if (isTablet) {
       return {
-        width: Math.min(wp(48), 340), // Max 340px width
-        height: 150,
-        imageSize: 95,
-        padding: 14,
-        borderRadius: 18,
+        width: Math.min(wp(52), 420), // Increased max width from 340px to 420px
+        height: 180, // Increased height from 150 to 180
+        imageSize: 125, // Increased image size from 95 to 125
+        padding: 16, // Increased padding
+        borderRadius: 20, // Increased border radius
         // Text sizes (increased by 2px)
         foodNameSize: getResponsiveText(18), // Increased by 2
         priceSize: getResponsiveText(17), // Increased by 2
@@ -93,11 +93,11 @@ const FoodItemCard = ({
       };
     } else {
       return {
-        width: Math.min(wp(85), 300), // Max 300px width for phones
-        height: 140,
-        imageSize: 85,
-        padding: 12,
-        borderRadius: 16,
+        width: Math.min(wp(90), 350), // Increased max width from 300px to 350px
+        height: 160, // Increased height from 140 to 160
+        imageSize: 110, // Increased image size from 85 to 110
+        padding: 14, // Increased padding
+        borderRadius: 18, // Increased border radius
         // Text sizes (increased by 2px)
         foodNameSize: getResponsiveText(17), // Increased by 2
         priceSize: getResponsiveText(16), // Increased by 2

@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '@/src/navigation/types';
 import { useTheme, ActivityIndicator } from 'react-native-paper';
+import { useResponsive } from '@/src/hooks/useResponsive';
 
 import { useTranslation } from 'react-i18next';
 import {
@@ -16,6 +17,7 @@ import {
 interface CategoryItemProps {
   title: string;
   image: any;
+  description?: string;
   categoryId?: string;
   isLoading?: boolean;
   onPress?: () => void;
@@ -30,6 +32,7 @@ interface CategoryItemProps {
 const CategoryItem: React.FC<CategoryItemProps> = ({
   title,
   image,
+  description,
   categoryId,
   isLoading = false,
   onPress,
@@ -44,6 +47,7 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
   const [imageError, setImageError] = useState(false);
+  const { isSmallScreen, isTablet, isLargeScreen, wp, getResponsiveText } = useResponsive();
 
   const handlePress = useCallback(() => {
     if (isLoading || disabled) return;
@@ -71,6 +75,49 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
     setImageError(true);
   }, []);
 
+  // Calculate responsive dimensions for category cards
+  const getCategoryDimensions = () => {
+    if (isLargeScreen) {
+      return {
+        cardSize: 140, // Increased from 85 to 140
+        imageContainerSize: 70, // Increased from 40 to 70
+        imageSize: 50, // Increased from 32 to 50
+        iconSize: 35, // Increased from 18 to 35
+        borderRadius: 24, // Increased from 16 to 24
+        padding: 18, // Increased from 12 to 18
+        titleFontSize: getResponsiveText(14), // Increased from 12
+        itemCountFontSize: getResponsiveText(11), // Increased from 9
+        badgeFontSize: getResponsiveText(12), // Increased from 10
+      };
+    } else if (isTablet) {
+      return {
+        cardSize: 120, // Increased from 85 to 120
+        imageContainerSize: 60, // Increased from 40 to 60
+        imageSize: 42, // Increased from 32 to 42
+        iconSize: 28, // Increased from 18 to 28
+        borderRadius: 20, // Increased from 16 to 20
+        padding: 16, // Increased from 12 to 16
+        titleFontSize: getResponsiveText(13), // Increased from 12
+        itemCountFontSize: getResponsiveText(10), // Increased from 9
+        badgeFontSize: getResponsiveText(11), // Increased from 10
+      };
+    } else {
+      return {
+        cardSize: 100, // Increased from 85 to 100
+        imageContainerSize: 50, // Increased from 40 to 50
+        imageSize: 36, // Increased from 32 to 36
+        iconSize: 22, // Increased from 18 to 22
+        borderRadius: 18, // Increased from 16 to 18
+        padding: 14, // Increased from 12 to 14
+        titleFontSize: getResponsiveText(12), // Same as before but responsive
+        itemCountFontSize: getResponsiveText(9), // Same as before but responsive
+        badgeFontSize: getResponsiveText(10), // Same as before but responsive
+      };
+    }
+  };
+
+  const dimensions = getCategoryDimensions();
+
   return (
     <TouchableOpacity
       onPress={handlePress}
@@ -82,20 +129,20 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
     >
       <View
         style={{
-          borderRadius: 12,
-          margin: 6,
-          padding: 12,
-          backgroundColor: colors.surface,
-          shadowColor: colors.shadow,
+          borderRadius: dimensions.borderRadius,
+          margin: 4,
+          padding: dimensions.padding,
+          backgroundColor: color || '#4A90E2', // Use custom color or default blue
+          shadowColor: '#000',
           shadowOffset: {
             width: 0,
-            height: 1,
+            height: 3, // Increased shadow
           },
-          shadowOpacity: 0.08,
-          shadowRadius: 2,
-          elevation: 3,
-          width: 100,
-          height: 90,
+          shadowOpacity: 0.15, // Increased shadow opacity
+          shadowRadius: 6, // Increased shadow radius
+          elevation: 6, // Increased elevation for Android
+          width: dimensions.cardSize,
+          height: dimensions.cardSize,
           position: 'relative',
           flexDirection: 'column',
           alignItems: 'center',
@@ -107,58 +154,56 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
           <View
             style={{
               position: 'absolute',
-              top: 8,
-              right: 8,
-              backgroundColor: colors.primary,
-              borderRadius: 10,
-              paddingHorizontal: 6,
+              top: 6,
+              right: 6,
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              borderRadius: 8,
+              paddingHorizontal: 4,
               paddingVertical: 2,
               zIndex: 1,
             }}
           >
-            <Overline color="white" weight="bold">
+            <Overline color="#4A90E2" weight="bold" style={{ fontSize: dimensions.badgeFontSize }}>
               {badgeText}
             </Overline>
           </View>
         )}
 
-        {/* Emoji, Image or Loading */}
+        {/* Image or Loading */}
         <View
           style={{
-            height: 40,
-            width: 40,
+            height: dimensions.imageContainerSize,
+            width: dimensions.imageContainerSize,
             justifyContent: 'center',
             alignItems: 'center',
             marginBottom: 8,
-            backgroundColor: color ? color + '20' : 'transparent',
-            borderRadius: 20,
+            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+            borderRadius: dimensions.imageContainerSize / 2,
           }}
         >
           {isLoading ? (
-            <ActivityIndicator size="small" color={colors.primary} />
-          ) : emoji ? (
-            <Typography variant="h3">{emoji}</Typography>
+            <ActivityIndicator size="small" color="white" />
           ) : imageError ? (
             <View
               style={{
-                height: 40,
-                width: 40,
-                backgroundColor: colors.surfaceVariant,
-                borderRadius: 20,
+                height: dimensions.imageSize,
+                width: dimensions.imageSize,
+                backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                borderRadius: dimensions.imageSize / 2,
                 justifyContent: 'center',
                 alignItems: 'center',
               }}
             >
               <MaterialIcon
                 name="restaurant"
-                size={20}
-                color={colors.onSurfaceVariant}
+                size={dimensions.iconSize}
+                color="white"
               />
             </View>
           ) : (
             <Image
               source={image}
-              style={{ height: 32, width: 32 }}
+              style={{ height: dimensions.imageSize, width: dimensions.imageSize, tintColor: 'white' }}
               resizeMode="contain"
               onError={handleImageError}
             />
@@ -167,11 +212,12 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
 
         {/* Category Title */}
         <Caption
-          color={colors.onSurface}
-          weight="semibold"
+          color="white"
+          weight="bold"
           align="center"
           numberOfLines={2}
           ellipsizeMode="tail"
+          style={{ fontSize: dimensions.titleFontSize, lineHeight: dimensions.titleFontSize * 1.2 }}
         >
           {t(
             `category_${title?.toLowerCase().replace(/[\s-]/g, '_') || 'unknown'}`,
@@ -182,9 +228,9 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
         {/* Item Count */}
         {itemCount !== undefined && (
           <Overline
-            color={colors.onSurfaceVariant}
+            color="rgba(255, 255, 255, 0.7)"
             align="center"
-            style={{ marginTop: 2 }}
+            style={{ marginTop: 2, fontSize: dimensions.itemCountFontSize }}
           >
             {itemCount} {t('items')}
           </Overline>
@@ -199,14 +245,13 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
               left: 0,
               right: 0,
               bottom: 0,
-              backgroundColor: colors.surface,
-              opacity: 0.8,
-              borderRadius: 12,
+              backgroundColor: 'rgba(74, 144, 226, 0.8)',
+              borderRadius: dimensions.borderRadius,
               justifyContent: 'center',
               alignItems: 'center',
             }}
           >
-            <ActivityIndicator size="small" color={colors.primary} />
+            <ActivityIndicator size="small" color="white" />
           </View>
         )}
       </View>

@@ -7,7 +7,8 @@ import { useTheme, Badge } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from '@/src/location/useLocation';
 import { useCartItemCount } from '@/src/stores/customerStores/cartStore';
-import { useUnreadCount } from '@/src/stores/customerStores/notificationStore';
+import { useUnreadNotificationCount } from '@/src/hooks/shared/useUnreadNotificationCount';
+import NotificationBadge from '@/src/components/common/NotificationBadge';
 import { useUser } from '@/src/stores/AuthStore';
 import Avatar from '@/src/components/common/Avatar';
 import Toast from 'react-native-toast-message';
@@ -21,7 +22,7 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
   const cartItemCount = useCartItemCount();
-  const unreadNotificationCount = useUnreadCount();
+  const { unreadCount: unreadNotificationCount } = useUnreadNotificationCount();
   const user = useUser();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const queryClient = useQueryClient();
@@ -274,19 +275,11 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
               color={colors.onSurface}
             />
           </View>
-          {unreadNotificationCount > 0 && (
-            <Badge
-              size={18}
-              style={{
-                position: 'absolute',
-                top: -2,
-                right: -2,
-                backgroundColor: colors.error,
-              }}
-            >
-              {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
-            </Badge>
-          )}
+          <NotificationBadge
+            count={unreadNotificationCount}
+            position="top-right"
+            offset={{ x: 6, y: 6 }}
+          />
         </TouchableOpacity>
 
         {/* Cart Icon */}

@@ -6,8 +6,8 @@ import React, {
   useEffect,
 } from 'react';
 import { useNotifications } from '@/src/hooks/useNotifications';
-import { initializeNotifications } from '@/src/notifications';
 import { useAuthStore } from '@/src/stores/AuthStore';
+import pushNotificationService from '@/src/services/shared/pushNotificationService';
 
 interface NotificationContextType {
   // Customer functions
@@ -62,15 +62,8 @@ export const SimpleNotificationProvider: React.FC<
   // Initialize notifications when user is authenticated
   useEffect(() => {
     if (isAuthenticated && userType && user?.id) {
-      initializeNotifications(userType, user.id)
-        .then((success) => {
-          if (success) {
-          } else {
-          }
-        })
-        .catch((error) => {
-          console.error('❌ Error initializing notification service:', error);
-        });
+      // Push notification service is already initialized via usePushNotifications hook
+      console.log('✅ Notification service ready for user:', userType);
     }
   }, [isAuthenticated, userType, user?.id]);
 

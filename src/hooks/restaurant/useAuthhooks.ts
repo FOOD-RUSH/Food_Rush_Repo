@@ -148,30 +148,7 @@ export const useRestaurantLogout = () => {
   });
 };
 
-// Deprecated: Use useUpdateProfile from '@/src/hooks/shared/useProfileUpdate' instead
-// This hook is kept for backward compatibility
-export const useUpdateRestaurantProfile = () => {
-  const queryClient = useQueryClient();
-  const { setUser, clearError } = useAuthStore();
 
-  return useMutation({
-    mutationFn: async (userData: any) => {
-      const response = await restaurantAuthApi.updateProfile(userData);
-      return response.data;
-    },
-    onMutate: () => {
-      clearError();
-    },
-    onSuccess: (updatedUser: User) => {
-      // Update user in store
-      setUser(updatedUser);
-
-      // Update cached data
-      queryClient.setQueryData(['auth', 'me'], updatedUser);
-      queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
-    },
-  });
-};
 
 export const useResetRestaurantPassword = () => {
   const { clearError } = useAuthStore();
