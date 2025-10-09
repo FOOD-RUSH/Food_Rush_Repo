@@ -125,7 +125,7 @@ export interface RestaurantCard {
   updatedAt?: string;
   // Legacy fields for backward compatibility
   distance?: number; // Legacy field - use distanceKm instead
-  image?: string | null; // Restaurant image
+  pictureUrl?: string | null; // Restaurant image
   menu?: any[]; // Restaurant menu items
 }
 
@@ -142,7 +142,7 @@ export interface RestaurantProfile {
   id: string;
   name: string;
   address: string;
-  image: string | null;
+  pictureUrl: string | null;
   rating: number | null;
   ratingCount: number;
   // Backend-calculated fields based on user's location

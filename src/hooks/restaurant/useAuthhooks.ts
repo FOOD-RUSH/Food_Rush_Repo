@@ -24,7 +24,13 @@ export const useRegisterRestaurant = () => {
       clearError();
     },
     onSuccess: (data) => {
-      // Registration data can be handled locally in components if needed
+      console.log('✅ Restaurant registration successful:', {
+        restaurantId: data.restaurant?.id,
+        restaurantName: data.restaurant?.name,
+        userId: data.user?.id,
+        pictureUrl: data.pictureUrl,
+        nextAction: data.nextAction
+      });
     },
   });
 };

@@ -30,7 +30,10 @@ import { useNetwork } from '@/src/contexts/NetworkContext';
 import { useTranslation } from 'react-i18next';
 import CustomCheckbox from '@/src/components/common/CustomCheckbox';
 import { useRegister } from '@/src/hooks/customer/useAuthhooks';
+import { RegisterRequest } from '@/src/services/shared/authTypes';
 import ErrorDisplay from '@/src/components/auth/ErrorDisplay';
+import TermsAndConditionsModal from '@/src/components/common/modals/TermsAndConditionsModal';
+import { useTermsModal } from '@/src/hooks/common/useTermsModal';
 import {
   Typography,
   Heading2,
@@ -73,6 +76,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
   } = useRegister();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { clearError, setError, error: authError } = useAuthStore();
+  const { isVisible: showTermsModal, showTerms, hideTerms } = useTermsModal();
 
   // get usertype gotten from params
   const userType = route.params?.userType || 'customer';
@@ -154,36 +158,42 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
       clearError();
 
       try {
-        // Prepare registration data
-        const registrationData = {
-          role: userType,
-          fullName: data.fullName.trim(),
+        // Prepare registration data according to backend API specification
+        // POST /api/v1/auth/register
+        const registrationData: RegisterRequest = {
+          email: data.email.trim().toLowerCase(),
           phoneNumber: `${selectedCountryCode.code}${data.phoneNumber.trim()}`,
-          email: data.email.trim(),
+          fullName: data.fullName.trim(),
           password: data.password,
+          role: 'customer',
         };
 
         registerUserMutation(registrationData, {
           onSuccess: (response) => {
+            console.log('✅ Registration successful:', response);
+            
             Toast.show({
               type: 'success',
               text1: t('success'),
-              text2: t('account_created_successfully'),
+              text2: response.emailSent === true
+                ? 'Account created! Check your email for verification code.'
+                : t('account_created_successfully'),
               position: 'top',
             });
-
-            // Navigate to OTP verification screen with the response data
+            
+            // Navigate to OTP verification screen with the correct response data
             navigation.navigate('OTPVerification', {
-              userId: response.data.userId, // Handle different response structures
-              email: data.email,
-              phone: registrationData.phoneNumber,
+              userId: response.userId,
+              email: response.email,
+              phone: response.phoneNumber,
               userType,
               type: 'email',
             });
           },
           onError: (error: any) => {
-            const errorMessage =
-              error?.message || t('failed_to_create_account');
+            console.error('❌ Registration failed:', error);
+            
+            const errorMessage = error?.message || t('failed_to_create_account');
             setError(errorMessage);
 
             Toast.show({
@@ -197,7 +207,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
       } catch (error: any) {
         const errorMessage = error?.message || t('failed_to_create_account');
         setError(errorMessage);
-
+        console.log('Error: ', error);
         Toast.show({
           type: 'error',
           text1: t('error'),
@@ -272,13 +282,8 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
   }, []);
 
   const openTerms = useCallback(() => {
-    Toast.show({
-      type: 'info',
-      text1: t('info'),
-      text2: t('terms_not_implemented'),
-      position: 'top',
-    });
-  }, [t]);
+    showTerms();
+  }, [showTerms]);
 
   const openPrivacyPolicy = useCallback(() => {
     Toast.show({
@@ -705,6 +710,13 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
               />
             </SafeAreaView>
           </Modal>
+
+          {/* Terms and Conditions Modal */}
+          <TermsAndConditionsModal
+            visible={showTermsModal}
+            onDismiss={hideTerms}
+            userType="customer"
+          />
         </KeyboardAvoidingView>
       </ScrollView>
     </CommonView>

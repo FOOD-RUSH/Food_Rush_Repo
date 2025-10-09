@@ -3,12 +3,11 @@ import { CustomerHomeStackScreenProps } from '@/src/navigation/types';
 
 import { useNavigation } from '@react-navigation/native';
 import React from 'react';
-import { View, TouchableOpacity, Image, Platform } from 'react-native';
+import { View, TouchableOpacity, Image, Dimensions } from 'react-native';
 import { Card, Text, useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { useResponsive } from '@/src/hooks/useResponsive';
 import { images } from '@/assets/images';
-import { Dimensions } from 'react-native';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -65,31 +64,31 @@ const FoodItemCard = ({
   const getCardDimensions = () => {
     if (isLargeScreen) {
       return {
-        width: Math.min(wp(50), 480), // Increased max width from 400px to 480px
-        height: 200, // Increased height from 160 to 200
-        imageSize: 140, // Increased image size from 100 to 140
-        padding: 18, // Increased padding
+        width: Math.min(wp(50), 400), // Increased max width from 400px to 480px
+        height: 175, // Increased height from 160 to 200
+        imageSize: 120, // Increased image size from 100 to 140
+        padding: 16, // Increased padding
         borderRadius: 22, // Increased border radius
         // Text sizes (increased by 2px)
-        foodNameSize: getResponsiveText(19), // Increased by 2
-        priceSize: getResponsiveText(18), // Increased by 2
-        distanceSize: getResponsiveText(14), // Increased by 2
-        deliverySize: getResponsiveText(13), // Increased by 2
-        badgeSize: getResponsiveText(12), // Increased by 2
+        foodNameSize: getResponsiveText(17), // Increased by 2
+        priceSize: getResponsiveText(16), // Increased by 2
+        distanceSize: getResponsiveText(12), // Increased by 2
+        deliverySize: getResponsiveText(11), // Increased by 2
+        badgeSize: getResponsiveText(10), // Increased by 2
       };
     } else if (isTablet) {
       return {
-        width: Math.min(wp(52), 420), // Increased max width from 340px to 420px
+        width: Math.min(wp(52), 360), // Increased max width from 340px to 420px
         height: 180, // Increased height from 150 to 180
-        imageSize: 125, // Increased image size from 95 to 125
-        padding: 16, // Increased padding
-        borderRadius: 20, // Increased border radius
+        imageSize: 120, // Increased image size from 95 to 125
+        padding: 12, // Increased padding
+        borderRadius: 26, // Increased border radius
         // Text sizes (increased by 2px)
-        foodNameSize: getResponsiveText(18), // Increased by 2
-        priceSize: getResponsiveText(17), // Increased by 2
-        distanceSize: getResponsiveText(13), // Increased by 2
-        deliverySize: getResponsiveText(12), // Increased by 2
-        badgeSize: getResponsiveText(11), // Increased by 2
+        foodNameSize: getResponsiveText(17), // Increased by 2
+        priceSize: getResponsiveText(16), // Increased by 2
+        distanceSize: getResponsiveText(12), // Increased by 2
+        deliverySize: getResponsiveText(11), // Increased by 2
+        badgeSize: getResponsiveText(10), // Increased by 2
       };
     } else {
       return {

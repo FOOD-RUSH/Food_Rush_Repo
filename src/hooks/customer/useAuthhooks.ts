@@ -9,6 +9,7 @@ import {
   UpdateProfileRequest,
   ResetPasswordRequest,
   ChangePasswordRequest,
+  ResendOTPRequest,
 } from '@/src/services/shared/authTypes';
 import TokenManager from '@/src/services/shared/tokenManager';
 import {
@@ -165,14 +166,25 @@ export const useRegister = () => {
 
   return useMutation({
     mutationFn: async (userData: RegisterRequest) => {
+      // Call the updated register API that returns the full response
       const response = await authApi.register(userData);
-      return response.data.data;
+      
+      // Return the data portion for the component to use
+      return response.data;
     },
     onMutate: () => {
       clearError();
     },
     onSuccess: (data) => {
-      // Registration data can be handled locally in components if needed
+      console.log('✅ Registration hook success:', {
+        userId: data.userId,
+        emailSent: data.emailSent,
+        name: data.name,
+        email: data.email
+      });
+    },
+    onError: (error: any) => {
+      console.error('❌ Registration hook error:', error);
     },
   });
 };
@@ -184,8 +196,9 @@ export const useVerifyOTP = () => {
 
   return useMutation({
     mutationFn: async (otpData: OTPCredentials) => {
+      // Call the updated verifyOTP API
       const response = await authApi.verifyOTP(otpData);
-      return response.data.data;
+      return response.data;
     },
     onMutate: () => {
       clearError();
@@ -196,6 +209,12 @@ export const useVerifyOTP = () => {
       if (!accessToken || !refreshToken || !user) {
         throw new Error('Invalid verification response: missing required data');
       }
+
+      console.log('✅ OTP verification hook success:', {
+        userId: user.id,
+        email: user.email,
+        role: user.role
+      });
 
       // Set auth data using the simplified store method
       await setAuthData({
@@ -210,7 +229,7 @@ export const useVerifyOTP = () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
     onError: (error: any) => {
-      console.error('Customer OTP verification failed:', error);
+      console.error('❌ Customer OTP verification failed:', error);
       TokenManager.clearAllTokens().catch(console.error);
     },
   });
@@ -243,8 +262,8 @@ export const useResendOTP = () => {
   const { clearError } = useAuthStore();
 
   return useMutation({
-    mutationFn: async (email: string) => {
-      const response = await authApi.resendVerification(email);
+    mutationFn: async (data: ResendOTPRequest) => {
+      const response = await authApi.resendVerification(data);
       return response.data;
     },
     onMutate: () => {

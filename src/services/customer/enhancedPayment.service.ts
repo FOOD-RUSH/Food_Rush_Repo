@@ -84,12 +84,12 @@ class EnhancedPaymentService {
       ? cleanNumber.substring(3) 
       : cleanNumber;
 
-    // Validate format: 9 digits starting with 6
-    if (!/^6\d{8}$/.test(localNumber)) {
+    // Must be exactly 9 digits
+    if (!/^\d{9}$/.test(localNumber)) {
       return false;
     }
 
-    // Provider-specific validation
+    // Get the first two digits (prefix)
     const prefix = localNumber.substring(0, 2);
     
     if (medium === 'mtn') {
@@ -115,7 +115,7 @@ class EnhancedPaymentService {
     }
     
     // Return as-is if already 9 digits
-    if (cleanNumber.length === 9 && cleanNumber.startsWith('6')) {
+    if (cleanNumber.length === 9) {
       return cleanNumber;
     }
     

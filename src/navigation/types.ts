@@ -50,6 +50,7 @@ export type RootStackParamList = {
   FavoriteRestaurantScreen: undefined;
   LanguageScreen: undefined;
   NearbyRestaurants: undefined;
+  AllRestaurants: undefined;
   OrderReceipt: { orderId: string };
 
   // Restaurant full-screen screens (NO TABS)
@@ -113,6 +114,22 @@ export type AuthStackParamList = {
   AwaitingApproval: {
     restaurantId?: string;
     userId?: string;
+    restaurantData?: {
+      id: string;
+      name: string;
+      address: string;
+      phone: string;
+      pictureUrl?: string;
+      verificationStatus: string;
+      latitude: string;
+      longitude: string;
+    };
+    userData?: {
+      id: string;
+      fullName: string;
+      email: string;
+      phoneNumber: string;
+    };
   };
 };
 

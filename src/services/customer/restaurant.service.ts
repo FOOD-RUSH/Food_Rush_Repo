@@ -60,6 +60,21 @@ export const restaurantApi = {
     }
   },
 
+  // Get all restaurants without location requirements
+  getAllRestaurantsWithoutLocation: async (query: Omit<RestaurantQuery, 'nearLat' | 'nearLng' | 'radiusKm'> = {}) => {
+    try {
+      const response = await apiClient.get<RestaurantItems>(
+        '/restaurants',
+        { params: query },
+      );
+      return response.data.data;
+    } catch (error) {
+      console.error('❌ Get All Restaurants (No Location) API Error:', error);
+      logError(error, 'getAllRestaurantsWithoutLocation');
+      throw error;
+    }
+  },
+
   // Get restaurants using browse endpoint (replaces nearby)
   getBrowseRestaurants: async (query: RestaurantQuery) => {
     try {

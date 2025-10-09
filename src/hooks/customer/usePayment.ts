@@ -77,7 +77,7 @@ export const usePaymentMethods = () => {
 
 // Hook to validate phone number
 export const useValidatePhoneNumber = () => {
-  return (phoneNumber: string, medium: 'mtn' | 'orange_money'): boolean => {
+  return (phoneNumber: string, medium: 'mtn' | 'orange'): boolean => {
     return PaymentService.validatePhoneNumber(phoneNumber, medium);
   };
 };
@@ -94,14 +94,17 @@ export const useCreatePaymentRequest = () => {
   return (
     orderId: string,
     phone: string,
-    medium: 'mtn' | 'orange_money',
+    medium: 'mtn' | 'orange',
     userName: string,
     userEmail: string,
   ): PaymentInitRequest => {
+    // Ensure phone number contains only digits (remove spaces and other non-digit characters)
+    const cleanPhone = phone.replace(/\D/g, '');
+    
     return {
       orderId,
       method: 'mobile_money',
-      phone,
+      phone: cleanPhone,
       medium,
       name: userName,
       email: userEmail,

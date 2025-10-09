@@ -35,9 +35,12 @@ import { TextButton } from '@/src/components/common/TextButton';
 import Toast from 'react-native-toast-message';
 import { useNetwork } from '@/src/contexts/NetworkContext';
 import { useTranslation } from 'react-i18next';
-import { useRegisterRestaurant } from '@/src/hooks/restaurant/useAuthhooks';
 import CustomCheckbox from '@/src/components/common/CustomCheckbox';
 import ErrorDisplay from '@/src/components/auth/ErrorDisplay';
+import { useRegisterRestaurant } from '@/src/hooks/restaurant/useAuthhooks';
+import TermsAndConditionsModal from '@/src/components/common/modals/TermsAndConditionsModal';
+import { useTermsModal } from '@/src/hooks/common/useTermsModal';
+import CommonView from '@/src/components/common/CommonView';
 import * as ImagePicker from 'expo-image-picker';
 import {
   pickImageForUpload,
@@ -96,6 +99,7 @@ const RestaurantSignupStep2: React.FC<
     error: registerError,
   } = useRegisterRestaurant();
   const { clearError, setError, error: authError } = useAuthStore();
+  const { isVisible: showTermsModal, showTerms, hideTerms } = useTermsModal();
 
   // Get step 1 data from route params
   const step1Data: Step1Data = route.params?.step1Data;
@@ -182,7 +186,7 @@ const RestaurantSignupStep2: React.FC<
     };
 
     animateEntrance();
-  }, []);
+  }, [formAnim, overlayAnim, titleAnim]);
 
   // Animate loading indicator
   useEffect(() => {
@@ -274,7 +278,7 @@ const RestaurantSignupStep2: React.FC<
     } finally {
       setIsGettingLocation(false);
     }
-  }, [hasPermission, requestPermissionWithLocation]);
+  }, [hasPermission, requestPermissionWithLocation, t]);
 
   const onSubmit = useCallback(
     async (data: Step2FormData) => {
@@ -318,14 +322,37 @@ const RestaurantSignupStep2: React.FC<
         };
 
         registerRestaurantMutation(registrationData, {
-          onSuccess: () => {
+          onSuccess: (response) => {
+            console.log('✅ Restaurant registration response:', response);
+            
             Toast.show({
               type: 'success',
               text1: t('registration_successful'),
               text2: t('registration_submitted_awaiting_approval'),
               position: 'top',
             });
-            navigation.navigate('AwaitingApproval');
+            
+            // Navigate with restaurant and user data
+            navigation.navigate('AwaitingApproval', {
+              restaurantId: response.restaurant?.id,
+              userId: response.user?.id,
+              restaurantData: response.restaurant ? {
+                id: response.restaurant.id,
+                name: response.restaurant.name,
+                address: response.restaurant.address,
+                phone: response.restaurant.phone,
+                pictureUrl: response.restaurant.pictureUrl || response.pictureUrl,
+                verificationStatus: response.restaurant.verificationStatus,
+                latitude: response.restaurant.latitude,
+                longitude: response.restaurant.longitude,
+              } : undefined,
+              userData: response.user ? {
+                id: response.user.id,
+                fullName: response.user.fullName,
+                email: response.user.email,
+                phoneNumber: response.user.phoneNumber,
+              } : undefined,
+            });
           },
           onError: (error: any) => {
             const errorMessage =
@@ -368,13 +395,8 @@ const RestaurantSignupStep2: React.FC<
   const toggleTerms = useCallback(() => setTermsAccepted((prev) => !prev), []);
 
   const openTerms = useCallback(() => {
-    Toast.show({
-      type: 'info',
-      text1: t('info'),
-      text2: t('terms_will_be_implemented'),
-      position: 'top',
-    });
-  }, [t]);
+    showTerms();
+  }, [showTerms]);
 
   const openPrivacyPolicy = useCallback(() => {
     Toast.show({
@@ -388,7 +410,7 @@ const RestaurantSignupStep2: React.FC<
   const pickDocument = useCallback(async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions?.Images || 'images',
+        mediaTypes: 'images',
         allowsEditing: true,
         aspect: [4, 3],
         quality: 0.8,
@@ -565,7 +587,6 @@ const RestaurantSignupStep2: React.FC<
                 borderWidth: 2,
                 borderColor: 'rgba(255, 255, 255, 0.3)',
                 borderStyle: 'dashed',
-                backdropFilter: 'blur(10px)',
               }}
             >
               <IoniconsIcon
@@ -1044,6 +1065,13 @@ const RestaurantSignupStep2: React.FC<
             </Button>
           </View>
         </View>
+
+        {/* Terms and Conditions Modal */}
+        <TermsAndConditionsModal
+          visible={showTermsModal}
+          onDismiss={hideTerms}
+          userType="restaurant"
+        />
       </Modal>
     </View>
   );

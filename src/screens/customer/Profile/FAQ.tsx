@@ -174,7 +174,8 @@ const FAQ = () => {
             </View>
             <Body
               color={colors.onPrimaryContainer || colors.primary}
-              style={{ lineHeight: 20 }}
+              style={{ lineHeight: 20, fontSize: 14 }}
+              
             >
               {t(
                 'contact_support_description',
@@ -215,7 +216,7 @@ const QuestionCard = ({ item, isExpanded, onToggle }: QuestionCardProps) => {
           <Label
             color={colors.onSurface}
             weight="semibold"
-            style={{ flex: 1, paddingRight: 12, fontSize: scale(16),  }}
+            style={{ flex: 1, paddingRight: 12, fontSize: scale(14),  }}
           >
             {item.title}
           </Label>
@@ -232,7 +233,7 @@ const QuestionCard = ({ item, isExpanded, onToggle }: QuestionCardProps) => {
             <Body
               color={colors.onSurfaceVariant}
               style={{
-                lineHeight: scale(22),
+                lineHeight: scale(26),
                 fontSize: scale(14),
               }}
             >

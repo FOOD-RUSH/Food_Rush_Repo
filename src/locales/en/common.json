@@ -1,0 +1,161 @@
+{
+  "terms_and_conditions": "Terms & Conditions",
+  "partner_terms": "Partner Terms",
+  "last_updated": "Last updated",
+  "foodrush_terms_title": "FoodRush – Terms & Conditions",
+  "restaurant_terms_title": "Foodrush Partner Restaurant Terms & Service",
+  
+  "customer_terms": {
+    "acceptance_title": "1. Acceptance of Terms",
+    "acceptance_content": "By accessing or using the FoodRush mobile application (\"App\") and services (collectively, \"Services\"), you (\"Customer,\" \"you,\" or \"your\") agree to these Terms & Conditions. If you do not agree, please do not use the App.",
+    
+    "account_title": "2. Account Registration & Security",
+    "account_bullet_1": "You agree to provide accurate, current, and complete registration information, including email, phone number, delivery address, and payment details.",
+    "account_bullet_2": "Your account credentials are personal and confidential. You must notify us immediately of any unauthorized access.",
+    
+    "ordering_title": "3. Ordering Process",
+    "ordering_bullet_1": "You are responsible for verifying order details—items, quantities, and delivery address—before completing your order.",
+    "ordering_bullet_2": "Menu or availability may change without notice due to restaurant conditions.",
+    
+    "payment_title": "4. Payment & Fees",
+    "payment_bullet_1": "Payment is collected via the App at the time of order placement. Additional fees (e.g., delivery fees, service charges) may apply.",
+    "payment_bullet_2": "You agree that all payment details you provide are accurate and authorize FoodRush to charge your selected payment method.",
+    
+    "delivery_title": "5. Delivery & Timing",
+    "delivery_bullet_1": "Delivery is facilitated by independent drivers (\"Couriers\"). Estimated delivery times are approximations; actual times may vary due to traffic, weather, or other factors.",
+    "delivery_bullet_2": "FoodRush is not responsible for delays outside its control but will make reasonable efforts to communicate updates.",
+    
+    "quality_title": "6. Food Quality & Complaints",
+    "quality_bullet_1": "FoodRush is not liable for issues regarding food quality or preparation—that is the responsibility of the restaurant.",
+    "quality_bullet_2": "Customers should report concerns or complaints—such as missing items, poor quality, or contamination—via customer support promptly.",
+    
+    "community_title": "7. Community Guidelines & Conduct",
+    "community_intro": "You agree to:",
+    "community_bullet_1": "Treat Couriers and restaurant staff with respect and courtesy. Harassment, abuse, or discrimination is prohibited.",
+    "community_bullet_2": "Not provide false or misleading information.",
+    "community_bullet_3": "Ensure a safe delivery pickup environment (e.g., greet Couriers clothed and appropriately). Inappropriate behavior may result in account penalties.",
+    
+    "suspension_title": "8. Account Suspension & Termination",
+    "suspension_bullet_1": "FoodRush reserves the right to suspend or terminate your access if you violate these Terms or engage in harmful or fraudulent behavior.",
+    "suspension_bullet_2": "If your account is locked or deactivated for suspicious activity or policy violations, you may contact support for review.",
+    "suspension_bullet_3": "Our enforcement is intended to be fair and proportionate.",
+    
+    "modifications_title": "9. Modifications to Terms",
+    "modifications_bullet_1": "FoodRush may update these Terms at any time. Changes become effective when posted in-app or on our website.",
+    "modifications_bullet_2": "It is your responsibility to review these Terms periodically. Continued use of the Service after updates constitutes acceptance.",
+    
+    "privacy_title": "10. Privacy",
+    "privacy_content": "Our Privacy Policy governs how we collect, use, and protect your personal information. By using the App, you consent to its terms.",
+    
+    "disclaimers_title": "11. Disclaimers & Liability Limitations",
+    "disclaimers_bullet_1": "The Service is provided \"as is.\" FoodRush disclaims warranties of perfection, accuracy, or availability.",
+    "disclaimers_bullet_2": "FoodRush is not responsible for third-party restaurant actions or events beyond our reasonable control.",
+    
+    "governing_title": "12. Governing Law & Dispute Resolution",
+    "governing_content": "These Terms are governed by the laws of the jurisdiction where FoodRush operates. Disputes shall be subject to the exclusive jurisdiction of relevant courts."
+  },
+  
+  "restaurant_terms": {
+    "intro_content": "These Terms & Conditions (\"Agreement\") set out the rights and obligations between you (\"Restaurant Partner,\" \"you,\" \"your\") and Foodrush (\"Foodrush,\" \"we,\" \"us,\" \"our\") in respect of your participation in the Foodrush platform for ordering, delivery and/or pickup services (the \"Service\"). By signing up and operating as a Foodrush Partner, you agree to these Terms.",
+    
+    "definitions_title": "1. Definitions",
+    "definitions_customer": "Customer: A person placing an order through the Foodrush mobile application or website.",
+    "definitions_driver": "Delivery Partner / Driver: An independent contractor engaged to deliver orders from you to the Customer, whether managed by Foodrush or by you (if you choose self‑delivery).",
+    "definitions_order": "Order: A request by a Customer for food / items via Foodrush, accepted by you, for delivery or pickup.",
+    "definitions_commission": "Commission / Fee: The percentage or fixed amount deducted by Foodrush from the order subtotal, or other fees as defined in the Merchant Agreement.",
+    "definitions_menu": "Menu & Menu Items: Your offerings made visible via Foodrush, including name, description, price, photos.",
+    "definitions_zone": "Delivery Zone: The geographic boundary within which deliveries are accepted/provided.",
+    
+    "enrollment_title": "2. Enrollment and Onboarding",
+    "enrollment_bullet_1": "You must provide accurate, complete, and up‑to‑date information about your business (name, address, contacts, food hygiene license, tax identification, etc.).",
+    "enrollment_bullet_2": "Foodrush will review your information and may approve or reject your application. Approval may depend on meeting local food safety regulations, insurance, and other legal requirements.",
+    "enrollment_bullet_3": "Onboarding includes integrating your menu, setting hours of operation, delivery zones (if applicable), prices, and methods of receiving orders (e.g. tablet, POS system, dashboard).",
+    
+    "processing_title": "3. Order Processing",
+    "processing_bullet_1": "When a Customer places an order, we will send you a notification. You are required to accept or reject within a specified timeframe.",
+    "processing_bullet_2": "Once accepted, you must prepare the order in accordance with the Customer's instructions, within the committed prep time.",
+    "processing_bullet_3": "Orders must be fully prepared and packaged before the Delivery Partner picks up (in a delivery scenario). In a pickup scenario, orders must be prepared and ready for collection at agreed time.",
+    "processing_bullet_4": "You must maintain accurate, up‑to‑date menu information (availability, pricing, photos, descriptions). If an item is out of stock, you should mark it as unavailable as soon as reasonably possible.",
+    
+    "delivery_title": "4. Delivery & Pickup",
+    "delivery_foodrush": "Delivery by Foodrush / Third Party Drivers: If using Foodrush drivers, once order is ready, you will package it appropriately and hand it over to the driver.",
+    "delivery_self": "Self‑Delivery Option: You may, if eligible, use your own delivery personnel (\"self‑delivery\"). If so, you must ensure your drivers meet all requirements (licensing, local laws, food safety, insurance) and adhere to Foodrush's standards.",
+    "delivery_pickup": "For pickup orders, you must have clearly communicated when and where the Customer can collect.",
+    
+    "fees_title": "5. Fees, Payments, and Commissions",
+    "fees_bullet_1": "Foodrush will charge you a commission on each accepted order. The commission rate, transaction fees, or other fees (delivery, promotion, marketing) will be agreed in your Merchant Agreement.",
+    "fees_bullet_2": "Payments to you will be made on a regular schedule (e.g. Daily, weekly), after deducting all applicable fees, refunds, chargebacks, and adjustments.",
+    "fees_bullet_3": "You are responsible for all costs in preparing and packaging the food, labor, utilities, and any other restaurant costs.",
+    "fees_bullet_4": "You will handle applicable taxes on your food items; Foodrush may remit taxes if required by law but you are responsible to provide required tax documentation.",
+    
+    "quality_title": "6. Quality, Food Safety, & Standards",
+    "quality_bullet_1": "You must comply with all applicable health, food safety, licensing, and sanitation laws and regulations.",
+    "quality_bullet_2": "Food must be prepared in a safe, hygienic manner, using safe ingredients and stored correctly.",
+    "quality_bullet_3": "Packaging must protect food, maintain temperature, avoid contamination, and be suitable for delivery.",
+    "quality_bullet_4": "You will maintain insurance as required by local law (e.g. general liability, foodborne illness insurance).",
+    
+    "hours_title": "7. Hours of Operation, Menu & Availability",
+    "hours_bullet_1": "You set your own operating hours in the system. You must update them accurately, especially for holidays, closures, or unexpected events.",
+    "hours_bullet_2": "You are responsible for maintaining accurate pricing, specials, surcharges, and charges. Any changes must be updated in Foodrush in advance.",
+    "hours_bullet_3": "Items listed must reflect what you can reliably make. Repeated issues of missing items or unacceptable quality may lead to warnings or suspension.",
+    
+    "service_title": "8. Customer Service, Complaints & Refunds",
+    "service_bullet_1": "You must cooperate with Foodrush in resolving customer complaints (wrong items, missing items, late deliveries, etc.).",
+    "service_bullet_2": "If a Customer is entitled to refund or credit (under policy), Foodrush may issue such, and you may be responsible for covering that cost, depending on the nature of the complaint.",
+    "service_bullet_3": "You will respond to requests from Foodrush for information (photos, etc.) to facilitate investigations.",
+    
+    "conduct_title": "9. Standards of Conduct & Representation",
+    "conduct_bullet_1": "You must represent your restaurant and food honestly (menu descriptions, photos, nutrition or allergy info if provided) and not mislead Customers.",
+    "conduct_bullet_2": "You must not discriminate against Customers, Drivers, or Foodrush staff.",
+    "conduct_bullet_3": "You must treat Delivery Partners appropriately; the handing over of orders must be smooth, and you should not expect Drivers to perform restaurant tasks beyond pickup.",
+    
+    "promotions_title": "10. Promotions, Advertising & Pricing",
+    "promotions_bullet_1": "Foodrush may offer promotions, featured listings, discounts, loyalty programs, or marketing tools; you may choose to participate subject to additional fees or conditions.",
+    "promotions_bullet_2": "Prices communicated to Customers must include or exclude tax as per local law, and any delivery or service fee must be transparent.",
+    "promotions_bullet_3": "You must not inflate prices secretly to offset commissions or fees (such behavior could violate consumer protection laws).",
+    
+    "data_title": "11. Data, Reporting & Access",
+    "data_bullet_1": "You will have access to reporting tools: order history, sales metrics, customer feedback, etc. Foodrush may require certain performance metrics (order acceptance rate, cancellation rate, etc.).",
+    "data_bullet_2": "You consent to Foodrush's use of transactional data for analytics, improvements, fraud detection, etc., in accordance with applicable data protection / privacy law.",
+    
+    "termination_title": "12. Suspension, Termination & Liability",
+    "termination_bullet_1": "Foodrush may suspend or deactivate your restaurant's participation for failure to meet these Terms, for serious violations (e.g. food safety breach, repeated complaints, fraudulent behavior), or by mutual agreement.",
+    "termination_bullet_2": "Either party may terminate the relationship per the notice period in the Merchant Agreement. Upon termination, you must fulfill accepted orders already in process.",
+    "termination_bullet_3": "Limitation of Liability: Foodrush will not be liable for indirect or consequential losses (such as lost profits), except to the extent mandated by law. Your liability is similarly limited.",
+    
+    "ip_title": "13. Intellectual Property & Branding",
+    "ip_bullet_1": "You grant Foodrush a non‑exclusive, royalty‑free license to use your name, logo, images of your menu items for the purpose of promoting the app, displaying in app, marketing, etc.",
+    "ip_bullet_2": "You represent that you own or have the rights to any material (images, trademarks, descriptions) you upload, and that they do not infringe the rights of third parties.",
+    
+    "insurance_title": "14. Insurance & Compliance",
+    "insurance_bullet_1": "You shall maintain all required business, food safety, and liability insurance, and licenses required by local, regional, or national law.",
+    "insurance_bullet_2": "You will comply with any laws governing food allergens, nutrition labeling, hygiene, labor, wages, and worker safety.",
+    
+    "indemnification_title": "15. Indemnification",
+    "indemnification_content": "You agree to indemnify, defend and hold harmless Foodrush, its officers, directors, employees and agents from any claims, damages, losses, liabilities, costs or expenses arising out of your breach of these Terms, or your negligent or intentional acts (including food safety issues, misrepresentations, or failing to comply with law).",
+    
+    "privacy_title": "16. Privacy & Confidentiality",
+    "privacy_bullet_1": "You must adhere to any privacy laws applicable in your jurisdiction in handling Customer data. Foodrush will collect and store Customer data; as a partner you may receive certain data (e.g. contact for delivery, special instructions). Use such data only for fulfilling the order and not for unsolicited marketing unless you have consent.",
+    "privacy_bullet_2": "Confidential information (business operations, commission structure, internal metrics) provided by Foodrush must be kept confidential.",
+    
+    "changes_title": "17. Changes to These Terms",
+    "changes_bullet_1": "Foodrush may revise these Terms from time to time. When changes are material, we will provide notice (e.g. via email or in‑app). Continued use of the Service after changes implies your acceptance.",
+    "changes_bullet_2": "If you do not agree to the changes, you may terminate under the provisions of Section 12.",
+    
+    "governing_title": "18. Governing Law & Dispute Resolution",
+    "governing_bullet_1": "This Agreement shall be governed by the laws of Cameroon.",
+    "governing_bullet_2": "Any dispute arising under this Agreement shall first be attempted to be resolved via mediation or negotiation between the parties. If unresolved, then by arbitration or in court as agreed per local law.",
+    
+    "misc_title": "19. Miscellaneous",
+    "misc_contractor": "Independent Contractor: Unless otherwise agreed, the Restaurant Partner is an independent contractor; partnership or employment is not created.",
+    "misc_force": "Force Majeure: Neither party shall be liable for delays or failures due to causes beyond their control (natural disasters, government actions, epidemics, etc.).",
+    "misc_severability": "Severability: If any provision is invalid or unenforceable, the rest remain in force.",
+    "misc_waiver": "Waiver: A failure to enforce a right does not waive that right in the future.",
+    
+    "contact_title": "Contact Information",
+    "contact_intro": "For questions about these terms, contact us at:",
+    "contact_email": "Email: partners@foodrush.cm",
+    "contact_phone": "Phone: +237 XXX XXX XXX",
+    "contact_address": "Address: Douala, Cameroon"
+  }
+}

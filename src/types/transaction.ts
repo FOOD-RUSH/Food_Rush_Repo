@@ -1,36 +1,53 @@
-// Transaction History Types - Updated to match Payment API documentation
+// Transaction History Types - Updated to match actual Payment API response
 
-// Raw API response from /api/v1/payments/transactions/{userId}
+// Raw API response from GET /api/v1/payments/transactions/{userId}
 export interface PaymentTransactionApiResponse {
   transId: string;
   status: 'PENDING' | 'SUCCESSFUL' | 'FAILED';
-  medium: string; // e.g., "mobile money"
-  serviceName: string; // e.g., "FoodRush"
+  medium: string | null; // e.g., "mobile money" or null
+  serviceName: string; // e.g., "Glenzzy"
+  transType: string; // e.g., "Collection"
   amount: number;
-  payerName: string;
+  revenue: number | null; // Revenue after fees
+  payerName: string | null;
   email: string;
-  financialTransId?: string; // Provider's transaction ID (e.g., "MTN-789456")
-  dateInitiated: string; // e.g., "2025-10-06"
-  dateConfirmed?: string; // null if still pending
+  redirectUrl: string | null;
+  externalId: string; // UUID for the transaction
+  userId: string | null;
+  webhook: string | null;
+  financialTransId: string | null; // Provider's transaction ID (e.g., "783257261")
+  dateInitiated: string; // ISO date string
+  dateConfirmed: string; // ISO date string
+}
+
+// API response wrapper for the transaction list
+export interface PaymentTransactionListResponse {
+  status_code: number;
+  message: string;
+  data: PaymentTransactionApiResponse[];
 }
 
 // Enhanced transaction interface for app usage
 export interface Transaction {
   id: string; // Maps to transId from API
-  orderId?: string; // May not be available from payment API
+  orderId?: string; // Maps to externalId from API (order UUID)
   amount: number;
+  revenue: number | null; // Revenue after fees
   currency: string; // Default to "XAF" for Cameroon
-  method: 'mobile_money';
-  provider: 'mtn' | 'orange'; // Derived from medium or financialTransId
+  method: 'mobile_money' | 'unknown';
+  provider: 'mtn' | 'orange' | 'unknown'; // Derived from medium or financialTransId
   status: 'pending' | 'completed' | 'failed' | 'cancelled'; // Mapped from API status
   transactionId: string; // Maps to transId from API
-  financialTransId?: string; // Provider's transaction ID
+  financialTransId: string | null; // Provider's transaction ID
   phoneNumber?: string; // May not be available from payment API
-  payerName: string; // From API
+  payerName: string | null; // From API
   email: string; // From API
   description: string; // Generated description
+  serviceName: string; // From API (e.g., "Glenzzy")
+  transType: string; // From API (e.g., "Collection")
+  externalId: string; // UUID from API
   createdAt: string; // Maps to dateInitiated
-  updatedAt: string; // Maps to dateConfirmed or dateInitiated
+  updatedAt: string; // Maps to dateConfirmed
   // Order details for display (may need to be fetched separately)
   orderDetails?: {
     restaurantName: string;
@@ -67,3 +84,9 @@ export interface PaymentMethodSelection {
   provider: 'mtn' | 'orange';
   phoneNumber?: string;
 }
+
+// Transaction status type for filtering
+export type TransactionStatus = 'pending' | 'completed' | 'failed' | 'cancelled';
+
+// Transaction provider type
+export type TransactionProvider = 'mtn' | 'orange' | 'unknown';

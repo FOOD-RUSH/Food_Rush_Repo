@@ -1,5 +1,5 @@
 import { IoniconsIcon } from '@/src/components/common/icons';
-import { View, Text, TouchableOpacity, Linking, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Linking, Alert, Platform } from 'react-native';
 import React from 'react';
 
 import { useTheme, Card } from 'react-native-paper';
@@ -28,15 +28,70 @@ const SocialCards = ({
     }
 
     try {
+      // Special handling for phone calls
+      if (link.startsWith('tel:')) {
+        const phoneNumber = link.replace('tel:', '');
+        
+        // Show confirmation dialog for phone calls
+        Alert.alert(
+          t('make_phone_call'),
+          t('call_confirmation', { phoneNumber }),
+          [
+            {
+              text: t('cancel'),
+              style: 'cancel',
+            },
+            {
+              text: t('call'),
+              onPress: async () => {
+                try {
+                  // Check if the device can make phone calls
+                  const canCall = await Linking.canOpenURL(link);
+                  
+                  if (canCall) {
+                    await Linking.openURL(link);
+                  } else {
+                    // Fallback: try alternative phone URL schemes
+                    const alternativeLink = Platform.OS === 'ios' 
+                      ? `telprompt:${phoneNumber}` 
+                      : `tel:${phoneNumber}`;
+                    
+                    const canCallAlternative = await Linking.canOpenURL(alternativeLink);
+                    
+                    if (canCallAlternative) {
+                      await Linking.openURL(alternativeLink);
+                    } else {
+                      Alert.alert(
+                        t('error'),
+                        t('phone_not_supported')
+                      );
+                    }
+                  }
+                } catch (callError) {
+                  console.error('Error making phone call:', callError);
+                  Alert.alert(
+                    t('error'),
+                    t('call_failed')
+                  );
+                }
+              },
+            },
+          ],
+          { cancelable: true }
+        );
+        return;
+      }
+
+      // Handle other links (WhatsApp, websites, etc.)
       const supported = await Linking.canOpenURL(link);
       if (supported) {
         await Linking.openURL(link);
       } else {
-        Alert.alert(t('error'), `${t('cannot_open')}${social_platform}`);
+        Alert.alert(t('error'), t('cannot_open_link', { platform: social_platform }));
       }
     } catch (error) {
-      Alert.alert(t('error'), `${t('failed_to_open')}${social_platform}`);
       console.error('Error opening link:', error);
+      Alert.alert(t('error'), t('failed_to_open_link', { platform: social_platform }));
     }
   };
 
@@ -84,6 +139,14 @@ const SocialCards = ({
                 style={{ color: colors.onSurfaceVariant }}
               >
                 {t('chat_with_us')}
+              </Text>
+            )}
+            {social_platform === 'Email' && (
+              <Text
+                className="text-sm mt-1"
+                style={{ color: colors.onSurfaceVariant }}
+              >
+                {t('email_support')}
               </Text>
             )}
             {['Website', 'Facebook', 'Twitter', 'Instagram'].includes(

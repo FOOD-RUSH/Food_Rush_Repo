@@ -12,6 +12,7 @@ import { Button, useTheme } from 'react-native-paper';
 import CommonView from '@/src/components/common/CommonView';
 import { useCustomerProfile } from '@/src/stores/AuthStore';
 import { useUpdateProfile } from '@/src/hooks/shared/useProfileUpdate';
+import { usePickAndUploadProfileImage } from '@/src/hooks/shared/useImageUpload';
 
 const EditProfileScreen = ({
   navigation,
@@ -32,40 +33,39 @@ const EditProfileScreen = ({
   const { colors } = useTheme();
 
   const updateProfileMutation = useUpdateProfile();
+  const pickAndUploadImageMutation = usePickAndUploadProfileImage();
 
   const handleImagePicker = async () => {
     try {
       setIsUploadingImage(true);
 
-      // Request permissions
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert(
-          t('permission_required') || 'Permission Required',
-          t('camera_permission_message') ||
-            'We need camera roll permissions to update your profile picture.',
-        );
+      // Use the new pick and upload hook
+      const imageUrl = await pickAndUploadImageMutation.mutateAsync();
+      
+      // Set the uploaded image URL (not local URI)
+      setProfileImage(imageUrl);
+      
+      Alert.alert(
+        t('success') || 'Success',
+        t('profile_image_updated_successfully') || 'Profile image updated successfully',
+      );
+    } catch (error: any) {
+      console.error('Error picking/uploading image:', error);
+      
+      // Handle specific error cases
+      if (error.message === 'No image selected') {
+        // User cancelled, no need to show error
         return;
       }
-
-      // Launch image picker
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-        allowsMultipleSelection: false,
-      });
-
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        setProfileImage(result.assets[0].uri);
-      }
-    } catch (error) {
-      console.error('Error picking image:', error);
+      
+      const errorMessage = 
+        error?.message ||
+        t('failed_to_pick_image') || 
+        'Failed to pick and upload image';
+        
       Alert.alert(
         t('error') || 'Error',
-        t('failed_to_pick_image') || 'Failed to pick image',
+        errorMessage,
       );
     } finally {
       setIsUploadingImage(false);
@@ -74,30 +74,55 @@ const EditProfileScreen = ({
 
   const handleUpdate = async () => {
     try {
-      // Use the unified profile update with only the specified fields
-      const updateData: any = {
-        fullName,
-        phoneNumber,
-      };
-
-      // Only include profilePicture if it exists
-      if (profileImage) {
-        updateData.profilePicture = profileImage;
+      // Validate required fields
+      if (!fullName.trim()) {
+        Alert.alert(
+          t('error') || 'Error',
+          'Full name is required'
+        );
+        return;
       }
 
+      if (!phoneNumber.trim()) {
+        Alert.alert(
+          t('error') || 'Error',
+          'Phone number is required'
+        );
+        return;
+      }
+
+      // Prepare update data according to PATCH /api/v1/auth/profile specification
+      const updateData = {
+        fullName: fullName.trim(),
+        phoneNumber: phoneNumber.trim(),
+        // Only include profilePicture if it exists and is a valid URL
+        ...(profileImage && { profilePicture: profileImage }),
+      };
+
+      console.log('📤 Updating profile via PATCH /api/v1/auth/profile:', {
+        fullName: updateData.fullName,
+        phoneNumber: updateData.phoneNumber,
+        profilePicture: updateData.profilePicture ? '(URL provided)' : '(no image)',
+      });
+
       await updateProfileMutation.mutateAsync(updateData);
-      Alert.alert(t('success'), t('profile_updated_successfully'));
+      
+      Alert.alert(
+        t('success') || 'Success', 
+        t('profile_updated_successfully') || 'Profile updated successfully'
+      );
       navigation.goBack();
     } catch (error: any) {
-      console.error('Failed to update profile:', error);
+      console.error('❌ Profile update failed:', error);
 
       // Show more specific error messages
       const errorMessage =
-        error?.response?.data?.message ||
         error?.message ||
-        t('failed_to_update_profile' as any);
+        error?.response?.data?.message ||
+        t('failed_to_update_profile') ||
+        'Failed to update profile';
 
-      Alert.alert(t('error'), errorMessage);
+      Alert.alert(t('error') || 'Error', errorMessage);
     }
   };
 
@@ -179,7 +204,7 @@ const EditProfileScreen = ({
           className="active:opacity-75 mb-2"
           onPress={handleUpdate}
           loading={updateProfileMutation.status === 'pending'}
-          disabled={updateProfileMutation.isPending || isUploadingImage}
+          disabled={updateProfileMutation.isPending || isUploadingImage || pickAndUploadImageMutation.isPending}
         >
           {t('update')}
         </Button>

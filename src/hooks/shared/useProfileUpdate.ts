@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   profileApi,
   UpdateProfileRequest,
-  UpdateProfileWithImageRequest,
+  LocalImageData,
   isLocalFileUri,
 } from '@/src/services/shared/profileApi';
 import { useAuthStore } from '@/src/stores/AuthStore';
@@ -18,8 +18,20 @@ interface ProfileUpdateData {
 
 /**
  * Unified hook for updating user profiles (both customer and restaurant)
- * Uses PATCH /api/v1/auth/profile endpoint
- * Automatically detects if image upload is needed based on profilePicture value
+ * 
+ * API: PATCH /api/v1/auth/profile
+ * Content-Type: application/json
+ * 
+ * Automatically handles image upload workflow:
+ * 1. If local image: upload image first to get URL, then update profile with JSON
+ * 2. If URL or no image: update profile directly with JSON
+ * 
+ * Request format:
+ * {
+ *   "fullName": "Tochukwu Paul",
+ *   "phoneNumber": "+237612345678",
+ *   "profilePicture": "https://example.com/profile.jpg"
+ * }
  */
 export const useUpdateProfile = () => {
   const queryClient = useQueryClient();
@@ -27,35 +39,49 @@ export const useUpdateProfile = () => {
 
   return useMutation({
     mutationFn: async (data: ProfileUpdateData) => {
+      console.log('📤 Starting profile update process...');
+      
       // Check if we have a local file URI that needs to be uploaded
       const hasLocalImage = data.profilePicture && isLocalFileUri(data.profilePicture);
       
       if (hasLocalImage) {
-        // Use FormData approach for image upload
-        const imageData: UpdateProfileWithImageRequest = {
-          fullName: data.fullName,
-          phoneNumber: data.phoneNumber,
-          picture: createImageFormDataObject({
-            uri: data.profilePicture!,
-            type: 'image/jpeg', // Default type, could be improved
-            name: `profile-${Date.now()}.jpg`,
-          }),
-        };
+        // Use the complete workflow: upload image then update profile
+        const imageData: LocalImageData = createImageFormDataObject({
+          uri: data.profilePicture!,
+          type: 'image/jpeg', // Default type, could be improved
+          name: `profile-${Date.now()}.jpg`,
+        });
         
-        console.log('📤 Updating profile with image upload...');
-        const response = await profileApi.updateProfileWithImage(imageData);
-        return response.data.data;
+        console.log('📤 Updating profile with image upload workflow...');
+        const response = await profileApi.updateProfileWithImage({
+          fullName: data.fullName?.trim(),
+          phoneNumber: data.phoneNumber?.trim(),
+          picture: imageData,
+        });
+        return response.data;
       } else {
-        // Use JSON approach for URL or no image
-        const jsonData: UpdateProfileRequest = {
-          fullName: data.fullName,
-          phoneNumber: data.phoneNumber,
-          profilePicture: data.profilePicture, // Should be URL or undefined
-        };
+        // Use direct JSON approach for URL or no image
+        const profileData: UpdateProfileRequest = {};
         
-        console.log('📤 Updating profile with JSON data...');
-        const response = await profileApi.updateProfile(jsonData);
-        return response.data.data;
+        // Only include fields that are provided and not empty
+        if (data.fullName && data.fullName.trim()) {
+          profileData.fullName = data.fullName.trim();
+        }
+        if (data.phoneNumber && data.phoneNumber.trim()) {
+          profileData.phoneNumber = data.phoneNumber.trim();
+        }
+        if (data.profilePicture) {
+          profileData.profilePicture = data.profilePicture;
+        }
+        
+        console.log('📤 Updating profile with JSON data:', {
+          hasFullName: !!profileData.fullName,
+          hasPhoneNumber: !!profileData.phoneNumber,
+          hasProfilePicture: !!profileData.profilePicture,
+        });
+        
+        const response = await profileApi.updateProfile(profileData);
+        return response.data;
       }
     },
     onMutate: () => {

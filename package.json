@@ -10,6 +10,9 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "format": "prettier --write .",
     "validate:translations": "node src/locales/validate-translations.js validate",
+    "analyze:translations": "node scripts/analyze-translations.js",
+    "clean:translations": "node scripts/clean-translations.js",
+    "remove:duplicates": "node scripts/remove-duplicate-translations.js",
     "analyze:bundle": "node scripts/analyze-bundle.js",
     "monitor:bundle": "node scripts/monitor-bundle-size.js",
     "bundle:quick": "node scripts/quick-bundle-check.js",
@@ -25,7 +28,10 @@
     "production:build:all": "npm run production:prepare && npm run production:build:android && npm run production:build:ios",
     "production:test": "npm run lint && npm run format && npm run production:cleanup",
     "clean": "rm -rf node_modules/.cache dist .expo/web-build production-cleanup-report.json",
-    "clean:all": "npm run clean && rm -rf node_modules && npm install"
+    "clean:all": "npm run clean && rm -rf node_modules && npm install",
+    "fix:cache": "node scripts/fix-metro-cache.js",
+    "fix:syntax": "npm run lint --fix && npm run format",
+    "fix:app": "node scripts/fix-app-errors.js"
   },
   "jest": {
     "preset": "jest-expo"

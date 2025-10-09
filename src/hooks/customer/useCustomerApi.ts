@@ -180,6 +180,34 @@ export const useAllRestaurants = (query: RestaurantQuery = {}) => {
   });
 };
 
+// Hook for all restaurants without location requirements
+export const useAllRestaurantsWithoutLocation = (query: Omit<RestaurantQuery, 'nearLat' | 'nearLng' | 'radiusKm'> = {}) => {
+  const queryParams = {
+    isOpen: true,
+    verificationStatus: 'APPROVED' as const,
+    limit: 50, // Default limit
+    sortDir: 'ASC' as const, // Default sort direction
+    ...query, // Allow overriding defaults
+  };
+
+  return useQuery({
+    queryKey: ['restaurants', 'all-no-location', queryParams],
+    queryFn: async () => {
+      try {
+        const result = await restaurantApi.getAllRestaurantsWithoutLocation(queryParams);
+        return result;
+      } catch (error) {
+        console.error('❌ Error fetching all restaurants (no location):', error);
+        throw error;
+      }
+    },
+    staleTime: CACHE_CONFIG.STALE_TIME,
+    gcTime: CACHE_CONFIG.CACHE_TIME,
+    retry: CACHE_CONFIG.MAX_RETRIES,
+    enabled: true, // Always enabled since no location required
+  });
+};
+
 // Hook for menu item by ID with automatic location
 export const useMenuItemById = (
   id: string,

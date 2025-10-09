@@ -85,8 +85,7 @@ const PaymentProcessingScreen = ({
   const validatePhoneNumber = useCallback(
     (phone: string, provider: string) => {
       // Convert provider to medium format for validation
-    // Convert provider to medium format for validation
-    const medium = provider === 'orange' ? 'orange_money' : 'mtn';
+      const medium = provider === 'orange' ? 'orange' : 'mtn';
       return PaymentService.validatePhoneNumber(phone, medium);
     },
     [],
@@ -95,14 +94,14 @@ const PaymentProcessingScreen = ({
   // Initialize payment with selected method
   const initializePaymentWithSelection = async (selection: PaymentMethodSelection) => {
     if (!validatePhoneNumber(selection.phoneNumber, selection.provider)) {
-      setError(`Please enter a valid ${selection.provider.toUpperCase()} phone number`);
+      setError(t('please_enter_valid_phone', { provider: selection.provider.toUpperCase() }));
       setCurrentStep('method_selection');
       setShowPaymentModal(true);
       return;
     }
 
     if (!user?.fullName || !user?.email) {
-      setError('User information is missing. Please log in again.');
+      setError(t('user_info_missing'));
       setCurrentStep('failed');
       return;
     }
@@ -111,8 +110,8 @@ const PaymentProcessingScreen = ({
     setError('');
 
     try {
-      // Convert provider to the new medium format
-      const medium = selection.provider === 'orange' ? 'orange_money' : 'mtn';
+      // Convert provider to the correct medium format
+      const medium = selection.provider === 'orange' ? 'orange' : 'mtn';
 
       // Create payment request using the new API structure
       const paymentRequest = createPaymentRequest(
@@ -134,19 +133,19 @@ const PaymentProcessingScreen = ({
             // Start polling for payment status
             startPaymentStatusPolling(result.transactionId);
           } else {
-            setError(result.error || 'Failed to initialize payment');
+            setError(result.error || t('failed_initialize_payment'));
             setCurrentStep('failed');
           }
         },
         onError: (error) => {
           console.error('Payment initialization error:', error);
-          setError('Failed to initialize payment. Please try again.');
+          setError(t('failed_initialize_payment_retry'));
           setCurrentStep('failed');
         },
       });
     } catch (error) {
       console.error('Payment initialization error:', error);
-      setError('Failed to initialize payment. Please try again.');
+      setError(t('failed_initialize_payment_retry'));
       setCurrentStep('failed');
     } finally {
       // Payment initialization complete
@@ -184,7 +183,7 @@ const PaymentProcessingScreen = ({
       clearInterval(pollInterval);
       if (currentStep !== 'success' && currentStep !== 'failed') {
         setCurrentStep('failed');
-        setError('Payment timeout. Please try again.');
+        setError(t('payment_timeout_retry'));
       }
     }, 300000);
   };
@@ -197,7 +196,7 @@ const PaymentProcessingScreen = ({
           if (prev <= 1) {
             clearInterval(timer);
             setCurrentStep('failed');
-            setError('Payment session expired. Please try again.');
+            setError(t('payment_session_expired'));
             return 0;
           }
           return prev - 1;
@@ -212,7 +211,7 @@ const PaymentProcessingScreen = ({
   const copyUssdCode = async () => {
     if (ussdCode) {
       await Clipboard.setString(ussdCode);
-      Alert.alert('Copied', 'USSD code copied to clipboard');
+      Alert.alert(t('copied'), t('ussd_code_copied'));
     }
   };
 
@@ -275,7 +274,7 @@ const PaymentProcessingScreen = ({
             className="text-base text-center mt-2"
             style={{ color: colors.onSurfaceVariant }}
           >
-            Choose your payment method to pay {formattedAmount} FCFA
+            {t('choose_payment_method_to_pay', { amount: formattedAmount })}
           </Text>
         </View>
 
@@ -310,13 +309,13 @@ const PaymentProcessingScreen = ({
             className="text-xl font-bold text-center"
             style={{ color: colors.onSurface }}
           >
-            Dial USSD Code
+            {t('dial_ussd_code')}
           </Text>
           <Text
             className="text-base text-center mt-2"
             style={{ color: colors.onSurfaceVariant }}
           >
-            Dial the code below on your {getProviderName()} line
+            {t('dial_code_on_line', { provider: getProviderName() })}
           </Text>
         </View>
 
@@ -346,21 +345,21 @@ const PaymentProcessingScreen = ({
             className="text-sm font-medium"
             style={{ color: colors.onSurfaceVariant }}
           >
-            Instructions:
+            {t('instructions')}
           </Text>
           <Text
             className="text-sm mt-1"
             style={{ color: colors.onSurfaceVariant }}
           >
-            1. Dial {ussdCode} on your {getProviderName()} line{'\n'}
-            2. Follow the prompts to complete payment{'\n'}
-            3. We&apos;ll automatically detect when payment is complete
+            {t('dial_code_instruction', { code: ussdCode, provider: getProviderName() })}{'\n'}
+            {t('follow_prompts_instruction')}{'\n'}
+            {t('auto_detect_instruction')}
           </Text>
         </View>
 
         <View className="items-center">
           <Text className="text-sm" style={{ color: colors.onSurfaceVariant }}>
-            Time remaining: {formatTime(countdown)}
+            {t('time_remaining', { time: formatTime(countdown) })}
           </Text>
           <ActivityIndicator
             size="small"
@@ -371,7 +370,7 @@ const PaymentProcessingScreen = ({
             className="text-sm mt-1"
             style={{ color: colors.onSurfaceVariant }}
           >
-            Waiting for payment confirmation...
+            {t('waiting_payment_confirmation')}
           </Text>
         </View>
       </Card.Content>
@@ -393,13 +392,13 @@ const PaymentProcessingScreen = ({
             className="text-2xl font-bold text-center mb-2"
             style={{ color: colors.onSurface }}
           >
-            Payment Successful!
+            {t('payment_successful')}
           </Text>
           <Text
             className="text-base text-center mb-6"
             style={{ color: colors.onSurfaceVariant }}
           >
-            Your order has been confirmed and is being prepared.
+            {t('order_confirmed_preparing')}
           </Text>
 
           <TouchableOpacity
@@ -411,7 +410,7 @@ const PaymentProcessingScreen = ({
               className="text-base font-semibold"
               style={{ color: colors.onPrimary }}
             >
-              View Order Status
+              {t('view_order_status')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -434,13 +433,13 @@ const PaymentProcessingScreen = ({
             className="text-2xl font-bold text-center mb-2"
             style={{ color: colors.onSurface }}
           >
-            Payment Failed
+            {t('payment_failed')}
           </Text>
           <Text
             className="text-base text-center mb-6"
             style={{ color: colors.onSurfaceVariant }}
           >
-            {error || 'Something went wrong with your payment.'}
+            {error || t('payment_error_generic')}
           </Text>
 
           <View className="flex-row space-x-4">
@@ -453,7 +452,7 @@ const PaymentProcessingScreen = ({
                 className="text-base font-semibold"
                 style={{ color: colors.onSurface }}
               >
-                Cancel
+                {t('cancel')}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -465,7 +464,7 @@ const PaymentProcessingScreen = ({
                 className="text-base font-semibold"
                 style={{ color: colors.onPrimary }}
               >
-                Try Again
+                {t('try_again')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -490,7 +489,7 @@ const PaymentProcessingScreen = ({
             className="text-base text-center mt-2"
             style={{ color: colors.onSurfaceVariant }}
           >
-            Please wait while we process your payment...
+            {t('processing_payment_wait')}
           </Text>
         </View>
       </Card.Content>
@@ -538,7 +537,7 @@ const PaymentProcessingScreen = ({
             className="text-lg font-semibold"
             style={{ color: colors.onSurface }}
           >
-            Payment
+            {t('payment')}
           </Text>
         </View>
 
@@ -551,7 +550,7 @@ const PaymentProcessingScreen = ({
             className="text-sm font-medium"
             style={{ color: colors.onSurfaceVariant }}
           >
-            Order #{orderId}
+            {t('order_number', { orderId })}
           </Text>
           <Text
             className="text-2xl font-bold"

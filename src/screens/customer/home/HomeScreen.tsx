@@ -17,13 +17,6 @@ import {
 import { CustomerHomeStackScreenProps } from '@/src/navigation/types';
 import { RestaurantCard } from '@/src/components/customer/RestaurantCard';
 import HomeScreenHeaders from '@/src/components/customer/HomeScreenHeaders';
-import Animated, {
-  interpolate,
-  useAnimatedStyle,
-  SharedValue,
-} from 'react-native-reanimated';
-import Carousel from 'react-native-reanimated-carousel';
-import ClassicFoodCard from '@/src/components/customer/ClassicFoodCard';
 
 import { useTranslation } from 'react-i18next';
 import {
@@ -31,11 +24,12 @@ import {
   useGetAllMenuItem,
   useAllRestaurants,
   useBrowseRestaurants,
+  useAllRestaurantsWithoutLocation,
 } from '@/src/hooks/customer/useCustomerApi';
 import { FoodProps, RestaurantCard as RestaurantProps } from '@/src/types';
 import RestaurantCardSkeleton from '@/src/components/customer/RestaurantCardSkeleton';
 import FoodItemCardSkeleton from '@/src/components/customer/FoodItemCardSkeleton';
-import ClassicFoodCardSkeleton from '@/src/components/customer/ClassicFoodCardSkeleton';
+
 import ErrorDisplay from '@/src/components/common/ErrorDisplay';
 import EmptyState from '@/src/components/common/EmptyState';
 import HomeHeader from '@/src/components/customer/HomeHeader';
@@ -45,93 +39,33 @@ import { useFloatingTabBarHeight } from '@/src/hooks/useFloatingTabBarHeight';
 const { width } = Dimensions.get('window');
 
 // Constants
-const CAROUSEL_CONFIG = {
-  width: width * 0.65,
-  height: 300,
-  autoPlayInterval: 4000,
-  animationDuration: 1000,
-} as const;
-
 const SKELETON_COUNTS = {
-  restaurants: 4,
-  foods: 4,
-  carousel: 3,
+  restaurants: 5,
+  foods: 5,
 } as const;
 
 type HomeScreenProps = CustomerHomeStackScreenProps<'HomeScreen'>;
 
-// Simplified CarouselItem component
-interface CarouselItemProps {
-  food?: FoodProps;
-  animationValue: SharedValue<number>;
-}
 
-const CarouselItem = React.memo<CarouselItemProps>(
-  ({ food, animationValue }) => {
-    const { t } = useTranslation('translation');
-
-    const animatedStyle = useAnimatedStyle(() => {
-      const scale = interpolate(
-        animationValue.value,
-        [-1, 0, 1],
-        [0.95, 1, 0.95],
-      );
-      const opacity = interpolate(
-        animationValue.value,
-        [-1, 0, 1],
-        [0.8, 1, 0.8],
-      );
-      return { transform: [{ scale }], opacity };
-    });
-
-    if (!food) {
-      return (
-        <Animated.View style={animatedStyle} className="px-2">
-          <ClassicFoodCardSkeleton />
-        </Animated.View>
-      );
-    }
-
-    return (
-      <Animated.View style={animatedStyle} className="px-2">
-        <ClassicFoodCard
-          id={food.id}
-          restaurantId={food.restaurant.id}
-          foodName={food.name}
-          foodPrice={food.price}
-          restaurantName={food.restaurant.name}
-          distance={food.distanceKm || food.distance}
-          rating={food.restaurant?.rating || null}
-          status={food.isAvailable ? 'AVAILABLE' : 'UNAVAILABLE'}
-          imageUrl={food.pictureUrl}
-          deliveryStatus={food.isAvailable ? t('available') : t('sold_out')}
-          deliveryFee={food.deliveryFee}
-          isAvailable={food.isAvailable}
-        />
-      </Animated.View>
-    );
-  },
-);
-
-CarouselItem.displayName = 'CarouselItem';
 
 // Section types for FlatList
 type HomeSectionItem =
   | { type: 'header'; title: string; onPress: (() => void) | null }
   | { type: 'search' }
   | { type: 'category'; data: any[] }
-  | { type: 'carousel'; data: FoodProps[] }
-  | { type: 'recommended'; data: FoodProps[] }
+  | { type: 'food_near_you'; data: FoodProps[] }
   | { type: 'restaurants'; data: RestaurantProps[] }
+  | { type: 'All Restaurant'; data: RestaurantProps[] }
+
   | {
       type: 'loading';
-      skeletonType: 'carousel' | 'foods' | 'restaurants';
+      skeletonType: 'foods' | 'restaurants';
       count: number;
     }
   | { type: 'error'; errorType: 'food' | 'restaurant'; onRetry: () => void }
   | {
       type: 'empty';
-      emptyType: 'carousel' | 'recommended' | 'restaurants';
+      emptyType: 'food_near_you' | 'restaurants';
       onActionPress?: () => void;
     };
 
@@ -175,6 +109,18 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
     limit: 20,
   });
 
+  // Get all restaurants without location requirements
+  const {
+    data: allRestaurantsNoLocation,
+    isLoading: allNoLocationLoading,
+    error: allNoLocationError,
+    refetch: refetchAllNoLocation,
+  } = useAllRestaurantsWithoutLocation({
+    isOpen: true,
+    verificationStatus: 'APPROVED',
+    limit: 30,
+  });
+
   // Use browse menu items endpoint for better food recommendations
   const {
     data: browseMenuData,
@@ -199,14 +145,17 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
     browseRestaurants && browseRestaurants.length > 0
       ? browseRestaurants
       : allRestaurants;
-
+  
+  // All restaurants data (without location requirements)
+  const allRestaurantsData = allRestaurantsNoLocation;
+  
   // Use browse menu data if available, otherwise fallback to all menu data
   const foodData =
     browseMenuData && browseMenuData.length > 0 ? browseMenuData : allMenuData;
 
   // Simplified loading state
   const isLoading =
-    browseLoading || allLoading || browseMenuLoading || allMenuLoading;
+    browseLoading || allLoading || browseMenuLoading || allMenuLoading || allNoLocationLoading;
   const hasError =
     (browseError && allError) || (browseMenuError && allMenuError);
 
@@ -230,6 +179,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
       await Promise.all([
         refetchBrowse(),
         refetchAll(),
+        refetchAllNoLocation(),
         refetchBrowseMenu(),
         refetchAllMenu(),
         // Categories refetch handled by unified hook
@@ -239,7 +189,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
     } finally {
       setRefreshing(false);
     }
-  }, [refetchBrowse, refetchAll, refetchBrowseMenu, refetchAllMenu]);
+  }, [refetchBrowse, refetchAll, refetchAllNoLocation, refetchBrowseMenu, refetchAllMenu]);
 
   // Navigation handlers
   const handleSearchPress = useCallback(() => {
@@ -250,20 +200,12 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
     navigation.navigate('NearbyRestaurants');
   }, [navigation]);
 
+  const handleAllRestaurantsPress = useCallback(() => {
+    navigation.navigate('AllRestaurants');
+  }, [navigation]);
+
   // Memoized render functions
-  const renderDiscountCarouselItem = useCallback(
-    ({
-      index,
-      animationValue,
-    }: {
-      index: number;
-      animationValue: SharedValue<number>;
-    }) => {
-      const food = foodData?.[index];
-      return <CarouselItem food={food} animationValue={animationValue} />;
-    },
-    [foodData],
-  );
+
 
   const renderRestaurantItem = useCallback(
     ({ item }: { item: RestaurantProps }) => (
@@ -283,7 +225,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
         estimatedDeliveryTime={item.estimatedDeliveryTime || '30-40 mins'}
         rating={item.rating}
         ratingCount={item.ratingCount}
-        image={item.image}
+        image={item.pictureUrl}
         phone={item.phone}
         menu={item.menu || []}
       />
@@ -337,8 +279,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
   );
 
   // Memoized data slices for performance
-  const carouselData = useMemo(() => foodData?.slice(0, 6) || [], [foodData]);
-  const recommendedFoodData = useMemo(
+  const foodNearYouData = useMemo(
     () => foodData?.slice(0, 8) || [],
     [foodData],
   );
@@ -358,42 +299,12 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
         type: 'category',
         data: categoriesForDisplay,
       },
-
-      // Discounts Guaranteed - Carousel Section
-      { type: 'header', title: t('discount_guaranteed'), onPress: null },
     ];
 
-    // Add carousel content
-    if (isLoading) {
-      data.push({
-        type: 'loading',
-        skeletonType: 'carousel',
-        count: SKELETON_COUNTS.carousel,
-      });
-    } else if (hasError) {
-      data.push({
-        type: 'error',
-        errorType: 'food',
-        onRetry: () => {
-          refetchBrowseMenu();
-          refetchAllMenu();
-        },
-      });
-    } else if (carouselData.length === 0) {
-      data.push({
-        type: 'empty',
-        emptyType: 'carousel',
-        onActionPress: () =>
-          navigation.navigate('SearchScreen', { type: 'search' }),
-      });
-    } else {
-      data.push({ type: 'carousel', data: carouselData });
-    }
-
-    // Recommended for You Section
+    // Food Near You Section
     data.push({
       type: 'header',
-      title: t('recommended_for_you'),
+      title: t('food_near_you'),
       onPress: () => navigation.navigate('SearchScreen', { type: 'search' }),
     });
 
@@ -412,15 +323,15 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
           refetchAllMenu();
         },
       });
-    } else if (recommendedFoodData.length === 0) {
+    } else if (foodNearYouData.length === 0) {
       data.push({
         type: 'empty',
-        emptyType: 'recommended',
+        emptyType: 'food_near_you',
         onActionPress: () =>
           navigation.navigate('SearchScreen', { type: 'search' }),
       });
     } else {
-      data.push({ type: 'recommended', data: recommendedFoodData });
+      data.push({ type: 'food_near_you', data: foodNearYouData });
     }
 
     // Restaurants Near You Section
@@ -451,26 +362,39 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
     } else {
       data.push({ type: 'restaurants', data: restaurantData });
     }
+    // All Restaurants Section
+    data.push({
+      type: 'header',
+      title: t('all_restaurants'),
+      onPress: handleAllRestaurantsPress,
+    });
+
+    if (allNoLocationLoading) {
+      data.push({
+        type: 'loading',
+        skeletonType: 'restaurants',
+        count: SKELETON_COUNTS.restaurants,
+      });
+    } else if (allNoLocationError) {
+      data.push({
+        type: 'error',
+        errorType: 'restaurant',
+        onRetry: refetchAllNoLocation,
+      });
+    } else if (!allRestaurantsData || allRestaurantsData.length === 0) {
+      data.push({
+        type: 'empty',
+        emptyType: 'restaurants',
+        onActionPress: handleAllRestaurantsPress,
+      });
+    } else {
+      data.push({ type: 'restaurants', data: allRestaurantsData });
+    }
+    
+
 
     return data;
-  }, [
-    t,
-    isLoading,
-    hasError,
-    browseMenuError,
-    allMenuError,
-    browseError,
-    allError,
-    carouselData,
-    recommendedFoodData,
-    restaurantData,
-    categoriesForDisplay,
-    refetchBrowseMenu,
-    refetchAllMenu,
-    refetchBrowse,
-    handleNearbyRestaurantsPress,
-    navigation,
-  ]);
+  }, [t, categoriesForDisplay, isLoading, browseMenuError, allMenuError, foodNearYouData, handleNearbyRestaurantsPress, handleAllRestaurantsPress, browseError, allError, restaurantData, allRestaurantsData, allNoLocationLoading, allNoLocationError, refetchBrowseMenu, refetchAllMenu, refetchAllNoLocation, navigation, refetchBrowse]);
 
   // Render item based on type
   const renderItem: ListRenderItem<HomeSectionItem> = useCallback(
@@ -532,32 +456,9 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
             </View>
           );
 
-        case 'carousel':
-          return (
-            <View className="mb-5" style={{ height: CAROUSEL_CONFIG.height }}>
-              <Carousel
-                width={CAROUSEL_CONFIG.width}
-                height={CAROUSEL_CONFIG.height}
-                autoPlay
-                autoPlayInterval={CAROUSEL_CONFIG.autoPlayInterval}
-                data={item.data}
-                scrollAnimationDuration={CAROUSEL_CONFIG.animationDuration}
-                renderItem={renderDiscountCarouselItem}
-                style={{
-                  width: width,
-                  height: CAROUSEL_CONFIG.height,
-                  backgroundColor: colors.background,
-                }}
-                mode="parallax"
-                modeConfig={{
-                  parallaxScrollingScale: 0.9,
-                  parallaxScrollingOffset: 40,
-                }}
-              />
-            </View>
-          );
 
-        case 'recommended':
+
+        case 'food_near_you':
           return (
             <View className="mb-4">
               <FlatList
@@ -577,7 +478,20 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
             <View className="mb-6">
               <FlatList
                 data={item.data}
-                showsVerticalScrollIndicator={false}
+                horizontal
+                showsHorizontalScrollIndicator={false}                
+                keyExtractor={(restaurantItem) => restaurantItem.id}
+                renderItem={renderRestaurantItem}
+                contentContainerStyle={{ paddingHorizontal: 8 }}
+              />
+            </View>
+          );
+        case 'All Restaurant':
+          return (
+              <View className="mb-6">
+              <FlatList
+                data={item.data}
+                showsVerticalScrollIndicator={false}                
                 keyExtractor={(restaurantItem) => restaurantItem.id}
                 renderItem={renderRestaurantItem}
                 contentContainerStyle={{ paddingHorizontal: 8 }}
@@ -587,25 +501,6 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
 
         case 'loading':
           switch (item.skeletonType) {
-            case 'carousel':
-              return (
-                <View
-                  className="mb-5"
-                  style={{ height: CAROUSEL_CONFIG.height }}
-                >
-                  <FlatList
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    data={Array(item.count).fill(0)}
-                    keyExtractor={(_, index) => `skeleton-carousel-${index}`}
-                    renderItem={() => (
-                      <View className="px-2">
-                        <ClassicFoodCardSkeleton />
-                      </View>
-                    )}
-                  />
-                </View>
-              );
             case 'foods':
               return (
                 <View className="mb-4">
@@ -627,6 +522,8 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
               return (
                 <View className="mb-6">
                   <FlatList
+                  horizontal
+                    showsHorizontalScrollIndicator={false}
                     data={Array(item.count).fill(0)}
                     keyExtractor={(_, index) => `skeleton-restaurant-${index}`}
                     renderItem={() => (
@@ -658,18 +555,11 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
         case 'empty':
           const getEmptyStateProps = () => {
             switch (item.emptyType) {
-              case 'carousel':
-                return {
-                  icon: 'pricetag-outline' as const,
-                  title: t('no_discounts_available'),
-                  description: t('no_discounts_description'),
-                  actionText: t('view_all_food'),
-                };
-              case 'recommended':
+              case 'food_near_you':
                 return {
                   icon: 'restaurant-outline' as const,
-                  title: t('no_recommendations'),
-                  description: t('no_recommendations_description'),
+                  title: t('no_food_near_you'),
+                  description: t('no_food_near_you_description'),
                   actionText: t('explore_menu'),
                 };
               case 'restaurants':
@@ -709,7 +599,6 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
       t,
       handleSearchPress,
       renderCategoryItem,
-      renderDiscountCarouselItem,
       renderFoodItem,
       renderRestaurantItem,
     ],

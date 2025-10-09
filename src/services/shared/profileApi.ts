@@ -1,21 +1,33 @@
 import { apiClient } from './apiClient';
 import { User } from '@/src/types';
 
-// Unified profile update request interface based on the API documentation
+// Profile update request interface - PATCH /api/v1/auth/profile
+// Content-Type: application/json
+// Matches the exact API specification provided
 export interface UpdateProfileRequest {
-  fullName?: string;
-  phoneNumber?: string;
-  profilePicture?: string; // Should be a URL string, not a file
+  fullName?: string;        // e.g., "Tochukwu Paul"
+  phoneNumber?: string;     // e.g., "+237612345678"
+  profilePicture?: string;  // e.g., "https://example.com/profile.jpg"
 }
 
-// Interface for profile update with file upload
-export interface UpdateProfileWithImageRequest {
-  fullName?: string;
-  phoneNumber?: string;
-  picture?: {
-    uri: string;
-    type: string;
-    name: string;
+// Interface for local image data before upload
+export interface LocalImageData {
+  uri: string;
+  type: string;
+  name: string;
+}
+
+// Interface for image upload to get URL
+export interface ImageUploadRequest {
+  picture: LocalImageData;
+}
+
+// Interface for image upload response
+export interface ImageUploadResponse {
+  status_code: number;
+  message: string;
+  data: {
+    imageUrl: string;
   };
 }
 
@@ -29,46 +41,107 @@ export interface ProfileUpdateResponse {
 // Profile API service using the unified PATCH /auth/profile endpoint
 export const profileApi = {
   /**
-   * Update current user profile with JSON data (no image upload)
-   * Uses PATCH /api/v1/auth/profile endpoint
-   *
-   * Example request body:
+   * Update current user profile
+   * 
+   * API: PATCH /api/v1/auth/profile
+   * Content-Type: application/json
+   * 
+   * Request body example:
    * {
-   *   "fullName": "John Doe",
+   *   "fullName": "Tochukwu Paul",
    *   "phoneNumber": "+237612345678",
    *   "profilePicture": "https://example.com/profile.jpg"
    * }
+   * 
+   * @param data - Profile update data
+   * @returns Promise<ProfileUpdateResponse>
    */
-  updateProfile: (data: UpdateProfileRequest) => {
-    // Validate that profilePicture is a URL if provided
+  updateProfile: async (data: UpdateProfileRequest): Promise<ProfileUpdateResponse> => {
+    // Validate input data
     if (data.profilePicture && !isValidUrl(data.profilePicture)) {
       throw new Error('profilePicture must be a valid URL, not a local file path');
     }
     
-    return apiClient.patch<ProfileUpdateResponse>('/auth/profile', data);
+    // Validate phone number format if provided
+    if (data.phoneNumber && !isValidPhoneNumber(data.phoneNumber)) {
+      throw new Error('phoneNumber must be in valid format (e.g., +237612345678)');
+    }
+    
+    // Validate fullName if provided
+    if (data.fullName && data.fullName.trim().length < 2) {
+      throw new Error('fullName must be at least 2 characters long');
+    }
+    
+    try {
+      console.log('📤 Updating profile via PATCH /api/v1/auth/profile');
+      
+      const response = await apiClient.patch<ProfileUpdateResponse>('/auth/profile', data, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      console.log('✅ Profile updated successfully');
+      return response.data;
+    } catch (error: any) {
+      console.error('❌ Profile update failed:', error);
+      throw new Error(
+        error.response?.data?.message || 
+        error.message || 
+        'Failed to update profile'
+      );
+    }
   },
 
   /**
-   * Update current user profile with image upload using FormData
-   * Uses PATCH /api/v1/auth/profile endpoint with multipart/form-data
+   * Upload profile picture to get URL
+   * This should be called first to upload the image and get a URL
+   * Then use updateProfile with the returned URL
+   * 
+   * Note: This endpoint needs to be confirmed with backend team
+   * as it might be a separate upload endpoint like POST /api/v1/upload/profile-picture
    */
-  updateProfileWithImage: (data: UpdateProfileWithImageRequest) => {
+  uploadProfilePicture: async (data: ImageUploadRequest): Promise<string> => {
     const formData = new FormData();
+    formData.append('picture', data.picture as any);
     
-    // Add text fields
-    if (data.fullName) {
-      formData.append('fullName', data.fullName);
+    try {
+      // This might need to be a different endpoint for image upload
+      // Check with backend team for the correct upload endpoint
+      const response = await apiClient.post<ImageUploadResponse>('/upload/profile-picture', formData);
+      return response.data.data.imageUrl;
+    } catch (error) {
+      console.error('Failed to upload profile picture:', error);
+      throw new Error('Failed to upload profile picture. Please try again.');
     }
-    if (data.phoneNumber) {
-      formData.append('phoneNumber', data.phoneNumber);
+  },
+
+  /**
+   * Complete profile update workflow with image
+   * 1. Upload image to get URL
+   * 2. Update profile with JSON data including the image URL
+   */
+  updateProfileWithImage: async (data: {
+    fullName?: string;
+    phoneNumber?: string;
+    picture: LocalImageData;
+  }) => {
+    try {
+      // Step 1: Upload image to get URL
+      const imageUrl = await profileApi.uploadProfilePicture({ picture: data.picture });
+      
+      // Step 2: Update profile with JSON data including image URL
+      const profileData: UpdateProfileRequest = {
+        fullName: data.fullName,
+        phoneNumber: data.phoneNumber,
+        profilePicture: imageUrl,
+      };
+      
+      return await profileApi.updateProfile(profileData);
+    } catch (error) {
+      console.error('Failed to update profile with image:', error);
+      throw error;
     }
-    
-    // Add image file if provided
-    if (data.picture) {
-      formData.append('picture', data.picture as any);
-    }
-    
-    return apiClient.patch<ProfileUpdateResponse>('/auth/profile', formData);
   },
 
   /**
@@ -83,11 +156,26 @@ export const profileApi = {
 // Helper function to validate URL
 function isValidUrl(string: string): boolean {
   try {
-    new URL(string);
-    return true;
+    const url = new URL(string);
+    return url.protocol === 'http:' || url.protocol === 'https:';
   } catch (_) {
     return false;
   }
+}
+
+// Helper function to validate phone number format
+function isValidPhoneNumber(phoneNumber: string): boolean {
+  // Validate Cameroon phone number format: +237XXXXXXXXX or 237XXXXXXXXX or 6XXXXXXXX
+  const cleanNumber = phoneNumber.replace(/\s+/g, '');
+  
+  // Pattern for Cameroon numbers
+  const patterns = [
+    /^\+237[67]\d{8}$/,  // +237XXXXXXXXX
+    /^237[67]\d{8}$/,   // 237XXXXXXXXX
+    /^[67]\d{8}$/,      // XXXXXXXXX (9 digits starting with 6 or 7)
+  ];
+  
+  return patterns.some(pattern => pattern.test(cleanNumber));
 }
 
 // Helper function to check if a string is a local file URI
@@ -96,4 +184,13 @@ export function isLocalFileUri(uri: string): boolean {
 }
 
 // Export types for use in other files
-export type { UpdateProfileRequest, UpdateProfileWithImageRequest, ProfileUpdateResponse };
+export type { 
+  UpdateProfileRequest, 
+  LocalImageData,
+  ImageUploadRequest,
+  ImageUploadResponse,
+  ProfileUpdateResponse 
+};
+
+// Export validation helpers
+export { isValidUrl, isLocalFileUri };

@@ -32,7 +32,7 @@ const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
 }) => {
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
-  const { isSmallScreen, isTablet, wp, getResponsiveText } = useResponsive();
+  const {  isTablet, wp, getResponsiveText } = useResponsive();
   
   const [selectedProvider, setSelectedProvider] = useState<'mtn' | 'orange'>(
     currentSelection?.provider || 'mtn'
@@ -86,24 +86,34 @@ const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
   // Handle confirm
   const handleConfirm = useCallback(() => {
     if (!phoneNumber.trim()) {
-      Alert.alert(t('error'), t('please_enter_phone_number'));
+      Alert.alert(t('error'), t('phone_number_required'));
+      return;
+    }
+
+    // Remove all non-digit characters for validation
+    const cleanNumber = phoneNumber.replace(/\D/g, '');
+    
+    // Check if it's 9 digits
+    if (cleanNumber.length !== 9) {
+      Alert.alert(t('error'), t('invalid_phone_format'));
       return;
     }
 
     if (!validatePhoneNumber(phoneNumber, selectedProvider)) {
-      Alert.alert(
-        t('error'),
-        t('invalid_phone_number_format', {
-          provider: selectedProvider.toUpperCase(),
-        })
-      );
+      const errorMessage = selectedProvider === 'mtn' 
+        ? t('invalid_mtn_number')
+        : t('invalid_orange_number');
+      Alert.alert(t('error'), errorMessage);
       return;
     }
+
+    // Remove all spaces and non-digit characters before sending to payment service
+    const cleanPhoneNumber = phoneNumber.replace(/\D/g, '');
 
     onConfirm({
       method: 'mobile_money',
       provider: selectedProvider,
-      phoneNumber: phoneNumber.trim(),
+      phoneNumber: cleanPhoneNumber,
     });
   }, [phoneNumber, selectedProvider, onConfirm, t]);
 

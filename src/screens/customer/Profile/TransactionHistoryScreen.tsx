@@ -168,11 +168,11 @@ const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
         >
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             {/* Provider Icon */}
-            <Image
+            {/* <Image
               source={getProviderIcon(item.provider)}
               style={{ width: 32, height: 32, marginRight: 12 }}
               resizeMode="contain"
-            />
+            /> */}
             
             {/* Transaction Details */}
             <View style={{ flex: 1 }}>
@@ -265,7 +265,7 @@ const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
         </TouchableOpacity>
       </Card>
     );
-  }, [colors, cardDimensions, getResponsiveText, t, formatTransactionDate, getStatusColor]);
+  }, [colors.surface, colors.outline, colors.onSurface, colors.onSurfaceVariant, colors.primary, cardDimensions.borderRadius, cardDimensions.marginVertical, cardDimensions.padding, getResponsiveText, t, getStatusColor, navigation]);
   
   // Render filter button
   const renderFilterButton = useCallback(({ item }: { item: typeof filterOptions[0] }) => {
@@ -423,7 +423,7 @@ const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
   if (isError) {
     return (
       <CommonView>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <MaterialIcon name="error-outline" size={80} color={colors.error} />
           <Text
             style={{
@@ -483,7 +483,7 @@ const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
             {renderStatsCard()}
             
             {/* Filter Buttons */}
-            <View style={{ paddingHorizontal: 16, marginBottom: 8 }}>
+            <View style={{ marginBottom: 8 }}>
               <FlatList
                 data={filterOptions}
                 renderItem={renderFilterButton}

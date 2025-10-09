@@ -4,12 +4,11 @@ import { View, Image, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '@/src/navigation/types';
-import { useTheme, ActivityIndicator } from 'react-native-paper';
+import {  ActivityIndicator } from 'react-native-paper';
 import { useResponsive } from '@/src/hooks/useResponsive';
 
 import { useTranslation } from 'react-i18next';
 import {
-  Typography,
   Caption,
   Overline,
 } from '@/src/components/common/Typography';
@@ -44,10 +43,9 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
   color,
 }) => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const { colors } = useTheme();
   const { t } = useTranslation('translation');
   const [imageError, setImageError] = useState(false);
-  const { isSmallScreen, isTablet, isLargeScreen, wp, getResponsiveText } = useResponsive();
+  const {  isTablet, isLargeScreen, getResponsiveText } = useResponsive();
 
   const handlePress = useCallback(() => {
     if (isLoading || disabled) return;
@@ -69,7 +67,7 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
         { text: 'OK' },
       ]);
     }
-  }, [navigation, title, categoryId, isLoading, disabled, onPress, t]);
+  }, [navigation, title, isLoading, disabled, onPress, t]);
 
   const handleImageError = useCallback(() => {
     setImageError(true);
@@ -80,38 +78,38 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
     if (isLargeScreen) {
       return {
         cardSize: 140, // Increased from 85 to 140
-        imageContainerSize: 70, // Increased from 40 to 70
-        imageSize: 50, // Increased from 32 to 50
-        iconSize: 35, // Increased from 18 to 35
+        imageContainerSize: 80, // Increased from 70 to 80
+        imageSize: 60, // Increased from 50 to 60
+        iconSize: 40, // Increased from 35 to 40
         borderRadius: 24, // Increased from 16 to 24
         padding: 18, // Increased from 12 to 18
-        titleFontSize: getResponsiveText(14), // Increased from 12
-        itemCountFontSize: getResponsiveText(11), // Increased from 9
-        badgeFontSize: getResponsiveText(12), // Increased from 10
+        titleFontSize: getResponsiveText(11), // Decreased from 14 to 11
+        itemCountFontSize: getResponsiveText(9), // Decreased from 11 to 9
+        badgeFontSize: getResponsiveText(10), // Decreased from 12 to 10
       };
     } else if (isTablet) {
       return {
         cardSize: 120, // Increased from 85 to 120
-        imageContainerSize: 60, // Increased from 40 to 60
-        imageSize: 42, // Increased from 32 to 42
-        iconSize: 28, // Increased from 18 to 28
+        imageContainerSize: 70, // Increased from 60 to 70
+        imageSize: 52, // Increased from 42 to 52
+        iconSize: 32, // Increased from 28 to 32
         borderRadius: 20, // Increased from 16 to 20
         padding: 16, // Increased from 12 to 16
-        titleFontSize: getResponsiveText(13), // Increased from 12
-        itemCountFontSize: getResponsiveText(10), // Increased from 9
-        badgeFontSize: getResponsiveText(11), // Increased from 10
+        titleFontSize: getResponsiveText(10), // Decreased from 13 to 10
+        itemCountFontSize: getResponsiveText(8), // Decreased from 10 to 8
+        badgeFontSize: getResponsiveText(9), // Decreased from 11 to 9
       };
     } else {
       return {
-        cardSize: 100, // Increased from 85 to 100
-        imageContainerSize: 50, // Increased from 40 to 50
-        imageSize: 36, // Increased from 32 to 36
-        iconSize: 22, // Increased from 18 to 22
+        cardSize: 150, // Increased from 85 to 100
+        imageContainerSize: 100, // Increased from 50 to 60
+        imageSize: 100, // Increased from 36 to 45
+        iconSize: 28, // Increased from 22 to 28
         borderRadius: 18, // Increased from 16 to 18
         padding: 14, // Increased from 12 to 14
-        titleFontSize: getResponsiveText(12), // Same as before but responsive
-        itemCountFontSize: getResponsiveText(9), // Same as before but responsive
-        badgeFontSize: getResponsiveText(10), // Same as before but responsive
+        titleFontSize: getResponsiveText(9), // Decreased from 12 to 9
+        itemCountFontSize: getResponsiveText(7), // Decreased from 9 to 7
+        badgeFontSize: getResponsiveText(8), // Decreased from 10 to 8
       };
     }
   };

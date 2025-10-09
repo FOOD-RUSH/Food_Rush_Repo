@@ -7,8 +7,6 @@ import React from 'react';
 import { TouchableOpacity, View, Dimensions } from 'react-native';
 import { useTheme, Card } from 'react-native-paper';
 import { useResponsive } from '@/src/hooks/useResponsive';
-
-const { width: screenWidth } = Dimensions.get('window');
 import { useTranslation } from 'react-i18next';
 import {
   Typography,
@@ -18,6 +16,8 @@ import {
   Caption,
 } from '@/src/components/common/Typography';
 import { useLocationStatus } from '@/src/hooks/customer/useLocationService';
+const { width: screenWidth } = Dimensions.get('window');
+
 
 interface RestaurantCardProps {
   id: string;

@@ -6,7 +6,7 @@ import { apiClient } from '@/src/services/shared/apiClient';
 export interface PaymentMethod {
   id: string;
   type: 'mobile_money' | 'cash' | 'card';
-  provider?: 'mtn' | 'orange_money'; // Only for mobile_money type
+  provider?: 'mtn' | 'orange'; // Only for mobile_money type
   name: string;
   isDefault: boolean;
 }
@@ -15,7 +15,7 @@ export interface PaymentInitRequest {
   orderId: string;
   method: 'mobile_money';
   phone: string;
-  medium: 'mtn' | 'orange_money';
+  medium: 'mtn' | 'orange';
   name: string;
   email: string;
 }
@@ -62,17 +62,30 @@ class PaymentService {
    */
   validatePhoneNumber(
     phoneNumber: string,
-    medium: 'mtn' | 'orange_money',
+    medium: 'mtn' | 'orange',
   ): boolean {
     // Remove all non-digit characters
     const cleanNumber = phoneNumber.replace(/\D/g, '');
 
-    // MTN numbers: 67, 68, 65, 66 (Cameroon)
-    // Orange numbers: 69, 65, 66 (some overlap with MTN)
+    // Remove country code if present
+    const localNumber = cleanNumber.startsWith('237') 
+      ? cleanNumber.substring(3) 
+      : cleanNumber;
+
+    // Must be exactly 9 digits
+    if (!/^\d{9}$/.test(localNumber)) {
+      return false;
+    }
+
+    // Get the first two digits (prefix)
+    const prefix = localNumber.substring(0, 2);
+    
     if (medium === 'mtn') {
-      return /^(237)?(6[5-8])\d{7}$/.test(cleanNumber);
-    } else if (medium === 'orange_money') {
-      return /^(237)?(6[5-6,9])\d{7}$/.test(cleanNumber);
+      // MTN prefixes: 65, 66, 67, 68
+      return ['65', '66', '67', '68'].includes(prefix);
+    } else if (medium === 'orange') {
+      // Orange prefixes: 65, 66, 69 (some overlap with MTN)
+      return ['65', '66', '69'].includes(prefix);
     }
 
     return false;
@@ -86,7 +99,7 @@ class PaymentService {
 
     // Add country code if not present
     if (cleanNumber.startsWith('6') && cleanNumber.length === 9) {
-      return `237${cleanNumber}`;
+      return `${cleanNumber}`;
     }
 
     return cleanNumber;
@@ -237,7 +250,7 @@ class PaymentService {
       {
         id: 'orange_money',
         type: 'mobile_money',
-        provider: 'orange_money',
+        provider: 'orange',
         name: 'Orange Money',
         isDefault: false,
       },

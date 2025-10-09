@@ -56,17 +56,17 @@ const NotificationScreen = () => {
       // Handle navigation based on notification type and data
       if (notification.data?.orderId) {
         const screenName =
-          userType === 'restaurant' ? 'RestaurantOrderDetails' : 'OrderDetails';
+          userType === 'restaurant' ? 'RestaurantOrderDetails' : 'OrderReceipt';
         navigation.navigate(
-          screenName as never,
-          { orderId: notification.data.orderId } as never,
+          screenName,
+          { orderId: notification.data.orderId },
         );
       } else if (notification.data?.restaurantId) {
         navigation.navigate(
-          'RestaurantDetails' as never,
+          'RestaurantDetails',
           {
             restaurantId: notification.data.restaurantId,
-          } as never,
+          },
         );
       } else {
         // Show notification details

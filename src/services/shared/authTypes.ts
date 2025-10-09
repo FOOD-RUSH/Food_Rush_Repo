@@ -6,12 +6,14 @@ export interface LoginRequest {
   password: string;
 }
 
+// Updated to match exact backend API specification
+// POST /api/v1/auth/register
 export interface RegisterRequest {
-  role: string;
-  fullName: string;
-  phoneNumber: string;
-  email: string;
-  password: string;
+  email: string;        // "user@examle.com"
+  phoneNumber: string;  // "+237613345678"
+  fullName: string;     // "John Doew"
+  password: string;     // "password123"
+  role: string;         // "customer"
 }
 
 export interface OTPCredentials {
@@ -28,6 +30,14 @@ export interface ChangePasswordRequest {
   email: string;
   otp: string;
   newPassword: string;
+}
+
+export interface ResendOTPRequest {
+  userId: string;
+  email: string;
+  phone?: string;
+  type: 'email' | 'phone' | 'reset_password';
+  userType: 'customer' | 'restaurant';
 }
 
 // Legacy interface - use UpdateProfileRequest from profileApi instead
@@ -58,13 +68,18 @@ export interface LoginResponseData {
   data: LoginResponse;
 }
 
+// Updated to match exact backend API response
+// Response from POST /api/v1/auth/register
 export interface RegisterResponseData {
+  status_code: number;  // 201
+  message: string;      // "Registration successful"
   data: {
-    email: string;
-    phoneNumber: string;
-    role: string;
-    userId: string;
-    name: string;
+    userId: string;     // "d098c742-f677-44a2-9aff-0ba2362e0268"
+    emailSent: boolean; // true
+    name: string;       // "John Doew"
+    email: string;      // "user@examle.com"
+    phoneNumber: string; // "+237613345678"
+    role: string;       // "customer"
   };
 }
 

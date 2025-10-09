@@ -48,10 +48,7 @@ class ApiClient {
       process.env.EXPO_PUBLIC_API_URL ||
       'https://foodrush-be.onrender.com/api/v1';
 
-    // Handle Android emulator localhost
-    if (Platform.OS === 'android' && apiUrl.includes('localhost')) {
-      return apiUrl.replace('localhost', '10.0.2.2');
-    }
+   
 
     return apiUrl;
   }

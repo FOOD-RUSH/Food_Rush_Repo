@@ -15,7 +15,7 @@ export const FOOD_CATEGORIES: Category[] = [
     label: 'Local Dishes',
     emoji: '🍲',
     image: FoodCategory.localdish,
-    color: '#FF6B35',
+    color: '#007AFF',
     description: 'Traditional and regional cuisine',
   },
   {
@@ -23,7 +23,7 @@ export const FOOD_CATEGORIES: Category[] = [
     label: 'Breakfast',
     emoji: '🥞',
     image: FoodCategory.breakfast,
-    color: '#FFD93D',
+    color: '#007AFF',
     description: 'Morning meals and breakfast items',
   },
   {
@@ -31,7 +31,7 @@ export const FOOD_CATEGORIES: Category[] = [
     label: 'Fast Food',
     emoji: '🍔',
     image: FoodCategory.fastfood,
-    color: '#FF3B30',
+    color: '#007AFF',
     description: 'Quick service meals and burgers',
   },
   {
@@ -39,7 +39,7 @@ export const FOOD_CATEGORIES: Category[] = [
     label: 'Desserts',
     emoji: '🍰',
     image: FoodCategory.dessert,
-    color: '#FF69B4',
+    color: '#007AFF',
     description: 'Sweet treats and desserts',
   },
   {
@@ -55,7 +55,7 @@ export const FOOD_CATEGORIES: Category[] = [
     label: 'Vegetarian',
     emoji: '🥗',
     image: FoodCategory.vegetarian,
-    color: '#34C759',
+    color: '#007AFF',
     description: 'Plant-based and vegetarian options',
   },
 ];

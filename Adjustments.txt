@@ -1,13 +1,8 @@
 
-- payment logic
-- date time picker adaptability compatibility in ios
-- images of restaurant card, profile details needs to updated; loaded from backend
 - terms and conditions of applications
-- images of categories
 - about us modification
 -seervice fee updates
 -contact us and support updated
--help in profiles - to be updated
 -add all restarant page 
 - remove instagram, facebook, website, adjust wahtsapp and email
 

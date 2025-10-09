@@ -287,7 +287,7 @@ const OTPScreen: React.FC<AuthStackScreenProps<'OTPVerification'>> = ({
             color={colors.onBackground}
             style={{ lineHeight: 20 }}
           >
-            {t('otp_sent')} {data.phone || data.email}
+            {t('otp_sent')} {data.email}
           </Body>
         </View>
 
@@ -301,11 +301,20 @@ const OTPScreen: React.FC<AuthStackScreenProps<'OTPVerification'>> = ({
               }}
               className={`w-15 h-15 mx-2 text-center text-2xl font-semibold border-2 rounded-lg`}
               style={{
-                backgroundColor: digit ? colors.surfaceVariant : colors.surface,
-                borderColor: digit ? colors.primary : colors.surface,
+                backgroundColor: digit ? colors.primaryContainer : colors.surface,
+                borderColor: digit ? colors.primary : colors.outline,
                 color: colors.onSurface,
                 width: 60,
-                height: 100,
+                height: 60,
+                fontSize: 24,
+                fontWeight: '600',
+                textAlign: 'center',
+                // Ensure visibility in both light and dark modes
+                shadowColor: colors.shadow,
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.1,
+                shadowRadius: 2,
+                elevation: 2,
               }}
               value={digit}
               onChangeText={(value) => handleOtpChange(value, index)}
@@ -316,25 +325,35 @@ const OTPScreen: React.FC<AuthStackScreenProps<'OTPVerification'>> = ({
               maxLength={1}
               selectTextOnFocus
               editable={!isVerifying}
+              autoFocus={index === 0}
             />
           ))}
         </View>
 
         {/* Resend Timer */}
-        <View className="mb-8">
-          <Body align="center" color={colors.onSurface}>
+        <View className="mb-8 px-4">
+          <View 
+            style={{
+              backgroundColor: colors.surfaceVariant,
+              borderRadius: 12,
+              padding: 16,
+              alignItems: 'center',
+            }}
+          >
             {isResendEnabled ? (
-              <Body color={colors.primary}>You can now resend the code</Body>
+              <Body color={colors.primary} weight="medium">
+                You can now resend the code
+              </Body>
             ) : (
-              <>
+              <Body color={colors.onSurfaceVariant} align="center">
                 {t('resend_code')} in{' '}
-                <Label weight="medium" color={colors.primary}>
+                <Label weight="bold" color={colors.primary}>
                   {Math.floor(timer / 60)}:
-                  {(timer % 60).toString().padStart(2, '0')} s
+                  {(timer % 60).toString().padStart(2, '0')}
                 </Label>
-              </>
+              </Body>
             )}
-          </Body>
+          </View>
         </View>
 
         {/* Error Display */}
@@ -351,10 +370,18 @@ const OTPScreen: React.FC<AuthStackScreenProps<'OTPVerification'>> = ({
           onPress={handleVerify}
           loading={isVerifying}
           disabled={!otpComplete || isVerifying}
-          buttonColor={colors.primary}
-          textColor="white"
-          contentStyle={{ paddingVertical: 8 }}
-          style={{ borderRadius: 25, marginBottom: 20 }}
+          buttonColor={otpComplete ? colors.primary : colors.surfaceVariant}
+          textColor={otpComplete ? colors.onPrimary : colors.onSurfaceVariant}
+          contentStyle={{ paddingVertical: 12 }}
+          style={{ 
+            borderRadius: 12, 
+            marginBottom: 20,
+            elevation: otpComplete ? 3 : 0,
+            shadowColor: colors.primary,
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: otpComplete ? 0.2 : 0,
+            shadowRadius: 4,
+          }}
           labelStyle={{ fontSize: 16, fontWeight: '600' }}
         >
           {isVerifying ? t('verifying') : t('verify')}
@@ -364,12 +391,20 @@ const OTPScreen: React.FC<AuthStackScreenProps<'OTPVerification'>> = ({
         <TouchableOpacity
           onPress={handleResend}
           disabled={!isResendEnabled || isResending}
-          className="self-center"
+          style={{
+            alignSelf: 'center',
+            paddingVertical: 12,
+            paddingHorizontal: 24,
+            borderRadius: 8,
+            backgroundColor: isResendEnabled && !isResending ? colors.primaryContainer : colors.surfaceVariant,
+            borderWidth: 1,
+            borderColor: isResendEnabled && !isResending ? colors.primary : colors.outline,
+          }}
         >
           <Label
-            weight="medium"
+            weight="semibold"
             color={
-              isResendEnabled && !isResending ? colors.primary : colors.outline
+              isResendEnabled && !isResending ? colors.primary : colors.onSurfaceVariant
             }
           >
             {isResending ? t('resending') : t('resend_code')}

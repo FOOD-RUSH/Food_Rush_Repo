@@ -19,6 +19,7 @@ import {
   useCurrentRestaurant,
 } from '@/src/stores/AuthStore';
 import { useUpdateProfile } from '@/src/hooks/shared/useProfileUpdate';
+import { usePickAndUploadProfileImage } from '@/src/hooks/shared/useImageUpload';
 
 interface ProfileEditScreenProps {
   navigation: any;
@@ -42,6 +43,7 @@ const ProfileEditScreen: React.FC<ProfileEditScreenProps> = ({
   );
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const updateProfileMutation = useUpdateProfile();
+  const pickAndUploadImageMutation = usePickAndUploadProfileImage();
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -51,34 +53,33 @@ const ProfileEditScreen: React.FC<ProfileEditScreenProps> = ({
     try {
       setIsUploadingImage(true);
 
-      // Request permissions
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert(
-          t('permission_required') || 'Permission Required',
-          t('camera_permission_message') ||
-            'We need camera roll permissions to update your profile picture.',
-        );
+      // Use the new pick and upload hook
+      const imageUrl = await pickAndUploadImageMutation.mutateAsync();
+      
+      // Set the uploaded image URL (not local URI)
+      setProfileImage(imageUrl);
+      
+      Alert.alert(
+        t('success') || 'Success',
+        t('profile_image_updated_successfully') || 'Profile image updated successfully',
+      );
+    } catch (error: any) {
+      console.error('Error picking/uploading image:', error);
+      
+      // Handle specific error cases
+      if (error.message === 'No image selected') {
+        // User cancelled, no need to show error
         return;
       }
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-        allowsMultipleSelection: false,
-      });
-
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        setProfileImage(result.assets[0].uri);
-      }
-    } catch (error) {
-      console.error('Error picking image:', error);
+      
+      const errorMessage = 
+        error?.message ||
+        t('failed_to_pick_image') || 
+        'Failed to pick and upload image';
+        
       Alert.alert(
         t('error') || 'Error',
-        t('failed_to_pick_image') || 'Failed to pick image',
+        errorMessage,
       );
     } finally {
       setIsUploadingImage(false);
@@ -87,31 +88,49 @@ const ProfileEditScreen: React.FC<ProfileEditScreenProps> = ({
 
   const handleSave = async () => {
     try {
-      // Use the unified profile update with only the specified fields
-      const updateData: any = {
-        fullName: formData.fullName,
-        phoneNumber: formData.phoneNumber,
-      };
-
-      // Only include profilePicture if it exists
-      if (profileImage) {
-        updateData.profilePicture = profileImage;
+      // Validate required fields
+      if (!fullName.trim()) {
+        Alert.alert(
+          t('error') || 'Error',
+          'Full name is required'
+        );
+        return;
       }
 
+      if (!phoneNumber.trim()) {
+        Alert.alert(
+          t('error') || 'Error',
+          'Phone number is required'
+        );
+        return;
+      }
+
+      // Prepare update data according to PATCH /api/v1/auth/profile specification
+      const updateData = {
+        fullName: fullName.trim(),
+        phoneNumber: phoneNumber.trim(),
+        ...(profileImage && { profilePicture: profileImage }),
+      };
+
+      console.log('📤 Updating restaurant profile via PATCH /api/v1/auth/profile:', {
+        fullName: updateData.fullName,
+        phoneNumber: updateData.phoneNumber,
+        profilePicture: updateData.profilePicture ? '(URL provided)' : '(no image)',
+      });
+
       await updateProfileMutation.mutateAsync(updateData);
-
+      
       Alert.alert(
-        t('success') || 'Success',
-        t('profile_updated_successfully') || 'Profile updated successfully',
-        [{ text: t('ok') || 'OK', onPress: () => navigation.goBack() }],
+        t('success') || 'Success', 
+        t('profile_updated_successfully') || 'Profile updated successfully'
       );
+      navigation.goBack();
     } catch (error: any) {
-      console.error('Error saving profile:', error);
+      console.error('❌ Restaurant profile update failed:', error);
 
-      // Show more specific error messages
       const errorMessage =
-        error?.response?.data?.message ||
         error?.message ||
+        error?.response?.data?.message ||
         t('failed_to_update_profile') ||
         'Failed to update profile';
 
@@ -204,7 +223,7 @@ const ProfileEditScreen: React.FC<ProfileEditScreenProps> = ({
             mode="contained"
             onPress={handleSave}
             loading={updateProfileMutation.isPending}
-            disabled={updateProfileMutation.isPending || isUploadingImage}
+            disabled={updateProfileMutation.isPending || isUploadingImage || pickAndUploadImageMutation.isPending}
             style={{ paddingVertical: 8 }}
           >
             {updateProfileMutation.isPending

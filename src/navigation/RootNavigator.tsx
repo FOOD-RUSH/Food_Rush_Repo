@@ -1,4 +1,4 @@
-import { IoniconsIcon, MaterialIcon } from '@/src/components/common/icons';
+import { MaterialIcon } from '@/src/components/common/icons';
 import React, { useMemo, useCallback, useRef } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
@@ -86,7 +86,7 @@ import LanguageScreen from '../screens/customer/Profile/LanguageScreen';
 import ProfileEditScreen from '../screens/restaurant/account/ProfileEditScreen';
 import AddressScreen from '../screens/customer/Profile/AddressScreen';
 import PaymentProcessingScreen from '../screens/customer/payment/PaymentProcessingScreen';
-
+import AllRestaurantsScreen from '../screens/customer/home/AllRestaurantsScreen';
 // Data & theme
 import { OnboardingSlides } from '@/src/utils/onboardingData';
 import { useAppTheme, useAppNavigationTheme } from '../config/theme';
@@ -402,8 +402,15 @@ const RootNavigator: React.FC = () => {
               component={NearbyRestaurantsScreen}
               options={{ headerTitle: t('restaurants_near_you') }}
             />
+            <Stack.Screen
+              name="AllRestaurants"
+              component={AllRestaurantsScreen}
+              options={{ headerTitle: t('all_restaurants') }}
+            />
+          </Stack.Group>
 
-            {/* Restaurant screens */}
+          {/* Restaurant screens */}
+          <Stack.Group screenOptions={screenOptions.card}>
             <Stack.Screen
               name="RestaurantOrderDetails"
               component={OrderDetailsScreen}

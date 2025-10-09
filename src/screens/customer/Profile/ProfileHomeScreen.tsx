@@ -13,6 +13,8 @@ import LogoutContent from '@/src/components/common/BottomSheet/LogoutContent';
 import Avatar from '@/src/components/common/Avatar';
 import { useTranslation } from 'react-i18next';
 import { useFloatingTabBarHeight } from '@/src/hooks/useFloatingTabBarHeight';
+import TermsAndConditionsModal from '@/src/components/common/modals/TermsAndConditionsModal';
+import { useTermsModal } from '@/src/hooks/common/useTermsModal';
 
 const ProfileHomeScreen = ({
   navigation,
@@ -25,6 +27,7 @@ const ProfileHomeScreen = ({
   const { present, dismiss, isPresented } = useBottomSheet();
   const { t } = useTranslation('translation');
   const tabBarHeight = useFloatingTabBarHeight();
+  const { isVisible: showTermsModal, showTerms, hideTerms } = useTermsModal();
 
   const handleLogout = useCallback(() => {
     try {
@@ -115,6 +118,10 @@ const ProfileHomeScreen = ({
   const handleSecurityPress = useCallback(() => {
     Alert.alert(t('info'), t('security_settings_coming_soon'));
   }, [t]);
+
+  const handleTermsPress = useCallback(() => {
+    showTerms();
+  }, [showTerms]);
 
   return (
     <CommonView>
@@ -254,6 +261,14 @@ const ProfileHomeScreen = ({
           iconColor={colors.primary}
           showIconBackground={true}
         />
+        <RowView
+          title={t('terms_and_conditions')}
+          subtitle={t('view_our_terms_of_service')}
+          onPress={handleTermsPress}
+          leftIconName="document-text-outline"
+          iconColor="#6B7280"
+          showIconBackground={true}
+        />
 
         {/* Dark Mode Toggle */}
         <View className="flex-row justify-between mb-4 items-center px-2 py-2">
@@ -314,6 +329,13 @@ const ProfileHomeScreen = ({
           showIconBackground={true}
         />
       </ScrollView>
+
+      {/* Terms and Conditions Modal */}
+      <TermsAndConditionsModal
+        visible={showTermsModal}
+        onDismiss={hideTerms}
+        userType="customer"
+      />
     </CommonView>
   );
 };

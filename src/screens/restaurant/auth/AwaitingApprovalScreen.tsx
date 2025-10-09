@@ -25,8 +25,7 @@ import {
   Label,
 } from '@/src/components/common/Typography';
 
-interface AwaitingApprovalScreenProps
-  extends AuthStackScreenProps<'AwaitingApproval'> {}
+type AwaitingApprovalScreenProps = AuthStackScreenProps<'AwaitingApproval'>
 
 const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
   navigation,
@@ -36,7 +35,7 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
   const { t } = useTranslation();
   const logout = useAuthStore((state) => state.logout);
 
-  const { restaurantId, userId } = route.params || {};
+  const { restaurantId, userId, restaurantData, userData } = route.params || {};
 
   const handleLogout = useCallback(async () => {
     Alert.alert(t('logout'), t('are_you_sure_logout'), [
@@ -131,14 +130,14 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
         </View>
 
         <View style={styles.content}>
-          {/* Professional Illustration */}
+          {/* Professional Illustration
           <View style={styles.illustrationContainer}>
             <Image
               source={images.onboarding3}
               style={styles.illustration}
               resizeMode="contain"
             />
-          </View>
+          </View> */}
 
           {/* Title Section */}
           <View style={styles.titleSection}>
@@ -233,8 +232,216 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
             </View>
           </View>
 
-          {/* Info Card */}
-          {(restaurantId || userId) && (
+          {/* Restaurant Info Card */}
+          {restaurantData && (
+            <View style={styles.restaurantCard}>
+              <Heading2
+                color={colors.onSurface}
+                weight="semibold"
+                align="center"
+                style={{ marginBottom: 20 }}
+              >
+                {t('restaurant_information')}
+              </Heading2>
+              
+              {/* Restaurant Image */}
+              {restaurantData.pictureUrl && (
+                <View style={styles.restaurantImageContainer}>
+                  <Image
+                    source={{ uri: restaurantData.pictureUrl }}
+                    style={styles.restaurantImage}
+                    resizeMode="cover"
+                  />
+                </View>
+              )}
+              
+              {/* Restaurant Details */}
+              <View style={styles.restaurantDetails}>
+                <View style={styles.infoRow}>
+                  <IoniconsIcon
+                    name="storefront"
+                    size={20}
+                    color={colors.primary}
+                  />
+                  <View style={styles.infoContent}>
+                    <Label
+                      color={colors.onSurfaceVariant}
+                      weight="medium"
+                      style={{ marginBottom: 2 }}
+                    >
+                      {t('restaurant_name')}
+                    </Label>
+                    <Body
+                      color={colors.onSurface}
+                      weight="semibold"
+                    >
+                      {restaurantData.name}
+                    </Body>
+                  </View>
+                </View>
+                
+                {restaurantData.address && (
+                  <View style={styles.infoRow}>
+                    <IoniconsIcon
+                      name="location"
+                      size={20}
+                      color={colors.primary}
+                    />
+                    <View style={styles.infoContent}>
+                      <Label
+                        color={colors.onSurfaceVariant}
+                        weight="medium"
+                        style={{ marginBottom: 2 }}
+                      >
+                        {t('address')}
+                      </Label>
+                      <Body
+                        color={colors.onSurface}
+                        numberOfLines={2}
+                      >
+                        {restaurantData.address || `${restaurantData.latitude}, ${restaurantData.longitude}`}
+                      </Body>
+                    </View>
+                  </View>
+                )}
+                
+                {restaurantData.phone && (
+                  <View style={styles.infoRow}>
+                    <IoniconsIcon
+                      name="call"
+                      size={20}
+                      color={colors.primary}
+                    />
+                    <View style={styles.infoContent}>
+                      <Label
+                        color={colors.onSurfaceVariant}
+                        weight="medium"
+                        style={{ marginBottom: 2 }}
+                      >
+                        {t('phone_number')}
+                      </Label>
+                      <Body
+                        color={colors.onSurface}
+                        weight="medium"
+                      >
+                        {restaurantData.phone}
+                      </Body>
+                    </View>
+                  </View>
+                )}
+                
+                <View style={styles.infoRow}>
+                  <IoniconsIcon
+                    name="shield-checkmark"
+                    size={20}
+                    color={restaurantData.verificationStatus === 'PENDING_VERIFICATION' ? colors.secondary : colors.primary}
+                  />
+                  <View style={styles.infoContent}>
+                    <Label
+                      color={colors.onSurfaceVariant}
+                      weight="medium"
+                      style={{ marginBottom: 2 }}
+                    >
+                      {t('verification_status')}
+                    </Label>
+                    <Body
+                      color={restaurantData.verificationStatus === 'PENDING_VERIFICATION' ? colors.secondary : colors.primary}
+                      weight="semibold"
+                      style={{ textTransform: 'capitalize' }}
+                    >
+                      {restaurantData.verificationStatus.replace('_', ' ').toLowerCase()}
+                    </Body>
+                  </View>
+                </View>
+              </View>
+            </View>
+          )}
+          
+          {/* Owner Info Card */}
+          {userData && (
+            <View style={styles.infoCard}>
+              <Heading2
+                color={colors.onSurface}
+                weight="semibold"
+                align="center"
+                style={{ marginBottom: 16 }}
+              >
+                {t('owner_information')}
+              </Heading2>
+              
+              <View style={styles.infoRow}>
+                <IoniconsIcon
+                  name="person"
+                  size={18}
+                  color={colors.primary}
+                />
+                <View style={styles.infoContent}>
+                  <Label
+                    color={colors.onSurfaceVariant}
+                    weight="medium"
+                    style={{ marginBottom: 2 }}
+                  >
+                    {t('full_name')}
+                  </Label>
+                  <Body
+                    color={colors.onSurface}
+                    weight="medium"
+                  >
+                    {userData.fullName}
+                  </Body>
+                </View>
+              </View>
+              
+              <View style={styles.infoRow}>
+                <IoniconsIcon
+                  name="mail"
+                  size={18}
+                  color={colors.primary}
+                />
+                <View style={styles.infoContent}>
+                  <Label
+                    color={colors.onSurfaceVariant}
+                    weight="medium"
+                    style={{ marginBottom: 2 }}
+                  >
+                    {t('email')}
+                  </Label>
+                  <Body
+                    color={colors.onSurface}
+                    weight="medium"
+                  >
+                    {userData.email}
+                  </Body>
+                </View>
+              </View>
+              
+              <View style={styles.infoRow}>
+                <IoniconsIcon
+                  name="call"
+                  size={18}
+                  color={colors.primary}
+                />
+                <View style={styles.infoContent}>
+                  <Label
+                    color={colors.onSurfaceVariant}
+                    weight="medium"
+                    style={{ marginBottom: 2 }}
+                  >
+                    {t('phone')}
+                  </Label>
+                  <Body
+                    color={colors.onSurface}
+                    weight="medium"
+                  >
+                    {userData.phoneNumber}
+                  </Body>
+                </View>
+              </View>
+            </View>
+          )}
+          
+          {/* Fallback Info Card for legacy data */}
+          {!restaurantData && !userData && (restaurantId || userId) && (
             <View style={styles.infoCard}>
               <Heading2
                 color={colors.onSurface}
@@ -464,6 +671,36 @@ const createStyles = (colors: any) =>
       backgroundColor: colors.outline,
       marginLeft: 23,
       marginVertical: 8,
+    },
+    restaurantCard: {
+      width: '100%',
+      backgroundColor: colors.surface,
+      borderRadius: 20,
+      padding: 24,
+      marginBottom: 24,
+      elevation: 3,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.15,
+      shadowRadius: 6,
+    },
+    restaurantImageContainer: {
+      alignItems: 'center',
+      marginBottom: 20,
+    },
+    restaurantImage: {
+      width: 120,
+      height: 120,
+      borderRadius: 60,
+      borderWidth: 3,
+      borderColor: colors.primary + '30',
+    },
+    restaurantDetails: {
+      gap: 16,
+    },
+    infoContent: {
+      flex: 1,
+      marginLeft: 12,
     },
     infoCard: {
       width: '100%',
