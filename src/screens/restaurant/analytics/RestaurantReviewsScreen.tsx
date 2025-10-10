@@ -18,21 +18,17 @@ import * as Haptics from 'expo-haptics';
 import CommonView from '@/src/components/common/CommonView';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import {
-  Typography,
   Heading1,
-  Heading4,
   Heading5,
   Body,
   Label,
   Caption,
-  Overline,
 } from '@/src/components/common/Typography';
 import Avatar from '@/src/components/common/Avatar';
 import ErrorDisplay from '@/src/components/common/ErrorDisplay';
 import { useRestaurantReviews } from '@/src/hooks/restaurant/useRestaurantReviews';
 import { RestaurantReview } from '@/src/types';
 
-const { width: screenWidth } = Dimensions.get('window');
 
 interface ReviewItemProps {
   review: RestaurantReview;
@@ -264,9 +260,7 @@ const RestaurantReviewsScreen: React.FC<
             }}
           >
             <View>
-              <Heading1 color={colors.primary} weight="bold">
-                {reviewStats.averageRating.toFixed(1)}
-              </Heading1>
+             
               <View
                 style={{ flexDirection: 'row', marginTop: 4, marginBottom: 8 }}
               >

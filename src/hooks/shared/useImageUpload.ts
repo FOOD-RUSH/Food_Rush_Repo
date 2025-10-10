@@ -3,51 +3,48 @@ import { profileApi, LocalImageData } from '@/src/services/shared/profileApi';
 import { pickImageForUpload } from '@/src/utils/imageUtils';
 
 /**
- * Hook for uploading profile pictures
- * Returns a URL that can be used in profile updates
+ * Hook for uploading profile pictures with profile data
+ * Uses FormData approach directly with the profile update endpoint
  */
 export const useProfileImageUpload = () => {
   return useMutation({
-    mutationFn: async (imageData: LocalImageData): Promise<string> => {
-      console.log('📤 Uploading profile picture...');
-      const imageUrl = await profileApi.uploadProfilePicture({ picture: imageData });
-      console.log('✅ Profile picture uploaded successfully:', imageUrl);
-      return imageUrl;
+    mutationFn: async (data: {
+      fullName?: string;
+      phoneNumber?: string;
+      picture: LocalImageData;
+    }): Promise<any> => {
+
+      return response.data;
     },
     onError: (error: any) => {
-      console.error('❌ Profile picture upload failed:', error);
+      console.error('❌ Profile update with image failed:', error);
     },
   });
 };
 
 /**
- * Hook for picking and uploading profile pictures in one step
- * Combines image picker with upload functionality
+ * Hook for picking profile images
+ * Returns the picked image data that can be used with profile update
  */
 export const usePickAndUploadProfileImage = () => {
-  const uploadMutation = useProfileImageUpload();
-
   return useMutation({
-    mutationFn: async (): Promise<string> => {
-      // Step 1: Pick image from device
-      console.log('📱 Opening image picker...');
+    mutationFn: async (): Promise<LocalImageData> => {
+      // Pick image from device
+
       const imageResult = await pickImageForUpload();
       
       if (!imageResult) {
         throw new Error('No image selected');
       }
 
-      // Step 2: Upload the picked image
-      console.log('📤 Uploading selected image...');
-      const imageUrl = await profileApi.uploadProfilePicture({ picture: imageResult });
-      
-      return imageUrl;
+
+      return imageResult;
     },
-    onSuccess: (imageUrl: string) => {
-      console.log('✅ Image picked and uploaded successfully:', imageUrl);
+    onSuccess: (imageData: LocalImageData) => {
+
     },
     onError: (error: any) => {
-      console.error('❌ Pick and upload failed:', error);
+      console.error('❌ Image picking failed:', error);
     },
   });
 };
@@ -57,15 +54,15 @@ export const usePickAndUploadProfileImage = () => {
  */
 export const useImageUploadStatus = () => {
   const uploadMutation = useProfileImageUpload();
-  const pickAndUploadMutation = usePickAndUploadProfileImage();
+  const pickImageMutation = usePickAndUploadProfileImage();
 
   return {
-    isUploading: uploadMutation.isPending || pickAndUploadMutation.isPending,
-    uploadError: uploadMutation.error || pickAndUploadMutation.error,
-    uploadSuccess: uploadMutation.isSuccess || pickAndUploadMutation.isSuccess,
+    isUploading: uploadMutation.isPending || pickImageMutation.isPending,
+    uploadError: uploadMutation.error || pickImageMutation.error,
+    uploadSuccess: uploadMutation.isSuccess || pickImageMutation.isSuccess,
     reset: () => {
       uploadMutation.reset();
-      pickAndUploadMutation.reset();
+      pickImageMutation.reset();
     },
   };
 };

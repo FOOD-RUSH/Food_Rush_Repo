@@ -170,7 +170,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
 
         registerUserMutation(registrationData, {
           onSuccess: (response) => {
-            console.log('✅ Registration successful:', response);
+
             
             Toast.show({
               type: 'success',
@@ -207,7 +207,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
       } catch (error: any) {
         const errorMessage = error?.message || t('failed_to_create_account');
         setError(errorMessage);
-        console.log('Error: ', error);
+
         Toast.show({
           type: 'error',
           text1: t('error'),

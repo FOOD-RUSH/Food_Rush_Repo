@@ -68,18 +68,6 @@ export const authApi = {
         throw new Error('Full name must be at least 2 characters long');
       }
       
-      console.log('📤 Registering user via POST /api/v1/auth/register:', {
-        email: data.email,
-        phoneNumber: data.phoneNumber,
-        fullName: data.fullName,
-        role: data.role,
-        hasPassword: !!data.password,
-        passwordLength: data.password?.length
-      });
-      
-      // Log the exact request payload for debugging
-      console.log('📤 Exact request payload:', JSON.stringify(data, null, 2));
-      
       // Ensure proper Content-Type header for JSON
       const config = {
         headers: {
@@ -88,17 +76,7 @@ export const authApi = {
         }
       };
       
-      // Log the full URL being called
-      console.log('📤 Making request to:', `${process.env.EXPO_PUBLIC_API_URL || 'https://foodrush-be.onrender.com/api/v1'}/auth/register`);
-      
       const response = await apiClient.post<RegisterResponseData>('/auth/register', data, config);
-      
-      console.log('✅ Registration successful:', {
-        status_code: response.data.status_code,
-        message: response.data.message,
-        userId: response.data.data.userId,
-        emailSent: response.data.data.emailSent
-      });
       
       return response.data;
     } catch (error: any) {
@@ -151,15 +129,7 @@ export const authApi = {
 
   verifyOTP: async (data: OTPCredentials): Promise<LoginResponseData> => {
     try {
-      console.log('📤 Verifying OTP via POST /api/v1/auth/verify-otp:', {
-        userId: data.userId,
-        type: data.type,
-        hasOtp: !!data.otp
-      });
-      
       const response = await apiClient.post<LoginResponseData>('/auth/verify-otp', data);
-      
-      console.log('✅ OTP verification successful');
       return response.data;
     } catch (error: any) {
       console.error('❌ OTP verification failed:', error);

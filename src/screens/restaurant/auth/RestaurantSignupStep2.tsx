@@ -61,6 +61,7 @@ import {
   useResponsiveFontSize,
 } from '@/src/hooks/useResponsive';
 import * as yup from 'yup';
+import { CommonActions } from '@react-navigation/native';
 
 interface Step2FormData {
   restaurantName: string;
@@ -91,7 +92,6 @@ const RestaurantSignupStep2: React.FC<
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
   const { isConnected, isInternetReachable } = useNetwork();
-  const { scale } = useResponsive();
   const fontSize = useResponsiveFontSize();
   const {
     mutate: registerRestaurantMutation,
@@ -323,7 +323,7 @@ const RestaurantSignupStep2: React.FC<
 
         registerRestaurantMutation(registrationData, {
           onSuccess: (response) => {
-            console.log('✅ Restaurant registration response:', response);
+
             
             Toast.show({
               type: 'success',
@@ -333,7 +333,13 @@ const RestaurantSignupStep2: React.FC<
             });
             
             // Navigate with restaurant and user data
-            navigation.navigate('AwaitingApproval', {
+            navigation.dispatch(
+              CommonActions.reset({
+                index: 0,
+                routes: [
+                  {
+                    name: 'AwaitingApproval',
+                    params: {
               restaurantId: response.restaurant?.id,
               userId: response.user?.id,
               restaurantData: response.restaurant ? {
@@ -341,7 +347,7 @@ const RestaurantSignupStep2: React.FC<
                 name: response.restaurant.name,
                 address: response.restaurant.address,
                 phone: response.restaurant.phone,
-                pictureUrl: response.restaurant.pictureUrl || response.pictureUrl,
+                pictureUrl: response.restaurant.pictureUrl,
                 verificationStatus: response.restaurant.verificationStatus,
                 latitude: response.restaurant.latitude,
                 longitude: response.restaurant.longitude,
@@ -352,7 +358,33 @@ const RestaurantSignupStep2: React.FC<
                 email: response.user.email,
                 phoneNumber: response.user.phoneNumber,
               } : undefined,
-            });
+            }
+                  }
+                ]
+              })
+            )
+          //   navigation.navigate('AwaitingApproval', 
+          //     {
+          //     restaurantId: response.restaurant?.id,
+          //     userId: response.user?.id,
+          //     restaurantData: response.restaurant ? {
+          //       id: response.restaurant.id,
+          //       name: response.restaurant.name,
+          //       address: response.restaurant.address,
+          //       phone: response.restaurant.phone,
+          //       pictureUrl: response.restaurant.pictureUrl || response.pictureUrl,
+          //       verificationStatus: response.restaurant.verificationStatus,
+          //       latitude: response.restaurant.latitude,
+          //       longitude: response.restaurant.longitude,
+          //     } : undefined,
+          //     userData: response.user ? {
+          //       id: response.user.id,
+          //       fullName: response.user.fullName,
+          //       email: response.user.email,
+          //       phoneNumber: response.user.phoneNumber,
+          //     } : undefined,
+          //   }
+          // );
           },
           onError: (error: any) => {
             const errorMessage =
@@ -436,7 +468,7 @@ const RestaurantSignupStep2: React.FC<
         position: 'top',
       });
     }
-  }, []);
+  }, [t]);
 
   const pickProfileImage = useCallback(async () => {
     try {
@@ -529,7 +561,6 @@ const RestaurantSignupStep2: React.FC<
             backgroundColor: 'rgba(255, 255, 255, 0.15)',
             borderRadius: 20,
             padding: 12,
-            backdropFilter: 'blur(10px)',
           }}
         >
           <IoniconsIcon name="arrow-back" size={24} color="white" />

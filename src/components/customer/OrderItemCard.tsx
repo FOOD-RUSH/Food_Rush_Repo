@@ -55,7 +55,7 @@ const OrderItemCard = ({
   const isActiveOrder = !['delivered', 'cancelled'].includes(order.status);
 
   const handleNavigation = useCallback(
-    () => navigation.navigate('OrderReceipt', { orderId: order.id }),
+    () => navigation.push('OrderReceipt', { orderId: order.id }), // Use push() to ensure screen appears on top
     [navigation, order.id],
   );
 
@@ -63,7 +63,7 @@ const OrderItemCard = ({
     if (onTrackOrder) {
       onTrackOrder(order.id);
     } else {
-      navigation.navigate('OrderTracking', { orderId: order.id });
+      navigation.push('OrderTracking', { orderId: order.id }); // Use push() to ensure screen appears on top
     }
   }, [navigation, order.id, onTrackOrder]);
 
@@ -116,7 +116,7 @@ const OrderItemCard = ({
 
   const handleReviews = useCallback(
     () =>
-      navigation.navigate('RestaurantReview', {
+      navigation.push('RestaurantReview', {
         restaurantId: order.restaurantId,
         restaurantName: order.restaurant?.name || 'Restaurant',
       }),

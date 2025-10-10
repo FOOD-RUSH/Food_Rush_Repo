@@ -17,18 +17,11 @@ export interface LocalImageData {
   name: string;
 }
 
-// Interface for image upload to get URL
-export interface ImageUploadRequest {
+// Interface for FormData profile update with image
+export interface ProfileUpdateWithImageRequest {
+  fullName?: string;
+  phoneNumber?: string;
   picture: LocalImageData;
-}
-
-// Interface for image upload response
-export interface ImageUploadResponse {
-  status_code: number;
-  message: string;
-  data: {
-    imageUrl: string;
-  };
 }
 
 // API response interface
@@ -73,16 +66,7 @@ export const profileApi = {
     }
     
     try {
-      console.log('📤 Updating profile via PATCH /api/v1/auth/profile');
-      
-      const response = await apiClient.patch<ProfileUpdateResponse>('/auth/profile', data, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      console.log('✅ Profile updated successfully');
-      return response.data;
+      const response = await apiClient.patch<ProfileUpdateResponse>('/auth/profile', data);
     } catch (error: any) {
       console.error('❌ Profile update failed:', error);
       throw new Error(
@@ -94,32 +78,54 @@ export const profileApi = {
   },
 
   /**
-   * Upload profile picture to get URL
-   * This should be called first to upload the image and get a URL
-   * Then use updateProfile with the returned URL
-   * 
-   * Note: This endpoint needs to be confirmed with backend team
-   * as it might be a separate upload endpoint like POST /api/v1/upload/profile-picture
+   * Update profile with image using FormData
+   * Uses PATCH /api/v1/auth/profile with multipart/form-data
+   * Similar to how menu items and restaurant registration handle images
    */
-  uploadProfilePicture: async (data: ImageUploadRequest): Promise<string> => {
+  updateProfileWithFormData: async (data: {
+    fullName?: string;
+    phoneNumber?: string;
+    picture: LocalImageData;
+  }): Promise<ProfileUpdateResponse> => {
     const formData = new FormData();
-    formData.append('picture', data.picture as any);
+    
+    // Add text fields if provided
+    if (data.fullName && data.fullName.trim()) {
+      formData.append('fullName', data.fullName.trim());
+    }
+    if (data.phoneNumber && data.phoneNumber.trim()) {
+      formData.append('phoneNumber', data.phoneNumber.trim());
+    }
+    
+    // Add the image file
+    const imageFile = {
+      uri: data.picture.uri,
+      name: data.picture.name,
+      type: data.picture.type,
+    };
+    formData.append('profilePicture', imageFile as any);
     
     try {
-      // This might need to be a different endpoint for image upload
-      // Check with backend team for the correct upload endpoint
-      const response = await apiClient.post<ImageUploadResponse>('/upload/profile-picture', formData);
-      return response.data.data.imageUrl;
-    } catch (error) {
-      console.error('Failed to upload profile picture:', error);
-      throw new Error('Failed to upload profile picture. Please try again.');
+      const response = await apiClient.patch<ProfileUpdateResponse>('/auth/profile', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error('❌ Profile update with image failed:', error);
+      throw new Error(
+        error.response?.data?.message || 
+        error.message || 
+        'Failed to update profile with image'
+      );
     }
   },
 
   /**
    * Complete profile update workflow with image
-   * 1. Upload image to get URL
-   * 2. Update profile with JSON data including the image URL
+   * Uses FormData approach directly with PATCH /api/v1/auth/profile
+   * This is the recommended approach for profile updates with images
    */
   updateProfileWithImage: async (data: {
     fullName?: string;
@@ -127,17 +133,8 @@ export const profileApi = {
     picture: LocalImageData;
   }) => {
     try {
-      // Step 1: Upload image to get URL
-      const imageUrl = await profileApi.uploadProfilePicture({ picture: data.picture });
-      
-      // Step 2: Update profile with JSON data including image URL
-      const profileData: UpdateProfileRequest = {
-        fullName: data.fullName,
-        phoneNumber: data.phoneNumber,
-        profilePicture: imageUrl,
-      };
-      
-      return await profileApi.updateProfile(profileData);
+      // Use FormData approach directly
+      return await profileApi.updateProfileWithFormData(data);
     } catch (error) {
       console.error('Failed to update profile with image:', error);
       throw error;
@@ -187,8 +184,7 @@ export function isLocalFileUri(uri: string): boolean {
 export type { 
   UpdateProfileRequest, 
   LocalImageData,
-  ImageUploadRequest,
-  ImageUploadResponse,
+  ProfileUpdateWithImageRequest,
   ProfileUpdateResponse 
 };
 

@@ -25,7 +25,9 @@ import {
   getCustomerPhone,
   formatOrderTotal,
   ORDER_STATUS_COLORS,
+  getTimeSinceOrder,
 } from '@/src/utils/orderUtils';
+import { formatDate } from '@/src/utils/dateUtils';
 
 const OrderDetailsScreen: React.FC<
   RootStackScreenProps<'RestaurantOrderDetails'>
@@ -163,11 +165,19 @@ const OrderDetailsScreen: React.FC<
               <Heading1 style={{ color: colors.onSurface, marginBottom: 8 }} weight="bold">
                 #{orderId.slice(0, 8)}
               </Heading1>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <MaterialCommunityIcon name="clock-outline" size={16} color={colors.onSurfaceVariant} />
-                <Caption style={{ marginLeft: 6, color: colors.onSurfaceVariant }}>
-                  {orderData.time}
-                </Caption>
+              <View style={{ gap: 8 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <MaterialCommunityIcon name="clock-outline" size={16} color={colors.onSurfaceVariant} />
+                  <Caption style={{ marginLeft: 6, color: colors.onSurfaceVariant }}>
+                    {getTimeSinceOrder(orderData)}
+                  </Caption>
+                </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <MaterialCommunityIcon name="calendar-outline" size={16} color={colors.onSurfaceVariant} />
+                  <Caption style={{ marginLeft: 6, color: colors.onSurfaceVariant }}>
+                    {t('order_placed_at')} {formatDate(orderData.createdAt || orderData.time || new Date().toISOString(), 'MMM DD, h:mm a')}
+                  </Caption>
+                </View>
               </View>
             </View>
             <View
@@ -181,6 +191,64 @@ const OrderDetailsScreen: React.FC<
               <Label style={{ color: 'white', textTransform: 'uppercase', letterSpacing: 0.5 }} weight="bold">
                 {t(orderData.status)}
               </Label>
+            </View>
+          </View>
+        </View>
+
+        {/* Order Information */}
+        <View style={{ backgroundColor: colors.surface, marginTop: 12, paddingHorizontal: 20, paddingVertical: 20 }}>
+          <Label style={{ color: colors.onSurface, marginBottom: 16, fontSize: 15 }} weight="semibold">
+            {t('order_details')}
+          </Label>
+          
+          <View style={{ gap: 14 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  backgroundColor: colors.primaryContainer,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <MaterialCommunityIcon name="calendar-clock" size={20} color={colors.onPrimaryContainer} />
+              </View>
+              <View style={{ marginLeft: 14, flex: 1 }}>
+                <Caption style={{ color: colors.onSurfaceVariant, marginBottom: 2 }}>
+                  {t('order_created_at')}
+                </Caption>
+                <Body style={{ color: colors.onSurface }} weight="medium">
+                  {formatDate(orderData.createdAt || orderData.time || new Date().toISOString())}
+                </Body>
+                <Caption style={{ color: colors.onSurfaceVariant, marginTop: 2 }}>
+                  {getTimeSinceOrder(orderData)}
+                </Caption>
+              </View>
+            </View>
+
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  backgroundColor: colors.primaryContainer,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <MaterialCommunityIcon name="identifier" size={20} color={colors.onPrimaryContainer} />
+              </View>
+              <View style={{ marginLeft: 14, flex: 1 }}>
+                <Caption style={{ color: colors.onSurfaceVariant, marginBottom: 2 }}>
+                  {t('order_id')}
+                </Caption>
+                <Body style={{ color: colors.onSurface }} weight="medium">
+                  #{orderId}
+                </Body>
+              </View>
             </View>
           </View>
         </View>

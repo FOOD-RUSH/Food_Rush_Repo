@@ -78,7 +78,7 @@ const ProfileHomeScreen = ({
 
   // Navigation handlers
   const navigateToEditProfile = useCallback(() => {
-    navigation.navigate('EditProfile');
+    navigation.push('EditProfile'); // Use push() to ensure screen appears on top
   }, [navigation]);
 
   const navigateToProfileDetails = useCallback(() => {
@@ -90,11 +90,11 @@ const ProfileHomeScreen = ({
   }, [navigation]);
 
   const navigateToTransactionHistory = useCallback(() => {
-    navigation.navigate('TransactionHistory');
+    navigation.push('TransactionHistory'); // Use push() to ensure screen appears on top
   }, [navigation]);
 
   const navigateToAddress = useCallback(() => {
-    navigation.navigate('AddressScreen');
+    navigation.push('AddressScreen'); // Use push() to ensure screen appears on top
   }, [navigation]);
 
   const navigateToHelp = useCallback(() => {
@@ -107,7 +107,7 @@ const ProfileHomeScreen = ({
 
   // Notification handler
   const handleNotificationPress = useCallback(() => {
-    navigation.navigate('Notifications');
+    navigation.push('Notifications'); // Use push() to ensure screen appears on top
   }, [navigation]);
 
   // Placeholder handlers for incomplete features

@@ -176,12 +176,7 @@ export const useRegister = () => {
       clearError();
     },
     onSuccess: (data) => {
-      console.log('✅ Registration hook success:', {
-        userId: data.userId,
-        emailSent: data.emailSent,
-        name: data.name,
-        email: data.email
-      });
+
     },
     onError: (error: any) => {
       console.error('❌ Registration hook error:', error);
@@ -210,11 +205,7 @@ export const useVerifyOTP = () => {
         throw new Error('Invalid verification response: missing required data');
       }
 
-      console.log('✅ OTP verification hook success:', {
-        userId: user.id,
-        email: user.email,
-        role: user.role
-      });
+
 
       // Set auth data using the simplified store method
       await setAuthData({

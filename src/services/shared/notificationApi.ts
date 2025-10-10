@@ -48,7 +48,7 @@ export const notificationApi = {
   // PATCH /api/v1/notifications/read-all - Mark all notifications as read for authenticated user
   markAllAsRead: async () => {
     const response = await apiClient.patch<NotificationApiResponse>(
-      '/api/v1/notifications/read-all',
+      '/notifications/read-all',
     );
     return response.data;
   },

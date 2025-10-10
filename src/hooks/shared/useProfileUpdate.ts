@@ -39,20 +39,20 @@ export const useUpdateProfile = () => {
 
   return useMutation({
     mutationFn: async (data: ProfileUpdateData) => {
-      console.log('📤 Starting profile update process...');
+
       
       // Check if we have a local file URI that needs to be uploaded
       const hasLocalImage = data.profilePicture && isLocalFileUri(data.profilePicture);
       
       if (hasLocalImage) {
-        // Use the complete workflow: upload image then update profile
+        // Use FormData approach for local images
         const imageData: LocalImageData = createImageFormDataObject({
           uri: data.profilePicture!,
           type: 'image/jpeg', // Default type, could be improved
           name: `profile-${Date.now()}.jpg`,
         });
         
-        console.log('📤 Updating profile with image upload workflow...');
+
         const response = await profileApi.updateProfileWithImage({
           fullName: data.fullName?.trim(),
           phoneNumber: data.phoneNumber?.trim(),
@@ -74,11 +74,7 @@ export const useUpdateProfile = () => {
           profileData.profilePicture = data.profilePicture;
         }
         
-        console.log('📤 Updating profile with JSON data:', {
-          hasFullName: !!profileData.fullName,
-          hasPhoneNumber: !!profileData.phoneNumber,
-          hasProfilePicture: !!profileData.profilePicture,
-        });
+
         
         const response = await profileApi.updateProfile(profileData);
         return response.data;
@@ -88,7 +84,7 @@ export const useUpdateProfile = () => {
       clearError();
     },
     onSuccess: (updatedUser: User) => {
-      console.log('✅ Profile updated successfully:', updatedUser);
+
 
       // Update user in auth store
       setUser(updatedUser);
@@ -139,7 +135,7 @@ export const useGetProfile = () => {
       return response.data.data;
     },
     onSuccess: (userData: User) => {
-      console.log('✅ Profile fetched successfully:', userData);
+
 
       // Update user in auth store
       setUser(userData);

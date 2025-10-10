@@ -71,14 +71,14 @@ const PaymentBillingScreen: React.FC = () => {
         text: t('mobile_money'),
         onPress: () => {
           // Navigate to add mobile money method
-          console.log('Add mobile money method');
+
         },
       },
       {
         text: t('bank_account'),
         onPress: () => {
           // Navigate to add bank account
-          console.log('Add bank account');
+
         },
       },
     ]);
@@ -111,7 +111,7 @@ const PaymentBillingScreen: React.FC = () => {
         { text: t('cancel'), style: 'cancel' },
         { text: t('confirm'), onPress: () => {
           // Process payout request
-          console.log('Processing payout request');
+
         }},
       ],
     );

@@ -15,7 +15,7 @@ const PaymentScreen = ({
 
   const handleSelectPaymentMethod = (method: string) => {
     // Handle payment method selection
-    console.log('Selected payment method:', method);
+
     navigation.goBack(); // Navigate back to the checkout screen
   };
 

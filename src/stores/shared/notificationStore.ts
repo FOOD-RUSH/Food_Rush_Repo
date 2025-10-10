@@ -180,9 +180,10 @@ export const useNotificationStore = create<
           try {
             const response = await notificationApi.getUnreadCount();
             if (response.status_code === 200) {
-              set({ unreadCount: response.data });
+              set({ unreadCount: response.data.count });
             }
           } catch (error: any) {
+            console.error('Failed to update unread count:', error);
           }
         },
 

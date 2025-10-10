@@ -39,18 +39,18 @@ const EditProfileScreen = ({
     try {
       setIsUploadingImage(true);
 
-      // Use the new pick and upload hook
-      const imageUrl = await pickAndUploadImageMutation.mutateAsync();
+      // Pick image using the hook
+      const imageData = await pickAndUploadImageMutation.mutateAsync();
       
-      // Set the uploaded image URL (not local URI)
-      setProfileImage(imageUrl);
+      // Set the local image URI for preview
+      setProfileImage(imageData.uri);
       
       Alert.alert(
         t('success') || 'Success',
-        t('profile_image_updated_successfully') || 'Profile image updated successfully',
+        t('image_selected_successfully') || 'Image selected successfully. Save to update your profile.',
       );
     } catch (error: any) {
-      console.error('Error picking/uploading image:', error);
+      console.error('Error picking image:', error);
       
       // Handle specific error cases
       if (error.message === 'No image selected') {
@@ -61,7 +61,7 @@ const EditProfileScreen = ({
       const errorMessage = 
         error?.message ||
         t('failed_to_pick_image') || 
-        'Failed to pick and upload image';
+        'Failed to pick image';
         
       Alert.alert(
         t('error') || 'Error',
@@ -99,11 +99,7 @@ const EditProfileScreen = ({
         ...(profileImage && { profilePicture: profileImage }),
       };
 
-      console.log('📤 Updating profile via PATCH /api/v1/auth/profile:', {
-        fullName: updateData.fullName,
-        phoneNumber: updateData.phoneNumber,
-        profilePicture: updateData.profilePicture ? '(URL provided)' : '(no image)',
-      });
+
 
       await updateProfileMutation.mutateAsync(updateData);
       

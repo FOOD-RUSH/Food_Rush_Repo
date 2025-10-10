@@ -162,7 +162,7 @@ const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
           style={{ padding: cardDimensions.padding }}
           onPress={() => {
             // Navigate to transaction details
-            navigation.navigate('TransactionDetails', { transactionId: item.id });
+            navigation.push('TransactionDetails', { transactionId: item.id }); // Use push() to ensure screen appears on top
           }}
           activeOpacity={0.7}
         >

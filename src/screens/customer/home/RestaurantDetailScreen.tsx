@@ -256,8 +256,8 @@ const RestaurantDetailScreen = ({
       <View style={{ position: 'relative' }}>
         <ResponsiveImage
           source={
-            restaurantDetails.pictureUrl
-              ? { uri: restaurantDetails.pictureUrl }
+            restaurantDetails.image
+              ? { uri: restaurantDetails.image }
               : images.onboarding2
           }
           width="100%"

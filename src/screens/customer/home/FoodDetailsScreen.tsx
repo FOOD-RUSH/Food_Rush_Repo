@@ -184,7 +184,7 @@ const FoodDetailsScreen = ({
                 : images.onboarding1
             }
             resizeMode="cover"
-            onError={() => console.log('Image load error')}
+            onError={() => {}}
           />
 
           {/* Cart Status Badge */}

@@ -67,7 +67,7 @@ export const useEnhancedOrderFlow = () => {
     mutationFn: (orderData: CreateOrderRequest) =>
       OrderApi.createOrder(orderData),
     onSuccess: (response) => {
-      console.log('✅ Order created successfully:', response.data.id);
+
       setFlowState({
         step: 'waiting_restaurant',
         orderId: response.data.id,
@@ -107,7 +107,7 @@ export const useEnhancedOrderFlow = () => {
   const cancelOrderMutation = useMutation({
     mutationFn: (orderId: string) => OrderApi.cancelOrder(orderId),
     onSuccess: () => {
-      console.log('✅ Order cancelled successfully');
+
       setFlowState((prev) => ({
         ...prev,
         step: 'order_cancelled',
@@ -150,7 +150,7 @@ export const useEnhancedOrderFlow = () => {
       
       // Handle restaurant confirmation
       if (data.status === 'confirmed' && currentStep === 'waiting_restaurant') {
-        console.log('✅ Restaurant confirmed order');
+
         setFlowState((prev) => ({
           ...prev,
           step: 'payment_required',
@@ -169,7 +169,7 @@ export const useEnhancedOrderFlow = () => {
       
       // Handle restaurant rejection/cancellation
       else if (data.status === 'cancelled') {
-        console.log('❌ Restaurant cancelled order');
+
         setFlowState((prev) => ({
           ...prev,
           step: 'order_cancelled',
@@ -329,12 +329,12 @@ export const useEnhancedOrderFlow = () => {
         const result: PaymentPollingResult = await EnhancedPaymentService.processPaymentWithRetry(
           paymentRequest,
           (status) => {
-            console.log('Payment status update:', status.status);
+
           },
         );
 
         if (result.success) {
-          console.log('✅ Payment successful:', result.transactionId);
+
           setFlowState((prev) => ({
             ...prev,
             step: 'payment_success',

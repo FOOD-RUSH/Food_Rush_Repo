@@ -141,9 +141,9 @@ export const RestaurantCard = ({
   return (
     <TouchableOpacity
       onPress={() => {
-        navigation.navigate('RestaurantDetails', {
+        navigation.push('RestaurantDetails', {
           restaurantId: id,
-        });
+        }); // Use push() to ensure screen appears on top
       }}
       activeOpacity={0.9}
     >

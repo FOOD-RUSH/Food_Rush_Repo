@@ -63,7 +63,7 @@ export const SimpleNotificationProvider: React.FC<
   useEffect(() => {
     if (isAuthenticated && userType && user?.id) {
       // Push notification service is already initialized via usePushNotifications hook
-      console.log('✅ Notification service ready for user:', userType);
+
     }
   }, [isAuthenticated, userType, user?.id]);
 

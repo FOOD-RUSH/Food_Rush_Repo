@@ -61,7 +61,7 @@ const ProfileDetailsScreen = ({
       },
       {
         label: t('phone_number'),
-        value: user?.phoneNumber && user.phoneNumber.trim() !== '' ? user.phoneNumber : undefined,
+        value: user.phoneNumber ,
         icon: 'phone',
         iconSet: 'MaterialCommunityIcons' as const,
       },

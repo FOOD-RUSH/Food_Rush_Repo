@@ -43,11 +43,11 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
 
   // Navigation handlers
   const handleNotificationPress = useCallback(() => {
-    navigation.navigate('Notifications');
+    navigation.push('Notifications'); // Use push() to ensure screen appears on top
   }, [navigation]);
 
   const handleCartPress = useCallback(() => {
-    navigation.navigate('Cart');
+    navigation.push('Cart'); // Use push() to ensure screen appears on top
   }, [navigation]);
 
   const getDisplayAddress = () => {

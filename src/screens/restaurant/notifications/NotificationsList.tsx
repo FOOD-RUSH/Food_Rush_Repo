@@ -115,14 +115,7 @@ const RestaurantNotificationScreen = () => {
     [setFilter],
   );
 
-  // Send test notification (for development)
-  const handleSendTestNotification = useCallback(async () => {
-    await sendLocalNotification(
-      'Test Notification',
-      'This is a test notification for the restaurant app',
-      { type: 'test' },
-    );
-  }, [sendLocalNotification]);
+
 
   // Get restaurant-specific notification icon
   const getNotificationIcon = (type: string, priority?: string) => {

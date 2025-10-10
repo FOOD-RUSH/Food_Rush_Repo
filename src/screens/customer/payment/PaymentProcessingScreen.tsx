@@ -14,7 +14,7 @@ import { RootStackScreenProps } from '@/src/navigation/types';
 import CommonView from '@/src/components/common/CommonView';
 import { useTranslation } from 'react-i18next';
 import PaymentService from '@/src/services/customer/payment.service';
-import { useCartStore } from '@/src/stores/customerStores/cartStore';
+import { useCartStore, useCartServiceFee } from '@/src/stores/customerStores/cartStore';
 import { useOrderFlow } from '@/src/hooks/customer/useOrderFlow';
 import { useAuthUser } from '@/src/stores/customerStores';
 import {
@@ -27,8 +27,9 @@ import { PaymentMethodSelection } from '@/src/types/transaction';
 type PaymentStep =
   | 'method_selection'    // Select payment method (MTN/Orange)
   | 'processing'          // Processing payment
+  | 'ussd_prompt'         // Show USSD prompt message
   | 'ussd_display'        // Show USSD code
-  | 'confirmation'        // Waiting for confirmation
+  | 'verification'        // Verifying payment status
   | 'success'             // Payment successful
   | 'failed';             // Payment failed
 
@@ -42,6 +43,7 @@ const PaymentProcessingScreen = ({
   const clearCart = useCartStore((state) => state.clearCart);
   const { completePayment } = useOrderFlow();
   const user = useAuthUser();
+  const serviceFee = useCartServiceFee(); // Get service fee from cart
   const createPaymentRequest = useCreatePaymentRequest();
   const { mutate: initializePayment } = useInitializePayment();
 
@@ -57,7 +59,8 @@ const PaymentProcessingScreen = ({
   const [transactionId, setTransactionId] = useState<string>('');
   const [ussdCode, setUssdCode] = useState<string>('');
   const [error, setError] = useState<string>('');
-  const [countdown, setCountdown] = useState(300); // 5 minutes countdown
+  const [countdown, setCountdown] = useState(120); // 2 minutes countdown
+  const [verificationStarted, setVerificationStarted] = useState(false);
 
   // Format amount for display
   const formattedAmount = amount.toLocaleString('fr-FR', {
@@ -120,6 +123,7 @@ const PaymentProcessingScreen = ({
         medium,
         user.fullName,
         user.email,
+        serviceFee, // Pass the service fee from cart
       );
 
       // Use the new payment hook
@@ -128,10 +132,21 @@ const PaymentProcessingScreen = ({
           if (result.success && result.transactionId) {
             setTransactionId(result.transactionId);
             setUssdCode(result.ussdCode || '');
-            setCurrentStep(result.ussdCode ? 'ussd_display' : 'confirmation');
-
-            // Start polling for payment status
-            startPaymentStatusPolling(result.transactionId);
+            
+            // Show USSD prompt message first
+            setCurrentStep('ussd_prompt');
+            
+            // After 3 seconds, show USSD code if available, otherwise start verification
+            setTimeout(() => {
+              if (result.ussdCode) {
+                setCurrentStep('ussd_display');
+              } else {
+                setCurrentStep('verification');
+              }
+              
+              // Start 2-minute countdown and verification after timeout
+              startVerificationCountdown(result.transactionId);
+            }, 3000);
           } else {
             setError(result.error || t('failed_initialize_payment'));
             setCurrentStep('failed');
@@ -152,51 +167,82 @@ const PaymentProcessingScreen = ({
     }
   };
 
-  // Start payment status polling
-  const startPaymentStatusPolling = (txnId: string) => {
+  // Start verification countdown and check payment status after 2 minutes
+  const startVerificationCountdown = (txnId: string) => {
+    setVerificationStarted(true);
+    
+    // Start immediate polling every 5 seconds
     const pollInterval = setInterval(async () => {
       try {
         const status = await PaymentService.checkPaymentStatus(txnId);
-
+        
         if (status.status === 'completed') {
           clearInterval(pollInterval);
           setCurrentStep('success');
-          // Mark payment as completed in order flow
           completePayment();
           
           // Auto-navigate to success after a short delay
           setTimeout(() => {
             handleSuccess();
           }, 2000);
-        } else if (status.status === 'failed' || status.status === 'expired') {
+        } else if (status.status === 'failed') {
           clearInterval(pollInterval);
           setCurrentStep('failed');
-          setError(status.message);
+          setError(t('payment_status_failed'));
+        } else if (status.status === 'expired') {
+          clearInterval(pollInterval);
+          setCurrentStep('failed');
+          setError(t('payment_status_expired'));
         }
       } catch (error) {
         console.error('Payment status polling error:', error);
       }
-    }, 3000); // Poll every 3 seconds
-
-    // Stop polling after 5 minutes
-    setTimeout(() => {
+    }, 5000); // Poll every 5 seconds
+    
+    // After 2 minutes, do final verification
+    setTimeout(async () => {
       clearInterval(pollInterval);
+      
       if (currentStep !== 'success' && currentStep !== 'failed') {
-        setCurrentStep('failed');
-        setError(t('payment_timeout_retry'));
+        setCurrentStep('verification');
+        
+        try {
+          const finalStatus = await PaymentService.checkPaymentStatus(txnId);
+          
+          if (finalStatus.status === 'completed') {
+            setCurrentStep('success');
+            completePayment();
+            setTimeout(() => {
+              handleSuccess();
+            }, 2000);
+          } else if (finalStatus.status === 'failed') {
+            setCurrentStep('failed');
+            setError(t('payment_status_failed'));
+          } else if (finalStatus.status === 'expired') {
+            setCurrentStep('failed');
+            setError(t('payment_status_expired'));
+          } else {
+            // Still pending after 2 minutes
+            setCurrentStep('failed');
+            setError(t('payment_timeout_message'));
+          }
+        } catch (error) {
+          console.error('Final payment verification error:', error);
+          setCurrentStep('failed');
+          setError(t('payment_timeout_retry'));
+        }
       }
-    }, 300000);
+    }, 120000); // 2 minutes
   };
 
-  // Countdown timer for USSD
+  // Countdown timer for USSD and verification
   useEffect(() => {
-    if (currentStep === 'ussd_display' || currentStep === 'confirmation') {
+    if (currentStep === 'ussd_display' || currentStep === 'verification') {
       const timer = setInterval(() => {
         setCountdown((prev) => {
           if (prev <= 1) {
             clearInterval(timer);
-            setCurrentStep('failed');
-            setError(t('payment_session_expired'));
+            // Don't set failed here, let the verification timeout handle it
             return 0;
           }
           return prev - 1;
@@ -244,9 +290,10 @@ const PaymentProcessingScreen = ({
     setCurrentStep('method_selection');
     setShowPaymentModal(true);
     setError('');
-    setCountdown(300);
+    setCountdown(120); // Reset to 2 minutes
     setTransactionId('');
     setUssdCode('');
+    setVerificationStarted(false);
   };
 
   // Render method selection step
@@ -294,7 +341,75 @@ const PaymentProcessingScreen = ({
     </Card>
   );
 
-  // Render USSD display step
+  // Render USSD prompt step
+  const renderUssdPrompt = () => (
+    <Card mode="outlined" className="mx-4 mt-6">
+      <Card.Content className="p-6">
+        <View className="items-center mb-6">
+          <View
+            className="w-16 h-16 rounded-full items-center justify-center mb-4"
+            style={{ backgroundColor: colors.primary + '20' }}
+          >
+            <IoniconsIcon name="phone-portrait" size={32} color={colors.primary} />
+          </View>
+          <Text
+            className="text-xl font-bold text-center"
+            style={{ color: colors.onSurface }}
+          >
+            {t('expect_ussd_prompt')}
+          </Text>
+          <Text
+            className="text-base text-center mt-2"
+            style={{ color: colors.onSurfaceVariant }}
+          >
+            {t('ussd_prompt_message', { provider: getProviderName() })}
+          </Text>
+        </View>
+
+        <View className="bg-blue-50 p-4 rounded-lg mb-4">
+          <View className="flex-row items-start">
+            <IoniconsIcon name="information-circle" size={24} color={colors.primary} className="mr-3 mt-1" />
+            <View className="flex-1">
+              <Text
+                className="text-sm font-medium mb-2"
+                style={{ color: colors.primary }}
+              >
+                {t('important_note')}
+              </Text>
+              <Text
+                className="text-sm"
+                style={{ color: colors.onSurfaceVariant }}
+              >
+                {t('no_ussd_prompt_help')}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        <View className="items-center">
+          <ActivityIndicator
+            size="large"
+            color={colors.primary}
+            className="mb-4"
+          />
+          <Text
+            className="text-base font-medium"
+            style={{ color: colors.onSurface }}
+          >
+            {t('payment_verification_in_progress')}
+          </Text>
+          <Text
+            className="text-sm mt-2"
+            style={{ color: colors.onSurfaceVariant }}
+          >
+            {t('checking_payment_status')}
+          </Text>
+        </View>
+      </Card.Content>
+    </Card>
+  );
+
+  // Render USSD display step (if USSD code is provided)
   const renderUssdDisplay = () => (
     <Card mode="outlined" className="mx-4 mt-6">
       <Card.Content className="p-6">
@@ -340,20 +455,16 @@ const PaymentProcessingScreen = ({
           </View>
         </View>
 
-        <View className="bg-yellow-50 p-4 rounded-lg mb-4">
+        <View className="bg-blue-50 p-4 rounded-lg mb-4">
           <Text
-            className="text-sm font-medium"
-            style={{ color: colors.onSurfaceVariant }}
+            className="text-sm font-medium text-blue-800 mb-2"
           >
-            {t('instructions')}
+            💡 {t('important_note')}
           </Text>
           <Text
-            className="text-sm mt-1"
-            style={{ color: colors.onSurfaceVariant }}
+            className="text-sm text-blue-700"
           >
-            {t('dial_code_instruction', { code: ussdCode, provider: getProviderName() })}{'\n'}
-            {t('follow_prompts_instruction')}{'\n'}
-            {t('auto_detect_instruction')}
+            {t('ussd_pin_fallback_instruction')}
           </Text>
         </View>
 
@@ -368,6 +479,51 @@ const PaymentProcessingScreen = ({
           />
           <Text
             className="text-sm mt-1"
+            style={{ color: colors.onSurfaceVariant }}
+          >
+            {t('waiting_payment_confirmation')}
+          </Text>
+        </View>
+      </Card.Content>
+    </Card>
+  );
+
+  // Render verification step
+  const renderVerification = () => (
+    <Card mode="outlined" className="mx-4 mt-6">
+      <Card.Content className="p-6">
+        <View className="items-center mb-6">
+          <View
+            className="w-16 h-16 rounded-full items-center justify-center mb-4"
+            style={{ backgroundColor: colors.primary + '20' }}
+          >
+            <IoniconsIcon name="shield-checkmark" size={32} color={colors.primary} />
+          </View>
+          <Text
+            className="text-xl font-bold text-center"
+            style={{ color: colors.onSurface }}
+          >
+            {t('payment_verification_in_progress')}
+          </Text>
+          <Text
+            className="text-base text-center mt-2"
+            style={{ color: colors.onSurfaceVariant }}
+          >
+            {t('checking_payment_status')}
+          </Text>
+        </View>
+
+        <View className="items-center">
+          <Text className="text-sm" style={{ color: colors.onSurfaceVariant }}>
+            {t('time_remaining', { time: formatTime(countdown) })}
+          </Text>
+          <ActivityIndicator
+            size="large"
+            color={colors.primary}
+            className="mt-4"
+          />
+          <Text
+            className="text-sm mt-4 text-center"
             style={{ color: colors.onSurfaceVariant }}
           >
             {t('waiting_payment_confirmation')}
@@ -398,7 +554,7 @@ const PaymentProcessingScreen = ({
             className="text-base text-center mb-6"
             style={{ color: colors.onSurfaceVariant }}
           >
-            {t('order_confirmed_preparing')}
+            {t('payment_status_successful')}
           </Text>
 
           <TouchableOpacity
@@ -503,9 +659,12 @@ const PaymentProcessingScreen = ({
         return renderMethodSelection();
       case 'processing':
         return renderProcessing();
+      case 'ussd_prompt':
+        return renderUssdPrompt();
       case 'ussd_display':
-      case 'confirmation':
         return renderUssdDisplay();
+      case 'verification':
+        return renderVerification();
       case 'success':
         return renderSuccess();
       case 'failed':
@@ -558,6 +717,32 @@ const PaymentProcessingScreen = ({
           >
             {formattedAmount} FCFA
           </Text>
+          
+          {/* Service Fee Display */}
+          {serviceFee > 0 && (
+            <View className="mt-2 pt-2 border-t" style={{ borderTopColor: colors.outline }}>
+              <View className="flex-row justify-between items-center">
+                <Text
+                  className="text-sm"
+                  style={{ color: colors.onSurfaceVariant }}
+                >
+                  {t('service_fee')}:
+                </Text>
+                <Text
+                  className="text-sm font-medium"
+                  style={{ color: colors.onSurface }}
+                >
+                  {serviceFee.toLocaleString('fr-FR')} FCFA
+                </Text>
+              </View>
+              <Text
+                className="text-xs mt-1"
+                style={{ color: colors.onSurfaceVariant }}
+              >
+                {t('service_fee_note')}
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* Payment Step Content */}

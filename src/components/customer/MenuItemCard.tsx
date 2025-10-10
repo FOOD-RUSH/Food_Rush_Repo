@@ -138,9 +138,9 @@ const MenuItemCard = ({ item }: { item: FoodProps }) => {
           },
         ]}
         onPress={() => {
-          navigation.navigate('FoodDetails', {
+          navigation.push('FoodDetails', {
             foodId: item.id,
-          });
+          }); // Use push() to ensure screen appears on top
         }}
         onLongPress={longPress}
       >

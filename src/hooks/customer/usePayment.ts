@@ -97,6 +97,7 @@ export const useCreatePaymentRequest = () => {
     medium: 'mtn' | 'orange',
     userName: string,
     userEmail: string,
+    serviceFee?: number, // Optional service fee parameter
   ): PaymentInitRequest => {
     // Ensure phone number contains only digits (remove spaces and other non-digit characters)
     const cleanPhone = phone.replace(/\D/g, '');
@@ -108,6 +109,7 @@ export const useCreatePaymentRequest = () => {
       medium,
       name: userName,
       email: userEmail,
+      ...(serviceFee && { serviceFee }), // Include service fee if provided
     };
   };
 };

@@ -85,6 +85,31 @@ export interface PaymentMethodSelection {
   phoneNumber?: string;
 }
 
+// Payment initialization response from API
+export interface PaymentInitSuccessResponse {
+  status_code: 201; // Resource created successfully
+  message: 'Resource created successfully';
+  data: {
+    message: 'Accepted';
+    transId: string; // e.g., "E1HWnnNj"
+    dateInitiated: string; // ISO date string e.g., "2025-10-09T20:04:37.508Z"
+  };
+}
+
+// Generic payment initialization response
+export interface PaymentInitResponse {
+  status_code: number;
+  message: string;
+  data: {
+    message: string;
+    transId: string;
+    dateInitiated: string;
+    status?: 'PENDING';
+    amount?: number;
+    ussdCode?: string;
+  };
+}
+
 // Transaction status type for filtering
 export type TransactionStatus = 'pending' | 'completed' | 'failed' | 'cancelled';
 

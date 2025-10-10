@@ -220,7 +220,7 @@ const OrderTab: React.FC<OrderTabProps> = ({ status, showActions = false }) => {
 
   const handleOrderPress = (orderId: string) => {
     Haptics.selectionAsync();
-    navigation.navigate('RestaurantOrderDetails', { orderId });
+    navigation.push('RestaurantOrderDetails', { orderId }); // Use push() to ensure screen appears on top
   };
 
   const onRefresh = () => {
@@ -298,7 +298,7 @@ const OrdersList: React.FC<RestaurantOrdersStackScreenProps<'OrdersList'>> = () 
 
   const handleNotificationPress = () => {
     Haptics.selectionAsync();
-    navigation.navigate('RestaurantNotifications');
+    navigation.push('RestaurantNotifications'); // Use push() to ensure screen appears on top
   };
 
   return (

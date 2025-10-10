@@ -141,11 +141,7 @@ class TransactionService {
         `/payments/transactions/${userId}`
       );
       
-      console.log('✅ Transactions fetched successfully:', {
-        count: response.data.data.length,
-        status: response.data.status_code,
-        message: response.data.message
-      });
+
       // Transform API response to expected format
       let transactions = response.data.data.map(apiTransaction => 
         this.transformApiResponseToTransaction(apiTransaction)

@@ -35,7 +35,7 @@ export interface User {
   id: string;
   email: string;
   fullName: string;
-  phoneNumber?: string; // Optional since it can be empty string from API
+  phoneNumber: string; // Optional since it can be empty string from API
   role: 'customer' | 'restaurant';
   isEmailVerified?: boolean;
   isPhoneVerified?: boolean;
@@ -142,7 +142,7 @@ export interface RestaurantProfile {
   id: string;
   name: string;
   address: string;
-  pictureUrl: string | null;
+  image: string | null;
   rating: number | null;
   ratingCount: number;
   // Backend-calculated fields based on user's location
@@ -345,7 +345,9 @@ export interface NotificationResponse {
 export interface UnreadCountResponse {
   status_code: number;
   message: string;
-  data: number;
+  data: {
+    count: number;
+  };
 }
 
 // Re-export analytics types

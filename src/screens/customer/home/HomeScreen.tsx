@@ -80,12 +80,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
     useLocationForQueries();
 
   // Log location data for debugging
-  console.log('🏠 HomeScreen Location Data:', {
-    coordinates: { lat: nearLat, lng: nearLng },
-    locationSource,
-    hasLocation,
-    timestamp: new Date().toISOString(),
-  });
+
 
   // Get categories from local data
   const { categories, isLoading: isCategoriesLoading } = useCategories();
@@ -193,15 +188,15 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
 
   // Navigation handlers
   const handleSearchPress = useCallback(() => {
-    navigation.navigate('SearchScreen', { type: 'search' });
+    navigation.push('SearchScreen', { type: 'search' }); // Use push() to ensure screen appears on top
   }, [navigation]);
 
   const handleNearbyRestaurantsPress = useCallback(() => {
-    navigation.navigate('NearbyRestaurants');
+    navigation.push('NearbyRestaurants'); // Use push() to ensure screen appears on top
   }, [navigation]);
 
   const handleAllRestaurantsPress = useCallback(() => {
-    navigation.navigate('AllRestaurants');
+    navigation.push('AllRestaurants'); // Use push() to ensure screen appears on top
   }, [navigation]);
 
   // Memoized render functions
@@ -305,7 +300,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
     data.push({
       type: 'header',
       title: t('food_near_you'),
-      onPress: () => navigation.navigate('SearchScreen', { type: 'search' }),
+      onPress: () => navigation.push('SearchScreen', { type: 'search' }), // Use push() to ensure screen appears on top
     });
 
     if (isLoading) {
@@ -328,7 +323,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
         type: 'empty',
         emptyType: 'food_near_you',
         onActionPress: () =>
-          navigation.navigate('SearchScreen', { type: 'search' }),
+          navigation.push('SearchScreen', { type: 'search' }), // Use push() to ensure screen appears on top
       });
     } else {
       data.push({ type: 'food_near_you', data: foodNearYouData });

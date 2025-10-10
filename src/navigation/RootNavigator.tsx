@@ -392,11 +392,7 @@ const RootNavigator: React.FC = () => {
                 headerTitle: '',
               }}
             />
-            <Stack.Screen
-              name="AddressScreen"
-              component={AddressScreen}
-              options={{ headerTitle: t('address') }}
-            />
+            
             <Stack.Screen
               name="NearbyRestaurants"
               component={NearbyRestaurantsScreen}
@@ -593,7 +589,14 @@ const RootNavigator: React.FC = () => {
               headerTitle: t('checkout_order'),
             }}
           />
+        <Stack.Screen
+              name="AddressScreen"
+              component={AddressScreen}
+              options={{
+                              ...screenOptions.checkout,
 
+                 headerTitle: t('address') }}
+            />
           {/* Payment Processing */}
           <Stack.Screen
             name="PaymentProcessing"

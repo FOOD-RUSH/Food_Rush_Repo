@@ -45,7 +45,7 @@ export const useNotifications = () => {
   useEffect(() => {
     if (isAuthenticated && user) {
       // The push notification service is already initialized via usePushNotifications hook
-      console.log(`✅ ${userType} notification service ready`);
+
     }
   }, [isAuthenticated, user, userType]);
 
@@ -106,11 +106,13 @@ export const useNotifications = () => {
   const markAsReadOptimistic = async (notificationId: string) => {
     try {
       await markAsRead(notificationId);
-      // Update unread count after marking as read
+      // Refresh unread count from server after marking as read
       await updateUnreadCount();
       return true;
     } catch (error) {
       console.error('Error marking notification as read:', error);
+      // Refresh count even on error to ensure consistency
+      await updateUnreadCount();
       return false;
     }
   };
@@ -119,11 +121,13 @@ export const useNotifications = () => {
   const markAllAsReadOptimistic = async () => {
     try {
       await markAllAsRead();
-      // Update unread count after marking all as read
+      // Refresh unread count from server after marking all as read
       await updateUnreadCount();
       return true;
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
+      // Refresh count even on error to ensure consistency
+      await updateUnreadCount();
       return false;
     }
   };

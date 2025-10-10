@@ -131,7 +131,7 @@ class PushNotificationServiceImpl implements PushNotificationService {
       // Register with backend
       await notificationApi.registerDevice(token, platform, role);
       
-      console.log('✅ Push notification token registered successfully');
+
       return token;
     } catch (error) {
       console.error('❌ Error registering push notification token:', error);
@@ -144,7 +144,7 @@ class PushNotificationServiceImpl implements PushNotificationService {
       if (this.expoPushToken) {
         await notificationApi.unregisterDevice(this.expoPushToken);
         this.expoPushToken = null;
-        console.log('✅ Push notification token unregistered successfully');
+
       }
     } catch (error) {
       console.error('❌ Error unregistering push notification token:', error);
@@ -152,7 +152,7 @@ class PushNotificationServiceImpl implements PushNotificationService {
   }
 
   handleNotificationReceived(notification: Notifications.Notification) {
-    console.log('📱 Notification received:', notification);
+
     
     // Add notification to store for in-app display
     const { addNotification } = useNotificationStore.getState();
@@ -173,7 +173,7 @@ class PushNotificationServiceImpl implements PushNotificationService {
   }
 
   handleNotificationResponse(response: Notifications.NotificationResponse) {
-    console.log('📱 Notification response:', response);
+
     
     const data = response.notification.request.content.data;
     
@@ -181,10 +181,10 @@ class PushNotificationServiceImpl implements PushNotificationService {
     if (data?.orderId) {
       // Navigate to order details
       // This would need to be implemented with navigation service
-      console.log('Navigate to order:', data.orderId);
+
     } else if (data?.restaurantId) {
       // Navigate to restaurant details
-      console.log('Navigate to restaurant:', data.restaurantId);
+
     }
     
     // Mark notification as read

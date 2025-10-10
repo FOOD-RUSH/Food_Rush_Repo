@@ -24,7 +24,6 @@ import {
   useCartItemCount,
   CartItem,
 } from '@/src/stores/customerStores/cartStore';
-import { useAuthUser } from '@/src/stores/customerStores';
 import { useDefaultAddress } from '@/src/location/store';
 import { useOrderFlow } from '@/src/hooks/customer/useOrderFlow';
 import { useLocationForQueries } from '@/src/hooks/customer/useLocationService';
@@ -49,7 +48,6 @@ const CheckOutScreen = ({
   const serviceFee = useCartServiceFee();
   const total = useCartTotal();
   const itemCount = useCartItemCount();
-  const clearCart = useCartStore((state) => state.clearCart);
   
   const defaultAddress = useDefaultAddress();
 
@@ -61,8 +59,6 @@ const CheckOutScreen = ({
   const {
     flowState,
     createOrderFromCart,
-    resetFlow,
-    isOrderCreated,
     isCreatingOrder,
     shouldProceedToPayment,
     startPaymentFlow,
@@ -112,9 +108,9 @@ const CheckOutScreen = ({
     navigation.goBack();
   }, [navigation]);
 
-  // Handle address selection
+  // Handle address selection - Use push() to ensure screen appears on top
   const handleAddressPress = useCallback(() => {
-    navigation.navigate('AddressScreen');
+    navigation.push('AddressScreen');
   }, [navigation]);
 
   // Handle payment info press (informational only)
@@ -176,10 +172,10 @@ const CheckOutScreen = ({
       Alert.alert(t('error'), t('please_add_delivery_address'), [
         {
           text: t('add_address'),
-          onPress: () => navigation.navigate('AddressScreen'),
+          onPress: () => navigation.push('AddressScreen'),
         },
         { text: t('cancel'), style: 'cancel' },
-      ]);
+      ]);j
       return;
     }
 

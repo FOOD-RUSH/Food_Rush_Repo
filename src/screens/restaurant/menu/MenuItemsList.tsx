@@ -119,7 +119,7 @@ const MenuItemsList: React.FC<
   const handleAddItem = () => {
     try {
       Haptics.selectionAsync();
-      navigation.navigate('RestaurantMenuItemForm', {});
+      navigation.push('RestaurantMenuItemForm', {}); // Use push() to ensure screen appears on top
     } catch (error) {
       setError({
         hasError: true,
@@ -131,7 +131,7 @@ const MenuItemsList: React.FC<
   const handleEditItem = (itemId: string) => {
     try {
       Haptics.selectionAsync();
-      navigation.navigate('RestaurantEditFoodItem', { menuId: itemId });
+      navigation.push('RestaurantEditFoodItem', { menuId: itemId }); // Use push() to ensure screen appears on top
     } catch (error) {
       setError({
         hasError: true,

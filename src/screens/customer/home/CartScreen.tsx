@@ -58,7 +58,7 @@ const CartScreen = ({ navigation }: RootStackScreenProps<'Cart'>) => {
 
     // Always proceed to checkout if there are items, even without restaurantID
     // The checkout screen can handle missing restaurant info
-    navigation.navigate('Checkout', { cartId: restaurantID || 'unknown' });
+    navigation.push('Checkout', { cartId: restaurantID || 'unknown' }); // Use push() to ensure screen appears on top
   }, [cartItems.length, restaurantID, navigation, t]);
 
   // Optimized render item with useCallback to prevent unnecessary re-renders

@@ -64,7 +64,7 @@ export const useUpdateRestaurantLocation = () => {
             longitude: updatedProfile.longitude ? parseFloat(updatedProfile.longitude) : null,
           });
           
-          console.log('✅ Restaurant profile store updated with new location data');
+
         } catch (error) {
           console.error('❌ Failed to update restaurant profile store:', error);
         }

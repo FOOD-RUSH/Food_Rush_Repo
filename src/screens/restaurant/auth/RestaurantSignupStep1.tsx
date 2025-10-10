@@ -422,15 +422,17 @@ const RestaurantSignupStep1: React.FC<
                             style={{
                               flexDirection: 'row',
                               alignItems: 'center',
+                              paddingHorizontal: 8,
+                              minWidth: 70,
                             }}
                           >
-                            <Body style={{ marginRight: 4, fontSize: 16 }}>
+                            <Body style={{ marginRight: 8, fontSize: 16 }}>
                               🇨🇲
                             </Body>
                             <Body
                               style={{
                                 fontFamily: 'Urbanist-Medium',
-                                fontSize: 14,
+                                fontSize: 15,
                                 color: colors.onSurface,
                               }}
                             >

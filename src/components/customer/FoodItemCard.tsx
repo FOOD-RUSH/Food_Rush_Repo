@@ -151,9 +151,9 @@ const FoodItemCard = ({
   return (
     <TouchableOpacity
       onPress={() => {
-        navigation.navigate('FoodDetails', {
+        navigation.push('FoodDetails', {
           foodId: foodId,
-        });
+        }); // Use push() to ensure screen appears on top
       }}
       activeOpacity={0.8}
       className="m-2"

@@ -24,13 +24,7 @@ export const useRegisterRestaurant = () => {
       clearError();
     },
     onSuccess: (data) => {
-      console.log('✅ Restaurant registration successful:', {
-        restaurantId: data.restaurant?.id,
-        restaurantName: data.restaurant?.name,
-        userId: data.user?.id,
-        pictureUrl: data.pictureUrl,
-        nextAction: data.nextAction
-      });
+
     },
   });
 };

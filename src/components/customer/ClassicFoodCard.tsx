@@ -120,9 +120,9 @@ const ClassicFoodCard = ({
     <TouchableOpacity
       activeOpacity={0.8}
       onPress={() => {
-        navigation.navigate('FoodDetails', {
+        navigation.push('FoodDetails', {
           foodId: id,
-        });
+        }); // Use push() to ensure screen appears on top
       }}
       className="my-2 mx-1"
     >

@@ -2,6 +2,7 @@
 // Implements the complete payment flow as specified in the API documentation
 
 import { apiClient } from '@/src/services/shared/apiClient';
+import { PaymentInitResponse } from '@/src/types/transaction';
 
 export interface PaymentInitRequest {
   orderId: string;
@@ -10,18 +11,10 @@ export interface PaymentInitRequest {
   medium: 'mtn' | 'orange';
   name: string;
   email: string;
+  serviceFee?: number; // Optional service fee field
 }
 
-export interface PaymentInitResponse {
-  status_code: number;
-  message: string;
-  data: {
-    transId: string;
-    status: 'PENDING';
-    amount: number;
-    message: string;
-  };
-}
+// PaymentInitResponse is now imported from types/transaction.ts
 
 export interface PaymentVerificationResponse {
   transId: string;
@@ -170,21 +163,12 @@ class EnhancedPaymentService {
         medium: request.medium,
         name: request.name.trim(),
         email: request.email.trim().toLowerCase(),
+        ...(request.serviceFee && { serviceFee: request.serviceFee }), // Include service fee if provided
       };
 
-      console.log('🔄 Initializing payment:', {
-        orderId: paymentData.orderId,
-        medium: paymentData.medium,
-        phone: `${paymentData.phone.substring(0, 3)}****${paymentData.phone.substring(7)}`,
-      });
-
-      const response = await apiClient.post<PaymentInitResponse>(
-        '/payments/init',
-        paymentData,
-      );
-
-      if (response.data.status_code === 200 && response.data.data) {
-        console.log('✅ Payment initialized successfully:', response.data.data.transId);
+      const response = await apiClient.post<PaymentInitResponse>('/payments/init', request);
+      
+      if (response.data?.status_code === 200 && response.data?.data?.transId) {
         
         return {
           success: true,
@@ -277,7 +261,7 @@ class EnhancedPaymentService {
 
       const poll = async () => {
         pollCount++;
-        console.log(`🔄 Polling payment status (attempt ${pollCount}):`, transactionId);
+
 
         try {
           const status = await this.verifyPaymentStatus(transactionId);
@@ -302,7 +286,7 @@ class EnhancedPaymentService {
           onStatusUpdate?.(status);
 
           if (status.status === 'SUCCESSFUL') {
-            console.log('✅ Payment successful:', transactionId);
+
             resolve({
               success: true,
               status: 'SUCCESSFUL',
@@ -313,7 +297,7 @@ class EnhancedPaymentService {
           }
 
           if (status.status === 'FAILED') {
-            console.log('❌ Payment failed:', transactionId);
+
             resolve({
               success: false,
               status: 'FAILED',
@@ -326,7 +310,7 @@ class EnhancedPaymentService {
 
           // Still pending, check timeout
           if (Date.now() - startTime >= timeoutMs) {
-            console.log('⏰ Payment timeout:', transactionId);
+
             resolve({
               success: false,
               status: 'TIMEOUT',
@@ -372,7 +356,7 @@ class EnhancedPaymentService {
     let lastError: string = '';
     
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      console.log(`🔄 Payment attempt ${attempt}/${maxRetries}`);
+
       
       try {
         // Initialize payment
