@@ -8,11 +8,8 @@ module.exports = function (api) {
     // Production optimizations only
     ...(isProduction
       ? [
-          // Remove console.log statements in production
-          ['babel-plugin-transform-remove-console', { exclude: ['error', 'warn'] }],
-          // Optimize React components
-          ['@babel/plugin-transform-react-constant-elements'],
-          ['@babel/plugin-transform-react-inline-elements'],
+          '@babel/plugin-transform-react-constant-elements',
+          '@babel/plugin-transform-react-inline-elements',
         ]
       : []),
   ].filter(Boolean);
@@ -23,25 +20,11 @@ module.exports = function (api) {
         'babel-preset-expo',
         {
           jsxImportSource: 'nativewind',
-          // Use automatic JSX runtime (React 17+)
           jsxRuntime: 'automatic',
         },
       ],
       'nativewind/babel',
     ],
     plugins: plugins.filter(Boolean),
-    // Environment-specific configurations
-    env: {
-      production: {
-        plugins: [
-          'react-native-worklets/plugin',
-          // Additional production-only optimizations
-          ['transform-remove-console', { exclude: ['error', 'warn'] }],
-        ],
-      },
-    },
   };
 };
-
-// Note: Some plugins like transform-remove-console may need to be installed
-// Run: npm install --save-dev babel-plugin-transform-remove-console

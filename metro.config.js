@@ -1,90 +1,84 @@
 const { getDefaultConfig } = require('expo/metro-config');
 const { withNativeWind } = require('nativewind/metro');
+const path = require('path');
+
 const config = getDefaultConfig(__dirname);
 
-// Production optimization flags
+// Production optimization flag
 const isProduction = process.env.NODE_ENV === 'production';
 
-// Optimize bundle size and performance
-config.transformer = {
-  ...config.transformer,
-  // Enhanced minification for production
-  minifierConfig: {
-    keep_fnames: !isProduction, // Remove function names in production
-    mangle: {
-      keep_fnames: !isProduction,
-    },
-    // Additional optimizations for production
-    ...(isProduction && {
-      compress: {
-        drop_console: true, // Remove console.log in production
-        drop_debugger: true, // Remove debugger statements
-        pure_funcs: ['console.log', 'console.info', 'console.debug'], // Remove specific console methods
-      },
-    }),
+// Extend resolver with NativeWind and custom settings
+config.resolver = {
+  ...config.resolver,
+  // Important: Always extend from Expo's defaults
+  sourceExts: [
+    ...getDefaultConfig(__dirname).resolver.sourceExts,
+    'svg', // Add SVG support
+  ],
+  assetExts: [
+    ...getDefaultConfig(__dirname).resolver.assetExts,
+    // Note: Don't remove extensions here, only add if needed
+  ],
+  platforms: ['ios', 'android', 'native'],
+  // Path alias for cleaner imports
+  alias: {
+    '@': path.resolve(__dirname, 'src'),
   },
-  // Optimize asset transformations
-  assetPlugins: ['expo-asset/tools/hashAssetFiles'],
 };
 
-// Enable consistent module IDs for better caching
+// Transformer configuration for production optimization
+config.transformer = {
+  ...config.transformer,
+  // Minifier configuration (only applies to production)
+  minifierConfig: isProduction
+    ? {
+        keep_fnames: false, // Remove function names in production
+        mangle: true,
+        compress: {
+          drop_console: true, // Remove console.log in production
+          drop_debugger: true,
+          pure_funcs: ['console.log', 'console.info', 'console.debug'],
+        },
+      }
+    : undefined,
+};
+
+// Serializer configuration
 config.serializer = {
   ...config.serializer,
+  // Create consistent module IDs for better caching
   createModuleIdFactory: () => (path) => {
-    // Use shorter, consistent IDs for better caching
     return require('crypto')
       .createHash('sha1')
       .update(path)
       .digest('hex')
       .substr(0, 8);
   },
-  // Optimize output for production
-  ...(isProduction && {
-    processModuleFilter: (module) => {
-      // Filter out development-only modules in production
-      if (module.path.includes('__DEV__')) return false;
-      if (module.path.includes('.test.')) return false;
-      if (module.path.includes('.spec.')) return false;
-      if (module.path.includes('__tests__')) return false;
-      if (module.path.includes('__mocks__')) return false;
-      if (module.path.includes('.old.')) return false;
-      if (module.path.includes('.backup.')) return false;
-      if (module.path.includes('.tmp.')) return false;
-      if (module.path.includes('debug-')) return false;
-      if (module.path.includes('scripts/')) return false;
-      return true;
-    },
-  }),
 };
 
-// Optimize resolver for better tree shaking and performance
-config.resolver = {
-  ...config.resolver,
-  platforms: ['ios', 'android', 'native', 'web'],
-  // Asset extensions optimization
-  assetExts: [
-    ...config.resolver.assetExts,
-    // Remove unused extensions to speed up resolution
-  ].filter((ext) => !['gif'].includes(ext)), // Remove gif since we converted to png
-  // Source extensions optimization
-  sourceExts: [
-    ...config.resolver.sourceExts,
-    'svg', // Add SVG support
-  ],
-  // Alias for better tree shaking
-  alias: {
-    '@': __dirname,
-  },
-};
+// Only set processModuleFilter for production
+if (isProduction) {
+  config.serializer.processModuleFilter = (module) => {
+    // Exclude development-only modules in production
+    const excludePatterns = [
+      '__DEV__',
+      '.test.',
+      '.spec.',
+      '__tests__',
+      '__mocks__',
+      '.old.',
+      '.backup.',
+      '.tmp.',
+      'debug-',
+      'scripts/',
+    ];
 
-// Cache configuration for better performance
-// Note: Removed custom cacheStores configuration to fix cache issues
+    return !excludePatterns.some((pattern) => module.path.includes(pattern));
+  };
+}
 
-// Watch folder optimization
-config.watchFolders = [
-  // Only watch necessary folders
-  require('path').resolve(__dirname, 'src'),
-  require('path').resolve(__dirname, 'assets'),
-];
+// Watch folders - keep it minimal
+config.watchFolders = [path.resolve(__dirname, 'src'), path.resolve(__dirname, 'assets')];
 
+// Apply NativeWind configuration
 module.exports = withNativeWind(config, { input: './globals.css' });

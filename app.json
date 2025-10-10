@@ -16,6 +16,9 @@
     },
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.mrcalculus.foodrush",
+      "buildNumber": "1",
+      "icon": "./assets/FoodRush.png",
       "infoPlist": {
         "UIBackgroundModes": [
           "location",
@@ -27,13 +30,7 @@
         "NSLocationWhenInUseUsageDescription": "This app needs access to your location to show nearby restaurants and calculate delivery times.",
         "NSUserNotificationUsageDescription": "This app uses notifications to update you about your orders and special offers.",
         "ITSAppUsesNonExemptEncryption": false
-      },
-      "bundleIdentifier": "com.mrcalculus.foodrush",
-      "buildNumber": "1",
-      "deploymentTarget": "13.0",
-      "icon": "./assets/FoodRush.png"
-
-
+      }
     },
     "android": {
       "package": "com.mrcalculus.foodrush",
@@ -42,7 +39,6 @@
         "foregroundImage": "./assets/FoodRush-adaptive.png",
         "backgroundColor": "#FFFFFF"
       },
-      "edgeToEdgeEnabled": true,
       "permissions": [
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
@@ -51,15 +47,7 @@
         "RECEIVE_BOOT_COMPLETED",
         "VIBRATE",
         "WAKE_LOCK"
-      ],
-      "enableProguard": true,
-      "enableHermes": true,
-      "usesCleartextTraffic": false,
-      "allowBackup": false,
-      "compileSdkVersion": 34,
-      "targetSdkVersion": 34,
-      "minSdkVersion": 23,
-      "proguardFiles": ["proguard-rules.pro"]
+      ]
     },
     "assetBundlePatterns": [
       "assets/fonts/*.ttf",
