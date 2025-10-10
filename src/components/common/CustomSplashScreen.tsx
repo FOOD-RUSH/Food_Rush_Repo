@@ -33,24 +33,6 @@ const CustomSplashScreen: React.FC<CustomSplashScreenProps> = ({
     'food' | 'rush' | 'complete'
   >('food');
 
-  const startFoodAnimation = () => {
-    // Animate each letter of "Food" one by one
-    const letterAnimationsList = letterAnimations.map((anim, index) =>
-      Animated.timing(anim, {
-        toValue: 1,
-        duration: 400,
-        delay: index * 150, // 150ms delay between each letter
-        useNativeDriver: true,
-      }),
-    );
-
-    Animated.sequence([
-      Animated.stagger(150, letterAnimationsList),
-      Animated.delay(300), // Wait 300ms after "Food" completes
-    ]).start(() => {
-      startRushAnimation();
-    });
-  };
 
   useEffect(() => {
     startFoodAnimation();
