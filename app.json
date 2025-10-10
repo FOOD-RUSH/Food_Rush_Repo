@@ -7,7 +7,7 @@
     "icon": "./assets/FoodRush.png",
     "scheme": "foodrush",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": false,
+    "newArchEnabled": true,
     "platforms": ["android", "ios"],
     "splash": {
       "image": "./assets/images/SplashScreen.png",
