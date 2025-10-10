@@ -3,7 +3,6 @@ import {
   formatDateOnly,
   formatTimeOnly,
   parseISOToDate,
-  parseISOToCameroonTime,
   getCurrentCameroonTime,
 } from './timeUtils';
 

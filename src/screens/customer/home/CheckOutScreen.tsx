@@ -175,7 +175,7 @@ const CheckOutScreen = ({
           onPress: () => navigation.push('AddressScreen'),
         },
         { text: t('cancel'), style: 'cancel' },
-      ]);j
+      ]);
       return;
     }
 

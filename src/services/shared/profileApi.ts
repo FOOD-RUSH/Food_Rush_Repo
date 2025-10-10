@@ -189,4 +189,4 @@ export type {
 };
 
 // Export validation helpers
-export { isValidUrl, isLocalFileUri };
+export { isValidUrl };

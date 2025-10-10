@@ -1,4 +1,4 @@
-import { Order, OrderStatus } from '@/src/types';
+import { Order } from '@/src/types';
 
 // OrderReceipt interface that extends the real Order type
 export interface OrderReceipt extends Order {

@@ -163,7 +163,7 @@ export const useDeviceOptimization = (): DeviceConfig => {
       ui,
       layout,
     };
-  }, [isSmallDevice]);
+  }, []);
 };
 
 // Hook for getting optimized image settings

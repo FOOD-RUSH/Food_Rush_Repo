@@ -6,7 +6,6 @@ import {
   OTPCredentials,
   LoginRequest,
   RegisterRequest,
-  UpdateProfileRequest,
   ResetPasswordRequest,
   ChangePasswordRequest,
   ResendOTPRequest,

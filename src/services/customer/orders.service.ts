@@ -1,6 +1,5 @@
 import { Order } from '@/src/types/index';
 import { apiClient } from '@/src/services/shared/apiClient';
-import { logError } from '@/src/utils/errorHandler';
 
 // Order creation request (matches API docs)
 export interface CreateOrderRequest {

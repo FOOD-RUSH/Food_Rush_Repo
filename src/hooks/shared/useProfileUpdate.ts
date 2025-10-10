@@ -35,7 +35,7 @@ interface ProfileUpdateData {
  */
 export const useUpdateProfile = () => {
   const queryClient = useQueryClient();
-  const { setUser, clearError, user } = useAuthStore();
+  const { setUser, clearError } = useAuthStore();
 
   return useMutation({
     mutationFn: async (data: ProfileUpdateData) => {
@@ -127,7 +127,7 @@ export const useUpdateProfile = () => {
  */
 export const useGetProfile = () => {
   const queryClient = useQueryClient();
-  const { setUser, isAuthenticated } = useAuthStore();
+  const { setUser } = useAuthStore();
 
   return useMutation({
     mutationFn: async () => {

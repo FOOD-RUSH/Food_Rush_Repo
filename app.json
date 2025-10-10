@@ -7,30 +7,12 @@
     "icon": "./assets/FoodRush.png",
     "scheme": "foodrush",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "platforms": ["android", "ios"],
     "splash": {
       "image": "./assets/images/SplashScreen.png",
       "resizeMode": "contain",
       "backgroundColor": "#06102b"
-    },
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.mrcalculus.foodrush",
-      "buildNumber": "1",
-      "icon": "./assets/FoodRush.png",
-      "infoPlist": {
-        "UIBackgroundModes": [
-          "location",
-          "fetch",
-          "background-processing",
-          "remote-notification"
-        ],
-        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to your location to show nearby restaurants and provide accurate delivery services.",
-        "NSLocationWhenInUseUsageDescription": "This app needs access to your location to show nearby restaurants and calculate delivery times.",
-        "NSUserNotificationUsageDescription": "This app uses notifications to update you about your orders and special offers.",
-        "ITSAppUsesNonExemptEncryption": false
-      }
     },
     "android": {
       "package": "com.mrcalculus.foodrush",
@@ -43,58 +25,41 @@
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
         "INTERNET",
-        "ACCESS_NETWORK_STATE",
-        "RECEIVE_BOOT_COMPLETED",
-        "VIBRATE",
-        "WAKE_LOCK"
+        "ACCESS_NETWORK_STATE"
       ]
     },
+    "ios": {
+      "bundleIdentifier": "com.mrcalculus.foodrush",
+      "buildNumber": "1",
+      "supportsTablet": true
+    },
     "assetBundlePatterns": [
-      "assets/fonts/*.ttf",
-      "assets/images/Foodrushlogo.png",
-      "assets/images/SplashScreen.png",
-      "assets/images/notification-icon.png",
-      "assets/images/NoOrdersDark.png",
-      "assets/images/NoOrdersLight.png",
-      "assets/images/apple.png",
-      "assets/images/R-Logo.png",
-      "assets/images/MTN_mobileMoney.png",
-      "assets/images/Orange_money.png",
-      "assets/images/Delivery_static.png",
-      "assets/images/Food Illustrations/*",
-      "assets/sounds/notification.wav"
+      "assets/fonts/**",
+      "assets/images/**",
+      "assets/sounds/**"
     ],
     "plugins": [
       "expo-font",
       "expo-asset",
-      "expo-web-browser",
-      "expo-secure-store",
-      "expo-localization",
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUseUsageDescription": "This app needs access to your location to show nearby restaurants and provide accurate delivery services.",
-          "locationAlwaysPermission": "This app needs access to your location to show nearby restaurants and provide delivery services even when the app is in the background.",
-          "locationWhenInUsePermission": "This app needs access to your location to show nearby restaurants and calculate delivery times.",
-          "isIosBackgroundLocationEnabled": false,
-          "isAndroidBackgroundLocationEnabled": false
+          "locationAlwaysAndWhenInUseUsageDescription": "This app needs your location to show nearby restaurants.",
+          "locationWhenInUsePermission": "This app needs your location to show nearby restaurants."
         }
       ],
       [
         "expo-notifications",
         {
           "icon": "./assets/images/notification-icon.png",
-          "color": "#007aff",
-          "defaultChannel": "default",
-          "sounds": ["./assets/sounds/notification.wav"]
+          "color": "#007aff"
         }
       ]
     ],
     "extra": {
       "eas": {
         "projectId": "08bd6b92-2717-47f7-b11c-ed37f5126c0e"
-      },
-      "API_BASE_URL": "https://your-backend.example.com"
+      }
     },
     "owner": "mr_calculus"
   }

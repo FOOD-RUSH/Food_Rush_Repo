@@ -1,10 +1,6 @@
-import { IoniconsIcon } from '@/src/components/common/icons';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Platform, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { FloatingTabBar } from '../components/common/FloatingTabBar';
 import {

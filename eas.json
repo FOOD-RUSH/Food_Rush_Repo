@@ -1,7 +1,6 @@
 {
   "cli": {
-    "version": ">= 16.0.0",
-    "appVersionSource": "remote"
+    "version": ">= 16.0.0"
   },
   "build": {
     "development": {
@@ -10,10 +9,6 @@
       "android": {
         "gradleCommand": ":app:assembleDebug",
         "buildType": "apk"
-      },
-      "ios": {
-        "buildConfiguration": "Debug",
-        "simulator": true
       }
     },
     "preview": {
@@ -22,81 +17,16 @@
         "buildType": "apk",
         "gradleCommand": ":app:assembleRelease"
       },
-      "ios": {
-        "buildConfiguration": "Release",
-        "enterpriseProvisioning": "universal"
-      },
       "env": {
         "NODE_ENV": "production"
       }
     },
     "production": {
       "android": {
-        "buildType": "app-bundle",
-        "gradleCommand": ":app:bundleRelease"
-      },
-      "ios": {
-        "buildConfiguration": "Release"
+        "buildType": "app-bundle"
       },
       "env": {
         "NODE_ENV": "production"
-      },
-      "cache": {
-        "disabled": false
-      }
-    },
-    "production-apk": {
-      "extends": "production",
-      "android": {
-        "buildType": "apk",
-        "gradleCommand": ":app:assembleRelease"
-      }
-    },
-    "production-optimized": {
-      "extends": "production",
-      "android": {
-        "buildType": "app-bundle",
-        "gradleCommand": ":app:bundleRelease"
-      },
-      "env": {
-        "NODE_ENV": "production",
-        "EXPO_OPTIMIZE_ASSETS": "true"
-      }
-    },
-    "store-android": {
-      "extends": "production",
-      "android": {
-        "buildType": "app-bundle",
-        "gradleCommand": ":app:bundleRelease"
-      },
-      "env": {
-        "NODE_ENV": "production",
-        "EXPO_OPTIMIZE_ASSETS": "true",
-        "EXPO_MINIFY": "true"
-      }
-    },
-    "store-ios": {
-      "extends": "production",
-      "ios": {
-        "buildConfiguration": "Release"
-      },
-      "env": {
-        "NODE_ENV": "production",
-        "EXPO_OPTIMIZE_ASSETS": "true",
-        "EXPO_MINIFY": "true"
-      }
-    }
-  },
-  "submit": {
-    "production": {
-      "android": {
-        "serviceAccountKeyPath": "./service-account-key.json",
-        "track": "internal"
-      },
-      "ios": {
-        "appleId": "your-apple-id@example.com",
-        "ascAppId": "your-app-store-connect-app-id",
-        "appleTeamId": "your-apple-team-id"
       }
     }
   }

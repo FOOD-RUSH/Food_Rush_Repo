@@ -1,6 +1,6 @@
 import { MaterialCommunityIcon } from '@/src/components/common/icons';
 import React, { useState, useCallback } from 'react';
-import { View, TouchableOpacity, Platform, Modal, Alert } from 'react-native';
+import { View, TouchableOpacity, Platform, Modal } from 'react-native';
 import { useTheme, Button } from 'react-native-paper';
 
 import DateTimePicker from '@react-native-community/datetimepicker';

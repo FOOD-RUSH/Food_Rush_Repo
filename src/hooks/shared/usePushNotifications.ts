@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '@/src/stores/AuthStore';
 import { useNotificationStore } from '@/src/stores/shared/notificationStore';
-import pushNotificationService, {
+import {
   registerForPushNotifications,
   unregisterPushNotifications,
   checkNotificationPermissions,
@@ -48,7 +48,7 @@ export const usePushNotifications = (
         unregister();
       }
     }
-  }, [isAuthenticated, user, autoRegister]);
+  }, []);
 
   const checkPermission = async (): Promise<boolean> => {
     try {

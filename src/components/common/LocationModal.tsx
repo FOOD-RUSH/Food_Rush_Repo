@@ -28,7 +28,7 @@ const LocationModal: React.FC<LocationModalProps> = ({
 }) => {
   const { colors } = useTheme();
   const { t } = useTranslation();
-  const { isSmallScreen, wp, hp } = useResponsive();
+  const { wp } = useResponsive();
   const spacing = useResponsiveSpacing();
   const [isGettingLocation, setIsGettingLocation] = useState(false);
 
@@ -147,7 +147,7 @@ const LocationModal: React.FC<LocationModalProps> = ({
             exactLocation =
               result.street || result.district || result.subregion || 'Yaoundé';
           }
-        } catch (geocodeError) {
+        } catch (_geocodeError) {
           // Continue with coordinates even if geocoding fails
         }
 

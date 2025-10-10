@@ -42,7 +42,7 @@ export const generateSecureId = (length: number = 16): string => {
         byte.toString(16).padStart(2, '0'),
       ).join('');
     }
-  } catch (e) {
+  } catch (_e) {
     // Fallback to Math.random if crypto is not available
   }
 

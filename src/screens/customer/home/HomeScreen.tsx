@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import CommonView from '@/src/components/common/CommonView';
 import { TextInput, useTheme } from 'react-native-paper';
 import { useCategories } from '@/src/hooks/useCategories';
@@ -36,7 +36,7 @@ import HomeHeader from '@/src/components/customer/HomeHeader';
 import { useLocationForQueries } from '@/src/hooks/customer/useLocationService';
 import { useFloatingTabBarHeight } from '@/src/hooks/useFloatingTabBarHeight';
 
-const { width } = Dimensions.get('window');
+  // const { width } = Dimensions.get('window'); // Removed unused variable
 
 // Constants
 const SKELETON_COUNTS = {
@@ -76,14 +76,11 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
   const tabBarHeight = useFloatingTabBarHeight();
 
   // Get location info for debugging
-  const { nearLat, nearLng, locationSource, hasLocation } =
+  const { nearLat, nearLng } =
     useLocationForQueries();
 
-  // Log location data for debugging
-
-
   // Get categories from local data
-  const { categories, isLoading: isCategoriesLoading } = useCategories();
+  const { categories } = useCategories();
 
   // Updated data fetching with new hooks
   const {
@@ -151,8 +148,6 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
   // Simplified loading state
   const isLoading =
     browseLoading || allLoading || browseMenuLoading || allMenuLoading || allNoLocationLoading;
-  const hasError =
-    (browseError && allError) || (browseMenuError && allMenuError);
 
   // Memoized categories data
   const categoriesForDisplay = useMemo(() => {

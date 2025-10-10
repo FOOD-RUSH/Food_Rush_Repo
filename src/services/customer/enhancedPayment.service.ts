@@ -156,15 +156,15 @@ class EnhancedPaymentService {
       const formattedPhone = this.formatPhoneNumber(request.phone);
 
       // Prepare API request
-      const paymentData = {
-        orderId: request.orderId,
-        method: request.method,
-        phone: formattedPhone,
-        medium: request.medium,
-        name: request.name.trim(),
-        email: request.email.trim().toLowerCase(),
-        ...(request.serviceFee && { serviceFee: request.serviceFee }), // Include service fee if provided
-      };
+      // const paymentData = {
+      //   orderId: request.orderId,
+      //   method: request.method,
+      //   phone: formattedPhone,
+      //   medium: request.medium,
+      //   name: request.name.trim(),
+      //   email: request.email.trim().toLowerCase(),
+      //   ...(request.serviceFee && { serviceFee: request.serviceFee }), // Include service fee if provided
+      // };
 
       const response = await apiClient.post<PaymentInitResponse>('/payments/init', request);
       
@@ -257,7 +257,6 @@ class EnhancedPaymentService {
   ): Promise<PaymentPollingResult> {
     return new Promise((resolve) => {
       const startTime = Date.now();
-      let pollCount = 0;
 
       const poll = async () => {
         pollCount++;

@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useMemo } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   useRestaurantProfileStore,
@@ -25,10 +25,8 @@ export const useRestaurantProfile = () => {
     hasLoadedProfile,
     fetchRestaurantProfile,
     updateRestaurantProfile,
-    updateIsOpen,
     markProfileAsLoaded,
     clearError,
-    setLoading,
     setUpdating,
   } = useRestaurantProfileStore();
 

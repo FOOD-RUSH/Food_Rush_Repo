@@ -161,17 +161,18 @@ class PaymentService {
       const formattedPhone = this.formatPhoneNumber(request.phone);
 
       // Prepare API request body according to your specification
-      const paymentData = {
-        orderId: request.orderId,
-        method: request.method, // Always 'mobile_money'
-        phone: formattedPhone,
-        medium: request.medium, // 'mtn' or 'orange'
-        name: request.name,
-        email: request.email,
-        ...(request.serviceFee && { serviceFee: request.serviceFee }), // Include service fee if provided
-      };
+      // const paymentData = {
+      //   orderId: request.orderId,
+      //   method: request.method, // Always 'mobile_money'
+      //   phone: formattedPhone,
+      //   medium: request.medium, // 'mtn' or 'orange'
+      //   name: request.name,
+      //   email: request.email,
+      //   ...(request.serviceFee && { serviceFee: request.serviceFee }), // Include service fee if provided
+      // };
 
       const response = await apiClient.post<PaymentInitResponse>('/payment/initialize', request);
+      return this.parsePaymentResponse(response);
     } catch (error: any) {
       console.error('❌ Payment initialization error:', {
         message: error.message,

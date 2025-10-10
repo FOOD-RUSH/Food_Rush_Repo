@@ -7,7 +7,7 @@ import { View, ActivityIndicator, Text } from 'react-native';
 import Toast from 'react-native-toast-message';
 import { AppContextProvider } from '@/src/contexts/AppContextProvider';
 import RootNavigator from '@/src/navigation/RootNavigator';
-import ErrorBoundary from '@/src/components/ErrorBoundary';
+import { ErrorBoundary } from '@/src/components/ErrorBoundary';
 import { useAppLoading } from '@/src/hooks/useAppLoading';
 import CustomSplashScreen from '@/src/components/common/CustomSplashScreen';
 

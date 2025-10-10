@@ -92,9 +92,9 @@ export const useLocation = (options: UseLocationOptions = {}) => {
         }
 
         return result.success;
-      } catch (error) {
+      } catch (_error) {
         const errorMsg =
-          error instanceof Error ? error.message : 'Failed to get location';
+          _error instanceof Error ? _error.message : 'Failed to get location';
         setError(errorMsg);
         return false;
       } finally {
@@ -111,8 +111,8 @@ export const useLocation = (options: UseLocationOptions = {}) => {
       setPermission(result.granted);
 
       return result.granted;
-    } catch (error) {
-      console.error('Error requesting permission:', error);
+    } catch (_error) {
+      console.error('Error requesting permission:', _error);
       return false;
     }
   }, [setPermission]);
@@ -145,9 +145,9 @@ export const useLocation = (options: UseLocationOptions = {}) => {
           setError('Location permission denied');
           return false;
         }
-      } catch (error) {
+      } catch (_error) {
         const errorMsg =
-          error instanceof Error ? error.message : 'Failed to get location';
+          _error instanceof Error ? _error.message : 'Failed to get location';
         setError(errorMsg);
         return false;
       } finally {

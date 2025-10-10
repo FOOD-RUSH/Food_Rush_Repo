@@ -21,8 +21,8 @@ export const getCurrentCameroonTime = (): Date => {
     }
 
     return cameroonTime;
-  } catch (error) {
-    console.error('Error getting Cameroon time:', error);
+  } catch (_error) {
+    console.error('Error getting Cameroon time:', _error);
     return new Date(); // Fallback to current time
   }
 };
@@ -70,7 +70,7 @@ export const formatCameroonTime = (
 
   try {
     return new Intl.DateTimeFormat('fr-CM', formatOptions).format(date);
-  } catch (error) {
+  } catch (_error) {
     // Fallback to basic formatting
     return date.toLocaleString('fr-FR', formatOptions);
   }

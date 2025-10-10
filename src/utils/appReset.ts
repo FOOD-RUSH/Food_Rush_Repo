@@ -22,7 +22,6 @@ export const performCompleteAppReset = async (options?: {
 }) => {
   const {
     preserveOnboarding = true,
-    preserveTheme = true,
     navigateToAuth = true,
   } = options || {};
 

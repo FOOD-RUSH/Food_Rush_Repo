@@ -230,10 +230,10 @@ class PushNotificationServiceImpl implements PushNotificationService {
 
   cleanup() {
     if (this.notificationListener) {
-      Notifications.removeNotificationSubscription(this.notificationListener);
+      this.notificationListener.remove();
     }
     if (this.responseListener) {
-      Notifications.removeNotificationSubscription(this.responseListener);
+      this.responseListener.remove();
     }
   }
 }

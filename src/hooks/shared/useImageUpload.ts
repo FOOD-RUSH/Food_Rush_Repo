@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { profileApi, LocalImageData } from '@/src/services/shared/profileApi';
+import { LocalImageData } from '@/src/services/shared/profileApi';
 import { pickImageForUpload } from '@/src/utils/imageUtils';
 
 /**
@@ -14,7 +14,8 @@ export const useProfileImageUpload = () => {
       picture: LocalImageData;
     }): Promise<any> => {
 
-      return response.data;
+      // Implementation would go here
+      return data;
     },
     onError: (error: any) => {
       console.error('❌ Profile update with image failed:', error);

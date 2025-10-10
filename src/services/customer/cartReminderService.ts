@@ -83,7 +83,7 @@ class CartReminderService {
           await pushNotificationService.cancelNotification(
             reminder.notificationId,
           );
-        } catch (error) {
+        } catch (_error) {
         }
       }
     }
@@ -250,7 +250,7 @@ class CartReminderService {
             await pushNotificationService.cancelNotification(
               reminder.notificationId,
             );
-          } catch (error) {
+          } catch (_error) {
           }
         },
       );
@@ -281,7 +281,7 @@ class CartReminderService {
               reminder.notificationId,
             );
             toRemove.push(key);
-          } catch (error) {
+          } catch (_error) {
           }
         }
       }

@@ -33,7 +33,7 @@ export const formatCurrency = (
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(safeValue);
-  } catch (error) {
+  } catch (_error) {
     return `${safeValue.toLocaleString()} ${currency}`;
   }
 };
@@ -268,7 +268,7 @@ export const formatDateLabel = (dateString?: string): string => {
       month: 'short',
       year: '2-digit',
     });
-  } catch (error) {
+  } catch (_error) {
     return 'N/A';
   }
 };

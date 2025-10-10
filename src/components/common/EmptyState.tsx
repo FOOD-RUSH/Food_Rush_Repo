@@ -2,7 +2,6 @@ import React from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { IoniconsIcon, type IoniconsName } from './icons';
-import { useTranslation } from 'react-i18next';
 import {
   Heading5,
   Heading4,
@@ -32,7 +31,6 @@ const EmptyState: React.FC<EmptyStateProps> = ({
   style,
 }) => {
   const { colors } = useTheme();
-  const { t } = useTranslation('translation');
 
   const getSizeStyles = () => {
     switch (size) {

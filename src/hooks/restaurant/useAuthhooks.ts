@@ -2,7 +2,6 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { restaurantAuthApi } from '@/src/services/restaurant/authApi';
 import {
   RestaurantRegisterRequest,
-  RestaurantLoginResponse,
 } from '@/src/services/shared/authTypes';
 import {
   RestaurantProfile,
@@ -10,7 +9,6 @@ import {
   useSetAuthData,
 } from '@/src/stores/AuthStore';
 import TokenManager from '@/src/services/shared/tokenManager';
-import { User } from '@/src/types';
 
 export const useRegisterRestaurant = () => {
   const { clearError } = useAuthStore();

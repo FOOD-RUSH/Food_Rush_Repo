@@ -2,7 +2,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
 
 console.log('🔍 Food Rush Bundle Analysis');
 console.log('============================\n');
@@ -224,7 +223,7 @@ try {
     .forEach((pkg) => {
       console.log(`  ${pkg.name}: ${formatBytes(pkg.size)}`);
     });
-} catch (error) {
+} catch (_error) {
   console.log('  Could not analyze individual package sizes');
 }
 

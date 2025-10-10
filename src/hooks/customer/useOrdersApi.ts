@@ -38,17 +38,6 @@ export const useActiveOrders = () => {
       const allOrders = await OrderApi.getMyOrders();
 
       // Filter for active orders (all statuses except delivered and cancelled)
-      const activeStatuses = [
-        'pending',
-        'confirmed',
-        'preparing',
-        'ready',
-        'ready_for_pickup',
-        'picked_up',
-        'out_for_delivery',
-        'payment_pending',
-        'payment_confirmed',
-      ];
       return allOrders.filter(
         (order) => !['delivered', 'cancelled'].includes(order.status),
       );

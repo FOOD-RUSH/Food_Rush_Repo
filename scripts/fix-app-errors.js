@@ -2,7 +2,6 @@
 
 const { execSync } = require('child_process');
 const fs = require('fs');
-const path = require('path');
 
 console.log('🔧 Comprehensive App Error Fix Script\n');
 
@@ -13,8 +12,8 @@ function runCommand(command, description) {
     execSync(command, { stdio: 'inherit' });
     console.log(`✅ ${description} completed\n`);
     return true;
-  } catch (error) {
-    console.log(`⚠️  ${description} failed: ${error.message}\n`);
+  } catch (_error) {
+    console.log(`⚠️  ${description} failed: ${_error.message}\n`);
     return false;
   }
 }
@@ -26,8 +25,8 @@ function removeDir(dirPath, description) {
     try {
       fs.rmSync(dirPath, { recursive: true, force: true });
       console.log(`✅ ${description} removed\n`);
-    } catch (error) {
-      console.log(`⚠️  Failed to remove ${description}: ${error.message}\n`);
+    } catch (_error) {
+      console.log(`⚠️  Failed to remove ${description}: ${_error.message}\n`);
     }
   }
 }

@@ -2,7 +2,6 @@
 
 const { execSync } = require('child_process');
 const fs = require('fs');
-const path = require('path');
 
 console.log('🔧 Fixing Metro bundler cache and syntax issues...\n');
 
@@ -12,7 +11,7 @@ function runCommand(command, description) {
   try {
     execSync(command, { stdio: 'inherit' });
     console.log(`✅ ${description} completed\n`);
-  } catch (error) {
+  } catch (_error) {
     console.log(`⚠️  ${description} failed, continuing...\n`);
   }
 }

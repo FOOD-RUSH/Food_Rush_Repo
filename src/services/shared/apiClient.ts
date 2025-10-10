@@ -5,7 +5,6 @@ import axios, {
   AxiosError,
   InternalAxiosRequestConfig,
 } from 'axios';
-import { Platform } from 'react-native';
 import TokenManager from './tokenManager';
 import { getUserFriendlyErrorMessage } from '../../utils/errorHandler';
 
@@ -62,7 +61,6 @@ class ApiClient {
           if (token && config.headers) {
             config.headers.Authorization = `Bearer ${token}`;
             // Log API request details for debugging (without sensitive data)
-            const isFormData = config.data instanceof FormData;
             // API Request: method, url, hasAuth, contentType
           } else if (config.url && !config.url.includes('/auth/')) {
             // Warn if no token is available for protected routes

@@ -27,7 +27,7 @@ class LocationService {
   async isLocationEnabled(): Promise<boolean> {
     try {
       return await ExpoLocation.hasServicesEnabledAsync();
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   }
@@ -43,7 +43,7 @@ class LocationService {
         default:
           return PermissionStatus.NOT_REQUESTED;
       }
-    } catch (error) {
+    } catch (_error) {
       return PermissionStatus.NOT_REQUESTED;
     }
   }
@@ -81,7 +81,7 @@ class LocationService {
         status,
         shouldShowRationale: result.canAskAgain === false,
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         granted: false,
         status: PermissionStatus.DENIED,
@@ -160,9 +160,9 @@ class LocationService {
         location,
         fromCache: false,
       };
-    } catch (error) {
+    } catch (_error) {
       const errorMessage =
-        error instanceof Error ? error.message : 'Failed to get location';
+        _error instanceof Error ? _error.message : 'Failed to get location';
       return this.getFallbackLocation(errorMessage);
     }
   }
@@ -203,7 +203,7 @@ class LocationService {
         exactLocation,
         formattedAddress: addressParts.join(', '),
       };
-    } catch (error) {
+    } catch (_error) {
       return {
         exactLocation: 'Yaoundé',
         formattedAddress: 'Yaoundé, Cameroun',

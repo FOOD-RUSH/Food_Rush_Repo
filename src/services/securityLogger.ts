@@ -66,8 +66,8 @@ class SecurityLogger {
       }
 
       this.isInitialized = true;
-    } catch (error) {
-      console.error('Failed to initialize security logger:', error);
+    } catch (_error) {
+      console.error('Failed to initialize security logger:', _error);
     }
   }
 

@@ -6,12 +6,7 @@ import {
   Theme as NavigationTheme,
 } from '@react-navigation/native';
 import { useAppStore } from '../stores/AppStore';
-import {
-  restaurantDarkNavigationTheme,
-  restaurantLightNavigationTheme,
-  restaurantDarkTheme,
-  restaurantLightTheme,
-} from './restaurantTheme';
+// Restaurant themes are available but not used in this file
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 

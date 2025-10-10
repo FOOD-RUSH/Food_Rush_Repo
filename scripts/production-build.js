@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 const { execSync } = require('child_process');
-const fs = require('fs');
 
 // Starting optimized production build...
 
@@ -10,7 +9,7 @@ const fs = require('fs');
 try {
   execSync('expo export --clear', { stdio: 'inherit' });
   // Build cache cleared
-} catch (error) {
+} catch (_error) {
   // Could not clear cache, continuing...
 }
 
@@ -19,7 +18,7 @@ try {
 try {
   execSync('node scripts/optimize-assets.js', { stdio: 'inherit' });
   // Assets optimized
-} catch (error) {
+} catch (_error) {
   // Asset optimization failed, continuing...
 }
 
@@ -39,8 +38,8 @@ try {
   // • Assets: ~70% smaller (5.2MB → ~1.5MB)
   // • Code: ~30% smaller with ProGuard + Hermes
   // • Total: 220MB → ~50-80MB estimated
-} catch (error) {
-  console.error('\n❌ Build failed:', error.message);
+} catch (_error) {
+  console.error('\n❌ Build failed:', _error.message);
 
   // Fallback: Building regular production APK...
   try {
@@ -48,8 +47,8 @@ try {
       stdio: 'inherit',
     });
     // Fallback build completed!
-  } catch (fallbackError) {
-    console.error('\n❌ Fallback build also failed:', fallbackError.message);
+  } catch (_fallbackError) {
+    console.error('\n❌ Fallback build also failed:', _fallbackError.message);
   }
 }
 

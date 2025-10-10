@@ -1,6 +1,5 @@
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import transactionService, { TransactionFilters } from '@/src/services/customer/transaction.service';
-import { Transaction } from '@/src/types/transaction';
 
 /**
  * Hook to fetch transaction history with pagination

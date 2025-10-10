@@ -1,19 +1,6 @@
 module.exports = function (api) {
   api.cache(true);
 
-  const isProduction = process.env.NODE_ENV === 'production';
-
-  const plugins = [
-    'react-native-worklets/plugin',
-    // Production optimizations only
-    ...(isProduction
-      ? [
-          '@babel/plugin-transform-react-constant-elements',
-          '@babel/plugin-transform-react-inline-elements',
-        ]
-      : []),
-  ].filter(Boolean);
-
   return {
     presets: [
       [
@@ -25,6 +12,6 @@ module.exports = function (api) {
       ],
       'nativewind/babel',
     ],
-    plugins: plugins.filter(Boolean),
+    plugins: ['react-native-worklets/plugin'],
   };
 };

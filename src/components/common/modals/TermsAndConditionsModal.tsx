@@ -125,7 +125,7 @@ const TermsAndConditionsModal: React.FC<TermsAndConditionsModalProps> = ({
         </Heading2>
         <View style={styles.bulletPoint}>
           <Body color={colors.onSurface} style={styles.bulletText}>
-            • You are responsible for verifying order details—items, quantities, and delivery address—before completing your order.
+            • You are responsible for verifying order details&mdash;items, quantities, and delivery address&mdash;before completing your order.
           </Body>
         </View>
         <View style={styles.bulletPoint}>
@@ -157,7 +157,7 @@ const TermsAndConditionsModal: React.FC<TermsAndConditionsModalProps> = ({
         </Heading2>
         <View style={styles.bulletPoint}>
           <Body color={colors.onSurface} style={styles.bulletText}>
-            • Delivery is facilitated by independent drivers ("Couriers"). Estimated delivery times are approximations; actual times may vary due to traffic, weather, or other factors.
+            • Delivery is facilitated by independent drivers (&ldquo;Couriers&rdquo;). Estimated delivery times are approximations; actual times may vary due to traffic, weather, or other factors.
           </Body>
         </View>
         <View style={styles.bulletPoint}>
@@ -173,12 +173,12 @@ const TermsAndConditionsModal: React.FC<TermsAndConditionsModalProps> = ({
         </Heading2>
         <View style={styles.bulletPoint}>
           <Body color={colors.onSurface} style={styles.bulletText}>
-            • FoodRush is not liable for issues regarding food quality or preparation—that is the responsibility of the restaurant.
+            • FoodRush is not liable for issues regarding food quality or preparation&mdash;that is the responsibility of the restaurant.
           </Body>
         </View>
         <View style={styles.bulletPoint}>
           <Body color={colors.onSurface} style={styles.bulletText}>
-            • Customers should report concerns or complaints—such as missing items, poor quality, or contamination—via customer support promptly.
+            • Customers should report concerns or complaints&mdash;such as missing items, poor quality, or contamination&mdash;via customer support promptly.
           </Body>
         </View>
       </View>
@@ -259,7 +259,7 @@ const TermsAndConditionsModal: React.FC<TermsAndConditionsModalProps> = ({
         </Heading2>
         <View style={styles.bulletPoint}>
           <Body color={colors.onSurface} style={styles.bulletText}>
-            • The Service is provided "as is." FoodRush disclaims warranties of perfection, accuracy, or availability.
+            • The Service is provided &ldquo;as is.&rdquo; FoodRush disclaims warranties of perfection, accuracy, or availability.
           </Body>
         </View>
         <View style={styles.bulletPoint}>
@@ -288,7 +288,7 @@ const TermsAndConditionsModal: React.FC<TermsAndConditionsModalProps> = ({
         </Heading1>
         
         <Body color={colors.onSurfaceVariant} style={styles.paragraph}>
-          These Terms & Conditions ("Agreement") set out the rights and obligations between you ("Restaurant Partner," "you," "your") and Foodrush ("Foodrush," "we," "us," "our") in respect of your participation in the Foodrush platform for ordering, delivery and/or pickup services (the "Service"). By signing up and operating as a Foodrush Partner, you agree to these Terms.
+          These Terms &amp; Conditions (&ldquo;Agreement&rdquo;) set out the rights and obligations between you (&ldquo;Restaurant Partner,&rdquo; &ldquo;you,&rdquo; &ldquo;your&rdquo;) and Foodrush (&ldquo;Foodrush,&rdquo; &ldquo;we,&rdquo; &ldquo;us,&rdquo; &ldquo;our&rdquo;) in respect of your participation in the Foodrush platform for ordering, delivery and/or pickup services (the &ldquo;Service&rdquo;). By signing up and operating as a Foodrush Partner, you agree to these Terms.
         </Body>
       </View>
 
@@ -360,7 +360,7 @@ const TermsAndConditionsModal: React.FC<TermsAndConditionsModalProps> = ({
         </View>
         <View style={styles.bulletPoint}>
           <Body color={colors.onSurface} style={styles.bulletText}>
-            • Once accepted, you must prepare the order in accordance with the Customer's instructions, within the committed prep time.
+            • Once accepted, you must prepare the order in accordance with the Customer&apos;s instructions, within the committed prep time.
           </Body>
         </View>
         <View style={styles.bulletPoint}>
@@ -386,7 +386,7 @@ const TermsAndConditionsModal: React.FC<TermsAndConditionsModalProps> = ({
         </View>
         <View style={styles.bulletPoint}>
           <Body color={colors.onSurface} style={styles.bulletText}>
-            • <Label weight="semibold">Self‑Delivery Option:</Label> You may, if eligible, use your own delivery personnel ("self‑delivery"). If so, you must ensure your drivers meet all requirements (licensing, local laws, food safety, insurance) and adhere to Foodrush's standards.
+            • <Label weight="semibold">Self‑Delivery Option:</Label> You may, if eligible, use your own delivery personnel (&ldquo;self‑delivery&rdquo;). If so, you must ensure your drivers meet all requirements (licensing, local laws, food safety, insurance) and adhere to Foodrush&apos;s standards.
           </Body>
         </View>
         <View style={styles.bulletPoint}>
@@ -543,7 +543,7 @@ const TermsAndConditionsModal: React.FC<TermsAndConditionsModalProps> = ({
         </View>
         <View style={styles.bulletPoint}>
           <Body color={colors.onSurface} style={styles.bulletText}>
-            • You consent to Foodrush's use of transactional data for analytics, improvements, fraud detection, etc., in accordance with applicable data protection / privacy law.
+            • You consent to Foodrush&apos;s use of transactional data for analytics, improvements, fraud detection, etc., in accordance with applicable data protection / privacy law.
           </Body>
         </View>
       </View>
@@ -554,7 +554,7 @@ const TermsAndConditionsModal: React.FC<TermsAndConditionsModalProps> = ({
         </Heading2>
         <View style={styles.bulletPoint}>
           <Body color={colors.onSurface} style={styles.bulletText}>
-            • Foodrush may suspend or deactivate your restaurant's participation for failure to meet these Terms, for serious violations (e.g. food safety breach, repeated complaints, fraudulent behavior), or by mutual agreement.
+            • Foodrush may suspend or deactivate your restaurant&lsquo;s participation for failure to meet these Terms, for serious violations (e.g. food safety breach, repeated complaints, fraudulent behavior), or by mutual agreement.
           </Body>
         </View>
         <View style={styles.bulletPoint}>
@@ -692,8 +692,8 @@ const TermsAndConditionsModal: React.FC<TermsAndConditionsModalProps> = ({
           For questions about these terms, contact us at:
         </Body>
         <Body color={colors.onSurface} style={styles.paragraph}>
-          Email: partners@foodrush.cm{'\n'}
-          Phone: +237 XXX XXX XXX{'\n'}
+          Email: partners@foodrush.cm{`\n`}
+          Phone: +237 XXX XXX XXX{`\n`}
           Address: Douala, Cameroon
         </Body>
       </View>

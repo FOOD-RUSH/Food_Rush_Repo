@@ -11,7 +11,6 @@ import { useTheme } from 'react-native-paper';
 
 import { useTranslation } from 'react-i18next';
 import { useCategories } from '@/src/hooks/useCategories';
-import { getCategoryEmoji, getCategoryColor } from '@/src/data/categories';
 import {
   Typography,
   Heading5,

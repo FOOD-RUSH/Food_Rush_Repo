@@ -99,7 +99,7 @@ export const getUserFriendlyErrorMessage = (error: any): string => {
           defaultValue: 'An unexpected error occurred. Please try again.',
         });
     }
-  } catch (i18nError) {
+  } catch (_i18nError) {
     // Fallback if i18n is not available or fails
 
     // Provide fallback messages without i18n

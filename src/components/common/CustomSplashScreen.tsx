@@ -5,13 +5,13 @@ import {
   Animated,
   Dimensions,
   StyleSheet,
-  useWindowDimensions,
 } from 'react-native';
 
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 interface CustomSplashScreenProps {
   onAnimationComplete: () => void;
+  onTransitionStart?: () => void;
 }
 
 const CustomSplashScreen: React.FC<CustomSplashScreenProps> = ({
@@ -32,6 +32,25 @@ const CustomSplashScreen: React.FC<CustomSplashScreenProps> = ({
   const [animationPhase, setAnimationPhase] = useState<
     'food' | 'rush' | 'complete'
   >('food');
+
+  const startFoodAnimation = () => {
+    // Animate each letter of "Food" one by one
+    const letterAnimationsList = letterAnimations.map((anim, index) =>
+      Animated.timing(anim, {
+        toValue: 1,
+        duration: 400,
+        delay: index * 150, // 150ms delay between each letter
+        useNativeDriver: true,
+      }),
+    );
+
+    Animated.sequence([
+      Animated.stagger(150, letterAnimationsList),
+      Animated.delay(300), // Wait 300ms after "Food" completes
+    ]).start(() => {
+      startRushAnimation();
+    });
+  };
 
   useEffect(() => {
     startFoodAnimation();

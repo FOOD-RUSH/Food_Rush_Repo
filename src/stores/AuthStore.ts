@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DeviceEventEmitter } from 'react-native';
-import { navigate, reset } from '../navigation/navigationHelpers';
 import TokenManager from '../services/shared/tokenManager';
 
 // User profiles for different user types

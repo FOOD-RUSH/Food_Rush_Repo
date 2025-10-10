@@ -4,7 +4,6 @@ import {
   RevenueBucketsResponse,
   AnalyticsPeriod,
   AnalyticsDateRange,
-  RestaurantBalanceResponse,
   RestaurantBalanceApiResponse,
 } from '@/src/types/analytics';
 

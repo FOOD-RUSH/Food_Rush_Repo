@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import {
   categoriesApi,
-  CategoryOption,
 } from '@/src/services/shared/categoriesApi';
 
 // Unified hook for fetching categories - replaces all other category hooks

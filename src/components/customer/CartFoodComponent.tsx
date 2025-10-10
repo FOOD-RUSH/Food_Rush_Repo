@@ -57,7 +57,7 @@ const CartFoodComponent: React.FC<CartFoodComponentProps> = React.memo(
     const triggerHaptic = useCallback(() => {
       try {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      } catch (error) {
+      } catch (_error) {
         // Haptics might not be available on all devices
       }
     }, []);
@@ -67,8 +67,8 @@ const CartFoodComponent: React.FC<CartFoodComponentProps> = React.memo(
       try {
         deleteCart(id);
         onDelete?.(id);
-      } catch (error) {
-        console.error('Error deleting cart item:', error);
+      } catch (_error) {
+        console.error('Error deleting cart item:', _error);
         Alert.alert(t('error'), t('failed_to_delete_item'));
       }
     }, [id, deleteCart, onDelete, t]);
@@ -151,14 +151,14 @@ const CartFoodComponent: React.FC<CartFoodComponentProps> = React.memo(
         opacity: opacity.value,
         transform: [{ scale: scale.value }],
       }),
-      [opacity, scale],
+      [],
     );
 
     const cardAnimatedStyle = useAnimatedStyle(
       () => ({
         transform: [{ translateX: translateX.value }],
       }),
-      [translateX],
+      [],
     );
 
     const deleteBackgroundStyle = useAnimatedStyle(() => {
@@ -167,7 +167,7 @@ const CartFoodComponent: React.FC<CartFoodComponentProps> = React.memo(
         backgroundColor: `rgba(220, 38, 38, ${interpolate(progress, [0, 1], [0, 0.9])})`,
         borderRadius: 12,
       };
-    }, [translateX]);
+    }, []);
 
     const deleteIconStyle = useAnimatedStyle(() => {
       const progress = Math.abs(translateX.value);
@@ -175,7 +175,7 @@ const CartFoodComponent: React.FC<CartFoodComponentProps> = React.memo(
       return {
         transform: [{ scale: clamp(iconScale, 0.5, 1) }],
       };
-    }, [translateX]);
+    }, []);
 
     return (
       <View style={styles.container}>
