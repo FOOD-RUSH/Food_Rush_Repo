@@ -1,8 +1,10 @@
-const { getDefaultConfig } = require('expo/metro-config');
 const { withNativeWind } = require('nativewind/metro');
 const path = require('path');
+const {
+  getSentryExpoConfig
+} = require("@sentry/react-native/metro");
 
-const config = getDefaultConfig(__dirname);
+const config = getSentryExpoConfig(__dirname);
 
 // Production optimization flag
 const isProduction = process.env.NODE_ENV === 'production';
@@ -12,11 +14,11 @@ config.resolver = {
   ...config.resolver,
   // Important: Always extend from Expo's defaults
   sourceExts: [
-    ...getDefaultConfig(__dirname).resolver.sourceExts,
+    ...getSentryExpoConfig(__dirname).resolver.sourceExts,
     'svg', // Add SVG support
   ],
   assetExts: [
-    ...getDefaultConfig(__dirname).resolver.assetExts,
+    ...getSentryExpoConfig(__dirname).resolver.assetExts,
     // Note: Don't remove extensions here, only add if needed
   ],
   platforms: ['ios', 'android', 'native'],

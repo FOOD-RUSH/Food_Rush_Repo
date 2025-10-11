@@ -171,7 +171,7 @@ class PaymentService {
       //   ...(request.serviceFee && { serviceFee: request.serviceFee }), // Include service fee if provided
       // };
 
-      const response = await apiClient.post<PaymentInitResponse>('/payment/initialize', request);
+      const response = await apiClient.post<PaymentInitResponse>('/payments/init', request);
       return this.parsePaymentResponse(response);
     } catch (error: any) {
       console.error('❌ Payment initialization error:', {

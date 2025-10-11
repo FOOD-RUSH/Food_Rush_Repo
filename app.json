@@ -8,7 +8,10 @@
     "scheme": "foodrush",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "platforms": ["android", "ios"],
+    "platforms": [
+      "android",
+      "ios"
+    ],
     "splash": {
       "image": "./assets/images/SplashScreen.png",
       "resizeMode": "contain",
@@ -53,6 +56,14 @@
         {
           "icon": "./assets/images/notification-icon.png",
           "color": "#007aff"
+        }
+      ],
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "project": "react-native",
+          "organization": "student-i3b"
         }
       ]
     ],

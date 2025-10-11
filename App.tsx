@@ -10,6 +10,26 @@ import RootNavigator from '@/src/navigation/RootNavigator';
 import { ErrorBoundary } from '@/src/components/ErrorBoundary';
 import { useAppLoading } from '@/src/hooks/useAppLoading';
 import CustomSplashScreen from '@/src/components/common/CustomSplashScreen';
+import * as Sentry from '@sentry/react-native';
+
+Sentry.init({
+  dsn: 'https://5dd2a75ca59d510bd578ee70fc5e0898@o4509617549344768.ingest.us.sentry.io/4509617551835136',
+
+  // Adds more context data to events (IP address, cookies, user, etc.)
+  // For more information, visit: https://docs.sentry.io/platforms/react-native/data-management/data-collected/
+  sendDefaultPii: true,
+
+  // Enable Logs
+  enableLogs: true,
+
+  // Configure Session Replay
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1,
+  integrations: [Sentry.mobileReplayIntegration(), Sentry.feedbackIntegration()],
+
+  // uncomment the line below to enable Spotlight (https://spotlightjs.com)
+  // spotlight: __DEV__,
+});
 
 // Prevent the default Expo splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync();
@@ -42,7 +62,7 @@ const LoadingFallback = ({ message = 'Loading...' }: { message?: string }) => {
   );
 };
 
-export default function App() {
+export default Sentry.wrap(function App() {
   const {
     showCustomSplash,
     appReady,
@@ -98,4 +118,4 @@ export default function App() {
       </AppContextProvider>
     </ErrorBoundary>
   );
-}
+});
