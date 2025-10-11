@@ -187,7 +187,6 @@ const ProfileHomeScreen = ({
         </View>
 
         {/* Divider */}
-        <Button title='Try!' onPress={ () => { Sentry.captureException(new Error('First error')) }}/>
         <View
           className="h-[1px] mx-1 my-4"
           style={{ backgroundColor: colors.outline }}

@@ -12,27 +12,53 @@ import { useAppLoading } from '@/src/hooks/useAppLoading';
 import CustomSplashScreen from '@/src/components/common/CustomSplashScreen';
 import * as Sentry from '@sentry/react-native';
 
-Sentry.init({
-  dsn: 'https://5dd2a75ca59d510bd578ee70fc5e0898@o4509617549344768.ingest.us.sentry.io/4509617551835136',
+// Initialize Sentry with error handling to prevent startup crashes
+try {
+  Sentry.init({
+    dsn: process.env.EXPO_PUBLIC_SENTRY_DSN || undefined,
 
-  // Adds more context data to events (IP address, cookies, user, etc.)
-  // For more information, visit: https://docs.sentry.io/platforms/react-native/data-management/data-collected/
-  sendDefaultPii: true,
+    // Only send PII in production if explicitly required
+    sendDefaultPii: !__DEV__,
 
-  // Enable Logs
-  enableLogs: true,
-  debug: true,
-  // Configure Session Replay
-  replaysSessionSampleRate: 0.1,
-  replaysOnErrorSampleRate: 1,
-  integrations: [Sentry.mobileReplayIntegration(), Sentry.feedbackIntegration()],
+    // Disable debug logging in production for performance and security
+    debug: __DEV__,
+    enableLogs: __DEV__,
 
-  // uncomment the line below to enable Spotlight (https://spotlightjs.com)
-  // spotlight: __DEV__,
-});
+    // Configure Session Replay - lower sample rate in production
+    replaysSessionSampleRate: __DEV__ ? 0.1 : 0.01,
+    replaysOnErrorSampleRate: 1.0,
+
+    integrations: [Sentry.mobileReplayIntegration(), Sentry.feedbackIntegration()],
+
+    // Set environment from env variable
+    environment: process.env.EXPO_PUBLIC_ENVIRONMENT || 'production',
+
+    // Enable Spotlight only in development
+    spotlight: __DEV__,
+
+    // Add error handling callback
+    beforeSend(event, hint) {
+      if (__DEV__) {
+        console.log('Sentry Event:', event);
+      }
+      return event;
+    },
+  });
+  if (__DEV__) {
+    console.log('✓ Sentry initialized successfully');
+  }
+} catch (error) {
+  console.error('Failed to initialize Sentry:', error);
+  // App continues without Sentry rather than crashing
+}
 
 // Prevent the default Expo splash screen from auto-hiding
-SplashScreen.preventAutoHideAsync();
+try {
+  SplashScreen.preventAutoHideAsync();
+} catch (error) {
+  console.warn('SplashScreen.preventAutoHideAsync failed:', error);
+  // Continue - this is not critical for app functionality
+}
 
 // Loading fallback component with font loading
 const LoadingFallback = ({ message = 'Loading...' }: { message?: string }) => {
