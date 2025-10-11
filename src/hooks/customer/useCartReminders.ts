@@ -15,12 +15,39 @@ export const useCartReminders = () => {
   const reminderEnabled = useCartReminderEnabled();
   const restaurantName = useCartRestaurantName();
   const lastActivity = useCartLastActivity();
-  const {
-    scheduleCartReminders,
-    cancelCartReminders,
-    enableReminders,
-    disableReminders,
-  } = useCartStore();
+  
+  // Direct reminder functions using the service
+  const scheduleCartReminders = useCallback(async () => {
+    if (reminderEnabled && cartItems.length > 0) {
+      try {
+        const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+        await cartReminderService.scheduleCartReminders(
+          itemCount,
+          restaurantName || undefined,
+          lastActivity
+        );
+      } catch (error) {
+        console.error('Failed to schedule cart reminders:', error);
+      }
+    }
+  }, [reminderEnabled, cartItems, restaurantName, lastActivity]);
+
+  const cancelCartReminders = useCallback(async () => {
+    try {
+      await cartReminderService.cancelAllCartReminders();
+    } catch (error) {
+      console.error('Failed to cancel cart reminders:', error);
+    }
+  }, []);
+
+  const enableReminders = useCallback(() => {
+    useCartStore.setState({ reminderEnabled: true });
+  }, []);
+
+  const disableReminders = useCallback(() => {
+    useCartStore.setState({ reminderEnabled: false });
+    cancelCartReminders();
+  }, [cancelCartReminders]);
 
   // Initialize cart reminder service
   useEffect(() => {

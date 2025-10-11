@@ -17,7 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 
 import CommonView from '@/src/components/common/CommonView';
-import { useNotifications } from '@/src/hooks/useNotifications';
+import { useNotifications } from '@/src/contexts/SimpleNotificationProvider';
 import type { Notification } from '@/src/types';
 
 const NotificationScreen = () => {

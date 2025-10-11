@@ -18,7 +18,7 @@ import { useNavigation } from '@react-navigation/native';
 import * as Haptics from 'expo-haptics';
 
 import CommonView from '@/src/components/common/CommonView';
-import { useNotifications } from '@/src/hooks/useNotifications';
+import { useNotifications } from '@/src/contexts/SimpleNotificationProvider';
 import type { Notification } from '@/src/types';
 
 const RestaurantNotificationScreen = () => {

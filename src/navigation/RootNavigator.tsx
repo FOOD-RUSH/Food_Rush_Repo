@@ -112,12 +112,11 @@ const RootNavigator: React.FC = () => {
   const { completeOnboarding, setSelectedUserType } = useAppStore();
 
   // Synchronize user type between stores
-  React.useEffect(() => {
-    if (authUserType && authUserType !== appUserType) {
-      setSelectedUserType(authUserType);
-    }
-  }, [authUserType, appUserType, setSelectedUserType]);
-
+ React.useEffect(() => {
+  if (authUserType && authUserType !== appUserType) {
+    setSelectedUserType(authUserType);
+  }
+},  [authUserType, appUserType])
   // Cart store selectors
   const clearCart = useCartStore((state) => state.clearCart);
   const cartItemsLength = useCartStore((state) => state.items.length);

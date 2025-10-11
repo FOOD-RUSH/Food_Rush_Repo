@@ -190,7 +190,7 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
       {/* Left Section - Avatar and Location */}
       <View className="flex-row items-center flex-1">
         <Avatar
-          profilePicture={user?.pictureUrl}
+          profilePicture={user?.profilePicture}
           fullName={user?.fullName || 'User'}
           size={70}
         />

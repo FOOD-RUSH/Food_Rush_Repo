@@ -237,47 +237,30 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         set({ defaultRestaurantId }),
 
       // Optimized logout - prevent multiple calls and simplify store clearing
-      logout: async () => {
-        const currentState = get();
+    logout: async () => {
+  const currentState = get();
 
-        // Prevent multiple logout calls
-        if (!currentState.isAuthenticated && !currentState.user) {
-          return;
-        }
+  // Prevent multiple logout calls
+  if (!currentState.isAuthenticated && !currentState.user) {
+    return;
+  }
 
-        try {
-          set({ isLoading: true });
+  try {
+    set({ isLoading: true });
 
-          // Clear authentication tokens
-          await TokenManager.clearAllTokens();
+    // Clear tokens
+    await TokenManager.clearAllTokens();
 
-          // Clear stores efficiently - only clear what's necessary
-          try {
-            // Import stores dynamically to avoid circular dependencies
-            const [cartStore, appStore] = await Promise.all([
-              import('./customerStores/cartStore').then((m) =>
-                m.useCartStore.getState(),
-              ),
-              import('./AppStore').then((m) => m.useAppStore.getState()),
-            ]);
+    // Reset auth state
+    set({ ...initialState, isLoading: false });
 
-            // Clear cart and user type only
-            cartStore.clearCart();
-            appStore.clearSelectedUserType();
-          } catch (storeError) {
-            console.error('Error clearing stores:', storeError);
-          }
-
-          // Reset auth state
-          set({ ...initialState, isLoading: false });
-
-          // Emit logout event only once
-          DeviceEventEmitter.emit('user-logout');
-        } catch (error) {
-          console.error('Logout error:', error);
-          set({ ...initialState, isLoading: false });
-        }
-      },
+    // Emit logout event for navigation
+    DeviceEventEmitter.emit('user-logout');
+  } catch (error) {
+    console.error('Logout error:', error);
+    set({ ...initialState, isLoading: false });
+  }
+},
 
       // Utility actions
       clearError: () => set({ error: null }),

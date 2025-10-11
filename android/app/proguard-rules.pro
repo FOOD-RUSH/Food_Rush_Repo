@@ -10,5 +10,6 @@
 # react-native-reanimated
 -keep class com.swmansion.reanimated.** { *; }
 -keep class com.facebook.react.turbomodule.** { *; }
-
+-keep class io.sentry.** { *; }
+-keep class * extends java.lang.Throwable { *; }
 # Add any project specific keep options here:

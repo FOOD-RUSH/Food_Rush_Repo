@@ -1,147 +1,216 @@
-import React, {
-  createContext,
-  useContext,
-  ReactNode,
-  useMemo,
-  useEffect,
-} from 'react';
-import { useNotifications } from '@/src/hooks/useNotifications';
-import { useAuthStore } from '@/src/stores/AuthStore';
-import pushNotificationService from '@/src/services/shared/pushNotificationService';
+import React, { ReactNode, useMemo } from 'react';
+import { useNotificationStore } from '@/src/stores/shared/notificationStore';
+import { usePushNotifications } from '@/src/hooks/shared/usePushNotifications';
+import { pushNotificationService } from '@/src/services/shared/pushNotificationService';
+import { useUserType } from '@/src/stores/AuthStore';
 
-interface NotificationContextType {
-  // Customer functions
-  sendOrderStatus: (
-    orderId: string,
-    status: 'confirmed' | 'preparing' | 'ready' | 'delivered' | 'cancelled',
-    restaurantName?: string,
-  ) => Promise<void>;
-  scheduleCartReminder: (
-    itemCount: number,
-    restaurantName?: string,
-    minutesFromNow?: number,
-  ) => Promise<string | null>;
-  cancelCartReminders: () => Promise<void>;
-
-  // Restaurant functions
-  sendNewOrder: (orderId: string, customerName?: string) => Promise<void>;
-
-  // Common functions
-  sendPromotion: (
-    title: string,
-    message: string,
-    promotionId?: string,
-  ) => Promise<void>;
-  sendGeneral: (
-    title: string,
-    message: string,
-    data?: Record<string, any>,
-  ) => Promise<void>;
-
-  // State
-  isAuthenticated: boolean;
-  userType: 'customer' | 'restaurant' | null;
+interface NotificationCounts {
+  all: number;
+  unread: number;
+  order: number;
+  system: number;
+  promotion: number;
+  alert: number;
 }
 
-const NotificationContext = createContext<NotificationContextType | undefined>(
-  undefined,
-);
+interface NotificationContextType {
+  // Notifications
+  notifications: any[];
+  unreadCount: number;
+  isLoading: boolean;
+  isLoadingMore: boolean;
+  error: string | null;
+  hasNextPage: boolean;
+  selectedFilter: string;
+  notificationCounts: NotificationCounts;
+  hasNotifications: boolean;
+  userType: 'customer' | 'restaurant' | null;
+
+  // Actions
+  fetchNotifications: () => Promise<void>;
+  refreshNotifications: () => Promise<void>;
+  refresh: () => Promise<void>;
+  loadMore: () => Promise<void>;
+  markAsRead: (id: string) => Promise<boolean>;
+  markAllAsRead: () => Promise<boolean>;
+  setFilter: (filter: string) => void;
+  clearError: () => void;
+
+  // Push
+  pushIsReady: boolean;
+  pushError: string | null;
+
+  // Utils
+  sendLocalNotification: (
+    title: string,
+    body: string,
+    data?: any,
+  ) => Promise<string>;
+  scheduleReminder: (
+    title: string,
+    body: string,
+    minutesFromNow: number,
+    data?: any,
+  ) => Promise<string>;
+}
+
+const NotificationContext = React.createContext<
+  NotificationContextType | undefined
+>(undefined);
 
 interface NotificationProviderProps {
   children: ReactNode;
 }
 
-export const SimpleNotificationProvider: React.FC<
-  NotificationProviderProps
-> = ({ children }) => {
-  const notifications = useNotifications();
-  const user = useAuthStore((state) => state.user);
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const userType = user?.role;
+export const NotificationProvider: React.FC<NotificationProviderProps> = ({
+  children,
+}) => {
+  const { isReady: pushIsReady, error: pushError } = usePushNotifications();
+  const userType = useUserType();
 
-  // Initialize notifications when user is authenticated
-  useEffect(() => {
-    if (isAuthenticated && userType && user?.id) {
-      // Push notification service is already initialized via usePushNotifications hook
+  const {
+    notifications,
+    unreadCount,
+    isLoading,
+    isLoadingMore,
+    error,
+    hasNextPage,
+    selectedFilter,
+    fetchNotifications,
+    refreshNotifications,
+    loadMoreNotifications,
+    markAsRead: storeMarkAsRead,
+    markAllAsRead: storeMarkAllAsRead,
+    setFilter,
+    getFilteredNotifications,
+    clearError,
+  } = useNotificationStore();
 
+  // Calculate notification counts
+  const notificationCounts = useMemo(() => {
+    const counts: NotificationCounts = {
+      all: notifications.length,
+      unread: notifications.filter(n => !n.readAt).length,
+      order: notifications.filter(n => n.type === 'order').length,
+      system: notifications.filter(n => n.type === 'system').length,
+      promotion: notifications.filter(n => n.type === 'promotion').length,
+      alert: notifications.filter(n => n.type === 'alert').length,
+    };
+    return counts;
+  }, [notifications]);
+
+  // Get filtered notifications
+  const filteredNotifications = useMemo(() => {
+    return getFilteredNotifications();
+  }, [getFilteredNotifications]);
+
+  // Enhanced mark as read with success return
+  const markAsRead = async (id: string): Promise<boolean> => {
+    try {
+      await storeMarkAsRead(id);
+      return true;
+    } catch (error) {
+      console.error('Failed to mark notification as read:', error);
+      return false;
     }
-  }, [isAuthenticated, userType, user?.id]);
+  };
 
-  const contextValue: NotificationContextType = useMemo(
+  // Enhanced mark all as read with success return
+  const markAllAsRead = async (): Promise<boolean> => {
+    try {
+      await storeMarkAllAsRead();
+      return true;
+    } catch (error) {
+      console.error('Failed to mark all notifications as read:', error);
+      return false;
+    }
+  };
+
+  // Refresh alias
+  const refresh = refreshNotifications;
+
+  // Load more alias
+  const loadMore = loadMoreNotifications;
+
+  const value = useMemo<NotificationContextType>(
     () => ({
-      sendOrderStatus: async (
-        orderId: string,
-        status: 'confirmed' | 'preparing' | 'ready' | 'delivered' | 'cancelled',
-        restaurantName?: string,
-      ) => {
-        await notifications.sendOrderNotification(orderId, status, {
-          restaurantName,
+      notifications: filteredNotifications,
+      unreadCount,
+      isLoading,
+      isLoadingMore,
+      error,
+      hasNextPage,
+      selectedFilter,
+      notificationCounts,
+      hasNotifications: notifications.length > 0,
+      userType,
+
+      fetchNotifications,
+      refreshNotifications,
+      refresh,
+      loadMore,
+      markAsRead,
+      markAllAsRead,
+      setFilter,
+      clearError,
+
+      pushIsReady,
+      pushError,
+
+      sendLocalNotification: async (title, body, data) => {
+        return pushNotificationService.sendLocalNotification({
+          title,
+          body,
+          data,
         });
       },
-      scheduleCartReminder: async (
-        itemCount: number,
-        restaurantName?: string,
-        minutesFromNow: number = 25,
-      ) => {
-        return await notifications.scheduleReminder(
-          "🛒 Don't Forget Your Cart!",
-          `You have ${itemCount} item${itemCount === 1 ? '' : 's'}${restaurantName ? ` from ${restaurantName}` : ''} waiting for you. Complete your order now!`,
+
+      scheduleReminder: async (title, body, minutesFromNow, data) => {
+        return pushNotificationService.scheduleReminder(
+          title,
+          body,
           minutesFromNow,
-          { type: 'cart_reminder', itemCount, restaurantName },
+          data,
         );
       },
-      cancelCartReminders: async () => {
-        // This would need to be implemented in the notification service
-      },
-      sendNewOrder: async (orderId: string, customerName?: string) => {
-        await notifications.sendOrderNotification(orderId, 'pending', {
-          customerName,
-        });
-      },
-      sendPromotion: async (
-        title: string,
-        message: string,
-        promotionId?: string,
-      ) => {
-        await notifications.sendPromotionNotification(title, message, {
-          promotionId,
-        });
-      },
-      sendGeneral: async (
-        title: string,
-        message: string,
-        data?: Record<string, any>,
-      ) => {
-        await notifications.sendLocalNotification(title, message, data);
-      },
-      isAuthenticated,
-      userType,
     }),
     [
-      notifications.sendOrderNotification,
-      notifications.scheduleReminder,
-      notifications.sendPromotionNotification,
-      notifications.sendLocalNotification,
-      isAuthenticated,
+      filteredNotifications,
+      notifications.length,
+      unreadCount,
+      isLoading,
+      isLoadingMore,
+      error,
+      hasNextPage,
+      selectedFilter,
+      notificationCounts,
       userType,
+      pushIsReady,
+      pushError,
+      fetchNotifications,
+      refreshNotifications,
+      refresh,
+      loadMore,
+      markAsRead,
+      markAllAsRead,
+      setFilter,
+      clearError,
     ],
   );
 
   return (
-    <NotificationContext.Provider value={contextValue}>
+    <NotificationContext.Provider value={value}>
       {children}
     </NotificationContext.Provider>
   );
 };
 
-export const useNotificationContext = (): NotificationContextType => {
-  const context = useContext(NotificationContext);
-  if (context === undefined) {
+export const useNotifications = (): NotificationContextType => {
+  const context = React.useContext(NotificationContext);
+  if (!context) {
     throw new Error(
-      'useNotificationContext must be used within a SimpleNotificationProvider',
+      'useNotifications must be used within NotificationProvider',
     );
   }
   return context;
 };
-
-export default SimpleNotificationProvider;

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTheme } from 'react-native-paper';
 import Animated, {
   useSharedValue,
@@ -24,11 +24,15 @@ const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
   const { colors } = useTheme();
   const opacity = useSharedValue(0.5);
 
-  opacity.value = withRepeat(
-    withTiming(1, { duration: 1000, easing: Easing.ease }),
-    -1,
-    true,
-  );
+  // CRITICAL: Move animation setup to useEffect
+  // This prevents reading/writing shared values during render
+  useEffect(() => {
+    opacity.value = withRepeat(
+      withTiming(1, { duration: 1000, easing: Easing.ease }),
+      -1,
+      true,
+    );
+  }, []); // Empty array - run once on mount
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
@@ -52,4 +56,4 @@ const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
   );
 };
 
-export default SkeletonLoader;
+export default React.memo(SkeletonLoader);

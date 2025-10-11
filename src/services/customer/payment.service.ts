@@ -1,5 +1,5 @@
-// Payment service - Mobile Money integration for Cameroon market
-// Supports MTN Mobile Money and Orange Money with USSD code flow
+// Payment service - Production-ready Mobile Money integration
+// Supports MTN Mobile Money and Orange Money with robust polling
 
 import { apiClient } from '@/src/services/shared/apiClient';
 import { PaymentInitResponse } from '@/src/types/transaction';
@@ -7,7 +7,7 @@ import { PaymentInitResponse } from '@/src/types/transaction';
 export interface PaymentMethod {
   id: string;
   type: 'mobile_money' | 'cash' | 'card';
-  provider?: 'mtn' | 'orange'; // Only for mobile_money type
+  provider?: 'mtn' | 'orange';
   name: string;
   isDefault: boolean;
 }
@@ -19,10 +19,8 @@ export interface PaymentInitRequest {
   medium: 'mtn' | 'orange';
   name: string;
   email: string;
-  serviceFee?: number; // Optional service fee field
+  serviceFee?: number;
 }
-
-// PaymentInitResponse is now imported from types/transaction.ts
 
 export interface PaymentStatusResponse {
   success: boolean;
@@ -35,10 +33,22 @@ export interface PaymentStatusResponse {
 export interface PaymentResult {
   success: boolean;
   transactionId?: string;
-  ussdCode?: string;
   error?: string;
   message?: string;
 }
+
+// Polling configuration for production
+const POLLING_CONFIG = {
+  INITIAL_DELAY: 3000, // 3 seconds before first check
+  POLL_INTERVAL: 5000, // 5 seconds between polls
+  MAX_POLL_DURATION: 120000, // 2 minutes total
+  MAX_RETRIES: 3,
+  BACKOFF_MULTIPLIER: 1.5,
+  REQUEST_TIMEOUT: 10000,
+};
+
+// Active polling sessions to prevent duplicates
+const activePollingSessions = new Map<string, AbortController>();
 
 class PaymentService {
   private static instance: PaymentService;
@@ -53,31 +63,21 @@ class PaymentService {
   /**
    * Validate phone number for Mobile Money providers
    */
-  validatePhoneNumber(
-    phoneNumber: string,
-    medium: 'mtn' | 'orange',
-  ): boolean {
-    // Remove all non-digit characters
+  validatePhoneNumber(phoneNumber: string, medium: 'mtn' | 'orange'): boolean {
     const cleanNumber = phoneNumber.replace(/\D/g, '');
-
-    // Remove country code if present
-    const localNumber = cleanNumber.startsWith('237') 
-      ? cleanNumber.substring(3) 
+    const localNumber = cleanNumber.startsWith('237')
+      ? cleanNumber.substring(3)
       : cleanNumber;
 
-    // Must be exactly 9 digits
     if (!/^\d{9}$/.test(localNumber)) {
       return false;
     }
 
-    // Get the first two digits (prefix)
     const prefix = localNumber.substring(0, 2);
-    
+
     if (medium === 'mtn') {
-      // MTN prefixes: 65, 66, 67, 68
       return ['65', '66', '67', '68'].includes(prefix);
     } else if (medium === 'orange') {
-      // Orange prefixes: 65, 66, 69 (some overlap with MTN)
       return ['65', '66', '69'].includes(prefix);
     }
 
@@ -90,9 +90,8 @@ class PaymentService {
   formatPhoneNumber(phoneNumber: string): string {
     const cleanNumber = phoneNumber.replace(/\D/g, '');
 
-    // Add country code if not present
     if (cleanNumber.startsWith('6') && cleanNumber.length === 9) {
-      return `${cleanNumber}`;
+      return cleanNumber;
     }
 
     return cleanNumber;
@@ -103,21 +102,14 @@ class PaymentService {
    */
   private parsePaymentResponse(response: any): PaymentResult {
     const { status_code, message, data } = response.data;
-    
+
     if (response.data?.status_code === 200 && response.data?.data?.transId) {
       return {
         success: true,
         transactionId: data.transId,
-        ussdCode: data.ussdCode,
         message: data.message || message,
       };
     } else {
-      console.error('❌ Payment initialization failed:', {
-        status_code,
-        message,
-        data,
-      });
-      
       return {
         success: false,
         error: message || 'Failed to initialize payment',
@@ -130,163 +122,237 @@ class PaymentService {
    */
   async initializePayment(request: PaymentInitRequest): Promise<PaymentResult> {
     try {
-
-
-      // Validate phone number
       if (!this.validatePhoneNumber(request.phone, request.medium)) {
-        console.error('❌ Invalid phone number:', {
-          phone: request.phone.substring(0, 3) + '****' + request.phone.substring(7),
-          medium: request.medium,
-        });
         return {
           success: false,
           error: `Invalid ${request.medium.toUpperCase()} phone number format`,
         };
       }
 
-      // Validate required fields
       if (!request.orderId || !request.name || !request.email) {
-        console.error('❌ Missing required fields:', {
-          orderId: !!request.orderId,
-          name: !!request.name,
-          email: !!request.email,
-        });
         return {
           success: false,
           error: 'Order ID, name, and email are required',
         };
       }
 
-      // Format phone number
       const formattedPhone = this.formatPhoneNumber(request.phone);
 
-      // Prepare API request body according to your specification
-      // const paymentData = {
-      //   orderId: request.orderId,
-      //   method: request.method, // Always 'mobile_money'
-      //   phone: formattedPhone,
-      //   medium: request.medium, // 'mtn' or 'orange'
-      //   name: request.name,
-      //   email: request.email,
-      //   ...(request.serviceFee && { serviceFee: request.serviceFee }), // Include service fee if provided
-      // };
+      const response = await apiClient.post<PaymentInitResponse>(
+        '/payments/init',
+        {
+          orderId: request.orderId,
+          method: request.method,
+          phone: formattedPhone,
+          medium: request.medium,
+          name: request.name,
+          email: request.email,
+          ...(request.serviceFee && { serviceFee: request.serviceFee }),
+        },
+        { timeout: POLLING_CONFIG.REQUEST_TIMEOUT }
+      );
 
-      const response = await apiClient.post<PaymentInitResponse>('/payments/init', request);
       return this.parsePaymentResponse(response);
     } catch (error: any) {
-      console.error('❌ Payment initialization error:', {
-        message: error.message,
-        status: error.response?.status,
-        data: error.response?.data,
-      });
-      
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        'Failed to initialize payment';
+
       return {
         success: false,
-        error: error.response?.data?.message || error.message || 'Failed to initialize payment',
+        error: errorMessage,
       };
     }
   }
 
   /**
-   * Check payment status using the verify endpoint as per API documentation
+   * Check payment status with retry logic and exponential backoff
    */
-  async checkPaymentStatus(
+  private async checkPaymentStatusWithRetry(
     transactionId: string,
+    retryCount = 0
   ): Promise<PaymentStatusResponse> {
     try {
-      const response = await apiClient.get<PaymentStatusResponse>(`/payment/status/${transactionId}`);
+      const response = await apiClient.get<any>(
+        `/payments/verify?transId=${encodeURIComponent(transactionId)}`,
+        { timeout: POLLING_CONFIG.REQUEST_TIMEOUT }
+      );
 
-      // Transform the API response to match our interface
-      const apiData = response.data;
-      const apiStatus = apiData.status;
-      
-      // Map API status to our internal status
+      const apiData = response.data?.data || response.data;
+      const apiStatus = apiData?.status;
+
       let internalStatus: 'pending' | 'completed' | 'failed' | 'expired';
       let success = false;
       let message = '';
-      
+
       switch (apiStatus) {
         case 'SUCCESSFUL':
           internalStatus = 'completed';
           success = true;
-          message = 'Payment completed successfully';
+          message = 'Payment completed successfully! Your order has been confirmed.';
           break;
         case 'FAILED':
           internalStatus = 'failed';
           success = false;
-          message = 'Payment failed';
+          message =
+            'Payment failed. Please try again or use a different payment method.';
           break;
         case 'EXPIRED':
           internalStatus = 'expired';
           success = false;
-          message = 'Payment session expired';
+          message = 'Payment session expired. Please initiate a new payment.';
           break;
         case 'PENDING':
         default:
           internalStatus = 'pending';
           success = false;
-          message = 'Payment is pending';
+          message = 'Payment is still being processed. Please wait...';
           break;
       }
-      
 
-      
       return {
         success,
         status: internalStatus,
-        transactionId: apiData.transId || transactionId,
+        transactionId: apiData?.transId || transactionId,
         message,
         apiStatus,
       };
     } catch (error: any) {
-      console.error('❌ Payment status check error:', error);
+      // Retry logic with exponential backoff for transient errors
+      if (
+        retryCount < POLLING_CONFIG.MAX_RETRIES &&
+        (error.code === 'ECONNABORTED' ||
+          error.response?.status === 429 ||
+          error.response?.status >= 500)
+      ) {
+        const backoffDelay = Math.min(
+          1000 * Math.pow(POLLING_CONFIG.BACKOFF_MULTIPLIER, retryCount),
+          10000
+        );
+
+        await new Promise((resolve) => setTimeout(resolve, backoffDelay));
+        return this.checkPaymentStatusWithRetry(transactionId, retryCount + 1);
+      }
+
       return {
         success: false,
         status: 'failed',
         transactionId,
         message:
-          error.response?.data?.message || 'Failed to check payment status',
+          error.response?.data?.message ||
+          'Failed to check payment status. Please try again.',
       };
     }
   }
 
   /**
-   * Process payment with selected method (legacy method for backward compatibility)
+   * Poll payment status with proper cleanup and deduplication
+   * Returns an AbortController for manual cancellation
    */
-  async processPayment(
-    amount: number,
-    method: PaymentMethod,
-    orderId: string,
-  ): Promise<PaymentResult> {
-    try {
+  async pollPaymentStatus(
+    transactionId: string,
+    onStatusChange: (status: PaymentStatusResponse) => void,
+    onError?: (error: string) => void
+  ): Promise<AbortController> {
+    // Cancel any existing polling for this transaction
+    const existingController = activePollingSessions.get(transactionId);
+    if (existingController) {
+      existingController.abort();
+    }
 
-      // For Mobile Money, we need phone number - this should be handled by the UI
-      if (method.type === 'mobile_money') {
-        return {
-          success: false,
-          error: 'Phone number required for Mobile Money payments',
-        };
+    const abortController = new AbortController();
+    activePollingSessions.set(transactionId, abortController);
+
+    const startTime = Date.now();
+    let pollCount = 0;
+
+    const poll = async () => {
+      // Check if polling should be aborted
+      if (abortController.signal.aborted) {
+        activePollingSessions.delete(transactionId);
+        return;
       }
 
-      // For other payment methods (future implementation)
-      return {
-        success: true,
-        transactionId: `txn_${Date.now()}`,
-      };
-    } catch (error) {
-      console.error('Payment processing error:', error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Payment failed',
-      };
+      // Check if max poll duration exceeded
+      const elapsedTime = Date.now() - startTime;
+      if (elapsedTime > POLLING_CONFIG.MAX_POLL_DURATION) {
+        const timeoutError =
+          'Payment verification timeout. Please check your transaction status manually.';
+        onError?.(timeoutError);
+        activePollingSessions.delete(transactionId);
+        return;
+      }
+
+      try {
+        const status = await this.checkPaymentStatusWithRetry(transactionId);
+        pollCount++;
+
+        // Call status change callback
+        onStatusChange(status);
+
+        // Stop polling if terminal state reached
+        if (
+          status.status === 'completed' ||
+          status.status === 'failed' ||
+          status.status === 'expired'
+        ) {
+          activePollingSessions.delete(transactionId);
+          return;
+        }
+
+        // Schedule next poll
+        if (!abortController.signal.aborted) {
+          setTimeout(poll, POLLING_CONFIG.POLL_INTERVAL);
+        }
+      } catch (error) {
+        const errorMsg =
+          error instanceof Error ? error.message : 'Polling error occurred';
+        onError?.(errorMsg);
+        activePollingSessions.delete(transactionId);
+      }
+    };
+
+    // Start polling after initial delay
+    setTimeout(poll, POLLING_CONFIG.INITIAL_DELAY);
+
+    return abortController;
+  }
+
+  /**
+   * Manually check payment status (single request, no polling)
+   */
+  async checkPaymentStatus(
+    transactionId: string
+  ): Promise<PaymentStatusResponse> {
+    return this.checkPaymentStatusWithRetry(transactionId);
+  }
+
+  /**
+   * Stop polling for a specific transaction
+   */
+  stopPolling(transactionId: string): void {
+    const controller = activePollingSessions.get(transactionId);
+    if (controller) {
+      controller.abort();
+      activePollingSessions.delete(transactionId);
     }
+  }
+
+  /**
+   * Stop all active polling sessions
+   */
+  stopAllPolling(): void {
+    activePollingSessions.forEach((controller) => {
+      controller.abort();
+    });
+    activePollingSessions.clear();
   }
 
   /**
    * Get available payment methods
    */
   async getPaymentMethods(): Promise<PaymentMethod[]> {
-    // This would fetch from API or local storage
     return [
       {
         id: 'mtn_mobile_money',
@@ -309,6 +375,27 @@ class PaymentService {
         isDefault: false,
       },
     ];
+  }
+
+  /**
+   * Process payment (legacy method)
+   */
+  async processPayment(
+    amount: number,
+    method: PaymentMethod,
+    orderId: string
+  ): Promise<PaymentResult> {
+    if (method.type === 'mobile_money') {
+      return {
+        success: false,
+        error: 'Phone number required for Mobile Money payments',
+      };
+    }
+
+    return {
+      success: true,
+      transactionId: `txn_${Date.now()}`,
+    };
   }
 }
 

@@ -3,7 +3,7 @@
 
 // Customer-specific stores
 export * from './cartStore';
-export * from './notificationStore';
+// Notification store moved to shared - use from '@/src/stores/shared/notificationStore'
 // Payment store removed - using React Query for transaction history
 export * from './addressStore';
 

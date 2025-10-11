@@ -1,5 +1,5 @@
 import React, { memo, useMemo } from 'react';
-import { SimpleNotificationProvider } from '@/src/contexts/SimpleNotificationProvider';
+import { NotificationProvider } from '@/src/contexts/SimpleNotificationProvider';
 import { I18nextProvider } from 'react-i18next';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -51,9 +51,9 @@ const AppStateProviders = memo<AppContextProviderProps>(({ children }) => {
         <LanguageProvider>
           <ThemeProvider>
             <NetworkProvider>
-              <SimpleNotificationProvider>
+              <NotificationProvider>
                 {children}
-              </SimpleNotificationProvider>
+              </NotificationProvider>
             </NetworkProvider>
           </ThemeProvider>
         </LanguageProvider>
