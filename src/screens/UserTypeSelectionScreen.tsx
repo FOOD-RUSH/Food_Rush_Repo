@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   StatusBar,
   useWindowDimensions,
+  type ViewStyle,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme, Button } from 'react-native-paper';
@@ -20,7 +21,7 @@ import { useAppStore } from '../stores/AppStore';
 interface UserType {
   id: 'customer' | 'restaurant';
   image: any;
-  title: string;
+  title: 'looking_for_food' | 'create_a_restaurant';
 }
 
 // User types configuration
@@ -76,14 +77,14 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
   }, [selectedType, setSelectedUserType, completeOnboarding, navigation]);
 
   const getCardStyle = useCallback(
-    (isSelected: boolean) => ({
+    (isSelected: boolean): ViewStyle => ({
       borderRadius: 20,
       backgroundColor: colors.surfaceVariant,
       borderWidth: 3,
       borderColor: isSelected ? colors.primary : 'transparent',
       padding: 4,
       marginBottom: 20,
-      overflow: 'hidden',
+      overflow: 'hidden' as 'hidden',
       elevation: isSelected ? 8 : 2,
       shadowColor: isSelected ? colors.primary : '#000',
       shadowOffset: { width: 0, height: isSelected ? 4 : 2 },
