@@ -28,7 +28,7 @@ import ResponsiveImage from '@/src/components/common/ResponsiveImage';
 interface UserType {
   id: 'customer' | 'restaurant';
   image: any;
-  title: string;
+  title: 'looking_for_food' | 'create_a_restaurant';
 }
 
 // User types configuration
@@ -129,7 +129,6 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
 
         {/* User Type Cards */}
         <View style={{ gap: 24 }}>
-          {' '}
           {/* Proper spacing between cards */}
           {userTypes.map((type, index) => (
             <TouchableOpacity
@@ -260,8 +259,9 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
               style={{ marginTop: 16 }}
             >
               <Text>
-                {t('you_selected')}{' '}
-                {selectedType === 'customer' ? t('customer') : t('restaurant')}
+                {`${t('you_selected')} ${
+                  selectedType === 'customer' ? t('customer') : t('restaurant')
+                }`}
               </Text>
             </Body>
           )}
