@@ -40,6 +40,7 @@ const userTypes: UserType[] = [
 
 type UserTypeSelectionScreenProps = RootStackScreenProps<'UserTypeSelection'>;
 
+
 const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
   navigation,
 }) => {
@@ -283,8 +284,9 @@ const UserTypeSelectionScreen: React.FC<UserTypeSelectionScreenProps> = ({
                 fontWeight: '500',
               }}
             >
-              {t('you_selected')}{' '}
-              {selectedType === 'customer' ? t('customer') : t('restaurant')}
+              {`${t('you_selected')} ${
+                selectedType === 'customer' ? t('customer') : t('restaurant')
+              }`}
             </Text>
           )}
         </View>
