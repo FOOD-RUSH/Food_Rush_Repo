@@ -101,9 +101,9 @@ class PaymentService {
    * Parse successful payment initialization response
    */
   private parsePaymentResponse(response: any): PaymentResult {
-    const { status_code, message, data } = response.data;
+    const { status_code: statusCode, message, data } = response.data;
 
-    if (response.data?.status_code === 200 && response.data?.data?.transId) {
+    if (statusCode === 200 && data?.transId) {
       return {
         success: true,
         transactionId: data.transId,
@@ -265,7 +265,6 @@ class PaymentService {
     activePollingSessions.set(transactionId, abortController);
 
     const startTime = Date.now();
-    let pollCount = 0;
 
     const poll = async () => {
       // Check if polling should be aborted
@@ -286,7 +285,6 @@ class PaymentService {
 
       try {
         const status = await this.checkPaymentStatusWithRetry(transactionId);
-        pollCount++;
 
         // Call status change callback
         onStatusChange(status);

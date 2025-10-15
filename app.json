@@ -59,11 +59,11 @@
         }
       ],
       [
-        "@sentry/react-native/expo",
+        "@sentry/react-native",
         {
-          "url": "https://sentry.io/",
-          "project": "react-native",
-          "organization": "student-i3b"
+          "dsn": "${EXPO_PUBLIC_SENTRY_DSN}",
+          "organization": "YOUR_SENTRY_ORG_SLUG",
+          "project": "YOUR_SENTRY_PROJECT_SLUG"
         }
       ]
     ],

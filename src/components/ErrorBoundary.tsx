@@ -13,6 +13,7 @@ interface ErrorBoundaryProps {
 interface ErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
+  componentStack?: string | null;
 }
 
 export class ErrorBoundary extends React.Component<
@@ -25,11 +26,12 @@ export class ErrorBoundary extends React.Component<
   }
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { hasError: true, error };
+    return { hasError: true, error, componentStack: undefined };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
+    this.setState({ componentStack: errorInfo?.componentStack });
   }
 
   render() {
@@ -51,6 +53,9 @@ export class ErrorBoundary extends React.Component<
           >
             <Text style={styles.retryButtonText}>Try Again</Text>
           </TouchableOpacity>
+          {__DEV__ && this.state.componentStack ? (
+            <Text style={[styles.errorMessage, { marginTop: 12 }]}>\n{this.state.componentStack}</Text>
+          ) : null}
         </View>
       );
     }
@@ -80,8 +85,8 @@ export const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
     (error as ApiError)?.status === 401;
   const isNetworkError = (error as ApiError)?.code === 'NETWORK_ERROR';
 
-  const getErrorIcon = () => {
-    if (isNetworkError) return 'wifi-off';
+  const getErrorIcon = (): 'wifi' | 'lock-closed' | 'alert-circle' => {
+    if (isNetworkError) return 'wifi';
     if (isAuthError) return 'lock-closed';
     return 'alert-circle';
   };
@@ -255,9 +260,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
-
-// Set display name for debugging
-ErrorBoundary.displayName = 'ErrorBoundary';
 
 // Default export
 export default ErrorBoundary;

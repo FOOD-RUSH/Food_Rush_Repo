@@ -1,1 +1,95 @@
-// Example component showing how to handle cart reminders using effects\r\n// This replaces the old store-based reminder logic\r\n\r\nimport React, { useEffect } from 'react';\r\nimport { useCartReminders } from '../hooks/customer/useCartReminders';\r\nimport {\r\n  useCartItems,\r\n  useCartReminderEnabled,\r\n} from '../stores/customerStores/cartStore';\r\n\r\nexport const CartReminderExample: React.FC = () => {\r\n  const cartItems = useCartItems();\r\n  const reminderEnabled = useCartReminderEnabled();\r\n  const {\r\n    scheduleCartReminders,\r\n    cancelCartReminders,\r\n    enableReminders,\r\n    disableReminders,\r\n    toggleReminders,\r\n  } = useCartReminders();\r\n\r\n  // Handle cart changes with effects (replaces store logic)\r\n  useEffect(() => {\r\n    if (reminderEnabled) {\r\n      if (cartItems.length > 0) {\r\n        // Schedule reminders when cart has items\r\n        scheduleCartReminders();\r\n      } else {\r\n        // Cancel reminders when cart is empty\r\n        cancelCartReminders();\r\n      }\r\n    } else {\r\n      // Cancel reminders when disabled\r\n      cancelCartReminders();\r\n    }\r\n  }, [cartItems.length, reminderEnabled, scheduleCartReminders, cancelCartReminders]);\r\n\r\n  // Cleanup reminders on unmount\r\n  useEffect(() => {\r\n    return () => {\r\n      cancelCartReminders();\r\n    };\r\n  }, [cancelCartReminders]);\r\n\r\n  return (\r\n    <div>\r\n      <h3>Cart Reminder Management</h3>\r\n      <p>Cart Items: {cartItems.length}</p>\r\n      <p>Reminders Enabled: {reminderEnabled ? 'Yes' : 'No'}</p>\r\n      \r\n      <button onClick={toggleReminders}>\r\n        {reminderEnabled ? 'Disable' : 'Enable'} Reminders\r\n      </button>\r\n      \r\n      <button onClick={scheduleCartReminders}>\r\n        Schedule Reminders\r\n      </button>\r\n      \r\n      <button onClick={cancelCartReminders}>\r\n        Cancel Reminders\r\n      </button>\r\n    </div>\r\n  );\r\n};\r\n\r\nexport default CartReminderExample;\r\n"
+// Example component showing how to handle cart reminders using effects
+// This replaces the old store-based reminder logic and uses React Native primitives
+
+import React, { useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useCartReminders } from '../hooks/customer/useCartReminders';
+import {
+	useCartItems,
+	useCartReminderEnabled,
+} from '../stores/customerStores/cartStore';
+
+export const CartReminderExample: React.FC = () => {
+	const cartItems = useCartItems();
+	const reminderEnabled = useCartReminderEnabled();
+	const {
+		scheduleCartReminders,
+		cancelCartReminders,
+		toggleReminders,
+	} = useCartReminders();
+
+	// Handle cart changes with effects (replaces store logic)
+	useEffect(() => {
+		if (reminderEnabled) {
+			if (cartItems.length > 0) {
+				// Schedule reminders when cart has items
+				scheduleCartReminders();
+			} else {
+				// Cancel reminders when cart is empty
+				cancelCartReminders();
+			}
+		} else {
+			// Cancel reminders when disabled
+			cancelCartReminders();
+		}
+	}, [cartItems.length, reminderEnabled, scheduleCartReminders, cancelCartReminders]);
+
+	// Cleanup reminders on unmount
+	useEffect(() => {
+		return () => {
+			cancelCartReminders();
+		};
+	}, [cancelCartReminders]);
+
+	return (
+		<View style={styles.container}>
+			<Text style={styles.title}>Cart Reminder Management</Text>
+			<Text style={styles.text}>Cart Items: {cartItems.length}</Text>
+			<Text style={styles.text}>
+				Reminders Enabled: {reminderEnabled ? 'Yes' : 'No'}
+			</Text>
+
+			<TouchableOpacity style={styles.button} onPress={toggleReminders}>
+				<Text style={styles.buttonText}>
+					{reminderEnabled ? 'Disable' : 'Enable'} Reminders
+				</Text>
+			</TouchableOpacity>
+
+			<TouchableOpacity style={styles.button} onPress={scheduleCartReminders}>
+				<Text style={styles.buttonText}>Schedule Reminders</Text>
+			</TouchableOpacity>
+
+			<TouchableOpacity style={styles.button} onPress={cancelCartReminders}>
+				<Text style={styles.buttonText}>Cancel Reminders</Text>
+			</TouchableOpacity>
+		</View>
+	);
+};
+
+const styles = StyleSheet.create({
+	container: {
+		padding: 16,
+		gap: 12,
+	},
+	title: {
+		fontSize: 18,
+		fontWeight: '600',
+		marginBottom: 8,
+	},
+	text: {
+		fontSize: 16,
+	},
+	button: {
+		backgroundColor: '#0ea5e9',
+		paddingVertical: 10,
+		paddingHorizontal: 12,
+		borderRadius: 8,
+		alignSelf: 'flex-start',
+	},
+	buttonText: {
+		color: 'white',
+		fontWeight: '600',
+	},
+});
+
+export default CartReminderExample;

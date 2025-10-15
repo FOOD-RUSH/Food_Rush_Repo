@@ -71,7 +71,6 @@ import { EditFoodScreen } from '../screens/restaurant/menu/EditFoodScreen';
 import RestaurantAnalyticsReviewsScreen from '../screens/restaurant/analytics/RestaurantReviewsScreen';
 import TimeHeatmap from '../screens/restaurant/analytics/TimeHeatmap';
 import ProfileScreen from '../screens/restaurant/account/ProfileScreen';
-import AccountSettingsScreen from '../screens/restaurant/account/AccountSettingsScreen';
 import SupportScreen from '../screens/restaurant/account/SupportScreen';
 import AboutScreen from '../screens/restaurant/account/AboutScreen';
 import RestaurantLocationScreen from '../screens/restaurant/account/RestaurantLocationScreen';
@@ -92,6 +91,7 @@ import { OnboardingSlides } from '@/src/utils/onboardingData';
 import { useAppTheme, useAppNavigationTheme } from '../config/theme';
 import OrderHistoryScreen from '../screens/restaurant/orders/OrderHistoryScreen';
 import ProfileDetailsScreen from '../screens/customer/Profile/ProfileDetailsScreen';
+import * as Sentry from '@sentry/react-native';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -116,7 +116,7 @@ const RootNavigator: React.FC = () => {
   if (authUserType && authUserType !== appUserType) {
     setSelectedUserType(authUserType);
   }
-},  [authUserType, appUserType])
+},  [authUserType, appUserType, setSelectedUserType])
   // Cart store selectors
   const clearCart = useCartStore((state) => state.clearCart);
   const cartItemsLength = useCartStore((state) => state.items.length);
@@ -278,6 +278,20 @@ const RootNavigator: React.FC = () => {
         theme={navigationTheme}
         fallback={<LoadingScreen />}
         onReady={handleNavigationReady}
+        onStateChange={() => {
+          try {
+            const route = navigationRef.getCurrentRoute();
+            const name = route?.name ?? 'unknown';
+            // Helpful breadcrumb for isolating crashes like "Text strings must be rendered within a <Text> component"
+            if (__DEV__) {
+              console.log(`[nav] focused route: ${name}`);
+            }
+            // Tag Sentry scope with current screen
+            Sentry.setTag('screen', name);
+          } catch {
+            // no-op
+          }
+        }}
       >
         <Stack.Navigator
           initialRouteName={getInitialRouteName()}
@@ -303,7 +317,7 @@ const RootNavigator: React.FC = () => {
 
           {/* Auth */}
           <Stack.Screen name="Auth" options={{ headerShown: false }}>
-            {(props) => <AuthNavigator {...props} userType={userType} />}
+            {(props) => <AuthNavigator {...props} userType={userType ?? undefined} />}
           </Stack.Screen>
 
           {/* Main apps */}
@@ -508,8 +522,9 @@ const RootNavigator: React.FC = () => {
               component={EditFoodScreen}
               options={{
                 headerTitle: 'Edit Item',
-                headerBackTitleVisible: Platform.OS === 'ios',
-                headerBackTitle: 'Menu',
+                ...(Platform.OS === 'ios' && {
+                  headerBackTitle: 'Menu',
+                }),
               }}
             />
             <Stack.Screen
@@ -534,13 +549,6 @@ const RootNavigator: React.FC = () => {
               }}
             />
             <Stack.Screen
-              name="RestaurantSettings"
-              component={AccountSettingsScreen}
-              options={{
-                headerTitle: t('settings'),
-              }}
-            />
-            <Stack.Screen
               name="RestaurantSupport"
               component={SupportScreen}
               options={{
@@ -551,7 +559,7 @@ const RootNavigator: React.FC = () => {
               name="RestaurantAbout"
               component={AboutScreen}
               options={{
-                headerTitle: t('about'),
+                headerTitle: 'About',
               }}
             />
 

@@ -158,7 +158,9 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
       Toast.show({
         type: 'error',
         text1: t('error'),
-        text2: 'No internet connection. Please check your network settings.',
+        text2: t('no_internet', {
+          defaultValue: 'No internet connection. Please check your network settings.',
+        }),
         position: 'top',
       });
       return false;
@@ -182,24 +184,32 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
         Toast.show({
           type: 'success',
           text1: t('success'),
-          text2: 'Login successful!',
+          text2: t('login_success', { defaultValue: 'Login successful!' }),
           position: 'top',
         });
 
         navigation.getParent()?.navigate('CustomerApp');
-      } catch (error: any) {
-        let errorMessage = 'Login failed. Please try again.';
+      } catch (err: unknown) {
+        let errorMessage: string = t('login_failed_generic', {
+          defaultValue: 'Login failed. Please try again.',
+        });
 
-        if (error?.message) {
-          errorMessage = error.message;
-        } else if (error?.status === 401) {
-          errorMessage =
-            'Invalid email or password. Please check your credentials.';
-        } else if (error?.status === 429) {
-          errorMessage = 'Too many login attempts. Please try again later.';
-        } else if (error?.code === 'NETWORK_ERROR') {
-          errorMessage =
-            'Network error. Please check your internet connection.';
+        const e = err as { message?: string; status?: number; code?: string };
+
+        if (e?.message) {
+          errorMessage = e.message;
+        } else if (e?.status === 401) {
+          errorMessage = t('invalid_credentials', {
+            defaultValue: 'Invalid email or password. Please check your credentials.',
+          });
+        } else if (e?.status === 429) {
+          errorMessage = t('too_many_attempts', {
+            defaultValue: 'Too many login attempts. Please try again later.',
+          });
+        } else if (e?.code === 'NETWORK_ERROR') {
+          errorMessage = t('network_error', {
+            defaultValue: 'Network error. Please check your internet connection.',
+          });
         }
 
         Toast.show({
@@ -221,7 +231,14 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
       Toast.show({
         type: 'info',
         text1: t('info'),
-        text2: `${provider} Sign In not implemented yet`,
+        text2:
+          provider === 'Google'
+            ? t('google_sign_in_not_implemented', {
+                defaultValue: 'Google Sign In not implemented yet',
+              })
+            : t('apple_sign_in_not_implemented', {
+                defaultValue: 'Apple Sign In not implemented yet',
+              }),
         position: 'top',
       });
     },
@@ -300,7 +317,7 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
             marginTop: 8,
           }}
         >
-          Sign in to continue
+          {t('sign_in_to_continue', { defaultValue: 'Sign in to continue' })}
         </Body>
       </Animated.View>
 
@@ -342,7 +359,7 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
               render={({ field: { onChange, onBlur, value } }) => (
                 <View style={{ marginBottom: 16 }}>
                   <TextInput
-                    placeholder="Enter your email"
+                    placeholder={t('enter_email', { defaultValue: 'Enter your email' })}
                     value={value}
                     onChangeText={onChange}
                     onBlur={onBlur}
@@ -371,7 +388,7 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
               render={({ field: { onChange, onBlur, value } }) => (
                 <View style={{ marginBottom: 20 }}>
                   <TextInput
-                    placeholder="Enter your password"
+                    placeholder={t('enter_password', { defaultValue: 'Enter your password' })}
                     value={value}
                     onChangeText={onChange}
                     onBlur={onBlur}
@@ -416,11 +433,15 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                   uncheckedColor={colors.onSurfaceVariant}
                   color={colors.primary}
                 />
-                <Body style={{ marginLeft: 4 }}>Remember me</Body>
+                <Body style={{ marginLeft: 4 }}>
+                  {t('remember_me', { defaultValue: 'Remember me' })}
+                </Body>
               </TouchableOpacity>
 
               <TouchableOpacity onPress={handleForgotPassword}>
-                <Body style={{ color: colors.primary }}>Forgot Password?</Body>
+                <Body style={{ color: colors.primary }}>
+                  {t('forgot_password', { defaultValue: 'Forgot Password?' })}
+                </Body>
               </TouchableOpacity>
             </View>
 
@@ -439,7 +460,9 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
               style={loginButtonStyle}
               contentStyle={{ paddingVertical: 8 }}
             >
-              {loginMutation.isPending ? 'Signing In...' : 'Sign In'}
+              {loginMutation.isPending
+                ? t('signing_in', { defaultValue: 'Signing In...' })
+                : t('sign_in', { defaultValue: 'Sign In' })}
             </Button>
 
             {/* Divider */}
@@ -456,7 +479,7 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
               <Body
                 style={{ marginHorizontal: 16, color: colors.onSurfaceVariant }}
               >
-                or sign in with
+                {t('or_sign_in_with', { defaultValue: 'or sign in with' })}
               </Body>
               <View
                 style={{ flex: 1, height: 1, backgroundColor: colors.outline }}
@@ -472,7 +495,7 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                 style={socialButtonStyle}
                 icon="google"
               >
-                Google
+                {t('google', { defaultValue: 'Google' })}
               </Button>
               <Button
                 mode="outlined"
@@ -481,7 +504,7 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                 style={socialButtonStyle}
                 icon="apple"
               >
-                Apple
+                {t('apple', { defaultValue: 'Apple' })}
               </Button>
             </View>
 
@@ -495,11 +518,11 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
               }}
             >
               <Body style={{ color: colors.onSurfaceVariant }}>
-                Don&apos;t have an account?{' '}
+                {t('dont_have_account', { defaultValue: "Don't have an account?" })}
               </Body>
               <TouchableOpacity onPress={handleSignUp}>
                 <Body style={{ color: colors.primary, fontWeight: 'bold' }}>
-                  Sign Up
+                  {t('sign_up', { defaultValue: 'Sign Up' })}
                 </Body>
               </TouchableOpacity>
             </View>

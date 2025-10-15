@@ -32,7 +32,7 @@ export const useDeliveryConfirmation = () => {
   // Mutation for confirming delivery
   const confirmDeliveryMutation = useMutation({
     mutationFn: async ({ orderId }: ConfirmDeliveryParams) => {
-      const response = await apiClient.post(`//${orderId}/confirm-received`);
+      const response = await apiClient.post(`/orders/${orderId}/confirm-received`);
       return response.data;
     },
     onSuccess: (data, variables) => {

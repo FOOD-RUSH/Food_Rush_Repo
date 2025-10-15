@@ -278,7 +278,7 @@ class SecurityLogger {
         await AsyncStorage.setItem('device_id', deviceId);
       }
       return deviceId;
-    } catch (error) {
+    } catch {
       return 'unknown';
     }
   }

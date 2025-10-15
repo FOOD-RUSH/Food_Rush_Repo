@@ -8,10 +8,9 @@ import {
   Image,
   TextInput,
   StyleSheet,
-  SafeAreaView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from 'react-native-paper';
-import { useTranslation } from 'react-i18next';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import { useCreateRestaurantReview } from '@/src/hooks/customer/useCustomerApi';
 import { getUserFriendlyErrorMessage } from '@/src/utils/errorHandler';
@@ -24,7 +23,6 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
   route,
 }) => {
   const { colors } = useTheme();
-  const { t } = useTranslation('translation');
 
   // Get restaurant data from route params with safe defaults
   const params = route.params || {};
@@ -151,7 +149,7 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
                 { color: colors.onSurface },
               ]}
             >
-              How was your delivery order?
+              {`How was your order from ${restaurantName}?`}
             </Text>
 
             <Text

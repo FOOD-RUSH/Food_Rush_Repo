@@ -67,6 +67,7 @@ export const profileApi = {
     
     try {
       const response = await apiClient.patch<ProfileUpdateResponse>('/auth/profile', data);
+      return response.data;
     } catch (error: any) {
       console.error('❌ Profile update failed:', error);
       throw new Error(
@@ -155,7 +156,7 @@ function isValidUrl(string: string): boolean {
   try {
     const url = new URL(string);
     return url.protocol === 'http:' || url.protocol === 'https:';
-  } catch (_) {
+  } catch {
     return false;
   }
 }
@@ -179,14 +180,6 @@ function isValidPhoneNumber(phoneNumber: string): boolean {
 export function isLocalFileUri(uri: string): boolean {
   return uri.startsWith('file://') || uri.startsWith('content://') || uri.startsWith('ph://');
 }
-
-// Export types for use in other files
-export type { 
-  UpdateProfileRequest, 
-  LocalImageData,
-  ProfileUpdateWithImageRequest,
-  ProfileUpdateResponse 
-};
 
 // Export validation helpers
 export { isValidUrl };

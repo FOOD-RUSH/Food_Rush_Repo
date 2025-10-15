@@ -135,6 +135,10 @@ npm run validate:translations
 | **iOS**     | ✅ Supported | iOS 13.0+              |
 | **Web**     | ✅ Supported | Modern browsers        |
 
+## 🔔 Notifications (Expo Go note)
+
+When running in Expo Go, Android remote push notifications are not fully supported starting with SDK 53+. For reliable testing of push notifications (especially background/remote delivery), use a development build instead of Expo Go. Local notifications and most iOS behaviors still work in Expo Go, but native behavior can differ from a dev build.
+
 ## 🌍 Internationalization
 
 The app supports multiple languages with automatic detection based on device settings:
