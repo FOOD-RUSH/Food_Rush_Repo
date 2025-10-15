@@ -53,7 +53,7 @@ npm run production:build:ios      # iOS production build
 
 ---
 
-# Repository Tour
+## Repository Tour
 
 ## 🎯 What This Repository Does
 
@@ -71,7 +71,7 @@ Food Rush is a comprehensive React Native food delivery application that connect
 
 ### System Context
 
-```
+```text
 [Customers] → [Food Rush App] → [Backend API]
                     ↓
 [Restaurants] → [Restaurant Interface] → [Order Management]
@@ -99,7 +99,7 @@ Food Rush is a comprehensive React Native food delivery application that connect
 
 ## 📁 Project Structure [Partial Directory Tree]
 
-```
+```text
 food-rush/
 ├── src/                           # Main application source code
 │   ├── components/                # Reusable UI components

@@ -32,7 +32,7 @@ import Toast from 'react-native-toast-message';
 import { useNetwork } from '@/src/contexts/NetworkContext';
 import { useTranslation } from 'react-i18next';
 import ErrorDisplay from '@/src/components/auth/ErrorDisplay';
-import { Heading1, Body, Label } from '@/src/components/common/Typography';
+import { Heading1, Body } from '@/src/components/common/Typography';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CustomCheckbox from '@/src/components/common/CustomCheckbox';
 
@@ -262,7 +262,8 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
         <Animated.View
           style={{
             flex: 1,
-            backgroundColor: `rgba(0, 0, 0, ${overlayAnim})`,
+            backgroundColor: '#000',
+            opacity: overlayAnim,
           }}
         />
       </ImageBackground>
