@@ -259,9 +259,6 @@ class EnhancedPaymentService {
       const startTime = Date.now();
 
       const poll = async () => {
-        pollCount++;
-
-
         try {
           const status = await this.verifyPaymentStatus(transactionId);
           
@@ -381,7 +378,37 @@ class EnhancedPaymentService {
           continue;
         }
 
-        // Poll for payment completion
+        // Prefer WebSocket for status updates if available
+        try {
+          const { socketService } = await import('@/src/services/shared/socket');
+          await socketService.connect();
+          if (socketService.isConnected()) {
+            const wsResult = await socketService.waitFor<{
+              transId: string;
+              status: 'SUCCESSFUL' | 'FAILED' | 'PENDING';
+              financialTransId?: string;
+            }>('payment:status', (d) => d?.transId === initResult.transactionId, this.PAYMENT_TIMEOUT);
+
+            if (wsResult.status === 'SUCCESSFUL') {
+              return {
+                success: true,
+                status: 'SUCCESSFUL',
+                transactionId: initResult.transactionId,
+              };
+            } else if (wsResult.status === 'FAILED') {
+              return {
+                success: false,
+                status: 'FAILED',
+                transactionId: initResult.transactionId,
+                error: 'Payment was rejected or failed',
+              };
+            }
+          }
+        } catch (e) {
+          // Fall back to HTTP polling
+        }
+
+        // Fallback: Poll for payment completion
         const pollResult = await this.pollPaymentStatus(
           initResult.transactionId,
           onStatusUpdate,

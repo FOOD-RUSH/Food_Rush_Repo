@@ -8,7 +8,6 @@ import CategoryItem from '@/src/components/customer/CategoryItem';
 import FoodItemCard from '@/src/components/customer/FoodItemCard';
 import {
   View,
-  Dimensions,
   RefreshControl,
   FlatList,
   ListRenderItem,
@@ -26,6 +25,7 @@ import {
   useBrowseRestaurants,
   useAllRestaurantsWithoutLocation,
 } from '@/src/hooks/customer/useCustomerApi';
+import { useFavoriteRestaurants } from '@/src/hooks/customer/useFavoriteRestaurants';
 import { FoodProps, RestaurantCard as RestaurantProps } from '@/src/types';
 import RestaurantCardSkeleton from '@/src/components/customer/RestaurantCardSkeleton';
 import FoodItemCardSkeleton from '@/src/components/customer/FoodItemCardSkeleton';
@@ -55,6 +55,7 @@ type HomeSectionItem =
   | { type: 'category'; data: any[] }
   | { type: 'food_near_you'; data: FoodProps[] }
   | { type: 'restaurants'; data: RestaurantProps[] }
+  | { type: 'favorite_restaurants'; data: RestaurantProps[] }
   | { type: 'All Restaurant'; data: RestaurantProps[] }
 
   | {
@@ -62,10 +63,10 @@ type HomeSectionItem =
       skeletonType: 'foods' | 'restaurants';
       count: number;
     }
-  | { type: 'error'; errorType: 'food' | 'restaurant'; onRetry: () => void }
+  | { type: 'error'; errorType: 'food' | 'restaurant' | 'favorites'; onRetry: () => void }
   | {
       type: 'empty';
-      emptyType: 'food_near_you' | 'restaurants';
+      emptyType: 'food_near_you' | 'restaurants' | 'favorites';
       onActionPress?: () => void;
     };
 
@@ -75,9 +76,8 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
   const [refreshing, setRefreshing] = useState(false);
   const tabBarHeight = useFloatingTabBarHeight();
 
-  // Get location info for debugging
-  const { nearLat, nearLng } =
-    useLocationForQueries();
+  // Location info available if needed
+  useLocationForQueries();
 
   // Get categories from local data
   const { categories } = useCategories();
@@ -89,6 +89,14 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
     error: browseError,
     refetch: refetchBrowse,
   } = useBrowseRestaurants();
+
+  // Favorite restaurants
+  const {
+    data: favoriteRestaurants,
+    isLoading: favoritesLoading,
+    error: favoritesError,
+    refetch: refetchFavorites,
+  } = useFavoriteRestaurants();
 
   const {
     data: allRestaurants,
@@ -324,6 +332,35 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
       data.push({ type: 'food_near_you', data: foodNearYouData });
     }
 
+    // Favorite Restaurants Section
+    data.push({
+      type: 'header',
+      title: t('favorite_restaurants'),
+      onPress: null,
+    });
+
+    if (favoritesLoading) {
+      data.push({
+        type: 'loading',
+        skeletonType: 'restaurants',
+        count: SKELETON_COUNTS.restaurants,
+      });
+    } else if (favoritesError) {
+      data.push({
+        type: 'error',
+        errorType: 'favorites',
+        onRetry: refetchFavorites,
+      });
+    } else if (!favoriteRestaurants || favoriteRestaurants.length === 0) {
+      data.push({
+        type: 'empty',
+        emptyType: 'favorites',
+        onActionPress: handleAllRestaurantsPress,
+      });
+    } else {
+      data.push({ type: 'favorite_restaurants', data: favoriteRestaurants });
+    }
+
     // Restaurants Near You Section
     data.push({
       type: 'header',
@@ -384,7 +421,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
 
 
     return data;
-  }, [t, categoriesForDisplay, isLoading, browseMenuError, allMenuError, foodNearYouData, handleNearbyRestaurantsPress, handleAllRestaurantsPress, browseError, allError, restaurantData, allRestaurantsData, allNoLocationLoading, allNoLocationError, refetchBrowseMenu, refetchAllMenu, refetchAllNoLocation, navigation, refetchBrowse]);
+  }, [t, categoriesForDisplay, isLoading, browseMenuError, allMenuError, foodNearYouData, handleNearbyRestaurantsPress, handleAllRestaurantsPress, browseError, allError, restaurantData, allRestaurantsData, allNoLocationLoading, allNoLocationError, refetchBrowseMenu, refetchAllMenu, refetchAllNoLocation, navigation, refetchBrowse, favoritesLoading, favoritesError, favoriteRestaurants, refetchFavorites]);
 
   // Render item based on type
   const renderItem: ListRenderItem<HomeSectionItem> = useCallback(
@@ -476,6 +513,19 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
               />
             </View>
           );
+        case 'favorite_restaurants':
+          return (
+            <View className="mb-6">
+              <FlatList
+                data={item.data}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                keyExtractor={(restaurantItem) => restaurantItem.id}
+                renderItem={renderRestaurantItem}
+                contentContainerStyle={{ paddingHorizontal: 8 }}
+              />
+            </View>
+          );
         case 'All Restaurant':
           return (
               <View className="mb-6">
@@ -535,6 +585,8 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
                 error={
                   item.errorType === 'food'
                     ? t('network_error_food')
+                    : item.errorType === 'favorites'
+                    ? t('favorites_error_description')
                     : t('network_error_restaurant')
                 }
                 onRetry={item.onRetry}
@@ -557,6 +609,13 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
                   icon: 'storefront-outline' as const,
                   title: t('no_restaurants_found'),
                   description: t('no_restaurants_description'),
+                  actionText: t('explore_restaurants'),
+                };
+              case 'favorites':
+                return {
+                  icon: 'heart-outline' as const,
+                  title: t('no_favorite_restaurants'),
+                  description: t('no_favorites_description'),
                   actionText: t('explore_restaurants'),
                 };
               default:

@@ -136,19 +136,8 @@ const RestaurantLoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          {/* Header */}
-          <Animated.View style={[styles.header, { opacity: fadeAnim }]}>
-            <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              style={styles.backButton}
-            >
-              <IoniconsIcon
-                name="arrow-back"
-                size={24}
-                color={colors.primary}
-              />
-            </TouchableOpacity>
-          </Animated.View>
+
+          
 
           {/* Logo Section */}
           <Animated.View
@@ -406,6 +395,7 @@ const createStyles = (colors: any) =>
     container: {
       flex: 1,
       backgroundColor: colors.background,
+      paddingTop: 30,
     },
     keyboardView: {
       flex: 1,

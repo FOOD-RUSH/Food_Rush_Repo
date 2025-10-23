@@ -249,6 +249,7 @@ class PaymentService {
   /**
    * Poll payment status with proper cleanup and deduplication
    * Returns an AbortController for manual cancellation
+   * Enhanced for Android compatibility
    */
   async pollPaymentStatus(
     transactionId: string,
@@ -258,10 +259,26 @@ class PaymentService {
     // Cancel any existing polling for this transaction
     const existingController = activePollingSessions.get(transactionId);
     if (existingController) {
-      existingController.abort();
+      try {
+        existingController.abort();
+      } catch (e) {
+        // Ignore abort errors on older Android versions
+        console.warn('Error aborting existing controller:', e);
+      }
     }
 
-    const abortController = new AbortController();
+    // Use AbortController with error handling for Android
+    let abortController: AbortController;
+    try {
+      abortController = new AbortController();
+    } catch (e) {
+      // Fallback for environments without AbortController
+      console.warn('AbortController not available, using manual abort flag');
+      abortController = {
+        signal: { aborted: false },
+        abort: function() { this.signal.aborted = true; }
+      } as any;
+    }
     activePollingSessions.set(transactionId, abortController);
 
     const startTime = Date.now();
@@ -286,8 +303,18 @@ class PaymentService {
       try {
         const status = await this.checkPaymentStatusWithRetry(transactionId);
 
-        // Call status change callback
-        onStatusChange(status);
+        // Check if aborted before calling callback (Android safety)
+        if (abortController.signal.aborted) {
+          activePollingSessions.delete(transactionId);
+          return;
+        }
+
+        // Call status change callback with try-catch for Android
+        try {
+          onStatusChange(status);
+        } catch (callbackError) {
+          console.error('Error in status callback:', callbackError);
+        }
 
         // Stop polling if terminal state reached
         if (
@@ -299,14 +326,27 @@ class PaymentService {
           return;
         }
 
-        // Schedule next poll
+        // Schedule next poll (with safety check)
         if (!abortController.signal.aborted) {
-          setTimeout(poll, POLLING_CONFIG.POLL_INTERVAL);
+          // Use setImmediate for better Android compatibility
+          const timerId = setTimeout(() => {
+            if (!abortController.signal.aborted) {
+              poll();
+            }
+          }, POLLING_CONFIG.POLL_INTERVAL);
+          
+          // Store timer ID for cleanup if needed
+          (abortController as any).timerId = timerId;
         }
       } catch (error) {
+        console.error('Polling error:', error);
         const errorMsg =
           error instanceof Error ? error.message : 'Polling error occurred';
-        onError?.(errorMsg);
+        
+        // Check if aborted before calling error callback
+        if (!abortController.signal.aborted) {
+          onError?.(errorMsg);
+        }
         activePollingSessions.delete(transactionId);
       }
     };
@@ -328,12 +368,22 @@ class PaymentService {
 
   /**
    * Stop polling for a specific transaction
+   * Enhanced with cleanup for Android
    */
   stopPolling(transactionId: string): void {
     const controller = activePollingSessions.get(transactionId);
     if (controller) {
-      controller.abort();
-      activePollingSessions.delete(transactionId);
+      try {
+        // Clear any pending timeouts
+        if ((controller as any).timerId) {
+          clearTimeout((controller as any).timerId);
+        }
+        controller.abort();
+      } catch (e) {
+        console.warn('Error stopping polling:', e);
+      } finally {
+        activePollingSessions.delete(transactionId);
+      }
     }
   }
 

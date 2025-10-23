@@ -12,7 +12,7 @@ Notifications.setNotificationHandler({
     shouldPlaySound: true,
     shouldSetBadge: true,
     shouldShowBanner: true,
-    shouldShowList: true, // Added to satisfy NotificationBehavior type
+    shouldShowList: true,
   }),
 });
 
@@ -20,7 +20,7 @@ export interface NotificationPayload {
   title: string;
   body: string;
   data?: Record<string, any>;
-  scheduleAfter?: number; // seconds from now
+  scheduleAfter?: number;
 }
 
 class PushNotificationService {
@@ -29,9 +29,9 @@ class PushNotificationService {
   private responseListener: Notifications.Subscription | null = null;
   private initialized = false;
 
-  // Removed empty constructor as it was unnecessary
-
   private setupListeners() {
+    console.log('[PushService] Setting up listeners...');
+    
     try {
       if (this.notificationListener) {
         this.notificationListener.remove();
@@ -40,125 +40,165 @@ class PushNotificationService {
         this.responseListener.remove();
       }
 
-      // Handle notifications received while app is foregrounded
       this.notificationListener = Notifications.addNotificationReceivedListener(
         this.handleNotificationReceived.bind(this),
       );
 
-      // Handle notification responses (user tapped notification)
       this.responseListener = Notifications.addNotificationResponseReceivedListener(
         this.handleNotificationResponse.bind(this),
       );
+      
+      console.log('[PushService] Listeners setup complete');
     } catch (error) {
-      console.error('Error setting up notification listeners:', error);
+      console.error('[PushService] Error setting up notification listeners:', error);
     }
   }
 
   async init(): Promise<void> {
-    if (this.initialized) return;
+    if (this.initialized) {
+      console.log('[PushService] Already initialized');
+      return;
+    }
+
+    console.log('[PushService] Initializing...');
 
     try {
       this.setupListeners();
       this.initialized = true;
+      console.log('[PushService] Initialization complete');
     } catch (error) {
-      console.error('Error initializing push notifications:', error);
+      console.error('[PushService] Error initializing push notifications:', error);
       this.initialized = false;
+      throw error;
     }
   }
 
   async requestPermissions(): Promise<boolean> {
     if (!Device.isDevice) {
-      console.warn('Push notifications only work on physical devices');
+      console.warn('[PushService] Push notifications only work on physical devices');
       return false;
     }
 
+    console.log('[PushService] Requesting permissions...');
+
     try {
       const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      console.log('[PushService] Existing permission status:', existingStatus);
+      
       let finalStatus = existingStatus;
 
       if (existingStatus !== 'granted') {
         const { status } = await Notifications.requestPermissionsAsync();
         finalStatus = status;
+        console.log('[PushService] New permission status:', finalStatus);
       }
 
-      return finalStatus === 'granted';
+      const granted = finalStatus === 'granted';
+      console.log('[PushService] Permissions granted:', granted);
+      return granted;
     } catch (error) {
-      console.error('Error requesting notification permissions:', error);
+      console.error('[PushService] Error requesting notification permissions:', error);
       return false;
     }
   }
 
   async getExpoPushToken(): Promise<string | null> {
     if (this.expoPushToken) {
+      console.log('[PushService] Using cached token');
       return this.expoPushToken;
     }
 
     if (!Device.isDevice) {
+      console.warn('[PushService] Not a physical device, cannot get token');
       return null;
     }
+
+    console.log('[PushService] Getting Expo push token...');
 
     try {
       const hasPermission = await this.requestPermissions();
       if (!hasPermission) {
+        console.warn('[PushService] No permission, cannot get token');
         return null;
       }
 
+      const projectId = process.env.EXPO_PROJECT_ID;
+      console.log('[PushService] Project ID:', projectId);
+
       const token = await Notifications.getExpoPushTokenAsync({
-        projectId: process.env.EXPO_PROJECT_ID,
+        projectId,
       });
 
       this.expoPushToken = token.data;
+      console.log('[PushService] Token obtained:', this.expoPushToken);
       return token.data;
     } catch (error) {
-      console.error('Error getting Expo push token:', error);
+      console.error('[PushService] Error getting Expo push token:', error);
       return null;
     }
   }
 
   async registerDevice(): Promise<string | null> {
+    console.log('[PushService] Registering device...');
+    
     try {
       const token = await this.getExpoPushToken();
       if (!token) {
+        console.warn('[PushService] No token available for registration');
         return null;
       }
 
       const { user } = useAuthStore.getState();
       if (!user) {
-        console.warn('User not authenticated, cannot register device');
+        console.warn('[PushService] User not authenticated, cannot register device');
         return null;
       }
 
       const platform = Platform.OS;
       const role = user.role?.toLowerCase() || 'customer';
 
+      console.log('[PushService] Registering with:', { platform, role });
+
       await notificationApi.registerDevice(token, platform, role);
       useNotificationStore.getState().setPushEnabled(true);
 
+      console.log('[PushService] Device registered successfully');
       return token;
     } catch (error) {
-      console.error('Error registering device:', error);
+      console.error('[PushService] Error registering device:', error);
       return null;
     }
   }
 
   async unregisterDevice(): Promise<void> {
+    console.log('[PushService] Unregistering device...');
+    
     try {
       if (this.expoPushToken) {
         await notificationApi.unregisterDevice(this.expoPushToken);
         this.expoPushToken = null;
         useNotificationStore.getState().setPushEnabled(false);
+        console.log('[PushService] Device unregistered successfully');
       }
     } catch (error) {
-      console.error('Error unregistering device:', error);
+      console.error('[PushService] Error unregistering device:', error);
     }
   }
 
   private handleNotificationReceived(notification: Notifications.Notification) {
+    console.log('[PushService] Notification received:', {
+      id: notification.request.identifier,
+      title: notification.request.content.title,
+      body: notification.request.content.body,
+      data: notification.request.content.data
+    });
+
     try {
-      const { addNotification } = useNotificationStore.getState();
+      const { addNotification, fetchNotifications } = useNotificationStore.getState();
 
       const appNotification = {
         id: notification.request.identifier,
+        userId: '', // Will be set by backend
         title: notification.request.content.title || 'Notification',
         body: notification.request.content.body || '',
         type: (notification.request.content.data?.type as string) || 'system',
@@ -169,36 +209,49 @@ class PushNotificationService {
       };
 
       addNotification(appNotification);
+      
+      // Refresh notifications from backend to sync
+      fetchNotifications().catch(err => {
+        console.error('[PushService] Failed to refresh notifications:', err);
+      });
+
+      console.log('[PushService] Notification handled successfully');
     } catch (error) {
-      console.error('Error handling notification received:', error);
+      console.error('[PushService] Error handling notification received:', error);
     }
   }
 
   private handleNotificationResponse(response: Notifications.NotificationResponse) {
+    console.log('[PushService] Notification response:', {
+      id: response.notification.request.identifier,
+      actionIdentifier: response.actionIdentifier,
+      data: response.notification.request.content.data
+    });
+
     try {
       const data = response.notification.request.content.data;
       const notificationId = response.notification.request.identifier;
 
-      // Mark as read
       const { markAsRead } = useNotificationStore.getState();
       markAsRead(notificationId).catch((err) => {
-        console.error('Error marking notification as read:', err);
+        console.error('[PushService] Error marking notification as read:', err);
       });
 
-      // Handle deep linking based on notification type
       if (data?.orderId) {
-        // TODO: Navigate to order details
-        console.log('Navigate to order:', data.orderId);
+        console.log('[PushService] Navigate to order:', data.orderId);
+        // TODO: Implement navigation
       } else if (data?.restaurantId) {
-        // TODO: Navigate to restaurant details
-        console.log('Navigate to restaurant:', data.restaurantId);
+        console.log('[PushService] Navigate to restaurant:', data.restaurantId);
+        // TODO: Implement navigation
       }
     } catch (error) {
-      console.error('Error handling notification response:', error);
+      console.error('[PushService] Error handling notification response:', error);
     }
   }
 
   async sendLocalNotification(payload: NotificationPayload): Promise<string> {
+    console.log('[PushService] Sending local notification:', payload.title);
+    
     try {
       const notificationId = await Notifications.scheduleNotificationAsync({
         content: {
@@ -212,9 +265,10 @@ class PushNotificationService {
           : null,
       });
 
+      console.log('[PushService] Local notification sent:', notificationId);
       return notificationId;
     } catch (error) {
-      console.error('Error sending local notification:', error);
+      console.error('[PushService] Error sending local notification:', error);
       throw error;
     }
   }
@@ -225,6 +279,8 @@ class PushNotificationService {
     minutesFromNow: number,
     data?: Record<string, any>,
   ): Promise<string> {
+    console.log('[PushService] Scheduling reminder:', { title, minutesFromNow });
+    
     return this.sendLocalNotification({
       title: `⏰ ${title}`,
       body,
@@ -234,22 +290,30 @@ class PushNotificationService {
   }
 
   async cancelNotification(notificationId: string): Promise<void> {
+    console.log('[PushService] Canceling notification:', notificationId);
+    
     try {
       await Notifications.cancelScheduledNotificationAsync(notificationId);
+      console.log('[PushService] Notification canceled');
     } catch (error) {
-      console.error('Error canceling notification:', error);
+      console.error('[PushService] Error canceling notification:', error);
     }
   }
 
   async cancelAllScheduled(): Promise<void> {
+    console.log('[PushService] Canceling all scheduled notifications');
+    
     try {
       await Notifications.cancelAllScheduledNotificationsAsync();
+      console.log('[PushService] All notifications canceled');
     } catch (error) {
-      console.error('Error canceling all notifications:', error);
+      console.error('[PushService] Error canceling all notifications:', error);
     }
   }
 
   cleanup() {
+    console.log('[PushService] Cleaning up...');
+    
     if (this.notificationListener) {
       this.notificationListener.remove();
       this.notificationListener = null;
@@ -259,6 +323,8 @@ class PushNotificationService {
       this.responseListener = null;
     }
     this.initialized = false;
+    
+    console.log('[PushService] Cleanup complete');
   }
 }
 

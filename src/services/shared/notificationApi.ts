@@ -19,6 +19,7 @@ export interface UnreadCountResponse {
   };
 }
 
+// Prefer WebSocket for pushes; keep HTTP for fallback and initial load
 export const notificationApi = {
   getNotifications: async (params: {
     limit?: number;

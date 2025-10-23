@@ -1,167 +1,239 @@
 import { useQuery } from '@tanstack/react-query';
+import { useEffect, useRef } from 'react';
 import { analyticsApi } from '@/src/services/restaurant/analyticsApi';
 import { AnalyticsPeriod, AnalyticsDateRange } from '@/src/types/analytics';
+import { queryClient } from '@/src/services/shared/queryClient';
 
 /**
- * Hook to fetch restaurant analytics summary using Africa/Douala timezone
- * @param dateRange - Optional date range for filtering (ISO date-time)
- * @returns Query result with analytics summary data
+ * Hook to fetch restaurant analytics summary - WebSocket-first with HTTP fallback
  */
 export const useAnalyticsSummary = (dateRange?: AnalyticsDateRange) => {
-  return useQuery({
+  const wsConnectedRef = useRef(false);
+
+  const query = useQuery({
     queryKey: ['analytics', 'summary', dateRange],
     queryFn: () => analyticsApi.getSummary(dateRange),
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 5 * 60 * 1000, // 5 minutes
-    retry: (failureCount, error) => {
-      // Don't retry on authentication errors
-      if (
-        error &&
-        typeof error === 'object' &&
-        'status' in error &&
-        error.status === 401
-      ) {
-        return false;
-      }
-      return failureCount < 3;
-    },
-    refetchOnWindowFocus: false,
+    staleTime: 2 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
     refetchOnMount: true,
-    // Don't throw errors, handle them gracefully
-    throwOnError: false,
+    refetchOnWindowFocus: false,
+    retry: 1,
   });
+
+  // WebSocket real-time updates
+  useEffect(() => {
+    let mounted = true;
+
+    const setupWebSocket = async () => {
+      try {
+        const { socketService } = await import('@/src/services/shared/socket');
+        
+        if (!mounted) return;
+        
+        await socketService.connect();
+        
+        if (!socketService.isConnected()) {
+          console.log('[Analytics] WebSocket not available, using HTTP polling');
+          return;
+        }
+
+        wsConnectedRef.current = true;
+
+        const handleSummaryUpdate = (payload: any) => {
+          if (!mounted || !payload?.data) return;
+          
+          queryClient.setQueryData(
+            ['analytics', 'summary', dateRange],
+            payload
+          );
+        };
+
+        socketService.on('analytics:summary', handleSummaryUpdate);
+
+        return () => {
+          socketService.off('analytics:summary', handleSummaryUpdate);
+        };
+      } catch (error) {
+        console.log('[Analytics] WebSocket setup failed, using HTTP only');
+      }
+    };
+
+    setupWebSocket();
+
+    return () => {
+      mounted = false;
+    };
+  }, [dateRange]);
+
+  return query;
 };
 
 /**
- * Hook to fetch restaurant balance (ledger credits - debits) in XAF
- * @returns Query result with balance data
+ * Hook to fetch restaurant balance - WebSocket-first with HTTP fallback
  */
 export const useRestaurantBalance = () => {
-  return useQuery({
+  const wsConnectedRef = useRef(false);
+
+  const query = useQuery({
     queryKey: ['analytics', 'balance'],
     queryFn: () => analyticsApi.getBalance(),
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
-    retry: (failureCount, error) => {
-      // Don't retry on authentication errors
-      if (
-        error &&
-        typeof error === 'object' &&
-        'status' in error &&
-        error.status === 401
-      ) {
-        return false;
-      }
-      return failureCount < 3;
-    },
-    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
     refetchOnMount: true,
-    // Don't throw errors, handle them gracefully
-    throwOnError: false,
+    refetchOnWindowFocus: false,
+    retry: 1,
   });
+
+  // WebSocket real-time updates
+  useEffect(() => {
+    let mounted = true;
+
+    const setupWebSocket = async () => {
+      try {
+        const { socketService } = await import('@/src/services/shared/socket');
+        
+        if (!mounted) return;
+        
+        await socketService.connect();
+        
+        if (!socketService.isConnected()) return;
+
+        wsConnectedRef.current = true;
+
+        const handleBalanceUpdate = (payload: any) => {
+          if (!mounted || !payload?.data) return;
+          
+          queryClient.setQueryData(['analytics', 'balance'], payload);
+        };
+
+        socketService.on('analytics:balance', handleBalanceUpdate);
+
+        return () => {
+          socketService.off('analytics:balance', handleBalanceUpdate);
+        };
+      } catch (error) {
+        console.log('[Balance] WebSocket setup failed, using HTTP only');
+      }
+    };
+
+    setupWebSocket();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  return query;
 };
 
 /**
- * Hook to fetch restaurant revenue buckets using Africa/Douala timezone
- * @param period - Time period for bucketing (daily | weekly | monthly)
- * @param dateRange - Optional date range and pagination parameters
- * @returns Query result with revenue bucket data
+ * Hook to fetch restaurant revenue buckets - WebSocket-first with HTTP fallback
  */
 export const useRevenueBuckets = (
   period: AnalyticsPeriod = 'daily',
   dateRange?: AnalyticsDateRange & { page?: number },
 ) => {
-  return useQuery({
+  const wsConnectedRef = useRef(false);
+
+  const query = useQuery({
     queryKey: ['analytics', 'revenue-buckets', period, dateRange],
     queryFn: () => analyticsApi.getRevenueBuckets(period, dateRange),
-    staleTime: 2 * 60 * 1000, // 2 minutes
-    gcTime: 5 * 60 * 1000, // 5 minutes
-    retry: (failureCount, error) => {
-      // Don't retry on authentication errors
-      if (
-        error &&
-        typeof error === 'object' &&
-        'status' in error &&
-        error.status === 401
-      ) {
-        return false;
-      }
-      return failureCount < 3;
-    },
-    enabled: !!period, // Only run query if period is provided
-    refetchOnWindowFocus: false,
+    staleTime: 2 * 60 * 1000,
+    gcTime: 5 * 60 * 1000,
+    enabled: !!period,
     refetchOnMount: true,
-    // Don't throw errors, handle them gracefully
-    throwOnError: false,
+    refetchOnWindowFocus: false,
+    retry: 1,
   });
+
+  // WebSocket real-time updates
+  useEffect(() => {
+    let mounted = true;
+
+    const setupWebSocket = async () => {
+      try {
+        const { socketService } = await import('@/src/services/shared/socket');
+        
+        if (!mounted) return;
+        
+        await socketService.connect();
+        
+        if (!socketService.isConnected()) return;
+
+        wsConnectedRef.current = true;
+
+        const handleRevenueUpdate = (payload: any) => {
+          if (!mounted || !Array.isArray(payload?.data)) return;
+          
+          queryClient.setQueryData(
+            ['analytics', 'revenue-buckets', period, dateRange],
+            payload
+          );
+        };
+
+        socketService.on('analytics:revenue', handleRevenueUpdate);
+
+        return () => {
+          socketService.off('analytics:revenue', handleRevenueUpdate);
+        };
+      } catch (error) {
+        console.log('[Revenue] WebSocket setup failed, using HTTP only');
+      }
+    };
+
+    setupWebSocket();
+
+    return () => {
+      mounted = false;
+    };
+  }, [period, dateRange]);
+
+  return query;
 };
 
 /**
- * Hook to get formatted date range for Africa/Douala timezone
- * @param days - Number of days to go back (default: 30)
- * @returns Date range object with from and to ISO strings
+ * Generate date range for analytics queries
  */
-export const useDoualaDateRange = (days: number = 30): AnalyticsDateRange => {
+export const generateDateRange = (
+  period: 'today' | 'yesterday' | '7days' | '30days',
+): { from: string; to: string } | undefined => {
   const now = new Date();
-  const from = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-  return {
-    from: from.toISOString(),
-    to: now.toISOString(),
-  };
-};
+  switch (period) {
+    case 'today':
+      return {
+        from: today.toISOString(),
+        to: now.toISOString(),
+      };
 
-/**
- * Hook to get analytics data with proper error handling and loading states
- * @param period - Analytics period
- * @param dateRange - Date range for filtering
- * @returns Combined analytics data with loading and error states
- */
-export const useAnalyticsData = (
-  period: AnalyticsPeriod = 'daily',
-  dateRange?: AnalyticsDateRange,
-) => {
-  const summaryQuery = useAnalyticsSummary(dateRange);
-  const balanceQuery = useRestaurantBalance();
-  const revenueQuery = useRevenueBuckets(period, dateRange);
+    case 'yesterday':
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const endOfYesterday = new Date(yesterday);
+      endOfYesterday.setHours(23, 59, 59, 999);
+      return {
+        from: yesterday.toISOString(),
+        to: endOfYesterday.toISOString(),
+      };
 
-  // Simplified loading and error states
-  const isLoading =
-    summaryQuery.isLoading || balanceQuery.isLoading || revenueQuery.isLoading;
-  const isFetching =
-    summaryQuery.isFetching ||
-    balanceQuery.isFetching ||
-    revenueQuery.isFetching;
+    case '7days':
+      const sevenDaysAgo = new Date(today);
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      return {
+        from: sevenDaysAgo.toISOString(),
+        to: now.toISOString(),
+      };
 
-  // Combine errors - if any of the queries has an auth error, treat as auth error
-  const authError =
-    (summaryQuery.error && (summaryQuery.error as any)?.status === 401) ||
-    (balanceQuery.error && (balanceQuery.error as any)?.status === 401) ||
-    (revenueQuery.error && (revenueQuery.error as any)?.status === 401);
+    case '30days':
+      const thirtyDaysAgo = new Date(today);
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      return {
+        from: thirtyDaysAgo.toISOString(),
+        to: now.toISOString(),
+      };
 
-  // Data error - if all queries failed
-  const dataError =
-    summaryQuery.isError && balanceQuery.isError && revenueQuery.isError;
-
-  return {
-    summary: summaryQuery.data,
-    balance: balanceQuery.data,
-    revenue: revenueQuery.data,
-    isLoading,
-    isFetching,
-    isError: authError || dataError,
-    error: authError
-      ? 'Authentication required'
-      : dataError
-        ? 'Failed to load analytics data'
-        : null,
-    refetch: async () => {
-      const results = await Promise.allSettled([
-        summaryQuery.refetch(),
-        balanceQuery.refetch(),
-        revenueQuery.refetch(),
-      ]);
-      return results;
-    },
-  };
+    default:
+      return undefined;
+  }
 };

@@ -145,6 +145,14 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           // Store tokens
           await TokenManager.setTokens(data.accessToken, data.refreshToken);
 
+          // Clear any stale notifications immediately on user/role change
+          try {
+            const { useNotificationStore } = await import('@/src/stores/shared/notificationStore');
+            useNotificationStore.getState().reset();
+          } catch (e) {
+            console.error('Error resetting notification store on login:', e);
+          }
+
           // Update state
           const newState: Partial<AuthState> = {
             user: data.user,
@@ -248,8 +256,25 @@ export const useAuthStore = create<AuthState & AuthActions>()(
   try {
     set({ isLoading: true });
 
+    // Best-effort: unregister push device and cleanup listeners
+    try {
+      const { pushNotificationService } = await import('@/src/services/shared/pushNotificationService');
+      await pushNotificationService.unregisterDevice();
+      pushNotificationService.cleanup();
+    } catch (e) {
+      console.error('Push cleanup during logout failed:', e);
+    }
+
     // Clear tokens
     await TokenManager.clearAllTokens();
+
+    // Reset notification store to avoid showing stale items after logout
+    try {
+      const { useNotificationStore } = await import('@/src/stores/shared/notificationStore');
+      useNotificationStore.getState().reset();
+    } catch (e) {
+      console.error('Error resetting notification store on logout:', e);
+    }
 
     // Reset auth state
     set({ ...initialState, isLoading: false });

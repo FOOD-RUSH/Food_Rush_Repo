@@ -7,12 +7,12 @@ import { useTheme, Badge } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from '@/src/location/useLocation';
 import { useCartItemCount } from '@/src/stores/customerStores/cartStore';
-import { useUnreadNotificationCount } from '@/src/hooks/shared/useUnreadNotificationCount';
 import NotificationBadge from '@/src/components/common/NotificationBadge';
 import { useUser } from '@/src/stores/AuthStore';
 import Avatar from '@/src/components/common/Avatar';
 import Toast from 'react-native-toast-message';
 import { useQueryClient } from '@tanstack/react-query';
+import { useNotifications } from '@/src/contexts/SimpleNotificationProvider';
 
 interface HomeHeaderProps {
   navigation: any;
@@ -22,7 +22,7 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
   const cartItemCount = useCartItemCount();
-  const { unreadCount: unreadNotificationCount } = useUnreadNotificationCount();
+  const { unreadCount: unreadNotificationCount } = useNotifications()
   const user = useUser();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const queryClient = useQueryClient();

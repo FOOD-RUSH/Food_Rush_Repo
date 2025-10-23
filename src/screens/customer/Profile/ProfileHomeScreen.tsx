@@ -1,5 +1,5 @@
 import { AntDesignIcon, MaterialIcon } from '@/src/components/common/icons';
-import { View, Text, ScrollView, TouchableOpacity, Alert, Button } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import React, { useCallback } from 'react';
 import { Switch, useTheme } from 'react-native-paper';
 
@@ -15,7 +15,6 @@ import { useTranslation } from 'react-i18next';
 import { useFloatingTabBarHeight } from '@/src/hooks/useFloatingTabBarHeight';
 import TermsAndConditionsModal from '@/src/components/common/modals/TermsAndConditionsModal';
 import { useTermsModal } from '@/src/hooks/common/useTermsModal';
-import * as Sentry from '@sentry/react-native';
 
 
 const ProfileHomeScreen = ({

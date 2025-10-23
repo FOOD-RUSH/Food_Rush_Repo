@@ -112,11 +112,12 @@ const RootNavigator: React.FC = () => {
   const { completeOnboarding, setSelectedUserType } = useAppStore();
 
   // Synchronize user type between stores
- React.useEffect(() => {
-  if (authUserType && authUserType !== appUserType) {
-    setSelectedUserType(authUserType);
-  }
-},  [authUserType, appUserType, setSelectedUserType])
+  React.useEffect(() => {
+    if (authUserType && authUserType !== appUserType) {
+      setSelectedUserType(authUserType);
+    }
+  }, [authUserType, appUserType, setSelectedUserType]);
+
   // Cart store selectors
   const clearCart = useCartStore((state) => state.clearCart);
   const cartItemsLength = useCartStore((state) => state.items.length);
@@ -146,13 +147,10 @@ const RootNavigator: React.FC = () => {
   }, [cartItemsLength, clearCart, t]);
 
   const handleDeepLink = useCallback((url: string) => {
-    // Deep link received: url
+    // Handle deep link navigation if needed
   }, []);
 
-  // Stable onboarding handlers
-  // Event handlers
   const handleOnboardingComplete = useCallback(() => {
-    // Mark onboarding as complete in the store
     completeOnboarding();
   }, [completeOnboarding]);
 
@@ -178,11 +176,7 @@ const RootNavigator: React.FC = () => {
       logoutListenerRef.current.remove();
     }
 
-    // Add single logout event listener
-    // Add single logout event listener
     const logoutListener = () => {
-      // Logout event received, navigating to UserTypeSelection
-      // Navigate to user type selection when logout event is received
       if (navigationRef.isReady()) {
         navigationRef.reset({
           index: 0,
@@ -206,60 +200,42 @@ const RootNavigator: React.FC = () => {
     };
   }, [handleDeepLink]);
 
-  // Memoized screen options
-  // Then in your RootNavigator component, replace the screenOptions useMemo with:
   const screenOptions = useMemo(() => {
     return createPlatformScreenOptions(theme.colors, navigationTheme.colors, t);
   }, [theme.colors, navigationTheme.colors, t]);
 
-  // Memoized cart screen options
   const cartScreenOptions = useMemo(
     () => ({
       headerTitle: t('my_cart'),
       headerBackTitleVisible: false,
       headerRight: () => (
         <TouchableOpacity onPress={handleClearCart} style={{ marginRight: 16 }}>
-          <MaterialIcon
-            name="delete-forever"
-            size={24}
-            color={navigationTheme.colors.notification}
-          />
+          <MaterialIcon name="delete-forever" size={24} color={navigationTheme.colors.notification} />
         </TouchableOpacity>
       ),
     }),
     [t, handleClearCart, navigationTheme.colors.notification],
   );
 
-  // Determine initial route name based on app state
   const getInitialRouteName = useCallback((): keyof RootStackParamList => {
-    // If onboarding is not complete, show onboarding
     if (!isOnboardingComplete) {
-      // Onboarding not complete, showing onboarding
       return 'Onboarding';
     }
 
-    // If onboarding is complete but no user type selected, show user type selection
     if (!userType && !appUserType) {
-      // No user type selected, showing user type selection
       return 'UserTypeSelection';
     }
 
-    // If not authenticated, go to auth
     if (!isAuthenticated) {
-      // User not authenticated, navigating to Auth
       return 'UserTypeSelection';
     }
 
-    // Navigate based on user type
     switch (userType) {
       case 'customer':
-        // Navigating to CustomerApp
         return 'CustomerApp';
       case 'restaurant':
-        // Navigating to RestaurantApp
         return 'RestaurantApp';
       default:
-        // Unknown user type, navigating to UserTypeSelection
         return 'UserTypeSelection';
     }
   }, [isAuthenticated, userType, appUserType, isOnboardingComplete]);
@@ -282,14 +258,12 @@ const RootNavigator: React.FC = () => {
           try {
             const route = navigationRef.getCurrentRoute();
             const name = route?.name ?? 'unknown';
-            // Helpful breadcrumb for isolating crashes like "Text strings must be rendered within a <Text> component"
             if (__DEV__) {
               console.log(`[nav] focused route: ${name}`);
             }
-            // Tag Sentry scope with current screen
             Sentry.setTag('screen', name);
           } catch {
-            // no-op
+            // Ignore navigation state errors
           }
         }}
       >
@@ -297,7 +271,7 @@ const RootNavigator: React.FC = () => {
           initialRouteName={getInitialRouteName()}
           screenOptions={screenOptions.default}
         >
-          {/* Onboarding Screens */}
+          {/* Onboarding & Auth */}
           <Stack.Screen name="Onboarding" options={{ headerShown: false }}>
             {(props) => (
               <OnboardingScreen
@@ -315,12 +289,11 @@ const RootNavigator: React.FC = () => {
             options={{ headerShown: false }}
           />
 
-          {/* Auth */}
           <Stack.Screen name="Auth" options={{ headerShown: false }}>
             {(props) => <AuthNavigator {...props} userType={userType ?? undefined} />}
           </Stack.Screen>
 
-          {/* Main apps */}
+          {/* Main Applications */}
           <Stack.Screen
             name="CustomerApp"
             component={CustomerNavigator}
@@ -332,7 +305,7 @@ const RootNavigator: React.FC = () => {
             options={{ headerShown: false }}
           />
 
-          {/* Modals */}
+          {/* Modal Screens */}
           <Stack.Group screenOptions={screenOptions.modal}>
             <Stack.Screen
               name="Cart"
@@ -348,7 +321,7 @@ const RootNavigator: React.FC = () => {
             />
           </Stack.Group>
 
-          {/* FullScreen */}
+          {/* Full Screen Modals */}
           <Stack.Screen
             name="SearchScreen"
             component={SearchScreen}
@@ -382,7 +355,7 @@ const RootNavigator: React.FC = () => {
             }}
           />
 
-          {/* Card Presentation Screens */}
+          {/* Customer Screens */}
           <Stack.Group screenOptions={screenOptions.card}>
             <Stack.Screen
               name="RestaurantOrderHistory"
@@ -418,7 +391,7 @@ const RootNavigator: React.FC = () => {
             />
           </Stack.Group>
 
-          {/* Restaurant screens */}
+          {/* Restaurant Screens */}
           <Stack.Group screenOptions={screenOptions.card}>
             <Stack.Screen
               name="RestaurantOrderDetails"
@@ -452,7 +425,7 @@ const RootNavigator: React.FC = () => {
             />
           </Stack.Group>
 
-          {/* Restaurant Modals */}
+          {/* Restaurant Modal Screens */}
           <Stack.Group screenOptions={screenOptions.modal}>
             <Stack.Screen
               name="RestaurantConfirmOrder"
@@ -476,7 +449,7 @@ const RootNavigator: React.FC = () => {
             />
           </Stack.Group>
 
-          {/* Profile */}
+          {/* Profile & Settings Screens */}
           <Stack.Group screenOptions={screenOptions.profileCard}>
             <Stack.Screen
               name="EditProfile"
@@ -509,7 +482,7 @@ const RootNavigator: React.FC = () => {
               options={{ headerTitle: t('language_settings') }}
             />
 
-            {/* Restaurant profile screens */}
+            {/* Restaurant Profile Screens */}
             <Stack.Screen
               name="RestaurantEditProfile"
               component={ProfileEditScreen}
@@ -587,7 +560,7 @@ const RootNavigator: React.FC = () => {
             />
           </Stack.Group>
 
-          {/* Checkout */}
+          {/* Checkout & Payment */}
           <Stack.Screen
             name="Checkout"
             component={CheckOutScreen}
@@ -596,26 +569,23 @@ const RootNavigator: React.FC = () => {
               headerTitle: t('checkout_order'),
             }}
           />
-        <Stack.Screen
-              name="AddressScreen"
-              component={AddressScreen}
-              options={{
-                              ...screenOptions.checkout,
-
-                 headerTitle: t('address') }}
-            />
-          {/* Payment Processing */}
+          <Stack.Screen
+            name="AddressScreen"
+            component={AddressScreen}
+            options={{
+              ...screenOptions.checkout,
+              headerTitle: t('address'),
+            }}
+          />
           <Stack.Screen
             name="PaymentProcessing"
             component={PaymentProcessingScreen}
             options={{
               ...screenOptions.default,
               headerShown: false,
-              gestureEnabled: false, // Prevent swipe back during payment
+              gestureEnabled: false,
             }}
           />
-
-          {/* Order Receipt */}
           <Stack.Screen
             name="OrderReceipt"
             component={OrderReceiptScreen}

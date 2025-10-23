@@ -1,225 +1,317 @@
 import { create } from 'zustand';
-import { createJSONStorage, devtools, persist } from 'zustand/middleware';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { notificationApi } from '@/src/services/shared/notificationApi';
 import type { Notification } from '@/src/types';
 
 interface NotificationState {
+  // Data
   notifications: Notification[];
   unreadCount: number;
-  isLoading: boolean;
-  isLoadingMore: boolean;
-  error: string | null;
-  hasNextPage: boolean;
   currentPage: number;
   totalPages: number;
-  total: number;
-  selectedFilter: 'all' | 'order' | 'system' | 'promotion' | 'alert' | 'unread';
+  selectedFilter: 'all' | 'unread' | 'order' | 'system' | 'promotion' | 'alert';
+  
+  // Loading states
+  isLoading: boolean;
+  isLoadingMore: boolean;
+  
+  // Error handling
+  error: string | null;
+  
+  // Flags
+  hasNextPage: boolean;
   pushEnabled: boolean;
-  lastSyncTime: number | null;
-}
+  isInitialized: boolean;
 
-interface NotificationActions {
-  fetchNotifications: (
-    params?: { limit?: number; page?: number },
-    append?: boolean,
-  ) => Promise<void>;
-  loadMoreNotifications: () => Promise<void>;
+  // Actions
+  fetchNotifications: () => Promise<void>;
   refreshNotifications: () => Promise<void>;
-  markAsRead: (notificationId: string) => Promise<void>;
+  loadMoreNotifications: () => Promise<void>;
+  markAsRead: (id: string) => Promise<void>;
   markAllAsRead: () => Promise<void>;
-  updateUnreadCount: () => Promise<void>;
   addNotification: (notification: Notification) => void;
-  removeNotification: (notificationId: string) => void;
   setFilter: (filter: NotificationState['selectedFilter']) => void;
   getFilteredNotifications: () => Notification[];
+  updateUnreadCount: () => Promise<void>;
+  setPushEnabled: (enabled: boolean) => void;
   clearError: () => void;
   reset: () => void;
-  setPushEnabled: (enabled: boolean) => void;
-  setLastSyncTime: (time: number) => void;
 }
 
-const initialState: NotificationState = {
+const initialState = {
   notifications: [],
   unreadCount: 0,
+  currentPage: 1,
+  totalPages: 1,
+  selectedFilter: 'all' as const,
   isLoading: false,
   isLoadingMore: false,
   error: null,
-  hasNextPage: true,
-  currentPage: 1,
-  totalPages: 1,
-  total: 0,
-  selectedFilter: 'all',
+  hasNextPage: false,
   pushEnabled: false,
-  lastSyncTime: null,
+  isInitialized: false,
 };
 
-export const useNotificationStore = create<
-  NotificationState & NotificationActions
->()(
-  devtools(
-    persist(
-      (set, get) => ({
-        ...initialState,
+export const useNotificationStore = create<NotificationState>((set, get) => ({
+  ...initialState,
 
-        fetchNotifications: async (params = { limit: 20, page: 1 }, append = false) => {
-          try {
-            const isFirstPage = params.page === 1;
-            set({
-              isLoading: isFirstPage && !append,
-              isLoadingMore: !isFirstPage || append,
-              error: null,
-            });
+  fetchNotifications: async () => {
+    const state = get();
+    if (state.isLoading) {
+      console.log('[NotificationStore] Already loading, skipping fetch');
+      return;
+    }
 
-            const response = await notificationApi.getNotifications(params);
+    console.log('[NotificationStore] Fetching notifications...');
+    set({ isLoading: true, error: null });
 
-            if (response.status_code === 200) {
-              const { items, total, page, pages } = response.data;
+    try {
+      const params: any = { limit: 20, page: 1 };
+      
+      // Apply filter
+      if (state.selectedFilter !== 'all' && state.selectedFilter !== 'unread') {
+        params.type = state.selectedFilter;
+      }
 
-              set((state) => ({
-                notifications: append ? [...state.notifications, ...items] : items,
-                total,
-                currentPage: page,
-                totalPages: pages,
-                hasNextPage: page < pages,
-                isLoading: false,
-                isLoadingMore: false,
-                lastSyncTime: Date.now(),
-              }));
-            } else {
-              throw new Error(response.message || 'Failed to fetch notifications');
-            }
-          } catch (error: any) {
-            set({
-              error: error.message || 'Failed to fetch notifications',
-              isLoading: false,
-              isLoadingMore: false,
-            });
-            console.error('Error fetching notifications:', error);
-          }
-        },
+      console.log('[NotificationStore] API params:', params);
+      const response = await notificationApi.getNotifications(params);
+      console.log('[NotificationStore] API response:', {
+        total: response.data.total,
+        items: response.data.items.length,
+        pages: response.data.pages
+      });
 
-        loadMoreNotifications: async () => {
-          const { currentPage, hasNextPage, isLoadingMore } = get();
-          if (!hasNextPage || isLoadingMore) return;
-          await get().fetchNotifications({ limit: 20, page: currentPage + 1 }, true);
-        },
+      let notifications = response.data.items || [];
 
-        refreshNotifications: async () => {
-          await get().fetchNotifications({ limit: 20, page: 1 }, false);
-        },
+      // Apply unread filter locally (API might not support it)
+      if (state.selectedFilter === 'unread') {
+        notifications = notifications.filter(n => !n.readAt);
+        console.log('[NotificationStore] Filtered to unread:', notifications.length);
+      }
 
-        markAsRead: async (notificationId) => {
-          try {
-            const response = await notificationApi.markAsRead(notificationId);
+      const unreadCount = notifications.filter(n => !n.readAt).length;
 
-            if (response.status_code === 200) {
-              set((state) => ({
-                notifications: state.notifications.map((notification) =>
-                  notification.id === notificationId
-                    ? { ...notification, readAt: new Date().toISOString() }
-                    : notification,
-                ),
-                unreadCount: Math.max(0, state.unreadCount - 1),
-              }));
-            }
-          } catch (error: any) {
-            console.error('Error marking notification as read:', error);
-            throw error;
-          }
-        },
+      set({
+        notifications,
+        unreadCount,
+        currentPage: response.data.page,
+        totalPages: response.data.pages,
+        hasNextPage: response.data.page < response.data.pages,
+        isLoading: false,
+        isInitialized: true,
+        error: null,
+      });
 
-        markAllAsRead: async () => {
-          try {
-            const response = await notificationApi.markAllAsRead();
+      console.log('[NotificationStore] State updated:', {
+        notificationsCount: notifications.length,
+        unreadCount,
+        hasNextPage: response.data.page < response.data.pages
+      });
+    } catch (error: any) {
+      console.error('[NotificationStore] Fetch error:', error);
+      set({
+        error: error.message || 'Failed to fetch notifications',
+        isLoading: false,
+      });
+    }
+  },
 
-            if (response.status_code === 200) {
-              const now = new Date().toISOString();
-              set((state) => ({
-                notifications: state.notifications.map((notification) => ({
-                  ...notification,
-                  readAt: notification.readAt || now,
-                })),
-                unreadCount: 0,
-              }));
-            }
-          } catch (error: any) {
-            console.error('Error marking all as read:', error);
-            throw error;
-          }
-        },
+  refreshNotifications: async () => {
+    console.log('[NotificationStore] Refreshing notifications...');
+    set({ currentPage: 1 });
+    await get().fetchNotifications();
+  },
 
-        updateUnreadCount: async () => {
-          try {
-            const response = await notificationApi.getUnreadCount();
-            if (response.status_code === 200) {
-              set({ unreadCount: response.data.count });
-            }
-          } catch (error: any) {
-            console.error('Error updating unread count:', error);
-          }
-        },
+  loadMoreNotifications: async () => {
+    const state = get();
+    
+    if (state.isLoadingMore || !state.hasNextPage) {
+      console.log('[NotificationStore] Skip load more:', {
+        isLoadingMore: state.isLoadingMore,
+        hasNextPage: state.hasNextPage
+      });
+      return;
+    }
 
-        addNotification: (notification) => {
-          set((state) => ({
-            notifications: [notification, ...state.notifications],
-            unreadCount: state.unreadCount + (notification.readAt ? 0 : 1),
-            total: state.total + 1,
-          }));
-        },
+    console.log('[NotificationStore] Loading more notifications...');
+    set({ isLoadingMore: true, error: null });
 
-        removeNotification: (notificationId) => {
-          set((state) => ({
-            notifications: state.notifications.filter((n) => n.id !== notificationId),
-            total: Math.max(0, state.total - 1),
-          }));
-        },
+    try {
+      const nextPage = state.currentPage + 1;
+      const params: any = { limit: 20, page: nextPage };
+      
+      if (state.selectedFilter !== 'all' && state.selectedFilter !== 'unread') {
+        params.type = state.selectedFilter;
+      }
 
-        setFilter: (filter) => {
-          set({ selectedFilter: filter });
-        },
+      console.log('[NotificationStore] Load more params:', params);
+      const response = await notificationApi.getNotifications(params);
+      console.log('[NotificationStore] Load more response:', {
+        newItems: response.data.items.length,
+        page: response.data.page
+      });
 
-        getFilteredNotifications: () => {
-          const { notifications, selectedFilter } = get();
-          switch (selectedFilter) {
-            case 'unread':
-              return notifications.filter((n) => !n.readAt);
-            case 'order':
-            case 'system':
-            case 'promotion':
-            case 'alert':
-              return notifications.filter((n) => n.type === selectedFilter);
-            default:
-              return notifications;
-          }
-        },
+      let newNotifications = response.data.items || [];
 
-        clearError: () => set({ error: null }),
-        reset: () => set(initialState),
-        setPushEnabled: (enabled) => set({ pushEnabled: enabled }),
-        setLastSyncTime: (time) => set({ lastSyncTime: time }),
-      }),
-      {
-        name: 'notification-storage',
-        storage: createJSONStorage(() => AsyncStorage),
-        partialize: (state) => ({
-          unreadCount: state.unreadCount,
-          selectedFilter: state.selectedFilter,
-          pushEnabled: state.pushEnabled,
-        }),
-        version: 1,
-      },
-    ),
-    { name: 'NotificationStore' },
-  ),
-);
+      if (state.selectedFilter === 'unread') {
+        newNotifications = newNotifications.filter(n => !n.readAt);
+      }
 
-// Selector hooks for performance
-export const useNotificationSelectors = {
-  useNotifications: () => useNotificationStore((state) => state.getFilteredNotifications()),
-  useAllNotifications: () => useNotificationStore((state) => state.notifications),
-  useUnreadCount: () => useNotificationStore((state) => state.unreadCount),
-  useIsLoading: () => useNotificationStore((state) => state.isLoading),
-  useError: () => useNotificationStore((state) => state.error),
-  usePushEnabled: () => useNotificationStore((state) => state.pushEnabled),
-};
+      const allNotifications = [...state.notifications, ...newNotifications];
+      const unreadCount = allNotifications.filter(n => !n.readAt).length;
+
+      set({
+        notifications: allNotifications,
+        unreadCount,
+        currentPage: response.data.page,
+        hasNextPage: response.data.page < response.data.pages,
+        isLoadingMore: false,
+      });
+
+      console.log('[NotificationStore] Load more complete:', {
+        totalNotifications: allNotifications.length,
+        unreadCount
+      });
+    } catch (error: any) {
+      console.error('[NotificationStore] Load more error:', error);
+      set({
+        error: error.message || 'Failed to load more notifications',
+        isLoadingMore: false,
+      });
+    }
+  },
+
+  markAsRead: async (id: string) => {
+    console.log('[NotificationStore] Marking as read:', id);
+    
+    try {
+      await notificationApi.markAsRead(id);
+      
+      set(state => {
+        const updatedNotifications = state.notifications.map(n =>
+          n.id === id ? { ...n, readAt: new Date().toISOString() } : n
+        );
+        const unreadCount = updatedNotifications.filter(n => !n.readAt).length;
+        
+        console.log('[NotificationStore] Mark as read success:', {
+          id,
+          newUnreadCount: unreadCount
+        });
+
+        return {
+          notifications: updatedNotifications,
+          unreadCount,
+        };
+      });
+    } catch (error: any) {
+      console.error('[NotificationStore] Mark as read error:', error);
+      throw error;
+    }
+  },
+
+  markAllAsRead: async () => {
+    console.log('[NotificationStore] Marking all as read...');
+    
+    try {
+      await notificationApi.markAllAsRead();
+      
+      set(state => {
+        const updatedNotifications = state.notifications.map(n => ({
+          ...n,
+          readAt: n.readAt || new Date().toISOString(),
+        }));
+        
+        console.log('[NotificationStore] Mark all as read success');
+
+        return {
+          notifications: updatedNotifications,
+          unreadCount: 0,
+        };
+      });
+    } catch (error: any) {
+      console.error('[NotificationStore] Mark all as read error:', error);
+      throw error;
+    }
+  },
+
+  addNotification: (notification: Notification) => {
+    console.log('[NotificationStore] Adding notification:', {
+      id: notification.id,
+      title: notification.title,
+      type: notification.type
+    });
+
+    set(state => {
+      // Check if notification already exists
+      const exists = state.notifications.some(n => n.id === notification.id);
+      if (exists) {
+        console.log('[NotificationStore] Notification already exists, skipping');
+        return state;
+      }
+
+      const notifications = [notification, ...state.notifications];
+      const unreadCount = notifications.filter(n => !n.readAt).length;
+
+      console.log('[NotificationStore] Notification added:', {
+        totalNotifications: notifications.length,
+        unreadCount
+      });
+
+      return {
+        notifications,
+        unreadCount,
+      };
+    });
+  },
+
+  setFilter: (filter: NotificationState['selectedFilter']) => {
+    console.log('[NotificationStore] Setting filter:', filter);
+    set({ selectedFilter: filter, currentPage: 1 });
+    get().fetchNotifications();
+  },
+
+  getFilteredNotifications: () => {
+    const state = get();
+    console.log('[NotificationStore] Getting filtered notifications:', {
+      filter: state.selectedFilter,
+      total: state.notifications.length
+    });
+
+    switch (state.selectedFilter) {
+      case 'unread':
+        return state.notifications.filter(n => !n.readAt);
+      case 'all':
+        return state.notifications;
+      default:
+        return state.notifications.filter(n => n.type === state.selectedFilter);
+    }
+  },
+
+  updateUnreadCount: async () => {
+    console.log('[NotificationStore] Updating unread count...');
+    
+    try {
+      const response = await notificationApi.getUnreadCount();
+      const count = response.data.count;
+      
+      console.log('[NotificationStore] Unread count updated:', count);
+      set({ unreadCount: count });
+    } catch (error: any) {
+      console.error('[NotificationStore] Update unread count error:', error);
+    }
+  },
+
+  setPushEnabled: (enabled: boolean) => {
+    console.log('[NotificationStore] Push enabled:', enabled);
+    set({ pushEnabled: enabled });
+  },
+
+  clearError: () => {
+    console.log('[NotificationStore] Clearing error');
+    set({ error: null });
+  },
+
+  reset: () => {
+    console.log('[NotificationStore] Resetting store');
+    set(initialState);
+  },
+}));

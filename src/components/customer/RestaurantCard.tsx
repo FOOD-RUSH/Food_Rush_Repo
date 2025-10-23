@@ -4,20 +4,18 @@ import { CustomerHomeStackScreenProps } from '@/src/navigation/types';
 
 import { useNavigation } from '@react-navigation/native';
 import React from 'react';
-import { TouchableOpacity, View, Dimensions } from 'react-native';
-import { useTheme, Card } from 'react-native-paper';
+import { TouchableOpacity, View } from 'react-native';
+import { useTheme, Card, Snackbar } from 'react-native-paper';
 import { useResponsive } from '@/src/hooks/useResponsive';
 import { useTranslation } from 'react-i18next';
 import {
-  Typography,
   Heading4,
   Body,
   Label,
   Caption,
 } from '@/src/components/common/Typography';
 import { useLocationStatus } from '@/src/hooks/customer/useLocationService';
-const { width: screenWidth } = Dimensions.get('window');
-
+import { useToggleFavorite, useIsRestaurantLiked } from '@/src/hooks/customer/useFavoriteRestaurants';
 
 interface RestaurantCardProps {
   id: string;
@@ -63,8 +61,21 @@ export const RestaurantCard = ({
     useNavigation<CustomerHomeStackScreenProps<'HomeScreen'>['navigation']>();
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
-  const { isSmallScreen, isTablet, isLargeScreen, wp, getResponsiveText } =
+  const { isTablet, isLargeScreen, wp, getResponsiveText } =
     useResponsive();
+
+  const isInitiallyLiked = useIsRestaurantLiked(id);
+  const { toggleFavorite, isLoading: isToggling } = useToggleFavorite();
+
+  const [optimisticLiked, setOptimisticLiked] = React.useState<boolean | null>(null);
+  const liked = optimisticLiked ?? isInitiallyLiked;
+
+  const [snackVisible, setSnackVisible] = React.useState(false);
+  const [snackMessage, setSnackMessage] = React.useState('');
+  const showSnack = (msg: string) => {
+    setSnackMessage(msg);
+    setSnackVisible(true);
+  };
 
   // Calculate responsive dimensions and text sizes
   const getCardDimensions = () => {
@@ -115,7 +126,7 @@ export const RestaurantCard = ({
 
   const cardDimensions = getCardDimensions();
 
-  const { hasRealLocation, isUsingFallback, locationSource } =
+  const {isUsingFallback } =
     useLocationStatus();
 
   // Use backend-provided data directly (no calculations needed)
@@ -137,7 +148,6 @@ export const RestaurantCard = ({
     }
     return rating.toFixed(1);
   };
-
   return (
     <TouchableOpacity
       onPress={() => {
@@ -202,9 +212,19 @@ export const RestaurantCard = ({
 
           {/* Heart Icon */}
           <TouchableOpacity
-            onPress={(e) => {
+            onPress={async (e) => {
               e.stopPropagation();
-              // Handle favorite toggle
+              if (isToggling) return;
+              const next = !liked;
+              setOptimisticLiked(next);
+              try {
+                await toggleFavorite(id);
+                showSnack(next ? t('restaurant_liked', 'Added to favorites') : t('restaurant_unliked', 'Removed from favorites'));
+              } catch (err: any) {
+                // revert
+                setOptimisticLiked(!next);
+                showSnack(err?.message || t('failed_to_toggle_favorite', 'Failed to update favorite'));
+              }
             }}
             style={{
               position: 'absolute',
@@ -222,9 +242,9 @@ export const RestaurantCard = ({
             activeOpacity={0.7}
           >
             <IoniconsIcon
-              name="heart-outline"
+              name={liked ? 'heart' : 'heart-outline'}
               size={20}
-              color={colors.onSurface}
+              color={liked ? colors.primary : colors.onSurface}
             />
           </TouchableOpacity>
 
@@ -406,6 +426,13 @@ export const RestaurantCard = ({
           </View>
         </Card.Content>
       </Card>
+      <Snackbar
+        visible={snackVisible}
+        onDismiss={() => setSnackVisible(false)}
+        duration={2000}
+      >
+        {snackMessage}
+      </Snackbar>
     </TouchableOpacity>
   );
 };

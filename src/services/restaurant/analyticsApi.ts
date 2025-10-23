@@ -26,7 +26,7 @@ export const analyticsApi = {
           },
         },
       );
-      return response;
+      return response.data;
     } catch (error: any) {
       console.error('Analytics Summary API Error:', error);
       // Return empty data structure if API fails
@@ -66,7 +66,7 @@ export const analyticsApi = {
   getBalance: async (): Promise<RestaurantBalanceApiResponse> => {
     try {
       const response = await apiClient.get('/analytics/restaurants/my/balance');
-      return response;
+      return response.data;
     } catch (error: any) {
       console.error('Restaurant Balance API Error:', error);
       // Return empty balance data if API fails
@@ -105,7 +105,7 @@ export const analyticsApi = {
           },
         },
       );
-      return response;
+      return response.data;
     } catch (error: any) {
       console.error('Revenue Buckets API Error:', error);
       // Return empty revenue data if API fails

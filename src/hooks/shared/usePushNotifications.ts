@@ -34,28 +34,37 @@ export const usePushNotifications = () => {
   useEffect(() => {
     if (!isAuthenticated || !user?.id || !isReady) return;
 
+    let isSubscribed = true;
+
     const registerDevice = async () => {
       try {
         const token = await pushNotificationService.registerDevice();
-        if (token) {
-          setPushEnabled(true);
-          setError(null);
-        } else {
-          setPushEnabled(false);
-          console.warn('Failed to get push token');
+        if (isSubscribed) {
+          if (token) {
+            setPushEnabled(true);
+            setError(null);
+          } else {
+            setPushEnabled(false);
+            console.warn('Failed to get push token');
+          }
         }
       } catch (err) {
         console.error('Error registering device:', err);
-        setError('Failed to register device');
-        setPushEnabled(false);
+        if (isSubscribed) {
+          setError('Failed to register device');
+          setPushEnabled(false);
+        }
       }
     };
 
     registerDevice();
 
     return () => {
-      // Cleanup on unmount
-      pushNotificationService.unregisterDevice().catch(console.error);
+      isSubscribed = false;
+      // Only unregister if user is logging out (not on every re-render)
+      if (!isAuthenticated) {
+        pushNotificationService.unregisterDevice().catch(console.error);
+      }
     };
   }, [isAuthenticated, user?.id, isReady, setPushEnabled]);
 

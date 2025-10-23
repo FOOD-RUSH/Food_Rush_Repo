@@ -2,7 +2,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthUser } from '@/src/stores/customerStores';
 import { RestaurantCard as RestaurantCardType } from '@/src/types';
 import { restaurantApi } from '@/src/services/customer/restaurant.service';
-import Toast from 'react-native-toast-message';
 import { useTranslation } from 'react-i18next';
 
 // Hook to get user's favorite/liked restaurants
@@ -62,24 +61,9 @@ export const useLikeRestaurant = () => {
       // Optionally update other restaurant-related queries
       queryClient.invalidateQueries({ queryKey: ['restaurants'] });
       queryClient.invalidateQueries({ queryKey: ['restaurant', restaurantId] });
-
-      Toast.show({
-        type: 'success',
-        text1: t('restaurant_liked', 'Restaurant Liked'),
-        text2: t('added_to_favorites', 'Added to your favorites'),
-        position: 'top',
-      });
     },
     onError: (error: any) => {
       console.error('Error liking restaurant:', error);
-      Toast.show({
-        type: 'error',
-        text1: t('error', 'Error'),
-        text2:
-          error?.message ||
-          t('failed_to_like_restaurant', 'Failed to like restaurant'),
-        position: 'top',
-      });
     },
   });
 };
@@ -104,24 +88,9 @@ export const useUnlikeRestaurant = () => {
       // Optionally update other restaurant-related queries
       queryClient.invalidateQueries({ queryKey: ['restaurants'] });
       queryClient.invalidateQueries({ queryKey: ['restaurant', restaurantId] });
-
-      Toast.show({
-        type: 'success',
-        text1: t('restaurant_unliked', 'Restaurant Removed'),
-        text2: t('removed_from_favorites', 'Removed from your favorites'),
-        position: 'top',
-      });
     },
     onError: (error: any) => {
       console.error('Error unliking restaurant:', error);
-      Toast.show({
-        type: 'error',
-        text1: t('error', 'Error'),
-        text2:
-          error?.message ||
-          t('failed_to_unlike_restaurant', 'Failed to remove from favorites'),
-        position: 'top',
-      });
     },
   });
 };

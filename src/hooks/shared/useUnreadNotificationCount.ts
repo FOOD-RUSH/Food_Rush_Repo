@@ -1,51 +1,18 @@
-import { useEffect, useCallback } from 'react';
-import { AppState } from 'react-native';
+import { useEffect } from 'react';
 import { useNotificationStore } from '@/src/stores/shared/notificationStore';
-import { useAuthStore } from '@/src/stores/AuthStore';
 
 /**
- * Hook to get and manage unread notification count
- * Automatically updates the count when user is authenticated
- * Refreshes count when app comes to foreground
+ * Minimal hook to expose unread notification count from the store
+ * and a method to refresh it from the backend.
  */
 export const useUnreadNotificationCount = () => {
-  const { unreadCount, updateUnreadCount, isLoading } = useNotificationStore();
-  const { isAuthenticated } = useAuthStore();
+  const unreadCount = useNotificationStore((state) => state.unreadCount);
+  const refreshUnread = useNotificationStore((state) => state.updateUnreadCount);
 
-  // Refresh unread count
-  const refreshCount = useCallback(async () => {
-    if (isAuthenticated) {
-      try {
-        await updateUnreadCount();
-      } catch (error) {
-        console.error('Failed to refresh unread count:', error);
-      }
-    }
-  }, [isAuthenticated, updateUnreadCount]);
-
-  // Update unread count when user is authenticated
   useEffect(() => {
-    refreshCount();
-  }, [refreshCount]);
+    // Prime the count on first use; ignore failures
+    refreshUnread().catch(() => {});
+  }, [refreshUnread]);
 
-  // Listen for app state changes and refresh count when app becomes active
-  useEffect(() => {
-    const handleAppStateChange = (nextAppState: string) => {
-      if (nextAppState === 'active' && isAuthenticated) {
-        // Refresh unread count when app comes to foreground
-        refreshCount();
-      }
-    };
-
-    const subscription = AppState.addEventListener('change', handleAppStateChange);
-    return () => subscription?.remove();
-  }, [isAuthenticated, refreshCount]);
-
-  return {
-    unreadCount,
-    isLoading,
-    refresh: refreshCount,
-  };
+  return { unreadCount, refreshUnread } as const;
 };
-
-export default useUnreadNotificationCount;

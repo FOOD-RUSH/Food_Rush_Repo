@@ -1,6 +1,5 @@
-// src/screens/NotificationScreen.tsx
 import { IoniconsIcon } from '@/src/components/common/icons';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,9 +11,8 @@ import {
 } from 'react-native';
 import { useTheme, ActivityIndicator, Chip } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
-
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 import CommonView from '@/src/components/common/CommonView';
 import { useNotifications } from '@/src/contexts/SimpleNotificationProvider';
@@ -43,50 +41,131 @@ const NotificationScreen = () => {
     clearError,
     hasNotifications,
     userType,
+    isInitialized,
   } = useNotifications();
 
-  // Handle notification press
+  // Log mount
+  useEffect(() => {
+    console.log('[NotificationScreen] Mounted', {
+      hasNotifications,
+      isInitialized,
+      isLoading,
+      notificationsCount: notifications.length
+    });
+  }, []);
+
+  // Log state changes
+  useEffect(() => {
+    console.log('[NotificationScreen] State update:', {
+      notificationsCount: notifications.length,
+      unreadCount,
+      isLoading,
+      hasNextPage,
+      selectedFilter,
+      error
+    });
+  }, [notifications.length, unreadCount, isLoading, hasNextPage, selectedFilter, error]);
+
+  // Show error alert
+  useEffect(() => {
+    if (error) {
+      console.error('[NotificationScreen] Error:', error);
+      Alert.alert(
+        t('error'),
+        error,
+        [
+          {
+            text: t('retry'),
+            onPress: () => {
+              clearError();
+              refresh();
+            }
+          },
+          {
+            text: t('dismiss'),
+            onPress: clearError,
+            style: 'cancel'
+          }
+        ]
+      );
+    }
+  }, [error, t, clearError, refresh]);
+
   const handleNotificationPress = useCallback(
     async (notification: Notification) => {
-      // Mark as read if not already read
+      console.log('[NotificationScreen] Notification pressed:', notification.id);
+      
       if (!notification.readAt) {
-        await markAsRead(notification.id);
+        const success = await markAsRead(notification.id);
+        console.log('[NotificationScreen] Mark as read result:', success);
       }
 
       // Handle navigation based on notification type and data
-      if (notification.data?.orderId) {
-        const screenName =
-          userType === 'restaurant' ? 'RestaurantOrderDetails' : 'OrderReceipt';
-        navigation.navigate(
-          screenName,
-          { orderId: notification.data.orderId },
-        );
-      } else if (notification.data?.restaurantId) {
-        navigation.navigate(
-          'RestaurantDetails',
-          {
+      try {
+        if (notification.data?.orderId) {
+          const screenName =
+            userType === 'restaurant' ? 'RestaurantOrderDetails' : 'OrderReceipt';
+          console.log('[NotificationScreen] Navigating to:', screenName, notification.data.orderId);
+          navigation.navigate(screenName as never, { 
+            orderId: notification.data.orderId 
+          } as never);
+        } else if (notification.data?.restaurantId) {
+          console.log('[NotificationScreen] Navigating to restaurant:', notification.data.restaurantId);
+          navigation.navigate('RestaurantDetails' as never, {
             restaurantId: notification.data.restaurantId,
-          },
-        );
-      } else {
-        // Show notification details
+          } as never);
+        } else {
+          Alert.alert(notification.title, notification.body);
+        }
+      } catch (navError) {
+        console.error('[NotificationScreen] Navigation error:', navError);
         Alert.alert(notification.title, notification.body);
       }
     },
     [markAsRead, navigation, userType],
   );
 
-  // Handle mark all as read
   const handleMarkAllAsRead = useCallback(async () => {
-    if (unreadCount > 0) {
-      const success = await markAllAsRead();
-      if (!success) {
-        Alert.alert(t('error'), t('mark_all_read_error'));
-      }
+    if (unreadCount === 0) {
+      console.log('[NotificationScreen] No unread notifications');
+      return;
+    }
+
+    console.log('[NotificationScreen] Marking all as read...');
+    const success = await markAllAsRead();
+    
+    if (!success) {
+      console.error('[NotificationScreen] Mark all as read failed');
+      Alert.alert(t('error'), t('mark_all_read_error'));
+    } else {
+      console.log('[NotificationScreen] Mark all as read success');
     }
   }, [unreadCount, markAllAsRead, t]);
 
-  // Get notification icon
+  const handleLoadMore = useCallback(() => {
+    console.log('[NotificationScreen] Load more triggered:', {
+      isLoadingMore,
+      hasNextPage
+    });
+    
+    if (!isLoadingMore && hasNextPage) {
+      loadMore();
+    }
+  }, [isLoadingMore, hasNextPage, loadMore]);
+
+  const handleRefresh = useCallback(() => {
+    console.log('[NotificationScreen] Refresh triggered');
+    refresh();
+  }, [refresh]);
+
+  // Ensure freshest data when screen gains focus
+  useFocusEffect(
+    useCallback(() => {
+      refresh();
+      return () => {};
+    }, [refresh])
+  );
+
   const getNotificationIcon = (
     type: Notification['type'],
     priority?: string,
@@ -102,7 +181,6 @@ const NotificationScreen = () => {
     return icons[type] || 'notifications-outline';
   };
 
-  // Get notification color
   const getNotificationColor = (
     type: Notification['type'],
     priority?: string,
@@ -119,22 +197,25 @@ const NotificationScreen = () => {
     return typeColors[type] || colors.onSurfaceVariant;
   };
 
-  // Format timestamp
   const formatTime = (createdAt: string) => {
-    const date = new Date(createdAt);
-    const now = new Date();
-    const diffInHours = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60 * 60),
-    );
+    try {
+      const date = new Date(createdAt);
+      const now = new Date();
+      const diffInHours = Math.floor(
+        (now.getTime() - date.getTime()) / (1000 * 60 * 60),
+      );
 
-    if (diffInHours < 1) return t('just_now');
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-    const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays < 7) return `${diffInDays}d ago`;
-    return date.toLocaleDateString();
+      if (diffInHours < 1) return t('just_now');
+      if (diffInHours < 24) return `${diffInHours}h ago`;
+      const diffInDays = Math.floor(diffInHours / 24);
+      if (diffInDays < 7) return `${diffInDays}d ago`;
+      return date.toLocaleDateString();
+    } catch (error) {
+      console.error('[NotificationScreen] Date format error:', error);
+      return '';
+    }
   };
 
-  // Render notification item
   const renderNotification: ListRenderItem<Notification> = ({ item }) => {
     const isUnread = !item.readAt;
     const iconName = getNotificationIcon(item.type, item.priority);
@@ -153,7 +234,6 @@ const NotificationScreen = () => {
         activeOpacity={0.7}
       >
         <View className="flex-row items-start space-x-3">
-          {/* Icon */}
           <View
             className="w-10 h-10 rounded-full items-center justify-center"
             style={{ backgroundColor: iconColor + '20' }}
@@ -161,7 +241,6 @@ const NotificationScreen = () => {
             <IoniconsIcon name={iconName as any} size={20} color={iconColor} />
           </View>
 
-          {/* Content */}
           <View className="flex-1">
             <View className="flex-row items-start justify-between mb-1">
               <Text
@@ -230,7 +309,6 @@ const NotificationScreen = () => {
     );
   };
 
-  // Filter options
   const filters = [
     { key: 'all', label: t('all'), count: notificationCounts.all },
     { key: 'unread', label: t('unread'), count: notificationCounts.unread },
@@ -240,10 +318,12 @@ const NotificationScreen = () => {
     { key: 'alert', label: t('alerts'), count: notificationCounts.alert },
   ];
 
-  // Render filter item
   const renderFilter = ({ item }: { item: (typeof filters)[0] }) => (
     <TouchableOpacity
-      onPress={() => setFilter(item.key as any)}
+      onPress={() => {
+        console.log('[NotificationScreen] Filter selected:', item.key);
+        setFilter(item.key as any);
+      }}
       className="px-3 py-2 mr-2 rounded-full flex-row items-center"
       style={{
         backgroundColor:
@@ -283,7 +363,6 @@ const NotificationScreen = () => {
     </TouchableOpacity>
   );
 
-  // Render empty state
   const renderEmptyState = () => (
     <View className="justify-center items-center flex-1 px-6 py-12">
       <IoniconsIcon
@@ -308,11 +387,24 @@ const NotificationScreen = () => {
           ? t('youre_all_caught_up')
           : t('well_notify_when_something_happens')}
       </Text>
+      
+      {/* Debug info in development */}
+      {__DEV__ && (
+        <View className="mt-4 p-4 bg-gray-100 rounded">
+          <Text className="text-xs font-mono">
+            Debug Info:{'\n'}
+            Initialized: {String(isInitialized)}{'\n'}
+            Loading: {String(isLoading)}{'\n'}
+            Error: {error || 'none'}{'\n'}
+            User Type: {userType || 'none'}
+          </Text>
+        </View>
+      )}
     </View>
   );
 
   // Loading state
-  if (isLoading && !hasNotifications) {
+  if (isLoading && !isInitialized) {
     return (
       <CommonView>
         <View className="justify-center items-center flex-1">
@@ -331,7 +423,6 @@ const NotificationScreen = () => {
   return (
     <CommonView>
       <View className="flex-1" style={{ backgroundColor: colors.background }}>
-        {/* Header with mark all read */}
         {hasNotifications && unreadCount > 0 && (
           <View
             className="px-4 py-3 border-b flex-row justify-between items-center"
@@ -351,7 +442,6 @@ const NotificationScreen = () => {
           </View>
         )}
 
-        {/* Filters */}
         <View className="py-3">
           <FlatList
             horizontal
@@ -363,7 +453,6 @@ const NotificationScreen = () => {
           />
         </View>
 
-        {/* Notifications list */}
         <FlatList
           data={notifications}
           renderItem={renderNotification}
@@ -371,13 +460,13 @@ const NotificationScreen = () => {
           ListEmptyComponent={renderEmptyState}
           refreshControl={
             <RefreshControl
-              refreshing={isLoading}
-              onRefresh={refresh}
+              refreshing={isLoading && isInitialized}
+              onRefresh={handleRefresh}
               colors={[colors.primary]}
               tintColor={colors.primary}
             />
           }
-          onEndReached={loadMore}
+          onEndReached={handleLoadMore}
           onEndReachedThreshold={0.1}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{

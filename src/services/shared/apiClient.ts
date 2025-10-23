@@ -29,7 +29,8 @@ interface RefreshTokenResponse {
 class ApiClient {
   private client: AxiosInstance;
   private isRefreshing = false;
-  private refreshSubscribers: ((token: string) => void)[] = [];
+  private refreshPromise: Promise<AxiosResponse> | null = null;
+  private logoutTriggered = false;
 
   constructor() {
     const baseURL = this.getApiUrl();
@@ -187,57 +188,62 @@ class ApiClient {
         throw error;
       }
 
-      if (this.isRefreshing) {
-        // Token refresh in progress, queuing request
-        return new Promise((resolve, reject) => {
-          this.refreshSubscribers.push((token: string) => {
-            if (originalRequest.headers) {
-              originalRequest.headers.Authorization = `Bearer ${token}`;
-            }
-            resolve(this.client(originalRequest));
-          });
-        });
+      if (this.isRefreshing && this.refreshPromise) {
+        // Token refresh in progress, wait for it and retry
+        try {
+          await this.refreshPromise;
+          const token = await TokenManager.getToken();
+          if (token && originalRequest.headers) {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+          }
+          return this.client(originalRequest);
+        } catch (err) {
+          throw err;
+        }
       }
 
       originalRequest._retry = true;
       this.isRefreshing = true;
 
-      const response = await axios.post<RefreshTokenResponse['data']>(
-        `${this.client.defaults.baseURL}/auth/refresh-token`,
-        { refresh_token: refreshToken },
-        { timeout: 10000 },
-      );
+      // Create refresh promise for concurrent requests
+      this.refreshPromise = (async () => {
+        const response = await axios.post<RefreshTokenResponse['data']>(
+          `${this.client.defaults.baseURL}/auth/refresh-token`,
+          { refresh_token: refreshToken },
+          { timeout: 10000 },
+        );
 
-      const { accessToken, refreshToken: newRefreshToken } = response.data;
+        const { accessToken, refreshToken: newRefreshToken } = response.data;
 
-      if (!accessToken || !newRefreshToken) {
-        console.error('❌ Invalid refresh token response:', {
-          hasAccessToken: !!accessToken,
-          hasRefreshToken: !!newRefreshToken,
-        });
-        throw new Error('Invalid refresh token response');
-      }
+        if (!accessToken || !newRefreshToken) {
+          console.error('❌ Invalid refresh token response:', {
+            hasAccessToken: !!accessToken,
+            hasRefreshToken: !!newRefreshToken,
+          });
+          throw new Error('Invalid refresh token response');
+        }
 
-      // Token refresh successful
-      await TokenManager.setTokens(accessToken, newRefreshToken);
+        // Token refresh successful
+        await TokenManager.setTokens(accessToken, newRefreshToken);
 
-      // Update original request
-      if (originalRequest.headers) {
-        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-      }
+        // Update original request
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        }
 
-      // Notify waiting requests
-      this.refreshSubscribers.forEach((callback) => callback(accessToken));
-      this.refreshSubscribers = [];
+        return this.client(originalRequest);
+      })();
 
-      return this.client(originalRequest);
+      return await this.refreshPromise;
     } catch (refreshError) {
       console.error('❌ Token refresh failed:', refreshError);
       await TokenManager.clearAllTokens();
-      this.refreshSubscribers = [];
 
-      // Trigger full logout when refresh fails
-      this.triggerLogout();
+      // Trigger full logout when refresh fails (only once)
+      if (!this.logoutTriggered) {
+        this.logoutTriggered = true;
+        this.triggerLogout();
+      }
 
       const error = new Error(
         'Session expired. Please log in again.',
@@ -248,6 +254,7 @@ class ApiClient {
       throw error;
     } finally {
       this.isRefreshing = false;
+      this.refreshPromise = null;
     }
   }
 
@@ -339,10 +346,11 @@ class ApiClient {
     }
   }
 
-  // Utility method to clear all pending refresh subscribers (useful for logout)
-  public clearRefreshSubscribers(): void {
-    this.refreshSubscribers = [];
+  // Utility method to reset refresh state (useful for logout)
+  public resetRefreshState(): void {
     this.isRefreshing = false;
+    this.refreshPromise = null;
+    this.logoutTriggered = false;
   }
 
   // Method to update base URL if needed

@@ -14,7 +14,7 @@ import { useTheme, ActivityIndicator, Chip, FAB } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import * as Haptics from 'expo-haptics';
 
 import CommonView from '@/src/components/common/CommonView';
@@ -325,6 +325,14 @@ const RestaurantNotificationScreen = () => {
     );
   };
 
+  // Refresh on focus to avoid stale data after role/login switches
+  useFocusEffect(
+    React.useCallback(() => {
+      refresh();
+      return () => {};
+    }, [refresh])
+  );
+
   // Restaurant-specific filters
   const restaurantFilters = [
     { key: 'all', label: t('all'), count: notificationCounts.all },
@@ -534,7 +542,7 @@ const RestaurantNotificationScreen = () => {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{
             flexGrow: 1,
-            padding: 16,
+            padding: 4,
             paddingBottom: insets.bottom + 80, // Space for FAB
           }}
           ListFooterComponent={

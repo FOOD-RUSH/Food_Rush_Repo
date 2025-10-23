@@ -5,6 +5,7 @@ import {
   Text,
   TouchableOpacity,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { useTheme, Card } from 'react-native-paper';
 
@@ -205,10 +206,16 @@ const PaymentProcessingScreen = ({
     if (!isMountedRef.current) return;
 
     try {
+      // Enhanced error handling for Android
       const controller = await PaymentService.pollPaymentStatus(
         txnId,
         (status) => {
           if (!isMountedRef.current) return;
+
+          // Log status for debugging platform-specific issues
+          if (__DEV__ && Platform.OS === 'android') {
+            console.log('[PaymentProcessing] Android polling status:', status);
+          }
 
           if (status.status === 'completed') {
             handlePaymentSuccess();
@@ -225,6 +232,7 @@ const PaymentProcessingScreen = ({
         },
         (error) => {
           if (!isMountedRef.current) return;
+          console.error('[PaymentProcessing] Polling error:', error);
           cleanup();
           setCurrentStep('failed');
           setError(error || t('payment_verification_failed'));
@@ -232,8 +240,13 @@ const PaymentProcessingScreen = ({
       );
 
       pollingControllerRef.current = controller;
+      
+      if (__DEV__ && Platform.OS === 'android') {
+        console.log('[PaymentProcessing] Android polling started successfully');
+      }
     } catch (error) {
       if (!isMountedRef.current) return;
+      console.error('[PaymentProcessing] Failed to start polling:', error);
       cleanup();
       setCurrentStep('failed');
       setError(t('failed_to_start_verification'));
@@ -454,8 +467,8 @@ const PaymentProcessingScreen = ({
           >
             {error || t('payment_error_generic')}
           </Text>
-
-          <View className="flex-row space-x-4">
+    {/* to review  */}
+          <View className="flex-row justify-between gap-2">
             <TouchableOpacity
               className="flex-1 rounded-lg py-4 items-center border"
               style={{ borderColor: colors.outline }}

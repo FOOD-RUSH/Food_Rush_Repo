@@ -28,7 +28,7 @@ import {
   createOrderSummary,
   ORDER_STATUS_COLORS,
 } from '@/src/utils/orderUtils';
-import { useUnreadNotificationCount } from '@/src/hooks/shared/useUnreadNotificationCount';
+import { useNotifications } from '@/src/contexts/SimpleNotificationProvider';
 import NotificationBadge from '@/src/components/common/NotificationBadge';
 import { useFloatingTabBarHeight } from '@/src/hooks/useFloatingTabBarHeight';
 
@@ -294,7 +294,7 @@ const OrdersList: React.FC<RestaurantOrdersStackScreenProps<'OrdersList'>> = () 
   const navigation = useNavigation();
   const { data: pendingOrdersData } = useGetOrders({ status: 'pending' });
   const pendingOrdersCount = Array.isArray(pendingOrdersData) ? pendingOrdersData.length : 0;
-  const { unreadCount: notificationCount } = useUnreadNotificationCount();
+  const { unreadCount: notificationCount } = useNotifications();
 
   const handleNotificationPress = () => {
     Haptics.selectionAsync();

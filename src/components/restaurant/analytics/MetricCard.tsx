@@ -43,7 +43,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
     }
   };
 
-  const getChangeIcon = (): keyof MaterialCommunityIconName => {
+  const getChangeIcon = (): string => {
     switch (changeType) {
       case 'positive':
         return 'trending-up';
@@ -90,7 +90,7 @@ const MetricCard: React.FC<MetricCardProps> = ({
             }}
           >
             <MaterialCommunityIcon
-              name={icon as keyof MaterialCommunityIconName}
+              name={icon as any}
               size={20}
               color={color || colors.primary}
             />
