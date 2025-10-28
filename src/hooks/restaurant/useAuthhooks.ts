@@ -41,7 +41,6 @@ export const useLoginRestaurant = () => {
       clearError();
     },
     onSuccess: async (data) => {
-
       const {
         user,
         accessToken,
@@ -63,8 +62,19 @@ export const useLoginRestaurant = () => {
         defaultRestaurantId,
       });
 
-      // Cache user data
-      queryClient.setQueryData(['auth', 'me'], user);
+      // Immediately fetch full profile (to include profilePicture)
+      try {
+        const profileRes = await restaurantAuthApi.getProfile();
+        const fullUser = profileRes.data.data as RestaurantProfile;
+        // Update cache and store
+        queryClient.setQueryData(['auth', 'me'], fullUser);
+        const { useAuthStore } = await import('@/src/stores/AuthStore');
+        useAuthStore.getState().setUser(fullUser);
+      } catch (e) {
+        console.warn('Fetching full profile after restaurant login failed, using basic user from login.', e);
+        // Cache basic user as fallback
+        queryClient.setQueryData(['auth', 'me'], user);
+      }
 
       // Invalidate restaurant-specific queries
       queryClient.invalidateQueries({ queryKey: ['restaurant'] });

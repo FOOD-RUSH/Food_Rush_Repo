@@ -1,10 +1,7 @@
-import { FoodCategory } from '@/assets/images';
-
 export interface Category {
   value: string;
   label: string;
   emoji: string;
-  image: any;
   color: string;
   description?: string;
 }
@@ -14,48 +11,42 @@ export const FOOD_CATEGORIES: Category[] = [
     value: 'local-dishes',
     label: 'Local Dishes',
     emoji: '🍲',
-    image: FoodCategory.localdish,
-    color: '#007AFF',
+    color: '#FF6B6B',
     description: 'Traditional and regional cuisine',
   },
   {
     value: 'breakfast',
     label: 'Breakfast',
     emoji: '🥞',
-    image: FoodCategory.breakfast,
-    color: '#007AFF',
+    color: '#4ECDC4',
     description: 'Morning meals and breakfast items',
   },
   {
     value: 'fastfood',
     label: 'Fast Food',
     emoji: '🍔',
-    image: FoodCategory.fastfood,
-    color: '#007AFF',
+    color: '#FFD93D',
     description: 'Quick service meals and burgers',
   },
   {
     value: 'desserts',
     label: 'Desserts',
     emoji: '🍰',
-    image: FoodCategory.dessert,
-    color: '#007AFF',
+    color: '#FF8FB1',
     description: 'Sweet treats and desserts',
   },
   {
     value: 'drinks',
     label: 'Drinks',
     emoji: '🥤',
-    image: FoodCategory.drinks,
-    color: '#007AFF',
+    color: '#A8DADC',
     description: 'Beverages and refreshments',
   },
   {
     value: 'vegetarian',
     label: 'Vegetarian',
     emoji: '🥗',
-    image: FoodCategory.vegetarian,
-    color: '#007AFF',
+    color: '#6BCF7F',
     description: 'Plant-based and vegetarian options',
   },
 ];

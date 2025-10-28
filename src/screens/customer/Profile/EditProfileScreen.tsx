@@ -38,35 +38,24 @@ const EditProfileScreen = ({
   const handleImagePicker = async () => {
     try {
       setIsUploadingImage(true);
-
-      // Pick image using the hook
+      // Step 1: Pick image from device
       const imageData = await pickAndUploadImageMutation.mutateAsync();
-      
-      // Set the local image URI for preview
-      setProfileImage(imageData.uri);
-      
+      // Step 2: Upload to backend to get public pictureUrl
+      const { uploadApi } = await import('@/src/services/shared/uploadApi');
+      const pictureUrl = await uploadApi.uploadImage({ uri: imageData.uri, name: imageData.name, type: imageData.type });
+      // Set for preview and subsequent PATCH
+      setProfileImage(pictureUrl);
       Alert.alert(
         t('success') || 'Success',
         t('image_selected_successfully') || 'Image selected successfully. Save to update your profile.',
       );
     } catch (error: any) {
-      console.error('Error picking image:', error);
-      
-      // Handle specific error cases
+      console.error('Error picking/uploading image:', error);
       if (error.message === 'No image selected') {
-        // User cancelled, no need to show error
         return;
       }
-      
-      const errorMessage = 
-        error?.message ||
-        t('failed_to_pick_image') || 
-        'Failed to pick image';
-        
-      Alert.alert(
-        t('error') || 'Error',
-        errorMessage,
-      );
+      const errorMessage = error?.message || t('failed_to_pick_image') || 'Failed to pick image';
+      Alert.alert(t('error') || 'Error', errorMessage);
     } finally {
       setIsUploadingImage(false);
     }
