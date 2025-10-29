@@ -115,7 +115,7 @@ export const useProfileManager = () => {
     invalidateProfile,
     updateLocalProfile,
     hasProfile: !!user,
-    isProfileStale: error?.status === 401,
+    isProfileStale: (error as any)?.status === 401,
   };
 };
 
@@ -146,8 +146,19 @@ export const useLogin = () => {
         refreshToken,
       });
 
-      // Cache user data
-      queryClient.setQueryData(['auth', 'me'], user);
+      // Immediately fetch full profile (to include profilePicture)
+      try {
+        const profileRes = await authApi.getProfile();
+        const fullUser = profileRes.data.data as CustomerProfile;
+        // Update cache and store
+        queryClient.setQueryData(['auth', 'me'], fullUser);
+        const { useAuthStore } = await import('@/src/stores/AuthStore');
+        useAuthStore.getState().setUser(fullUser);
+      } catch (e) {
+        console.warn('Fetching full profile after login failed, using basic user from login.', e);
+        // Cache basic user as fallback
+        queryClient.setQueryData(['auth', 'me'], user);
+      }
 
       // Invalidate and refetch user-dependent queries
       queryClient.invalidateQueries({ queryKey: ['addresses'] });

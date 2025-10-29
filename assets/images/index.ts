@@ -1,10 +1,4 @@
-// New food category images with transparent backgrounds
-import breakfast from '@/assets/images/breakfast.png';
-import dessert from '@/assets/images/dessert.png';
-import vegetarian from '@/assets/images/vegetarian.png';
-import fastfood from '@/assets/images/fastfood.png';
-import drinks from '@/assets/images/dirnks.png';
-import localdish from '@/assets/images/localdish.png';
+// Category images removed - now using emojis for categories
 import R_logo from '@/assets/images/R-Logo.png';
 import deliveryGif from '@/assets/images/Delivery_static.png';
 import onboarding1 from '@/assets/images/background.png';
@@ -56,57 +50,4 @@ export const icons = {
   ProfilePlogo,
 };
 
-export const FoodCategory = {
-  breakfast,
-  dessert,
-  vegetarian,
-  fastfood,
-  drinks,
-  localdish,
-};
-
-export interface FoodCategoryProps {
-  image: any;
-  title: string;
-  description: string;
-  id: number;
-}
-
-export const CategoryFilters = [
-  {
-    id: 1,
-    image: FoodCategory.localdish,
-    title: 'Local Dishes',
-    description: 'Traditional local cuisine',
-  },
-  {
-    id: 2,
-    image: FoodCategory.breakfast,
-    title: 'Breakfast',
-    description: 'Morning meals and breakfast items',
-  },
-  {
-    id: 3,
-    image: FoodCategory.fastfood,
-    title: 'Fast Food',
-    description: 'Quick service meals',
-  },
-  {
-    id: 4,
-    image: FoodCategory.vegetarian,
-    title: 'Vegetarian',
-    description: 'Plant-based dishes',
-  },
-  {
-    id: 5,
-    image: FoodCategory.dessert,
-    title: 'Desserts',
-    description: 'Sweet treats and desserts',
-  },
-  {
-    id: 6,
-    image: FoodCategory.drinks,
-    title: 'Drinks',
-    description: 'Beverages and refreshments',
-  },
-];
+// FoodCategory and CategoryFilters removed - now using emoji-based categories from src/data/categories.ts

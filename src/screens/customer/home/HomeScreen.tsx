@@ -171,7 +171,6 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
       description: category.description || 'Delicious food items',
       emoji: category.emoji,
       color: category.color,
-      image: category.image || images.onboarding1, // Use category image
     }));
   }, [categoriesData]);
 
@@ -271,12 +270,10 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
         description: string;
         emoji: string;
         color: string;
-        image: any;
       };
     }) => (
       <CategoryItem
         key={item.value}
-        image={item.image}
         title={item.label}
         description={item.description}
         emoji={item.emoji}

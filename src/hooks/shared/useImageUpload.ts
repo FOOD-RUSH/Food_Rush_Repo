@@ -1,45 +1,39 @@
 import { useMutation } from '@tanstack/react-query';
 import { LocalImageData } from '@/src/services/shared/profileApi';
 import { pickImageForUpload } from '@/src/utils/imageUtils';
+import { uploadApi } from '@/src/services/shared/uploadApi';
 
 /**
- * Hook for uploading profile pictures with profile data
- * Uses FormData approach directly with the profile update endpoint
+ * Upload a picked image to backend and return the hosted pictureUrl
  */
 export const useProfileImageUpload = () => {
   return useMutation({
-    mutationFn: async (data: {
-      fullName?: string;
-      phoneNumber?: string;
-      picture: LocalImageData;
-    }): Promise<any> => {
-      // Implementation would go here
-      return data;
+    mutationFn: async (image: LocalImageData): Promise<string> => {
+      const pictureUrl = await uploadApi.uploadImage({
+        uri: image.uri,
+        name: image.name,
+        type: image.type,
+      });
+      return pictureUrl;
     },
     onError: (error: any) => {
-      console.error('❌ Profile update with image failed:', error);
+      console.error('❌ Profile image upload failed:', error);
     },
   });
 };
 
 /**
- * Hook for picking profile images
- * Returns the picked image data that can be used with profile update
+ * Pick an image from device
  */
 export const usePickAndUploadProfileImage = () => {
   return useMutation({
     mutationFn: async (): Promise<LocalImageData> => {
-      // Pick image from device
-
       const imageResult = await pickImageForUpload();
-
       if (!imageResult) {
         throw new Error('No image selected');
       }
-
       return imageResult;
     },
-    onSuccess: (imageData: LocalImageData) => {},
     onError: (error: any) => {
       console.error('❌ Image picking failed:', error);
     },
@@ -47,7 +41,7 @@ export const usePickAndUploadProfileImage = () => {
 };
 
 /**
- * Hook for getting current upload progress and status
+ * Helper to track upload status across pick+upload flows
  */
 export const useImageUploadStatus = () => {
   const uploadMutation = useProfileImageUpload();
@@ -55,7 +49,7 @@ export const useImageUploadStatus = () => {
 
   return {
     isUploading: uploadMutation.isPending || pickImageMutation.isPending,
-    uploadError: uploadMutation.error || pickImageMutation.error,
+    uploadError: (uploadMutation.error as any) || (pickImageMutation.error as any),
     uploadSuccess: uploadMutation.isSuccess || pickImageMutation.isSuccess,
     reset: () => {
       uploadMutation.reset();
