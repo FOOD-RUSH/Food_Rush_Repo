@@ -1,5 +1,7 @@
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
-import transactionService, { TransactionFilters } from '@/src/services/customer/transaction.service';
+import transactionService, {
+  TransactionFilters,
+} from '@/src/services/customer/transaction.service';
 
 /**
  * Hook to fetch transaction history with pagination
@@ -7,11 +9,12 @@ import transactionService, { TransactionFilters } from '@/src/services/customer/
 export const useTransactionHistory = (filters: TransactionFilters = {}) => {
   return useInfiniteQuery({
     queryKey: ['transactions', 'history', filters],
-    queryFn: ({ pageParam = 1 }) => transactionService.getTransactionHistory({
-      ...filters,
-      page: pageParam,
-      limit: 20,
-    }),
+    queryFn: ({ pageParam = 1 }) =>
+      transactionService.getTransactionHistory({
+        ...filters,
+        page: pageParam,
+        limit: 20,
+      }),
     getNextPageParam: (lastPage) => {
       const { page, pages } = lastPage.data.pagination;
       return page < pages ? page + 1 : undefined;
@@ -20,8 +23,6 @@ export const useTransactionHistory = (filters: TransactionFilters = {}) => {
     gcTime: 10 * 60 * 1000, // 10 minutes
   });
 };
-
-
 
 /**
  * Hook to fetch transaction statistics

@@ -301,7 +301,9 @@ const OTPScreen: React.FC<AuthStackScreenProps<'OTPVerification'>> = ({
               }}
               className={`w-15 h-15 mx-2 text-center text-2xl font-semibold border-2 rounded-lg`}
               style={{
-                backgroundColor: digit ? colors.primaryContainer : colors.surface,
+                backgroundColor: digit
+                  ? colors.primaryContainer
+                  : colors.surface,
                 borderColor: digit ? colors.primary : colors.outline,
                 color: colors.onSurface,
                 width: 60,
@@ -332,7 +334,7 @@ const OTPScreen: React.FC<AuthStackScreenProps<'OTPVerification'>> = ({
 
         {/* Resend Timer */}
         <View className="mb-8 px-4">
-          <View 
+          <View
             style={{
               backgroundColor: colors.surfaceVariant,
               borderRadius: 12,
@@ -373,8 +375,8 @@ const OTPScreen: React.FC<AuthStackScreenProps<'OTPVerification'>> = ({
           buttonColor={otpComplete ? colors.primary : colors.surfaceVariant}
           textColor={otpComplete ? colors.onPrimary : colors.onSurfaceVariant}
           contentStyle={{ paddingVertical: 12 }}
-          style={{ 
-            borderRadius: 12, 
+          style={{
+            borderRadius: 12,
             marginBottom: 20,
             elevation: otpComplete ? 3 : 0,
             shadowColor: colors.primary,
@@ -396,15 +398,21 @@ const OTPScreen: React.FC<AuthStackScreenProps<'OTPVerification'>> = ({
             paddingVertical: 12,
             paddingHorizontal: 24,
             borderRadius: 8,
-            backgroundColor: isResendEnabled && !isResending ? colors.primaryContainer : colors.surfaceVariant,
+            backgroundColor:
+              isResendEnabled && !isResending
+                ? colors.primaryContainer
+                : colors.surfaceVariant,
             borderWidth: 1,
-            borderColor: isResendEnabled && !isResending ? colors.primary : colors.outline,
+            borderColor:
+              isResendEnabled && !isResending ? colors.primary : colors.outline,
           }}
         >
           <Label
             weight="semibold"
             color={
-              isResendEnabled && !isResending ? colors.primary : colors.onSurfaceVariant
+              isResendEnabled && !isResending
+                ? colors.primary
+                : colors.onSurfaceVariant
             }
           >
             {isResending ? t('resending') : t('resend_code')}

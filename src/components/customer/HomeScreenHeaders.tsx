@@ -20,9 +20,9 @@ const HomeScreenHeaders = ({ onPress, title }: HeaderProps) => {
   const bottomMargin = scale(8);
 
   return (
-    <View 
+    <View
       className="flex-row justify-between items-center"
-      style={{ 
+      style={{
         backgroundColor: colors.background,
         marginHorizontal: horizontalMargin,
         marginTop: topMargin,
@@ -32,10 +32,12 @@ const HomeScreenHeaders = ({ onPress, title }: HeaderProps) => {
       {/* Title */}
       <Text
         className="font-bold flex-1"
-        style={{ 
+        style={{
           color: colors.onSurface,
           fontSize: getResponsiveText(isSmallScreen ? 18 : isTablet ? 20 : 22),
-          lineHeight: getResponsiveText(isSmallScreen ? 24 : isTablet ? 26 : 28),
+          lineHeight: getResponsiveText(
+            isSmallScreen ? 24 : isTablet ? 26 : 28,
+          ),
           minWidth: 0,
         }}
         numberOfLines={1}
@@ -46,7 +48,7 @@ const HomeScreenHeaders = ({ onPress, title }: HeaderProps) => {
 
       {/* See More Button - Only show if onPress is provided */}
       {onPress && (
-        <Button 
+        <Button
           onPress={onPress}
           mode="text"
           compact={isSmallScreen}

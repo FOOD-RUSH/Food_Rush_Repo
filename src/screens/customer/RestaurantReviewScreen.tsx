@@ -105,7 +105,9 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+    >
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
@@ -115,7 +117,10 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
         <View style={styles.header}>
           <TouchableOpacity
             onPress={handleCancel}
-            style={[styles.backButton, { backgroundColor: colors.surfaceVariant }]}
+            style={[
+              styles.backButton,
+              { backgroundColor: colors.surfaceVariant },
+            ]}
             activeOpacity={0.7}
           >
             <Text style={[styles.backButtonText, { color: colors.onSurface }]}>
@@ -143,29 +148,18 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
 
           {/* Main Question */}
           <View style={styles.questionContainer}>
-            <Text
-              style={[
-                styles.mainQuestion,
-                { color: colors.onSurface },
-              ]}
-            >
+            <Text style={[styles.mainQuestion, { color: colors.onSurface }]}>
               {`How was your order from ${restaurantName}?`}
             </Text>
 
             <Text
-              style={[
-                styles.subQuestion,
-                { color: colors.onSurfaceVariant },
-              ]}
+              style={[styles.subQuestion, { color: colors.onSurfaceVariant }]}
             >
               Enjoyed the food? Rate the restaurant.
             </Text>
 
             <Text
-              style={[
-                styles.feedbackText,
-                { color: colors.onSurfaceVariant },
-              ]}
+              style={[styles.feedbackText, { color: colors.onSurfaceVariant }]}
             >
               Your feedback matters.
             </Text>
@@ -177,12 +171,7 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
           {/* Rating Display */}
           {score > 0 && (
             <View style={styles.ratingDisplay}>
-              <Text
-                style={[
-                  styles.ratingText,
-                  { color: colors.primary },
-                ]}
-              >
+              <Text style={[styles.ratingText, { color: colors.primary }]}>
                 {score} {score === 1 ? 'star' : 'stars'}
               </Text>
             </View>
@@ -240,7 +229,8 @@ const RestaurantReviewScreen: React.FC<RestaurantReviewScreenProps> = ({
                 style={[
                   styles.buttonText,
                   {
-                    color: score === 0 ? colors.onSurfaceVariant : colors.onPrimary,
+                    color:
+                      score === 0 ? colors.onSurfaceVariant : colors.onPrimary,
                   },
                 ]}
               >

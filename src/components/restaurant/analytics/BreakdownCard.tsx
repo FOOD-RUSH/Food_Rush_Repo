@@ -41,7 +41,9 @@ const BreakdownCard: React.FC<BreakdownCardProps> = ({
           >
             {title}
           </Heading5>
-          <Caption color={colors.onSurfaceVariant}>{t('no_data_available')}</Caption>
+          <Caption color={colors.onSurfaceVariant}>
+            {t('no_data_available')}
+          </Caption>
         </View>
       </Card>
     );

@@ -1,11 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
-import {
-  categoriesApi,
-} from '@/src/services/shared/categoriesApi';
+import { categoriesApi } from '@/src/services/shared/categoriesApi';
 
 // Unified hook for fetching categories - replaces all other category hooks
 export const useCategoriesApi = () => {
-
   const queryResult = useQuery({
     queryKey: ['categories'],
     queryFn: () => {

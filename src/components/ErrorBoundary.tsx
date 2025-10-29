@@ -54,7 +54,9 @@ export class ErrorBoundary extends React.Component<
             <Text style={styles.retryButtonText}>Try Again</Text>
           </TouchableOpacity>
           {__DEV__ && this.state.componentStack ? (
-            <Text style={[styles.errorMessage, { marginTop: 12 }]}>\n{this.state.componentStack}</Text>
+            <Text style={[styles.errorMessage, { marginTop: 12 }]}>
+              \n{this.state.componentStack}
+            </Text>
           ) : null}
         </View>
       );

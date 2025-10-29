@@ -71,8 +71,7 @@ const RestaurantLocationScreen: React.FC = () => {
   }, [restaurant]);
 
   // Debug loading and error states
-  useEffect(() => {
-  }, [isLoading, error]);
+  useEffect(() => {}, [isLoading, error]);
 
   // Animation for loading indicator
   useEffect(() => {
@@ -110,7 +109,6 @@ const RestaurantLocationScreen: React.FC = () => {
   const getExactLocation = useCallback(async () => {
     setIsGettingLocation(true);
     try {
-
       const servicesEnabled = await LocationService.isLocationEnabled();
       if (!servicesEnabled) {
         Toast.show({
@@ -142,7 +140,6 @@ const RestaurantLocationScreen: React.FC = () => {
         locationResult.location &&
         !locationResult.location.isFallback
       ) {
-
         setSelectedLocation(locationResult.location);
         Toast.show({
           type: 'success',
@@ -213,7 +210,12 @@ const RestaurantLocationScreen: React.FC = () => {
       console.error('Error updating restaurant location:', error);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
-  }, [selectedLocation, restaurant?.id, updateLocationMutation, loadProfileIfNeeded]);
+  }, [
+    selectedLocation,
+    restaurant?.id,
+    updateLocationMutation,
+    loadProfileIfNeeded,
+  ]);
 
   // Show update modal
   const showLocationUpdateModal = useCallback(() => {
@@ -414,8 +416,13 @@ const RestaurantLocationScreen: React.FC = () => {
                       color={colors.onSurfaceVariant}
                       style={{ marginLeft: 4 }}
                     >
-                      {typeof restaurant.latitude === 'number' ? restaurant.latitude.toFixed(6) : restaurant.latitude},{' '}
-                      {typeof restaurant.longitude === 'number' ? restaurant.longitude.toFixed(6) : restaurant.longitude}
+                      {typeof restaurant.latitude === 'number'
+                        ? restaurant.latitude.toFixed(6)
+                        : restaurant.latitude}
+                      ,{' '}
+                      {typeof restaurant.longitude === 'number'
+                        ? restaurant.longitude.toFixed(6)
+                        : restaurant.longitude}
                     </Caption>
                   </View>
                 )}
@@ -457,9 +464,9 @@ const RestaurantLocationScreen: React.FC = () => {
                 color="white"
               />
             )}
-            >
-              {t('update_location')}
-            </Button>
+          >
+            {t('update_location')}
+          </Button>
         </View>
 
         {/* Info Card */}

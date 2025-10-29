@@ -180,7 +180,7 @@ const FoodItemCard = ({
         }}
       >
         {/* Card content with horizontal layout */}
-        <View 
+        <View
           className="flex-row items-center relative"
           style={{ padding: cardDimensions.padding }}
         >
@@ -201,7 +201,7 @@ const FoodItemCard = ({
                 className="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-md"
                 style={{ backgroundColor: colors.primary }}
               >
-                <Text 
+                <Text
                   className="text-white font-bold"
                   style={{ fontSize: cardDimensions.badgeSize }}
                 >
@@ -242,8 +242,8 @@ const FoodItemCard = ({
 
             {/* Distance */}
             <View className="flex-row items-center mb-2 flex-wrap">
-              <Text 
-                style={{ 
+              <Text
+                style={{
                   color: colors.onSurface,
                   fontSize: cardDimensions.distanceSize,
                 }}
@@ -254,14 +254,14 @@ const FoodItemCard = ({
                 <>
                   <Text
                     className="mx-1"
-                    style={{ 
+                    style={{
                       color: colors.onSurface,
                       fontSize: cardDimensions.distanceSize,
                     }}
                   >
                     |
                   </Text>
-                  <Text 
+                  <Text
                     className="font-bold text-red-500"
                     style={{ fontSize: cardDimensions.distanceSize }}
                   >
@@ -291,7 +291,7 @@ const FoodItemCard = ({
                 </Text>
                 <Text
                   className="ml-1"
-                  style={{ 
+                  style={{
                     color: colors.onSurface,
                     fontSize: cardDimensions.deliverySize,
                   }}
@@ -306,7 +306,7 @@ const FoodItemCard = ({
                 />
                 <Text
                   className="ml-1"
-                  style={{ 
+                  style={{
                     color: colors.onSurface,
                     fontSize: cardDimensions.deliverySize,
                   }}

@@ -24,7 +24,6 @@ import { Card, useTheme, FAB, Snackbar } from 'react-native-paper';
 
 import { useAddressManager } from '@/src/hooks/customer/useAddressManager';
 import {
-  Typography,
   Heading5,
   Body,
   Label,
@@ -55,13 +54,8 @@ const AddressScreen = ({
   } = useLocationActions();
 
   // Address manager for location integration
-  const {
-    currentLocation,
-    hasLocationPermission,
-    addAddressFromCurrentLocation,
-    requestLocationPermission,
-    isProcessing,
-  } = useAddressManager();
+  const { currentLocation, addAddressFromCurrentLocation, isProcessing } =
+    useAddressManager();
 
   // Check if we should show current location suggestion
   useEffect(() => {

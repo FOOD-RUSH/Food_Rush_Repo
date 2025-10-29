@@ -1,6 +1,11 @@
 import { MaterialCommunityIcon } from '@/src/components/common/icons';
 import React, { useState } from 'react';
-import { View, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import {
+  View,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
 import { Button, useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
@@ -84,7 +89,14 @@ const OrderDetailsScreen: React.FC<
   if (isLoading && !orderData) {
     return (
       <CommonView style={{ backgroundColor: colors.background }}>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 24,
+          }}
+        >
           <ActivityIndicator size="large" color={colors.primary} />
           <Body style={{ marginTop: 16, color: colors.onSurfaceVariant }}>
             {t('loading_order_details')}
@@ -98,15 +110,36 @@ const OrderDetailsScreen: React.FC<
   if (error) {
     return (
       <CommonView style={{ backgroundColor: colors.background }}>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 }}>
-          <MaterialCommunityIcon name="alert-circle-outline" size={72} color={colors.error} />
-          <Heading3 style={{ marginTop: 24, marginBottom: 12, color: colors.onSurface }} align="center">
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 24,
+          }}
+        >
+          <MaterialCommunityIcon
+            name="alert-circle-outline"
+            size={72}
+            color={colors.error}
+          />
+          <Heading3
+            style={{ marginTop: 24, marginBottom: 12, color: colors.onSurface }}
+            align="center"
+          >
             {t('error_loading_order')}
           </Heading3>
-          <Body style={{ marginBottom: 32, color: colors.onSurfaceVariant }} align="center">
+          <Body
+            style={{ marginBottom: 32, color: colors.onSurfaceVariant }}
+            align="center"
+          >
             {error.message || t('failed_to_load_order_details')}
           </Body>
-          <Button mode="contained" onPress={() => refetch()} style={{ marginBottom: 12 }}>
+          <Button
+            mode="contained"
+            onPress={() => refetch()}
+            style={{ marginBottom: 12 }}
+          >
             {t('retry')}
           </Button>
           <Button mode="text" onPress={() => navigation.goBack()}>
@@ -121,12 +154,29 @@ const OrderDetailsScreen: React.FC<
   if (!orderData) {
     return (
       <CommonView style={{ backgroundColor: colors.background }}>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 }}>
-          <MaterialCommunityIcon name="file-document-outline" size={72} color={colors.onSurfaceVariant} />
-          <Heading3 style={{ marginTop: 24, marginBottom: 12, color: colors.onSurface }} align="center">
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 24,
+          }}
+        >
+          <MaterialCommunityIcon
+            name="file-document-outline"
+            size={72}
+            color={colors.onSurfaceVariant}
+          />
+          <Heading3
+            style={{ marginTop: 24, marginBottom: 12, color: colors.onSurface }}
+            align="center"
+          >
             {t('order_not_found')}
           </Heading3>
-          <Body style={{ marginBottom: 32, color: colors.onSurfaceVariant }} align="center">
+          <Body
+            style={{ marginBottom: 32, color: colors.onSurfaceVariant }}
+            align="center"
+          >
             {t('order_could_not_be_found')}
           </Body>
           <Button mode="contained" onPress={() => navigation.goBack()}>
@@ -137,7 +187,10 @@ const OrderDetailsScreen: React.FC<
     );
   }
 
-  const totalItems = orderData.items.reduce((sum, item) => sum + item.quantity, 0);
+  const totalItems = orderData.items.reduce(
+    (sum, item) => sum + item.quantity,
+    0,
+  );
 
   return (
     <CommonView style={{ backgroundColor: colors.background }}>
@@ -157,25 +210,59 @@ const OrderDetailsScreen: React.FC<
             borderBottomColor: colors.outlineVariant,
           }}
         >
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+            }}
+          >
             <View style={{ flex: 1 }}>
-              <Caption style={{ color: colors.onSurfaceVariant, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+              <Caption
+                style={{
+                  color: colors.onSurfaceVariant,
+                  marginBottom: 4,
+                  textTransform: 'uppercase',
+                  letterSpacing: 0.5,
+                }}
+              >
                 {t('order_id')}
               </Caption>
-              <Heading1 style={{ color: colors.onSurface, marginBottom: 8 }} weight="bold">
+              <Heading1
+                style={{ color: colors.onSurface, marginBottom: 8 }}
+                weight="bold"
+              >
                 #{orderId.slice(0, 8)}
               </Heading1>
               <View style={{ gap: 8 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <MaterialCommunityIcon name="clock-outline" size={16} color={colors.onSurfaceVariant} />
-                  <Caption style={{ marginLeft: 6, color: colors.onSurfaceVariant }}>
+                  <MaterialCommunityIcon
+                    name="clock-outline"
+                    size={16}
+                    color={colors.onSurfaceVariant}
+                  />
+                  <Caption
+                    style={{ marginLeft: 6, color: colors.onSurfaceVariant }}
+                  >
                     {getTimeSinceOrder(orderData)}
                   </Caption>
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <MaterialCommunityIcon name="calendar-outline" size={16} color={colors.onSurfaceVariant} />
-                  <Caption style={{ marginLeft: 6, color: colors.onSurfaceVariant }}>
-                    {t('order_placed_at')} {formatDate(orderData.createdAt || orderData.time || new Date().toISOString(), 'MMM DD, h:mm a')}
+                  <MaterialCommunityIcon
+                    name="calendar-outline"
+                    size={16}
+                    color={colors.onSurfaceVariant}
+                  />
+                  <Caption
+                    style={{ marginLeft: 6, color: colors.onSurfaceVariant }}
+                  >
+                    {t('order_placed_at')}{' '}
+                    {formatDate(
+                      orderData.createdAt ||
+                        orderData.time ||
+                        new Date().toISOString(),
+                      'MMM DD, h:mm a',
+                    )}
                   </Caption>
                 </View>
               </View>
@@ -188,7 +275,14 @@ const OrderDetailsScreen: React.FC<
                 borderRadius: 6,
               }}
             >
-              <Label style={{ color: 'white', textTransform: 'uppercase', letterSpacing: 0.5 }} weight="bold">
+              <Label
+                style={{
+                  color: 'white',
+                  textTransform: 'uppercase',
+                  letterSpacing: 0.5,
+                }}
+                weight="bold"
+              >
                 {t(orderData.status)}
               </Label>
             </View>
@@ -196,11 +290,21 @@ const OrderDetailsScreen: React.FC<
         </View>
 
         {/* Order Information */}
-        <View style={{ backgroundColor: colors.surface, marginTop: 12, paddingHorizontal: 20, paddingVertical: 20 }}>
-          <Label style={{ color: colors.onSurface, marginBottom: 16, fontSize: 15 }} weight="semibold">
+        <View
+          style={{
+            backgroundColor: colors.surface,
+            marginTop: 12,
+            paddingHorizontal: 20,
+            paddingVertical: 20,
+          }}
+        >
+          <Label
+            style={{ color: colors.onSurface, marginBottom: 16, fontSize: 15 }}
+            weight="semibold"
+          >
             {t('order_details')}
           </Label>
-          
+
           <View style={{ gap: 14 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <View
@@ -213,16 +317,28 @@ const OrderDetailsScreen: React.FC<
                   alignItems: 'center',
                 }}
               >
-                <MaterialCommunityIcon name="calendar-clock" size={20} color={colors.onPrimaryContainer} />
+                <MaterialCommunityIcon
+                  name="calendar-clock"
+                  size={20}
+                  color={colors.onPrimaryContainer}
+                />
               </View>
               <View style={{ marginLeft: 14, flex: 1 }}>
-                <Caption style={{ color: colors.onSurfaceVariant, marginBottom: 2 }}>
+                <Caption
+                  style={{ color: colors.onSurfaceVariant, marginBottom: 2 }}
+                >
                   {t('order_created_at')}
                 </Caption>
                 <Body style={{ color: colors.onSurface }} weight="medium">
-                  {formatDate(orderData.createdAt || orderData.time || new Date().toISOString())}
+                  {formatDate(
+                    orderData.createdAt ||
+                      orderData.time ||
+                      new Date().toISOString(),
+                  )}
                 </Body>
-                <Caption style={{ color: colors.onSurfaceVariant, marginTop: 2 }}>
+                <Caption
+                  style={{ color: colors.onSurfaceVariant, marginTop: 2 }}
+                >
                   {getTimeSinceOrder(orderData)}
                 </Caption>
               </View>
@@ -239,10 +355,16 @@ const OrderDetailsScreen: React.FC<
                   alignItems: 'center',
                 }}
               >
-                <MaterialCommunityIcon name="identifier" size={20} color={colors.onPrimaryContainer} />
+                <MaterialCommunityIcon
+                  name="identifier"
+                  size={20}
+                  color={colors.onPrimaryContainer}
+                />
               </View>
               <View style={{ marginLeft: 14, flex: 1 }}>
-                <Caption style={{ color: colors.onSurfaceVariant, marginBottom: 2 }}>
+                <Caption
+                  style={{ color: colors.onSurfaceVariant, marginBottom: 2 }}
+                >
                   {t('order_id')}
                 </Caption>
                 <Body style={{ color: colors.onSurface }} weight="medium">
@@ -254,11 +376,21 @@ const OrderDetailsScreen: React.FC<
         </View>
 
         {/* Customer Information */}
-        <View style={{ backgroundColor: colors.surface, marginTop: 12, paddingHorizontal: 20, paddingVertical: 20 }}>
-          <Label style={{ color: colors.onSurface, marginBottom: 16, fontSize: 15 }} weight="semibold">
+        <View
+          style={{
+            backgroundColor: colors.surface,
+            marginTop: 12,
+            paddingHorizontal: 20,
+            paddingVertical: 20,
+          }}
+        >
+          <Label
+            style={{ color: colors.onSurface, marginBottom: 16, fontSize: 15 }}
+            weight="semibold"
+          >
             {t('customer_information')}
           </Label>
-          
+
           <View style={{ gap: 14 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <View
@@ -271,10 +403,16 @@ const OrderDetailsScreen: React.FC<
                   alignItems: 'center',
                 }}
               >
-                <MaterialCommunityIcon name="account" size={20} color={colors.onPrimaryContainer} />
+                <MaterialCommunityIcon
+                  name="account"
+                  size={20}
+                  color={colors.onPrimaryContainer}
+                />
               </View>
               <View style={{ marginLeft: 14, flex: 1 }}>
-                <Caption style={{ color: colors.onSurfaceVariant, marginBottom: 2 }}>
+                <Caption
+                  style={{ color: colors.onSurfaceVariant, marginBottom: 2 }}
+                >
                   {t('customer_name')}
                 </Caption>
                 <Body style={{ color: colors.onSurface }} weight="medium">
@@ -294,10 +432,16 @@ const OrderDetailsScreen: React.FC<
                   alignItems: 'center',
                 }}
               >
-                <MaterialCommunityIcon name="phone" size={20} color={colors.onPrimaryContainer} />
+                <MaterialCommunityIcon
+                  name="phone"
+                  size={20}
+                  color={colors.onPrimaryContainer}
+                />
               </View>
               <View style={{ marginLeft: 14, flex: 1 }}>
-                <Caption style={{ color: colors.onSurfaceVariant, marginBottom: 2 }}>
+                <Caption
+                  style={{ color: colors.onSurfaceVariant, marginBottom: 2 }}
+                >
                   {t('phone_number')}
                 </Caption>
                 <Body style={{ color: colors.onSurface }} weight="medium">
@@ -318,10 +462,16 @@ const OrderDetailsScreen: React.FC<
                     alignItems: 'center',
                   }}
                 >
-                  <MaterialCommunityIcon name="map-marker" size={20} color={colors.onPrimaryContainer} />
+                  <MaterialCommunityIcon
+                    name="map-marker"
+                    size={20}
+                    color={colors.onPrimaryContainer}
+                  />
                 </View>
                 <View style={{ marginLeft: 14, flex: 1 }}>
-                  <Caption style={{ color: colors.onSurfaceVariant, marginBottom: 2 }}>
+                  <Caption
+                    style={{ color: colors.onSurfaceVariant, marginBottom: 2 }}
+                  >
                     {t('delivery_address')}
                   </Caption>
                   <Body style={{ color: colors.onSurface }} weight="medium">
@@ -343,9 +493,22 @@ const OrderDetailsScreen: React.FC<
                 borderLeftColor: colors.error,
               }}
             >
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                <MaterialCommunityIcon name="alert-circle" size={20} color={colors.error} />
-                <Label style={{ marginLeft: 8, color: colors.error }} weight="semibold">
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginBottom: 8,
+                }}
+              >
+                <MaterialCommunityIcon
+                  name="alert-circle"
+                  size={20}
+                  color={colors.error}
+                />
+                <Label
+                  style={{ marginLeft: 8, color: colors.error }}
+                  weight="semibold"
+                >
                   {t('special_instructions')}
                 </Label>
               </View>
@@ -357,9 +520,26 @@ const OrderDetailsScreen: React.FC<
         </View>
 
         {/* Order Items */}
-        <View style={{ backgroundColor: colors.surface, marginTop: 12, paddingHorizontal: 20, paddingVertical: 20 }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <Label style={{ color: colors.onSurface, fontSize: 15 }} weight="semibold">
+        <View
+          style={{
+            backgroundColor: colors.surface,
+            marginTop: 12,
+            paddingHorizontal: 20,
+            paddingVertical: 20,
+          }}
+        >
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: 16,
+            }}
+          >
+            <Label
+              style={{ color: colors.onSurface, fontSize: 15 }}
+              weight="semibold"
+            >
               {t('order_items')}
             </Label>
             <Caption style={{ color: colors.onSurfaceVariant }}>
@@ -377,7 +557,13 @@ const OrderDetailsScreen: React.FC<
                   borderTopColor: colors.outlineVariant,
                 }}
               >
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                  }}
+                >
                   <View style={{ flex: 1, flexDirection: 'row' }}>
                     <View
                       style={{
@@ -390,42 +576,69 @@ const OrderDetailsScreen: React.FC<
                         marginRight: 12,
                       }}
                     >
-                      <Caption style={{ color: colors.onPrimaryContainer }} weight="bold">
+                      <Caption
+                        style={{ color: colors.onPrimaryContainer }}
+                        weight="bold"
+                      >
                         {item.quantity}
                       </Caption>
                     </View>
                     <View style={{ flex: 1 }}>
-                      <Body style={{ color: colors.onSurface, marginBottom: 4 }} weight="semibold">
+                      <Body
+                        style={{ color: colors.onSurface, marginBottom: 4 }}
+                        weight="semibold"
+                      >
                         {item.name}
                       </Body>
                       {item.description && (
-                        <Caption style={{ color: colors.onSurfaceVariant, lineHeight: 18 }}>
+                        <Caption
+                          style={{
+                            color: colors.onSurfaceVariant,
+                            lineHeight: 18,
+                          }}
+                        >
                           {item.description}
                         </Caption>
                       )}
                       {item.modifications && item.modifications.length > 0 && (
                         <View style={{ marginTop: 8, gap: 4 }}>
-                          {item.modifications.map((mod: string, modIndex: number) => (
-                            <View key={modIndex} style={{ flexDirection: 'row', alignItems: 'center' }}>
+                          {item.modifications.map(
+                            (mod: string, modIndex: number) => (
                               <View
+                                key={modIndex}
                                 style={{
-                                  width: 6,
-                                  height: 6,
-                                  borderRadius: 3,
-                                  backgroundColor: colors.primary,
-                                  marginRight: 8,
+                                  flexDirection: 'row',
+                                  alignItems: 'center',
                                 }}
-                              />
-                              <Caption style={{ color: colors.onSurfaceVariant, fontStyle: 'italic' }}>
-                                {mod}
-                              </Caption>
-                            </View>
-                          ))}
+                              >
+                                <View
+                                  style={{
+                                    width: 6,
+                                    height: 6,
+                                    borderRadius: 3,
+                                    backgroundColor: colors.primary,
+                                    marginRight: 8,
+                                  }}
+                                />
+                                <Caption
+                                  style={{
+                                    color: colors.onSurfaceVariant,
+                                    fontStyle: 'italic',
+                                  }}
+                                >
+                                  {mod}
+                                </Caption>
+                              </View>
+                            ),
+                          )}
                         </View>
                       )}
                     </View>
                   </View>
-                  <Body style={{ color: colors.primary, marginLeft: 16 }} weight="bold">
+                  <Body
+                    style={{ color: colors.primary, marginLeft: 16 }}
+                    weight="bold"
+                  >
                     {formatOrderTotal(item.price * item.quantity)}
                   </Body>
                 </View>
@@ -435,22 +648,48 @@ const OrderDetailsScreen: React.FC<
         </View>
 
         {/* Payment Summary */}
-        <View style={{ backgroundColor: colors.surface, marginTop: 12, paddingHorizontal: 20, paddingVertical: 20 }}>
-          <Label style={{ color: colors.onSurface, marginBottom: 16, fontSize: 15 }} weight="semibold">
+        <View
+          style={{
+            backgroundColor: colors.surface,
+            marginTop: 12,
+            paddingHorizontal: 20,
+            paddingVertical: 20,
+          }}
+        >
+          <Label
+            style={{ color: colors.onSurface, marginBottom: 16, fontSize: 15 }}
+            weight="semibold"
+          >
             {t('payment_summary')}
           </Label>
 
           <View style={{ gap: 12 }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Body style={{ color: colors.onSurfaceVariant }}>{t('subtotal')}</Body>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
+              <Body style={{ color: colors.onSurfaceVariant }}>
+                {t('subtotal')}
+              </Body>
               <Body style={{ color: colors.onSurface }} weight="medium">
                 {formatOrderTotal(orderData.subtotal)}
               </Body>
             </View>
 
             {orderData.tax && (
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Body style={{ color: colors.onSurfaceVariant }}>{t('tax')}</Body>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <Body style={{ color: colors.onSurfaceVariant }}>
+                  {t('tax')}
+                </Body>
                 <Body style={{ color: colors.onSurface }} weight="medium">
                   {formatOrderTotal(orderData.tax)}
                 </Body>
@@ -458,10 +697,20 @@ const OrderDetailsScreen: React.FC<
             )}
 
             {(orderData.deliveryFee || orderData.deliveryPrice) && (
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Body style={{ color: colors.onSurfaceVariant }}>{t('delivery_fee')}</Body>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <Body style={{ color: colors.onSurfaceVariant }}>
+                  {t('delivery_fee')}
+                </Body>
                 <Body style={{ color: colors.onSurface }} weight="medium">
-                  {formatOrderTotal(orderData.deliveryFee || orderData.deliveryPrice)}
+                  {formatOrderTotal(
+                    orderData.deliveryFee || orderData.deliveryPrice,
+                  )}
                 </Body>
               </View>
             )}
@@ -474,7 +723,13 @@ const OrderDetailsScreen: React.FC<
               }}
             />
 
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
+            >
               <Heading3 style={{ color: colors.onSurface }} weight="bold">
                 {t('total')}
               </Heading3>
@@ -516,7 +771,9 @@ const OrderDetailsScreen: React.FC<
                 />
               </View>
               <View style={{ marginLeft: 12, flex: 1 }}>
-                <Caption style={{ color: colors.onSurfaceVariant, marginBottom: 2 }}>
+                <Caption
+                  style={{ color: colors.onSurfaceVariant, marginBottom: 2 }}
+                >
                   {t('payment_method')}
                 </Caption>
                 <Body style={{ color: colors.onSurface }} weight="medium">
@@ -548,7 +805,11 @@ const OrderDetailsScreen: React.FC<
                 disabled={isProcessing}
                 activeOpacity={0.8}
               >
-                <MaterialCommunityIcon name="check-circle" size={20} color="white" />
+                <MaterialCommunityIcon
+                  name="check-circle"
+                  size={20}
+                  color="white"
+                />
                 <Label style={{ marginLeft: 10, color: 'white' }} weight="bold">
                   {t('accept_order')}
                 </Label>
@@ -569,8 +830,15 @@ const OrderDetailsScreen: React.FC<
                 disabled={isProcessing}
                 activeOpacity={0.8}
               >
-                <MaterialCommunityIcon name="close-circle" size={20} color={colors.error} />
-                <Label style={{ marginLeft: 10, color: colors.error }} weight="bold">
+                <MaterialCommunityIcon
+                  name="close-circle"
+                  size={20}
+                  color={colors.error}
+                />
+                <Label
+                  style={{ marginLeft: 10, color: colors.error }}
+                  weight="bold"
+                >
                   {t('reject_order')}
                 </Label>
               </TouchableOpacity>

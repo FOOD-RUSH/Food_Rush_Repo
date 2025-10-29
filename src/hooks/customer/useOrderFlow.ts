@@ -11,15 +11,15 @@ import { useDefaultAddress } from '@/src/location/store';
 // Payment method now handled in checkout component
 
 export type OrderFlowStep =
-  | 'creating'                    // Creating the order
-  | 'created'                     // Order created successfully, ready for payment
-  | 'pending'                     // Waiting for restaurant confirmation (2-15 min)
-  | 'confirmed'                   // Restaurant confirmed, ready for payment
-  | 'payment_processing'          // Payment in progress
-  | 'preparing'                   // Payment successful, restaurant preparing
-  | 'completed'                   // Order flow completed
-  | 'cancelled'                   // Order cancelled
-  | 'failed';                     // Generic failure
+  | 'creating' // Creating the order
+  | 'created' // Order created successfully, ready for payment
+  | 'pending' // Waiting for restaurant confirmation (2-15 min)
+  | 'confirmed' // Restaurant confirmed, ready for payment
+  | 'payment_processing' // Payment in progress
+  | 'preparing' // Payment successful, restaurant preparing
+  | 'completed' // Order flow completed
+  | 'cancelled' // Order cancelled
+  | 'failed'; // Generic failure
 
 export interface OrderFlowState {
   step: OrderFlowStep;
@@ -112,12 +112,11 @@ export const useOrderFlow = () => {
 
   // Create order from cart
   const createOrderFromCart = useCallback(
-    async (restaurantId: string, coordinates?: { latitude: number; longitude: number }) => {
-      if (
-        !user?.id ||
-        !defaultAddress ||
-        cartItems.length === 0
-      ) {
+    async (
+      restaurantId: string,
+      coordinates?: { latitude: number; longitude: number },
+    ) => {
+      if (!user?.id || !defaultAddress || cartItems.length === 0) {
         throw new Error('Missing required information for order creation');
       }
 
@@ -131,19 +130,15 @@ export const useOrderFlow = () => {
         })),
         deliveryAddress: defaultAddress.fullAddress,
         deliveryLatitude: coordinates?.latitude || defaultAddress.latitude || 0,
-        deliveryLongitude: coordinates?.longitude || defaultAddress.longitude || 0,
+        deliveryLongitude:
+          coordinates?.longitude || defaultAddress.longitude || 0,
         paymentMethod: 'mobile_money', // Only mobile money is supported
       };
 
       setFlowState({ step: 'creating' });
       createOrderMutation.mutate(orderData);
     },
-    [
-      user,
-      defaultAddress,
-      cartItems,
-      createOrderMutation,
-    ],
+    [user, defaultAddress, cartItems, createOrderMutation],
   );
 
   // Cancel order (before restaurant confirmation)

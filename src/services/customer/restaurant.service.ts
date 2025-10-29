@@ -61,12 +61,13 @@ export const restaurantApi = {
   },
 
   // Get all restaurants without location requirements
-  getAllRestaurantsWithoutLocation: async (query: Omit<RestaurantQuery, 'nearLat' | 'nearLng' | 'radiusKm'> = {}) => {
+  getAllRestaurantsWithoutLocation: async (
+    query: Omit<RestaurantQuery, 'nearLat' | 'nearLng' | 'radiusKm'> = {},
+  ) => {
     try {
-      const response = await apiClient.get<RestaurantItems>(
-        '/restaurants',
-        { params: query },
-      );
+      const response = await apiClient.get<RestaurantItems>('/restaurants', {
+        params: query,
+      });
       return response.data.data;
     } catch (error) {
       console.error('❌ Get All Restaurants (No Location) API Error:', error);
@@ -78,7 +79,6 @@ export const restaurantApi = {
   // Get restaurants using browse endpoint (replaces nearby)
   getBrowseRestaurants: async (query: RestaurantQuery) => {
     try {
-
       const response = await apiClient.get<RestaurantItems>(
         '/restaurants/browse',
         { params: query },
@@ -95,7 +95,6 @@ export const restaurantApi = {
   // Get all nearby menu items with coordinates
   getAllMenuItems: async (query: FoodQuery) => {
     try {
-
       const response = await apiClient.get<FoodItems>('/menu/all/nearby', {
         params: query,
       });
@@ -111,7 +110,6 @@ export const restaurantApi = {
   // Browse menu items with category filtering
   browseMenuItems: async (query: FoodQuery) => {
     try {
-
       const response = await apiClient.get<FoodItems>('/menu/browse', {
         params: query,
       });
@@ -154,7 +152,6 @@ export const restaurantApi = {
     nearLng?: number,
   ) => {
     try {
-
       const response = await apiClient.get<RestaurantReturn>(
         `/restaurants/${id}/detail`,
         { params: { nearLat, nearLng } },

@@ -41,47 +41,59 @@ export const authApi = {
   register: async (data: RegisterRequest): Promise<RegisterResponseData> => {
     try {
       // Validate required fields before sending
-      if (!data.email || !data.phoneNumber || !data.fullName || !data.password || !data.role) {
+      if (
+        !data.email ||
+        !data.phoneNumber ||
+        !data.fullName ||
+        !data.password ||
+        !data.role
+      ) {
         throw new Error('All fields are required for registration');
       }
-      
+
       // Validate email format
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(data.email)) {
         throw new Error('Invalid email format');
       }
-      
+
       // Validate phone number format (Cameroon: +237XXXXXXXXX)
       // Accept any 9-digit number after +237
       const phoneRegex = /^\+237\d{9}$/;
       if (!phoneRegex.test(data.phoneNumber)) {
-        throw new Error(`Invalid phone number format. Expected +237 followed by 9 digits, got: ${data.phoneNumber}`);
+        throw new Error(
+          `Invalid phone number format. Expected +237 followed by 9 digits, got: ${data.phoneNumber}`,
+        );
       }
-      
+
       // Validate password length
       if (data.password.length < 6) {
         throw new Error('Password must be at least 6 characters long');
       }
-      
+
       // Validate full name
       if (data.fullName.trim().length < 2) {
         throw new Error('Full name must be at least 2 characters long');
       }
-      
+
       // Ensure proper Content-Type header for JSON
       const config = {
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
+          Accept: 'application/json',
+        },
       };
-      
-      const response = await apiClient.post<RegisterResponseData>('/auth/register', data, config);
-      
+
+      const response = await apiClient.post<RegisterResponseData>(
+        '/auth/register',
+        data,
+        config,
+      );
+
       return response.data;
     } catch (error: any) {
       console.error('❌ Registration failed:', error);
-      
+
       // Log more detailed error information
       if (error.response) {
         console.error('❌ Response error details:', {
@@ -93,25 +105,26 @@ export const authApi = {
             url: error.config?.url,
             method: error.config?.method,
             baseURL: error.config?.baseURL,
-            data: error.config?.data
-          }
+            data: error.config?.data,
+          },
         });
       } else if (error.request) {
         console.error('❌ Request error (no response):', {
           request: error.request,
           message: error.message,
-          code: error.code
+          code: error.code,
         });
       } else {
         console.error('❌ General error:', {
           message: error.message,
-          stack: error.stack
+          stack: error.stack,
         });
       }
-      
+
       // Enhanced error handling
       if (error.response?.status === 400) {
-        const message = error.response.data?.message || 'Invalid registration data';
+        const message =
+          error.response.data?.message || 'Invalid registration data';
         throw new Error(message);
       } else if (error.response?.status === 409) {
         throw new Error('Email or phone number already exists');
@@ -119,21 +132,30 @@ export const authApi = {
         const message = error.response.data?.message || 'Validation failed';
         throw new Error(message);
       } else if (error.response?.status === 500) {
-        const message = error.response.data?.message || 'Server error. Please try again later.';
+        const message =
+          error.response.data?.message ||
+          'Server error. Please try again later.';
         throw new Error(message);
       } else {
-        throw new Error(error.response?.data?.message || error.message || 'Registration failed');
+        throw new Error(
+          error.response?.data?.message ||
+            error.message ||
+            'Registration failed',
+        );
       }
     }
   },
 
   verifyOTP: async (data: OTPCredentials): Promise<LoginResponseData> => {
     try {
-      const response = await apiClient.post<LoginResponseData>('/auth/verify-otp', data);
+      const response = await apiClient.post<LoginResponseData>(
+        '/auth/verify-otp',
+        data,
+      );
       return response.data;
     } catch (error: any) {
       console.error('❌ OTP verification failed:', error);
-      
+
       if (error.response?.status === 400) {
         throw new Error('Invalid OTP code');
       } else if (error.response?.status === 404) {
@@ -141,7 +163,11 @@ export const authApi = {
       } else if (error.response?.status === 410) {
         throw new Error('OTP has expired');
       } else {
-        throw new Error(error.response?.data?.message || error.message || 'OTP verification failed');
+        throw new Error(
+          error.response?.data?.message ||
+            error.message ||
+            'OTP verification failed',
+        );
       }
     }
   },

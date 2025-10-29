@@ -1,8 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { restaurantAuthApi } from '@/src/services/restaurant/authApi';
-import {
-  RestaurantRegisterRequest,
-} from '@/src/services/shared/authTypes';
+import { RestaurantRegisterRequest } from '@/src/services/shared/authTypes';
 import {
   RestaurantProfile,
   useAuthStore,
@@ -21,9 +19,7 @@ export const useRegisterRestaurant = () => {
     onMutate: () => {
       clearError();
     },
-    onSuccess: (data) => {
-
-    },
+    onSuccess: (data) => {},
   });
 };
 
@@ -41,7 +37,6 @@ export const useLoginRestaurant = () => {
       clearError();
     },
     onSuccess: async (data) => {
-
       const {
         user,
         accessToken,
@@ -98,7 +93,6 @@ export const useVerifyRestaurantOTP = () => {
       clearError();
     },
     onSuccess: async (data: any) => {
-
       // Store tokens if provided
       if (data.accessToken && data.refreshToken && data.user) {
         // Set auth data using the simplified store method
@@ -146,8 +140,6 @@ export const useRestaurantLogout = () => {
   });
 };
 
-
-
 export const useResetRestaurantPassword = () => {
   const { clearError } = useAuthStore();
 
@@ -163,8 +155,7 @@ export const useResetRestaurantPassword = () => {
     onMutate: () => {
       clearError();
     },
-    onSuccess: (response) => {
-    },
+    onSuccess: (response) => {},
   });
 };
 
@@ -179,7 +170,6 @@ export const useRequestRestaurantPasswordReset = () => {
     onMutate: () => {
       clearError();
     },
-    onSuccess: () => {
-    },
+    onSuccess: () => {},
   });
 };

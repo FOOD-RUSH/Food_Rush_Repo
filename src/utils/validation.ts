@@ -136,7 +136,10 @@ export const profileUpdateSchema = yup.object().shape({
     .optional(),
   phoneNumber: yup
     .string()
-    .matches(/^\+?[0-9]{9,15}$/, 'Invalid phone number format (e.g., +237612345678)')
+    .matches(
+      /^\+?[0-9]{9,15}$/,
+      'Invalid phone number format (e.g., +237612345678)',
+    )
     .optional(),
   profilePicture: yup
     .string()

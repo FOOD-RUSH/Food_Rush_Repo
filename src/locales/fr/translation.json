@@ -5,7 +5,6 @@
   "4_stars_and_above": "4 étoiles et plus",
   "2_stars_and_above": "2 étoiles et plus",
   "5_to_10km": "5 à 10km",
-  "7_days": "7 Jours",
   "30_days": "30 Jours",
   "above_5000_fcfa": "Plus de 5 000 FCFA",
   "acceptance_rate": "Taux d'Acceptation",
@@ -361,7 +360,7 @@
     "server_error": "Erreur serveur. Veuillez réessayer plus tard.",
     "service_unavailable": "Service temporairement indisponible. Veuillez réessayer plus tard.",
     "currently_unavailable": "indisponible",
-      "restaurant_added_to_favorites": "Ce Restaurant à ete ajoute à vos favoris",
+    "restaurant_added_to_favorites": "Ce Restaurant à ete ajoute à vos favoris",
 
     "session_expired": "Votre session a expiré. Veuillez vous reconnecter.",
     "storage_error": "Erreur de stockage. Veuillez vérifier l'espace de stockage de l'appareil.",
@@ -621,11 +620,11 @@
   "new": "Nouveau",
   "new_order_received": "Nouvelle Commande Reçue",
   "new_orders": "Nouvelles Commandes",
-    "search_for_restaurant": "Recherche tout les restaurants",
+  "search_for_restaurant": "Recherche tout les restaurants",
 
   "new_restaurants": "Nouveaux Restaurants",
   "next": "Suivant",
-    "all_restaurants": "Tout Restaurants",
+  "all_restaurants": "Tout Restaurants",
 
   "next_payout": "Prochain paiement",
   "no_addresses_added": "Aucune Adresse Ajoutée",
@@ -1351,8 +1350,8 @@
   "payment_confirmed_order_processing": "Payement confirmed, Order Processing",
   "redirecting_home": "Redirecting Home...",
   "next_steps": "Next steps",
-  "complete_payment_on_phone": "Complete Payement on Phone"
+  "complete_payment_on_phone": "Complete Payement on Phone",
+  "7_days": "7 Jours",
 
-
-
+  "add_new_address": "Ajoute une nouvelle addresse"
 }

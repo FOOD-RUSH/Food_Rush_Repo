@@ -35,7 +35,14 @@ export interface CreateOrderResponse {
     subtotal: number;
     deliveryPrice: number;
     total: number;
-    status: 'pending' | 'confirmed' | 'preparing' | 'ready_for_pickup' | 'out_for_delivery' | 'delivered' | 'cancelled';
+    status:
+      | 'pending'
+      | 'confirmed'
+      | 'preparing'
+      | 'ready_for_pickup'
+      | 'out_for_delivery'
+      | 'delivered'
+      | 'cancelled';
     paymentMethod: string;
     createdAt: string;
   };
@@ -85,7 +92,14 @@ export const OrderApi = {
 
   // Get user orders with optional filters (matches API docs)
   getUserOrders: async (params?: {
-    status?: 'pending' | 'confirmed' | 'preparing' | 'ready_for_pickup' | 'out_for_delivery' | 'delivered' | 'cancelled';
+    status?:
+      | 'pending'
+      | 'confirmed'
+      | 'preparing'
+      | 'ready_for_pickup'
+      | 'out_for_delivery'
+      | 'delivered'
+      | 'cancelled';
     limit?: number;
     offset?: number;
   }) => {
@@ -104,7 +118,14 @@ export const OrderApi = {
 
   // Get my orders (alias for getUserOrders for consistency)
   getMyOrders: async (params?: {
-    status?: 'pending' | 'confirmed' | 'preparing' | 'ready_for_pickup' | 'out_for_delivery' | 'delivered' | 'cancelled';
+    status?:
+      | 'pending'
+      | 'confirmed'
+      | 'preparing'
+      | 'ready_for_pickup'
+      | 'out_for_delivery'
+      | 'delivered'
+      | 'cancelled';
     limit?: number;
     offset?: number;
   }) => {

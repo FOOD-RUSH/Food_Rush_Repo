@@ -4,14 +4,11 @@ import { View, Image, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '@/src/navigation/types';
-import {  ActivityIndicator } from 'react-native-paper';
+import { ActivityIndicator } from 'react-native-paper';
 import { useResponsive } from '@/src/hooks/useResponsive';
 
 import { useTranslation } from 'react-i18next';
-import {
-  Caption,
-  Overline,
-} from '@/src/components/common/Typography';
+import { Caption, Overline } from '@/src/components/common/Typography';
 
 interface CategoryItemProps {
   title: string;
@@ -45,7 +42,7 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const { t } = useTranslation('translation');
   const [imageError, setImageError] = useState(false);
-  const {  isTablet, isLargeScreen, getResponsiveText } = useResponsive();
+  const { isTablet, isLargeScreen, getResponsiveText } = useResponsive();
 
   const handlePress = useCallback(() => {
     if (isLoading || disabled) return;
@@ -161,7 +158,11 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
               zIndex: 1,
             }}
           >
-            <Overline color="#4A90E2" weight="bold" style={{ fontSize: dimensions.badgeFontSize }}>
+            <Overline
+              color="#4A90E2"
+              weight="bold"
+              style={{ fontSize: dimensions.badgeFontSize }}
+            >
               {badgeText}
             </Overline>
           </View>
@@ -201,7 +202,11 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
           ) : (
             <Image
               source={image}
-              style={{ height: dimensions.imageSize, width: dimensions.imageSize, tintColor: 'white' }}
+              style={{
+                height: dimensions.imageSize,
+                width: dimensions.imageSize,
+                tintColor: 'white',
+              }}
               resizeMode="contain"
               onError={handleImageError}
             />
@@ -215,7 +220,10 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
           align="center"
           numberOfLines={2}
           ellipsizeMode="tail"
-          style={{ fontSize: dimensions.titleFontSize, lineHeight: dimensions.titleFontSize * 1.2 }}
+          style={{
+            fontSize: dimensions.titleFontSize,
+            lineHeight: dimensions.titleFontSize * 1.2,
+          }}
         >
           {t(
             `category_${title?.toLowerCase().replace(/[\s-]/g, '_') || 'unknown'}`,

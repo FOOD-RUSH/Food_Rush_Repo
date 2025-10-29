@@ -190,8 +190,7 @@ export const validateOrderData = (order: any): order is Order => {
 /**
  * Log order data for debugging
  */
-export const logOrderData = (order: Order, context: string = ''): void => {
-};
+export const logOrderData = (order: Order, context: string = ''): void => {};
 
 /**
  * Create order summary for logging

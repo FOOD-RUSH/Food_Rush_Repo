@@ -9,14 +9,14 @@ interface NotificationState {
   currentPage: number;
   totalPages: number;
   selectedFilter: 'all' | 'unread' | 'order' | 'system' | 'promotion' | 'alert';
-  
+
   // Loading states
   isLoading: boolean;
   isLoadingMore: boolean;
-  
+
   // Error handling
   error: string | null;
-  
+
   // Flags
   hasNextPage: boolean;
   pushEnabled: boolean;
@@ -66,7 +66,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
 
     try {
       const params: any = { limit: 20, page: 1 };
-      
+
       // Apply filter
       if (state.selectedFilter !== 'all' && state.selectedFilter !== 'unread') {
         params.type = state.selectedFilter;
@@ -77,18 +77,21 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       console.log('[NotificationStore] API response:', {
         total: response.data.total,
         items: response.data.items.length,
-        pages: response.data.pages
+        pages: response.data.pages,
       });
 
       let notifications = response.data.items || [];
 
       // Apply unread filter locally (API might not support it)
       if (state.selectedFilter === 'unread') {
-        notifications = notifications.filter(n => !n.readAt);
-        console.log('[NotificationStore] Filtered to unread:', notifications.length);
+        notifications = notifications.filter((n) => !n.readAt);
+        console.log(
+          '[NotificationStore] Filtered to unread:',
+          notifications.length,
+        );
       }
 
-      const unreadCount = notifications.filter(n => !n.readAt).length;
+      const unreadCount = notifications.filter((n) => !n.readAt).length;
 
       set({
         notifications,
@@ -104,7 +107,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       console.log('[NotificationStore] State updated:', {
         notificationsCount: notifications.length,
         unreadCount,
-        hasNextPage: response.data.page < response.data.pages
+        hasNextPage: response.data.page < response.data.pages,
       });
     } catch (error: any) {
       console.error('[NotificationStore] Fetch error:', error);
@@ -123,11 +126,11 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
 
   loadMoreNotifications: async () => {
     const state = get();
-    
+
     if (state.isLoadingMore || !state.hasNextPage) {
       console.log('[NotificationStore] Skip load more:', {
         isLoadingMore: state.isLoadingMore,
-        hasNextPage: state.hasNextPage
+        hasNextPage: state.hasNextPage,
       });
       return;
     }
@@ -138,7 +141,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
     try {
       const nextPage = state.currentPage + 1;
       const params: any = { limit: 20, page: nextPage };
-      
+
       if (state.selectedFilter !== 'all' && state.selectedFilter !== 'unread') {
         params.type = state.selectedFilter;
       }
@@ -147,17 +150,17 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
       const response = await notificationApi.getNotifications(params);
       console.log('[NotificationStore] Load more response:', {
         newItems: response.data.items.length,
-        page: response.data.page
+        page: response.data.page,
       });
 
       let newNotifications = response.data.items || [];
 
       if (state.selectedFilter === 'unread') {
-        newNotifications = newNotifications.filter(n => !n.readAt);
+        newNotifications = newNotifications.filter((n) => !n.readAt);
       }
 
       const allNotifications = [...state.notifications, ...newNotifications];
-      const unreadCount = allNotifications.filter(n => !n.readAt).length;
+      const unreadCount = allNotifications.filter((n) => !n.readAt).length;
 
       set({
         notifications: allNotifications,
@@ -169,7 +172,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
 
       console.log('[NotificationStore] Load more complete:', {
         totalNotifications: allNotifications.length,
-        unreadCount
+        unreadCount,
       });
     } catch (error: any) {
       console.error('[NotificationStore] Load more error:', error);
@@ -182,19 +185,21 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
 
   markAsRead: async (id: string) => {
     console.log('[NotificationStore] Marking as read:', id);
-    
+
     try {
       await notificationApi.markAsRead(id);
-      
-      set(state => {
-        const updatedNotifications = state.notifications.map(n =>
-          n.id === id ? { ...n, readAt: new Date().toISOString() } : n
+
+      set((state) => {
+        const updatedNotifications = state.notifications.map((n) =>
+          n.id === id ? { ...n, readAt: new Date().toISOString() } : n,
         );
-        const unreadCount = updatedNotifications.filter(n => !n.readAt).length;
-        
+        const unreadCount = updatedNotifications.filter(
+          (n) => !n.readAt,
+        ).length;
+
         console.log('[NotificationStore] Mark as read success:', {
           id,
-          newUnreadCount: unreadCount
+          newUnreadCount: unreadCount,
         });
 
         return {
@@ -210,16 +215,16 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
 
   markAllAsRead: async () => {
     console.log('[NotificationStore] Marking all as read...');
-    
+
     try {
       await notificationApi.markAllAsRead();
-      
-      set(state => {
-        const updatedNotifications = state.notifications.map(n => ({
+
+      set((state) => {
+        const updatedNotifications = state.notifications.map((n) => ({
           ...n,
           readAt: n.readAt || new Date().toISOString(),
         }));
-        
+
         console.log('[NotificationStore] Mark all as read success');
 
         return {
@@ -237,23 +242,25 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
     console.log('[NotificationStore] Adding notification:', {
       id: notification.id,
       title: notification.title,
-      type: notification.type
+      type: notification.type,
     });
 
-    set(state => {
+    set((state) => {
       // Check if notification already exists
-      const exists = state.notifications.some(n => n.id === notification.id);
+      const exists = state.notifications.some((n) => n.id === notification.id);
       if (exists) {
-        console.log('[NotificationStore] Notification already exists, skipping');
+        console.log(
+          '[NotificationStore] Notification already exists, skipping',
+        );
         return state;
       }
 
       const notifications = [notification, ...state.notifications];
-      const unreadCount = notifications.filter(n => !n.readAt).length;
+      const unreadCount = notifications.filter((n) => !n.readAt).length;
 
       console.log('[NotificationStore] Notification added:', {
         totalNotifications: notifications.length,
-        unreadCount
+        unreadCount,
       });
 
       return {
@@ -273,26 +280,28 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
     const state = get();
     console.log('[NotificationStore] Getting filtered notifications:', {
       filter: state.selectedFilter,
-      total: state.notifications.length
+      total: state.notifications.length,
     });
 
     switch (state.selectedFilter) {
       case 'unread':
-        return state.notifications.filter(n => !n.readAt);
+        return state.notifications.filter((n) => !n.readAt);
       case 'all':
         return state.notifications;
       default:
-        return state.notifications.filter(n => n.type === state.selectedFilter);
+        return state.notifications.filter(
+          (n) => n.type === state.selectedFilter,
+        );
     }
   },
 
   updateUnreadCount: async () => {
     console.log('[NotificationStore] Updating unread count...');
-    
+
     try {
       const response = await notificationApi.getUnreadCount();
       const count = response.data.count;
-      
+
       console.log('[NotificationStore] Unread count updated:', count);
       set({ unreadCount: count });
     } catch (error: any) {

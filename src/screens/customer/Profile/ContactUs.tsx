@@ -34,11 +34,9 @@ const getContactData = (t: any) => [
     icon_name: 'mail-outline' as const,
     social_platform: t('email', 'Email'),
     link: 'mailto:support@foodrush.cm', // Food Rush support email
-    description: t(
-      'email_support',
-      'Send us an email for detailed inquiries',
-    ),
-  }];
+    description: t('email_support', 'Send us an email for detailed inquiries'),
+  },
+];
 
 const ContactUs = () => {
   const { t } = useTranslation('translation');
@@ -50,31 +48,30 @@ const ContactUs = () => {
   return (
     <CommonView>
       {/* Header */}
-    
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         className="flex-1 px-4 py-2"
         contentContainerStyle={{ paddingBottom: scale(20) }}
       >
-          <View
-        className="px-4 pt-10 border-b"
-        style={{ borderBottomColor: colors.outline + '30' }}
-      >
-        <Heading4
-          color={colors.onSurface}
-          weight="bold"
-          style={{ marginBottom: 8 }}
+        <View
+          className="px-4 pt-10 border-b"
+          style={{ borderBottomColor: colors.outline + '30' }}
         >
-          {t('contact_us', 'Contact Us')}
-        </Heading4>
-        <Body color={colors.onSurfaceVariant}>
-          {t(
-            'contact_subtitle',
-            "Get in touch with our support team. We're here to help!",
-          )}
-        </Body>
-      </View>
+          <Heading4
+            color={colors.onSurface}
+            weight="bold"
+            style={{ marginBottom: 8 }}
+          >
+            {t('contact_us', 'Contact Us')}
+          </Heading4>
+          <Body color={colors.onSurfaceVariant}>
+            {t(
+              'contact_subtitle',
+              "Get in touch with our support team. We're here to help!",
+            )}
+          </Body>
+        </View>
         {/* Support Hours Info */}
         <View
           className="mb-6 p-4 rounded-xl"
@@ -96,7 +93,10 @@ const ContactUs = () => {
             color={colors.onPrimaryContainer || colors.primary}
             style={{ lineHeight: 23 }}
           >
-            {t('support_schedule', 'Monday - Saturdays: 10:00 AM - 7:00 PM (WAT)')}
+            {t(
+              'support_schedule',
+              'Monday - Saturdays: 10:00 AM - 7:00 PM (WAT)',
+            )}
           </Body>
         </View>
 
@@ -110,8 +110,6 @@ const ContactUs = () => {
             link={data.link}
           />
         ))}
-
-     
       </ScrollView>
     </CommonView>
   );

@@ -1,5 +1,12 @@
 import { IoniconsIcon } from '@/src/components/common/icons';
-import { View, Text, TouchableOpacity, Linking, Alert, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Linking,
+  Alert,
+  Platform,
+} from 'react-native';
 import React from 'react';
 
 import { useTheme, Card } from 'react-native-paper';
@@ -31,7 +38,7 @@ const SocialCards = ({
       // Special handling for phone calls
       if (link.startsWith('tel:')) {
         const phoneNumber = link.replace('tel:', '');
-        
+
         // Show confirmation dialog for phone calls
         Alert.alert(
           t('make_phone_call'),
@@ -47,37 +54,33 @@ const SocialCards = ({
                 try {
                   // Check if the device can make phone calls
                   const canCall = await Linking.canOpenURL(link);
-                  
+
                   if (canCall) {
                     await Linking.openURL(link);
                   } else {
                     // Fallback: try alternative phone URL schemes
-                    const alternativeLink = Platform.OS === 'ios' 
-                      ? `telprompt:${phoneNumber}` 
-                      : `tel:${phoneNumber}`;
-                    
-                    const canCallAlternative = await Linking.canOpenURL(alternativeLink);
-                    
+                    const alternativeLink =
+                      Platform.OS === 'ios'
+                        ? `telprompt:${phoneNumber}`
+                        : `tel:${phoneNumber}`;
+
+                    const canCallAlternative =
+                      await Linking.canOpenURL(alternativeLink);
+
                     if (canCallAlternative) {
                       await Linking.openURL(alternativeLink);
                     } else {
-                      Alert.alert(
-                        t('error'),
-                        t('phone_not_supported')
-                      );
+                      Alert.alert(t('error'), t('phone_not_supported'));
                     }
                   }
                 } catch (callError) {
                   console.error('Error making phone call:', callError);
-                  Alert.alert(
-                    t('error'),
-                    t('call_failed')
-                  );
+                  Alert.alert(t('error'), t('call_failed'));
                 }
               },
             },
           ],
-          { cancelable: true }
+          { cancelable: true },
         );
         return;
       }
@@ -87,11 +90,17 @@ const SocialCards = ({
       if (supported) {
         await Linking.openURL(link);
       } else {
-        Alert.alert(t('error'), t('cannot_open_link', { platform: social_platform }));
+        Alert.alert(
+          t('error'),
+          t('cannot_open_link', { platform: social_platform }),
+        );
       }
     } catch (error) {
       console.error('Error opening link:', error);
-      Alert.alert(t('error'), t('failed_to_open_link', { platform: social_platform }));
+      Alert.alert(
+        t('error'),
+        t('failed_to_open_link', { platform: social_platform }),
+      );
     }
   };
 

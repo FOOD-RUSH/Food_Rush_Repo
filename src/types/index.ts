@@ -262,13 +262,13 @@ export declare interface InputFieldProps extends TextInputProps {
 }
 
 export type OrderStatus =
-  | 'pending'                    // Order placed, waiting for restaurant confirmation (2-15 min)
-  | 'confirmed'                  // Restaurant confirmed, customer needs to pay
-  | 'preparing'                  // Restaurant is preparing the order (after payment)
-  | 'ready_for_pickup'           // Order ready for pickup
-  | 'out_for_delivery'           // Order is being delivered
-  | 'delivered'                  // Order delivered
-  | 'cancelled';                 // Order cancelled (any reason)
+  | 'pending' // Order placed, waiting for restaurant confirmation (2-15 min)
+  | 'confirmed' // Restaurant confirmed, customer needs to pay
+  | 'preparing' // Restaurant is preparing the order (after payment)
+  | 'ready_for_pickup' // Order ready for pickup
+  | 'out_for_delivery' // Order is being delivered
+  | 'delivered' // Order delivered
+  | 'cancelled'; // Order cancelled (any reason)
 
 // Location Types
 export interface Location {

@@ -19,13 +19,7 @@ import {
   ImageBackground,
   StatusBar,
 } from 'react-native';
-import {
-  Button,
-
-  HelperText,
-  TextInput,
-  useTheme,
-} from 'react-native-paper';
+import { Button, HelperText, TextInput, useTheme } from 'react-native-paper';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 
@@ -112,7 +106,9 @@ const RestaurantSignupStep2: React.FC<
   );
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
-  const [profileImage, setProfileImage] = useState<SimpleImageResult | null>(null);
+  const [profileImage, setProfileImage] = useState<SimpleImageResult | null>(
+    null,
+  );
 
   // Animations
   const overlayAnim = useRef(new Animated.Value(1)).current;
@@ -323,15 +319,13 @@ const RestaurantSignupStep2: React.FC<
 
         registerRestaurantMutation(registrationData, {
           onSuccess: (response) => {
-
-            
             Toast.show({
               type: 'success',
               text1: t('registration_successful'),
               text2: t('registration_submitted_awaiting_approval'),
               position: 'top',
             });
-            
+
             // Navigate with restaurant and user data
             navigation.dispatch(
               CommonActions.reset({
@@ -340,51 +334,56 @@ const RestaurantSignupStep2: React.FC<
                   {
                     name: 'AwaitingApproval',
                     params: {
-              restaurantId: response.restaurant?.id,
-              userId: response.user?.id,
-              restaurantData: response.restaurant ? {
-                id: response.restaurant.id,
-                name: response.restaurant.name,
-                address: response.restaurant.address,
-                phone: response.restaurant.phone,
-                pictureUrl: response.restaurant.pictureUrl,
-                verificationStatus: response.restaurant.verificationStatus,
-                latitude: response.restaurant.latitude,
-                longitude: response.restaurant.longitude,
-              } : undefined,
-              userData: response.user ? {
-                id: response.user.id,
-                fullName: response.user.fullName,
-                email: response.user.email,
-                phoneNumber: response.user.phoneNumber,
-              } : undefined,
-            }
-                  }
-                ]
-              })
-            )
-          //   navigation.navigate('AwaitingApproval', 
-          //     {
-          //     restaurantId: response.restaurant?.id,
-          //     userId: response.user?.id,
-          //     restaurantData: response.restaurant ? {
-          //       id: response.restaurant.id,
-          //       name: response.restaurant.name,
-          //       address: response.restaurant.address,
-          //       phone: response.restaurant.phone,
-          //       pictureUrl: response.restaurant.pictureUrl || response.pictureUrl,
-          //       verificationStatus: response.restaurant.verificationStatus,
-          //       latitude: response.restaurant.latitude,
-          //       longitude: response.restaurant.longitude,
-          //     } : undefined,
-          //     userData: response.user ? {
-          //       id: response.user.id,
-          //       fullName: response.user.fullName,
-          //       email: response.user.email,
-          //       phoneNumber: response.user.phoneNumber,
-          //     } : undefined,
-          //   }
-          // );
+                      restaurantId: response.restaurant?.id,
+                      userId: response.user?.id,
+                      restaurantData: response.restaurant
+                        ? {
+                            id: response.restaurant.id,
+                            name: response.restaurant.name,
+                            address: response.restaurant.address,
+                            phone: response.restaurant.phone,
+                            pictureUrl: response.restaurant.pictureUrl,
+                            verificationStatus:
+                              response.restaurant.verificationStatus,
+                            latitude: response.restaurant.latitude,
+                            longitude: response.restaurant.longitude,
+                          }
+                        : undefined,
+                      userData: response.user
+                        ? {
+                            id: response.user.id,
+                            fullName: response.user.fullName,
+                            email: response.user.email,
+                            phoneNumber: response.user.phoneNumber,
+                          }
+                        : undefined,
+                    },
+                  },
+                ],
+              }),
+            );
+            //   navigation.navigate('AwaitingApproval',
+            //     {
+            //     restaurantId: response.restaurant?.id,
+            //     userId: response.user?.id,
+            //     restaurantData: response.restaurant ? {
+            //       id: response.restaurant.id,
+            //       name: response.restaurant.name,
+            //       address: response.restaurant.address,
+            //       phone: response.restaurant.phone,
+            //       pictureUrl: response.restaurant.pictureUrl || response.pictureUrl,
+            //       verificationStatus: response.restaurant.verificationStatus,
+            //       latitude: response.restaurant.latitude,
+            //       longitude: response.restaurant.longitude,
+            //     } : undefined,
+            //     userData: response.user ? {
+            //       id: response.user.id,
+            //       fullName: response.user.fullName,
+            //       email: response.user.email,
+            //       phoneNumber: response.user.phoneNumber,
+            //     } : undefined,
+            //   }
+            // );
           },
           onError: (error: any) => {
             const errorMessage =
@@ -497,18 +496,20 @@ const RestaurantSignupStep2: React.FC<
       }
     } catch (error: any) {
       console.error('❌ Error picking profile image:', error);
-      
+
       let errorMessage = t('failed_to_pick_image') || 'Failed to pick image';
-      
+
       // Handle specific error types
       if (error?.message?.includes('Permission')) {
-        errorMessage = t('camera_permission_denied') || 'Camera permission was denied. Please enable it in settings.';
+        errorMessage =
+          t('camera_permission_denied') ||
+          'Camera permission was denied. Please enable it in settings.';
       } else if (error?.message?.includes('Unsupported image type')) {
         errorMessage = error.message;
       } else if (error?.message) {
         errorMessage = error.message;
       }
-      
+
       Toast.show({
         type: 'error',
         text1: t('error'),

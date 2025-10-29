@@ -13,7 +13,10 @@ import { useTranslation } from 'react-i18next';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import CommonView from '@/src/components/common/CommonView';
 import { IoniconsIcon, MaterialIcon } from '@/src/components/common/icons';
-import { useTransactionHistory, useTransactionStats } from '@/src/hooks/customer/useTransactionHistory';
+import {
+  useTransactionHistory,
+  useTransactionStats,
+} from '@/src/hooks/customer/useTransactionHistory';
 import { Transaction } from '@/src/types/transaction';
 import { images } from '@/assets/images';
 import { useResponsive } from '@/src/hooks/useResponsive';
@@ -28,9 +31,11 @@ const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
   const { isTablet, getResponsiveText } = useResponsive();
-  
-  const [selectedFilter, setSelectedFilter] = useState<'all' | 'completed' | 'pending' | 'failed'>('all');
-  
+
+  const [selectedFilter, setSelectedFilter] = useState<
+    'all' | 'completed' | 'pending' | 'failed'
+  >('all');
+
   // Fetch transaction data
   const {
     data: transactionPages,
@@ -44,14 +49,16 @@ const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
   } = useTransactionHistory({
     status: selectedFilter === 'all' ? undefined : selectedFilter,
   });
-  
+
   const { data: stats, isLoading: statsLoading } = useTransactionStats();
-  
+
   // Flatten transactions from all pages
   const transactions = useMemo(() => {
-    return transactionPages?.pages.flatMap(page => page.data.transactions) || [];
+    return (
+      transactionPages?.pages.flatMap((page) => page.data.transactions) || []
+    );
   }, [transactionPages]);
-  
+
   // Get responsive dimensions
   const getCardDimensions = () => {
     if (isTablet) {
@@ -68,9 +75,9 @@ const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
       };
     }
   };
-  
+
   const cardDimensions = getCardDimensions();
-  
+
   // Format date based on locale using custom utils
   const formatTransactionDate = (dateString: string) => {
     try {
@@ -88,7 +95,7 @@ const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
       return dateString;
     }
   };
-  
+
   // Get status color
   const getStatusColor = (status: Transaction['status']) => {
     switch (status) {
@@ -103,7 +110,7 @@ const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
         return colors.onSurfaceVariant;
     }
   };
-  
+
   // Get status icon
   const getStatusIcon = (status: Transaction['status']) => {
     switch (status) {
@@ -118,12 +125,12 @@ const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
         return 'help-circle';
     }
   };
-  
+
   // Get provider icon
   const getProviderIcon = (provider: 'mtn' | 'orange') => {
     return provider === 'mtn' ? images.Mobile_Money : images.Orange_Money;
   };
-  
+
   // Filter options
   const filterOptions = [
     { key: 'all', label: t('all') },
@@ -131,173 +138,207 @@ const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
     { key: 'pending', label: t('pending') },
     { key: 'failed', label: t('failed') },
   ];
-  
+
   // Handle refresh
   const handleRefresh = useCallback(() => {
     refetch();
   }, [refetch]);
-  
+
   // Handle load more
   const handleLoadMore = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-  
+
   // Render transaction item
-  const renderTransactionItem = useCallback(({ item }: { item: Transaction }) => {
-    return (
-      <Card
-        mode="outlined"
-        style={{
-          backgroundColor: colors.surface,
-          borderColor: colors.outline + '30',
-          borderWidth: 1,
-          borderRadius: cardDimensions.borderRadius,
-          marginVertical: cardDimensions.marginVertical,
-          marginHorizontal: 16,
-        }}
-      >
-        <TouchableOpacity
-          style={{ padding: cardDimensions.padding }}
-          onPress={() => {
-            // Navigate to transaction details
-            navigation.push('TransactionDetails', { transactionId: item.id }); // Use push() to ensure screen appears on top
+  const renderTransactionItem = useCallback(
+    ({ item }: { item: Transaction }) => {
+      return (
+        <Card
+          mode="outlined"
+          style={{
+            backgroundColor: colors.surface,
+            borderColor: colors.outline + '30',
+            borderWidth: 1,
+            borderRadius: cardDimensions.borderRadius,
+            marginVertical: cardDimensions.marginVertical,
+            marginHorizontal: 16,
           }}
-          activeOpacity={0.7}
         >
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            {/* Provider Icon */}
-            {/* <Image
+          <TouchableOpacity
+            style={{ padding: cardDimensions.padding }}
+            onPress={() => {
+              // Navigate to transaction details
+              navigation.push('TransactionDetails', { transactionId: item.id }); // Use push() to ensure screen appears on top
+            }}
+            activeOpacity={0.7}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              {/* Provider Icon */}
+              {/* <Image
               source={getProviderIcon(item.provider)}
               style={{ width: 32, height: 32, marginRight: 12 }}
               resizeMode="contain"
             /> */}
-            
-            {/* Transaction Details */}
-            <View style={{ flex: 1 }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Text
+
+              {/* Transaction Details */}
+              <View style={{ flex: 1 }}>
+                <View
                   style={{
-                    fontSize: getResponsiveText(16),
-                    fontWeight: '600',
-                    color: colors.onSurface,
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
                   }}
-                  numberOfLines={1}
                 >
-                  {item.orderDetails?.restaurantName || t('food_order')}
-                </Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <IoniconsIcon
-                    name={getStatusIcon(item.status)}
-                    size={16}
-                    color={getStatusColor(item.status)}
-                  />
                   <Text
                     style={{
-                      fontSize: getResponsiveText(12),
-                      color: getStatusColor(item.status),
-                      marginLeft: 4,
-                      fontWeight: '500',
+                      fontSize: getResponsiveText(16),
+                      fontWeight: '600',
+                      color: colors.onSurface,
                     }}
+                    numberOfLines={1}
                   >
-                    {t(item.status)}
+                    {item.orderDetails?.restaurantName || t('food_order')}
                   </Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <IoniconsIcon
+                      name={getStatusIcon(item.status)}
+                      size={16}
+                      color={getStatusColor(item.status)}
+                    />
+                    <Text
+                      style={{
+                        fontSize: getResponsiveText(12),
+                        color: getStatusColor(item.status),
+                        marginLeft: 4,
+                        fontWeight: '500',
+                      }}
+                    >
+                      {t(item.status)}
+                    </Text>
+                  </View>
                 </View>
-              </View>
-              
-              <Text
-                style={{
-                  fontSize: getResponsiveText(14),
-                  color: colors.onSurfaceVariant,
-                  marginTop: 2,
-                }}
-              >
-                {item.description}
-              </Text>
-              
-              {/* Show payer name if available */}
-              {item.payerName && (
+
                 <Text
                   style={{
-                    fontSize: getResponsiveText(12),
+                    fontSize: getResponsiveText(14),
                     color: colors.onSurfaceVariant,
                     marginTop: 2,
                   }}
                 >
-                  {t('payer')}: {item.payerName}
+                  {item.description}
                 </Text>
-              )}
-              
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
-                <Text
+
+                {/* Show payer name if available */}
+                {item.payerName && (
+                  <Text
+                    style={{
+                      fontSize: getResponsiveText(12),
+                      color: colors.onSurfaceVariant,
+                      marginTop: 2,
+                    }}
+                  >
+                    {t('payer')}: {item.payerName}
+                  </Text>
+                )}
+
+                <View
                   style={{
-                    fontSize: getResponsiveText(18),
-                    fontWeight: 'bold',
-                    color: colors.primary,
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginTop: 8,
                   }}
                 >
-                  {item.amount.toLocaleString()} {item.currency}
-                </Text>
-                <Text
-                  style={{
-                    fontSize: getResponsiveText(12),
-                    color: colors.onSurfaceVariant,
-                  }}
-                >
-                  {formatTransactionDate(item.createdAt)}
-                </Text>
+                  <Text
+                    style={{
+                      fontSize: getResponsiveText(18),
+                      fontWeight: 'bold',
+                      color: colors.primary,
+                    }}
+                  >
+                    {item.amount.toLocaleString()} {item.currency}
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: getResponsiveText(12),
+                      color: colors.onSurfaceVariant,
+                    }}
+                  >
+                    {formatTransactionDate(item.createdAt)}
+                  </Text>
+                </View>
+
+                {item.orderDetails && (
+                  <Text
+                    style={{
+                      fontSize: getResponsiveText(12),
+                      color: colors.onSurfaceVariant,
+                      marginTop: 4,
+                    }}
+                  >
+                    {t('items_count', { count: item.orderDetails.itemCount })}
+                  </Text>
+                )}
               </View>
-              
-              {item.orderDetails && (
-                <Text
-                  style={{
-                    fontSize: getResponsiveText(12),
-                    color: colors.onSurfaceVariant,
-                    marginTop: 4,
-                  }}
-                >
-                  {t('items_count', { count: item.orderDetails.itemCount })}
-                </Text>
-              )}
             </View>
-          </View>
-        </TouchableOpacity>
-      </Card>
-    );
-  }, [colors.surface, colors.outline, colors.onSurface, colors.onSurfaceVariant, colors.primary, cardDimensions.borderRadius, cardDimensions.marginVertical, cardDimensions.padding, getResponsiveText, t, getStatusColor, navigation]);
-  
+          </TouchableOpacity>
+        </Card>
+      );
+    },
+    [
+      colors.surface,
+      colors.outline,
+      colors.onSurface,
+      colors.onSurfaceVariant,
+      colors.primary,
+      cardDimensions.borderRadius,
+      cardDimensions.marginVertical,
+      cardDimensions.padding,
+      getResponsiveText,
+      t,
+      getStatusColor,
+      navigation,
+    ],
+  );
+
   // Render filter button
-  const renderFilterButton = useCallback(({ item }: { item: typeof filterOptions[0] }) => {
-    const isSelected = selectedFilter === item.key;
-    return (
-      <TouchableOpacity
-        onPress={() => setSelectedFilter(item.key as any)}
-        style={{
-          paddingHorizontal: 16,
-          paddingVertical: 8,
-          borderRadius: 20,
-          backgroundColor: isSelected ? colors.primary : colors.surfaceVariant,
-          marginRight: 8,
-        }}
-      >
-        <Text
+  const renderFilterButton = useCallback(
+    ({ item }: { item: (typeof filterOptions)[0] }) => {
+      const isSelected = selectedFilter === item.key;
+      return (
+        <TouchableOpacity
+          onPress={() => setSelectedFilter(item.key as any)}
           style={{
-            fontSize: getResponsiveText(14),
-            fontWeight: '500',
-            color: isSelected ? colors.onPrimary : colors.onSurfaceVariant,
+            paddingHorizontal: 16,
+            paddingVertical: 8,
+            borderRadius: 20,
+            backgroundColor: isSelected
+              ? colors.primary
+              : colors.surfaceVariant,
+            marginRight: 8,
           }}
         >
-          {item.label}
-        </Text>
-      </TouchableOpacity>
-    );
-  }, [selectedFilter, colors, getResponsiveText]);
-  
+          <Text
+            style={{
+              fontSize: getResponsiveText(14),
+              fontWeight: '500',
+              color: isSelected ? colors.onPrimary : colors.onSurfaceVariant,
+            }}
+          >
+            {item.label}
+          </Text>
+        </TouchableOpacity>
+      );
+    },
+    [selectedFilter, colors, getResponsiveText],
+  );
+
   // Render stats card
   const renderStatsCard = () => {
     if (statsLoading || !stats) return null;
-    
+
     return (
       <Card
         mode="outlined"
@@ -320,8 +361,10 @@ const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
           >
             {t('transaction_summary')}
           </Text>
-          
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+
+          <View
+            style={{ flexDirection: 'row', justifyContent: 'space-between' }}
+          >
             <View style={{ alignItems: 'center' }}>
               <Text
                 style={{
@@ -341,7 +384,7 @@ const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
                 {t('total')}
               </Text>
             </View>
-            
+
             <View style={{ alignItems: 'center' }}>
               <Text
                 style={{
@@ -361,7 +404,7 @@ const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
                 XAF {t('spent')}
               </Text>
             </View>
-            
+
             <View style={{ alignItems: 'center' }}>
               <Text
                 style={{
@@ -386,10 +429,12 @@ const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
       </Card>
     );
   };
-  
+
   // Render empty state
   const renderEmptyState = () => (
-    <View style={{ alignItems: 'center', justifyContent: 'center', padding: 40 }}>
+    <View
+      style={{ alignItems: 'center', justifyContent: 'center', padding: 40 }}
+    >
       <MaterialIcon
         name="receipt-long"
         size={80}
@@ -418,12 +463,14 @@ const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
       </Text>
     </View>
   );
-  
+
   // Render error state
   if (isError) {
     return (
       <CommonView>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <View
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+        >
           <MaterialIcon name="error-outline" size={80} color={colors.error} />
           <Text
             style={{
@@ -460,7 +507,7 @@ const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
       </CommonView>
     );
   }
-  
+
   return (
     <CommonView>
       <FlatList
@@ -481,7 +528,7 @@ const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
           <>
             {/* Stats Card */}
             {renderStatsCard()}
-            
+
             {/* Filter Buttons */}
             <View style={{ marginBottom: 8 }}>
               <FlatList

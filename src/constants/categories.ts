@@ -57,9 +57,7 @@ export const CategoryFilters: FoodCategoryProps[] = [
 ];
 
 // Extended categories for filtering (same as main categories for now)
-export const AllCategories: FoodCategoryProps[] = [
-  ...CategoryFilters,
-];
+export const AllCategories: FoodCategoryProps[] = [...CategoryFilters];
 
 // Helper function to get category by title
 export const getCategoryByTitle = (

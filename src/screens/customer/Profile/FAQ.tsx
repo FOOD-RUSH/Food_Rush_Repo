@@ -6,11 +6,7 @@ import CommonView from '@/src/components/common/CommonView';
 import { Card, useTheme } from 'react-native-paper';
 import Seperator from '@/src/components/common/Seperator';
 
-import {
-  Heading4,
-  Body,
-  Label,
-} from '@/src/components/common/Typography';
+import { Heading4, Body, Label } from '@/src/components/common/Typography';
 import { useResponsive } from '@/src/hooks/useResponsive';
 
 interface FAQItem {
@@ -113,32 +109,30 @@ const FAQ = () => {
 
   return (
     <CommonView>
-   
-
       <ScrollView
         showsVerticalScrollIndicator={false}
         className="flex-1 px-4 py-2"
         contentContainerStyle={{ paddingBottom: scale(20) }}
       >
-           {/* Header */}
-      <View
-        className="px-4 pt-10 border-b"
-        style={{ borderBottomColor: colors.outline + '30' }}
-      >
-        <Heading4
-          color={colors.onSurface}
-          weight="bold"
-          style={{ marginBottom: 8 }}
+        {/* Header */}
+        <View
+          className="px-4 pt-10 border-b"
+          style={{ borderBottomColor: colors.outline + '30' }}
         >
-          {t('frequently_asked_questions', 'Frequently Asked Questions')}
-        </Heading4>
-        <Body color={colors.onSurfaceVariant}>
-          {t(
-            'faq_subtitle',
-            'Find answers to common questions about Food Rush',
-          )}
-        </Body>
-      </View>
+          <Heading4
+            color={colors.onSurface}
+            weight="bold"
+            style={{ marginBottom: 8 }}
+          >
+            {t('frequently_asked_questions', 'Frequently Asked Questions')}
+          </Heading4>
+          <Body color={colors.onSurfaceVariant}>
+            {t(
+              'faq_subtitle',
+              'Find answers to common questions about Food Rush',
+            )}
+          </Body>
+        </View>
         {faqData.map((item) => (
           <QuestionCard
             key={item.id}
@@ -175,7 +169,6 @@ const FAQ = () => {
             <Body
               color={colors.onPrimaryContainer || colors.primary}
               style={{ lineHeight: 20, fontSize: 14 }}
-              
             >
               {t(
                 'contact_support_description',
@@ -216,7 +209,7 @@ const QuestionCard = ({ item, isExpanded, onToggle }: QuestionCardProps) => {
           <Label
             color={colors.onSurface}
             weight="semibold"
-            style={{ flex: 1, paddingRight: 12, fontSize: scale(14),  }}
+            style={{ flex: 1, paddingRight: 12, fontSize: scale(14) }}
           >
             {item.title}
           </Label>

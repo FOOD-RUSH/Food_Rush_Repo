@@ -10,7 +10,7 @@ import { images } from '@/assets/images';
 const PaymentScreen = ({
   navigation,
 }: RootStackScreenProps<'PaymentMethods'>) => {
-  const { } = useTranslation('translation');
+  const {} = useTranslation('translation');
   const { colors } = useTheme();
 
   const handleSelectPaymentMethod = (method: string) => {

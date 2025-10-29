@@ -31,7 +31,8 @@ const CustomCheckbox: React.FC<CustomCheckboxProps> = ({
 
   // For iOS, we'll create a custom checkbox with better visibility
   if (Platform.OS === 'ios') {
-    const borderColor = status === 'checked' ? checkedColor : finalUncheckedColor;
+    const borderColor =
+      status === 'checked' ? checkedColor : finalUncheckedColor;
     const backgroundColor = status === 'checked' ? checkedColor : 'transparent';
     const borderWidth = status === 'checked' ? 0 : 2;
 

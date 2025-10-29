@@ -39,62 +39,65 @@ const CustomDateTimePicker: React.FC<DateTimePickerProps> = ({
   const [tempValue, setTempValue] = useState<Date | null>(null);
 
   // iOS-optimized onChange handler
-  const onChange = useCallback((event: any, selectedDate?: Date) => {
-    const currentDate = selectedDate || value || new Date();
+  const onChange = useCallback(
+    (event: any, selectedDate?: Date) => {
+      const currentDate = selectedDate || value || new Date();
 
-    // Handle different event types
-    if (event.type === 'dismissed') {
-      // User cancelled the picker
-      setShow(false);
-      setTempValue(null);
-      setTempDate(null);
-      setCurrentMode('date');
-      return;
-    }
-
-    if (Platform.OS === 'android') {
-      // Android: immediately apply changes and close
-      if (mode === 'datetime') {
-        if (currentMode === 'date') {
-          setTempDate(currentDate);
-          setCurrentMode('time');
-          setTimeout(() => setShow(true), 100);
-        } else {
-          const finalDate = tempDate ? new Date(tempDate) : new Date();
-          finalDate.setHours(currentDate.getHours());
-          finalDate.setMinutes(currentDate.getMinutes());
-          finalDate.setSeconds(0);
-          finalDate.setMilliseconds(0);
-          onDateTimeChange(finalDate);
-          setShow(false);
-          setTempDate(null);
-          setCurrentMode('date');
-        }
-      } else {
-        onDateTimeChange(currentDate);
+      // Handle different event types
+      if (event.type === 'dismissed') {
+        // User cancelled the picker
         setShow(false);
+        setTempValue(null);
+        setTempDate(null);
+        setCurrentMode('date');
+        return;
       }
-    } else {
-      // iOS: store temporary value for modal confirmation
-      if (mode === 'datetime') {
-        if (currentMode === 'date') {
-          // Store the selected date and prepare for time selection
-          setTempDate(currentDate);
-          // Don't switch mode here - let the Next button handle it
+
+      if (Platform.OS === 'android') {
+        // Android: immediately apply changes and close
+        if (mode === 'datetime') {
+          if (currentMode === 'date') {
+            setTempDate(currentDate);
+            setCurrentMode('time');
+            setTimeout(() => setShow(true), 100);
+          } else {
+            const finalDate = tempDate ? new Date(tempDate) : new Date();
+            finalDate.setHours(currentDate.getHours());
+            finalDate.setMinutes(currentDate.getMinutes());
+            finalDate.setSeconds(0);
+            finalDate.setMilliseconds(0);
+            onDateTimeChange(finalDate);
+            setShow(false);
+            setTempDate(null);
+            setCurrentMode('date');
+          }
         } else {
-          // Time selection - combine with previously selected date
-          const finalDate = tempDate ? new Date(tempDate) : new Date();
-          finalDate.setHours(currentDate.getHours());
-          finalDate.setMinutes(currentDate.getMinutes());
-          finalDate.setSeconds(0);
-          finalDate.setMilliseconds(0);
-          setTempValue(finalDate);
+          onDateTimeChange(currentDate);
+          setShow(false);
         }
       } else {
-        setTempValue(currentDate);
+        // iOS: store temporary value for modal confirmation
+        if (mode === 'datetime') {
+          if (currentMode === 'date') {
+            // Store the selected date and prepare for time selection
+            setTempDate(currentDate);
+            // Don't switch mode here - let the Next button handle it
+          } else {
+            // Time selection - combine with previously selected date
+            const finalDate = tempDate ? new Date(tempDate) : new Date();
+            finalDate.setHours(currentDate.getHours());
+            finalDate.setMinutes(currentDate.getMinutes());
+            finalDate.setSeconds(0);
+            finalDate.setMilliseconds(0);
+            setTempValue(finalDate);
+          }
+        } else {
+          setTempValue(currentDate);
+        }
       }
-    }
-  }, [value, mode, currentMode, tempDate, onDateTimeChange]);
+    },
+    [value, mode, currentMode, tempDate, onDateTimeChange],
+  );
 
   // iOS modal handlers
   const handleConfirm = useCallback(() => {
@@ -109,7 +112,7 @@ const CustomDateTimePicker: React.FC<DateTimePickerProps> = ({
       setCurrentMode('time');
       return;
     }
-    
+
     // Final confirmation - apply the selected date/time
     if (mode === 'datetime' && currentMode === 'time') {
       // Combine date and time
@@ -129,7 +132,7 @@ const CustomDateTimePicker: React.FC<DateTimePickerProps> = ({
       // Single mode (date or time only)
       onDateTimeChange(tempValue);
     }
-    
+
     // Reset state
     setShow(false);
     setTempValue(null);
@@ -294,7 +297,7 @@ const CustomDateTimePicker: React.FC<DateTimePickerProps> = ({
                 >
                   {t('cancel') || 'Cancel'}
                 </Button>
-                
+
                 <Label
                   color={colors.onSurface}
                   weight="semibold"
@@ -303,12 +306,12 @@ const CustomDateTimePicker: React.FC<DateTimePickerProps> = ({
                   {mode === 'datetime' && currentMode === 'date'
                     ? t('select_date') || 'Select Date'
                     : mode === 'datetime' && currentMode === 'time'
-                    ? t('select_time') || 'Select Time'
-                    : mode === 'date'
-                    ? t('select_date') || 'Select Date'
-                    : t('select_time') || 'Select Time'}
+                      ? t('select_time') || 'Select Time'
+                      : mode === 'date'
+                        ? t('select_date') || 'Select Date'
+                        : t('select_time') || 'Select Time'}
                 </Label>
-                
+
                 <Button
                   mode="text"
                   onPress={handleConfirm}

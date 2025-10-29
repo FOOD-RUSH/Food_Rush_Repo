@@ -178,7 +178,12 @@ export const restaurantMenuApi = {
   ) => {
     try {
       // Check if we have a picture to upload
-      if (data.picture && data.picture.uri && data.picture.name && data.picture.type) {
+      if (
+        data.picture &&
+        data.picture.uri &&
+        data.picture.name &&
+        data.picture.type
+      ) {
         // Use FormData for requests with image uploads
         const formData = new FormData();
 
@@ -226,13 +231,15 @@ export const restaurantMenuApi = {
       } else {
         // Use JSON for requests without image uploads
         const jsonData: any = {};
-        
+
         // Only include fields that are defined (not undefined)
         if (data.name !== undefined) jsonData.name = data.name;
-        if (data.description !== undefined) jsonData.description = data.description;
+        if (data.description !== undefined)
+          jsonData.description = data.description;
         if (data.price !== undefined) jsonData.price = data.price;
         if (data.category !== undefined) jsonData.category = data.category;
-        if (data.isAvailable !== undefined) jsonData.isAvailable = data.isAvailable;
+        if (data.isAvailable !== undefined)
+          jsonData.isAvailable = data.isAvailable;
         if (data.startAt !== undefined) jsonData.startAt = data.startAt;
         if (data.endAt !== undefined) jsonData.endAt = data.endAt;
 

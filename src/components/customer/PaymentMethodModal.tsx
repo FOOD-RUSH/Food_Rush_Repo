@@ -15,7 +15,10 @@ import { useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import { IoniconsIcon } from '@/src/components/common/icons';
 import { images } from '@/assets/images';
-import { PaymentProvider, PaymentMethodSelection } from '@/src/types/transaction';
+import {
+  PaymentProvider,
+  PaymentMethodSelection,
+} from '@/src/types/transaction';
 import { useResponsive } from '@/src/hooks/useResponsive';
 import PaymentService from '@/src/services/customer/payment.service';
 
@@ -37,9 +40,11 @@ const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
   const { isTablet, wp, getResponsiveText } = useResponsive();
 
   const [selectedProvider, setSelectedProvider] = useState<'mtn' | 'orange'>(
-    currentSelection?.provider || 'mtn'
+    currentSelection?.provider || 'mtn',
   );
-  const [phoneNumber, setPhoneNumber] = useState(currentSelection?.phoneNumber || '');
+  const [phoneNumber, setPhoneNumber] = useState(
+    currentSelection?.phoneNumber || '',
+  );
   const [isValidating, setIsValidating] = useState(false);
 
   // Payment providers
@@ -73,7 +78,8 @@ const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
     const limited = cleaned.slice(0, 9);
 
     if (limited.length <= 3) return limited;
-    if (limited.length <= 5) return `${limited.slice(0, 3)} ${limited.slice(3)}`;
+    if (limited.length <= 5)
+      return `${limited.slice(0, 3)} ${limited.slice(3)}`;
     if (limited.length <= 7)
       return `${limited.slice(0, 3)} ${limited.slice(3, 5)} ${limited.slice(5)}`;
     return `${limited.slice(0, 3)} ${limited.slice(3, 5)} ${limited.slice(5, 7)} ${limited.slice(7)}`;
@@ -90,13 +96,15 @@ const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
 
     if (!PaymentService.validatePhoneNumber(cleanNumber, selectedProvider)) {
       const errorMessage =
-        selectedProvider === 'mtn' ? t('invalid_mtn_number') : t('invalid_orange_number');
+        selectedProvider === 'mtn'
+          ? t('invalid_mtn_number')
+          : t('invalid_orange_number');
       Alert.alert(t('error'), errorMessage);
       return;
     }
 
     setIsValidating(true);
-    
+
     setTimeout(() => {
       onConfirm({
         method: 'mobile_money',
@@ -108,7 +116,12 @@ const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
   }, [phoneNumber, selectedProvider, onConfirm, t]);
 
   return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onDismiss}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="fade"
+      onRequestClose={onDismiss}
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
@@ -169,7 +182,11 @@ const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
                     backgroundColor: colors.surfaceVariant,
                   }}
                 >
-                  <IoniconsIcon name="close" size={20} color={colors.onSurfaceVariant} />
+                  <IoniconsIcon
+                    name="close"
+                    size={20}
+                    color={colors.onSurfaceVariant}
+                  />
                 </TouchableOpacity>
               </View>
 
@@ -239,9 +256,13 @@ const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
                         borderRadius: 10,
                         borderWidth: 2,
                         borderColor:
-                          selectedProvider === provider.id ? colors.primary : colors.outline,
+                          selectedProvider === provider.id
+                            ? colors.primary
+                            : colors.outline,
                         backgroundColor:
-                          selectedProvider === provider.id ? colors.primary : 'transparent',
+                          selectedProvider === provider.id
+                            ? colors.primary
+                            : 'transparent',
                         justifyContent: 'center',
                         alignItems: 'center',
                       }}
@@ -311,7 +332,9 @@ const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
                   {/* Phone Input */}
                   <TextInput
                     value={phoneNumber}
-                    onChangeText={(text) => setPhoneNumber(formatPhoneInput(text))}
+                    onChangeText={(text) =>
+                      setPhoneNumber(formatPhoneInput(text))
+                    }
                     placeholder="6XX XX XX XX"
                     placeholderTextColor={colors.onSurfaceVariant + '80'}
                     keyboardType="phone-pad"
@@ -412,13 +435,17 @@ const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
                     padding: 16,
                     borderRadius: 12,
                     backgroundColor:
-                      isValidating || !phoneNumber ? colors.surfaceVariant : colors.primary,
+                      isValidating || !phoneNumber
+                        ? colors.surfaceVariant
+                        : colors.primary,
                     alignItems: 'center',
                     justifyContent: 'center',
                   }}
                 >
                   {isValidating ? (
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <View
+                      style={{ flexDirection: 'row', alignItems: 'center' }}
+                    >
                       <Text
                         style={{
                           fontSize: getResponsiveText(16),
@@ -434,7 +461,9 @@ const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
                       style={{
                         fontSize: getResponsiveText(16),
                         fontWeight: '600',
-                        color: !phoneNumber ? colors.onSurfaceVariant : colors.onPrimary,
+                        color: !phoneNumber
+                          ? colors.onSurfaceVariant
+                          : colors.onPrimary,
                       }}
                     >
                       {t('confirm')}

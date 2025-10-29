@@ -18,14 +18,14 @@ interface ProfileUpdateData {
 
 /**
  * Unified hook for updating user profiles (both customer and restaurant)
- * 
+ *
  * API: PATCH /api/v1/auth/profile
  * Content-Type: application/json
- * 
+ *
  * Automatically handles image upload workflow:
  * 1. If local image: upload image first to get URL, then update profile with JSON
  * 2. If URL or no image: update profile directly with JSON
- * 
+ *
  * Request format:
  * {
  *   "fullName": "Tochukwu Paul",
@@ -39,11 +39,10 @@ export const useUpdateProfile = () => {
 
   return useMutation({
     mutationFn: async (data: ProfileUpdateData) => {
-
-      
       // Check if we have a local file URI that needs to be uploaded
-      const hasLocalImage = data.profilePicture && isLocalFileUri(data.profilePicture);
-      
+      const hasLocalImage =
+        data.profilePicture && isLocalFileUri(data.profilePicture);
+
       if (hasLocalImage) {
         // Use FormData approach for local images
         const imageData: LocalImageData = createImageFormDataObject({
@@ -51,7 +50,6 @@ export const useUpdateProfile = () => {
           type: 'image/jpeg', // Default type, could be improved
           name: `profile-${Date.now()}.jpg`,
         });
-        
 
         const response = await profileApi.updateProfileWithImage({
           fullName: data.fullName?.trim(),
@@ -62,7 +60,7 @@ export const useUpdateProfile = () => {
       } else {
         // Use direct JSON approach for URL or no image
         const profileData: UpdateProfileRequest = {};
-        
+
         // Only include fields that are provided and not empty
         if (data.fullName && data.fullName.trim()) {
           profileData.fullName = data.fullName.trim();
@@ -73,9 +71,7 @@ export const useUpdateProfile = () => {
         if (data.profilePicture) {
           profileData.profilePicture = data.profilePicture;
         }
-        
 
-        
         const response = await profileApi.updateProfile(profileData);
         return response.data;
       }
@@ -84,8 +80,6 @@ export const useUpdateProfile = () => {
       clearError();
     },
     onSuccess: (updatedUser: User) => {
-
-
       // Update user in auth store
       setUser(updatedUser);
 
@@ -109,7 +103,7 @@ export const useUpdateProfile = () => {
       if (error?.response?.data) {
         console.error('Error details:', error.response.data);
       }
-      
+
       // Log the data that was being sent for debugging
       console.error('Failed request data:', {
         hasProfilePicture: !!error.config?.data?.profilePicture,
@@ -135,8 +129,6 @@ export const useGetProfile = () => {
       return response.data.data;
     },
     onSuccess: (userData: User) => {
-
-
       // Update user in auth store
       setUser(userData);
 

@@ -16,7 +16,6 @@ import { useFloatingTabBarHeight } from '@/src/hooks/useFloatingTabBarHeight';
 import TermsAndConditionsModal from '@/src/components/common/modals/TermsAndConditionsModal';
 import { useTermsModal } from '@/src/hooks/common/useTermsModal';
 
-
 const ProfileHomeScreen = ({
   navigation,
 }: CustomerProfileStackScreenProps<'ProfileHome'>) => {
@@ -46,7 +45,6 @@ const ProfileHomeScreen = ({
     }
 
     try {
-
       present(
         <LogoutContent onDismiss={dismiss} onConfirmLogout={handleLogout} />,
         {

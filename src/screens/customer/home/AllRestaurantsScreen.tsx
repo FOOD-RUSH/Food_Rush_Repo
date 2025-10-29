@@ -38,35 +38,39 @@ const AllRestaurantsScreen = ({
   const filteredRestaurants = React.useMemo(() => {
     if (!allRestaurants) return [];
     if (!searchQuery.trim()) return allRestaurants;
-    
-    return allRestaurants.filter((restaurant) =>
-      restaurant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      restaurant.address?.toLowerCase().includes(searchQuery.toLowerCase())
+
+    return allRestaurants.filter(
+      (restaurant) =>
+        restaurant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        restaurant.address?.toLowerCase().includes(searchQuery.toLowerCase()),
     );
   }, [allRestaurants, searchQuery]);
 
-  const renderRestaurant = useCallback(({ item }: { item: RestaurantProps }) => (
-    <RestaurantCard
-      key={item.id}
-      id={item.id}
-      name={item.name}
-      address={item.address}
-      latitude={item.latitude || '0'}
-      longitude={item.longitude || '0'}
-      isOpen={item.isOpen}
-      verificationStatus={item.verificationStatus || 'APPROVED'}
-      menuMode={item.menuMode || 'FIXED'}
-      createdAt={item.createdAt || new Date().toISOString()}
-      distanceKm={item.distanceKm || item.distance || 0}
-      deliveryPrice={item.deliveryPrice || 500}
-      estimatedDeliveryTime={item.estimatedDeliveryTime || '30-40 mins'}
-      rating={item.rating}
-      ratingCount={item.ratingCount}
-      image={item.pictureUrl}
-      phone={item.phone}
-      menu={item.menu || []}
-    />
-  ), []);
+  const renderRestaurant = useCallback(
+    ({ item }: { item: RestaurantProps }) => (
+      <RestaurantCard
+        key={item.id}
+        id={item.id}
+        name={item.name}
+        address={item.address}
+        latitude={item.latitude || '0'}
+        longitude={item.longitude || '0'}
+        isOpen={item.isOpen}
+        verificationStatus={item.verificationStatus || 'APPROVED'}
+        menuMode={item.menuMode || 'FIXED'}
+        createdAt={item.createdAt || new Date().toISOString()}
+        distanceKm={item.distanceKm || item.distance || 0}
+        deliveryPrice={item.deliveryPrice || 500}
+        estimatedDeliveryTime={item.estimatedDeliveryTime || '30-40 mins'}
+        rating={item.rating}
+        ratingCount={item.ratingCount}
+        image={item.pictureUrl}
+        phone={item.phone}
+        menu={item.menu || []}
+      />
+    ),
+    [],
+  );
 
   const renderEmptyState = () => (
     <View className="flex-1 justify-center items-center px-6">
@@ -80,16 +84,17 @@ const AllRestaurantsScreen = ({
         className="text-xl font-semibold text-center mb-2"
         style={{ color: colors.onSurface }}
       >
-        {searchQuery ? t('no_results_for', { query: searchQuery }) : t('no_restaurants_found')}
+        {searchQuery
+          ? t('no_results_for', { query: searchQuery })
+          : t('no_restaurants_found')}
       </Text>
       <Text
         className="text-base text-center leading-6"
         style={{ color: colors.onSurfaceVariant }}
       >
-        {searchQuery 
+        {searchQuery
           ? t('try_different_search_or_filter')
-          : t('no_restaurants_description')
-        }
+          : t('no_restaurants_description')}
       </Text>
     </View>
   );

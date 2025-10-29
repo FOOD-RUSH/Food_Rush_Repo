@@ -85,8 +85,8 @@ const RestaurantDetailScreen = ({
     navigation.navigate('RestaurantReview', {
       restaurantId,
       restaurantName: restaurantDetails?.name || 'Restaurant',
-      restaurantImage: restaurantDetails?.image  ,
-    })
+      restaurantImage: restaurantDetails?.image,
+    });
   };
 
   const handleViewLocation = () => {
@@ -236,7 +236,7 @@ const RestaurantDetailScreen = ({
       </View>
     );
   }
- 
+
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: colors.background }}

@@ -2,16 +2,12 @@
   "expo": {
     "name": "Foodrush",
     "slug": "food-rush",
-    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/FoodRush.png",
     "scheme": "foodrush",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "platforms": [
-      "android",
-      "ios"
-    ],
+    "platforms": ["android", "ios"],
     "splash": {
       "image": "./assets/images/SplashScreen.png",
       "resizeMode": "contain",

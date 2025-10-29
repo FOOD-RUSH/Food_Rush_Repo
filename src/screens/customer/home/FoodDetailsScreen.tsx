@@ -95,14 +95,12 @@ const FoodDetailsScreen = ({
         navigation.navigate('CustomerApp', {
           screen: 'Home',
           params: {
-            screen: 'HomeScreen'
-          }
+            screen: 'HomeScreen',
+          },
         });
       });
       // Show success feedback
       // Note: The cart store will handle the duplicate item dialog
-
-    
     } catch (error) {
       Alert.alert(
         t('error') || 'Error',

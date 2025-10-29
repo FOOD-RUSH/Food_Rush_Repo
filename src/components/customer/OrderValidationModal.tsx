@@ -29,7 +29,7 @@ const OrderValidationModal: React.FC<OrderValidationModalProps> = ({
 }) => {
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
-  
+
   // Cart data
   const cartItems = useCartItems();
   const subtotal = useCartSubtotal();
@@ -108,7 +108,7 @@ const OrderValidationModal: React.FC<OrderValidationModalProps> = ({
           >
             {t('order_items')}
           </Text>
-          
+
           <ScrollView
             style={{
               maxHeight: 200,
@@ -172,8 +172,9 @@ const OrderValidationModal: React.FC<OrderValidationModalProps> = ({
                     }}
                   >
                     {formatCurrency(
-                      item.quantity * parseFloat(item.menuItem.price || '0')
-                    )} XAF
+                      item.quantity * parseFloat(item.menuItem.price || '0'),
+                    )}{' '}
+                    XAF
                   </Text>
                 </View>
               </View>
@@ -399,7 +400,11 @@ const OrderValidationModal: React.FC<OrderValidationModalProps> = ({
               fontStyle: 'italic',
             }}
           >
-            * {t('service_fee_note', 'Service fee helps us maintain and improve our platform')}
+            *{' '}
+            {t(
+              'service_fee_note',
+              'Service fee helps us maintain and improve our platform',
+            )}
           </Text>
         </View>
       </View>

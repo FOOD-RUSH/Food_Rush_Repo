@@ -10,12 +10,7 @@ import {
   Modal,
   FlatList,
 } from 'react-native';
-import {
-  useTheme,
-  Card,
-  RadioButton,
- 
-} from 'react-native-paper';
+import { useTheme, Card, RadioButton } from 'react-native-paper';
 
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
@@ -349,7 +344,6 @@ const ThemeSettingsScreen: React.FC = () => {
 
           {renderLanguageDropdown()}
         </View>
-
 
         {/* Bottom Spacing */}
         <View style={{ height: 20 }} />

@@ -4,60 +4,60 @@
   "last_updated": "Dernière mise à jour",
   "foodrush_terms_title": "FoodRush – Conditions Générales",
   "restaurant_terms_title": "Conditions de Service des Restaurants Partenaires Foodrush",
-  
+
   "customer_terms": {
     "acceptance_title": "1. Acceptation des Conditions",
     "acceptance_content": "En accédant ou en utilisant l'application mobile FoodRush (\"App\") et les services (collectivement, \"Services\"), vous (\"Client,\" \"vous,\" ou \"votre\") acceptez ces Conditions Générales. Si vous n'êtes pas d'accord, veuillez ne pas utiliser l'App.",
-    
+
     "account_title": "2. Inscription et Sécurité du Compte",
     "account_bullet_1": "Vous acceptez de fournir des informations d'inscription exactes, actuelles et complètes, y compris l'email, le numéro de téléphone, l'adresse de livraison et les détails de paiement.",
     "account_bullet_2": "Vos identifiants de compte sont personnels et confidentiels. Vous devez nous informer immédiatement de tout accès non autorisé.",
-    
+
     "ordering_title": "3. Processus de Commande",
     "ordering_bullet_1": "Vous êtes responsable de vérifier les détails de la commande—articles, quantités et adresse de livraison—avant de finaliser votre commande.",
     "ordering_bullet_2": "Le menu ou la disponibilité peuvent changer sans préavis en raison des conditions du restaurant.",
-    
+
     "payment_title": "4. Paiement et Frais",
     "payment_bullet_1": "Le paiement est collecté via l'App au moment de la passation de commande. Des frais supplémentaires (par exemple, frais de livraison, frais de service) peuvent s'appliquer.",
     "payment_bullet_2": "Vous acceptez que tous les détails de paiement que vous fournissez sont exacts et autorisez FoodRush à débiter votre méthode de paiement sélectionnée.",
-    
+
     "delivery_title": "5. Livraison et Délais",
     "delivery_bullet_1": "La livraison est facilitée par des chauffeurs indépendants (\"Coursiers\"). Les temps de livraison estimés sont des approximations ; les temps réels peuvent varier en raison du trafic, de la météo ou d'autres facteurs.",
     "delivery_bullet_2": "FoodRush n'est pas responsable des retards hors de son contrôle mais fera des efforts raisonnables pour communiquer les mises à jour.",
-    
+
     "quality_title": "6. Qualité des Aliments et Plaintes",
     "quality_bullet_1": "FoodRush n'est pas responsable des problèmes concernant la qualité ou la préparation des aliments—c'est la responsabilité du restaurant.",
     "quality_bullet_2": "Les clients doivent signaler rapidement les préoccupations ou plaintes—telles que les articles manquants, la mauvaise qualité ou la contamination—via le support client.",
-    
+
     "community_title": "7. Directives Communautaires et Conduite",
     "community_intro": "Vous acceptez de :",
     "community_bullet_1": "Traiter les Coursiers et le personnel du restaurant avec respect et courtoisie. Le harcèlement, l'abus ou la discrimination sont interdits.",
     "community_bullet_2": "Ne pas fournir d'informations fausses ou trompeuses.",
     "community_bullet_3": "Assurer un environnement de collecte de livraison sûr (par exemple, accueillir les Coursiers habillé et de manière appropriée). Un comportement inapproprié peut entraîner des pénalités de compte.",
-    
+
     "suspension_title": "8. Suspension et Résiliation du Compte",
     "suspension_bullet_1": "FoodRush se réserve le droit de suspendre ou de résilier votre accès si vous violez ces Conditions ou vous engagez dans un comportement nuisible ou frauduleux.",
     "suspension_bullet_2": "Si votre compte est verrouillé ou désactivé pour activité suspecte ou violations de politique, vous pouvez contacter le support pour révision.",
     "suspension_bullet_3": "Notre application est destinée à être juste et proportionnée.",
-    
+
     "modifications_title": "9. Modifications des Conditions",
     "modifications_bullet_1": "FoodRush peut mettre à jour ces Conditions à tout moment. Les changements deviennent effectifs lorsqu'ils sont publiés dans l'app ou sur notre site web.",
     "modifications_bullet_2": "Il est de votre responsabilité de réviser ces Conditions périodiquement. L'utilisation continue du Service après les mises à jour constitue une acceptation.",
-    
+
     "privacy_title": "10. Confidentialité",
     "privacy_content": "Notre Politique de Confidentialité régit comment nous collectons, utilisons et protégeons vos informations personnelles. En utilisant l'App, vous consentez à ses termes.",
-    
+
     "disclaimers_title": "11. Avertissements et Limitations de Responsabilité",
     "disclaimers_bullet_1": "Le Service est fourni \"tel quel.\" FoodRush décline les garanties de perfection, d'exactitude ou de disponibilité.",
     "disclaimers_bullet_2": "FoodRush n'est pas responsable des actions de restaurants tiers ou d'événements hors de notre contrôle raisonnable.",
-    
+
     "governing_title": "12. Loi Applicable et Résolution des Litiges",
     "governing_content": "Ces Conditions sont régies par les lois de la juridiction où FoodRush opère. Les litiges seront soumis à la juridiction exclusive des tribunaux pertinents."
   },
-  
+
   "restaurant_terms": {
     "intro_content": "Ces Conditions Générales (\"Accord\") définissent les droits et obligations entre vous (\"Partenaire Restaurant,\" \"vous,\" \"votre\") et Foodrush (\"Foodrush,\" \"nous,\" \"notre\") concernant votre participation à la plateforme Foodrush pour les services de commande, livraison et/ou collecte (le \"Service\"). En vous inscrivant et en opérant comme Partenaire Foodrush, vous acceptez ces Conditions.",
-    
+
     "definitions_title": "1. Définitions",
     "definitions_customer": "Client : Une personne passant une commande via l'application mobile ou le site web Foodrush.",
     "definitions_driver": "Partenaire de Livraison / Chauffeur : Un contractant indépendant engagé pour livrer les commandes de vous au Client, qu'il soit géré par Foodrush ou par vous (si vous choisissez l'auto-livraison).",
@@ -65,93 +65,93 @@
     "definitions_commission": "Commission / Frais : Le pourcentage ou montant fixe déduit par Foodrush du sous-total de la commande, ou autres frais définis dans l'Accord Marchand.",
     "definitions_menu": "Menu et Articles du Menu : Vos offres rendues visibles via Foodrush, incluant nom, description, prix, photos.",
     "definitions_zone": "Zone de Livraison : La limite géographique dans laquelle les livraisons sont acceptées/fournies.",
-    
+
     "enrollment_title": "2. Inscription et Intégration",
     "enrollment_bullet_1": "Vous devez fournir des informations exactes, complètes et à jour sur votre entreprise (nom, adresse, contacts, licence d'hygiène alimentaire, identification fiscale, etc.).",
     "enrollment_bullet_2": "Foodrush examinera vos informations et peut approuver ou rejeter votre candidature. L'approbation peut dépendre du respect des réglementations locales de sécurité alimentaire, d'assurance et d'autres exigences légales.",
     "enrollment_bullet_3": "L'intégration comprend l'intégration de votre menu, la définition des heures d'ouverture, des zones de livraison (le cas échéant), des prix et des méthodes de réception des commandes (par exemple tablette, système POS, tableau de bord).",
-    
+
     "processing_title": "3. Traitement des Commandes",
     "processing_bullet_1": "Lorsqu'un Client passe une commande, nous vous enverrons une notification. Vous devez accepter ou rejeter dans un délai spécifié.",
     "processing_bullet_2": "Une fois acceptée, vous devez préparer la commande selon les instructions du Client, dans le temps de préparation engagé.",
     "processing_bullet_3": "Les commandes doivent être entièrement préparées et emballées avant que le Partenaire de Livraison ne les récupère (dans un scénario de livraison). Dans un scénario de collecte, les commandes doivent être préparées et prêtes pour la collecte à l'heure convenue.",
     "processing_bullet_4": "Vous devez maintenir des informations de menu exactes et à jour (disponibilité, prix, photos, descriptions). Si un article est en rupture de stock, vous devriez le marquer comme indisponible dès que raisonnablement possible.",
-    
+
     "delivery_title": "4. Livraison et Collecte",
     "delivery_foodrush": "Livraison par Foodrush / Chauffeurs Tiers : Si vous utilisez les chauffeurs Foodrush, une fois la commande prête, vous l'emballerez de manière appropriée et la remettrez au chauffeur.",
     "delivery_self": "Option d'Auto-Livraison : Vous pouvez, si éligible, utiliser votre propre personnel de livraison (\"auto-livraison\"). Si c'est le cas, vous devez vous assurer que vos chauffeurs répondent à toutes les exigences (licence, lois locales, sécurité alimentaire, assurance) et adhèrent aux normes de Foodrush.",
     "delivery_pickup": "Pour les commandes de collecte, vous devez avoir clairement communiqué quand et où le Client peut collecter.",
-    
+
     "fees_title": "5. Frais, Paiements et Commissions",
     "fees_bullet_1": "Foodrush vous facturera une commission sur chaque commande acceptée. Le taux de commission, les frais de transaction ou autres frais (livraison, promotion, marketing) seront convenus dans votre Accord Marchand.",
     "fees_bullet_2": "Les paiements vous seront effectués selon un calendrier régulier (par exemple quotidien, hebdomadaire), après déduction de tous les frais applicables, remboursements, rétrofacturations et ajustements.",
     "fees_bullet_3": "Vous êtes responsable de tous les coûts de préparation et d'emballage de la nourriture, main-d'œuvre, services publics et tout autre coût de restaurant.",
     "fees_bullet_4": "Vous gérerez les taxes applicables sur vos articles alimentaires ; Foodrush peut remettre les taxes si requis par la loi mais vous êtes responsable de fournir la documentation fiscale requise.",
-    
+
     "quality_title": "6. Qualité, Sécurité Alimentaire et Normes",
     "quality_bullet_1": "Vous devez vous conformer à toutes les lois et réglementations applicables en matière de santé, sécurité alimentaire, licence et assainissement.",
     "quality_bullet_2": "La nourriture doit être préparée de manière sûre et hygiénique, en utilisant des ingrédients sûrs et stockée correctement.",
     "quality_bullet_3": "L'emballage doit protéger la nourriture, maintenir la température, éviter la contamination et être adapté à la livraison.",
     "quality_bullet_4": "Vous maintiendrez une assurance comme requis par la loi locale (par exemple responsabilité générale, assurance maladie d'origine alimentaire).",
-    
+
     "hours_title": "7. Heures d'Ouverture, Menu et Disponibilité",
     "hours_bullet_1": "Vous définissez vos propres heures d'ouverture dans le système. Vous devez les mettre à jour avec précision, surtout pour les vacances, fermetures ou événements inattendus.",
     "hours_bullet_2": "Vous êtes responsable de maintenir des prix exacts, des spéciaux, des suppléments et des charges. Tout changement doit être mis à jour dans Foodrush à l'avance.",
     "hours_bullet_3": "Les articles listés doivent refléter ce que vous pouvez faire de manière fiable. Les problèmes répétés d'articles manquants ou de qualité inacceptable peuvent conduire à des avertissements ou une suspension.",
-    
+
     "service_title": "8. Service Client, Plaintes et Remboursements",
     "service_bullet_1": "Vous devez coopérer avec Foodrush pour résoudre les plaintes des clients (mauvais articles, articles manquants, livraisons tardives, etc.).",
     "service_bullet_2": "Si un Client a droit à un remboursement ou crédit (sous politique), Foodrush peut l'émettre, et vous pouvez être responsable de couvrir ce coût, selon la nature de la plainte.",
     "service_bullet_3": "Vous répondrez aux demandes de Foodrush pour des informations (photos, etc.) pour faciliter les enquêtes.",
-    
+
     "conduct_title": "9. Normes de Conduite et Représentation",
     "conduct_bullet_1": "Vous devez représenter votre restaurant et votre nourriture honnêtement (descriptions de menu, photos, informations nutritionnelles ou d'allergie si fournies) et ne pas tromper les Clients.",
     "conduct_bullet_2": "Vous ne devez pas discriminer contre les Clients, Chauffeurs ou le personnel Foodrush.",
     "conduct_bullet_3": "Vous devez traiter les Partenaires de Livraison de manière appropriée ; la remise des commandes doit être fluide, et vous ne devriez pas attendre des Chauffeurs qu'ils effectuent des tâches de restaurant au-delà de la collecte.",
-    
+
     "promotions_title": "10. Promotions, Publicité et Prix",
     "promotions_bullet_1": "Foodrush peut offrir des promotions, des listes en vedette, des remises, des programmes de fidélité ou des outils marketing ; vous pouvez choisir de participer sous réserve de frais ou conditions supplémentaires.",
     "promotions_bullet_2": "Les prix communiqués aux Clients doivent inclure ou exclure la taxe selon la loi locale, et tout frais de livraison ou de service doit être transparent.",
     "promotions_bullet_3": "Vous ne devez pas gonfler secrètement les prix pour compenser les commissions ou frais (un tel comportement pourrait violer les lois de protection des consommateurs).",
-    
+
     "data_title": "11. Données, Rapports et Accès",
     "data_bullet_1": "Vous aurez accès aux outils de rapport : historique des commandes, métriques de ventes, commentaires des clients, etc. Foodrush peut exiger certaines métriques de performance (taux d'acceptation des commandes, taux d'annulation, etc.).",
     "data_bullet_2": "Vous consentez à l'utilisation par Foodrush des données transactionnelles pour l'analyse, les améliorations, la détection de fraude, etc., conformément à la loi applicable de protection des données / confidentialité.",
-    
+
     "termination_title": "12. Suspension, Résiliation et Responsabilité",
     "termination_bullet_1": "Foodrush peut suspendre ou désactiver la participation de votre restaurant pour non-respect de ces Conditions, pour violations graves (par exemple violation de sécurité alimentaire, plaintes répétées, comportement frauduleux), ou par accord mutuel.",
     "termination_bullet_2": "Chaque partie peut résilier la relation selon la période de préavis dans l'Accord Marchand. Lors de la résiliation, vous devez remplir les commandes acceptées déjà en cours.",
     "termination_bullet_3": "Limitation de Responsabilité : Foodrush ne sera pas responsable des pertes indirectes ou consécutives (telles que les profits perdus), sauf dans la mesure mandatée par la loi. Votre responsabilité est similairement limitée.",
-    
+
     "ip_title": "13. Propriété Intellectuelle et Image de Marque",
     "ip_bullet_1": "Vous accordez à Foodrush une licence non exclusive et libre de redevances pour utiliser votre nom, logo, images de vos articles de menu dans le but de promouvoir l'app, d'afficher dans l'app, marketing, etc.",
     "ip_bullet_2": "Vous représentez que vous possédez ou avez les droits sur tout matériel (images, marques, descriptions) que vous téléchargez, et qu'ils n'enfreignent pas les droits de tiers.",
-    
+
     "insurance_title": "14. Assurance et Conformité",
     "insurance_bullet_1": "Vous maintiendrez toutes les assurances commerciales, de sécurité alimentaire et de responsabilité requises, et les licences requises par la loi locale, régionale ou nationale.",
     "insurance_bullet_2": "Vous vous conformerez à toutes les lois régissant les allergènes alimentaires, l'étiquetage nutritionnel, l'hygiène, le travail, les salaires et la sécurité des travailleurs.",
-    
+
     "indemnification_title": "15. Indemnisation",
     "indemnification_content": "Vous acceptez d'indemniser, défendre et tenir indemne Foodrush, ses dirigeants, directeurs, employés et agents de toute réclamation, dommage, perte, responsabilité, coût ou dépense découlant de votre violation de ces Conditions, ou de vos actes négligents ou intentionnels (y compris les problèmes de sécurité alimentaire, fausses déclarations, ou non-conformité à la loi).",
-    
+
     "privacy_title": "16. Confidentialité et Confidentialité",
     "privacy_bullet_1": "Vous devez adhérer à toutes les lois de confidentialité applicables dans votre juridiction lors de la gestion des données Client. Foodrush collectera et stockera les données Client ; en tant que partenaire, vous pouvez recevoir certaines données (par exemple contact pour livraison, instructions spéciales). Utilisez ces données uniquement pour remplir la commande et non pour du marketing non sollicité sauf si vous avez le consentement.",
     "privacy_bullet_2": "Les informations confidentielles (opérations commerciales, structure de commission, métriques internes) fournies par Foodrush doivent être gardées confidentielles.",
-    
+
     "changes_title": "17. Modifications de ces Conditions",
     "changes_bullet_1": "Foodrush peut réviser ces Conditions de temps en temps. Lorsque les changements sont matériels, nous fournirons un avis (par exemple via email ou dans l'app). L'utilisation continue du Service après les changements implique votre acceptation.",
     "changes_bullet_2": "Si vous n'êtes pas d'accord avec les changements, vous pouvez résilier sous les dispositions de la Section 12.",
-    
+
     "governing_title": "18. Loi Applicable et Résolution des Litiges",
     "governing_bullet_1": "Cet Accord sera régi par les lois du Cameroun.",
     "governing_bullet_2": "Tout litige découlant de cet Accord devra d'abord être tenté d'être résolu via médiation ou négociation entre les parties. Si non résolu, alors par arbitrage ou en cour comme convenu selon la loi locale.",
-    
+
     "misc_title": "19. Divers",
     "misc_contractor": "Contractant Indépendant : Sauf accord contraire, le Partenaire Restaurant est un contractant indépendant ; aucun partenariat ou emploi n'est créé.",
     "misc_force": "Force Majeure : Aucune partie ne sera responsable des retards ou échecs dus à des causes hors de leur contrôle (catastrophes naturelles, actions gouvernementales, épidémies, etc.).",
     "misc_severability": "Divisibilité : Si une disposition est invalide ou inapplicable, le reste reste en vigueur.",
     "misc_waiver": "Renonciation : Un échec à faire respecter un droit ne renonce pas à ce droit dans le futur.",
-    
+
     "contact_title": "Informations de Contact",
     "contact_intro": "Pour des questions sur ces conditions, contactez-nous à :",
     "contact_email": "Email : partners@foodrush.cm",

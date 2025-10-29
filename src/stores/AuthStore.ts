@@ -147,7 +147,9 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
           // Clear any stale notifications immediately on user/role change
           try {
-            const { useNotificationStore } = await import('@/src/stores/shared/notificationStore');
+            const { useNotificationStore } = await import(
+              '@/src/stores/shared/notificationStore'
+            );
             useNotificationStore.getState().reset();
           } catch (e) {
             console.error('Error resetting notification store on login:', e);
@@ -245,47 +247,51 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         set({ defaultRestaurantId }),
 
       // Optimized logout - prevent multiple calls and simplify store clearing
-    logout: async () => {
-  const currentState = get();
+      logout: async () => {
+        const currentState = get();
 
-  // Prevent multiple logout calls
-  if (!currentState.isAuthenticated && !currentState.user) {
-    return;
-  }
+        // Prevent multiple logout calls
+        if (!currentState.isAuthenticated && !currentState.user) {
+          return;
+        }
 
-  try {
-    set({ isLoading: true });
+        try {
+          set({ isLoading: true });
 
-    // Best-effort: unregister push device and cleanup listeners
-    try {
-      const { pushNotificationService } = await import('@/src/services/shared/pushNotificationService');
-      await pushNotificationService.unregisterDevice();
-      pushNotificationService.cleanup();
-    } catch (e) {
-      console.error('Push cleanup during logout failed:', e);
-    }
+          // Best-effort: unregister push device and cleanup listeners
+          try {
+            const { pushNotificationService } = await import(
+              '@/src/services/shared/pushNotificationService'
+            );
+            await pushNotificationService.unregisterDevice();
+            pushNotificationService.cleanup();
+          } catch (e) {
+            console.error('Push cleanup during logout failed:', e);
+          }
 
-    // Clear tokens
-    await TokenManager.clearAllTokens();
+          // Clear tokens
+          await TokenManager.clearAllTokens();
 
-    // Reset notification store to avoid showing stale items after logout
-    try {
-      const { useNotificationStore } = await import('@/src/stores/shared/notificationStore');
-      useNotificationStore.getState().reset();
-    } catch (e) {
-      console.error('Error resetting notification store on logout:', e);
-    }
+          // Reset notification store to avoid showing stale items after logout
+          try {
+            const { useNotificationStore } = await import(
+              '@/src/stores/shared/notificationStore'
+            );
+            useNotificationStore.getState().reset();
+          } catch (e) {
+            console.error('Error resetting notification store on logout:', e);
+          }
 
-    // Reset auth state
-    set({ ...initialState, isLoading: false });
+          // Reset auth state
+          set({ ...initialState, isLoading: false });
 
-    // Emit logout event for navigation
-    DeviceEventEmitter.emit('user-logout');
-  } catch (error) {
-    console.error('Logout error:', error);
-    set({ ...initialState, isLoading: false });
-  }
-},
+          // Emit logout event for navigation
+          DeviceEventEmitter.emit('user-logout');
+        } catch (error) {
+          console.error('Logout error:', error);
+          set({ ...initialState, isLoading: false });
+        }
+      },
 
       // Utility actions
       clearError: () => set({ error: null }),

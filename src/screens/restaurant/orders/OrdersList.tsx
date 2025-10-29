@@ -72,7 +72,10 @@ const OrderCard: React.FC<OrderCardProps> = React.memo(
       }
     };
 
-    const totalItems = item.items.reduce((sum, orderItem) => sum + orderItem.quantity, 0);
+    const totalItems = item.items.reduce(
+      (sum, orderItem) => sum + orderItem.quantity,
+      0,
+    );
 
     return (
       <Card
@@ -96,7 +99,13 @@ const OrderCard: React.FC<OrderCardProps> = React.memo(
           }}
         >
           <View style={{ flex: 1, marginRight: 12 }}>
-            <Body style={{ fontSize: 16, fontWeight: '600', color: colors.onSurface }}>
+            <Body
+              style={{
+                fontSize: 16,
+                fontWeight: '600',
+                color: colors.onSurface,
+              }}
+            >
               {getCustomerName(item)}
             </Body>
             <Caption style={{ marginTop: 2, color: colors.onSurfaceVariant }}>
@@ -112,7 +121,9 @@ const OrderCard: React.FC<OrderCardProps> = React.memo(
               borderRadius: 6,
             }}
           >
-            <Caption style={{ color: 'white', fontWeight: '700', fontSize: 11 }}>
+            <Caption
+              style={{ color: 'white', fontWeight: '700', fontSize: 11 }}
+            >
               {t(item.status).toUpperCase()}
             </Caption>
           </View>
@@ -130,13 +141,19 @@ const OrderCard: React.FC<OrderCardProps> = React.memo(
           }}
         >
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <MaterialCommunityIcon name="food" size={18} color={colors.onSurfaceVariant} />
+            <MaterialCommunityIcon
+              name="food"
+              size={18}
+              color={colors.onSurfaceVariant}
+            />
             <Body style={{ marginLeft: 6, color: colors.onSurfaceVariant }}>
               {totalItems} {totalItems === 1 ? 'item' : 'items'}
             </Body>
           </View>
 
-          <Body style={{ fontSize: 18, fontWeight: '700', color: colors.primary }}>
+          <Body
+            style={{ fontSize: 18, fontWeight: '700', color: colors.primary }}
+          >
             {formatOrderTotal(item.total)}
           </Body>
         </View>
@@ -164,7 +181,9 @@ const OrderCard: React.FC<OrderCardProps> = React.memo(
               onPress={handleReject}
               disabled={rejectOrderMutation.isPending}
             >
-              <Label style={{ color: colors.onErrorContainer, fontWeight: '600' }}>
+              <Label
+                style={{ color: colors.onErrorContainer, fontWeight: '600' }}
+              >
                 {t('reject')}
               </Label>
             </TouchableOpacity>
@@ -205,7 +224,12 @@ const OrderTab: React.FC<OrderTabProps> = ({ status, showActions = false }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const tabBarHeight = useFloatingTabBarHeight();
 
-  const { data: ordersData, isLoading, refetch, error } = useGetOrders({ status });
+  const {
+    data: ordersData,
+    isLoading,
+    refetch,
+    error,
+  } = useGetOrders({ status });
 
   const orders = Array.isArray(ordersData) ? ordersData : [];
   const sortedOrders = sortOrdersByPriority(orders);
@@ -256,7 +280,11 @@ const OrderTab: React.FC<OrderTabProps> = ({ status, showActions = false }) => {
       <FlatList
         data={filteredOrders}
         renderItem={({ item }) => (
-          <OrderCard item={item} onPress={handleOrderPress} showActions={showActions} />
+          <OrderCard
+            item={item}
+            onPress={handleOrderPress}
+            showActions={showActions}
+          />
         )}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{
@@ -288,12 +316,16 @@ const OrderTab: React.FC<OrderTabProps> = ({ status, showActions = false }) => {
   );
 };
 
-const OrdersList: React.FC<RestaurantOrdersStackScreenProps<'OrdersList'>> = () => {
+const OrdersList: React.FC<
+  RestaurantOrdersStackScreenProps<'OrdersList'>
+> = () => {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const navigation = useNavigation();
   const { data: pendingOrdersData } = useGetOrders({ status: 'pending' });
-  const pendingOrdersCount = Array.isArray(pendingOrdersData) ? pendingOrdersData.length : 0;
+  const pendingOrdersCount = Array.isArray(pendingOrdersData)
+    ? pendingOrdersData.length
+    : 0;
   const { unreadCount: notificationCount } = useNotifications();
 
   const handleNotificationPress = () => {
@@ -341,7 +373,11 @@ const OrdersList: React.FC<RestaurantOrdersStackScreenProps<'OrdersList'>> = () 
               }}
               activeOpacity={0.7}
             >
-              <MaterialCommunityIcon name="bell-outline" size={24} color={colors.onSurface} />
+              <MaterialCommunityIcon
+                name="bell-outline"
+                size={24}
+                color={colors.onSurface}
+              />
               <NotificationBadge
                 count={notificationCount}
                 position="top-right"
@@ -366,7 +402,11 @@ const OrdersList: React.FC<RestaurantOrdersStackScreenProps<'OrdersList'>> = () 
               shadowOpacity: 0,
             },
             tabBarScrollEnabled: true,
-            tabBarLabelStyle: { fontSize: 13, fontWeight: '600', textTransform: 'none' },
+            tabBarLabelStyle: {
+              fontSize: 13,
+              fontWeight: '600',
+              textTransform: 'none',
+            },
           }}
         >
           <Tab.Screen
@@ -374,7 +414,9 @@ const OrdersList: React.FC<RestaurantOrdersStackScreenProps<'OrdersList'>> = () 
             options={{
               tabBarLabel: ({ color }) => (
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Body style={{ color, fontWeight: '600' }}>{t('pending')}</Body>
+                  <Body style={{ color, fontWeight: '600' }}>
+                    {t('pending')}
+                  </Body>
                   {pendingOrdersCount > 0 && (
                     <View
                       style={{
@@ -388,7 +430,13 @@ const OrdersList: React.FC<RestaurantOrdersStackScreenProps<'OrdersList'>> = () 
                         paddingHorizontal: 6,
                       }}
                     >
-                      <Caption style={{ color: 'white', fontWeight: '700', fontSize: 11 }}>
+                      <Caption
+                        style={{
+                          color: 'white',
+                          fontWeight: '700',
+                          fontSize: 11,
+                        }}
+                      >
                         {pendingOrdersCount}
                       </Caption>
                     </View>
@@ -399,22 +447,40 @@ const OrdersList: React.FC<RestaurantOrdersStackScreenProps<'OrdersList'>> = () 
           >
             {() => <OrderTab status="pending" showActions={true} />}
           </Tab.Screen>
-          <Tab.Screen name="Confirmed" options={{ tabBarLabel: t('confirmed') }}>
+          <Tab.Screen
+            name="Confirmed"
+            options={{ tabBarLabel: t('confirmed') }}
+          >
             {() => <OrderTab status="confirmed" />}
           </Tab.Screen>
-          <Tab.Screen name="Preparing" options={{ tabBarLabel: t('preparing') }}>
+          <Tab.Screen
+            name="Preparing"
+            options={{ tabBarLabel: t('preparing') }}
+          >
             {() => <OrderTab status="preparing" />}
           </Tab.Screen>
-          <Tab.Screen name="ReadyForPickup" options={{ tabBarLabel: t('ready_for_pickup') }}>
+          <Tab.Screen
+            name="ReadyForPickup"
+            options={{ tabBarLabel: t('ready_for_pickup') }}
+          >
             {() => <OrderTab status="ready_for_pickup" />}
           </Tab.Screen>
-          <Tab.Screen name="OutForDelivery" options={{ tabBarLabel: t('out_for_delivery') }}>
+          <Tab.Screen
+            name="OutForDelivery"
+            options={{ tabBarLabel: t('out_for_delivery') }}
+          >
             {() => <OrderTab status="out_for_delivery" />}
           </Tab.Screen>
-          <Tab.Screen name="Delivered" options={{ tabBarLabel: t('delivered') }}>
+          <Tab.Screen
+            name="Delivered"
+            options={{ tabBarLabel: t('delivered') }}
+          >
             {() => <OrderTab status="delivered" />}
           </Tab.Screen>
-          <Tab.Screen name="Cancelled" options={{ tabBarLabel: t('cancelled') }}>
+          <Tab.Screen
+            name="Cancelled"
+            options={{ tabBarLabel: t('cancelled') }}
+          >
             {() => <OrderTab status="cancelled" />}
           </Tab.Screen>
         </Tab.Navigator>

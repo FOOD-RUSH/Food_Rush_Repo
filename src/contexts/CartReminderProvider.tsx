@@ -29,17 +29,20 @@ interface CartReminderProviderProps {
 export const CartReminderProvider: React.FC<CartReminderProviderProps> = memo(
   ({ children }) => {
     const [isInitialized, setIsInitialized] = React.useState(false);
-    
+
     // Direct reminder function using the service
     const scheduleCartReminders = React.useCallback(async () => {
       const state = useCartStore.getState();
       if (state.reminderEnabled && state.items.length > 0) {
         try {
-          const itemCount = state.items.reduce((sum, item) => sum + item.quantity, 0);
+          const itemCount = state.items.reduce(
+            (sum, item) => sum + item.quantity,
+            0,
+          );
           await cartReminderService.scheduleCartReminders(
             itemCount,
             state.restaurantName || undefined,
-            state.lastActivity
+            state.lastActivity,
           );
         } catch (error) {
           console.error('Failed to schedule cart reminders:', error);

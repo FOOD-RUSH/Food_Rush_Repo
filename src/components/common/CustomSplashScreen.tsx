@@ -1,11 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  View,
-  Text,
-  Animated,
-  Dimensions,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, Animated, Dimensions, StyleSheet } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -32,7 +26,6 @@ const CustomSplashScreen: React.FC<CustomSplashScreenProps> = ({
   const [animationPhase, setAnimationPhase] = useState<
     'food' | 'rush' | 'complete'
   >('food');
-
 
   useEffect(() => {
     startFoodAnimation();

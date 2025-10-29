@@ -13,7 +13,10 @@ import { RootStackScreenProps } from '@/src/navigation/types';
 import CommonView from '@/src/components/common/CommonView';
 import { useTranslation } from 'react-i18next';
 import PaymentService from '@/src/services/customer/payment.service';
-import { useCartStore, useCartServiceFee } from '@/src/stores/customerStores/cartStore';
+import {
+  useCartStore,
+  useCartServiceFee,
+} from '@/src/stores/customerStores/cartStore';
 import { useOrderFlow } from '@/src/hooks/customer/useOrderFlow';
 import { useAuthUser } from '@/src/stores/customerStores';
 import {
@@ -51,12 +54,14 @@ const PaymentProcessingScreen = ({
   const isMountedRef = useRef(true);
 
   // State management
-  const [currentStep, setCurrentStep] = useState<PaymentStep>('method_selection');
-  const [selectedPayment, setSelectedPayment] = useState<PaymentMethodSelection>({
-    method: 'mobile_money',
-    provider: provider || 'mtn',
-    phoneNumber: '',
-  });
+  const [currentStep, setCurrentStep] =
+    useState<PaymentStep>('method_selection');
+  const [selectedPayment, setSelectedPayment] =
+    useState<PaymentMethodSelection>({
+      method: 'mobile_money',
+      provider: provider || 'mtn',
+      phoneNumber: '',
+    });
   const [showPaymentModal, setShowPaymentModal] = useState(true);
 
   const [transactionId, setTransactionId] = useState<string>('');
@@ -69,7 +74,9 @@ const PaymentProcessingScreen = ({
   });
 
   const getProviderName = () => {
-    return selectedPayment.provider === 'mtn' ? 'MTN Mobile Money' : 'Orange Money';
+    return selectedPayment.provider === 'mtn'
+      ? 'MTN Mobile Money'
+      : 'Orange Money';
   };
 
   // Cleanup function
@@ -109,23 +116,24 @@ const PaymentProcessingScreen = ({
       setCurrentStep('processing');
       initializePaymentWithSelection(selection);
     },
-    []
+    [],
   );
 
   // Validate phone number
-  const validatePhoneNumber = useCallback(
-    (phone: string, provider: string) => {
-      const medium = provider === 'orange' ? 'orange' : 'mtn';
-      return PaymentService.validatePhoneNumber(phone, medium);
-    },
-    []
-  );
+  const validatePhoneNumber = useCallback((phone: string, provider: string) => {
+    const medium = provider === 'orange' ? 'orange' : 'mtn';
+    return PaymentService.validatePhoneNumber(phone, medium);
+  }, []);
 
   // Initialize payment
-  const initializePaymentWithSelection = async (selection: PaymentMethodSelection) => {
+  const initializePaymentWithSelection = async (
+    selection: PaymentMethodSelection,
+  ) => {
     if (!validatePhoneNumber(selection.phoneNumber!, selection.provider)) {
       setError(
-        t('please_enter_valid_phone', { provider: selection.provider.toUpperCase() })
+        t('please_enter_valid_phone', {
+          provider: selection.provider.toUpperCase(),
+        }),
       );
       setCurrentStep('method_selection');
       setShowPaymentModal(true);
@@ -149,7 +157,7 @@ const PaymentProcessingScreen = ({
         medium,
         user.fullName,
         user.email,
-        serviceFee
+        serviceFee,
       );
 
       initializePayment(paymentRequest, {
@@ -236,11 +244,11 @@ const PaymentProcessingScreen = ({
           cleanup();
           setCurrentStep('failed');
           setError(error || t('payment_verification_failed'));
-        }
+        },
       );
 
       pollingControllerRef.current = controller;
-      
+
       if (__DEV__ && Platform.OS === 'android') {
         console.log('[PaymentProcessing] Android polling started successfully');
       }
@@ -311,7 +319,11 @@ const PaymentProcessingScreen = ({
             className="w-16 h-16 rounded-full items-center justify-center mb-4"
             style={{ backgroundColor: colors.primary + '20' }}
           >
-            <IoniconsIcon name="card-outline" size={32} color={colors.primary} />
+            <IoniconsIcon
+              name="card-outline"
+              size={32}
+              color={colors.primary}
+            />
           </View>
           <Text
             className="text-xl font-bold text-center"
@@ -332,7 +344,10 @@ const PaymentProcessingScreen = ({
           style={{ backgroundColor: colors.primary }}
           onPress={() => setShowPaymentModal(true)}
         >
-          <Text className="text-base font-semibold" style={{ color: colors.onPrimary }}>
+          <Text
+            className="text-base font-semibold"
+            style={{ color: colors.onPrimary }}
+          >
             {t('select_payment_method')}
           </Text>
         </TouchableOpacity>
@@ -348,7 +363,11 @@ const PaymentProcessingScreen = ({
             className="w-16 h-16 rounded-full items-center justify-center mb-4"
             style={{ backgroundColor: colors.primary + '20' }}
           >
-            <IoniconsIcon name="phone-portrait" size={32} color={colors.primary} />
+            <IoniconsIcon
+              name="phone-portrait"
+              size={32}
+              color={colors.primary}
+            />
           </View>
           <Text
             className="text-xl font-bold text-center"
@@ -356,7 +375,10 @@ const PaymentProcessingScreen = ({
           >
             {t('complete_payment_on_phone')}
           </Text>
-          <Text className="text-base text-center mt-2" style={{ color: colors.onSurfaceVariant }}>
+          <Text
+            className="text-base text-center mt-2"
+            style={{ color: colors.onSurfaceVariant }}
+          >
             {t('check_phone_for_prompt', { provider: getProviderName() })}
           </Text>
         </View>
@@ -370,16 +392,28 @@ const PaymentProcessingScreen = ({
               className="mr-3 mt-1"
             />
             <View className="flex-1">
-              <Text className="text-sm font-medium mb-2" style={{ color: colors.primary }}>
+              <Text
+                className="text-sm font-medium mb-2"
+                style={{ color: colors.primary }}
+              >
                 {t('next_steps')}
               </Text>
-              <Text className="text-sm mb-1" style={{ color: colors.onSurfaceVariant }}>
+              <Text
+                className="text-sm mb-1"
+                style={{ color: colors.onSurfaceVariant }}
+              >
                 1. Check your phone for a payment prompt
               </Text>
-              <Text className="text-sm mb-1" style={{ color: colors.onSurfaceVariant }}>
+              <Text
+                className="text-sm mb-1"
+                style={{ color: colors.onSurfaceVariant }}
+              >
                 2. Enter your Mobile Money PIN
               </Text>
-              <Text className="text-sm" style={{ color: colors.onSurfaceVariant }}>
+              <Text
+                className="text-sm"
+                style={{ color: colors.onSurfaceVariant }}
+              >
                 3. We&apos;ll verify your payment automatically
               </Text>
             </View>
@@ -387,14 +421,27 @@ const PaymentProcessingScreen = ({
         </View>
 
         <View className="items-center">
-          <Text className="text-sm mb-2" style={{ color: colors.onSurfaceVariant }}>
+          <Text
+            className="text-sm mb-2"
+            style={{ color: colors.onSurfaceVariant }}
+          >
             {t('time_remaining', { time: formatTime(countdown) })}
           </Text>
-          <ActivityIndicator size="large" color={colors.primary} className="mb-4" />
-          <Text className="text-base font-medium" style={{ color: colors.onSurface }}>
+          <ActivityIndicator
+            size="large"
+            color={colors.primary}
+            className="mb-4"
+          />
+          <Text
+            className="text-base font-medium"
+            style={{ color: colors.onSurface }}
+          >
             {t('verifying_payment')}
           </Text>
-          <Text className="text-sm mt-2" style={{ color: colors.onSurfaceVariant }}>
+          <Text
+            className="text-sm mt-2"
+            style={{ color: colors.onSurfaceVariant }}
+          >
             {t('please_wait_checking_status')}
           </Text>
         </View>
@@ -436,7 +483,10 @@ const PaymentProcessingScreen = ({
             style={{ backgroundColor: colors.primary }}
             onPress={handleSuccessAndNavigateHome}
           >
-            <Text className="text-base font-semibold" style={{ color: colors.onPrimary }}>
+            <Text
+              className="text-base font-semibold"
+              style={{ color: colors.onPrimary }}
+            >
               {t('continue_to_home')}
             </Text>
           </TouchableOpacity>
@@ -467,7 +517,7 @@ const PaymentProcessingScreen = ({
           >
             {error || t('payment_error_generic')}
           </Text>
-    {/* to review  */}
+          {/* to review  */}
           <View className="flex-row justify-between gap-2">
             <TouchableOpacity
               className="flex-1 rounded-lg py-4 items-center border"
@@ -553,9 +603,16 @@ const PaymentProcessingScreen = ({
             }}
             className="mr-3"
           >
-            <IoniconsIcon name="arrow-back" size={24} color={colors.onSurface} />
+            <IoniconsIcon
+              name="arrow-back"
+              size={24}
+              color={colors.onSurface}
+            />
           </TouchableOpacity>
-          <Text className="text-lg font-semibold" style={{ color: colors.onSurface }}>
+          <Text
+            className="text-lg font-semibold"
+            style={{ color: colors.onSurface }}
+          >
             {t('payment')}
           </Text>
         </View>
@@ -571,12 +628,18 @@ const PaymentProcessingScreen = ({
           >
             {t('order_number', { orderId })}
           </Text>
-          <Text className="text-2xl font-bold" style={{ color: colors.onSurface }}>
+          <Text
+            className="text-2xl font-bold"
+            style={{ color: colors.onSurface }}
+          >
             {formattedAmount} FCFA
           </Text>
 
           {serviceFee > 0 && (
-            <View className="mt-2 pt-2 border-t" style={{ borderTopColor: colors.outline }}>
+            <View
+              className="mt-2 pt-2 border-t"
+              style={{ borderTopColor: colors.outline }}
+            >
               <View className="flex-row justify-between items-center">
                 <Text
                   className="text-sm"

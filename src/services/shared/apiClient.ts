@@ -48,8 +48,6 @@ class ApiClient {
       process.env.EXPO_PUBLIC_API_URL ||
       'https://foodrush-be.onrender.com/api/v1';
 
-   
-
     return apiUrl;
   }
 

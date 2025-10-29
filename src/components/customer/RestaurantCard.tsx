@@ -15,7 +15,10 @@ import {
   Caption,
 } from '@/src/components/common/Typography';
 import { useLocationStatus } from '@/src/hooks/customer/useLocationService';
-import { useToggleFavorite, useIsRestaurantLiked } from '@/src/hooks/customer/useFavoriteRestaurants';
+import {
+  useToggleFavorite,
+  useIsRestaurantLiked,
+} from '@/src/hooks/customer/useFavoriteRestaurants';
 
 interface RestaurantCardProps {
   id: string;
@@ -61,13 +64,14 @@ export const RestaurantCard = ({
     useNavigation<CustomerHomeStackScreenProps<'HomeScreen'>['navigation']>();
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
-  const { isTablet, isLargeScreen, wp, getResponsiveText } =
-    useResponsive();
+  const { isTablet, isLargeScreen, wp, getResponsiveText } = useResponsive();
 
   const isInitiallyLiked = useIsRestaurantLiked(id);
   const { toggleFavorite, isLoading: isToggling } = useToggleFavorite();
 
-  const [optimisticLiked, setOptimisticLiked] = React.useState<boolean | null>(null);
+  const [optimisticLiked, setOptimisticLiked] = React.useState<boolean | null>(
+    null,
+  );
   const liked = optimisticLiked ?? isInitiallyLiked;
 
   const [snackVisible, setSnackVisible] = React.useState(false);
@@ -126,8 +130,7 @@ export const RestaurantCard = ({
 
   const cardDimensions = getCardDimensions();
 
-  const {isUsingFallback } =
-    useLocationStatus();
+  const { isUsingFallback } = useLocationStatus();
 
   // Use backend-provided data directly (no calculations needed)
   const displayEstimatedDeliveryTime = estimatedDeliveryTime;
@@ -203,8 +206,15 @@ export const RestaurantCard = ({
                 alignItems: 'center',
               }}
             >
-              <IoniconsIcon name="checkmark-circle" size={cardDimensions.badgeSize} color="white" />
-              <Caption color="white" style={{ marginLeft: 4, fontSize: cardDimensions.badgeSize }}>
+              <IoniconsIcon
+                name="checkmark-circle"
+                size={cardDimensions.badgeSize}
+                color="white"
+              />
+              <Caption
+                color="white"
+                style={{ marginLeft: 4, fontSize: cardDimensions.badgeSize }}
+              >
                 Verified
               </Caption>
             </View>
@@ -219,11 +229,18 @@ export const RestaurantCard = ({
               setOptimisticLiked(next);
               try {
                 await toggleFavorite(id);
-                showSnack(next ? t('restaurant_liked', 'Added to favorites') : t('restaurant_unliked', 'Removed from favorites'));
+                showSnack(
+                  next
+                    ? t('restaurant_liked', 'Added to favorites')
+                    : t('restaurant_unliked', 'Removed from favorites'),
+                );
               } catch (err: any) {
                 // revert
                 setOptimisticLiked(!next);
-                showSnack(err?.message || t('failed_to_toggle_favorite', 'Failed to update favorite'));
+                showSnack(
+                  err?.message ||
+                    t('failed_to_toggle_favorite', 'Failed to update favorite'),
+                );
               }
             }}
             style={{
@@ -244,7 +261,7 @@ export const RestaurantCard = ({
             <IoniconsIcon
               name={liked ? 'heart' : 'heart-outline'}
               size={20}
-              color={liked ? colors.primary : colors.onSurface}
+              color={liked ? '#f87171' : colors.onSurface}
             />
           </TouchableOpacity>
 
@@ -273,7 +290,10 @@ export const RestaurantCard = ({
                 size={cardDimensions.badgeSize}
                 color={rating !== null ? 'yellow' : colors.onSurfaceVariant}
               />
-              <Caption color="white" style={{ marginLeft: 4, fontSize: cardDimensions.badgeSize }}>
+              <Caption
+                color="white"
+                style={{ marginLeft: 4, fontSize: cardDimensions.badgeSize }}
+              >
                 {getRatingDisplay()} ({ratingCount})
               </Caption>
             </View>
@@ -352,10 +372,10 @@ export const RestaurantCard = ({
 
           {/* Address display */}
           <View style={{ marginBottom: 8 }}>
-            <Body 
-              color={colors.onSurfaceVariant} 
+            <Body
+              color={colors.onSurfaceVariant}
               numberOfLines={1}
-              style={{ 
+              style={{
                 fontSize: cardDimensions.addressSize,
                 lineHeight: cardDimensions.addressSize * 1.3,
               }}
@@ -372,8 +392,8 @@ export const RestaurantCard = ({
             }}
           >
             <View style={{ flex: 1 }}>
-              <Label 
-                color={colors.primary} 
+              <Label
+                color={colors.primary}
                 weight="semibold"
                 style={{ fontSize: cardDimensions.deliveryPriceSize }}
               >
@@ -381,9 +401,9 @@ export const RestaurantCard = ({
               </Label>
 
               {/* Menu mode indicator */}
-              <Caption 
-                color={colors.onSurfaceVariant} 
-                style={{ 
+              <Caption
+                color={colors.onSurfaceVariant}
+                style={{
                   marginTop: 2,
                   fontSize: cardDimensions.captionSize,
                 }}
@@ -393,8 +413,8 @@ export const RestaurantCard = ({
             </View>
 
             <View style={{ alignItems: 'flex-end' }}>
-              <Label 
-                color={colors.onSurface} 
+              <Label
+                color={colors.onSurface}
                 weight="medium"
                 style={{ fontSize: cardDimensions.deliveryTimeSize }}
               >
@@ -403,7 +423,7 @@ export const RestaurantCard = ({
               <View style={{ alignItems: 'flex-end' }}>
                 <Caption
                   color={colors.onSurfaceVariant}
-                  style={{ 
+                  style={{
                     marginTop: 2,
                     fontSize: cardDimensions.distanceSize,
                   }}
@@ -413,8 +433,8 @@ export const RestaurantCard = ({
                 {isUsingFallback && (
                   <Caption
                     color={colors.primary}
-                    style={{ 
-                      marginTop: 1, 
+                    style={{
+                      marginTop: 1,
                       fontSize: cardDimensions.badgeSize,
                     }}
                   >
@@ -430,6 +450,7 @@ export const RestaurantCard = ({
         visible={snackVisible}
         onDismiss={() => setSnackVisible(false)}
         duration={2000}
+        style={{ backgroundColor: colors.inverseSurface }}
       >
         {snackMessage}
       </Snackbar>

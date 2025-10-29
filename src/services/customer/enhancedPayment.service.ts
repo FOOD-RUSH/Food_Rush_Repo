@@ -71,10 +71,10 @@ class EnhancedPaymentService {
   validatePhoneNumber(phoneNumber: string, medium: 'mtn' | 'orange'): boolean {
     // Remove all non-digit characters
     const cleanNumber = phoneNumber.replace(/\D/g, '');
-    
+
     // Remove country code if present
-    const localNumber = cleanNumber.startsWith('237') 
-      ? cleanNumber.substring(3) 
+    const localNumber = cleanNumber.startsWith('237')
+      ? cleanNumber.substring(3)
       : cleanNumber;
 
     // Must be exactly 9 digits
@@ -84,7 +84,7 @@ class EnhancedPaymentService {
 
     // Get the first two digits (prefix)
     const prefix = localNumber.substring(0, 2);
-    
+
     if (medium === 'mtn') {
       // MTN prefixes: 65, 66, 67, 68
       return ['65', '66', '67', '68'].includes(prefix);
@@ -101,17 +101,17 @@ class EnhancedPaymentService {
    */
   formatPhoneNumber(phoneNumber: string): string {
     const cleanNumber = phoneNumber.replace(/\D/g, '');
-    
+
     // Remove country code if present
     if (cleanNumber.startsWith('237') && cleanNumber.length === 12) {
       return cleanNumber.substring(3);
     }
-    
+
     // Return as-is if already 9 digits
     if (cleanNumber.length === 9) {
       return cleanNumber;
     }
-    
+
     throw new Error('Invalid phone number format');
   }
 
@@ -122,15 +122,15 @@ class EnhancedPaymentService {
     if (!request.orderId?.trim()) {
       throw new Error('Order ID is required');
     }
-    
+
     if (!request.name?.trim()) {
       throw new Error('Customer name is required');
     }
-    
+
     if (!request.email?.trim() || !this.isValidEmail(request.email)) {
       throw new Error('Valid email address is required');
     }
-    
+
     if (!this.validatePhoneNumber(request.phone, request.medium)) {
       throw new Error(`Invalid ${request.medium.toUpperCase()} phone number`);
     }
@@ -166,10 +166,12 @@ class EnhancedPaymentService {
       //   ...(request.serviceFee && { serviceFee: request.serviceFee }), // Include service fee if provided
       // };
 
-      const response = await apiClient.post<PaymentInitResponse>('/payments/init', request);
-      
+      const response = await apiClient.post<PaymentInitResponse>(
+        '/payments/init',
+        request,
+      );
+
       if (response.data?.status_code === 200 && response.data?.data?.transId) {
-        
         return {
           success: true,
           transactionId: response.data.data.transId,
@@ -177,7 +179,10 @@ class EnhancedPaymentService {
           status: 'PENDING',
         };
       } else {
-        console.error('❌ Payment initialization failed:', response.data.message);
+        console.error(
+          '❌ Payment initialization failed:',
+          response.data.message,
+        );
         return {
           success: false,
           error: response.data.message || 'Failed to initialize payment',
@@ -185,7 +190,7 @@ class EnhancedPaymentService {
       }
     } catch (error: any) {
       console.error('❌ Payment initialization error:', error);
-      
+
       // Handle specific error cases
       if (error.message.includes('phone number')) {
         return {
@@ -193,24 +198,25 @@ class EnhancedPaymentService {
           error: `Please enter a valid ${request.medium.toUpperCase()} phone number`,
         };
       }
-      
+
       if (error.response?.status === 400) {
         return {
           success: false,
           error: error.response.data?.message || 'Invalid payment information',
         };
       }
-      
+
       if (error.response?.status === 401) {
         return {
           success: false,
           error: 'Authentication failed. Please log in again.',
         };
       }
-      
+
       return {
         success: false,
-        error: error.message || 'Failed to initialize payment. Please try again.',
+        error:
+          error.message || 'Failed to initialize payment. Please try again.',
       };
     }
   }
@@ -218,7 +224,9 @@ class EnhancedPaymentService {
   /**
    * Verify payment status
    */
-  async verifyPaymentStatus(transactionId: string): Promise<PaymentVerificationResponse | null> {
+  async verifyPaymentStatus(
+    transactionId: string,
+  ): Promise<PaymentVerificationResponse | null> {
     try {
       const response = await apiClient.get<PaymentVerificationResponse>(
         `/payments/verify?transId=${transactionId}`,
@@ -234,7 +242,9 @@ class EnhancedPaymentService {
   /**
    * Check order payment status
    */
-  async checkOrderPaymentStatus(orderId: string): Promise<PaymentStatusResponse | null> {
+  async checkOrderPaymentStatus(
+    orderId: string,
+  ): Promise<PaymentStatusResponse | null> {
     try {
       const response = await apiClient.get<PaymentStatusResponse>(
         `/payments/status/${orderId}`,
@@ -261,7 +271,7 @@ class EnhancedPaymentService {
       const poll = async () => {
         try {
           const status = await this.verifyPaymentStatus(transactionId);
-          
+
           if (!status) {
             // If we can't get status, continue polling unless timeout
             if (Date.now() - startTime >= timeoutMs) {
@@ -273,7 +283,7 @@ class EnhancedPaymentService {
               });
               return;
             }
-            
+
             setTimeout(poll, this.POLLING_INTERVAL);
             return;
           }
@@ -282,7 +292,6 @@ class EnhancedPaymentService {
           onStatusUpdate?.(status);
 
           if (status.status === 'SUCCESSFUL') {
-
             resolve({
               success: true,
               status: 'SUCCESSFUL',
@@ -293,7 +302,6 @@ class EnhancedPaymentService {
           }
 
           if (status.status === 'FAILED') {
-
             resolve({
               success: false,
               status: 'FAILED',
@@ -306,7 +314,6 @@ class EnhancedPaymentService {
 
           // Still pending, check timeout
           if (Date.now() - startTime >= timeoutMs) {
-
             resolve({
               success: false,
               status: 'TIMEOUT',
@@ -320,7 +327,7 @@ class EnhancedPaymentService {
           setTimeout(poll, this.POLLING_INTERVAL);
         } catch (error) {
           console.error('❌ Polling error:', error);
-          
+
           // On error, continue polling unless timeout
           if (Date.now() - startTime >= timeoutMs) {
             resolve({
@@ -331,7 +338,7 @@ class EnhancedPaymentService {
             });
             return;
           }
-          
+
           setTimeout(poll, this.POLLING_INTERVAL);
         }
       };
@@ -350,19 +357,20 @@ class EnhancedPaymentService {
     maxRetries: number = this.MAX_RETRY_ATTEMPTS,
   ): Promise<PaymentPollingResult> {
     let lastError: string = '';
-    
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
 
-      
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         // Initialize payment
         const initResult = await this.initializePayment(request);
-        
+
         if (!initResult.success || !initResult.transactionId) {
           lastError = initResult.error || 'Failed to initialize payment';
-          
+
           // Don't retry on validation errors
-          if (lastError.includes('phone number') || lastError.includes('email')) {
+          if (
+            lastError.includes('phone number') ||
+            lastError.includes('email')
+          ) {
             return {
               success: false,
               status: 'FAILED',
@@ -370,24 +378,30 @@ class EnhancedPaymentService {
               error: lastError,
             };
           }
-          
+
           if (attempt === maxRetries) break;
-          
+
           // Wait before retry
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          await new Promise((resolve) => setTimeout(resolve, 2000));
           continue;
         }
 
         // Prefer WebSocket for status updates if available
         try {
-          const { socketService } = await import('@/src/services/shared/socket');
+          const { socketService } = await import(
+            '@/src/services/shared/socket'
+          );
           await socketService.connect();
           if (socketService.isConnected()) {
             const wsResult = await socketService.waitFor<{
               transId: string;
               status: 'SUCCESSFUL' | 'FAILED' | 'PENDING';
               financialTransId?: string;
-            }>('payment:status', (d) => d?.transId === initResult.transactionId, this.PAYMENT_TIMEOUT);
+            }>(
+              'payment:status',
+              (d) => d?.transId === initResult.transactionId,
+              this.PAYMENT_TIMEOUT,
+            );
 
             if (wsResult.status === 'SUCCESSFUL') {
               return {
@@ -416,15 +430,14 @@ class EnhancedPaymentService {
 
         // Return result (success or failure)
         return pollResult;
-        
       } catch (error: any) {
         lastError = error.message || 'Payment processing failed';
         console.error(`❌ Payment attempt ${attempt} failed:`, error);
-        
+
         if (attempt === maxRetries) break;
-        
+
         // Wait before retry
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 2000));
       }
     }
 
@@ -448,7 +461,7 @@ class EnhancedPaymentService {
    */
   getPaymentInstructions(medium: 'mtn' | 'orange'): string[] {
     const providerName = this.getProviderDisplayName(medium);
-    
+
     return [
       `Check your ${providerName} phone for a payment prompt`,
       'Enter your Mobile Money PIN when prompted',

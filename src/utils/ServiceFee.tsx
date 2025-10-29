@@ -1,14 +1,14 @@
 const calculateServiceFee = (orderValue: number): number => {
   let feePercentage: number;
   let baseFee: number;
-  
+
   const SMALL_ORDER_THRESHOLD = 2000;
   const MEDIUM_ORDER_THRESHOLD = 5000;
   const LARGE_ORDER_THRESHOLD = 10000;
-  
+
   if (orderValue < SMALL_ORDER_THRESHOLD) {
     feePercentage = 0.1; // 8% (reduced from 12%)
-    baseFee = 350 // 150 CFA (reduced from 300)
+    baseFee = 350; // 150 CFA (reduced from 300)
   } else if (orderValue < MEDIUM_ORDER_THRESHOLD) {
     feePercentage = 0.08; // 7% (reduced from 10%)
     baseFee = 300; // 150 CFA (reduced from 250)
@@ -19,8 +19,8 @@ const calculateServiceFee = (orderValue: number): number => {
     feePercentage = 0.05; // 5% (reduced from 6%)
     baseFee = 150; // 100 CFA (reduced from 150)
   }
-  
-  return Math.round((orderValue * feePercentage) + baseFee);
+
+  return Math.round(orderValue * feePercentage + baseFee);
 };
 
 // Reduced delivery fee

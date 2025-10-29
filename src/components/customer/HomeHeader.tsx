@@ -22,7 +22,7 @@ const HomeHeader: React.FC<HomeHeaderProps> = ({ navigation }) => {
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
   const cartItemCount = useCartItemCount();
-  const { unreadCount: unreadNotificationCount } = useNotifications()
+  const { unreadCount: unreadNotificationCount } = useNotifications();
   const user = useUser();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const queryClient = useQueryClient();

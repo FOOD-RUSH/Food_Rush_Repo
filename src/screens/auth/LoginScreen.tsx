@@ -16,12 +16,7 @@ import {
   TouchableOpacity,
   ImageBackground,
 } from 'react-native';
-import {
-  TextInput,
-  HelperText,
-  useTheme,
-  Button,
-} from 'react-native-paper';
+import { TextInput, HelperText, useTheme, Button } from 'react-native-paper';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { loginSchema } from '@/src/utils/validation';
@@ -159,7 +154,8 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
         type: 'error',
         text1: t('error'),
         text2: t('no_internet', {
-          defaultValue: 'No internet connection. Please check your network settings.',
+          defaultValue:
+            'No internet connection. Please check your network settings.',
         }),
         position: 'top',
       });
@@ -200,7 +196,8 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
           errorMessage = e.message;
         } else if (e?.status === 401) {
           errorMessage = t('invalid_credentials', {
-            defaultValue: 'Invalid email or password. Please check your credentials.',
+            defaultValue:
+              'Invalid email or password. Please check your credentials.',
           });
         } else if (e?.status === 429) {
           errorMessage = t('too_many_attempts', {
@@ -208,7 +205,8 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
           });
         } else if (e?.code === 'NETWORK_ERROR') {
           errorMessage = t('network_error', {
-            defaultValue: 'Network error. Please check your internet connection.',
+            defaultValue:
+              'Network error. Please check your internet connection.',
           });
         }
 
@@ -359,7 +357,9 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
               render={({ field: { onChange, onBlur, value } }) => (
                 <View style={{ marginBottom: 16 }}>
                   <TextInput
-                    placeholder={t('enter_email', { defaultValue: 'Enter your email' })}
+                    placeholder={t('enter_email', {
+                      defaultValue: 'Enter your email',
+                    })}
                     value={value}
                     onChangeText={onChange}
                     onBlur={onBlur}
@@ -388,7 +388,9 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
               render={({ field: { onChange, onBlur, value } }) => (
                 <View style={{ marginBottom: 20 }}>
                   <TextInput
-                    placeholder={t('enter_password', { defaultValue: 'Enter your password' })}
+                    placeholder={t('enter_password', {
+                      defaultValue: 'Enter your password',
+                    })}
                     value={value}
                     onChangeText={onChange}
                     onBlur={onBlur}
@@ -518,7 +520,9 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
               }}
             >
               <Body style={{ color: colors.onSurfaceVariant }}>
-                {t('dont_have_account', { defaultValue: "Don't have an account?" })}
+                {t('dont_have_account', {
+                  defaultValue: "Don't have an account?",
+                })}
               </Body>
               <TouchableOpacity onPress={handleSignUp}>
                 <Body style={{ color: colors.primary, fontWeight: 'bold' }}>

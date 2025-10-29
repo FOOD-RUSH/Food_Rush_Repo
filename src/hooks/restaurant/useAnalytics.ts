@@ -27,13 +27,15 @@ export const useAnalyticsSummary = (dateRange?: AnalyticsDateRange) => {
     const setupWebSocket = async () => {
       try {
         const { socketService } = await import('@/src/services/shared/socket');
-        
+
         if (!mounted) return;
-        
+
         await socketService.connect();
-        
+
         if (!socketService.isConnected()) {
-          console.log('[Analytics] WebSocket not available, using HTTP polling');
+          console.log(
+            '[Analytics] WebSocket not available, using HTTP polling',
+          );
           return;
         }
 
@@ -41,10 +43,10 @@ export const useAnalyticsSummary = (dateRange?: AnalyticsDateRange) => {
 
         const handleSummaryUpdate = (payload: any) => {
           if (!mounted || !payload?.data) return;
-          
+
           queryClient.setQueryData(
             ['analytics', 'summary', dateRange],
-            payload
+            payload,
           );
         };
 
@@ -91,18 +93,18 @@ export const useRestaurantBalance = () => {
     const setupWebSocket = async () => {
       try {
         const { socketService } = await import('@/src/services/shared/socket');
-        
+
         if (!mounted) return;
-        
+
         await socketService.connect();
-        
+
         if (!socketService.isConnected()) return;
 
         wsConnectedRef.current = true;
 
         const handleBalanceUpdate = (payload: any) => {
           if (!mounted || !payload?.data) return;
-          
+
           queryClient.setQueryData(['analytics', 'balance'], payload);
         };
 
@@ -153,21 +155,21 @@ export const useRevenueBuckets = (
     const setupWebSocket = async () => {
       try {
         const { socketService } = await import('@/src/services/shared/socket');
-        
+
         if (!mounted) return;
-        
+
         await socketService.connect();
-        
+
         if (!socketService.isConnected()) return;
 
         wsConnectedRef.current = true;
 
         const handleRevenueUpdate = (payload: any) => {
           if (!mounted || !Array.isArray(payload?.data)) return;
-          
+
           queryClient.setQueryData(
             ['analytics', 'revenue-buckets', period, dateRange],
-            payload
+            payload,
           );
         };
 

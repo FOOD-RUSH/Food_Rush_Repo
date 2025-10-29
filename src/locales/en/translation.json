@@ -1074,7 +1074,7 @@
   "total_items": "Total Items",
   "total_items_sold": "Total Items Sold",
   "total_orders": "Total Orders",
-    "failed_to_create_account": "Failed to create account. Please try again.",
+  "failed_to_create_account": "Failed to create account. Please try again.",
 
   "total_price": "Total price",
   "total_revenue": "Total Revenue",
@@ -1335,5 +1335,8 @@
   "payment_confirmed_order_processing": "Payement confirmed, Order Processing",
   "redirecting_home": "Redirecting Home...",
   "next_steps": "Next steps",
-  "complete_payment_on_phone": "Complete Payement on Phone"
+  "complete_payment_on_phone": "Complete Payement on Phone",
+  "7_days": "7 days",
+  "30_days": "30 days",
+  "add_new_address": "Add a new address"
 }

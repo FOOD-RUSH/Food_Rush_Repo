@@ -1,11 +1,11 @@
 import { apiClient } from '@/src/services/shared/apiClient';
-import { 
-  Transaction, 
-  TransactionHistoryResponse, 
+import {
+  Transaction,
+  TransactionHistoryResponse,
   PaymentTransactionApiResponse,
   PaymentTransactionListResponse,
   TransactionStatus,
-  TransactionProvider
+  TransactionProvider,
 } from '@/src/types/transaction';
 import { useAuthStore } from '@/src/stores/AuthStore';
 
@@ -43,18 +43,29 @@ class TransactionService {
   /**
    * Determine provider from financial transaction ID or medium
    */
-  private determineProvider(financialTransId: string | null, medium: string | null): TransactionProvider {
+  private determineProvider(
+    financialTransId: string | null,
+    medium: string | null,
+  ): TransactionProvider {
     // Check financial transaction ID first
     if (financialTransId) {
       const transIdLower = financialTransId.toLowerCase();
-      if (transIdLower.includes('mtn') || transIdLower.startsWith('67') || transIdLower.startsWith('68')) {
+      if (
+        transIdLower.includes('mtn') ||
+        transIdLower.startsWith('67') ||
+        transIdLower.startsWith('68')
+      ) {
         return 'mtn';
       }
-      if (transIdLower.includes('orange') || transIdLower.startsWith('69') || transIdLower.startsWith('65')) {
+      if (
+        transIdLower.includes('orange') ||
+        transIdLower.startsWith('69') ||
+        transIdLower.startsWith('65')
+      ) {
         return 'orange';
       }
     }
-    
+
     // Check medium
     if (medium) {
       const mediumLower = medium.toLowerCase();
@@ -65,7 +76,7 @@ class TransactionService {
         return 'mtn';
       }
     }
-    
+
     // Return unknown if we can't determine
     return 'unknown';
   }
@@ -73,7 +84,9 @@ class TransactionService {
   /**
    * Map API status to app status
    */
-  private mapApiStatus(apiStatus: 'PENDING' | 'SUCCESSFUL' | 'FAILED'): TransactionStatus {
+  private mapApiStatus(
+    apiStatus: 'PENDING' | 'SUCCESSFUL' | 'FAILED',
+  ): TransactionStatus {
     switch (apiStatus) {
       case 'PENDING':
         return 'pending';
@@ -89,19 +102,25 @@ class TransactionService {
   /**
    * Transform API response to Transaction interface
    */
-  private transformApiResponseToTransaction(apiResponse: PaymentTransactionApiResponse): Transaction {
-    const provider = this.determineProvider(apiResponse.financialTransId, apiResponse.medium);
+  private transformApiResponseToTransaction(
+    apiResponse: PaymentTransactionApiResponse,
+  ): Transaction {
+    const provider = this.determineProvider(
+      apiResponse.financialTransId,
+      apiResponse.medium,
+    );
     const status = this.mapApiStatus(apiResponse.status);
-    
+
     // Generate a user-friendly description based on available data
     let description = `${apiResponse.transType} - ${apiResponse.serviceName}`;
     if (provider !== 'unknown') {
       description = `${provider.toUpperCase()} Mobile Money ${apiResponse.transType.toLowerCase()}`;
     }
-    
+
     // Determine payment method
-    const method = apiResponse.medium === 'mobile money' ? 'mobile_money' : 'unknown';
-    
+    const method =
+      apiResponse.medium === 'mobile money' ? 'mobile_money' : 'unknown';
+
     return {
       id: apiResponse.transId,
       orderId: apiResponse.externalId, // Use externalId as order reference
@@ -131,43 +150,51 @@ class TransactionService {
    * Uses the documented API endpoint: GET /api/v1/payments/transactions/{userId}
    */
   async getTransactionHistory(
-    filters: TransactionFilters = {}
+    filters: TransactionFilters = {},
   ): Promise<TransactionHistoryResponse> {
     try {
       const userId = this.getCurrentUserId();
-      
+
       // Use the documented payment API endpoint
       const response = await apiClient.get<PaymentTransactionListResponse>(
-        `/payments/transactions/${userId}`
+        `/payments/transactions/${userId}`,
       );
-      
 
       // Transform API response to expected format
-      let transactions = response.data.data.map(apiTransaction => 
-        this.transformApiResponseToTransaction(apiTransaction)
+      let transactions = response.data.data.map((apiTransaction) =>
+        this.transformApiResponseToTransaction(apiTransaction),
       );
 
       // Apply client-side filtering since the API doesn't support query parameters
       if (filters.status) {
-        transactions = transactions.filter(t => t.status === filters.status);
+        transactions = transactions.filter((t) => t.status === filters.status);
       }
       if (filters.provider && filters.provider !== 'unknown') {
-        transactions = transactions.filter(t => t.provider === filters.provider);
+        transactions = transactions.filter(
+          (t) => t.provider === filters.provider,
+        );
       }
       if (filters.method) {
-        transactions = transactions.filter(t => t.method === filters.method);
+        transactions = transactions.filter((t) => t.method === filters.method);
       }
       if (filters.startDate) {
         const startDate = new Date(filters.startDate);
-        transactions = transactions.filter(t => new Date(t.createdAt) >= startDate);
+        transactions = transactions.filter(
+          (t) => new Date(t.createdAt) >= startDate,
+        );
       }
       if (filters.endDate) {
         const endDate = new Date(filters.endDate);
-        transactions = transactions.filter(t => new Date(t.createdAt) <= endDate);
+        transactions = transactions.filter(
+          (t) => new Date(t.createdAt) <= endDate,
+        );
       }
 
       // Sort by date (newest first)
-      transactions.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      transactions.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
 
       // Apply pagination
       const page = filters.page || 1;
@@ -196,7 +223,7 @@ class TransactionService {
     } catch (error: any) {
       console.error('Failed to fetch transaction history:', error);
       throw new Error(
-        error.response?.data?.message || 'Failed to fetch transaction history'
+        error.response?.data?.message || 'Failed to fetch transaction history',
       );
     }
   }
@@ -208,25 +235,27 @@ class TransactionService {
   async getTransactionById(transactionId: string): Promise<Transaction> {
     try {
       // First try to find the transaction in the user's transaction history
-      const transactionHistory = await this.getTransactionHistory({ limit: 1000 });
+      const transactionHistory = await this.getTransactionHistory({
+        limit: 1000,
+      });
       const foundTransaction = transactionHistory.data.transactions.find(
-        t => t.transactionId === transactionId
+        (t) => t.transactionId === transactionId,
       );
-      
+
       if (foundTransaction) {
         return foundTransaction;
       }
-      
+
       // Fallback: Use the payment verification endpoint
       const response = await apiClient.get<PaymentTransactionApiResponse>(
-        `/payments/verify?transId=${transactionId}`
+        `/payments/verify?transId=${transactionId}`,
       );
 
       return this.transformApiResponseToTransaction(response.data);
     } catch (error: any) {
       console.error('Failed to fetch transaction details:', error);
       throw new Error(
-        error.response?.data?.message || 'Failed to fetch transaction details'
+        error.response?.data?.message || 'Failed to fetch transaction details',
       );
     }
   }
@@ -244,22 +273,29 @@ class TransactionService {
   }> {
     try {
       // Get all transactions and calculate stats client-side
-      const transactionHistory = await this.getTransactionHistory({ limit: 1000 }); // Get a large number to calculate accurate stats
+      const transactionHistory = await this.getTransactionHistory({
+        limit: 1000,
+      }); // Get a large number to calculate accurate stats
       const transactions = transactionHistory.data.transactions;
 
       const stats = {
         totalTransactions: transactions.length,
         totalAmount: transactions.reduce((sum, t) => sum + t.amount, 0),
-        successfulTransactions: transactions.filter(t => t.status === 'completed').length,
-        failedTransactions: transactions.filter(t => t.status === 'failed' || t.status === 'cancelled').length,
-        pendingTransactions: transactions.filter(t => t.status === 'pending').length,
+        successfulTransactions: transactions.filter(
+          (t) => t.status === 'completed',
+        ).length,
+        failedTransactions: transactions.filter(
+          (t) => t.status === 'failed' || t.status === 'cancelled',
+        ).length,
+        pendingTransactions: transactions.filter((t) => t.status === 'pending')
+          .length,
       };
 
       return stats;
     } catch (error: any) {
       console.error('Failed to fetch transaction stats:', error);
       throw new Error(
-        error.response?.data?.message || 'Failed to fetch transaction stats'
+        error.response?.data?.message || 'Failed to fetch transaction stats',
       );
     }
   }

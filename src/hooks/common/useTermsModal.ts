@@ -9,7 +9,7 @@ export interface UseTermsModalReturn {
 
 /**
  * Hook to manage Terms & Conditions modal state
- * 
+ *
  * @returns Object with modal state and control functions
  */
 export const useTermsModal = (): UseTermsModalReturn => {
@@ -24,7 +24,7 @@ export const useTermsModal = (): UseTermsModalReturn => {
   }, []);
 
   const toggleTerms = useCallback(() => {
-    setIsVisible(prev => !prev);
+    setIsVisible((prev) => !prev);
   }, []);
 
   return {

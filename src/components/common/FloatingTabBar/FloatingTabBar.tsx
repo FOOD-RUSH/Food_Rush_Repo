@@ -154,19 +154,20 @@ const FloatingTabBar: React.FC<FloatingTabBarProps> = ({
                   />
                 )}
               </View>
-              
-                <Text
-                  style={[
-                    styles.label,
-                    {
-                      color: isFocused ?  navigationTheme.colors.primary : navigationTheme.colors.text,
-                    },
-                  ]}
-                  numberOfLines={1}
-                >
-                  {label}
-                </Text>
-           
+
+              <Text
+                style={[
+                  styles.label,
+                  {
+                    color: isFocused
+                      ? navigationTheme.colors.primary
+                      : navigationTheme.colors.text,
+                  },
+                ]}
+                numberOfLines={1}
+              >
+                {label}
+              </Text>
             </TouchableOpacity>
           );
         })}

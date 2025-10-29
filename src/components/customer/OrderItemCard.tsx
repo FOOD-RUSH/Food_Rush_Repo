@@ -87,8 +87,7 @@ const OrderItemCard = ({
 
   const handleConfirmOrder = useCallback(() => {
     confirmOrder(order.id, {
-      onSuccess: () => {
-      },
+      onSuccess: () => {},
       onError: (error) => {
         console.error('Failed to confirm order:', error);
       },
@@ -99,8 +98,7 @@ const OrderItemCard = ({
     cancelOrder(
       { orderId: order.id, reason: 'Customer cancelled' },
       {
-        onSuccess: () => {
-        },
+        onSuccess: () => {},
         onError: (error) => {
           console.error('Failed to cancel order:', error);
         },

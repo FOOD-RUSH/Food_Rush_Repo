@@ -29,9 +29,9 @@ const TransactionDetailsScreen: React.FC<TransactionDetailsScreenProps> = ({
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
   const { isTablet, getResponsiveText } = useResponsive();
-  
+
   const [isSharing, setIsSharing] = useState(false);
-  
+
   // Fetch transaction details
   const {
     data: transaction,
@@ -39,7 +39,7 @@ const TransactionDetailsScreen: React.FC<TransactionDetailsScreenProps> = ({
     isError,
     refetch,
   } = useTransaction(transactionId);
-  
+
   // Get responsive dimensions
   const getCardDimensions = () => {
     if (isTablet) {
@@ -56,9 +56,9 @@ const TransactionDetailsScreen: React.FC<TransactionDetailsScreenProps> = ({
       };
     }
   };
-  
+
   const cardDimensions = getCardDimensions();
-  
+
   // Format date based on locale
   const formatTransactionDate = (dateString: string) => {
     try {
@@ -75,7 +75,7 @@ const TransactionDetailsScreen: React.FC<TransactionDetailsScreenProps> = ({
       return dateString;
     }
   };
-  
+
   // Get status color
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -90,7 +90,7 @@ const TransactionDetailsScreen: React.FC<TransactionDetailsScreenProps> = ({
         return colors.onSurfaceVariant;
     }
   };
-  
+
   // Get status icon
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -105,16 +105,16 @@ const TransactionDetailsScreen: React.FC<TransactionDetailsScreenProps> = ({
         return 'help-circle';
     }
   };
-  
+
   // Get provider icon
   const getProviderIcon = (provider: 'mtn' | 'orange') => {
     return provider === 'mtn' ? images.Mobile_Money : images.Orange_Money;
   };
-  
+
   // Share transaction details
   const handleShare = async () => {
     if (!transaction) return;
-    
+
     setIsSharing(true);
     try {
       const shareContent = `
@@ -126,7 +126,7 @@ ${t('provider')}: ${transaction.provider.toUpperCase()}
 ${t('date')}: ${formatTransactionDate(transaction.createdAt)}
 ${transaction.financialTransId ? `${t('provider_ref')}: ${transaction.financialTransId}` : ''}
       `.trim();
-      
+
       await Share.share({
         message: shareContent,
         title: t('transaction_details'),
@@ -138,15 +138,17 @@ ${transaction.financialTransId ? `${t('provider_ref')}: ${transaction.financialT
       setIsSharing(false);
     }
   };
-  
+
   // Render detail row
   const renderDetailRow = (label: string, value: string, icon?: string) => (
-    <View style={{ 
-      flexDirection: 'row', 
-      justifyContent: 'space-between', 
-      alignItems: 'center',
-      paddingVertical: 12,
-    }}>
+    <View
+      style={{
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 12,
+      }}
+    >
       <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
         {icon && (
           <IoniconsIcon
@@ -179,13 +181,19 @@ ${transaction.financialTransId ? `${t('provider_ref')}: ${transaction.financialT
       </Text>
     </View>
   );
-  
+
   // Loading state
   if (isLoading) {
     return (
       <CommonView>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <MaterialIcon name="receipt-long" size={80} color={colors.onSurfaceVariant} />
+        <View
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+        >
+          <MaterialIcon
+            name="receipt-long"
+            size={80}
+            color={colors.onSurfaceVariant}
+          />
           <Text
             style={{
               fontSize: getResponsiveText(16),
@@ -199,12 +207,19 @@ ${transaction.financialTransId ? `${t('provider_ref')}: ${transaction.financialT
       </CommonView>
     );
   }
-  
+
   // Error state
   if (isError || !transaction) {
     return (
       <CommonView>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 20,
+          }}
+        >
           <MaterialIcon name="error-outline" size={80} color={colors.error} />
           <Text
             style={{
@@ -241,7 +256,7 @@ ${transaction.financialTransId ? `${t('provider_ref')}: ${transaction.financialT
       </CommonView>
     );
   }
-  
+
   return (
     <CommonView>
       <ScrollView
@@ -261,7 +276,13 @@ ${transaction.financialTransId ? `${t('provider_ref')}: ${transaction.financialT
           }}
         >
           <View style={{ padding: cardDimensions.padding }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 16,
+              }}
+            >
               <Image
                 source={getProviderIcon(transaction.provider)}
                 style={{ width: 40, height: 40, marginRight: 16 }}
@@ -277,7 +298,13 @@ ${transaction.financialTransId ? `${t('provider_ref')}: ${transaction.financialT
                 >
                   {transaction.provider.toUpperCase()} Mobile Money
                 </Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginTop: 4,
+                  }}
+                >
                   <IoniconsIcon
                     name={getStatusIcon(transaction.status)}
                     size={16}
@@ -311,7 +338,7 @@ ${transaction.financialTransId ? `${t('provider_ref')}: ${transaction.financialT
                 />
               </TouchableOpacity>
             </View>
-            
+
             {/* Amount */}
             <View style={{ alignItems: 'center', marginVertical: 16 }}>
               <Text
@@ -335,7 +362,7 @@ ${transaction.financialTransId ? `${t('provider_ref')}: ${transaction.financialT
             </View>
           </View>
         </Card>
-        
+
         {/* Transaction Details Card */}
         <Card
           mode="outlined"
@@ -359,71 +386,66 @@ ${transaction.financialTransId ? `${t('provider_ref')}: ${transaction.financialT
             >
               {t('transaction_details')}
             </Text>
-            
+
             {renderDetailRow(
               t('transaction_id'),
               transaction.transactionId,
-              'receipt-outline'
+              'receipt-outline',
             )}
             <Divider />
-            
+
             {transaction.financialTransId && (
               <>
                 {renderDetailRow(
                   t('provider_reference'),
                   transaction.financialTransId,
-                  'link-outline'
+                  'link-outline',
                 )}
                 <Divider />
               </>
             )}
-            
+
             {renderDetailRow(
               t('payment_method'),
               `${transaction.provider.toUpperCase()} Mobile Money`,
-              'card-outline'
+              'card-outline',
             )}
             <Divider />
-            
+
             {renderDetailRow(
               t('date_initiated'),
               formatTransactionDate(transaction.createdAt),
-              'calendar-outline'
+              'calendar-outline',
             )}
             <Divider />
-            
+
             {transaction.updatedAt !== transaction.createdAt && (
               <>
                 {renderDetailRow(
                   t('date_completed'),
                   formatTransactionDate(transaction.updatedAt),
-                  'checkmark-circle-outline'
+                  'checkmark-circle-outline',
                 )}
                 <Divider />
               </>
             )}
-            
+
             {transaction.payerName && (
               <>
                 {renderDetailRow(
                   t('payer_name'),
                   transaction.payerName,
-                  'person-outline'
+                  'person-outline',
                 )}
                 <Divider />
               </>
             )}
-            
-            {transaction.email && (
-              renderDetailRow(
-                t('email'),
-                transaction.email,
-                'mail-outline'
-              )
-            )}
+
+            {transaction.email &&
+              renderDetailRow(t('email'), transaction.email, 'mail-outline')}
           </View>
         </Card>
-        
+
         {/* Order Details Card (if available) */}
         {transaction.orderDetails && (
           <Card
@@ -448,20 +470,20 @@ ${transaction.financialTransId ? `${t('provider_ref')}: ${transaction.financialT
               >
                 {t('order_details')}
               </Text>
-              
+
               {renderDetailRow(
                 t('restaurant'),
                 transaction.orderDetails.restaurantName,
-                'restaurant-outline'
+                'restaurant-outline',
               )}
               <Divider />
-              
+
               {renderDetailRow(
                 t('items_count'),
                 transaction.orderDetails.itemCount.toString(),
-                'list-outline'
+                'list-outline',
               )}
-              
+
               {transaction.orderDetails.items.length > 0 && (
                 <>
                   <Divider />
@@ -495,7 +517,7 @@ ${transaction.financialTransId ? `${t('provider_ref')}: ${transaction.financialT
             </View>
           </Card>
         )}
-        
+
         {/* Help Card */}
         <Card
           mode="outlined"
@@ -508,7 +530,13 @@ ${transaction.financialTransId ? `${t('provider_ref')}: ${transaction.financialT
           }}
         >
           <View style={{ padding: cardDimensions.padding }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 12,
+              }}
+            >
               <IoniconsIcon
                 name="help-circle-outline"
                 size={24}

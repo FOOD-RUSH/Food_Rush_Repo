@@ -11,12 +11,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import {
-  Button,
-  HelperText,
-  TextInput,
-  useTheme,
-} from 'react-native-paper';
+import { Button, HelperText, TextInput, useTheme } from 'react-native-paper';
 import { Controller, useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { registerSchema } from '@/src/utils/validation';
@@ -170,17 +165,16 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
 
         registerUserMutation(registrationData, {
           onSuccess: (response) => {
-
-            
             Toast.show({
               type: 'success',
               text1: t('success'),
-              text2: response.emailSent === true
-                ? 'Account created! Check your email for verification code.'
-                : t('account_created_successfully'),
+              text2:
+                response.emailSent === true
+                  ? 'Account created! Check your email for verification code.'
+                  : t('account_created_successfully'),
               position: 'top',
             });
-            
+
             // Navigate to OTP verification screen with the correct response data
             navigation.navigate('OTPVerification', {
               userId: response.userId,
@@ -192,8 +186,9 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
           },
           onError: (error: any) => {
             console.error('❌ Registration failed:', error);
-            
-            const errorMessage = error?.message || t('failed_to_create_account');
+
+            const errorMessage =
+              error?.message || t('failed_to_create_account');
             setError(errorMessage);
 
             Toast.show({

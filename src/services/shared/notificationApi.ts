@@ -21,11 +21,13 @@ export interface UnreadCountResponse {
 
 // Prefer WebSocket for pushes; keep HTTP for fallback and initial load
 export const notificationApi = {
-  getNotifications: async (params: {
-    limit?: number;
-    page?: number;
-    type?: string;
-  } = {}) => {
+  getNotifications: async (
+    params: {
+      limit?: number;
+      page?: number;
+      type?: string;
+    } = {},
+  ) => {
     const response = await apiClient.get<NotificationResponse>(
       '/notifications/my',
       { params: { limit: 20, page: 1, ...params } },
@@ -56,11 +58,7 @@ export const notificationApi = {
     return response.data;
   },
 
-  registerDevice: async (
-    expoToken: string,
-    platform: string,
-    role: string,
-  ) => {
+  registerDevice: async (expoToken: string, platform: string, role: string) => {
     const response = await apiClient.post<{
       status_code: number;
       message: string;

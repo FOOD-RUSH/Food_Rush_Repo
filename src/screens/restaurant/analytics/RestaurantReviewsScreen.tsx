@@ -29,7 +29,6 @@ import ErrorDisplay from '@/src/components/common/ErrorDisplay';
 import { useRestaurantReviews } from '@/src/hooks/restaurant/useRestaurantReviews';
 import { RestaurantReview } from '@/src/types';
 
-
 interface ReviewItemProps {
   review: RestaurantReview;
 }
@@ -260,7 +259,6 @@ const RestaurantReviewsScreen: React.FC<
             }}
           >
             <View>
-             
               <View
                 style={{ flexDirection: 'row', marginTop: 4, marginBottom: 8 }}
               >

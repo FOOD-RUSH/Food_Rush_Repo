@@ -63,7 +63,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   children,
 }) => {
   console.log('[NotificationProvider] Rendering...');
-  
+
   const { isReady: pushIsReady, error: pushError } = usePushNotifications();
   const userType = useUserType();
 
@@ -116,12 +116,12 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     console.log('[NotificationProvider] Initial fetch check:', {
       isInitialized,
       isLoading,
-      userType
+      userType,
     });
 
     if (!isInitialized && !isLoading && userType) {
       console.log('[NotificationProvider] Triggering initial fetch');
-      fetchNotifications().catch(err => {
+      fetchNotifications().catch((err) => {
         console.error('[NotificationProvider] Initial fetch failed:', err);
       });
     }
@@ -129,27 +129,30 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
 
   // Reset and refetch when user type changes to prevent cross-role bleed-through
   const previousUserTypeRef = React.useRef<typeof userType>(userType);
-  
+
   useEffect(() => {
     // Only reset if userType actually changed (not on initial mount)
     if (!userType) {
       previousUserTypeRef.current = userType;
       return;
     }
-    
+
     // Skip if same as previous (prevents infinite loops)
     if (previousUserTypeRef.current === userType) {
       return;
     }
-    
+
     previousUserTypeRef.current = userType;
-    
+
     const doResetAndFetch = async () => {
       try {
         useNotificationStore.getState().reset();
         await fetchNotifications();
       } catch (err) {
-        console.error('[NotificationProvider] Refetch on userType change failed:', err);
+        console.error(
+          '[NotificationProvider] Refetch on userType change failed:',
+          err,
+        );
       }
     };
     doResetAndFetch();
@@ -158,17 +161,21 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
 
   // Calculate notification counts
   const notificationCounts = useMemo(() => {
-    console.log('[NotificationProvider] Calculating counts for', notifications.length, 'notifications');
-    
+    console.log(
+      '[NotificationProvider] Calculating counts for',
+      notifications.length,
+      'notifications',
+    );
+
     const counts: NotificationCounts = {
       all: notifications.length,
-      unread: notifications.filter(n => !n.readAt).length,
-      order: notifications.filter(n => n.type === 'order').length,
-      system: notifications.filter(n => n.type === 'system').length,
-      promotion: notifications.filter(n => n.type === 'promotion').length,
-      alert: notifications.filter(n => n.type === 'alert').length,
+      unread: notifications.filter((n) => !n.readAt).length,
+      order: notifications.filter((n) => n.type === 'order').length,
+      system: notifications.filter((n) => n.type === 'system').length,
+      promotion: notifications.filter((n) => n.type === 'promotion').length,
+      alert: notifications.filter((n) => n.type === 'alert').length,
     };
-    
+
     console.log('[NotificationProvider] Counts:', counts);
     return counts;
   }, [notifications]);
@@ -178,22 +185,28 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
     const filtered = getFilteredNotifications();
     console.log('[NotificationProvider] Filtered notifications:', {
       filter: selectedFilter,
-      count: filtered.length
+      count: filtered.length,
     });
     return filtered;
   }, [getFilteredNotifications, selectedFilter]);
 
   // Enhanced mark as read with success return
-  const markAsRead = useCallback(async (id: string): Promise<boolean> => {
-    console.log('[NotificationProvider] Mark as read:', id);
-    try {
-      await storeMarkAsRead(id);
-      return true;
-    } catch (error) {
-      console.error('[NotificationProvider] Failed to mark notification as read:', error);
-      return false;
-    }
-  }, [storeMarkAsRead]);
+  const markAsRead = useCallback(
+    async (id: string): Promise<boolean> => {
+      console.log('[NotificationProvider] Mark as read:', id);
+      try {
+        await storeMarkAsRead(id);
+        return true;
+      } catch (error) {
+        console.error(
+          '[NotificationProvider] Failed to mark notification as read:',
+          error,
+        );
+        return false;
+      }
+    },
+    [storeMarkAsRead],
+  );
 
   // Enhanced mark all as read with success return
   const markAllAsRead = useCallback(async (): Promise<boolean> => {
@@ -202,66 +215,18 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
       await storeMarkAllAsRead();
       return true;
     } catch (error) {
-      console.error('[NotificationProvider] Failed to mark all notifications as read:', error);
+      console.error(
+        '[NotificationProvider] Failed to mark all notifications as read:',
+        error,
+      );
       return false;
     }
   }, [storeMarkAllAsRead]);
 
-  const value = useMemo<NotificationContextType>(
-    () => {
-      console.log('[NotificationProvider] Memoizing context value');
-      return {
-        notifications: filteredNotifications,
-        unreadCount,
-        isLoading,
-        isLoadingMore,
-        error,
-        hasNextPage,
-        selectedFilter,
-        notificationCounts,
-        hasNotifications: notifications.length > 0,
-        userType,
-        isInitialized,
-
-        fetchNotifications,
-        refreshNotifications,
-        refresh: refreshNotifications,
-        loadMore: loadMoreNotifications,
-        markAsRead,
-        markAllAsRead,
-        // Wrap the store's strongly-typed setFilter with a string-accepting wrapper
-        setFilter: (filter: string) => {
-          // cast to any to satisfy the store's narrower type
-          setFilter(filter as any);
-        },
-        clearError,
-
-        pushIsReady,
-        pushError,
-
-        sendLocalNotification: async (title, body, data) => {
-          console.log('[NotificationProvider] Sending local notification:', title);
-          return pushNotificationService.sendLocalNotification({
-            title,
-            body,
-            data,
-          });
-        },
-
-        scheduleReminder: async (title, body, minutesFromNow, data) => {
-          console.log('[NotificationProvider] Scheduling reminder:', title, 'in', minutesFromNow, 'minutes');
-          return pushNotificationService.scheduleReminder(
-            title,
-            body,
-            minutesFromNow,
-            data,
-          );
-        },
-      };
-    },
-    [
-      filteredNotifications,
-      notifications.length,
+  const value = useMemo<NotificationContextType>(() => {
+    console.log('[NotificationProvider] Memoizing context value');
+    return {
+      notifications: filteredNotifications,
       unreadCount,
       isLoading,
       isLoadingMore,
@@ -269,21 +234,76 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
       hasNextPage,
       selectedFilter,
       notificationCounts,
+      hasNotifications: notifications.length > 0,
       userType,
       isInitialized,
-      pushIsReady,
-      pushError,
+
       fetchNotifications,
       refreshNotifications,
-      loadMoreNotifications,
+      refresh: refreshNotifications,
+      loadMore: loadMoreNotifications,
       markAsRead,
       markAllAsRead,
-      setFilter,
+      // Wrap the store's strongly-typed setFilter with a string-accepting wrapper
+      setFilter: (filter: string) => {
+        // cast to any to satisfy the store's narrower type
+        setFilter(filter as any);
+      },
       clearError,
-    ],
-  );
 
- 
+      pushIsReady,
+      pushError,
+
+      sendLocalNotification: async (title, body, data) => {
+        console.log(
+          '[NotificationProvider] Sending local notification:',
+          title,
+        );
+        return pushNotificationService.sendLocalNotification({
+          title,
+          body,
+          data,
+        });
+      },
+
+      scheduleReminder: async (title, body, minutesFromNow, data) => {
+        console.log(
+          '[NotificationProvider] Scheduling reminder:',
+          title,
+          'in',
+          minutesFromNow,
+          'minutes',
+        );
+        return pushNotificationService.scheduleReminder(
+          title,
+          body,
+          minutesFromNow,
+          data,
+        );
+      },
+    };
+  }, [
+    filteredNotifications,
+    notifications.length,
+    unreadCount,
+    isLoading,
+    isLoadingMore,
+    error,
+    hasNextPage,
+    selectedFilter,
+    notificationCounts,
+    userType,
+    isInitialized,
+    pushIsReady,
+    pushError,
+    fetchNotifications,
+    refreshNotifications,
+    loadMoreNotifications,
+    markAsRead,
+    markAllAsRead,
+    setFilter,
+    clearError,
+  ]);
 
   return (
     <NotificationContext.Provider value={value}>

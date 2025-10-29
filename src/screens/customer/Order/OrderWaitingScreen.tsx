@@ -58,8 +58,8 @@ const PulseAnimation: React.FC<{ children: React.ReactNode }> = ({
 };
 
 // Countdown timer component
-const CountdownTimer: React.FC<{ 
-  initialMinutes: number; 
+const CountdownTimer: React.FC<{
+  initialMinutes: number;
   onTimeout: () => void;
 }> = ({ initialMinutes, onTimeout }) => {
   const [timeLeft, setTimeLeft] = useState(initialMinutes * 60); // Convert to seconds
@@ -110,40 +110,32 @@ const OrderWaitingScreen = ({
 
   // Handle timeout (15 minutes)
   const handleTimeout = useCallback(() => {
-    Alert.alert(
-      t('restaurant_timeout'),
-      t('restaurant_timeout_message'),
-      [
-        {
-          text: t('ok'),
-          onPress: () => navigation.goBack(),
-        },
-      ]
-    );
+    Alert.alert(t('restaurant_timeout'), t('restaurant_timeout_message'), [
+      {
+        text: t('ok'),
+        onPress: () => navigation.goBack(),
+      },
+    ]);
   }, [navigation, t]);
 
   // Handle order cancellation
   const handleCancelOrder = useCallback(() => {
-    Alert.alert(
-      t('cancel_order'),
-      t('cancel_order_confirmation'),
-      [
-        { text: t('no'), style: 'cancel' },
-        {
-          text: t('yes_cancel'),
-          style: 'destructive',
-          onPress: () => {
-            cancelOrder();
-            Toast.show({
-              type: 'success',
-              text1: t('order_cancelled'),
-              text2: t('order_cancelled_successfully'),
-            });
-            navigation.goBack();
-          },
+    Alert.alert(t('cancel_order'), t('cancel_order_confirmation'), [
+      { text: t('no'), style: 'cancel' },
+      {
+        text: t('yes_cancel'),
+        style: 'destructive',
+        onPress: () => {
+          cancelOrder();
+          Toast.show({
+            type: 'success',
+            text1: t('order_cancelled'),
+            text2: t('order_cancelled_successfully'),
+          });
+          navigation.goBack();
         },
-      ]
-    );
+      },
+    ]);
   }, [cancelOrder, navigation, t]);
 
   // Navigate to payment when restaurant confirms
@@ -161,16 +153,12 @@ const OrderWaitingScreen = ({
   // Handle cancellation
   useEffect(() => {
     if (isCancelled) {
-      Alert.alert(
-        t('order_cancelled'),
-        t('order_was_cancelled'),
-        [
-          {
-            text: t('ok'),
-            onPress: () => navigation.goBack(),
-          },
-        ]
-      );
+      Alert.alert(t('order_cancelled'), t('order_was_cancelled'), [
+        {
+          text: t('ok'),
+          onPress: () => navigation.goBack(),
+        },
+      ]);
     }
   }, [isCancelled, navigation, t]);
 
@@ -231,19 +219,19 @@ const OrderWaitingScreen = ({
             >
               {t('order_summary')}
             </Heading5>
-            
+
             <View className="flex-row justify-between mb-2">
               <Body color={colors.onSurfaceVariant}>{t('order_id')}</Body>
               <Body color={colors.onSurface}>#{order.id.substring(0, 8)}</Body>
             </View>
-            
+
             <View className="flex-row justify-between mb-2">
               <Body color={colors.onSurfaceVariant}>{t('total')}</Body>
               <Body color={colors.onSurface} weight="semibold">
                 {order.total.toLocaleString()} XAF
               </Body>
             </View>
-            
+
             <View className="flex-row justify-between">
               <Body color={colors.onSurfaceVariant}>{t('items')}</Body>
               <Body color={colors.onSurface}>

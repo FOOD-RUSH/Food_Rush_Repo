@@ -81,11 +81,9 @@ export const ORDER_STATUSES = {
 export const restaurantOrderApi = {
   // Get all orders for the restaurant
   getOrders: (params?: { status?: string }) => {
-
     return apiClient
       .get<OrderResponse>('/orders/my-restaurant', { params })
       .then((res) => {
-
         return res.data.data;
       })
       .catch((error) => {

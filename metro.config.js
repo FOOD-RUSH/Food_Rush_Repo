@@ -1,8 +1,6 @@
 const { withNativeWind } = require('nativewind/metro');
 const path = require('path');
-const {
-  getSentryExpoConfig
-} = require("@sentry/react-native/metro");
+const { getSentryExpoConfig } = require('@sentry/react-native/metro');
 
 const config = getSentryExpoConfig(__dirname);
 
@@ -80,7 +78,10 @@ if (isProduction) {
 }
 
 // Watch folders - keep it minimal
-config.watchFolders = [path.resolve(__dirname, 'src'), path.resolve(__dirname, 'assets')];
+config.watchFolders = [
+  path.resolve(__dirname, 'src'),
+  path.resolve(__dirname, 'assets'),
+];
 
 // Apply NativeWind configuration
 module.exports = withNativeWind(config, { input: './globals.css' });

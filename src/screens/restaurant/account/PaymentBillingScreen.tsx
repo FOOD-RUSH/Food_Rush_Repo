@@ -71,14 +71,12 @@ const PaymentBillingScreen: React.FC = () => {
         text: t('mobile_money'),
         onPress: () => {
           // Navigate to add mobile money method
-
         },
       },
       {
         text: t('bank_account'),
         onPress: () => {
           // Navigate to add bank account
-
         },
       },
     ]);
@@ -109,10 +107,12 @@ const PaymentBillingScreen: React.FC = () => {
       `${t('request_payout_amount')} ${billingInfo.pendingPayouts.toLocaleString()} XAF?`,
       [
         { text: t('cancel'), style: 'cancel' },
-        { text: t('confirm'), onPress: () => {
-          // Process payout request
-
-        }},
+        {
+          text: t('confirm'),
+          onPress: () => {
+            // Process payout request
+          },
+        },
       ],
     );
   };

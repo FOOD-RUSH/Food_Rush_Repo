@@ -13,7 +13,6 @@ export const useProfileImageUpload = () => {
       phoneNumber?: string;
       picture: LocalImageData;
     }): Promise<any> => {
-
       // Implementation would go here
       return data;
     },
@@ -33,17 +32,14 @@ export const usePickAndUploadProfileImage = () => {
       // Pick image from device
 
       const imageResult = await pickImageForUpload();
-      
+
       if (!imageResult) {
         throw new Error('No image selected');
       }
 
-
       return imageResult;
     },
-    onSuccess: (imageData: LocalImageData) => {
-
-    },
+    onSuccess: (imageData: LocalImageData) => {},
     onError: (error: any) => {
       console.error('❌ Image picking failed:', error);
     },

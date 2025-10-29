@@ -7,7 +7,9 @@ import { useNotificationStore } from '@/src/stores/shared/notificationStore';
  */
 export const useUnreadNotificationCount = () => {
   const unreadCount = useNotificationStore((state) => state.unreadCount);
-  const refreshUnread = useNotificationStore((state) => state.updateUnreadCount);
+  const refreshUnread = useNotificationStore(
+    (state) => state.updateUnreadCount,
+  );
 
   useEffect(() => {
     // Prime the count on first use; ignore failures

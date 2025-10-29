@@ -115,8 +115,6 @@ const RestaurantNotificationScreen = () => {
     [setFilter],
   );
 
-
-
   // Get restaurant-specific notification icon
   const getNotificationIcon = (type: string, priority?: string) => {
     const iconMap: Record<string, string> = {
@@ -330,7 +328,7 @@ const RestaurantNotificationScreen = () => {
     React.useCallback(() => {
       refresh();
       return () => {};
-    }, [refresh])
+    }, [refresh]),
   );
 
   // Restaurant-specific filters
@@ -431,7 +429,9 @@ const RestaurantNotificationScreen = () => {
           marginBottom: 8,
         }}
       >
-        {selectedFilter === 'unread' ? t('youre_all_caught_up') : t('no_notifications')}
+        {selectedFilter === 'unread'
+          ? t('youre_all_caught_up')
+          : t('no_notifications')}
       </Text>
       <Text
         style={{

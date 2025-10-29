@@ -1,5 +1,11 @@
 import { MaterialIcon } from '@/src/components/common/icons';
-import { View, TouchableOpacity, StyleSheet, Image, Dimensions } from 'react-native';
+import {
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  Dimensions,
+} from 'react-native';
 import React, { useState, useMemo } from 'react';
 import { Card, useTheme, Text } from 'react-native-paper';
 import { FoodProps } from '@/src/types';
@@ -28,7 +34,7 @@ const MenuItemCard = ({ item }: { item: FoodProps }) => {
   const cardDimensions = useMemo(() => {
     const isTablet = screenWidth >= 768;
     const isDesktop = screenWidth >= 1024;
-    
+
     if (isDesktop) {
       return {
         imageSize: 120,
@@ -94,8 +100,8 @@ const MenuItemCard = ({ item }: { item: FoodProps }) => {
         navigation.navigate('CustomerApp', {
           screen: 'Home',
           params: {
-            screen: 'HomeScreen'
-          }
+            screen: 'HomeScreen',
+          },
         });
       });
     } else {
@@ -105,7 +111,7 @@ const MenuItemCard = ({ item }: { item: FoodProps }) => {
 
   const navigation =
     useNavigation<RootStackScreenProps<'RestaurantDetails'>['navigation']>();
-  
+
   const borderColor = isSelect
     ? colors.primary
     : isInCart
@@ -180,7 +186,7 @@ const MenuItemCard = ({ item }: { item: FoodProps }) => {
               </View>
             )}
           </View>
-          
+
           <View style={styles.textContainer}>
             <View style={styles.nameContainer}>
               <Text
@@ -206,7 +212,7 @@ const MenuItemCard = ({ item }: { item: FoodProps }) => {
                 </View>
               )}
             </View>
-            
+
             <Text
               style={[
                 styles.priceText,
@@ -220,8 +226,6 @@ const MenuItemCard = ({ item }: { item: FoodProps }) => {
             >
               {item.price} XAF
             </Text>
-            
-            
           </View>
         </View>
       </Card>

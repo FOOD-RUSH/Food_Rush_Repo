@@ -25,7 +25,7 @@ import {
   Label,
 } from '@/src/components/common/Typography';
 
-type AwaitingApprovalScreenProps = AuthStackScreenProps<'AwaitingApproval'>
+type AwaitingApprovalScreenProps = AuthStackScreenProps<'AwaitingApproval'>;
 
 const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
   navigation,
@@ -243,7 +243,7 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
               >
                 {t('restaurant_information')}
               </Heading2>
-              
+
               {/* Restaurant Image */}
               {restaurantData.pictureUrl && (
                 <View style={styles.restaurantImageContainer}>
@@ -254,7 +254,7 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
                   />
                 </View>
               )}
-              
+
               {/* Restaurant Details */}
               <View style={styles.restaurantDetails}>
                 <View style={styles.infoRow}>
@@ -271,15 +271,12 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
                     >
                       {t('restaurant_name')}
                     </Label>
-                    <Body
-                      color={colors.onSurface}
-                      weight="semibold"
-                    >
+                    <Body color={colors.onSurface} weight="semibold">
                       {restaurantData.name}
                     </Body>
                   </View>
                 </View>
-                
+
                 {restaurantData.address && (
                   <View style={styles.infoRow}>
                     <IoniconsIcon
@@ -295,16 +292,14 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
                       >
                         {t('address')}
                       </Label>
-                      <Body
-                        color={colors.onSurface}
-                        numberOfLines={2}
-                      >
-                        {restaurantData.address || `${restaurantData.latitude}, ${restaurantData.longitude}`}
+                      <Body color={colors.onSurface} numberOfLines={2}>
+                        {restaurantData.address ||
+                          `${restaurantData.latitude}, ${restaurantData.longitude}`}
                       </Body>
                     </View>
                   </View>
                 )}
-                
+
                 {restaurantData.phone && (
                   <View style={styles.infoRow}>
                     <IoniconsIcon
@@ -320,21 +315,23 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
                       >
                         {t('phone_number')}
                       </Label>
-                      <Body
-                        color={colors.onSurface}
-                        weight="medium"
-                      >
+                      <Body color={colors.onSurface} weight="medium">
                         {restaurantData.phone}
                       </Body>
                     </View>
                   </View>
                 )}
-                
+
                 <View style={styles.infoRow}>
                   <IoniconsIcon
                     name="shield-checkmark"
                     size={20}
-                    color={restaurantData.verificationStatus === 'PENDING_VERIFICATION' ? colors.secondary : colors.primary}
+                    color={
+                      restaurantData.verificationStatus ===
+                      'PENDING_VERIFICATION'
+                        ? colors.secondary
+                        : colors.primary
+                    }
                   />
                   <View style={styles.infoContent}>
                     <Label
@@ -345,18 +342,25 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
                       {t('verification_status')}
                     </Label>
                     <Body
-                      color={restaurantData.verificationStatus === 'PENDING_VERIFICATION' ? colors.secondary : colors.primary}
+                      color={
+                        restaurantData.verificationStatus ===
+                        'PENDING_VERIFICATION'
+                          ? colors.secondary
+                          : colors.primary
+                      }
                       weight="semibold"
                       style={{ textTransform: 'capitalize' }}
                     >
-                      {restaurantData.verificationStatus.replace('_', ' ').toLowerCase()}
+                      {restaurantData.verificationStatus
+                        .replace('_', ' ')
+                        .toLowerCase()}
                     </Body>
                   </View>
                 </View>
               </View>
             </View>
           )}
-          
+
           {/* Owner Info Card */}
           {userData && (
             <View style={styles.infoCard}>
@@ -368,13 +372,9 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
               >
                 {t('owner_information')}
               </Heading2>
-              
+
               <View style={styles.infoRow}>
-                <IoniconsIcon
-                  name="person"
-                  size={18}
-                  color={colors.primary}
-                />
+                <IoniconsIcon name="person" size={18} color={colors.primary} />
                 <View style={styles.infoContent}>
                   <Label
                     color={colors.onSurfaceVariant}
@@ -383,21 +383,14 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
                   >
                     {t('full_name')}
                   </Label>
-                  <Body
-                    color={colors.onSurface}
-                    weight="medium"
-                  >
+                  <Body color={colors.onSurface} weight="medium">
                     {userData.fullName}
                   </Body>
                 </View>
               </View>
-              
+
               <View style={styles.infoRow}>
-                <IoniconsIcon
-                  name="mail"
-                  size={18}
-                  color={colors.primary}
-                />
+                <IoniconsIcon name="mail" size={18} color={colors.primary} />
                 <View style={styles.infoContent}>
                   <Label
                     color={colors.onSurfaceVariant}
@@ -406,21 +399,14 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
                   >
                     {t('email')}
                   </Label>
-                  <Body
-                    color={colors.onSurface}
-                    weight="medium"
-                  >
+                  <Body color={colors.onSurface} weight="medium">
                     {userData.email}
                   </Body>
                 </View>
               </View>
-              
+
               <View style={styles.infoRow}>
-                <IoniconsIcon
-                  name="call"
-                  size={18}
-                  color={colors.primary}
-                />
+                <IoniconsIcon name="call" size={18} color={colors.primary} />
                 <View style={styles.infoContent}>
                   <Label
                     color={colors.onSurfaceVariant}
@@ -429,17 +415,14 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
                   >
                     {t('phone')}
                   </Label>
-                  <Body
-                    color={colors.onSurface}
-                    weight="medium"
-                  >
+                  <Body color={colors.onSurface} weight="medium">
                     {userData.phoneNumber}
                   </Body>
                 </View>
               </View>
             </View>
           )}
-          
+
           {/* Fallback Info Card for legacy data */}
           {!restaurantData && !userData && (restaurantId || userId) && (
             <View style={styles.infoCard}>

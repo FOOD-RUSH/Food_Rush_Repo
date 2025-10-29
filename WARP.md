@@ -23,6 +23,7 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
   - Production (EAS, if configured): `eas build --profile production --platform android|ios`
 
 Notes
+
 - Environment variables used at runtime:
   - `EXPO_PUBLIC_API_URL` (API base URL)
   - `EXPO_PUBLIC_SENTRY_DSN` (Sentry DSN)

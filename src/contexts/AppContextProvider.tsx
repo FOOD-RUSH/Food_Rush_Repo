@@ -51,9 +51,7 @@ const AppStateProviders = memo<AppContextProviderProps>(({ children }) => {
         <LanguageProvider>
           <ThemeProvider>
             <NetworkProvider>
-              <NotificationProvider>
-                {children}
-              </NotificationProvider>
+              <NotificationProvider>{children}</NotificationProvider>
             </NetworkProvider>
           </ThemeProvider>
         </LanguageProvider>

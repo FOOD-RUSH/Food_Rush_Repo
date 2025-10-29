@@ -7,20 +7,28 @@ import {
   ScrollView,
   RefreshControl,
 } from 'react-native';
-import { useTheme, Card, ActivityIndicator, ProgressBar } from 'react-native-paper';
+import {
+  useTheme,
+  Card,
+  ActivityIndicator,
+  ProgressBar,
+} from 'react-native-paper';
 import { IoniconsIcon } from '@/src/components/common/icons';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import CommonView from '@/src/components/common/CommonView';
 import { RootStackScreenProps } from '@/src/navigation/types';
-import { useOrderById, useCancelOrder } from '@/src/hooks/customer/useOrdersApi';
+import {
+  useOrderById,
+  useCancelOrder,
+} from '@/src/hooks/customer/useOrdersApi';
 import { useAuthUser } from '@/src/stores/customerStores';
 import EnhancedPaymentService from '@/src/services/customer/enhancedPayment.service';
 import PaymentMethodModal from '@/src/components/customer/PaymentMethodModal';
 import { PaymentMethodSelection } from '@/src/types/transaction';
 
-type OrderStatus = 
+type OrderStatus =
   | 'pending'
   | 'confirmed'
   | 'payment_required'
@@ -31,7 +39,7 @@ type OrderStatus =
   | 'delivered'
   | 'cancelled';
 
-type PaymentStep = 
+type PaymentStep =
   | 'idle'
   | 'method_selection'
   | 'processing'
@@ -52,23 +60,19 @@ const OrderTrackingScreen = ({
   // State management
   const [paymentStep, setPaymentStep] = useState<PaymentStep>('idle');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [selectedPayment, setSelectedPayment] = useState<PaymentMethodSelection>({
-    method: 'mobile_money',
-    provider: 'mtn',
-    phoneNumber: '',
-  });
+  const [selectedPayment, setSelectedPayment] =
+    useState<PaymentMethodSelection>({
+      method: 'mobile_money',
+      provider: 'mtn',
+      phoneNumber: '',
+    });
   const [transactionId, setTransactionId] = useState<string>('');
   const [paymentError, setPaymentError] = useState<string>('');
   const [paymentProgress, setPaymentProgress] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(300);
 
   // Fetch order details
-  const {
-    data: order,
-    isLoading,
-    error,
-    refetch,
-  } = useOrderById(orderId);
+  const { data: order, isLoading, error, refetch } = useOrderById(orderId);
 
   // Cancel order mutation
   const cancelOrderMutation = useCancelOrder();
@@ -100,69 +104,82 @@ const OrderTrackingScreen = ({
   };
 
   // Handle payment method selection
-  const handlePaymentConfirm = useCallback(async (selection: PaymentMethodSelection) => {
-    if (!user?.fullName || !user?.email) {
-      Alert.alert(t('error'), 'User information is missing. Please log in again.');
-      return;
-    }
-
-    setSelectedPayment(selection);
-    setShowPaymentModal(false);
-    setPaymentStep('processing');
-    setPaymentError('');
-    setTimeRemaining(300);
-
-    try {
-      // Validate phone number
-      if (!EnhancedPaymentService.validatePhoneNumber(selection.phoneNumber, selection.provider)) {
-        setPaymentError(`Please enter a valid ${selection.provider.toUpperCase()} phone number`);
-        setPaymentStep('failed');
+  const handlePaymentConfirm = useCallback(
+    async (selection: PaymentMethodSelection) => {
+      if (!user?.fullName || !user?.email) {
+        Alert.alert(
+          t('error'),
+          'User information is missing. Please log in again.',
+        );
         return;
       }
 
-      // Initialize payment
-      const paymentRequest = {
-        orderId,
-        method: 'mobile_money' as const,
-        phone: selection.phoneNumber,
-        medium: selection.provider,
-        name: user.fullName,
-        email: user.email,
-      };
+      setSelectedPayment(selection);
+      setShowPaymentModal(false);
+      setPaymentStep('processing');
+      setPaymentError('');
+      setTimeRemaining(300);
 
-      setPaymentStep('polling');
-      setPaymentProgress(0.1);
+      try {
+        // Validate phone number
+        if (
+          !EnhancedPaymentService.validatePhoneNumber(
+            selection.phoneNumber,
+            selection.provider,
+          )
+        ) {
+          setPaymentError(
+            `Please enter a valid ${selection.provider.toUpperCase()} phone number`,
+          );
+          setPaymentStep('failed');
+          return;
+        }
 
-      // Process payment with polling
-      const result = await EnhancedPaymentService.processPaymentWithRetry(
-        paymentRequest,
-        (status) => {
-          if (status.status === 'PENDING') {
-            setPaymentProgress(0.5);
-          }
-        },
-      );
+        // Initialize payment
+        const paymentRequest = {
+          orderId,
+          method: 'mobile_money' as const,
+          phone: selection.phoneNumber,
+          medium: selection.provider,
+          name: user.fullName,
+          email: user.email,
+        };
 
-      if (result.success) {
-        setPaymentStep('success');
-        setPaymentProgress(1);
-        setTransactionId(result.transactionId);
-        
-        setTimeout(() => {
-          refetch();
-        }, 2000);
-      } else {
+        setPaymentStep('polling');
+        setPaymentProgress(0.1);
+
+        // Process payment with polling
+        const result = await EnhancedPaymentService.processPaymentWithRetry(
+          paymentRequest,
+          (status) => {
+            if (status.status === 'PENDING') {
+              setPaymentProgress(0.5);
+            }
+          },
+        );
+
+        if (result.success) {
+          setPaymentStep('success');
+          setPaymentProgress(1);
+          setTransactionId(result.transactionId);
+
+          setTimeout(() => {
+            refetch();
+          }, 2000);
+        } else {
+          setPaymentStep('failed');
+          setPaymentError(result.error || 'Payment failed');
+          setPaymentProgress(0);
+        }
+      } catch (error: any) {
+        console.error('Payment error:', error);
         setPaymentStep('failed');
-        setPaymentError(result.error || 'Payment failed');
+        setPaymentError(error.message || 'Payment processing failed');
         setPaymentProgress(0);
       }
-    } catch (error: any) {
-      console.error('Payment error:', error);
-      setPaymentStep('failed');
-      setPaymentError(error.message || 'Payment processing failed');
-      setPaymentProgress(0);
-    }
-  }, [user, orderId, t, refetch]);
+    },
+    [user, orderId, t, refetch],
+  );
 
   // Handle payment retry
   const handlePaymentRetry = useCallback(() => {
@@ -175,39 +192,38 @@ const OrderTrackingScreen = ({
 
   // Handle cancel order
   const handleCancelOrder = useCallback(() => {
-    Alert.alert(
-      t('cancel_order'),
-      t('cancel_order_confirmation'),
-      [
-        { text: t('no'), style: 'cancel' },
-        {
-          text: t('yes_cancel'),
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await cancelOrderMutation.mutateAsync({
-                orderId,
-                reason: 'Customer cancellation',
-              });
-              navigation.goBack();
-            } catch (error) {
-              Alert.alert(t('error'), 'Failed to cancel order');
-            }
-          },
+    Alert.alert(t('cancel_order'), t('cancel_order_confirmation'), [
+      { text: t('no'), style: 'cancel' },
+      {
+        text: t('yes_cancel'),
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await cancelOrderMutation.mutateAsync({
+              orderId,
+              reason: 'Customer cancellation',
+            });
+            navigation.goBack();
+          } catch (error) {
+            Alert.alert(t('error'), 'Failed to cancel order');
+          }
         },
-      ],
-    );
+      },
+    ]);
   }, [t, navigation, cancelOrderMutation, orderId]);
 
   // Get order status info
   const getOrderStatusInfo = (status: string) => {
-    const statusMap: Record<string, {
-      title: string;
-      subtitle: string;
-      icon: string;
-      color: string;
-      progress: number;
-    }> = {
+    const statusMap: Record<
+      string,
+      {
+        title: string;
+        subtitle: string;
+        icon: string;
+        color: string;
+        progress: number;
+      }
+    > = {
       pending: {
         title: t('waiting_for_restaurant'),
         subtitle: t('restaurant_confirmation_time'),
@@ -259,13 +275,15 @@ const OrderTrackingScreen = ({
       },
     };
 
-    return statusMap[status] || {
-      title: 'Unknown Status',
-      subtitle: '',
-      icon: 'help-circle',
-      color: colors.onSurfaceVariant,
-      progress: 0,
-    };
+    return (
+      statusMap[status] || {
+        title: 'Unknown Status',
+        subtitle: '',
+        icon: 'help-circle',
+        color: colors.onSurfaceVariant,
+        progress: 0,
+      }
+    );
   };
 
   // Render payment section
@@ -293,7 +311,7 @@ const OrderTrackingScreen = ({
                 color={colors.primary}
               />
             </View>
-            
+
             <Text
               style={{
                 fontSize: 18,
@@ -304,7 +322,7 @@ const OrderTrackingScreen = ({
             >
               {t('payment_required')}
             </Text>
-            
+
             <Text
               style={{
                 fontSize: 14,
@@ -397,7 +415,11 @@ const OrderTrackingScreen = ({
                     textAlign: 'center',
                   }}
                 >
-                  Check your {EnhancedPaymentService.getProviderDisplayName(selectedPayment.provider)} phone and enter your PIN
+                  Check your{' '}
+                  {EnhancedPaymentService.getProviderDisplayName(
+                    selectedPayment.provider,
+                  )}{' '}
+                  phone and enter your PIN
                 </Text>
               </View>
 
@@ -490,11 +512,11 @@ const OrderTrackingScreen = ({
                 <Text
                   style={{
                     color: colors.onPrimary,
-                  fontWeight: '600',
-                }}
-              >
-                {t('retry')}
-              </Text>
+                    fontWeight: '600',
+                  }}
+                >
+                  {t('retry')}
+                </Text>
               </TouchableOpacity>
             </View>
           )}
@@ -506,7 +528,9 @@ const OrderTrackingScreen = ({
   if (isLoading) {
     return (
       <CommonView>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <View
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+        >
           <ActivityIndicator size="large" color={colors.primary} />
           <Text
             style={{
@@ -525,7 +549,14 @@ const OrderTrackingScreen = ({
   if (error || !order) {
     return (
       <CommonView>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 20,
+          }}
+        >
           <IoniconsIcon
             name="alert-circle"
             size={64}
@@ -646,7 +677,7 @@ const OrderTrackingScreen = ({
                   color={statusInfo.color}
                 />
               </View>
-              
+
               <Text
                 style={{
                   fontSize: 20,
@@ -657,7 +688,7 @@ const OrderTrackingScreen = ({
               >
                 {statusInfo.title}
               </Text>
-              
+
               <Text
                 style={{
                   fontSize: 14,
@@ -733,7 +764,9 @@ const OrderTrackingScreen = ({
                   color: colors.onSurface,
                 }}
               >
-                {order.paymentMethod === 'mobile_money' ? 'Mobile Money' : order.paymentMethod}
+                {order.paymentMethod === 'mobile_money'
+                  ? 'Mobile Money'
+                  : order.paymentMethod}
               </Text>
             </View>
 

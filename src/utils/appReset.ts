@@ -20,10 +20,7 @@ export const performCompleteAppReset = async (options?: {
   preserveTheme?: boolean;
   navigateToAuth?: boolean;
 }) => {
-  const {
-    preserveOnboarding = true,
-    navigateToAuth = true,
-  } = options || {};
+  const { preserveOnboarding = true, navigateToAuth = true } = options || {};
 
   try {
     // Clear tokens from storage

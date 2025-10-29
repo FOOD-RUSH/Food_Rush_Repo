@@ -15,16 +15,19 @@ export const useCartReminders = () => {
   const reminderEnabled = useCartReminderEnabled();
   const restaurantName = useCartRestaurantName();
   const lastActivity = useCartLastActivity();
-  
+
   // Direct reminder functions using the service
   const scheduleCartReminders = useCallback(async () => {
     if (reminderEnabled && cartItems.length > 0) {
       try {
-        const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+        const itemCount = cartItems.reduce(
+          (sum, item) => sum + item.quantity,
+          0,
+        );
         await cartReminderService.scheduleCartReminders(
           itemCount,
           restaurantName || undefined,
-          lastActivity
+          lastActivity,
         );
       } catch (error) {
         console.error('Failed to schedule cart reminders:', error);

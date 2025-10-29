@@ -30,15 +30,12 @@ interface CustomOrderConfirmationModalProps {
   isLoading?: boolean;
 }
 
-const CustomOrderConfirmationModal: React.FC<CustomOrderConfirmationModalProps> = ({
-  visible,
-  onDismiss,
-  onConfirm,
-  isLoading = false,
-}) => {
+const CustomOrderConfirmationModal: React.FC<
+  CustomOrderConfirmationModalProps
+> = ({ visible, onDismiss, onConfirm, isLoading = false }) => {
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
-  
+
   // Cart data
   const cartItems = useCartItems();
   const subtotal = useCartSubtotal();
@@ -65,7 +62,7 @@ const CustomOrderConfirmationModal: React.FC<CustomOrderConfirmationModalProps> 
       onRequestClose={isLoading ? undefined : onDismiss}
     >
       <StatusBar backgroundColor="rgba(0,0,0,0.5)" barStyle="light-content" />
-      
+
       {/* Backdrop */}
       <View
         style={{
@@ -110,7 +107,7 @@ const CustomOrderConfirmationModal: React.FC<CustomOrderConfirmationModalProps> 
             >
               {t('confirm_your_order')}
             </Text>
-            
+
             {!isLoading && (
               <TouchableOpacity
                 onPress={onDismiss}
@@ -123,7 +120,11 @@ const CustomOrderConfirmationModal: React.FC<CustomOrderConfirmationModalProps> 
                   justifyContent: 'center',
                 }}
               >
-                <IoniconsIcon name="close" size={20} color={colors.onSurfaceVariant} />
+                <IoniconsIcon
+                  name="close"
+                  size={20}
+                  color={colors.onSurfaceVariant}
+                />
               </TouchableOpacity>
             )}
           </View>
@@ -184,7 +185,7 @@ const CustomOrderConfirmationModal: React.FC<CustomOrderConfirmationModalProps> 
               >
                 {t('order_items')}
               </Text>
-              
+
               <View
                 style={{
                   backgroundColor: colors.surfaceVariant,
@@ -246,8 +247,10 @@ const CustomOrderConfirmationModal: React.FC<CustomOrderConfirmationModalProps> 
                         }}
                       >
                         {formatCurrency(
-                          item.quantity * parseFloat(item.menuItem.price || '0')
-                        )} XAF
+                          item.quantity *
+                            parseFloat(item.menuItem.price || '0'),
+                        )}{' '}
+                        XAF
                       </Text>
                     </View>
                   </View>
@@ -405,7 +408,13 @@ const CustomOrderConfirmationModal: React.FC<CustomOrderConfirmationModalProps> 
                 marginBottom: 20,
               }}
             >
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginBottom: 8,
+                }}
+              >
                 <IoniconsIcon
                   name="information-circle"
                   size={20}
@@ -429,7 +438,10 @@ const CustomOrderConfirmationModal: React.FC<CustomOrderConfirmationModalProps> 
                   lineHeight: 20,
                 }}
               >
-                {t('payment_after_order_creation_info', 'After placing your order, you will be redirected to payment. You can pay using MTN Mobile Money or Orange Money.')}
+                {t(
+                  'payment_after_order_creation_info',
+                  'After placing your order, you will be redirected to payment. You can pay using MTN Mobile Money or Orange Money.',
+                )}
               </Text>
             </View>
 
@@ -450,7 +462,11 @@ const CustomOrderConfirmationModal: React.FC<CustomOrderConfirmationModalProps> 
                   fontStyle: 'italic',
                 }}
               >
-                * {t('service_fee_note', 'Service fee helps us maintain and improve our platform')}
+                *{' '}
+                {t(
+                  'service_fee_note',
+                  'Service fee helps us maintain and improve our platform',
+                )}
               </Text>
             </View>
           </ScrollView>

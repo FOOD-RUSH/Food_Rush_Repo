@@ -11,7 +11,8 @@ import {
 // Type definitions for icon names
 export type IoniconsName = keyof typeof Ionicons.glyphMap;
 export type MaterialIconsName = keyof typeof MaterialIcons.glyphMap;
-export type MaterialCommunityIconsName = keyof typeof MaterialCommunityIcons.glyphMap;
+export type MaterialCommunityIconsName =
+  keyof typeof MaterialCommunityIcons.glyphMap;
 export type AntDesignName = keyof typeof AntDesign.glyphMap;
 export type FontAwesome5Name = keyof typeof FontAwesome5.glyphMap;
 export type FeatherName = keyof typeof Feather.glyphMap;

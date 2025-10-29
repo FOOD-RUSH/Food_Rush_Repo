@@ -33,7 +33,9 @@ class SocketService {
     if (token) auth.token = token;
 
     if (this.socket) {
-      try { this.socket.disconnect(); } catch {}
+      try {
+        this.socket.disconnect();
+      } catch {}
       this.socket = null;
     }
 
@@ -76,7 +78,11 @@ class SocketService {
     this.socket?.emit(event, data);
   }
 
-  waitFor<T = any>(event: string, predicate: (data: T) => boolean, timeoutMs = 300000): Promise<T> {
+  waitFor<T = any>(
+    event: string,
+    predicate: (data: T) => boolean,
+    timeoutMs = 300000,
+  ): Promise<T> {
     return new Promise<T>((resolve, reject) => {
       const timeout = setTimeout(() => {
         this.socket?.off(event, listener as any);

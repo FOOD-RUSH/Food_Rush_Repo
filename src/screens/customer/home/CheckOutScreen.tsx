@@ -37,10 +37,10 @@ const CheckOutScreen = ({
 }: RootStackScreenProps<'Checkout'>) => {
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
-  
+
   // Modal state
   const [showOrderModal, setShowOrderModal] = useState(false);
-  
+
   // Subscribe to specific store slices
   const cartItems = useCartItems();
   const subtotal = useCartSubtotal();
@@ -48,9 +48,8 @@ const CheckOutScreen = ({
   const serviceFee = useCartServiceFee();
   const total = useCartTotal();
   const itemCount = useCartItemCount();
-  
-  const defaultAddress = useDefaultAddress();
 
+  const defaultAddress = useDefaultAddress();
 
   // Get live location for order creation
   const { nearLat, nearLng } = useLocationForQueries();
@@ -69,39 +68,48 @@ const CheckOutScreen = ({
     if (shouldProceedToPayment && flowState.orderId && flowState.orderData) {
       // Mark payment flow as started
       startPaymentFlow();
-      
+
       // Navigate to payment processing with order details
       navigation.navigate('PaymentProcessing', {
         orderId: flowState.orderId,
         amount: flowState.orderData.total,
         provider: 'mtn', // Default provider, user can change in payment screen
       });
-      
+
       // Close the order modal
       setShowOrderModal(false);
     }
-  }, [shouldProceedToPayment, flowState.orderId, flowState.orderData, startPaymentFlow, navigation]);
+  }, [
+    shouldProceedToPayment,
+    flowState.orderId,
+    flowState.orderData,
+    startPaymentFlow,
+    navigation,
+  ]);
 
   // Memoized calculations for display
-  const calculations = useMemo(() => ({
-    subtotal: subtotal.toLocaleString('fr-FR', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
+  const calculations = useMemo(
+    () => ({
+      subtotal: subtotal.toLocaleString('fr-FR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }),
+      deliveryFee: deliveryFee.toLocaleString('fr-FR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }),
+      serviceFee: serviceFee.toLocaleString('fr-FR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }),
+      total: total.toLocaleString('fr-FR', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      }),
+      totalRaw: total,
     }),
-    deliveryFee: deliveryFee.toLocaleString('fr-FR', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }),
-    serviceFee: serviceFee.toLocaleString('fr-FR', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }),
-    total: total.toLocaleString('fr-FR', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }),
-    totalRaw: total,
-  }), [subtotal, deliveryFee, serviceFee, total]);
+    [subtotal, deliveryFee, serviceFee, total],
+  );
 
   // Handle navigation back to menu
   const handleAddItems = useCallback(() => {
@@ -115,11 +123,9 @@ const CheckOutScreen = ({
 
   // Handle payment info press (informational only)
   const handlePaymentPress = useCallback(() => {
-    Alert.alert(
-      t('payment_info'),
-      t('payment_after_restaurant_confirmation'),
-      [{ text: t('ok') }]
-    );
+    Alert.alert(t('payment_info'), t('payment_after_restaurant_confirmation'), [
+      { text: t('ok') },
+    ]);
   }, [t]);
 
   // Handle promo code
@@ -147,7 +153,7 @@ const CheckOutScreen = ({
         });
         return;
       }
-      
+
       // Create order with live coordinates for delivery fee calculation
       await createOrderFromCart(restaurantId, {
         latitude: nearLat,
@@ -406,11 +412,7 @@ const CheckOutScreen = ({
                 >
                   {t('pay_after_confirmation')}
                 </Text>
-                <MaterialIcon
-                  name="info"
-                  size={18}
-                  color={colors.primary}
-                />
+                <MaterialIcon name="info" size={18} color={colors.primary} />
               </View>
             </TouchableOpacity>
 
@@ -569,8 +571,6 @@ const CheckOutScreen = ({
         onConfirm={handleConfirmOrder}
         isLoading={isCreatingOrder}
       />
-
-
     </CommonView>
   );
 };

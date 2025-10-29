@@ -41,32 +41,28 @@ const EditProfileScreen = ({
 
       // Pick image using the hook
       const imageData = await pickAndUploadImageMutation.mutateAsync();
-      
+
       // Set the local image URI for preview
       setProfileImage(imageData.uri);
-      
+
       Alert.alert(
         t('success') || 'Success',
-        t('image_selected_successfully') || 'Image selected successfully. Save to update your profile.',
+        t('image_selected_successfully') ||
+          'Image selected successfully. Save to update your profile.',
       );
     } catch (error: any) {
       console.error('Error picking image:', error);
-      
+
       // Handle specific error cases
       if (error.message === 'No image selected') {
         // User cancelled, no need to show error
         return;
       }
-      
-      const errorMessage = 
-        error?.message ||
-        t('failed_to_pick_image') || 
-        'Failed to pick image';
-        
-      Alert.alert(
-        t('error') || 'Error',
-        errorMessage,
-      );
+
+      const errorMessage =
+        error?.message || t('failed_to_pick_image') || 'Failed to pick image';
+
+      Alert.alert(t('error') || 'Error', errorMessage);
     } finally {
       setIsUploadingImage(false);
     }
@@ -76,18 +72,12 @@ const EditProfileScreen = ({
     try {
       // Validate required fields
       if (!fullName.trim()) {
-        Alert.alert(
-          t('error') || 'Error',
-          'Full name is required'
-        );
+        Alert.alert(t('error') || 'Error', 'Full name is required');
         return;
       }
 
       if (!phoneNumber.trim()) {
-        Alert.alert(
-          t('error') || 'Error',
-          'Phone number is required'
-        );
+        Alert.alert(t('error') || 'Error', 'Phone number is required');
         return;
       }
 
@@ -99,13 +89,11 @@ const EditProfileScreen = ({
         ...(profileImage && { profilePicture: profileImage }),
       };
 
-
-
       await updateProfileMutation.mutateAsync(updateData);
-      
+
       Alert.alert(
-        t('success') || 'Success', 
-        t('profile_updated_successfully') || 'Profile updated successfully'
+        t('success') || 'Success',
+        t('profile_updated_successfully') || 'Profile updated successfully',
       );
       navigation.goBack();
     } catch (error: any) {
@@ -200,7 +188,11 @@ const EditProfileScreen = ({
           className="active:opacity-75 mb-2"
           onPress={handleUpdate}
           loading={updateProfileMutation.status === 'pending'}
-          disabled={updateProfileMutation.isPending || isUploadingImage || pickAndUploadImageMutation.isPending}
+          disabled={
+            updateProfileMutation.isPending ||
+            isUploadingImage ||
+            pickAndUploadImageMutation.isPending
+          }
         >
           {t('update')}
         </Button>

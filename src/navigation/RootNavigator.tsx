@@ -210,7 +210,11 @@ const RootNavigator: React.FC = () => {
       headerBackTitleVisible: false,
       headerRight: () => (
         <TouchableOpacity onPress={handleClearCart} style={{ marginRight: 16 }}>
-          <MaterialIcon name="delete-forever" size={24} color={navigationTheme.colors.notification} />
+          <MaterialIcon
+            name="delete-forever"
+            size={24}
+            color={navigationTheme.colors.notification}
+          />
         </TouchableOpacity>
       ),
     }),
@@ -290,7 +294,9 @@ const RootNavigator: React.FC = () => {
           />
 
           <Stack.Screen name="Auth" options={{ headerShown: false }}>
-            {(props) => <AuthNavigator {...props} userType={userType ?? undefined} />}
+            {(props) => (
+              <AuthNavigator {...props} userType={userType ?? undefined} />
+            )}
           </Stack.Screen>
 
           {/* Main Applications */}
@@ -378,7 +384,7 @@ const RootNavigator: React.FC = () => {
                 headerTitle: '',
               }}
             />
-            
+
             <Stack.Screen
               name="NearbyRestaurants"
               component={NearbyRestaurantsScreen}

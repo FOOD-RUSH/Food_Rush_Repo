@@ -31,23 +31,26 @@ const DatePicker: React.FC<DatePickerProps> = ({
   const [show, setShow] = useState(false);
   const [tempValue, setTempValue] = useState<Date | null>(null);
 
-  const onChange = useCallback((event: any, selectedDate?: Date) => {
-    const currentDate = selectedDate || value || new Date();
-    
-    if (event.type === 'dismissed') {
-      setShow(false);
-      setTempValue(null);
-      return;
-    }
+  const onChange = useCallback(
+    (event: any, selectedDate?: Date) => {
+      const currentDate = selectedDate || value || new Date();
 
-    if (Platform.OS === 'android') {
-      setShow(false);
-      onDateChange(currentDate);
-    } else {
-      // iOS: store temporary value for modal confirmation
-      setTempValue(currentDate);
-    }
-  }, [value, onDateChange]);
+      if (event.type === 'dismissed') {
+        setShow(false);
+        setTempValue(null);
+        return;
+      }
+
+      if (Platform.OS === 'android') {
+        setShow(false);
+        onDateChange(currentDate);
+      } else {
+        // iOS: store temporary value for modal confirmation
+        setTempValue(currentDate);
+      }
+    },
+    [value, onDateChange],
+  );
 
   const handleConfirm = useCallback(() => {
     if (tempValue) {
@@ -163,7 +166,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
                 >
                   Cancel
                 </Button>
-                
+
                 <Text
                   style={{
                     fontSize: 17,
@@ -173,7 +176,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
                 >
                   Select Date
                 </Text>
-                
+
                 <Button
                   mode="text"
                   onPress={handleConfirm}

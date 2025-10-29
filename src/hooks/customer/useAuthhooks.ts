@@ -95,7 +95,10 @@ export const useProfileManager = () => {
       }));
 
       // Also update the auth store
-      const currentUser = queryClient.getQueryData(['auth', 'me']) as CustomerProfile;
+      const currentUser = queryClient.getQueryData([
+        'auth',
+        'me',
+      ]) as CustomerProfile;
       if (currentUser) {
         setUser(currentUser);
       }
@@ -130,7 +133,6 @@ export const useLogin = () => {
       clearError();
     },
     onSuccess: async (data) => {
-
       const { user, accessToken, refreshToken } = data;
 
       if (!accessToken || !refreshToken || !user) {
@@ -167,16 +169,14 @@ export const useRegister = () => {
     mutationFn: async (userData: RegisterRequest) => {
       // Call the updated register API that returns the full response
       const response = await authApi.register(userData);
-      
+
       // Return the data portion for the component to use
       return response.data;
     },
     onMutate: () => {
       clearError();
     },
-    onSuccess: (data) => {
-
-    },
+    onSuccess: (data) => {},
     onError: (error: any) => {
       console.error('❌ Registration hook error:', error);
     },
@@ -204,8 +204,6 @@ export const useVerifyOTP = () => {
         throw new Error('Invalid verification response: missing required data');
       }
 
-
-
       // Set auth data using the simplified store method
       await setAuthData({
         user: user as CustomerProfile,
@@ -224,8 +222,6 @@ export const useVerifyOTP = () => {
     },
   });
 };
-
-
 
 export const useCustomerLogout = () => {
   const queryClient = useQueryClient();
@@ -259,8 +255,7 @@ export const useResendOTP = () => {
     onMutate: () => {
       clearError();
     },
-    onSuccess: () => {
-    },
+    onSuccess: () => {},
   });
 };
 
@@ -275,8 +270,7 @@ export const useResetPassword = () => {
     onMutate: () => {
       clearError();
     },
-    onSuccess: (response) => {
-    },
+    onSuccess: (response) => {},
   });
 };
 
@@ -291,7 +285,6 @@ export const useRequestPasswordReset = () => {
     onMutate: () => {
       clearError();
     },
-    onSuccess: () => {
-    },
+    onSuccess: () => {},
   });
 };

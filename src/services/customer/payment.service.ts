@@ -149,7 +149,7 @@ class PaymentService {
           email: request.email,
           ...(request.serviceFee && { serviceFee: request.serviceFee }),
         },
-        { timeout: POLLING_CONFIG.REQUEST_TIMEOUT }
+        { timeout: POLLING_CONFIG.REQUEST_TIMEOUT },
       );
 
       return this.parsePaymentResponse(response);
@@ -171,12 +171,12 @@ class PaymentService {
    */
   private async checkPaymentStatusWithRetry(
     transactionId: string,
-    retryCount = 0
+    retryCount = 0,
   ): Promise<PaymentStatusResponse> {
     try {
       const response = await apiClient.get<any>(
         `/payments/verify?transId=${encodeURIComponent(transactionId)}`,
-        { timeout: POLLING_CONFIG.REQUEST_TIMEOUT }
+        { timeout: POLLING_CONFIG.REQUEST_TIMEOUT },
       );
 
       const apiData = response.data?.data || response.data;
@@ -190,24 +190,33 @@ class PaymentService {
         case 'SUCCESSFUL':
           internalStatus = 'completed';
           success = true;
-          message = 'Payment completed successfully! Your order has been confirmed.';
+          message =
+            'Payment completed successfully! Your order has been confirmed.';
+          console.log(response.data);
+
           break;
         case 'FAILED':
           internalStatus = 'failed';
           success = false;
           message =
             'Payment failed. Please try again or use a different payment method.';
+          console.log(response.data);
+
           break;
         case 'EXPIRED':
           internalStatus = 'expired';
           success = false;
           message = 'Payment session expired. Please initiate a new payment.';
+          console.log(response.data);
+
           break;
         case 'PENDING':
         default:
           internalStatus = 'pending';
           success = false;
           message = 'Payment is still being processed. Please wait...';
+          console.log(response.data);
+
           break;
       }
 
@@ -228,7 +237,7 @@ class PaymentService {
       ) {
         const backoffDelay = Math.min(
           1000 * Math.pow(POLLING_CONFIG.BACKOFF_MULTIPLIER, retryCount),
-          10000
+          10000,
         );
 
         await new Promise((resolve) => setTimeout(resolve, backoffDelay));
@@ -254,7 +263,7 @@ class PaymentService {
   async pollPaymentStatus(
     transactionId: string,
     onStatusChange: (status: PaymentStatusResponse) => void,
-    onError?: (error: string) => void
+    onError?: (error: string) => void,
   ): Promise<AbortController> {
     // Cancel any existing polling for this transaction
     const existingController = activePollingSessions.get(transactionId);
@@ -276,7 +285,9 @@ class PaymentService {
       console.warn('AbortController not available, using manual abort flag');
       abortController = {
         signal: { aborted: false },
-        abort: function() { this.signal.aborted = true; }
+        abort: function () {
+          this.signal.aborted = true;
+        },
       } as any;
     }
     activePollingSessions.set(transactionId, abortController);
@@ -334,7 +345,7 @@ class PaymentService {
               poll();
             }
           }, POLLING_CONFIG.POLL_INTERVAL);
-          
+
           // Store timer ID for cleanup if needed
           (abortController as any).timerId = timerId;
         }
@@ -342,7 +353,7 @@ class PaymentService {
         console.error('Polling error:', error);
         const errorMsg =
           error instanceof Error ? error.message : 'Polling error occurred';
-        
+
         // Check if aborted before calling error callback
         if (!abortController.signal.aborted) {
           onError?.(errorMsg);
@@ -361,7 +372,7 @@ class PaymentService {
    * Manually check payment status (single request, no polling)
    */
   async checkPaymentStatus(
-    transactionId: string
+    transactionId: string,
   ): Promise<PaymentStatusResponse> {
     return this.checkPaymentStatusWithRetry(transactionId);
   }
@@ -431,7 +442,7 @@ class PaymentService {
   async processPayment(
     amount: number,
     method: PaymentMethod,
-    orderId: string
+    orderId: string,
   ): Promise<PaymentResult> {
     if (method.type === 'mobile_money') {
       return {

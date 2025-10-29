@@ -1,6 +1,12 @@
 import { MaterialCommunityIcon } from '@/src/components/common/icons';
 import React, { useState, useMemo, useCallback } from 'react';
-import { View, ScrollView, TouchableOpacity, RefreshControl, ActivityIndicator } from 'react-native';
+import {
+  View,
+  ScrollView,
+  TouchableOpacity,
+  RefreshControl,
+  ActivityIndicator,
+} from 'react-native';
 import { useTheme, Card } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
@@ -16,7 +22,13 @@ import {
   useRevenueBuckets,
   generateDateRange,
 } from '@/src/hooks/restaurant/useAnalytics';
-import { Heading1, Heading5, Body, Label, Caption } from '@/src/components/common/Typography';
+import {
+  Heading1,
+  Heading5,
+  Body,
+  Label,
+  Caption,
+} from '@/src/components/common/Typography';
 
 import MetricCard from '@/src/components/restaurant/analytics/MetricCard';
 import SimpleBarChart from '@/src/components/restaurant/analytics/SimpleBarChart';
@@ -42,19 +54,24 @@ const AnalyticsOverview: React.FC<
   const { t } = useTranslation();
   const tabBarHeight = useFloatingTabBarHeight();
 
-  const [selectedPeriod, setSelectedPeriod] = useState<AnalyticsPeriodOption>('7days');
+  const [selectedPeriod, setSelectedPeriod] =
+    useState<AnalyticsPeriodOption>('7days');
   const [refreshing, setRefreshing] = useState(false);
 
   // Get restaurant profile
   const restaurantProfileFromStore = useRestaurantProfileData();
   const { data: restaurantProfileFromAPI } = useRestaurantProfile();
-  const restaurantProfile = restaurantProfileFromStore || restaurantProfileFromAPI?.data;
+  const restaurantProfile =
+    restaurantProfileFromStore || restaurantProfileFromAPI?.data;
   const restaurantId = restaurantProfile?.id;
 
   const { data: reviewStats } = useRestaurantReviewStats(restaurantId || '');
 
   // Calculate date range
-  const dateRange = useMemo(() => generateDateRange(selectedPeriod), [selectedPeriod]);
+  const dateRange = useMemo(
+    () => generateDateRange(selectedPeriod),
+    [selectedPeriod],
+  );
 
   // Fetch analytics data with WebSocket support
   const summaryQuery = useAnalyticsSummary(dateRange);
@@ -62,9 +79,14 @@ const AnalyticsOverview: React.FC<
   const revenueQuery = useRevenueBuckets('daily', dateRange);
 
   // Loading states
-  const isLoading = summaryQuery.isLoading || balanceQuery.isLoading || revenueQuery.isLoading;
-  const isFetching = summaryQuery.isFetching || balanceQuery.isFetching || revenueQuery.isFetching;
-  const hasError = summaryQuery.isError && balanceQuery.isError && revenueQuery.isError;
+  const isLoading =
+    summaryQuery.isLoading || balanceQuery.isLoading || revenueQuery.isLoading;
+  const isFetching =
+    summaryQuery.isFetching ||
+    balanceQuery.isFetching ||
+    revenueQuery.isFetching;
+  const hasError =
+    summaryQuery.isError && balanceQuery.isError && revenueQuery.isError;
 
   // Extract data safely
   const summaryData = summaryQuery.data?.data ?? null;
@@ -74,13 +96,13 @@ const AnalyticsOverview: React.FC<
   // Process metric cards
   const metricCards = useMemo(
     () => convertToMetricCards(summaryData, null, isLoading),
-    [summaryData, isLoading]
+    [summaryData, isLoading],
   );
 
   // Process chart data
   const chartData = useMemo(
     () => convertToChartData(revenueInfo, colors.primary, isLoading),
-    [revenueInfo, colors.primary, isLoading]
+    [revenueInfo, colors.primary, isLoading],
   );
 
   // Process breakdowns
@@ -92,18 +114,20 @@ const AnalyticsOverview: React.FC<
         percentage: item.percentage ?? 0,
         color: item.color ?? colors.primary,
       })),
-    [summaryData?.counts, isLoading, colors.primary, t]
+    [summaryData?.counts, isLoading, colors.primary, t],
   );
 
   const paymentMethodBreakdown = useMemo(
     () =>
-      getPaymentMethodBreakdown(summaryData?.paymentMethod, isLoading).map((item) => ({
-        label: item.method ?? t('unknown'),
-        count: item.count ?? 0,
-        percentage: item.percentage ?? 0,
-        color: item.color ?? colors.primary,
-      })),
-    [summaryData?.paymentMethod, isLoading, colors.primary, t]
+      getPaymentMethodBreakdown(summaryData?.paymentMethod, isLoading).map(
+        (item) => ({
+          label: item.method ?? t('unknown'),
+          count: item.count ?? 0,
+          percentage: item.percentage ?? 0,
+          color: item.color ?? colors.primary,
+        }),
+      ),
+    [summaryData?.paymentMethod, isLoading, colors.primary, t],
   );
 
   const operatorBreakdown = useMemo(
@@ -114,7 +138,7 @@ const AnalyticsOverview: React.FC<
         percentage: item.percentage ?? 0,
         color: item.color ?? colors.primary,
       })),
-    [summaryData?.operator, isLoading, colors.primary, t]
+    [summaryData?.operator, isLoading, colors.primary, t],
   );
 
   // Period options
@@ -125,7 +149,7 @@ const AnalyticsOverview: React.FC<
       { key: '7days' as const, label: t('7_days') },
       { key: '30days' as const, label: t('30_days') },
     ],
-    [t]
+    [t],
   );
 
   // Event handlers
@@ -147,7 +171,11 @@ const AnalyticsOverview: React.FC<
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await Promise.all([summaryQuery.refetch(), balanceQuery.refetch(), revenueQuery.refetch()]);
+      await Promise.all([
+        summaryQuery.refetch(),
+        balanceQuery.refetch(),
+        revenueQuery.refetch(),
+      ]);
     } catch (error) {
       console.error('Refresh error:', error);
     } finally {
@@ -164,13 +192,13 @@ const AnalyticsOverview: React.FC<
         </View>
       ));
     },
-    [isLoading]
+    [isLoading],
   );
 
   // Format balance
   const formatBalance = useCallback(
     (value?: number | null) => (value == null ? '0' : formatLargeNumber(value)),
-    []
+    [],
   );
 
   const currency = balanceInfo?.currency ?? 'XAF';
@@ -200,7 +228,13 @@ const AnalyticsOverview: React.FC<
 
             {/* Real-time update indicator */}
             {isFetching && !refreshing && (
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 8 }}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginTop: 8,
+                }}
+              >
                 <ActivityIndicator size="small" color={colors.primary} />
                 <Body color={colors.onSurfaceVariant} style={{ marginLeft: 8 }}>
                   {t('updating_data')}...
@@ -219,7 +253,12 @@ const AnalyticsOverview: React.FC<
           {/* Error State */}
           {hasError && !isLoading && (
             <View style={{ paddingHorizontal: 16, paddingVertical: 8 }}>
-              <Card style={{ backgroundColor: colors.errorContainer, borderRadius: 12 }}>
+              <Card
+                style={{
+                  backgroundColor: colors.errorContainer,
+                  borderRadius: 12,
+                }}
+              >
                 <View style={{ padding: 20, alignItems: 'center' }}>
                   <MaterialCommunityIcon
                     name="alert-circle"
@@ -229,11 +268,19 @@ const AnalyticsOverview: React.FC<
                   <Heading5
                     color={colors.onErrorContainer}
                     weight="bold"
-                    style={{ marginTop: 12, marginBottom: 6, textAlign: 'center' }}
+                    style={{
+                      marginTop: 12,
+                      marginBottom: 6,
+                      textAlign: 'center',
+                    }}
                   >
                     {t('error_loading_analytics')}
                   </Heading5>
-                  <Body color={colors.onErrorContainer} align="center" style={{ marginBottom: 16 }}>
+                  <Body
+                    color={colors.onErrorContainer}
+                    align="center"
+                    style={{ marginBottom: 16 }}
+                  >
                     {t('please_try_again_later')}
                   </Body>
                   <TouchableOpacity
@@ -256,7 +303,13 @@ const AnalyticsOverview: React.FC<
 
           {/* Restaurant Balance Card */}
           <View style={{ paddingHorizontal: 16, paddingVertical: 8 }}>
-            <Card style={{ backgroundColor: colors.surface, borderRadius: 12, elevation: 2 }}>
+            <Card
+              style={{
+                backgroundColor: colors.surface,
+                borderRadius: 12,
+                elevation: 2,
+              }}
+            >
               <View style={{ padding: 16 }}>
                 <View
                   style={{
@@ -276,15 +329,28 @@ const AnalyticsOverview: React.FC<
                       padding: 8,
                     }}
                   >
-                    <MaterialCommunityIcon name="wallet" size={20} color={colors.primary} />
+                    <MaterialCommunityIcon
+                      name="wallet"
+                      size={20}
+                      color={colors.primary}
+                    />
                   </View>
                 </View>
 
-                <View style={{ flexDirection: 'row', alignItems: 'baseline', marginBottom: 16 }}>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'baseline',
+                    marginBottom: 16,
+                  }}
+                >
                   <Heading1 color={colors.primary} weight="bold">
                     {formatBalance(balanceInfo?.balance)}
                   </Heading1>
-                  <Caption color={colors.onSurfaceVariant} style={{ marginLeft: 6 }}>
+                  <Caption
+                    color={colors.onSurfaceVariant}
+                    style={{ marginLeft: 6 }}
+                  >
                     {currency}
                   </Caption>
                 </View>
@@ -299,7 +365,10 @@ const AnalyticsOverview: React.FC<
                   }}
                 >
                   <View style={{ flex: 1 }}>
-                    <Caption color={colors.onSurfaceVariant} style={{ marginBottom: 4 }}>
+                    <Caption
+                      color={colors.onSurfaceVariant}
+                      style={{ marginBottom: 4 }}
+                    >
                       {t('credits')}
                     </Caption>
                     <Label color={colors.onSurface} weight="semibold">
@@ -307,7 +376,10 @@ const AnalyticsOverview: React.FC<
                     </Label>
                   </View>
                   <View style={{ flex: 1, alignItems: 'flex-end' }}>
-                    <Caption color={colors.onSurfaceVariant} style={{ marginBottom: 4 }}>
+                    <Caption
+                      color={colors.onSurfaceVariant}
+                      style={{ marginBottom: 4 }}
+                    >
                       {t('debits')}
                     </Caption>
                     <Label color={colors.onSurface} weight="semibold">
@@ -325,13 +397,21 @@ const AnalyticsOverview: React.FC<
               {renderMetricCards(metricCards, 0, 2)}
             </View>
             {metricCards.length > 2 && (
-              <View style={{ flexDirection: 'row' }}>{renderMetricCards(metricCards, 2, 2)}</View>
+              <View style={{ flexDirection: 'row' }}>
+                {renderMetricCards(metricCards, 2, 2)}
+              </View>
             )}
           </View>
 
           {/* Revenue Trend Chart */}
           <View style={{ paddingHorizontal: 16, paddingVertical: 8 }}>
-            <Card style={{ backgroundColor: colors.surface, borderRadius: 12, elevation: 2 }}>
+            <Card
+              style={{
+                backgroundColor: colors.surface,
+                borderRadius: 12,
+                elevation: 2,
+              }}
+            >
               <View style={{ padding: 16 }}>
                 <View
                   style={{
@@ -359,7 +439,10 @@ const AnalyticsOverview: React.FC<
                       size={14}
                       color={colors.onSurfaceVariant}
                     />
-                    <Caption color={colors.onSurfaceVariant} style={{ marginLeft: 4 }}>
+                    <Caption
+                      color={colors.onSurfaceVariant}
+                      style={{ marginLeft: 4 }}
+                    >
                       {selectedPeriod === 'today' ? t('hourly') : t('daily')}
                     </Caption>
                   </View>
@@ -382,7 +465,10 @@ const AnalyticsOverview: React.FC<
                       size={48}
                       color={colors.onSurfaceVariant + '40'}
                     />
-                    <Caption color={colors.onSurfaceVariant} style={{ marginTop: 8 }}>
+                    <Caption
+                      color={colors.onSurfaceVariant}
+                      style={{ marginTop: 8 }}
+                    >
                       {t('no_revenue_data_available')}
                     </Caption>
                   </View>
@@ -393,22 +479,35 @@ const AnalyticsOverview: React.FC<
 
           {/* Order Status Breakdown */}
           <View style={{ paddingHorizontal: 16, paddingTop: 8 }}>
-            <BreakdownCard title={t('order_status')} data={orderStatusBreakdown} />
+            <BreakdownCard
+              title={t('order_status')}
+              data={orderStatusBreakdown}
+            />
           </View>
 
           {/* Payment Methods Breakdown */}
           <View style={{ paddingHorizontal: 16, paddingTop: 8 }}>
-            <BreakdownCard title={t('payment_methods')} data={paymentMethodBreakdown} />
+            <BreakdownCard
+              title={t('payment_methods')}
+              data={paymentMethodBreakdown}
+            />
           </View>
 
           {/* Mobile Money Operators Breakdown */}
           <View style={{ paddingHorizontal: 16, paddingTop: 8 }}>
-            <BreakdownCard title={t('mobile_money_operators')} data={operatorBreakdown} />
+            <BreakdownCard
+              title={t('mobile_money_operators')}
+              data={operatorBreakdown}
+            />
           </View>
 
           {/* Detailed Reports Section */}
           <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
-            <Heading5 color={colors.onSurface} weight="bold" style={{ marginBottom: 12 }}>
+            <Heading5
+              color={colors.onSurface}
+              weight="bold"
+              style={{ marginBottom: 12 }}
+            >
               {t('detailed_reports')}
             </Heading5>
 
@@ -418,11 +517,15 @@ const AnalyticsOverview: React.FC<
                 marginBottom: 12,
                 backgroundColor: colors.surface,
                 borderRadius: 12,
-                borderWidth: reviewStats?.totalReviews && reviewStats.totalReviews > 0 ? 1.5 : 0,
+                borderWidth:
+                  reviewStats?.totalReviews && reviewStats.totalReviews > 0
+                    ? 1.5
+                    : 0,
                 borderColor:
                   reviewStats?.averageRating && reviewStats.averageRating >= 4
                     ? '#00D084'
-                    : reviewStats?.averageRating && reviewStats.averageRating >= 3
+                    : reviewStats?.averageRating &&
+                        reviewStats.averageRating >= 3
                       ? '#FF9500'
                       : colors.outline,
                 elevation: 2,
@@ -437,7 +540,13 @@ const AnalyticsOverview: React.FC<
                       alignItems: 'center',
                     }}
                   >
-                    <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        flex: 1,
+                      }}
+                    >
                       <View
                         style={{
                           backgroundColor: '#FF9500' + '15',
@@ -446,18 +555,31 @@ const AnalyticsOverview: React.FC<
                           marginRight: 12,
                         }}
                       >
-                        <MaterialCommunityIcon name="star-circle" size={24} color="#FF9500" />
+                        <MaterialCommunityIcon
+                          name="star-circle"
+                          size={24}
+                          color="#FF9500"
+                        />
                       </View>
 
                       <View style={{ flex: 1 }}>
-                        <Label color={colors.onSurface} weight="bold" style={{ marginBottom: 4 }}>
+                        <Label
+                          color={colors.onSurface}
+                          weight="bold"
+                          style={{ marginBottom: 4 }}
+                        >
                           {t('customer_reviews')}
                         </Label>
 
-                        {reviewStats?.totalReviews && reviewStats.totalReviews > 0 ? (
+                        {reviewStats?.totalReviews &&
+                        reviewStats.totalReviews > 0 ? (
                           <View>
                             <View
-                              style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 2 }}
+                              style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                marginBottom: 2,
+                              }}
                             >
                               <Caption
                                 color={
@@ -474,7 +596,10 @@ const AnalyticsOverview: React.FC<
                               </Caption>
                               <Caption color={colors.onSurfaceVariant}>
                                 ({reviewStats.totalReviews}{' '}
-                                {reviewStats.totalReviews === 1 ? t('review') : t('reviews')})
+                                {reviewStats.totalReviews === 1
+                                  ? t('review')
+                                  : t('reviews')}
+                                )
                               </Caption>
                             </View>
                             <Caption color={colors.onSurfaceVariant}>
@@ -508,7 +633,10 @@ const AnalyticsOverview: React.FC<
                 elevation: 2,
               }}
             >
-              <TouchableOpacity onPress={handleViewTimeHeatmap} activeOpacity={0.7}>
+              <TouchableOpacity
+                onPress={handleViewTimeHeatmap}
+                activeOpacity={0.7}
+              >
                 <View style={{ padding: 16 }}>
                   <View
                     style={{
@@ -517,7 +645,13 @@ const AnalyticsOverview: React.FC<
                       alignItems: 'center',
                     }}
                   >
-                    <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        flex: 1,
+                      }}
+                    >
                       <View
                         style={{
                           backgroundColor: colors.primaryContainer,
@@ -533,7 +667,11 @@ const AnalyticsOverview: React.FC<
                         />
                       </View>
                       <View style={{ flex: 1 }}>
-                        <Label color={colors.onSurface} weight="semibold" style={{ marginBottom: 4 }}>
+                        <Label
+                          color={colors.onSurface}
+                          weight="semibold"
+                          style={{ marginBottom: 4 }}
+                        >
                           {t('time_heatmap')}
                         </Label>
                         <Caption color={colors.onSurfaceVariant}>

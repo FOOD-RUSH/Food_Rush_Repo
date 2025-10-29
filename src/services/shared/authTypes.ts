@@ -9,11 +9,11 @@ export interface LoginRequest {
 // Updated to match exact backend API specification
 // POST /api/v1/auth/register
 export interface RegisterRequest {
-  email: string;        // "user@examle.com"
-  phoneNumber: string;  // "+237613345678"
-  fullName: string;     // "John Doew"
-  password: string;     // "password123"
-  role: string;         // "customer"
+  email: string; // "user@examle.com"
+  phoneNumber: string; // "+237613345678"
+  fullName: string; // "John Doew"
+  password: string; // "password123"
+  role: string; // "customer"
 }
 
 export interface OTPCredentials {
@@ -71,15 +71,15 @@ export interface LoginResponseData {
 // Updated to match exact backend API response
 // Response from POST /api/v1/auth/register
 export interface RegisterResponseData {
-  status_code: number;  // 201
-  message: string;      // "Registration successful"
+  status_code: number; // 201
+  message: string; // "Registration successful"
   data: {
-    userId: string;     // "d098c742-f677-44a2-9aff-0ba2362e0268"
+    userId: string; // "d098c742-f677-44a2-9aff-0ba2362e0268"
     emailSent: boolean; // true
-    name: string;       // "John Doew"
-    email: string;      // "user@examle.com"
+    name: string; // "John Doew"
+    email: string; // "user@examle.com"
     phoneNumber: string; // "+237613345678"
-    role: string;       // "customer"
+    role: string; // "customer"
   };
 }
 

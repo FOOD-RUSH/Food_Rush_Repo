@@ -111,11 +111,9 @@ const RestaurantLoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
     [isConnected, isInternetReachable, loginMutation, clearError, navigation],
   );
 
-  const handleGoogleSignIn = useCallback(() => {
-  }, []);
+  const handleGoogleSignIn = useCallback(() => {}, []);
 
-  const handleAppleSignIn = useCallback(() => {
-  }, []);
+  const handleAppleSignIn = useCallback(() => {}, []);
 
   const togglePassword = useCallback(() => {
     setShowPassword((prev) => !prev);
@@ -136,9 +134,6 @@ const RestaurantLoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-
-          
-
           {/* Logo Section */}
           <Animated.View
             style={[

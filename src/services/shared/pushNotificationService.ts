@@ -31,7 +31,7 @@ class PushNotificationService {
 
   private setupListeners() {
     console.log('[PushService] Setting up listeners...');
-    
+
     try {
       if (this.notificationListener) {
         this.notificationListener.remove();
@@ -44,13 +44,17 @@ class PushNotificationService {
         this.handleNotificationReceived.bind(this),
       );
 
-      this.responseListener = Notifications.addNotificationResponseReceivedListener(
-        this.handleNotificationResponse.bind(this),
-      );
-      
+      this.responseListener =
+        Notifications.addNotificationResponseReceivedListener(
+          this.handleNotificationResponse.bind(this),
+        );
+
       console.log('[PushService] Listeners setup complete');
     } catch (error) {
-      console.error('[PushService] Error setting up notification listeners:', error);
+      console.error(
+        '[PushService] Error setting up notification listeners:',
+        error,
+      );
     }
   }
 
@@ -67,7 +71,10 @@ class PushNotificationService {
       this.initialized = true;
       console.log('[PushService] Initialization complete');
     } catch (error) {
-      console.error('[PushService] Error initializing push notifications:', error);
+      console.error(
+        '[PushService] Error initializing push notifications:',
+        error,
+      );
       this.initialized = false;
       throw error;
     }
@@ -75,16 +82,19 @@ class PushNotificationService {
 
   async requestPermissions(): Promise<boolean> {
     if (!Device.isDevice) {
-      console.warn('[PushService] Push notifications only work on physical devices');
+      console.warn(
+        '[PushService] Push notifications only work on physical devices',
+      );
       return false;
     }
 
     console.log('[PushService] Requesting permissions...');
 
     try {
-      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
       console.log('[PushService] Existing permission status:', existingStatus);
-      
+
       let finalStatus = existingStatus;
 
       if (existingStatus !== 'granted') {
@@ -97,7 +107,10 @@ class PushNotificationService {
       console.log('[PushService] Permissions granted:', granted);
       return granted;
     } catch (error) {
-      console.error('[PushService] Error requesting notification permissions:', error);
+      console.error(
+        '[PushService] Error requesting notification permissions:',
+        error,
+      );
       return false;
     }
   }
@@ -140,7 +153,7 @@ class PushNotificationService {
 
   async registerDevice(): Promise<string | null> {
     console.log('[PushService] Registering device...');
-    
+
     try {
       const token = await this.getExpoPushToken();
       if (!token) {
@@ -150,7 +163,9 @@ class PushNotificationService {
 
       const { user } = useAuthStore.getState();
       if (!user) {
-        console.warn('[PushService] User not authenticated, cannot register device');
+        console.warn(
+          '[PushService] User not authenticated, cannot register device',
+        );
         return null;
       }
 
@@ -172,7 +187,7 @@ class PushNotificationService {
 
   async unregisterDevice(): Promise<void> {
     console.log('[PushService] Unregistering device...');
-    
+
     try {
       if (this.expoPushToken) {
         await notificationApi.unregisterDevice(this.expoPushToken);
@@ -190,11 +205,12 @@ class PushNotificationService {
       id: notification.request.identifier,
       title: notification.request.content.title,
       body: notification.request.content.body,
-      data: notification.request.content.data
+      data: notification.request.content.data,
     });
 
     try {
-      const { addNotification, fetchNotifications } = useNotificationStore.getState();
+      const { addNotification, fetchNotifications } =
+        useNotificationStore.getState();
 
       const appNotification = {
         id: notification.request.identifier,
@@ -202,30 +218,36 @@ class PushNotificationService {
         title: notification.request.content.title || 'Notification',
         body: notification.request.content.body || '',
         type: (notification.request.content.data?.type as string) || 'system',
-        priority: (notification.request.content.data?.priority as string) || 'medium',
+        priority:
+          (notification.request.content.data?.priority as string) || 'medium',
         data: notification.request.content.data || {},
         createdAt: new Date().toISOString(),
         readAt: null,
       };
 
       addNotification(appNotification);
-      
+
       // Refresh notifications from backend to sync
-      fetchNotifications().catch(err => {
+      fetchNotifications().catch((err) => {
         console.error('[PushService] Failed to refresh notifications:', err);
       });
 
       console.log('[PushService] Notification handled successfully');
     } catch (error) {
-      console.error('[PushService] Error handling notification received:', error);
+      console.error(
+        '[PushService] Error handling notification received:',
+        error,
+      );
     }
   }
 
-  private handleNotificationResponse(response: Notifications.NotificationResponse) {
+  private handleNotificationResponse(
+    response: Notifications.NotificationResponse,
+  ) {
     console.log('[PushService] Notification response:', {
       id: response.notification.request.identifier,
       actionIdentifier: response.actionIdentifier,
-      data: response.notification.request.content.data
+      data: response.notification.request.content.data,
     });
 
     try {
@@ -245,13 +267,16 @@ class PushNotificationService {
         // TODO: Implement navigation
       }
     } catch (error) {
-      console.error('[PushService] Error handling notification response:', error);
+      console.error(
+        '[PushService] Error handling notification response:',
+        error,
+      );
     }
   }
 
   async sendLocalNotification(payload: NotificationPayload): Promise<string> {
     console.log('[PushService] Sending local notification:', payload.title);
-    
+
     try {
       const notificationId = await Notifications.scheduleNotificationAsync({
         content: {
@@ -279,8 +304,11 @@ class PushNotificationService {
     minutesFromNow: number,
     data?: Record<string, any>,
   ): Promise<string> {
-    console.log('[PushService] Scheduling reminder:', { title, minutesFromNow });
-    
+    console.log('[PushService] Scheduling reminder:', {
+      title,
+      minutesFromNow,
+    });
+
     return this.sendLocalNotification({
       title: `⏰ ${title}`,
       body,
@@ -291,7 +319,7 @@ class PushNotificationService {
 
   async cancelNotification(notificationId: string): Promise<void> {
     console.log('[PushService] Canceling notification:', notificationId);
-    
+
     try {
       await Notifications.cancelScheduledNotificationAsync(notificationId);
       console.log('[PushService] Notification canceled');
@@ -302,7 +330,7 @@ class PushNotificationService {
 
   async cancelAllScheduled(): Promise<void> {
     console.log('[PushService] Canceling all scheduled notifications');
-    
+
     try {
       await Notifications.cancelAllScheduledNotificationsAsync();
       console.log('[PushService] All notifications canceled');
@@ -313,7 +341,7 @@ class PushNotificationService {
 
   cleanup() {
     console.log('[PushService] Cleaning up...');
-    
+
     if (this.notificationListener) {
       this.notificationListener.remove();
       this.notificationListener = null;
@@ -323,7 +351,7 @@ class PushNotificationService {
       this.responseListener = null;
     }
     this.initialized = false;
-    
+
     console.log('[PushService] Cleanup complete');
   }
 }

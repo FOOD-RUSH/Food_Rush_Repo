@@ -111,7 +111,11 @@ export interface PaymentInitResponse {
 }
 
 // Transaction status type for filtering
-export type TransactionStatus = 'pending' | 'completed' | 'failed' | 'cancelled';
+export type TransactionStatus =
+  | 'pending'
+  | 'completed'
+  | 'failed'
+  | 'cancelled';
 
 // Transaction provider type
 export type TransactionProvider = 'mtn' | 'orange' | 'unknown';

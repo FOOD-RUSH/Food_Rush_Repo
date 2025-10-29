@@ -50,7 +50,7 @@ const NotificationScreen = () => {
       hasNotifications,
       isInitialized,
       isLoading,
-      notificationsCount: notifications.length
+      notificationsCount: notifications.length,
     });
   }, []);
 
@@ -62,39 +62,45 @@ const NotificationScreen = () => {
       isLoading,
       hasNextPage,
       selectedFilter,
-      error
+      error,
     });
-  }, [notifications.length, unreadCount, isLoading, hasNextPage, selectedFilter, error]);
+  }, [
+    notifications.length,
+    unreadCount,
+    isLoading,
+    hasNextPage,
+    selectedFilter,
+    error,
+  ]);
 
   // Show error alert
   useEffect(() => {
     if (error) {
       console.error('[NotificationScreen] Error:', error);
-      Alert.alert(
-        t('error'),
-        error,
-        [
-          {
-            text: t('retry'),
-            onPress: () => {
-              clearError();
-              refresh();
-            }
+      Alert.alert(t('error'), error, [
+        {
+          text: t('retry'),
+          onPress: () => {
+            clearError();
+            refresh();
           },
-          {
-            text: t('dismiss'),
-            onPress: clearError,
-            style: 'cancel'
-          }
-        ]
-      );
+        },
+        {
+          text: t('dismiss'),
+          onPress: clearError,
+          style: 'cancel',
+        },
+      ]);
     }
   }, [error, t, clearError, refresh]);
 
   const handleNotificationPress = useCallback(
     async (notification: Notification) => {
-      console.log('[NotificationScreen] Notification pressed:', notification.id);
-      
+      console.log(
+        '[NotificationScreen] Notification pressed:',
+        notification.id,
+      );
+
       if (!notification.readAt) {
         const success = await markAsRead(notification.id);
         console.log('[NotificationScreen] Mark as read result:', success);
@@ -104,16 +110,31 @@ const NotificationScreen = () => {
       try {
         if (notification.data?.orderId) {
           const screenName =
-            userType === 'restaurant' ? 'RestaurantOrderDetails' : 'OrderReceipt';
-          console.log('[NotificationScreen] Navigating to:', screenName, notification.data.orderId);
-          navigation.navigate(screenName as never, { 
-            orderId: notification.data.orderId 
-          } as never);
+            userType === 'restaurant'
+              ? 'RestaurantOrderDetails'
+              : 'OrderReceipt';
+          console.log(
+            '[NotificationScreen] Navigating to:',
+            screenName,
+            notification.data.orderId,
+          );
+          navigation.navigate(
+            screenName as never,
+            {
+              orderId: notification.data.orderId,
+            } as never,
+          );
         } else if (notification.data?.restaurantId) {
-          console.log('[NotificationScreen] Navigating to restaurant:', notification.data.restaurantId);
-          navigation.navigate('RestaurantDetails' as never, {
-            restaurantId: notification.data.restaurantId,
-          } as never);
+          console.log(
+            '[NotificationScreen] Navigating to restaurant:',
+            notification.data.restaurantId,
+          );
+          navigation.navigate(
+            'RestaurantDetails' as never,
+            {
+              restaurantId: notification.data.restaurantId,
+            } as never,
+          );
         } else {
           Alert.alert(notification.title, notification.body);
         }
@@ -133,7 +154,7 @@ const NotificationScreen = () => {
 
     console.log('[NotificationScreen] Marking all as read...');
     const success = await markAllAsRead();
-    
+
     if (!success) {
       console.error('[NotificationScreen] Mark all as read failed');
       Alert.alert(t('error'), t('mark_all_read_error'));
@@ -145,9 +166,9 @@ const NotificationScreen = () => {
   const handleLoadMore = useCallback(() => {
     console.log('[NotificationScreen] Load more triggered:', {
       isLoadingMore,
-      hasNextPage
+      hasNextPage,
     });
-    
+
     if (!isLoadingMore && hasNextPage) {
       loadMore();
     }
@@ -163,7 +184,7 @@ const NotificationScreen = () => {
     useCallback(() => {
       refresh();
       return () => {};
-    }, [refresh])
+    }, [refresh]),
   );
 
   const getNotificationIcon = (
@@ -314,7 +335,11 @@ const NotificationScreen = () => {
     { key: 'unread', label: t('unread'), count: notificationCounts.unread },
     { key: 'order', label: t('orders'), count: notificationCounts.order },
     { key: 'system', label: t('system'), count: notificationCounts.system },
-    { key: 'promotion', label: t('promos'), count: notificationCounts.promotion },
+    {
+      key: 'promotion',
+      label: t('promos'),
+      count: notificationCounts.promotion,
+    },
     { key: 'alert', label: t('alerts'), count: notificationCounts.alert },
   ];
 
@@ -387,15 +412,18 @@ const NotificationScreen = () => {
           ? t('youre_all_caught_up')
           : t('well_notify_when_something_happens')}
       </Text>
-      
+
       {/* Debug info in development */}
       {__DEV__ && (
         <View className="mt-4 p-4 bg-gray-100 rounded">
           <Text className="text-xs font-mono">
             Debug Info:{'\n'}
-            Initialized: {String(isInitialized)}{'\n'}
-            Loading: {String(isLoading)}{'\n'}
-            Error: {error || 'none'}{'\n'}
+            Initialized: {String(isInitialized)}
+            {'\n'}
+            Loading: {String(isLoading)}
+            {'\n'}
+            Error: {error || 'none'}
+            {'\n'}
             User Type: {userType || 'none'}
           </Text>
         </View>
@@ -429,10 +457,9 @@ const NotificationScreen = () => {
             style={{ borderBottomColor: colors.outline }}
           >
             <Text style={{ color: colors.onSurfaceVariant }}>
-              {unreadCount === 1 
+              {unreadCount === 1
                 ? t('unread_notification_count', { count: unreadCount })
-                : t('unread_notification_count_plural', { count: unreadCount })
-              }
+                : t('unread_notification_count_plural', { count: unreadCount })}
             </Text>
             <TouchableOpacity onPress={handleMarkAllAsRead}>
               <Text className="font-semibold" style={{ color: colors.primary }}>

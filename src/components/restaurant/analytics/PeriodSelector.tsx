@@ -27,8 +27,7 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
   const handlePeriodPress = async (period: AnalyticsPeriodOption) => {
     try {
       await Haptics.selectionAsync();
-    } catch (error) {
-    }
+    } catch (error) {}
     onPeriodChange(period);
   };
 

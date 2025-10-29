@@ -134,7 +134,7 @@ export const createPlatformScreenOptions = (
     },
 
     checkout: {
-            // presentation: 'card' as const,
+      // presentation: 'card' as const,
       headerShown: true,
       headerTitleAlign: 'center' as const,
       animation: 'slide_from_right' as const,

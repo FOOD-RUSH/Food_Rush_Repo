@@ -57,7 +57,6 @@ export const useLocationForQueries = () => {
       (Math.abs(currentCoords.lat - previousCoords.lat) > 0.001 ||
         Math.abs(currentCoords.lng - previousCoords.lng) > 0.001)
     ) {
-
       // Invalidate all location-dependent queries
       queryClient.invalidateQueries({ queryKey: ['browse-restaurants'] });
       queryClient.invalidateQueries({ queryKey: ['restaurants'] });

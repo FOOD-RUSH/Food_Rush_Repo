@@ -36,7 +36,7 @@ import HomeHeader from '@/src/components/customer/HomeHeader';
 import { useLocationForQueries } from '@/src/hooks/customer/useLocationService';
 import { useFloatingTabBarHeight } from '@/src/hooks/useFloatingTabBarHeight';
 
-  // const { width } = Dimensions.get('window'); // Removed unused variable
+// const { width } = Dimensions.get('window'); // Removed unused variable
 
 // Constants
 const SKELETON_COUNTS = {
@@ -45,8 +45,6 @@ const SKELETON_COUNTS = {
 } as const;
 
 type HomeScreenProps = CustomerHomeStackScreenProps<'HomeScreen'>;
-
-
 
 // Section types for FlatList
 type HomeSectionItem =
@@ -57,13 +55,16 @@ type HomeSectionItem =
   | { type: 'restaurants'; data: RestaurantProps[] }
   | { type: 'favorite_restaurants'; data: RestaurantProps[] }
   | { type: 'All Restaurant'; data: RestaurantProps[] }
-
   | {
       type: 'loading';
       skeletonType: 'foods' | 'restaurants';
       count: number;
     }
-  | { type: 'error'; errorType: 'food' | 'restaurant' | 'favorites'; onRetry: () => void }
+  | {
+      type: 'error';
+      errorType: 'food' | 'restaurant' | 'favorites';
+      onRetry: () => void;
+    }
   | {
       type: 'empty';
       emptyType: 'food_near_you' | 'restaurants' | 'favorites';
@@ -145,17 +146,21 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
     browseRestaurants && browseRestaurants.length > 0
       ? browseRestaurants
       : allRestaurants;
-  
+
   // All restaurants data (without location requirements)
   const allRestaurantsData = allRestaurantsNoLocation;
-  
+
   // Use browse menu data if available, otherwise fallback to all menu data
   const foodData =
     browseMenuData && browseMenuData.length > 0 ? browseMenuData : allMenuData;
 
   // Simplified loading state
   const isLoading =
-    browseLoading || allLoading || browseMenuLoading || allMenuLoading || allNoLocationLoading;
+    browseLoading ||
+    allLoading ||
+    browseMenuLoading ||
+    allMenuLoading ||
+    allNoLocationLoading;
 
   // Memoized categories data
   const categoriesForDisplay = useMemo(() => {
@@ -187,7 +192,13 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
     } finally {
       setRefreshing(false);
     }
-  }, [refetchBrowse, refetchAll, refetchAllNoLocation, refetchBrowseMenu, refetchAllMenu]);
+  }, [
+    refetchBrowse,
+    refetchAll,
+    refetchAllNoLocation,
+    refetchBrowseMenu,
+    refetchAllMenu,
+  ]);
 
   // Navigation handlers
   const handleSearchPress = useCallback(() => {
@@ -203,7 +214,6 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
   }, [navigation]);
 
   // Memoized render functions
-
 
   const renderRestaurantItem = useCallback(
     ({ item }: { item: RestaurantProps }) => (
@@ -417,11 +427,33 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
     } else {
       data.push({ type: 'restaurants', data: allRestaurantsData });
     }
-    
-
 
     return data;
-  }, [t, categoriesForDisplay, isLoading, browseMenuError, allMenuError, foodNearYouData, handleNearbyRestaurantsPress, handleAllRestaurantsPress, browseError, allError, restaurantData, allRestaurantsData, allNoLocationLoading, allNoLocationError, refetchBrowseMenu, refetchAllMenu, refetchAllNoLocation, navigation, refetchBrowse, favoritesLoading, favoritesError, favoriteRestaurants, refetchFavorites]);
+  }, [
+    t,
+    categoriesForDisplay,
+    isLoading,
+    browseMenuError,
+    allMenuError,
+    foodNearYouData,
+    handleNearbyRestaurantsPress,
+    handleAllRestaurantsPress,
+    browseError,
+    allError,
+    restaurantData,
+    allRestaurantsData,
+    allNoLocationLoading,
+    allNoLocationError,
+    refetchBrowseMenu,
+    refetchAllMenu,
+    refetchAllNoLocation,
+    navigation,
+    refetchBrowse,
+    favoritesLoading,
+    favoritesError,
+    favoriteRestaurants,
+    refetchFavorites,
+  ]);
 
   // Render item based on type
   const renderItem: ListRenderItem<HomeSectionItem> = useCallback(
@@ -483,8 +515,6 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
             </View>
           );
 
-
-
         case 'food_near_you':
           return (
             <View className="mb-4">
@@ -506,7 +536,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
               <FlatList
                 data={item.data}
                 horizontal
-                showsHorizontalScrollIndicator={false}                
+                showsHorizontalScrollIndicator={false}
                 keyExtractor={(restaurantItem) => restaurantItem.id}
                 renderItem={renderRestaurantItem}
                 contentContainerStyle={{ paddingHorizontal: 8 }}
@@ -528,10 +558,10 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
           );
         case 'All Restaurant':
           return (
-              <View className="mb-6">
+            <View className="mb-6">
               <FlatList
                 data={item.data}
-                showsVerticalScrollIndicator={false}                
+                showsVerticalScrollIndicator={false}
                 keyExtractor={(restaurantItem) => restaurantItem.id}
                 renderItem={renderRestaurantItem}
                 contentContainerStyle={{ paddingHorizontal: 8 }}
@@ -562,7 +592,7 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
               return (
                 <View className="mb-6">
                   <FlatList
-                  horizontal
+                    horizontal
                     showsHorizontalScrollIndicator={false}
                     data={Array(item.count).fill(0)}
                     keyExtractor={(_, index) => `skeleton-restaurant-${index}`}
@@ -586,8 +616,8 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
                   item.errorType === 'food'
                     ? t('network_error_food')
                     : item.errorType === 'favorites'
-                    ? t('favorites_error_description')
-                    : t('network_error_restaurant')
+                      ? t('favorites_error_description')
+                      : t('network_error_restaurant')
                 }
                 onRetry={item.onRetry}
               />

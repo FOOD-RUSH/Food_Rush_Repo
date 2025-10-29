@@ -29,7 +29,12 @@ export type {
 export const restaurantAuthApi = {
   register: (data: RestaurantRegisterRequest) => {
     // Check if we have a picture to upload
-    if (data.picture && data.picture.uri && data.picture.name && data.picture.type) {
+    if (
+      data.picture &&
+      data.picture.uri &&
+      data.picture.name &&
+      data.picture.type
+    ) {
       // Use FormData for requests with image uploads
       const formData = new FormData();
 
@@ -43,7 +48,7 @@ export const restaurantAuthApi = {
       formData.append('phone', data.phone);
       formData.append('nearLat', data.nearLat.toString());
       formData.append('nearLng', data.nearLng.toString());
-      
+
       if (data.document) {
         formData.append('document', data.document);
       }

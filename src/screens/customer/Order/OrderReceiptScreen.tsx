@@ -214,7 +214,9 @@ const OrderReceiptScreen = ({
               <View className="flex-row items-center">
                 <View
                   className="w-12 h-12 rounded-full items-center justify-center mr-4"
-                  style={{ backgroundColor: getStatusColor(order.status) + '20' }}
+                  style={{
+                    backgroundColor: getStatusColor(order.status) + '20',
+                  }}
                 >
                   <IoniconsIcon
                     name={getStatusIcon(order.status)}
@@ -252,7 +254,9 @@ const OrderReceiptScreen = ({
                     color={colors.error}
                   />
                 )}
-                {['preparing', 'ready_for_pickup', 'out_for_delivery'].includes(order.status) && (
+                {['preparing', 'ready_for_pickup', 'out_for_delivery'].includes(
+                  order.status,
+                ) && (
                   <View className="flex-row items-center">
                     <IoniconsIcon
                       name="time-outline"
@@ -272,7 +276,13 @@ const OrderReceiptScreen = ({
           </Card>
 
           {/* Order Progress Indicator for Active Orders */}
-          {['pending', 'confirmed', 'preparing', 'ready_for_pickup', 'out_for_delivery'].includes(order.status) && (
+          {[
+            'pending',
+            'confirmed',
+            'preparing',
+            'ready_for_pickup',
+            'out_for_delivery',
+          ].includes(order.status) && (
             <Card
               mode="outlined"
               style={{
@@ -295,7 +305,13 @@ const OrderReceiptScreen = ({
                     <View
                       className="w-8 h-8 rounded-full items-center justify-center mb-2"
                       style={{
-                        backgroundColor: ['pending', 'confirmed', 'preparing', 'ready_for_pickup', 'out_for_delivery'].includes(order.status)
+                        backgroundColor: [
+                          'pending',
+                          'confirmed',
+                          'preparing',
+                          'ready_for_pickup',
+                          'out_for_delivery',
+                        ].includes(order.status)
                           ? colors.primary
                           : colors.outline,
                       }}
@@ -303,11 +319,31 @@ const OrderReceiptScreen = ({
                       <IoniconsIcon
                         name="receipt-outline"
                         size={16}
-                        color={['pending', 'confirmed', 'preparing', 'ready_for_pickup', 'out_for_delivery'].includes(order.status) ? 'white' : colors.onSurfaceVariant}
+                        color={
+                          [
+                            'pending',
+                            'confirmed',
+                            'preparing',
+                            'ready_for_pickup',
+                            'out_for_delivery',
+                          ].includes(order.status)
+                            ? 'white'
+                            : colors.onSurfaceVariant
+                        }
                       />
                     </View>
                     <Caption
-                      color={['pending', 'confirmed', 'preparing', 'ready_for_pickup', 'out_for_delivery'].includes(order.status) ? colors.primary : colors.onSurfaceVariant}
+                      color={
+                        [
+                          'pending',
+                          'confirmed',
+                          'preparing',
+                          'ready_for_pickup',
+                          'out_for_delivery',
+                        ].includes(order.status)
+                          ? colors.primary
+                          : colors.onSurfaceVariant
+                      }
                       weight="medium"
                       align="center"
                     >
@@ -319,7 +355,12 @@ const OrderReceiptScreen = ({
                   <View
                     className="h-0.5 flex-1 mx-2"
                     style={{
-                      backgroundColor: ['confirmed', 'preparing', 'ready_for_pickup', 'out_for_delivery'].includes(order.status)
+                      backgroundColor: [
+                        'confirmed',
+                        'preparing',
+                        'ready_for_pickup',
+                        'out_for_delivery',
+                      ].includes(order.status)
                         ? colors.primary
                         : colors.outline,
                     }}
@@ -330,7 +371,12 @@ const OrderReceiptScreen = ({
                     <View
                       className="w-8 h-8 rounded-full items-center justify-center mb-2"
                       style={{
-                        backgroundColor: ['confirmed', 'preparing', 'ready_for_pickup', 'out_for_delivery'].includes(order.status)
+                        backgroundColor: [
+                          'confirmed',
+                          'preparing',
+                          'ready_for_pickup',
+                          'out_for_delivery',
+                        ].includes(order.status)
                           ? colors.primary
                           : colors.outline,
                       }}
@@ -338,11 +384,29 @@ const OrderReceiptScreen = ({
                       <IoniconsIcon
                         name="checkmark-circle-outline"
                         size={16}
-                        color={['confirmed', 'preparing', 'ready_for_pickup', 'out_for_delivery'].includes(order.status) ? 'white' : colors.onSurfaceVariant}
+                        color={
+                          [
+                            'confirmed',
+                            'preparing',
+                            'ready_for_pickup',
+                            'out_for_delivery',
+                          ].includes(order.status)
+                            ? 'white'
+                            : colors.onSurfaceVariant
+                        }
                       />
                     </View>
                     <Caption
-                      color={['confirmed', 'preparing', 'ready_for_pickup', 'out_for_delivery'].includes(order.status) ? colors.primary : colors.onSurfaceVariant}
+                      color={
+                        [
+                          'confirmed',
+                          'preparing',
+                          'ready_for_pickup',
+                          'out_for_delivery',
+                        ].includes(order.status)
+                          ? colors.primary
+                          : colors.onSurfaceVariant
+                      }
                       weight="medium"
                       align="center"
                     >
@@ -354,7 +418,11 @@ const OrderReceiptScreen = ({
                   <View
                     className="h-0.5 flex-1 mx-2"
                     style={{
-                      backgroundColor: ['preparing', 'ready_for_pickup', 'out_for_delivery'].includes(order.status)
+                      backgroundColor: [
+                        'preparing',
+                        'ready_for_pickup',
+                        'out_for_delivery',
+                      ].includes(order.status)
                         ? colors.primary
                         : colors.outline,
                     }}
@@ -365,7 +433,11 @@ const OrderReceiptScreen = ({
                     <View
                       className="w-8 h-8 rounded-full items-center justify-center mb-2"
                       style={{
-                        backgroundColor: ['preparing', 'ready_for_pickup', 'out_for_delivery'].includes(order.status)
+                        backgroundColor: [
+                          'preparing',
+                          'ready_for_pickup',
+                          'out_for_delivery',
+                        ].includes(order.status)
                           ? colors.primary
                           : colors.outline,
                       }}
@@ -373,11 +445,27 @@ const OrderReceiptScreen = ({
                       <IoniconsIcon
                         name="restaurant-outline"
                         size={16}
-                        color={['preparing', 'ready_for_pickup', 'out_for_delivery'].includes(order.status) ? 'white' : colors.onSurfaceVariant}
+                        color={
+                          [
+                            'preparing',
+                            'ready_for_pickup',
+                            'out_for_delivery',
+                          ].includes(order.status)
+                            ? 'white'
+                            : colors.onSurfaceVariant
+                        }
                       />
                     </View>
                     <Caption
-                      color={['preparing', 'ready_for_pickup', 'out_for_delivery'].includes(order.status) ? colors.primary : colors.onSurfaceVariant}
+                      color={
+                        [
+                          'preparing',
+                          'ready_for_pickup',
+                          'out_for_delivery',
+                        ].includes(order.status)
+                          ? colors.primary
+                          : colors.onSurfaceVariant
+                      }
                       weight="medium"
                       align="center"
                     >
@@ -389,7 +477,9 @@ const OrderReceiptScreen = ({
                   <View
                     className="h-0.5 flex-1 mx-2"
                     style={{
-                      backgroundColor: ['out_for_delivery'].includes(order.status)
+                      backgroundColor: ['out_for_delivery'].includes(
+                        order.status,
+                      )
                         ? colors.primary
                         : colors.outline,
                     }}
@@ -400,7 +490,9 @@ const OrderReceiptScreen = ({
                     <View
                       className="w-8 h-8 rounded-full items-center justify-center mb-2"
                       style={{
-                        backgroundColor: ['out_for_delivery'].includes(order.status)
+                        backgroundColor: ['out_for_delivery'].includes(
+                          order.status,
+                        )
                           ? colors.primary
                           : colors.outline,
                       }}
@@ -408,11 +500,19 @@ const OrderReceiptScreen = ({
                       <IoniconsIcon
                         name="car-outline"
                         size={16}
-                        color={['out_for_delivery'].includes(order.status) ? 'white' : colors.onSurfaceVariant}
+                        color={
+                          ['out_for_delivery'].includes(order.status)
+                            ? 'white'
+                            : colors.onSurfaceVariant
+                        }
                       />
                     </View>
                     <Caption
-                      color={['out_for_delivery'].includes(order.status) ? colors.primary : colors.onSurfaceVariant}
+                      color={
+                        ['out_for_delivery'].includes(order.status)
+                          ? colors.primary
+                          : colors.onSurfaceVariant
+                      }
                       weight="medium"
                       align="center"
                     >
@@ -717,9 +817,13 @@ const OrderReceiptScreen = ({
                   {t('browse_menu')}
                 </Label>
               </TouchableOpacity>
-            ) : ['preparing', 'ready_for_pickup', 'out_for_delivery'].includes(order.status) ? (
+            ) : ['preparing', 'ready_for_pickup', 'out_for_delivery'].includes(
+                order.status,
+              ) ? (
               <TouchableOpacity
-                onPress={() => navigation.navigate('OrderTracking', { orderId: order.id })}
+                onPress={() =>
+                  navigation.navigate('OrderTracking', { orderId: order.id })
+                }
                 className="flex-1 rounded-xl py-4 items-center ml-2"
                 style={{ backgroundColor: colors.primary }}
               >

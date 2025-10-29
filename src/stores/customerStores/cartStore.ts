@@ -85,7 +85,7 @@ export const useCartStore = create<CartState & CartActions>()(
         canAddItem: (item) => {
           const { restaurantID, items } = get();
           if (items.length === 0) return true;
-          
+
           const itemRestaurantId =
             item.restaurantId || (item as any).restaurant?.id;
           if (!itemRestaurantId) {
@@ -94,7 +94,12 @@ export const useCartStore = create<CartState & CartActions>()(
           return itemRestaurantId === restaurantID;
         },
 
-        addItemtoCart: (item, quantity, specialInstructions = '', onSuccess) => {
+        addItemtoCart: (
+          item,
+          quantity,
+          specialInstructions = '',
+          onSuccess,
+        ) => {
           try {
             const { items } = get();
 
@@ -110,7 +115,12 @@ export const useCartStore = create<CartState & CartActions>()(
                       clearCartState(set);
                       setTimeout(
                         () =>
-                          get().addItemtoCart(item, quantity, specialInstructions, onSuccess),
+                          get().addItemtoCart(
+                            item,
+                            quantity,
+                            specialInstructions,
+                            onSuccess,
+                          ),
                         100,
                       );
                     },
@@ -187,9 +197,10 @@ export const useCartStore = create<CartState & CartActions>()(
             }
 
             // Add new item
-            const deliveryFee = (item as any).restaurant?.deliveryPrice || 
-                              (item as any).deliveryPrice || 
-                              0;
+            const deliveryFee =
+              (item as any).restaurant?.deliveryPrice ||
+              (item as any).deliveryPrice ||
+              0;
 
             const newItem: CartItem = {
               id: generateCartItemId(item.id),
@@ -208,7 +219,7 @@ export const useCartStore = create<CartState & CartActions>()(
                 item.restaurantId || (item as any).restaurant?.id;
               const restaurantName =
                 (item as any).restaurant?.name || 'Unknown Restaurant';
-              
+
               set({
                 restaurantID: itemRestaurantId || null,
                 restaurantName: restaurantName,
@@ -217,15 +228,15 @@ export const useCartStore = create<CartState & CartActions>()(
 
             set({ items: newItems });
             updateActivity(set, get);
-            
+
             Alert.alert('Success', 'Successfully added item to cart', [
-              { 
+              {
                 text: 'OK',
                 onPress: () => {
                   if (onSuccess) {
                     onSuccess();
                   }
-                }
+                },
               },
             ]);
           } catch (error: any) {
@@ -318,7 +329,7 @@ export const useCartStore = create<CartState & CartActions>()(
         getDeliveryFee: () => {
           const { items } = get();
           if (items.length === 0) return 0;
-          
+
           // Use the delivery fee from the first item (all items should be from same restaurant)
           // This is the fee that was captured when the item was added to cart
           return items[0].deliveryFee || 0;
@@ -335,34 +346,32 @@ export const useCartStore = create<CartState & CartActions>()(
           const serviceFee = get().getServiceFee();
           return subtotal + deliveryFee + serviceFee;
         },
-
-       
-      
-
-       
-    }),
-    {
-      name: 'cart-store',
-      storage: createJSONStorage(() => AsyncStorage),
-      partialize: (state) => ({
-        items: state.items,
-        restaurantID: state.restaurantID,
-        restaurantName: state.restaurantName,
-        lastActivity: state.lastActivity,
-        reminderEnabled: state.reminderEnabled,
       }),
-    },
+      {
+        name: 'cart-store',
+        storage: createJSONStorage(() => AsyncStorage),
+        partialize: (state) => ({
+          items: state.items,
+          restaurantID: state.restaurantID,
+          restaurantName: state.restaurantName,
+          lastActivity: state.lastActivity,
+          reminderEnabled: state.reminderEnabled,
+        }),
+      },
+    ),
   ),
-
-  )
-)
+);
 // Selector hooks for better performance
 export const useCartItems = () => useCartStore((state) => state.items);
-export const useCartSubtotal = () => useCartStore((state) => state.getSubtotal());
-export const useCartDeliveryFee = () => useCartStore((state) => state.getDeliveryFee());
-export const useCartServiceFee = () => useCartStore((state) => state.getServiceFee());
+export const useCartSubtotal = () =>
+  useCartStore((state) => state.getSubtotal());
+export const useCartDeliveryFee = () =>
+  useCartStore((state) => state.getDeliveryFee());
+export const useCartServiceFee = () =>
+  useCartStore((state) => state.getServiceFee());
 export const useCartTotal = () => useCartStore((state) => state.getTotal());
-export const useCartRestaurantID = () => useCartStore((state) => state.restaurantID);
+export const useCartRestaurantID = () =>
+  useCartStore((state) => state.restaurantID);
 export const useCartError = () => useCartStore((state) => state.error);
 export const useCanAddToCart = () => useCartStore((state) => state.canAddItem);
 
@@ -400,8 +409,15 @@ export const useCartLastActivity = () =>
   useCartStore((state) => state.lastActivity);
 
 // Legacy compatibility - keep old function names
-export const addItemtoCart = (item: MenuProps, quantity: number, specialInstructions?: string, onSuccess?: () => void) =>
-  useCartStore.getState().addItemtoCart(item, quantity, specialInstructions, onSuccess);
+export const addItemtoCart = (
+  item: MenuProps,
+  quantity: number,
+  specialInstructions?: string,
+  onSuccess?: () => void,
+) =>
+  useCartStore
+    .getState()
+    .addItemtoCart(item, quantity, specialInstructions, onSuccess);
 
 export const modifyCart = (itemId: string, quantity: number) =>
   useCartStore.getState().updateItemQuantity(itemId, quantity);

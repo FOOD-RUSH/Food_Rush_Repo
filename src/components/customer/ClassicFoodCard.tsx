@@ -112,7 +112,8 @@ const ClassicFoodCard = ({
 
   const formatPrice = () => {
     if (!foodPrice) return 'N/A';
-    const price = typeof foodPrice === 'string' ? parseFloat(foodPrice) : foodPrice;
+    const price =
+      typeof foodPrice === 'string' ? parseFloat(foodPrice) : foodPrice;
     return isNaN(price) ? 'N/A' : `${price.toLocaleString()} XAF`;
   };
 
@@ -159,9 +160,9 @@ const ClassicFoodCard = ({
               }}
               resizeMode="cover"
             />
-            <TouchableOpacity 
+            <TouchableOpacity
               className="absolute top-2 right-2 bg-white rounded-full shadow-sm"
-              style={{ 
+              style={{
                 padding: cardDimensions.padding * 0.4,
                 ...Platform.select({
                   ios: {
@@ -176,10 +177,10 @@ const ClassicFoodCard = ({
                 }),
               }}
             >
-              <IoniconsIcon 
-                name="heart-outline" 
-                color={'#ff6b6b'} 
-                size={cardDimensions.heartIconSize} 
+              <IoniconsIcon
+                name="heart-outline"
+                color={'#ff6b6b'}
+                size={cardDimensions.heartIconSize}
               />
             </TouchableOpacity>
 
@@ -190,8 +191,8 @@ const ClassicFoodCard = ({
                   !isAvailable ? 'bg-red-500' : 'bg-blue-500'
                 }`}
               >
-                <Text 
-                  className="text-white font-bold text-center" 
+                <Text
+                  className="text-white font-bold text-center"
                   style={{ fontSize: cardDimensions.badgeSize }}
                 >
                   {!isAvailable ? t('sold_out') : status || 'AVAILABLE'}
@@ -231,12 +232,16 @@ const ClassicFoodCard = ({
           {/* Rating and distance */}
           <View className="flex-row justify-between items-center mb-3">
             <View className="flex-row items-center">
-              <IoniconsIcon name="star" size={cardDimensions.ratingSize} color={'#ffbb00'} />
+              <IoniconsIcon
+                name="star"
+                size={cardDimensions.ratingSize}
+                color={'#ffbb00'}
+              />
               <Text
                 className="ml-1"
-                style={{ 
+                style={{
                   color: colors.onSurface,
-                  fontSize: cardDimensions.ratingSize
+                  fontSize: cardDimensions.ratingSize,
                 }}
               >
                 {rating ? rating.toFixed(1) : 'N/A'}
@@ -250,9 +255,9 @@ const ClassicFoodCard = ({
               />
               <Text
                 className="ml-1"
-                style={{ 
+                style={{
                   color: colors.onSurface,
-                  fontSize: cardDimensions.distanceSize
+                  fontSize: cardDimensions.distanceSize,
                 }}
               >
                 {distance ? `${distance.toFixed(1)}km` : 'N/A'}
@@ -264,7 +269,7 @@ const ClassicFoodCard = ({
           <View className="flex-row justify-between items-center">
             <Text
               className="font-bold flex-shrink"
-              style={{ 
+              style={{
                 color: colors.primary,
                 fontSize: cardDimensions.priceSize,
               }}
@@ -281,9 +286,9 @@ const ClassicFoodCard = ({
               />
               <Text
                 className="ml-1"
-                style={{ 
+                style={{
                   color: colors.onSurface,
-                  fontSize: cardDimensions.deliverySize
+                  fontSize: cardDimensions.deliverySize,
                 }}
                 numberOfLines={1}
               >

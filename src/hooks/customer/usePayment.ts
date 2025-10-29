@@ -101,7 +101,7 @@ export const useCreatePaymentRequest = () => {
   ): PaymentInitRequest => {
     // Ensure phone number contains only digits (remove spaces and other non-digit characters)
     const cleanPhone = phone.replace(/\D/g, '');
-    
+
     return {
       orderId,
       method: 'mobile_money',

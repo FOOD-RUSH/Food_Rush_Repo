@@ -61,7 +61,7 @@ const ProfileDetailsScreen = ({
       },
       {
         label: t('phone_number'),
-        value: user.phoneNumber ,
+        value: user.phoneNumber,
         icon: 'phone',
         iconSet: 'MaterialCommunityIcons' as const,
       },
@@ -190,7 +190,9 @@ const ProfileDetailsScreen = ({
                           color={colors.onSurfaceVariant}
                           style={{ marginLeft: 6 }}
                         >
-                          {user?.phoneNumber && user.phoneNumber.trim() !== '' ? user.phoneNumber : t('not_provided')}
+                          {user?.phoneNumber && user.phoneNumber.trim() !== ''
+                            ? user.phoneNumber
+                            : t('not_provided')}
                         </Body>
                       </View>
 

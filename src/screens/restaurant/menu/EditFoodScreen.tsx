@@ -1,5 +1,11 @@
 import { MaterialCommunityIcon } from '@/src/components/common/icons';
-import React, { useState, useEffect, useLayoutEffect, useCallback, useMemo } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useLayoutEffect,
+  useCallback,
+  useMemo,
+} from 'react';
 import {
   View,
   Image,
@@ -17,7 +23,12 @@ import { useMenuItemById } from '@/src/hooks/customer/useCustomerApi';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import { useCurrentRestaurant } from '@/src/stores/AuthStore';
 import { useUpdateMenuItem } from '@/src/hooks/restaurant/useMenuApi';
-import { Heading3, Body, Label, Caption } from '@/src/components/common/Typography';
+import {
+  Heading3,
+  Body,
+  Label,
+  Caption,
+} from '@/src/components/common/Typography';
 import { useResponsive } from '@/src/hooks/useResponsive';
 import { FoodCategory, FOOD_CATEGORIES } from '@/src/types/MenuItem';
 import {
@@ -117,16 +128,21 @@ export const EditFoodScreen = ({
     const priceValue = parseFloat(price);
 
     if (!name.trim()) {
-      errors.push(t('validation.food_name_required') || 'Food name is required');
+      errors.push(
+        t('validation.food_name_required') || 'Food name is required',
+      );
     } else if (name.trim().length < 2) {
-      errors.push(t('validation.food_name_too_short') || 'Food name is too short');
+      errors.push(
+        t('validation.food_name_too_short') || 'Food name is too short',
+      );
     }
 
     if (!price.trim()) {
       errors.push(t('validation.price_required') || 'Price is required');
     } else if (isNaN(priceValue) || priceValue <= 0) {
       errors.push(
-        t('validation.price_must_be_positive') || 'Price must be a positive number'
+        t('validation.price_must_be_positive') ||
+          'Price must be a positive number',
       );
     } else if (priceValue > 1000000) {
       errors.push(t('validation.price_too_high') || 'Price is too high');
@@ -169,7 +185,8 @@ export const EditFoodScreen = ({
     if (!restaurantId) {
       Alert.alert(
         t('error') || 'Error',
-        t('restaurant_id_not_found') || 'Restaurant ID not found. Please log in again.'
+        t('restaurant_id_not_found') ||
+          'Restaurant ID not found. Please log in again.',
       );
       return;
     }
@@ -202,13 +219,16 @@ export const EditFoodScreen = ({
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Alert.alert(
         t('success') || 'Success',
-        t('menu_item_updated_successfully') || 'Menu item updated successfully!',
-        [{ text: t('ok') || 'OK', onPress: () => navigation.goBack() }]
+        t('menu_item_updated_successfully') ||
+          'Menu item updated successfully!',
+        [{ text: t('ok') || 'OK', onPress: () => navigation.goBack() }],
       );
     } catch (error: any) {
       console.error('Error updating menu item:', error);
 
-      let errorMessage = t('failed_to_update_menu_item') || 'Failed to update menu item. Please try again.';
+      let errorMessage =
+        t('failed_to_update_menu_item') ||
+        'Failed to update menu item. Please try again.';
 
       if (error?.response?.status === 400) {
         errorMessage = t('invalid_data_provided') || 'Invalid data provided';
@@ -217,7 +237,8 @@ export const EditFoodScreen = ({
       } else if (error?.response?.status === 413) {
         errorMessage = t('image_file_too_large') || 'Image file is too large';
       } else if (error?.message?.includes('Network')) {
-        errorMessage = t('network_error') || 'Network error. Please check your connection.';
+        errorMessage =
+          t('network_error') || 'Network error. Please check your connection.';
       } else if (error?.response?.data?.message) {
         errorMessage = error.response.data.message;
       } else if (error?.message) {
@@ -245,7 +266,9 @@ export const EditFoodScreen = ({
   if (isLoading) {
     return (
       <CommonView style={{ backgroundColor: colors.background }}>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <View
+          style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+        >
           <ActivityIndicator size="large" color={colors.primary} />
           <Body style={{ marginTop: 16, color: colors.onSurfaceVariant }}>
             Loading menu item...
@@ -259,12 +282,31 @@ export const EditFoodScreen = ({
   if (error) {
     return (
       <CommonView style={{ backgroundColor: colors.background }}>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-          <MaterialCommunityIcon name="alert-circle" size={64} color={colors.error} />
-          <Heading3 style={{ marginTop: 16, marginBottom: 8, color: colors.onSurface }}>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 20,
+          }}
+        >
+          <MaterialCommunityIcon
+            name="alert-circle"
+            size={64}
+            color={colors.error}
+          />
+          <Heading3
+            style={{ marginTop: 16, marginBottom: 8, color: colors.onSurface }}
+          >
             Error Loading Item
           </Heading3>
-          <Body style={{ textAlign: 'center', marginBottom: 20, color: colors.onSurfaceVariant }}>
+          <Body
+            style={{
+              textAlign: 'center',
+              marginBottom: 20,
+              color: colors.onSurfaceVariant,
+            }}
+          >
             Failed to load menu item. Please try again.
           </Body>
           <Button mode="contained" onPress={() => navigation.goBack()}>
@@ -314,20 +356,36 @@ export const EditFoodScreen = ({
                     justifyContent: 'center',
                   }}
                 >
-                  <MaterialCommunityIcon name="camera" size={20} color="white" />
+                  <MaterialCommunityIcon
+                    name="camera"
+                    size={20}
+                    color="white"
+                  />
                   <Body style={{ marginLeft: 8, color: 'white' }}>
                     {t('change_image') || 'Tap to change image'}
                   </Body>
                 </View>
               </>
             ) : (
-              <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <View
+                style={{
+                  flex: 1,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
                 <MaterialCommunityIcon
                   name="camera-plus"
                   size={48}
                   color={colors.primary}
                 />
-                <Body style={{ marginTop: 12, color: colors.primary, fontWeight: '600' }}>
+                <Body
+                  style={{
+                    marginTop: 12,
+                    color: colors.primary,
+                    fontWeight: '600',
+                  }}
+                >
                   {t('add_food_image') || 'Tap to add image'}
                 </Body>
                 <Caption
@@ -347,7 +405,9 @@ export const EditFoodScreen = ({
 
         {/* Form Fields */}
         <Card style={{ padding: 16, marginBottom: 16 }}>
-          <Label style={{ marginBottom: 16, color: colors.primary, fontSize: 16 }}>
+          <Label
+            style={{ marginBottom: 16, color: colors.primary, fontSize: 16 }}
+          >
             {t('basic_information') || 'Basic Information'}
           </Label>
 
@@ -379,7 +439,12 @@ export const EditFoodScreen = ({
             }}
             outlineStyle={{ borderRadius: 12 }}
             left={<TextInput.Icon icon="currency-usd" />}
-            error={validation.hasErrors && (!price.trim() || isNaN(parseFloat(price)) || parseFloat(price) <= 0)}
+            error={
+              validation.hasErrors &&
+              (!price.trim() ||
+                isNaN(parseFloat(price)) ||
+                parseFloat(price) <= 0)
+            }
           />
 
           <TextInput
@@ -404,7 +469,9 @@ export const EditFoodScreen = ({
 
         {/* Category Selection */}
         <Card style={{ padding: 16, marginBottom: 16 }}>
-          <Label style={{ marginBottom: 12, color: colors.primary, fontSize: 16 }}>
+          <Label
+            style={{ marginBottom: 12, color: colors.primary, fontSize: 16 }}
+          >
             {t('category') || 'Category'} *
           </Label>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -417,14 +484,17 @@ export const EditFoodScreen = ({
                     paddingHorizontal: 16,
                     paddingVertical: 10,
                     borderRadius: 8,
-                    backgroundColor: category === key ? colors.primary : colors.surface,
+                    backgroundColor:
+                      category === key ? colors.primary : colors.surface,
                     borderWidth: 1,
-                    borderColor: category === key ? colors.primary : colors.outline,
+                    borderColor:
+                      category === key ? colors.primary : colors.outline,
                   }}
                 >
                   <Body
                     style={{
-                      color: category === key ? colors.onPrimary : colors.onSurface,
+                      color:
+                        category === key ? colors.onPrimary : colors.onSurface,
                       fontWeight: category === key ? '600' : '400',
                     }}
                   >
@@ -438,15 +508,40 @@ export const EditFoodScreen = ({
 
         {/* Validation Summary */}
         {validation.hasErrors && (
-          <Card style={{ padding: 16, marginBottom: 16, backgroundColor: colors.errorContainer }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-              <MaterialCommunityIcon name="alert-circle" size={20} color={colors.error} />
-              <Label style={{ marginLeft: 8, color: colors.error, fontWeight: '600' }}>
+          <Card
+            style={{
+              padding: 16,
+              marginBottom: 16,
+              backgroundColor: colors.errorContainer,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 8,
+              }}
+            >
+              <MaterialCommunityIcon
+                name="alert-circle"
+                size={20}
+                color={colors.error}
+              />
+              <Label
+                style={{
+                  marginLeft: 8,
+                  color: colors.error,
+                  fontWeight: '600',
+                }}
+              >
                 {t('please_fix_errors') || 'Please fix the following errors'}
               </Label>
             </View>
             {validation.errors.map((error, index) => (
-              <Caption key={index} style={{ color: colors.onErrorContainer, marginLeft: 24 }}>
+              <Caption
+                key={index}
+                style={{ color: colors.onErrorContainer, marginLeft: 24 }}
+              >
                 • {error}
               </Caption>
             ))}
@@ -455,9 +550,21 @@ export const EditFoodScreen = ({
 
         {/* Availability Toggle */}
         <Card style={{ padding: 16, marginBottom: 24 }}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
             <View style={{ flex: 1 }}>
-              <Label style={{ color: colors.onSurface, fontSize: 16, marginBottom: 4 }}>
+              <Label
+                style={{
+                  color: colors.onSurface,
+                  fontSize: 16,
+                  marginBottom: 4,
+                }}
+              >
                 {t('availability') || 'Availability'}
               </Label>
               <Body style={{ color: colors.onSurfaceVariant }}>
@@ -472,7 +579,9 @@ export const EditFoodScreen = ({
                 width: 56,
                 height: 32,
                 borderRadius: 16,
-                backgroundColor: isAvailable ? colors.primary : colors.surfaceVariant,
+                backgroundColor: isAvailable
+                  ? colors.primary
+                  : colors.surfaceVariant,
                 justifyContent: 'center',
                 padding: 2,
               }}
@@ -504,7 +613,9 @@ export const EditFoodScreen = ({
           disabled={updateMenuItemMutation.isPending || !validation.isValid}
           style={{
             marginBottom: 12,
-            backgroundColor: validation.isValid ? colors.primary : colors.surfaceVariant,
+            backgroundColor: validation.isValid
+              ? colors.primary
+              : colors.surfaceVariant,
           }}
           contentStyle={{ height: 48 }}
         >

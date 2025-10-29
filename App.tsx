@@ -28,7 +28,10 @@ try {
     replaysSessionSampleRate: __DEV__ ? 0.1 : 0.01,
     replaysOnErrorSampleRate: 1.0,
 
-    integrations: [Sentry.mobileReplayIntegration(), Sentry.feedbackIntegration()],
+    integrations: [
+      Sentry.mobileReplayIntegration(),
+      Sentry.feedbackIntegration(),
+    ],
 
     // Set environment from env variable
     environment: process.env.EXPO_PUBLIC_ENVIRONMENT || 'production',

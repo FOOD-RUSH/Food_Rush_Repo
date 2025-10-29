@@ -181,7 +181,9 @@ export const useAllRestaurants = (query: RestaurantQuery = {}) => {
 };
 
 // Hook for all restaurants without location requirements
-export const useAllRestaurantsWithoutLocation = (query: Omit<RestaurantQuery, 'nearLat' | 'nearLng' | 'radiusKm'> = {}) => {
+export const useAllRestaurantsWithoutLocation = (
+  query: Omit<RestaurantQuery, 'nearLat' | 'nearLng' | 'radiusKm'> = {},
+) => {
   const queryParams = {
     isOpen: true,
     verificationStatus: 'APPROVED' as const,
@@ -194,10 +196,14 @@ export const useAllRestaurantsWithoutLocation = (query: Omit<RestaurantQuery, 'n
     queryKey: ['restaurants', 'all-no-location', queryParams],
     queryFn: async () => {
       try {
-        const result = await restaurantApi.getAllRestaurantsWithoutLocation(queryParams);
+        const result =
+          await restaurantApi.getAllRestaurantsWithoutLocation(queryParams);
         return result;
       } catch (error) {
-        console.error('❌ Error fetching all restaurants (no location):', error);
+        console.error(
+          '❌ Error fetching all restaurants (no location):',
+          error,
+        );
         throw error;
       }
     },
