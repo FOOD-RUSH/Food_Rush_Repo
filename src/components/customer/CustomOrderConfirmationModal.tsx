@@ -21,7 +21,7 @@ import {
   useCartRestaurantName,
 } from '@/src/stores/customerStores/cartStore';
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const {  height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 interface CustomOrderConfirmationModalProps {
   visible: boolean;
@@ -399,48 +399,84 @@ const CustomOrderConfirmationModal: React.FC<
               </View>
             </View>
 
-            {/* Payment Info */}
+            {/* Payment Info - Important Warning */}
             <View
               style={{
-                backgroundColor: colors.secondaryContainer,
+                backgroundColor: '#FFF3CD',
                 borderRadius: 12,
                 padding: 16,
                 marginBottom: 20,
+                borderWidth: 2,
+                borderColor: '#FFC107',
               }}
             >
               <View
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
-                  marginBottom: 8,
+                  marginBottom: 12,
                 }}
               >
                 <IoniconsIcon
-                  name="information-circle"
-                  size={20}
-                  color={colors.onSecondaryContainer}
+                  name="warning"
+                  size={24}
+                  color="#FF6B00"
                 />
                 <Text
                   style={{
-                    color: colors.onSecondaryContainer,
-                    fontSize: 16,
-                    fontWeight: '600',
+                    color: '#FF6B00',
+                    fontSize: 17,
+                    fontWeight: '700',
                     marginLeft: 8,
                   }}
                 >
-                  {t('payment_info')}
+                  {t('important_payment_notice')}
                 </Text>
               </View>
               <Text
                 style={{
-                  color: colors.onSecondaryContainer,
+                  color: '#856404',
                   fontSize: 14,
-                  lineHeight: 20,
+                  lineHeight: 22,
+                  fontWeight: '600',
+                  marginBottom: 12,
                 }}
               >
                 {t(
-                  'payment_after_order_creation_info',
-                  'After placing your order, you will be redirected to payment. You can pay using MTN Mobile Money or Orange Money.',
+                  'immediate_payment_required'  )}
+              </Text>
+              <View
+                style={{
+                  backgroundColor: '#FFF',
+                  borderRadius: 8,
+                  padding: 12,
+                  marginBottom: 8,
+                }}
+              >
+                <Text
+                  style={{
+                    color: '#856404',
+                    fontSize: 13,
+                    lineHeight: 20,
+                    fontWeight: '500',
+                  }}
+                >
+                  ⚠️ {t(
+                    'ensure_sufficient_funds'
+                    )}
+                </Text>
+              </View>
+              <Text
+                style={{
+                  color: '#856404',
+                  fontSize: 13,
+                  lineHeight: 20,
+                  fontStyle: 'italic',
+                }}
+              >
+                {t(
+                  'payment_methods_available'
+               
                 )}
               </Text>
             </View>
@@ -464,8 +500,7 @@ const CustomOrderConfirmationModal: React.FC<
               >
                 *{' '}
                 {t(
-                  'service_fee_note',
-                  'Service fee helps us maintain and improve our platform',
+                  'service_fee_note'
                 )}
               </Text>
             </View>

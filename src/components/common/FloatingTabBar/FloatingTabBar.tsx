@@ -63,15 +63,15 @@ const FloatingTabBar: React.FC<FloatingTabBarProps> = ({
     }
   };
 
-  const getTabLabel = (routeName: string): string => {
-    const descriptor = descriptors[state.routes[state.index].key];
+  const getTabLabel = (route: any): string => {
+    const descriptor = descriptors[route.key];
     const label = descriptor.options.tabBarLabel;
 
     if (typeof label === 'string') {
       return label;
     }
 
-    return routeName;
+    return route.name;
   };
 
   return (
@@ -115,7 +115,7 @@ const FloatingTabBar: React.FC<FloatingTabBarProps> = ({
           };
 
           const iconName = getIconName(route.name, isFocused);
-          const label = getTabLabel(route.name);
+          const label = getTabLabel(route);
 
           return (
             <TouchableOpacity

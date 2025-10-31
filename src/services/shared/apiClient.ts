@@ -30,7 +30,9 @@ class ApiClient {
   private client: AxiosInstance;
   private isRefreshing = false;
   private refreshPromise: Promise<AxiosResponse> | null = null;
-  private logoutTriggered = false;
+  private sessionExpired = false; // Flag to prevent cascading requests
+  private refreshFailureCount = 0; // Track consecutive refresh failures
+  private readonly MAX_REFRESH_RETRIES = 2; // Maximum refresh attempts before auto-logout
 
   constructor() {
     const baseURL = this.getApiUrl();
@@ -55,6 +57,11 @@ class ApiClient {
     // Request interceptor - add auth token
     this.client.interceptors.request.use(
       async (config: InternalAxiosRequestConfig) => {
+        // Immediately reject if session has expired
+        if (this.sessionExpired) {
+          throw this.createSessionExpiredError();
+        }
+
         try {
           const token = await TokenManager.getToken();
           if (token && config.headers) {
@@ -78,13 +85,14 @@ class ApiClient {
 
     // Response interceptor - handle errors and token refresh
     this.client.interceptors.response.use(
-      (response) => {
-        // Log successful API responses for debugging
-        // API Response: status, url, method
-        return response;
-      },
+      (response) => response,
       async (error: AxiosError) => {
         const originalRequest = error.config as RetryableRequest;
+
+        // Immediately reject if session has expired
+        if (this.sessionExpired) {
+          throw this.createSessionExpiredError();
+        }
 
         // Log API errors for debugging
         console.error('❌ API Error:', {
@@ -167,23 +175,33 @@ class ApiClient {
     return apiError;
   }
 
+  private createSessionExpiredError(): ApiError {
+    const error = new Error('Session expired. Please log in again.') as ApiError;
+    error.code = 'SESSION_EXPIRED';
+    error.status = 401;
+    error.isApiError = true;
+    return error;
+  }
+
   private async handleTokenRefresh(
     originalRequest: RetryableRequest,
   ): Promise<AxiosResponse> {
     try {
       const refreshToken = await TokenManager.getRefreshToken();
 
-      // Attempting token refresh for request: originalRequest.url
-
       if (!refreshToken) {
-        await TokenManager.clearAllTokens();
-        // Trigger full logout when no refresh token
-        this.triggerLogout();
-        const error = new Error('Please log in again.') as ApiError;
-        error.code = 'UNAUTHENTICATED';
-        error.status = 401;
-        error.isApiError = true;
-        throw error;
+        // No refresh token - immediately fail and logout
+        this.refreshFailureCount++;
+        console.warn(`⚠️ No refresh token available (Attempt ${this.refreshFailureCount}/${this.MAX_REFRESH_RETRIES})`);
+        await this.handleRefreshFailure();
+        throw this.createSessionExpiredError();
+      }
+
+      // Check if max retries exceeded
+      if (this.refreshFailureCount >= this.MAX_REFRESH_RETRIES) {
+        console.error(`❌ Max refresh retries (${this.MAX_REFRESH_RETRIES}) exceeded. Auto-logout initiated.`);
+        await this.handleRefreshFailure();
+        throw this.createSessionExpiredError();
       }
 
       if (this.isRefreshing && this.refreshPromise) {
@@ -221,7 +239,9 @@ class ApiClient {
           throw new Error('Invalid refresh token response');
         }
 
-        // Token refresh successful
+        // Token refresh successful - reset failure count
+        this.refreshFailureCount = 0;
+        console.log('✅ Token refresh successful');
         await TokenManager.setTokens(accessToken, newRefreshToken);
 
         // Update original request
@@ -234,22 +254,16 @@ class ApiClient {
 
       return await this.refreshPromise;
     } catch (refreshError) {
-      console.error('❌ Token refresh failed:', refreshError);
-      await TokenManager.clearAllTokens();
-
-      // Trigger full logout when refresh fails (only once)
-      if (!this.logoutTriggered) {
-        this.logoutTriggered = true;
-        this.triggerLogout();
+      this.refreshFailureCount++;
+      console.error(`❌ Token refresh failed (Attempt ${this.refreshFailureCount}/${this.MAX_REFRESH_RETRIES}):`, refreshError);
+      
+      // If max retries reached, handle refresh failure (logout)
+      if (this.refreshFailureCount >= this.MAX_REFRESH_RETRIES) {
+        console.error('❌ Max refresh retries exceeded. Logging out...');
+        await this.handleRefreshFailure();
       }
-
-      const error = new Error(
-        'Session expired. Please log in again.',
-      ) as ApiError;
-      error.code = 'SESSION_EXPIRED';
-      error.status = 401;
-      error.isApiError = true;
-      throw error;
+      
+      throw this.createSessionExpiredError();
     } finally {
       this.isRefreshing = false;
       this.refreshPromise = null;
@@ -344,11 +358,63 @@ class ApiClient {
     }
   }
 
+  // Centralized refresh failure handler - clears everything and logs out
+  private async handleRefreshFailure(): Promise<void> {
+    // Set session expired flag to prevent new requests
+    this.sessionExpired = true;
+
+    // Clear tokens
+    await TokenManager.clearAllTokens();
+
+    // Clear all stores and trigger logout
+    try {
+      // Clear all stores before logout
+      await this.clearAllStores();
+
+      // Trigger logout
+      const { useAuthStore } = await import('@/src/stores/AuthStore');
+      const logout = useAuthStore.getState().logout;
+      if (logout) {
+        await logout();
+      }
+    } catch (error) {
+      console.error('Error during refresh failure cleanup:', error);
+    }
+  }
+
+  // Clear all application stores
+  private async clearAllStores(): Promise<void> {
+    try {
+      // Clear cart store
+      const { useCartStore } = await import('@/src/stores/customerStores/cartStore');
+      useCartStore.getState().clearCart();
+
+      // Clear notification store
+      const { useNotificationStore } = await import('@/src/stores/shared/notificationStore');
+      useNotificationStore.getState().reset();
+
+      // Clear restaurant profile store
+      const { useRestaurantProfileStore } = await import('@/src/stores/restaurantStores/restaurantProfileStore');
+      useRestaurantProfileStore.getState().reset();
+
+      // Clear address store
+      const { useAddressStore } = await import('@/src/stores/customerStores/addressStore');
+      useAddressStore.getState().clearAddresses();
+
+      // Clear favorites store
+      const { useRestaurantFavoritesStore } = await import('@/src/stores/shared/favorites/restaurantFavoritesStore');
+      useRestaurantFavoritesStore.getState().clearFavorites();
+    } catch (error) {
+      console.error('Error clearing stores:', error);
+    }
+  }
+
   // Utility method to reset refresh state (useful for logout)
   public resetRefreshState(): void {
     this.isRefreshing = false;
     this.refreshPromise = null;
-    this.logoutTriggered = false;
+    this.sessionExpired = false;
+    this.refreshFailureCount = 0; // Reset failure counter
   }
 
   // Method to update base URL if needed
@@ -356,22 +422,9 @@ class ApiClient {
     this.client.defaults.baseURL = newBaseURL;
   }
 
-  // Trigger full logout across the app
-  private async triggerLogout(): Promise<void> {
-    try {
-      // Dynamically import the auth store to avoid circular dependencies
-      const { useAuthStore } = await import('@/src/stores/AuthStore');
-      if (useAuthStore) {
-        const logout = useAuthStore.getState().logout;
-        if (logout) {
-          await logout();
-        }
-      }
-    } catch (error) {
-      console.error('Error triggering logout:', error);
-      // Fallback: at least clear tokens
-      await TokenManager.clearAllTokens();
-    }
+  // Get base URL for fetch requests
+  public getBaseURL(): string {
+    return this.client.defaults.baseURL || this.getApiUrl();
   }
 }
 

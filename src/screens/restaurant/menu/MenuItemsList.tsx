@@ -8,7 +8,7 @@ import {
   Image,
   Dimensions,
 } from 'react-native';
-import { useTheme, Card, FAB, Switch, Chip } from 'react-native-paper';
+import { useTheme, Card, FAB, Switch } from 'react-native-paper';
 
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -61,14 +61,13 @@ interface ErrorState {
 
 const MenuItemsList: React.FC<
   RestaurantMenuStackScreenProps<'MenuItemsList'>
-> = () => {
+> = ({navigation}) => {
   const { colors } = useTheme();
   const { t } = useTranslation();
-  const navigation = useNavigation();
   const currentRestaurant = useCurrentRestaurant();
   const restaurantId = currentRestaurant?.id;
   const tabBarHeight = useFloatingTabBarHeight();
-  const { scale, isSmallScreen: responsiveIsSmallScreen } = useResponsive();
+  const { scale } = useResponsive();
 
   const { categories: apiCategories = [] } = useCategories();
 

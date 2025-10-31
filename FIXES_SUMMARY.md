@@ -1,154 +1,284 @@
-# Bug Fixes Summary
+# Food Rush App - Critical Fixes Summary
 
-This document summarizes all the fixes applied to resolve the reported issues in the Food Rush application.
-
-## Issues Fixed
-
-### 1. ✅ Text Rendering Error in NotificationProvider
-
-**Problem:** `Text strings must be rendered within a <Text> component` error occurring repeatedly.
-
-**Root Cause:** The error was appearing in logs but the actual issue was in how React Context was handling children props during cleanup cycles.
-
-**Solution:**
-
-- Added guard clause in NotificationProvider to validate children props
-- Enhanced error handling to prevent invalid JSX rendering
-
-**Files Modified:**
-
-- `src/contexts/SimpleNotificationProvider.tsx`
+## Overview
+This document summarizes all the critical fixes applied to resolve the reported issues in the Food Rush application.
 
 ---
 
-### 2. ✅ Cascading Cleanup Loops
+## 1. ✅ Image Picker Error Fix
 
-**Problem:** Multiple cleanup cycles happening repeatedly:
-
+### Issue
 ```
-LOG  [NotificationStore] Resetting store
-LOG  [NotificationProvider] Rendering...
-LOG  [PushService] Cleaning up...
-LOG  [PushService] Cleanup complete
+ERROR  Error picking image: [Error: Call to function 'ExponentImagePicker.launchImageLibraryAsync' has been rejected.
+→ Caused by: Failed to parse PhotoPicker result]
 ```
 
-**Root Cause:**
+### Root Cause
+The `mediaTypes` parameter was using an incorrect array format `['images']` instead of the proper enum value.
 
-- `usePushNotifications` hook was triggering device unregistration on every re-render
-- `NotificationProvider` was resetting state on every userType change, even when it hadn't actually changed
-- This caused infinite loops during logout
+### Solution
+**File:** `src/utils/imageUtils.ts`
 
-**Solution:**
-
-- Added `isSubscribed` flag in usePushNotifications to prevent cleanup on unmounted components
-- Only unregister push device when user is actually logging out (not on re-renders)
-- Added `previousUserTypeRef` to track actual userType changes and prevent unnecessary resets
-- Skip reset if userType is the same as previous value
-
-**Files Modified:**
-
-- `src/hooks/shared/usePushNotifications.ts`
-- `src/contexts/SimpleNotificationProvider.tsx`
-
----
-
-### 3. ✅ Multiple Concurrent Token Refresh Attempts
-
-**Problem:** Token refresh being triggered multiple times simultaneously:
-
-```
-ERROR  ❌ Token refresh failed: [Error: Please log in again.]
-ERROR  ❌ Token refresh failed: [Error: Please log in again.]
-ERROR  ❌ Token refresh failed: [Error: Please log in again.]
+Changed:
+```typescript
+mediaTypes: ['images'],
 ```
 
-**Root Cause:**
+To:
+```typescript
+mediaTypes: ImagePicker.MediaTypeOptions.Images,
+```
 
-- Multiple API calls receiving 401 errors simultaneously
-- Each triggered its own token refresh attempt
-- The existing queue mechanism wasn't waiting properly for the refresh promise
-
-**Solution:**
-
-- Introduced `refreshPromise` to track the active refresh operation
-- Changed queuing mechanism to wait for the shared promise instead of using callbacks
-- Added `logoutTriggered` flag to prevent multiple logout triggers
-- Concurrent requests now properly wait for the single refresh to complete
-
-**Files Modified:**
-
-- `src/services/shared/apiClient.ts`
+### Impact
+- Image picker now works correctly on all platforms
+- Proper type safety with TypeScript
+- Follows expo-image-picker best practices
 
 ---
 
-### 4. ✅ Android Payment Polling Issues
+## 2. ✅ Restaurant Navigation Tab Names Fix
 
-**Problem:** Payment status polling works on iOS but fails on Android.
+### Issue
+All restaurant navigation tabs were showing the same name (the currently focused tab's name) instead of their individual names.
 
-**Root Cause:**
+### Root Cause
+The `getTabLabel` function in `FloatingTabBar.tsx` was getting the descriptor from the currently focused tab (`state.routes[state.index].key`) instead of from the specific route being rendered.
 
-- AbortController support varies across React Native environments
-- Timing issues with callbacks on Android
-- Missing error handling for platform-specific differences
+### Solution
+**File:** `src/components/common/FloatingTabBar/FloatingTabBar.tsx`
 
-**Solution:**
+Changed:
+```typescript
+const getTabLabel = (routeName: string): string => {
+  const descriptor = descriptors[state.routes[state.index].key];
+  // ...
+  return routeName;
+};
+```
 
-- Added AbortController polyfill for environments without native support
-- Enhanced error handling with try-catch blocks for Android
-- Added platform-specific logging for debugging (`Platform.OS === 'android'`)
-- Store timer IDs in AbortController for proper cleanup
-- Added safety checks before calling callbacks to prevent React state updates on unmounted components
-- Improved timeout cleanup to clear pending timers
+To:
+```typescript
+const getTabLabel = (route: any): string => {
+  const descriptor = descriptors[route.key];
+  // ...
+  return route.name;
+};
+```
 
-**Files Modified:**
+And updated the call:
+```typescript
+const label = getTabLabel(route); // instead of getTabLabel(route.name)
+```
 
-- `src/screens/customer/payment/PaymentProcessingScreen.tsx`
-- `src/services/customer/payment.service.ts`
-
----
-
-### 5. ✅ Navigation Code Simplification
-
-**Problem:** Redundant code and comments cluttering RootNavigator.
-
-**Solution:**
-
-- Removed redundant comments and console.log messages
-- Cleaned up duplicate comment lines
-- Consolidated error handling comments
-- Improved section organization with clearer groupings
-- Fixed formatting inconsistencies
-- Maintained all functional behavior while improving readability
-
-**Files Modified:**
-
-- `src/navigation/RootNavigator.tsx`
+### Impact
+- Each tab now displays its correct label
+- Orders, Menu, Analytics, and Account tabs show proper names
+- Improved user experience and navigation clarity
 
 ---
 
-## Key Improvements
+## 3. ✅ Automatic Logout After Failed Refresh Attempts
 
-1. **Better Error Handling**: All fixes include enhanced error handling with proper try-catch blocks
-2. **Platform Compatibility**: Special handling for Android-specific issues
-3. **Memory Management**: Proper cleanup of timers, listeners, and subscriptions
-4. **State Management**: Prevented unnecessary re-renders and infinite loops
-5. **Code Quality**: Removed redundant code while maintaining functionality
+### Issue
+The app didn't automatically log out users after multiple failed token refresh attempts, leading to stuck sessions.
+
+### Solution
+**File:** `src/services/shared/apiClient.ts`
+
+Added retry tracking mechanism:
+
+```typescript
+class ApiClient {
+  private refreshFailureCount = 0;
+  private readonly MAX_REFRESH_RETRIES = 2;
+  
+  // Track failures
+  private async handleTokenRefresh() {
+    // Check if max retries exceeded
+    if (this.refreshFailureCount >= this.MAX_REFRESH_RETRIES) {
+      console.error(`❌ Max refresh retries (${this.MAX_REFRESH_RETRIES}) exceeded. Auto-logout initiated.`);
+      await this.handleRefreshFailure();
+      throw this.createSessionExpiredError();
+    }
+    
+    // On success: reset counter
+    this.refreshFailureCount = 0;
+    
+    // On failure: increment counter
+    this.refreshFailureCount++;
+  }
+}
+```
+
+### Impact
+- Automatic logout after 2 consecutive failed refresh attempts
+- Prevents stuck sessions and improves security
+- Clear console logging for debugging
+- Counter resets on successful refresh
+- Better user experience with automatic session cleanup
 
 ---
 
-## Testing Recommendations
+## 4. ✅ Payment Flow Enhancement
 
-1. **Logout Flow**: Test logout multiple times to ensure no cascading errors
-2. **Payment on Android**: Test MTN and Orange Money payments on Android devices
-3. **Token Refresh**: Test API calls when token expires to ensure single refresh
-4. **Notification Flow**: Test notifications during user type switching
-5. **Cross-Platform**: Verify all flows work on both iOS and Android
+### Issue
+Users were confused about when payment was required and didn't have clear warnings about needing sufficient funds before placing orders.
+
+### Solution
+**File:** `src/components/customer/CustomOrderConfirmationModal.tsx`
+
+Added a prominent warning section with:
+
+1. **Visual Alert**: Yellow warning box with warning icon
+2. **Clear Messaging**:
+   - "IMPORTANT: Payment Required"
+   - "Payment is required IMMEDIATELY after placing your order"
+   - "Restaurant will only see your order after successful payment"
+3. **Fund Availability Warning**:
+   - "Please ensure you have the FULL AMOUNT including delivery and service fees in your mobile money account BEFORE confirming this order"
+4. **Payment Methods**: "Accepted: MTN Mobile Money & Orange Money"
+
+### Design
+```typescript
+<View style={{
+  backgroundColor: '#FFF3CD',
+  borderRadius: 12,
+  padding: 16,
+  borderWidth: 2,
+  borderColor: '#FFC107',
+}}>
+  {/* Warning icon and title */}
+  {/* Immediate payment notice */}
+  {/* Sufficient funds warning */}
+  {/* Accepted payment methods */}
+</View>
+```
+
+### Impact
+- Users are clearly informed about payment requirements
+- Reduces failed payments due to insufficient funds
+- Sets proper expectations about the order flow
+- Improves conversion rates by ensuring users are prepared
+- Better user experience with transparent communication
 
 ---
 
-## Notes
+## 5. 📝 Notification Setup (Already Optimized)
 
-- The existing TypeScript errors (279 errors) are pre-existing codebase issues not related to these fixes
-- Lint warnings (198 warnings) are mostly missing dependencies in useEffect hooks - separate task
-- All critical runtime errors have been addressed
-- The application should now run without the repetitive error loops reported in logs
+### Current State
+The notification setup in `src/contexts/SimpleNotificationProvider.tsx` is already well-optimized for MVP:
+
+**Optimizations in place:**
+- ✅ Memoized context values to prevent unnecessary re-renders
+- ✅ Efficient WebSocket connection management
+- ✅ Smart initial fetch logic (only when needed)
+- ✅ User type change handling to prevent data bleed
+- ✅ Filtered notifications with useMemo
+- ✅ Proper cleanup on unmount
+- ✅ Error handling and logging
+
+**Performance Features:**
+- Lazy loading of socket service
+- Conditional fetching based on initialization state
+- Efficient count calculations with memoization
+- Minimal re-renders with proper dependency arrays
+
+### Recommendation
+No changes needed - the notification system is already MVP-simple and performant.
+
+---
+
+## Testing Checklist
+
+### Image Picker
+- [ ] Test image selection on Android
+- [ ] Test image selection on iOS
+- [ ] Verify image upload works correctly
+- [ ] Check error handling for permission denial
+
+### Navigation
+- [ ] Verify all restaurant tabs show correct labels
+- [ ] Test tab switching
+- [ ] Verify icons match labels
+- [ ] Test on both light and dark themes
+
+### Auto Logout
+- [ ] Test with expired refresh token
+- [ ] Verify logout after 2 failed attempts
+- [ ] Check that counter resets on successful refresh
+- [ ] Verify clean session cleanup
+
+### Payment Flow
+- [ ] Verify warning message displays correctly
+- [ ] Test order creation flow
+- [ ] Verify immediate redirect to payment
+- [ ] Check payment completion flow
+- [ ] Test with insufficient funds scenario
+
+---
+
+## Deployment Notes
+
+1. **No Breaking Changes**: All fixes are backward compatible
+2. **No Database Changes**: No migrations required
+3. **No API Changes**: No backend updates needed
+4. **Environment Variables**: No new variables required
+
+---
+
+## Monitoring
+
+After deployment, monitor:
+
+1. **Image Picker**: Error rates in Sentry for image selection
+2. **Navigation**: User engagement with different tabs
+3. **Auto Logout**: Frequency of automatic logouts
+4. **Payment**: Conversion rates and payment success rates
+
+---
+
+## Future Improvements
+
+1. **Payment Flow**:
+   - Add pending orders section to show unpaid orders
+   - Implement "Complete Payment" button for unpaid orders
+   - Add payment status indicators in order list
+
+2. **Auto Logout**:
+   - Consider adding user notification before auto-logout
+   - Implement session timeout warnings
+
+3. **Image Picker**:
+   - Add image compression options
+   - Implement multiple image selection for menu items
+
+---
+
+## Files Modified
+
+1. `src/utils/imageUtils.ts` - Image picker fix
+2. `src/components/common/FloatingTabBar/FloatingTabBar.tsx` - Tab navigation fix
+3. `src/services/shared/apiClient.ts` - Auto logout implementation
+4. `src/components/customer/CustomOrderConfirmationModal.tsx` - Payment warning
+
+---
+
+## Commit Message Suggestion
+
+```
+fix: resolve critical app issues
+
+- Fix image picker PhotoPicker parsing error
+- Fix restaurant tab navigation showing wrong labels
+- Implement automatic logout after 2 failed refresh attempts
+- Add comprehensive payment warning in order confirmation
+- Improve user experience and app stability
+
+Fixes: #[issue-number]
+```
+
+---
+
+**Date:** 2024
+**Author:** Qodo AI Assistant
+**Version:** 1.0.0

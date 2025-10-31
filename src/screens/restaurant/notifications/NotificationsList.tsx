@@ -32,8 +32,6 @@ const RestaurantNotificationScreen = () => {
     unreadCount,
     isLoading,
     isLoadingMore,
-    error,
-    hasNextPage,
     selectedFilter,
     notificationCounts,
     refresh,
@@ -41,9 +39,7 @@ const RestaurantNotificationScreen = () => {
     markAsRead,
     markAllAsRead,
     setFilter,
-    clearError,
     hasNotifications,
-    sendLocalNotification,
   } = useNotifications();
 
   // Restaurant-specific notification handling

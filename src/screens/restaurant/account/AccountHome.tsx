@@ -257,19 +257,25 @@ const AccountHome: React.FC<
             .join('')
             .toUpperCase()
         : 'R';
+    
+    // Get restaurant picture URL
+    const restaurantPictureUrl = restaurantProfile?.pictureUrl || currentRestaurant?.pictureUrl || null;
 
     return {
       displayName,
       displayEmail,
       restaurantName: restaurantDisplayName,
       avatarLabel,
+      restaurantPictureUrl,
     };
   }, [
     user?.fullName,
     user?.email,
     user?.businessName,
     restaurantProfile?.name,
+    restaurantProfile?.pictureUrl,
     currentRestaurant?.name,
+    currentRestaurant?.pictureUrl,
   ]);
 
   // Memoize menu items to prevent recreation
@@ -350,15 +356,26 @@ const AccountHome: React.FC<
             style={{ padding: 8 }}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Avatar.Text
-                size={64}
-                label={userDisplayData.avatarLabel}
-                style={{
-                  backgroundColor: colors.primary,
-                  marginRight: 16,
-                }}
-                labelStyle={{ fontSize: 22, fontWeight: 'bold' }}
-              />
+              {userDisplayData.restaurantPictureUrl ? (
+                <Avatar.Image
+                  size={64}
+                  source={{ uri: userDisplayData.restaurantPictureUrl }}
+                  style={{
+                    backgroundColor: colors.primary,
+                    marginRight: 16,
+                  }}
+                />
+              ) : (
+                <Avatar.Text
+                  size={64}
+                  label={userDisplayData.avatarLabel}
+                  style={{
+                    backgroundColor: colors.primary,
+                    marginRight: 16,
+                  }}
+                  labelStyle={{ fontSize: 22, fontWeight: 'bold' }}
+                />
+              )}
 
               <View style={{ flex: 1 }}>
                 <Text

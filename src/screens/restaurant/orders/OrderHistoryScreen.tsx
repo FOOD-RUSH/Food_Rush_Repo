@@ -14,7 +14,6 @@ import {
   Typography,
   Heading1,
   Heading4,
-  Heading5,
   Body,
   Label,
   LabelLarge,
@@ -50,7 +49,7 @@ const OrderHistoryScreen: React.FC<
     }).start();
   }, [fadeAnim]);
 
-  const [historyOrders, setHistoryOrders] = useState<HistoryOrder[]>([]);
+  const [historyOrders] = useState<HistoryOrder[]>([]);
 
   // Filter orders based on selected filter and search query
   const filteredOrders = historyOrders.filter((order) => {

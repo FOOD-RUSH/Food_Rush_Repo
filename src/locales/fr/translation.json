@@ -1353,5 +1353,9 @@
   "complete_payment_on_phone": "Complete Payement on Phone",
   "7_days": "7 Jours",
 
-  "add_new_address": "Ajoute une nouvelle addresse"
+  "add_new_address": "Ajoute une nouvelle addresse",
+  "important_payment_notice": "IMPORTANT : Paiement Requis",
+  "immediate_payment_required": "Le paiement est requis IMMÉDIATEMENT après avoir passé votre commande. Le restaurant ne verra votre commande qu'après un paiement réussi.",
+  "ensure_sufficient_funds": "Veuillez vous assurer d'avoir le MONTANT TOTAL incluant les frais de livraison et de service dans votre compte mobile money AVANT de confirmer cette commande.",
+  "payment_methods_available": "Accepté : MTN Mobile Money & Orange Money"
 }

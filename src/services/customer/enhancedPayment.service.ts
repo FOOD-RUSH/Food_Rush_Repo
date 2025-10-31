@@ -153,7 +153,6 @@ class EnhancedPaymentService {
       this.validatePaymentRequest(request);
 
       // Format phone number
-      const formattedPhone = this.formatPhoneNumber(request.phone);
 
       // Prepare API request
       // const paymentData = {

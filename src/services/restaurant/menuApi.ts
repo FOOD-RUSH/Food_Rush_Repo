@@ -1,4 +1,5 @@
 import { apiClient } from '@/src/services/shared/apiClient';
+import TokenManager from '@/src/services/shared/tokenManager';
 import { FoodCategory } from '../../types/MenuItem';
 
 export interface MenuItem {
@@ -113,7 +114,16 @@ export const restaurantMenuApi = {
 
   createMenuItem: async (restaurantId: string, data: CreateMenuItemRequest) => {
     try {
-      // Always use FormData approach
+      // Get auth token
+      const token = await TokenManager.getToken();
+      if (!token) {
+        throw new Error('No authentication token available');
+      }
+
+      // Get base URL
+      const baseURL = apiClient.getBaseURL();
+
+      // Create FormData for menu item creation
       const formData = new FormData();
 
       // Append text fields exactly as backend expects them
@@ -133,40 +143,46 @@ export const restaurantMenuApi = {
         formData.append('endAt', data.endAt);
       }
 
-      // FIXED: Add image file properly - React Native expects this exact format
+      // Add image file properly - React Native expects this exact format
       if (data.picture) {
-        // React Native FormData expects this specific object structure
         const imageFile = {
           uri: data.picture.uri,
           name: data.picture.name,
           type: data.picture.type,
         };
-
-        // Use 'picture' as the field name to match backend API
         formData.append('picture', imageFile as any);
       }
 
-      // Log what we're sending
-
-      const response = await apiClient.post<ApiResponse<MenuItem>>(
-        `/restaurants/${restaurantId}/menu`,
-        formData,
-        {
-          // Don't set Content-Type for FormData - let axios handle it
-          // The apiClient will automatically set the proper Content-Type with boundary
-          headers: {
-            Accept: 'application/json',
-          },
-          timeout: 30000, // 30 seconds timeout for file upload
+      // Use built-in fetch for binary upload
+      const response = await fetch(`${baseURL}/restaurants/${restaurantId}/menu`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
+          // Don't set Content-Type - let fetch handle it for FormData
         },
-      );
+        body: formData,
+      });
 
-      // Log successful response
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.message || `Failed to create menu item: ${response.status}`
+        );
+      }
 
-      return response;
+      const responseData: ApiResponse<MenuItem> = await response.json();
+      
+      // Return in axios-compatible format for backward compatibility
+      return {
+        data: responseData,
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers,
+        config: {} as any,
+      };
     } catch (error: any) {
-      // Log error response from backend
-
+      console.error('❌ Error creating menu item:', error);
       throw error;
     }
   },
