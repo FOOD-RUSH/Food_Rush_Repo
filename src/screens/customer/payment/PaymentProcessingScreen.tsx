@@ -230,7 +230,16 @@ const PaymentProcessingScreen = ({
           } else if (status.status === 'failed') {
             cleanup();
             setCurrentStep('failed');
-            setError(status.message || t('payment_failed'));
+            // Enhanced error messaging for common failure reasons
+            const errorMessage = status.message || t('payment_failed');
+            const isInsufficientFunds = errorMessage.toLowerCase().includes('insufficient') || 
+                                       errorMessage.toLowerCase().includes('balance') ||
+                                       errorMessage.toLowerCase().includes('funds');
+            setError(
+              isInsufficientFunds 
+                ? t('insufficient_funds_error', 'Payment failed: Insufficient funds in your mobile money account. Please top up and try again.')
+                : errorMessage
+            );
           } else if (status.status === 'expired') {
             cleanup();
             setCurrentStep('failed');

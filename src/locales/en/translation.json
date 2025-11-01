@@ -1342,5 +1342,9 @@
   "important_payment_notice": "IMPORTANT: Payment Required",
   "immediate_payment_required": "Payment is required IMMEDIATELY after placing your order. The restaurant will only see your order after successful payment.",
   "ensure_sufficient_funds": "Please ensure you have the FULL AMOUNT including delivery and service fees in your mobile money account BEFORE confirming this order.",
-  "payment_methods_available": "Accepted: MTN Mobile Money & Orange Money"
+  "payment_methods_available": "Accepted: MTN Mobile Money & Orange Money",
+  "paid": "Paid",
+  "unpaid": "Unpaid",
+  "pay_now": "Pay Now",
+  "insufficient_funds_error": "Payment failed: Insufficient funds in your mobile money account. Please top up and try again."
 }

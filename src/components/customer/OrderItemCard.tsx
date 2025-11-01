@@ -53,6 +53,11 @@ const OrderItemCard = ({
 
   const totalItems = order.items.reduce((sum, item) => sum + item.quantity, 0);
   const isActiveOrder = !['delivered', 'cancelled'].includes(order.status);
+  
+  // Check payment status - orders created after payment flow update will have isPaid field
+  // For backward compatibility, assume old orders with 'payment_confirmed' or later status are paid
+  const isPaid = order.isPaid ?? ['payment_confirmed', 'preparing', 'ready', 'ready_for_pickup', 'picked_up', 'out_for_delivery', 'delivered'].includes(order.status);
+  const needsPayment = !isPaid && ['pending', 'confirmed'].includes(order.status);
 
   const handleNavigation = useCallback(
     () => navigation.push('OrderReceipt', { orderId: order.id }), // Use push() to ensure screen appears on top
@@ -193,25 +198,49 @@ const OrderItemCard = ({
               >
                 #{order.id.substring(0, 8).toUpperCase()}
               </Text>
-              <View
-                style={{
-                  backgroundColor: statusInfo.color,
-                  paddingHorizontal: 8,
-                  paddingVertical: 4,
-                  borderRadius: 8,
-                  marginLeft: 8,
-                }}
-              >
-                <Text
+              <View style={{ flexDirection: 'row', gap: 4 }}>
+                {/* Payment Status Badge */}
+                {isActiveOrder && (
+                  <View
+                    style={{
+                      backgroundColor: isPaid ? '#4CAF50' : '#FF9800',
+                      paddingHorizontal: 8,
+                      paddingVertical: 4,
+                      borderRadius: 8,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: 'white',
+                        fontSize: 10,
+                        fontWeight: '700',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      {isPaid ? t('paid', 'Paid') : t('unpaid', 'Unpaid')}
+                    </Text>
+                  </View>
+                )}
+                {/* Order Status Badge */}
+                <View
                   style={{
-                    color: 'white',
-                    fontSize: 10,
-                    fontWeight: '700',
-                    textTransform: 'uppercase',
+                    backgroundColor: statusInfo.color,
+                    paddingHorizontal: 8,
+                    paddingVertical: 4,
+                    borderRadius: 8,
                   }}
                 >
-                  {t(order.status)}
-                </Text>
+                  <Text
+                    style={{
+                      color: 'white',
+                      fontSize: 10,
+                      fontWeight: '700',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    {t(order.status)}
+                  </Text>
+                </View>
               </View>
             </View>
 
@@ -322,34 +351,8 @@ const OrderItemCard = ({
         <View style={{ flexDirection: 'row', gap: 8 }}>
           {isActiveOrder ? (
             <>
-              {order.status === 'pending' && (
-                <TouchableOpacity
-                  style={{
-                    flex: 1,
-                    borderWidth: 2,
-                    borderRadius: 12,
-                    paddingVertical: 12,
-                    borderColor: '#F44336',
-                  }}
-                  onPress={handleCancelOrder}
-                  disabled={isCancelling}
-                >
-                  <Text
-                    style={{
-                      fontWeight: '600',
-                      textAlign: 'center',
-                      fontSize: 15,
-                      color: '#F44336',
-                    }}
-                  >
-                    {isCancelling
-                      ? t('cancelling', 'Cancelling...')
-                      : t('cancel_order')}
-                  </Text>
-                </TouchableOpacity>
-              )}
-
-              {order.status === 'confirmed' && (
+              {/* Show Pay Now button for unpaid orders */}
+              {needsPayment && (
                 <>
                   <TouchableOpacity
                     style={{
@@ -370,7 +373,9 @@ const OrderItemCard = ({
                         color: '#F44336',
                       }}
                     >
-                      {t('cancel')}
+                      {isCancelling
+                        ? t('cancelling', 'Cancelling...')
+                        : t('cancel_order')}
                     </Text>
                   </TouchableOpacity>
 
@@ -381,8 +386,14 @@ const OrderItemCard = ({
                       paddingVertical: 12,
                       backgroundColor: colors.primary,
                     }}
-                    onPress={handleConfirmOrder}
-                    disabled={isConfirmingOrder}
+                    onPress={() => {
+                      // Navigate to payment screen
+                      navigation.push('PaymentProcessing', {
+                        orderId: order.id,
+                        amount: order.total,
+                        provider: 'mtn',
+                      });
+                    }}
                   >
                     <Text
                       style={{
@@ -392,9 +403,7 @@ const OrderItemCard = ({
                         color: 'white',
                       }}
                     >
-                      {isConfirmingOrder
-                        ? t('confirming')
-                        : t('confirm_pay', 'Confirm & Pay')}
+                      {t('pay_now', 'Pay Now')}
                     </Text>
                   </TouchableOpacity>
                 </>

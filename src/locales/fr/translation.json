@@ -1357,5 +1357,9 @@
   "important_payment_notice": "IMPORTANT : Paiement Requis",
   "immediate_payment_required": "Le paiement est requis IMMÉDIATEMENT après avoir passé votre commande. Le restaurant ne verra votre commande qu'après un paiement réussi.",
   "ensure_sufficient_funds": "Veuillez vous assurer d'avoir le MONTANT TOTAL incluant les frais de livraison et de service dans votre compte mobile money AVANT de confirmer cette commande.",
-  "payment_methods_available": "Accepté : MTN Mobile Money & Orange Money"
+  "payment_methods_available": "Accepté : MTN Mobile Money & Orange Money",
+  "paid": "Payé",
+  "unpaid": "Non payé",
+  "pay_now": "Payer maintenant",
+  "insufficient_funds_error": "Échec du paiement : Fonds insuffisants dans votre compte mobile money. Veuillez recharger et réessayer."
 }

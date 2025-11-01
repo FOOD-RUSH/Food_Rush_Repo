@@ -12,14 +12,21 @@ import { useDefaultAddress } from '@/src/location/store';
 
 export type OrderFlowStep =
   | 'creating' // Creating the order
-  | 'created' // Order created successfully, ready for payment
-  | 'pending' // Waiting for restaurant confirmation (2-15 min)
-  | 'confirmed' // Restaurant confirmed, ready for payment
+  | 'created' // Order created successfully, MUST proceed to payment immediately
+  | 'pending' // Order created but not paid yet (should not happen in new flow)
+  | 'confirmed' // Restaurant confirmed (legacy - new orders require payment first)
   | 'payment_processing' // Payment in progress
   | 'preparing' // Payment successful, restaurant preparing
   | 'completed' // Order flow completed
   | 'cancelled' // Order cancelled
   | 'failed'; // Generic failure
+
+// NEW PAYMENT FLOW:
+// 1. User creates order → Order status: 'pending', isPaid: false
+// 2. User MUST pay immediately → Order status: 'pending', isPaid: true
+// 3. Restaurant can only see orders where isPaid: true
+// 4. Restaurant confirms → Order status: 'confirmed', isPaid: true
+// 5. Restaurant prepares → Order status: 'preparing', isPaid: true
 
 export interface OrderFlowState {
   step: OrderFlowStep;
@@ -45,12 +52,13 @@ export const useOrderFlow = () => {
     mutationFn: (orderData: CreateOrderRequest) =>
       OrderApi.createOrder(orderData),
     onSuccess: (response) => {
-      // Order created successfully, proceed to payment immediately
+      // Order created successfully, MUST proceed to payment immediately
+      // Restaurant will NOT see this order until payment is completed (isPaid: true)
       setFlowState({
         step: 'created',
         orderId: response.data.id,
         orderData: response.data,
-        shouldProceedToPayment: true,
+        shouldProceedToPayment: true, // This triggers navigation to payment screen
       });
     },
     onError: (error) => {

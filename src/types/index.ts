@@ -214,6 +214,9 @@ export interface Order {
   status: OrderStatus;
   paymentMethod: string;
   createdAt: string;
+  // Payment status fields - NEW: Track payment separately from order status
+  isPaid?: boolean; // Indicates if order has been paid for (optional for backward compatibility)
+  paidAt?: string; // Timestamp when payment was completed
   // Optional delivery info (only present when order has delivery)
   delivery?: {
     id: string;
@@ -231,6 +234,10 @@ export interface Order {
   // Additional fields that might be present
   restaurantName?: string;
   deliveryAddress?: string;
+  restaurant?: {
+    id: string;
+    name: string;
+  };
 }
 
 // Order item

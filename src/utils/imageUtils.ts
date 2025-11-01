@@ -23,7 +23,7 @@ export const pickImageForUpload =
 
       // Launch image picker with optimized configuration for food images
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [4, 3], // Better aspect ratio for food images
         quality: 0.8, // Good balance between quality and file size
