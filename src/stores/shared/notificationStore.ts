@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { notificationApi } from '@/src/services/shared/notificationApi';
 import type { Notification } from '@/src/types';
+import { eventBus } from '@/src/services/shared/eventBus';
 
 interface NotificationState {
   // Data
@@ -51,8 +52,14 @@ const initialState = {
   isInitialized: false,
 };
 
-export const useNotificationStore = create<NotificationState>((set, get) => ({
-  ...initialState,
+export const useNotificationStore = create<NotificationState>((set, get) => {
+  // Listen to logout event and reset notifications
+  eventBus.on('user-logout', () => {
+    set(initialState);
+  });
+
+  return {
+    ...initialState,
 
   fetchNotifications: async () => {
     const state = get();
@@ -323,4 +330,5 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
     console.log('[NotificationStore] Resetting store');
     set(initialState);
   },
-}));
+  };
+});

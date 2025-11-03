@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { MenuProps } from '../../types';
 import { calculateServiceFee } from '@/src/utils/ServiceFee';
+import { eventBus } from '@/src/services/shared/eventBus';
 
 export interface CartItem {
   id: string;
@@ -53,13 +54,25 @@ const calculateItemTotal = (item: CartItem): number => {
 
 export const useCartStore = create<CartState & CartActions>()(
   persist(
-    (set, get) => ({
-      // Initial state
-      items: [],
-      restaurantID: null,
-      restaurantName: null,
-      lastActivity: Date.now(),
-      error: null,
+    (set, get) => {
+      // Listen to logout event and clear cart
+      eventBus.on('user-logout', () => {
+        set({
+          items: [],
+          restaurantID: null,
+          restaurantName: null,
+          lastActivity: Date.now(),
+          error: null,
+        });
+      });
+
+      return {
+        // Initial state
+        items: [],
+        restaurantID: null,
+        restaurantName: null,
+        lastActivity: Date.now(),
+        error: null,
 
       canAddItem: (item) => {
         const { restaurantID, items } = get();
@@ -258,7 +271,8 @@ export const useCartStore = create<CartState & CartActions>()(
         const serviceFee = get().getServiceFee();
         return subtotal + deliveryFee + serviceFee;
       },
-    }),
+      };
+    },
     {
       name: 'cart-store',
       storage: createJSONStorage(() => AsyncStorage),

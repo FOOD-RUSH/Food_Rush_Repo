@@ -8,7 +8,15 @@
     "web": "expo start --web",
     "test": "jest --watchAll",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "clean": "rm -rf node_modules && rm -rf .expo && rm -rf android/build && rm -rf ios/build && npm cache clean --force",
+    "clean:metro": "rm -rf $TMPDIR/metro-* && rm -rf $TMPDIR/haste-*",
+    "clean:all": "npm run clean && npm run clean:metro",
+    "prebuild": "npm run clean:all && npm install",
+    "build:android:preview": "eas build --platform android --profile preview",
+    "build:android:production": "eas build --platform android --profile production",
+    "build:ios:preview": "eas build --platform ios --profile preview",
+    "build:ios:production": "eas build --platform ios --profile production"
   },
   "jest": {
     "preset": "jest-expo"

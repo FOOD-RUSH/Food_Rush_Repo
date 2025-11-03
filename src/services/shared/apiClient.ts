@@ -1,3 +1,21 @@
+/**
+ * API Client Service
+ * 
+ * Handles all HTTP requests with automatic token management and refresh.
+ * Uses event-driven architecture for session management.
+ * 
+ * Responsibilities:
+ * - HTTP request/response handling
+ * - Token injection and refresh
+ * - Error transformation
+ * - Event emission for session state changes
+ * 
+ * Does NOT:
+ * - Manage stores directly
+ * - Handle logout logic
+ * - Clear application state
+ */
+
 import axios, {
   AxiosInstance,
   AxiosResponse,
@@ -7,6 +25,7 @@ import axios, {
 } from 'axios';
 import TokenManager from './tokenManager';
 import { getUserFriendlyErrorMessage } from '../../utils/errorHandler';
+import { eventBus } from './eventBus';
 
 export interface ApiError extends Error {
   message: string;
@@ -29,58 +48,37 @@ interface RefreshTokenResponse {
 class ApiClient {
   private client: AxiosInstance;
   private isRefreshing = false;
-  private refreshPromise: Promise<AxiosResponse> | null = null;
-  private sessionExpired = false; // Flag to prevent cascading requests
-  private refreshFailureCount = 0; // Track consecutive refresh failures
-  private readonly MAX_REFRESH_RETRIES = 2; // Maximum refresh attempts before auto-logout
+  private refreshPromise: Promise<string> | null = null;
 
   constructor() {
     const baseURL = this.getApiUrl();
-
-    this.client = axios.create({
-      baseURL,
-      //timeout: 30000,
-    });
-
+    this.client = axios.create({ baseURL });
     this.setupInterceptors();
   }
 
   private getApiUrl(): string {
-    const apiUrl =
+    return (
       process.env.EXPO_PUBLIC_API_URL ||
-      'https://foodrush-be.onrender.com/api/v1';
-
-    return apiUrl;
+      'https://foodrush-be.onrender.com/api/v1'
+    );
   }
 
   private setupInterceptors() {
     // Request interceptor - add auth token
     this.client.interceptors.request.use(
       async (config: InternalAxiosRequestConfig) => {
-        // Immediately reject if session has expired
-        if (this.sessionExpired) {
-          throw this.createSessionExpiredError();
-        }
-
         try {
           const token = await TokenManager.getToken();
           if (token && config.headers) {
             config.headers.Authorization = `Bearer ${token}`;
-            // Log API request details for debugging (without sensitive data)
-            // API Request: method, url, hasAuth, contentType
-          } else if (config.url && !config.url.includes('/auth/')) {
-            // Warn if no token is available for protected routes
           }
           return config;
         } catch (error) {
-          console.error('❌ Error getting token for request:', error);
+          console.error('Error getting token for request:', error);
           return config;
         }
       },
-      (error) => {
-        console.error('❌ Request interceptor error:', error);
-        return Promise.reject(error);
-      },
+      (error) => Promise.reject(error),
     );
 
     // Response interceptor - handle errors and token refresh
@@ -88,20 +86,6 @@ class ApiClient {
       (response) => response,
       async (error: AxiosError) => {
         const originalRequest = error.config as RetryableRequest;
-
-        // Immediately reject if session has expired
-        if (this.sessionExpired) {
-          throw this.createSessionExpiredError();
-        }
-
-        // Log API errors for debugging
-        console.error('❌ API Error:', {
-          status: error.response?.status,
-          statusText: error.response?.statusText,
-          url: originalRequest?.url,
-          method: originalRequest?.method?.toUpperCase(),
-          code: error.code,
-        });
 
         // Handle network errors
         if (!error.response) {
@@ -123,17 +107,86 @@ class ApiClient {
     );
   }
 
+  private async handleTokenRefresh(
+    originalRequest: RetryableRequest,
+  ): Promise<AxiosResponse> {
+    // Check if this is an auth endpoint (login, register, etc.)
+    const isAuthEndpoint = originalRequest.url?.includes('/auth/');
+    if (isAuthEndpoint) {
+      // Don't try to refresh for auth endpoints
+      throw this.createApiError({
+        response: { status: 401 },
+      } as AxiosError);
+    }
+
+    try {
+      const refreshToken = await TokenManager.getRefreshToken();
+
+      if (!refreshToken) {
+        // No refresh token - session expired
+        this.handleSessionExpired();
+        throw this.createSessionExpiredError();
+      }
+
+      // If already refreshing, wait for it
+      if (this.isRefreshing && this.refreshPromise) {
+        const newToken = await this.refreshPromise;
+        originalRequest.headers!.Authorization = `Bearer ${newToken}`;
+        return this.client(originalRequest);
+      }
+
+      // Start refresh
+      originalRequest._retry = true;
+      this.isRefreshing = true;
+
+      this.refreshPromise = this.performTokenRefresh(refreshToken);
+      const newToken = await this.refreshPromise;
+
+      // Update request with new token
+      originalRequest.headers!.Authorization = `Bearer ${newToken}`;
+
+      // Emit event for successful refresh
+      eventBus.emit('token-refreshed');
+
+      return this.client(originalRequest);
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+      this.handleSessionExpired();
+      throw this.createSessionExpiredError();
+    } finally {
+      this.isRefreshing = false;
+      this.refreshPromise = null;
+    }
+  }
+
+  private async performTokenRefresh(refreshToken: string): Promise<string> {
+    const response = await axios.post<RefreshTokenResponse['data']>(
+      `${this.client.defaults.baseURL}/auth/refresh-token`,
+      { refresh_token: refreshToken },
+      { timeout: 10000 },
+    );
+
+    const { accessToken, refreshToken: newRefreshToken } = response.data;
+
+    if (!accessToken || !newRefreshToken) {
+      throw new Error('Invalid refresh token response');
+    }
+
+    await TokenManager.setTokens(accessToken, newRefreshToken);
+    return accessToken;
+  }
+
+  private handleSessionExpired(): void {
+    // Clear tokens
+    TokenManager.clearAllTokens().catch(console.error);
+
+    // Emit event - let AuthStore handle the logout
+    eventBus.emit('session-expired');
+  }
+
   private createNetworkError(error: AxiosError): ApiError {
     let message: string;
     let code: string;
-
-    // Log error for debugging
-    console.error('🚨 Network Error:', {
-      code: error.code,
-      message: error.message,
-      url: `${error.config?.baseURL}${error.config?.url}`,
-      method: error.config?.method?.toUpperCase(),
-    });
 
     switch (error.code) {
       case 'ECONNABORTED':
@@ -183,111 +236,17 @@ class ApiClient {
     return error;
   }
 
-  private async handleTokenRefresh(
-    originalRequest: RetryableRequest,
-  ): Promise<AxiosResponse> {
-    try {
-      const refreshToken = await TokenManager.getRefreshToken();
-
-      if (!refreshToken) {
-        // No refresh token - immediately fail and logout
-        this.refreshFailureCount++;
-        console.warn(`⚠️ No refresh token available (Attempt ${this.refreshFailureCount}/${this.MAX_REFRESH_RETRIES})`);
-        await this.handleRefreshFailure();
-        throw this.createSessionExpiredError();
-      }
-
-      // Check if max retries exceeded
-      if (this.refreshFailureCount >= this.MAX_REFRESH_RETRIES) {
-        console.error(`❌ Max refresh retries (${this.MAX_REFRESH_RETRIES}) exceeded. Auto-logout initiated.`);
-        await this.handleRefreshFailure();
-        throw this.createSessionExpiredError();
-      }
-
-      if (this.isRefreshing && this.refreshPromise) {
-        // Token refresh in progress, wait for it and retry
-        try {
-          await this.refreshPromise;
-          const token = await TokenManager.getToken();
-          if (token && originalRequest.headers) {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
-          }
-          return this.client(originalRequest);
-        } catch (err) {
-          throw err;
-        }
-      }
-
-      originalRequest._retry = true;
-      this.isRefreshing = true;
-
-      // Create refresh promise for concurrent requests
-      this.refreshPromise = (async () => {
-        const response = await axios.post<RefreshTokenResponse['data']>(
-          `${this.client.defaults.baseURL}/auth/refresh-token`,
-          { refresh_token: refreshToken },
-          { timeout: 10000 },
-        );
-
-        const { accessToken, refreshToken: newRefreshToken } = response.data;
-
-        if (!accessToken || !newRefreshToken) {
-          console.error('❌ Invalid refresh token response:', {
-            hasAccessToken: !!accessToken,
-            hasRefreshToken: !!newRefreshToken,
-          });
-          throw new Error('Invalid refresh token response');
-        }
-
-        // Token refresh successful - reset failure count
-        this.refreshFailureCount = 0;
-        console.log('✅ Token refresh successful');
-        await TokenManager.setTokens(accessToken, newRefreshToken);
-
-        // Update original request
-        if (originalRequest.headers) {
-          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-        }
-
-        return this.client(originalRequest);
-      })();
-
-      return await this.refreshPromise;
-    } catch (refreshError) {
-      this.refreshFailureCount++;
-      console.error(`❌ Token refresh failed (Attempt ${this.refreshFailureCount}/${this.MAX_REFRESH_RETRIES}):`, refreshError);
-      
-      // If max retries reached, handle refresh failure (logout)
-      if (this.refreshFailureCount >= this.MAX_REFRESH_RETRIES) {
-        console.error('❌ Max refresh retries exceeded. Logging out...');
-        await this.handleRefreshFailure();
-      }
-      
-      throw this.createSessionExpiredError();
-    } finally {
-      this.isRefreshing = false;
-      this.refreshPromise = null;
-    }
-  }
-
   // Helper method to check if error is from API
   public isApiError(error: any): error is ApiError {
     return error && typeof error === 'object' && error.isApiError === true;
   }
 
-  // HTTP Methods with better error handling
+  // HTTP Methods
   async get<T>(
     url: string,
     config?: AxiosRequestConfig,
   ): Promise<AxiosResponse<T>> {
-    try {
-      return await this.client.get<T>(url, config);
-    } catch (error) {
-      if (this.isApiError(error)) {
-        throw error;
-      }
-      throw this.createNetworkError(error as AxiosError);
-    }
+    return this.client.get<T>(url, config);
   }
 
   async post<T>(
@@ -295,23 +254,11 @@ class ApiClient {
     data?: any,
     config?: AxiosRequestConfig,
   ): Promise<AxiosResponse<T>> {
-    try {
-      // Handle FormData requests - don't set Content-Type, let axios handle it
-      if (data instanceof FormData) {
-        const formDataConfig = { ...config };
-        if (formDataConfig.headers) {
-          delete formDataConfig.headers['Content-Type']; // Let axios set the boundary
-        }
-        return await this.client.post<T>(url, data, formDataConfig);
-      }
-
-      return await this.client.post<T>(url, data, config);
-    } catch (error) {
-      if (this.isApiError(error)) {
-        throw error;
-      }
-      throw this.createNetworkError(error as AxiosError);
+    // Handle FormData - let axios set Content-Type with boundary
+    if (data instanceof FormData && config?.headers) {
+      delete config.headers['Content-Type'];
     }
+    return this.client.post<T>(url, data, config);
   }
 
   async put<T>(
@@ -319,14 +266,7 @@ class ApiClient {
     data?: any,
     config?: AxiosRequestConfig,
   ): Promise<AxiosResponse<T>> {
-    try {
-      return await this.client.put<T>(url, data, config);
-    } catch (error) {
-      if (this.isApiError(error)) {
-        throw error;
-      }
-      throw this.createNetworkError(error as AxiosError);
-    }
+    return this.client.put<T>(url, data, config);
   }
 
   async patch<T>(
@@ -334,97 +274,23 @@ class ApiClient {
     data?: any,
     config?: AxiosRequestConfig,
   ): Promise<AxiosResponse<T>> {
-    try {
-      return await this.client.patch<T>(url, data, config);
-    } catch (error) {
-      if (this.isApiError(error)) {
-        throw error;
-      }
-      throw this.createNetworkError(error as AxiosError);
-    }
+    return this.client.patch<T>(url, data, config);
   }
 
   async delete<T>(
     url: string,
     config?: AxiosRequestConfig,
   ): Promise<AxiosResponse<T>> {
-    try {
-      return await this.client.delete<T>(url, config);
-    } catch (error) {
-      if (this.isApiError(error)) {
-        throw error;
-      }
-      throw this.createNetworkError(error as AxiosError);
-    }
+    return this.client.delete<T>(url, config);
   }
 
-  // Centralized refresh failure handler - clears everything and logs out
-  private async handleRefreshFailure(): Promise<void> {
-    // Set session expired flag to prevent new requests
-    this.sessionExpired = true;
-
-    // Clear tokens
-    await TokenManager.clearAllTokens();
-
-    // Clear all stores and trigger logout
-    try {
-      // Clear all stores before logout
-      await this.clearAllStores();
-
-      // Trigger logout
-      const { useAuthStore } = await import('@/src/stores/AuthStore');
-      const logout = useAuthStore.getState().logout;
-      if (logout) {
-        await logout();
-      }
-    } catch (error) {
-      console.error('Error during refresh failure cleanup:', error);
-    }
-  }
-
-  // Clear all application stores
-  private async clearAllStores(): Promise<void> {
-    try {
-      // Clear cart store
-      const { useCartStore } = await import('@/src/stores/customerStores/cartStore');
-      useCartStore.getState().clearCart();
-
-      // Clear notification store
-      const { useNotificationStore } = await import('@/src/stores/shared/notificationStore');
-      useNotificationStore.getState().reset();
-
-      // Clear restaurant profile store
-      const { useRestaurantProfileStore } = await import('@/src/stores/restaurantStores/restaurantProfileStore');
-      useRestaurantProfileStore.getState().reset();
-
-      // Clear address store
-      const { useAddressStore } = await import('@/src/stores/customerStores/addressStore');
-      useAddressStore.getState().clearAddresses();
-
-      // Clear favorites store
-      const { useRestaurantFavoritesStore } = await import('@/src/stores/shared/favorites/restaurantFavoritesStore');
-      useRestaurantFavoritesStore.getState().clearFavorites();
-    } catch (error) {
-      console.error('Error clearing stores:', error);
-    }
-  }
-
-  // Utility method to reset refresh state (useful for logout)
-  public resetRefreshState(): void {
-    this.isRefreshing = false;
-    this.refreshPromise = null;
-    this.sessionExpired = false;
-    this.refreshFailureCount = 0; // Reset failure counter
-  }
-
-  // Method to update base URL if needed
-  public updateBaseURL(newBaseURL: string): void {
-    this.client.defaults.baseURL = newBaseURL;
-  }
-
-  // Get base URL for fetch requests
+  // Utility methods
   public getBaseURL(): string {
     return this.client.defaults.baseURL || this.getApiUrl();
+  }
+
+  public updateBaseURL(newBaseURL: string): void {
+    this.client.defaults.baseURL = newBaseURL;
   }
 }
 

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { devtools, persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { eventBus } from '@/src/services/shared/eventBus';
 
 export interface RestaurantFavorite {
   id: string;
@@ -19,6 +20,7 @@ interface RestaurantFavoritesActions {
   unlike: (restaurantId: string) => void;
   isLiked: (restaurantId: string) => boolean;
   getAll: () => RestaurantFavorite[];
+  clearFavorites: () => void;
 }
 
 const initialState: RestaurantFavoritesState = {
@@ -28,8 +30,14 @@ const initialState: RestaurantFavoritesState = {
 export const useRestaurantFavoritesStore = create<RestaurantFavoritesState & RestaurantFavoritesActions>()(
   devtools(
     persist(
-      (set, get) => ({
-        ...initialState,
+      (set, get) => {
+        // Listen to logout event and clear favorites
+        eventBus.on('user-logout', () => {
+          set(initialState);
+        });
+
+        return {
+          ...initialState,
         toggleFavorite: (restaurant) => {
           const { favorites } = get();
           const exists = !!favorites[restaurant.id];
@@ -70,7 +78,9 @@ export const useRestaurantFavoritesStore = create<RestaurantFavoritesState & Res
         },
         isLiked: (restaurantId) => !!get().favorites[restaurantId],
         getAll: () => Object.values(get().favorites),
-      }),
+        clearFavorites: () => set(initialState),
+        };
+      },
       {
         name: 'restaurant-favorites',
         storage: createJSONStorage(() => AsyncStorage),

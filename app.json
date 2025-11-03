@@ -2,6 +2,7 @@
   "expo": {
     "name": "Foodrush",
     "slug": "food-rush",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/FoodRush.png",
     "scheme": "foodrush",
@@ -15,7 +16,7 @@
     },
     "android": {
       "package": "com.mrcalculus.foodrush",
-      "versionCode": 1,
+      "versionCode": 10,
       "adaptiveIcon": {
         "foregroundImage": "./assets/FoodRush-adaptive.png",
         "backgroundColor": "#FFFFFF"
@@ -57,9 +58,7 @@
       [
         "@sentry/react-native",
         {
-          "dsn": "${EXPO_PUBLIC_SENTRY_DSN}",
-          "organization": "YOUR_SENTRY_ORG_SLUG",
-          "project": "YOUR_SENTRY_PROJECT_SLUG"
+          "dsn": "${EXPO_PUBLIC_SENTRY_DSN}"
         }
       ]
     ],

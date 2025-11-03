@@ -1,8 +1,26 @@
+/**
+ * Auth Store
+ * 
+ * Manages authentication state and user profile.
+ * Uses event-driven architecture for cross-cutting concerns.
+ * 
+ * Responsibilities:
+ * - Auth state management
+ * - User profile storage
+ * - Token management coordination
+ * - Event emission for auth state changes
+ * 
+ * Does NOT:
+ * - Manage other stores
+ * - Handle push notifications directly
+ * - Clear other stores' data
+ */
+
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { DeviceEventEmitter } from 'react-native';
 import TokenManager from '../services/shared/tokenManager';
+import { eventBus } from '../services/shared/eventBus';
 
 // User profiles for different user types
 export interface CustomerProfile {
@@ -16,7 +34,6 @@ export interface CustomerProfile {
   isEmailVerified?: boolean;
   isPhoneVerified?: boolean;
   profilePicture?: string | null;
-  // Customer-specific fields
   address?: string;
   dateOfBirth?: string;
   preferences?: {
@@ -37,7 +54,6 @@ export interface RestaurantProfile {
   isEmailVerified?: boolean;
   isPhoneVerified?: boolean;
   profilePicture?: string | null;
-  // Restaurant-specific fields
   businessName?: string;
   businessAddress?: string;
   businessPhone?: string;
@@ -73,19 +89,15 @@ export interface Restaurant {
 export type UserProfile = CustomerProfile | RestaurantProfile;
 
 interface AuthState {
-  // Core auth state
   user: UserProfile | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-
-  // Restaurant-specific state (only for restaurant users)
   restaurants: Restaurant[];
   defaultRestaurantId: string | null;
 }
 
 interface AuthActions {
-  // State setters - to be called after successful API responses
   setAuthData: (data: {
     user: UserProfile;
     accessToken: string;
@@ -93,15 +105,12 @@ interface AuthActions {
     restaurants?: Restaurant[];
     defaultRestaurantId?: string;
   }) => Promise<void>;
-
   setUser: (user: UserProfile | null) => void;
   setIsAuthenticated: (value: boolean) => void;
   setIsLoading: (value: boolean) => void;
   setError: (error: string | null) => void;
   setRestaurants: (restaurants: Restaurant[]) => void;
   setDefaultRestaurantId: (restaurantId: string) => void;
-
-  // Utility actions
   logout: () => Promise<void>;
   clearError: () => void;
   resetAuth: () => void;
@@ -122,7 +131,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
     (set, get) => ({
       ...initialState,
 
-      // Check if user is authenticated based on stored tokens
+      // Check authentication status based on stored tokens
       checkAuthStatus: async () => {
         try {
           const token = await TokenManager.getToken();
@@ -145,16 +154,6 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           // Store tokens
           await TokenManager.setTokens(data.accessToken, data.refreshToken);
 
-          // Clear any stale notifications immediately on user/role change
-          try {
-            const { useNotificationStore } = await import(
-              '@/src/stores/shared/notificationStore'
-            );
-            useNotificationStore.getState().reset();
-          } catch (e) {
-            console.error('Error resetting notification store on login:', e);
-          }
-
           // Update state
           const newState: Partial<AuthState> = {
             user: data.user,
@@ -167,70 +166,15 @@ export const useAuthStore = create<AuthState & AuthActions>()(
           if (data.user.role === 'restaurant' && data.restaurants) {
             newState.restaurants = data.restaurants;
             newState.defaultRestaurantId = data.defaultRestaurantId || null;
-
-            // Initialize restaurant profile store for new login session
-            try {
-              const { useRestaurantProfileStore } = await import(
-                './restaurantStores/restaurantProfileStore'
-              );
-              const profileStore = useRestaurantProfileStore.getState();
-
-              // Reset profile loading status for new login
-              profileStore.reset();
-
-              // If we have restaurant data from login, extract and store basic info
-              if (data.restaurants.length > 0 && data.defaultRestaurantId) {
-                const defaultRestaurant = data.restaurants.find(
-                  (r) => r.id === data.defaultRestaurantId,
-                );
-                if (defaultRestaurant) {
-                  // Map the basic restaurant data to detailed profile structure
-                  // This will be updated with full details when account screen is visited
-                  const basicProfile = {
-                    id: defaultRestaurant.id,
-                    name: defaultRestaurant.name,
-                    address: defaultRestaurant.address,
-                    phone: defaultRestaurant.phone,
-                    isOpen: defaultRestaurant.isOpen,
-                    latitude: defaultRestaurant.latitude,
-                    longitude: defaultRestaurant.longitude,
-                    deliveryRadius: null, // Default value for deliveryRadius
-                    verificationStatus: defaultRestaurant.verificationStatus,
-                    documentUrl: defaultRestaurant.documentUrl,
-                    pictureUrl: defaultRestaurant.pictureUrl, // Include pictureUrl
-                    rating: defaultRestaurant.rating,
-                    ratingCount: defaultRestaurant.ratingCount,
-                    ownerId: defaultRestaurant.ownerId,
-                    menuMode: defaultRestaurant.menuMode,
-                    timezone: defaultRestaurant.timezone,
-                    deliveryBaseFee: defaultRestaurant.deliveryBaseFee,
-                    deliveryPerKmRate: defaultRestaurant.deliveryPerKmRate,
-                    deliveryMinFee: defaultRestaurant.deliveryMinFee,
-                    deliveryMaxFee: defaultRestaurant.deliveryMaxFee,
-                    deliveryFreeThreshold:
-                      defaultRestaurant.deliveryFreeThreshold,
-                    deliverySurgeMultiplier:
-                      defaultRestaurant.deliverySurgeMultiplier,
-                    createdAt: defaultRestaurant.createdAt,
-                    updatedAt: defaultRestaurant.updatedAt,
-                  };
-
-                  // Store basic profile data from login
-                  profileStore.updateRestaurantProfile(basicProfile);
-                }
-              }
-            } catch (profileError) {
-              console.error(
-                'Error initializing restaurant profile store:',
-                profileError,
-              );
-            }
           } else {
             newState.restaurants = [];
             newState.defaultRestaurantId = null;
           }
 
           set(newState);
+
+          // Emit auth state changed event
+          eventBus.emit('auth-state-changed', { isAuthenticated: true });
         } catch (error) {
           console.error('Error setting auth data:', error);
           set({ error: 'Failed to save authentication data' });
@@ -246,7 +190,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       setDefaultRestaurantId: (defaultRestaurantId) =>
         set({ defaultRestaurantId }),
 
-      // Optimized logout - prevent multiple calls and simplify store clearing
+      // Simplified logout - just clear auth state and emit event
       logout: async () => {
         const currentState = get();
 
@@ -258,38 +202,22 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         try {
           set({ isLoading: true });
 
-          // Best-effort: unregister push device and cleanup listeners
-          try {
-            const { pushNotificationService } = await import(
-              '@/src/services/shared/pushNotificationService'
-            );
-            await pushNotificationService.unregisterDevice();
-            pushNotificationService.cleanup();
-          } catch (e) {
-            console.error('Push cleanup during logout failed:', e);
-          }
-
           // Clear tokens
           await TokenManager.clearAllTokens();
-
-          // Reset notification store to avoid showing stale items after logout
-          try {
-            const { useNotificationStore } = await import(
-              '@/src/stores/shared/notificationStore'
-            );
-            useNotificationStore.getState().reset();
-          } catch (e) {
-            console.error('Error resetting notification store on logout:', e);
-          }
 
           // Reset auth state
           set({ ...initialState, isLoading: false });
 
-          // Emit logout event for navigation
-          DeviceEventEmitter.emit('user-logout');
+          // Emit logout event - other stores will listen and clear themselves
+          eventBus.emit('user-logout');
+
+          // Emit auth state changed event
+          eventBus.emit('auth-state-changed', { isAuthenticated: false });
         } catch (error) {
           console.error('Logout error:', error);
+          // Still reset state even if token clearing fails
           set({ ...initialState, isLoading: false });
+          eventBus.emit('user-logout');
         }
       },
 
@@ -385,5 +313,3 @@ export const useResetAuth = () => useAuthStore((state) => state.resetAuth);
 // Backward compatibility
 export const useAuth = () => useAuthStore();
 export const useAuthUser = () => useUser();
-
-// Export types for use in other files

@@ -6,9 +6,9 @@ import { StatusBar } from 'expo-status-bar';
 import {
   TouchableOpacity,
   Linking,
-  DeviceEventEmitter,
   Platform,
 } from 'react-native';
+import { eventBus } from '../services/shared/eventBus';
 
 import Toast from 'react-native-toast-message';
 import { useTranslation } from 'react-i18next';
@@ -186,10 +186,7 @@ const RootNavigator: React.FC = () => {
     };
 
     // Store the listener reference
-    logoutListenerRef.current = DeviceEventEmitter.addListener(
-      'user-logout',
-      logoutListener,
-    );
+    logoutListenerRef.current = eventBus.on('user-logout', logoutListener);
 
     return () => {
       subscription?.remove();

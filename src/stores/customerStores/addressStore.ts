@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
+import { eventBus } from '@/src/services/shared/eventBus';
 
 export interface AddressData {
   id: string;
@@ -31,6 +32,7 @@ interface AddressActions {
   setDefaultAddress: (id: string) => void;
   setError: (error: string | null) => void;
   clearError: () => void;
+  clearAddresses: () => void;
 }
 
 const initialState: AddressState = {
@@ -41,8 +43,14 @@ const initialState: AddressState = {
 
 export const useAddressStore = create<AddressState & AddressActions>()(
   persist(
-    (set, get) => ({
-      ...initialState,
+    (set, get) => {
+      // Listen to logout event and clear addresses
+      eventBus.on('user-logout', () => {
+        set(initialState);
+      });
+
+      return {
+        ...initialState,
 
       // Actions
       addAddress: (address) => {
@@ -86,7 +94,10 @@ export const useAddressStore = create<AddressState & AddressActions>()(
       setError: (error) => set({ error }),
 
       clearError: () => set({ error: null }),
-    }),
+
+      clearAddresses: () => set(initialState),
+      };
+    },
     {
       name: 'address-storage',
       storage: createJSONStorage(() => AsyncStorage),
