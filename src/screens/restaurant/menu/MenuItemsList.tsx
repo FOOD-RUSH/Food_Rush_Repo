@@ -119,7 +119,7 @@ const MenuItemsList: React.FC<
     try {
       Haptics.selectionAsync();
       navigation.push('RestaurantMenuItemForm', {}); // Use push() to ensure screen appears on top
-    } catch (error) {
+    } catch (error)  {
       setError({
         hasError: true,
         message: 'Failed to navigate to add item screen',

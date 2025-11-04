@@ -192,7 +192,6 @@ class PaymentService {
           success = true;
           message =
             'Payment completed successfully! Your order has been confirmed.';
-          console.log(response.data);
 
           break;
         case 'FAILED':
@@ -200,14 +199,12 @@ class PaymentService {
           success = false;
           message =
             'Payment failed. Please try again or use a different payment method.';
-          console.log(response.data);
 
           break;
         case 'EXPIRED':
           internalStatus = 'expired';
           success = false;
           message = 'Payment session expired. Please initiate a new payment.';
-          console.log(response.data);
 
           break;
         case 'PENDING':
@@ -215,7 +212,6 @@ class PaymentService {
           internalStatus = 'pending';
           success = false;
           message = 'Payment is still being processed. Please wait...';
-          console.log(response.data);
 
           break;
       }

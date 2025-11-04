@@ -30,7 +30,6 @@ class PushNotificationService {
   private initialized = false;
 
   private setupListeners() {
-    console.log('[PushService] Setting up listeners...');
 
     try {
       if (this.notificationListener) {
@@ -49,7 +48,6 @@ class PushNotificationService {
           this.handleNotificationResponse.bind(this),
         );
 
-      console.log('[PushService] Listeners setup complete');
     } catch (error) {
       console.error(
         '[PushService] Error setting up notification listeners:',
@@ -60,16 +58,12 @@ class PushNotificationService {
 
   async init(): Promise<void> {
     if (this.initialized) {
-      console.log('[PushService] Already initialized');
       return;
     }
-
-    console.log('[PushService] Initializing...');
 
     try {
       this.setupListeners();
       this.initialized = true;
-      console.log('[PushService] Initialization complete');
     } catch (error) {
       console.error(
         '[PushService] Error initializing push notifications:',
@@ -93,18 +87,15 @@ class PushNotificationService {
     try {
       const { status: existingStatus } =
         await Notifications.getPermissionsAsync();
-      console.log('[PushService] Existing permission status:', existingStatus);
 
       let finalStatus = existingStatus;
 
       if (existingStatus !== 'granted') {
         const { status } = await Notifications.requestPermissionsAsync();
         finalStatus = status;
-        console.log('[PushService] New permission status:', finalStatus);
       }
 
       const granted = finalStatus === 'granted';
-      console.log('[PushService] Permissions granted:', granted);
       return granted;
     } catch (error) {
       console.error(
@@ -117,7 +108,6 @@ class PushNotificationService {
 
   async getExpoPushToken(): Promise<string | null> {
     if (this.expoPushToken) {
-      console.log('[PushService] Using cached token');
       return this.expoPushToken;
     }
 
@@ -126,7 +116,6 @@ class PushNotificationService {
       return null;
     }
 
-    console.log('[PushService] Getting Expo push token...');
 
     try {
       const hasPermission = await this.requestPermissions();
@@ -136,20 +125,13 @@ class PushNotificationService {
       }
 
       const projectId = process.env.EXPO_PROJECT_ID;
-      console.log('[PushService] Project ID:', projectId);
 
       const token = await Notifications.getExpoPushTokenAsync({
         projectId,
       });
 
       this.expoPushToken = token.data;
-      console.log('[PushService] Token obtained:', this.expoPushToken);
       return token.data;
-    } catch (error) {
-      console.error('[PushService] Error getting Expo push token:', error);
-      return null;
-    }
-  }
 
   async registerDevice(): Promise<string | null> {
     console.log('[PushService] Registering device...');
