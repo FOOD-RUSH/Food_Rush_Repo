@@ -132,6 +132,11 @@ class PushNotificationService {
 
       this.expoPushToken = token.data;
       return token.data;
+    } catch (error) {
+      console.error('[PushService] Error getting push token:', error);
+      return null;
+    }
+  }
 
   async registerDevice(): Promise<string | null> {
     console.log('[PushService] Registering device...');
