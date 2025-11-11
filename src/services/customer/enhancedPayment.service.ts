@@ -170,7 +170,7 @@ class EnhancedPaymentService {
         request,
       );
 
-      if (response.data?.status_code === 200 && response.data?.data?.transId) {
+      if (response.data?.status_code === 201 && response.data?.data?.transId) {
         return {
           success: true,
           transactionId: response.data.data.transId,

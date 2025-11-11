@@ -103,7 +103,7 @@ class PaymentService {
   private parsePaymentResponse(response: any): PaymentResult {
     const { status_code: statusCode, message, data } = response.data;
 
-    if (statusCode === 200 && data?.transId) {
+    if (statusCode === 201 && data?.transId) {
       return {
         success: true,
         transactionId: data.transId,

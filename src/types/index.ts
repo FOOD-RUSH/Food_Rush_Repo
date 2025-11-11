@@ -148,6 +148,7 @@ export interface RestaurantProfile {
   // Backend-calculated fields based on user's location
   distance: number; // Distance in kilometers from user's location (calculated by backend)
   deliveryPrice: number; // Delivery fee (calculated by backend)
+  pictureUrl: string | null;
   estimatedDeliveryTime: string; // e.g., "10-20 mins" (calculated by backend)
   menu: FoodProps[];
   // Additional restaurant details

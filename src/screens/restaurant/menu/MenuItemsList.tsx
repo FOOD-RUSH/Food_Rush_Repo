@@ -61,7 +61,7 @@ interface ErrorState {
 
 const MenuItemsList: React.FC<
   RestaurantMenuStackScreenProps<'MenuItemsList'>
-> = ({navigation}) => {
+> = ({ navigation }) => {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const currentRestaurant = useCurrentRestaurant();
@@ -119,7 +119,7 @@ const MenuItemsList: React.FC<
     try {
       Haptics.selectionAsync();
       navigation.push('RestaurantMenuItemForm', {}); // Use push() to ensure screen appears on top
-    } catch (error)  {
+    } catch (error) {
       setError({
         hasError: true,
         message: 'Failed to navigate to add item screen',

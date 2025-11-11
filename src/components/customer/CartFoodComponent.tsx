@@ -109,7 +109,7 @@ const CartFoodComponent: React.FC<CartFoodComponentProps> = React.memo(
         ],
         { cancelable: true },
       );
-    }, [menuItem.name, handleDelete, t]);
+    }, [t, menuItem.name, translateX, opacity, scale, handleDelete]);
 
     // Simplified pan gesture
     const panGesture = Gesture.Pan()

@@ -268,6 +268,7 @@ export const AddFoodScreen = () => {
         'desserts',
         'snacks',
         'drinks',
+        'vegetarian'
       ];
       if (!validCategories.includes(category)) {
         errors.push(`Category must be one of: ${validCategories.join(', ')}`);
