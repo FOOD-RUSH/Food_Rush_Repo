@@ -62,7 +62,7 @@ interface NotificationProviderProps {
 export const NotificationProvider: React.FC<NotificationProviderProps> = ({
   children,
 }) => {
-  console.log('[NotificationProvider] Rendering...');
+  // Removed console.log for production
 
   const { isReady: pushIsReady, error: pushError } = usePushNotifications();
   const userType = useUserType();
@@ -113,16 +113,12 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
 
   // Initial fetch on mount
   useEffect(() => {
-    console.log('[NotificationProvider] Initial fetch check:', {
-      isInitialized,
-      isLoading,
-      userType,
-    });
+    // Removed console.log for production
 
     if (!isInitialized && !isLoading && userType) {
-      console.log('[NotificationProvider] Triggering initial fetch');
+      // Removed console.log for production
       fetchNotifications().catch((err) => {
-        console.error('[NotificationProvider] Initial fetch failed:', err);
+        // Initial fetch failed - handle silently
       });
     }
   }, [isInitialized, isLoading, userType, fetchNotifications]);
@@ -149,10 +145,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
         useNotificationStore.getState().reset();
         await fetchNotifications();
       } catch (err) {
-        console.error(
-          '[NotificationProvider] Refetch on userType change failed:',
-          err,
-        );
+        // Refetch on userType change failed - handle silently
       }
     };
     doResetAndFetch();
@@ -161,11 +154,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
 
   // Calculate notification counts
   const notificationCounts = useMemo(() => {
-    console.log(
-      '[NotificationProvider] Calculating counts for',
-      notifications.length,
-      'notifications',
-    );
+    // Removed console.log for production
 
     const counts: NotificationCounts = {
       all: notifications.length,
@@ -176,32 +165,26 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
       alert: notifications.filter((n) => n.type === 'alert').length,
     };
 
-    console.log('[NotificationProvider] Counts:', counts);
+    // Removed console.log for production
     return counts;
   }, [notifications]);
 
   // Get filtered notifications
   const filteredNotifications = useMemo(() => {
     const filtered = getFilteredNotifications();
-    console.log('[NotificationProvider] Filtered notifications:', {
-      filter: selectedFilter,
-      count: filtered.length,
-    });
+    // Removed console.log for production
     return filtered;
   }, [getFilteredNotifications, selectedFilter]);
 
   // Enhanced mark as read with success return
   const markAsRead = useCallback(
     async (id: string): Promise<boolean> => {
-      console.log('[NotificationProvider] Mark as read:', id);
+      // Removed console.log for production
       try {
         await storeMarkAsRead(id);
         return true;
       } catch (error) {
-        console.error(
-          '[NotificationProvider] Failed to mark notification as read:',
-          error,
-        );
+        // Failed to mark notification as read - handle silently
         return false;
       }
     },
@@ -210,21 +193,18 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
 
   // Enhanced mark all as read with success return
   const markAllAsRead = useCallback(async (): Promise<boolean> => {
-    console.log('[NotificationProvider] Mark all as read');
+    // Removed console.log for production
     try {
       await storeMarkAllAsRead();
       return true;
     } catch (error) {
-      console.error(
-        '[NotificationProvider] Failed to mark all notifications as read:',
-        error,
-      );
+      // Failed to mark all notifications as read - handle silently
       return false;
     }
   }, [storeMarkAllAsRead]);
 
   const value = useMemo<NotificationContextType>(() => {
-    console.log('[NotificationProvider] Memoizing context value');
+    // Removed console.log for production
     return {
       notifications: filteredNotifications,
       unreadCount,
@@ -255,10 +235,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
       pushError,
 
       sendLocalNotification: async (title, body, data) => {
-        console.log(
-          '[NotificationProvider] Sending local notification:',
-          title,
-        );
+        // Removed console.log for production
         return pushNotificationService.sendLocalNotification({
           title,
           body,
@@ -267,13 +244,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
       },
 
       scheduleReminder: async (title, body, minutesFromNow, data) => {
-        console.log(
-          '[NotificationProvider] Scheduling reminder:',
-          title,
-          'in',
-          minutesFromNow,
-          'minutes',
-        );
+        // Removed console.log for production
         return pushNotificationService.scheduleReminder(
           title,
           body,

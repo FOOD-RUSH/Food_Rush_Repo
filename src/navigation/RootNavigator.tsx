@@ -86,6 +86,7 @@ import ProfileEditScreen from '../screens/restaurant/account/ProfileEditScreen';
 import AddressScreen from '../screens/customer/Profile/AddressScreen';
 import PaymentProcessingScreen from '../screens/customer/payment/PaymentProcessingScreen';
 import AllRestaurantsScreen from '../screens/customer/home/AllRestaurantsScreen';
+import PaymentInfoScreen from '../screens/customer/PaymentInfoScreen';
 // Data & theme
 import { OnboardingSlides } from '@/src/utils/onboardingData';
 import { useAppTheme, useAppNavigationTheme } from '../config/theme';
@@ -259,9 +260,6 @@ const RootNavigator: React.FC = () => {
           try {
             const route = navigationRef.getCurrentRoute();
             const name = route?.name ?? 'unknown';
-            if (__DEV__) {
-              console.log(`[nav] focused route: ${name}`);
-            }
             Sentry.setTag('screen', name);
           } catch {
             // Ignore navigation state errors
@@ -483,6 +481,11 @@ const RootNavigator: React.FC = () => {
               name="LanguageScreen"
               component={LanguageScreen}
               options={{ headerTitle: t('language_settings') }}
+            />
+            <Stack.Screen
+              name="PaymentInfo"
+              component={PaymentInfoScreen}
+              options={{ headerTitle: t('payment_information') }}
             />
 
             {/* Restaurant Profile Screens */}

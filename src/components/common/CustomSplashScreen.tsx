@@ -1,185 +1,219 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, Animated, Dimensions, StyleSheet } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Animated,
+  Dimensions,
+  Image,
+  StatusBar,
+} from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useTheme } from 'react-native-paper';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
-interface CustomSplashScreenProps {
+interface SplashScreenProps {
   onAnimationComplete: () => void;
   onTransitionStart?: () => void;
 }
 
-const CustomSplashScreen: React.FC<CustomSplashScreenProps> = ({
-  onAnimationComplete,
-}) => {
-  // Animation values for each letter in "Food"
-  const letterAnimations = useRef([
+export default function SplashScreen({ onAnimationComplete, onTransitionStart }: SplashScreenProps) {
+  const { colors } = useTheme();
+
+  // Animated values for each letter in "Food"
+  const foodLetterAnimations = useRef([
     new Animated.Value(0), // F
     new Animated.Value(0), // o
     new Animated.Value(0), // o
     new Animated.Value(0), // d
   ]).current;
 
-  // Animation values for "Rush"
-  const rushSlideAnim = useRef(new Animated.Value(width)).current;
-  const rushOpacityAnim = useRef(new Animated.Value(0)).current;
+  // Animated value for "Rush" image sliding from left
+  const rushAnimation = useRef(new Animated.Value(-width)).current;
 
-  const [animationPhase, setAnimationPhase] = useState<
-    'food' | 'rush' | 'complete'
-  >('food');
+  // Overall fade in animation
+  const fadeAnimation = useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
-    startFoodAnimation();
-  }, []);
+  // Animation for moving logo to top during transition
+  const logoTransitionY = useRef(new Animated.Value(0)).current;
+  const logoScale = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    // When animations are complete, call onAnimationComplete after a delay
-    if (animationPhase === 'complete') {
-      const timer = setTimeout(() => {
-        onAnimationComplete();
-      }, 1200); // Wait 1.2 seconds before transitioning (matching first implementation)
-      return () => clearTimeout(timer);
-    }
-  }, [animationPhase, onAnimationComplete]);
+    const animateFoodLetters = () => {
+      const letterAnimations = foodLetterAnimations.map((animation, index) =>
+        Animated.spring(animation, {
+          toValue: 1,
+          tension: 100, // More bouncy
+          friction: 8,
+          delay: index * 200, // Slightly slower stagger for more dramatic effect
+          useNativeDriver: true,
+        })
+      );
 
-  const startFoodAnimation = () => {
-    // Animate each letter of "Food" one by one
-    const letterAnimationsList = letterAnimations.map((anim, index) =>
-      Animated.timing(anim, {
-        toValue: 1,
-        duration: 400,
-        delay: index * 150, // 150ms delay between each letter
-        useNativeDriver: true,
-      }),
-    );
+      // Start all letter animations
+      Animated.stagger(200, letterAnimations).start(() => {
+        // After "Food" is complete, animate "Rush" sliding in from left
+        Animated.spring(rushAnimation, {
+          toValue: 0, // Slide to center position
+          tension: 80,
+          friction: 8, // Smooth spring animation
+          useNativeDriver: true,
+        }).start(() => {
+          // Wait a moment then start transition to top
+          setTimeout(() => {
+            startTransitionToTop();
+          }, 1200);
+        });
+      });
+    };
 
-    Animated.sequence([
-      Animated.stagger(150, letterAnimationsList),
-      Animated.delay(300), // Wait 300ms after "Food" completes
-    ]).start(() => {
-      startRushAnimation();
+    const startTransitionToTop = () => {
+      // Notify parent that transition is starting
+      if (onTransitionStart) {
+        onTransitionStart();
+      }
+
+      // Move logo up and scale down
+      Animated.parallel([
+        Animated.timing(logoTransitionY, {
+          toValue: -height * 0.35, // Move to top area
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(logoScale, {
+          toValue: 0.6, // Scale down to fit header size
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        // After transition animation, complete the splash
+        setTimeout(() => {
+          onAnimationComplete();
+        }, 200);
+      });
+    };
+
+    // Start the animation sequence with a fade in
+    Animated.timing(fadeAnimation, {
+      toValue: 1,
+      duration: 600, // Slightly longer fade in
+      useNativeDriver: true,
+    }).start(() => {
+      // Small delay before starting letter animation
+      setTimeout(() => {
+        animateFoodLetters();
+      }, 300);
     });
-  };
-
-  const startRushAnimation = () => {
-    setAnimationPhase('rush');
-
-    // Rush slides in from the right
-    Animated.parallel([
-      Animated.timing(rushSlideAnim, {
-        toValue: 0,
-        duration: 600,
-        useNativeDriver: true,
-      }),
-      Animated.timing(rushOpacityAnim, {
-        toValue: 1,
-        duration: 400,
-        delay: 200,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      setAnimationPhase('complete');
-    });
-  };
-
-  const renderLetter = (letter: string, index: number) => {
-    const translateY = letterAnimations[index].interpolate({
-      inputRange: [0, 1],
-      outputRange: [50, 0],
-    });
-
-    const opacity = letterAnimations[index];
-    const scale = letterAnimations[index].interpolate({
-      inputRange: [0, 1],
-      outputRange: [0.3, 1],
-    });
-
-    return (
-      <Animated.Text
-        key={index}
-        style={[
-          styles.letterText,
-          {
-            opacity,
-            transform: [{ translateY }, { scale }],
-          },
-        ]}
-      >
-        {letter}
-      </Animated.Text>
-    );
-  };
+  }, [fadeAnimation, foodLetterAnimations, rushAnimation, logoTransitionY, logoScale, onAnimationComplete, onTransitionStart]);
 
   return (
-    <View style={styles.container}>
-      {/* Food Text */}
-      <View style={styles.foodContainer}>
-        {['F', 'o', 'o', 'd'].map((letter, index) =>
-          renderLetter(letter, index),
-        )}
-      </View>
+    <LinearGradient
+      colors={[colors.background, colors.surface, colors.primary + '40']}
+      style={styles.container}
+    >
+      <StatusBar barStyle="light-content" backgroundColor={colors.background} />
 
-      {/* Rush Text */}
-      {animationPhase !== 'food' && (
+      <Animated.View style={[
+        styles.content,
+        {
+          opacity: fadeAnimation,
+          transform: [
+            { translateY: logoTransitionY },
+            { scale: logoScale }
+          ]
+        }
+      ]}>
+        {/* "Food" text with letter-by-letter animation */}
+        <View style={styles.foodContainer}>
+          {['F', 'o', 'o', 'd'].map((letter, index) => (
+            <Animated.Text
+              key={index}
+              style={[
+                styles.foodText,
+                {
+                  opacity: foodLetterAnimations[index],
+                  transform: [
+                    {
+                      translateY: foodLetterAnimations[index].interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [50, 0], // Slide up from below
+                      }),
+                    },
+                    {
+                      scale: foodLetterAnimations[index].interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0.5, 1], // Scale up animation
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            >
+              {letter}
+            </Animated.Text>
+          ))}
+        </View>
+
+        {/* "Rush" image sliding from left */}
         <Animated.View
           style={[
             styles.rushContainer,
             {
-              transform: [{ translateX: rushSlideAnim }],
-              opacity: rushOpacityAnim,
+              transform: [
+                {
+                  translateX: rushAnimation,
+                },
+              ],
             },
           ]}
         >
-          <Text style={styles.rushText}>Rush</Text>
-          <Text style={styles.dotText}>.</Text>
+          <Image
+            source={require('../../assets/outoloyout.png')}
+            style={styles.rushImage}
+            resizeMode="contain"
+            alt="Food Rush Logo"
+          />
         </Animated.View>
-      )}
-    </View>
+      </Animated.View>
+    </LinearGradient>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#06102b', // Updated background color as requested
     justifyContent: 'center',
     alignItems: 'center',
   },
+  content: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   foodContainer: {
     flexDirection: 'row',
-    marginBottom: -10,
+    alignItems: 'center',
+    marginBottom: -10, // Bring "Rush" closer to "Food"
   },
-  letterText: {
-    fontSize: 72,
-    fontWeight: '800', // Bolder font weight
-    color: 'white',
-    fontFamily: 'Urbanist-Bold', // Using the app's custom font
-    textShadowColor: 'rgba(255, 255, 255, 0.3)',
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 6,
+  foodText: {
+    fontSize: 80, // Larger size to match your design
+    fontWeight: '900', // Extra bold
+    color: '#FFFFFF',
+    fontFamily: 'System',
+    letterSpacing: -3, // Tighter letter spacing
+    textAlign: 'center',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   rushContainer: {
-    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: -5, // Fine-tune positioning
   },
-  rushText: {
-    fontSize: 72,
-    fontWeight: '800', // Bolder font weight
-    color: '#4FC3F7', // Light blue accent color
-    fontFamily: 'Urbanist-Bold', // Using the app's custom font
-    textShadowColor: 'rgba(79, 195, 247, 0.4)',
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 6,
-  },
-  dotText: {
-    fontSize: 72,
-    fontWeight: '800', // Bolder font weight
-    color: '#4FC3F7', // Light blue accent color
-    fontFamily: 'Urbanist-Bold', // Using the app's custom font
-    marginLeft: 4,
-    textShadowColor: 'rgba(79, 195, 247, 0.4)',
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 6,
+  rushImage: {
+    width: width * 0.7, // Slightly larger
+    height: 100, // Taller to match proportions
+    maxWidth: 350,
   },
 });
-
-export default CustomSplashScreen;

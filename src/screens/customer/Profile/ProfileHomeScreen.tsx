@@ -2,6 +2,7 @@ import { AntDesignIcon, MaterialIcon } from '@/src/components/common/icons';
 import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import React, { useCallback } from 'react';
 import { Switch, useTheme } from 'react-native-paper';
+import Toast from 'react-native-toast-message';
 
 import RowView from '@/src/components/common/RowView';
 import { CustomerProfileStackScreenProps } from '@/src/navigation/types';
@@ -34,7 +35,12 @@ const ProfileHomeScreen = ({
       logout();
     } catch (error) {
       console.error('Logout error:', error);
-      Alert.alert(t('error'), t('failed_to_logout'));
+      Toast.show({
+        type: 'error',
+        text1: t('error'),
+        text2: t('failed_to_logout'),
+        position: 'bottom',
+      });
     }
   }, [logout, t]);
 
@@ -111,11 +117,21 @@ const ProfileHomeScreen = ({
 
   // Placeholder handlers for incomplete features
   const handleSpecialOffersPress = useCallback(() => {
-    Alert.alert(t('info'), t('special_offers_feature_coming_soon'));
+    Toast.show({
+      type: 'info',
+      text1: t('info'),
+      text2: t('special_offers_feature_coming_soon'),
+      position: 'bottom',
+    });
   }, [t]);
 
   const handleSecurityPress = useCallback(() => {
-    Alert.alert(t('info'), t('security_settings_coming_soon'));
+    Toast.show({
+      type: 'info',
+      text1: t('info'),
+      text2: t('security_settings_coming_soon'),
+      position: 'bottom',
+    });
   }, [t]);
 
   const handleTermsPress = useCallback(() => {

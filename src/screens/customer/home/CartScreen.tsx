@@ -12,6 +12,7 @@ import {
 import { images } from '@/assets/images';
 import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-toast-message';
+import { useRestaurantDistance } from '@/src/hooks/customer/useRestaurantDistance';
 import {
   Heading5,
   Body,
@@ -22,6 +23,7 @@ import {
 const CartScreen = ({ navigation }: RootStackScreenProps<'Cart'>) => {
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
+  const { distance } = useRestaurantDistance();
 
   // Subscribe to specific store slices to minimize re-renders
   const cartItems = useCartStore((state) => state.items);
@@ -160,6 +162,7 @@ const CartScreen = ({ navigation }: RootStackScreenProps<'Cart'>) => {
               <BodySmall color={colors.onPrimary} style={{ opacity: 0.9 }}>
                 {totalItems} {t('item')}
                 {totalItems !== 1 ? t('items_suffix') : ''}
+                {distance && ` • ${distance.toFixed(1)} km`}
               </BodySmall>
             </View>
 

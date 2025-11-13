@@ -75,8 +75,8 @@ const PaymentProcessingScreen = ({
 
   const getProviderName = () => {
     return selectedPayment.provider === 'mtn'
-      ? 'MTN Mobile Money'
-      : 'Orange Money';
+      ? t('mtn_mobile_money')
+      : t('orange_money');
   };
 
   // Cleanup function
@@ -221,9 +221,7 @@ const PaymentProcessingScreen = ({
           if (!isMountedRef.current) return;
 
           // Log status for debugging platform-specific issues
-          if (__DEV__ && Platform.OS === 'android') {
-            console.log('[PaymentProcessing] Android polling status:', status);
-          }
+          // Removed console.log for production
 
           if (status.status === 'completed') {
             handlePaymentSuccess();
@@ -258,9 +256,7 @@ const PaymentProcessingScreen = ({
 
       pollingControllerRef.current = controller;
 
-      if (__DEV__ && Platform.OS === 'android') {
-        console.log('[PaymentProcessing] Android polling started successfully');
-      }
+      // Removed console.log for production
     } catch (error) {
       if (!isMountedRef.current) return;
       console.error('[PaymentProcessing] Failed to start polling:', error);
@@ -411,19 +407,19 @@ const PaymentProcessingScreen = ({
                 className="text-sm mb-1"
                 style={{ color: colors.onSurfaceVariant }}
               >
-                1. Check your phone for a payment prompt
+                {t('payment_step_1')}
               </Text>
               <Text
                 className="text-sm mb-1"
                 style={{ color: colors.onSurfaceVariant }}
               >
-                2. Enter your Mobile Money PIN
+                {t('payment_step_2')}
               </Text>
               <Text
                 className="text-sm"
                 style={{ color: colors.onSurfaceVariant }}
               >
-                3. We&apos;ll verify your payment automatically
+                {t('payment_step_3')}
               </Text>
             </View>
           </View>
@@ -641,7 +637,7 @@ const PaymentProcessingScreen = ({
             className="text-2xl font-bold"
             style={{ color: colors.onSurface }}
           >
-            {formattedAmount} FCFA
+            {formattedAmount} {t('currency_fcfa')}
           </Text>
 
           {serviceFee > 0 && (
@@ -660,7 +656,7 @@ const PaymentProcessingScreen = ({
                   className="text-sm font-medium"
                   style={{ color: colors.onSurface }}
                 >
-                  {serviceFee.toLocaleString('fr-FR')} FCFA
+                  {serviceFee.toLocaleString('fr-FR')} {t('currency_fcfa')}
                 </Text>
               </View>
               <Text

@@ -98,6 +98,17 @@ const CheckOutItem = memo<CheckOutItemProps>(
             >
               {parseFloat(menuItem.price || '0').toLocaleString('fr-FR')} FCFA
             </Text>
+            {menuItem.distanceKm && (
+              <Text
+                style={{
+                  color: colors.onSurfaceVariant,
+                  fontSize: 14,
+                  marginLeft: 8,
+                }}
+              >
+                | {menuItem.distanceKm.toFixed(2)} km
+              </Text>
+            )}
           </View>
 
           {/* Right Column - Quantity and Edit Button */}

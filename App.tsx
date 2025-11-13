@@ -41,15 +41,9 @@ try {
 
     // Add error handling callback
     beforeSend(event, hint) {
-      if (__DEV__) {
-        console.log('Sentry Event:', event);
-      }
       return event;
     },
   });
-  if (__DEV__) {
-    console.log('✓ Sentry initialized successfully');
-  }
 } catch (error) {
   console.error('Failed to initialize Sentry:', error);
   // App continues without Sentry rather than crashing
@@ -59,7 +53,6 @@ try {
 try {
   SplashScreen.preventAutoHideAsync();
 } catch (error) {
-  console.warn('SplashScreen.preventAutoHideAsync failed:', error);
   // Continue - this is not critical for app functionality
 }
 
@@ -109,7 +102,7 @@ export default Sentry.wrap(function App() {
           await SplashScreen.hideAsync();
         }
       } catch (error) {
-        console.error('Error hiding Expo splash screen:', error);
+        // Error handling for hiding splash screen - continue app execution
       }
     };
 

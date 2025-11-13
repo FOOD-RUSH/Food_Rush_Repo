@@ -19,73 +19,48 @@ interface FAQItem {
 const getFAQData = (t: any): FAQItem[] => [
   {
     id: 1,
-    title: t('what_is_foodrush', 'What is Food Rush?'),
-    description: t(
-      'foodrush_description',
-      'Food Rush is a comprehensive food delivery platform that connects you with local restaurants in Cameroon. You can browse menus, place orders, track deliveries in real-time, and enjoy your favorite meals delivered right to your door. Our platform supports multiple payment methods including mobile money (MTN, Orange) and cash on delivery.',
-    ),
+    title: t('how_to_get_started'),
+    description: t('get_started_description'),
   },
   {
     id: 2,
-    title: t('how_can_i_make_a_payment', 'How can I make a payment?'),
-    description: t(
-      'payment_methods_description',
-      "Food Rush supports multiple payment methods for your convenience: Mobile Money (MTN Mobile Money, Orange Money), Cash on Delivery, and Credit/Debit Cards. Simply select your preferred payment method during checkout. For mobile money payments, you'll receive an SMS prompt to complete the transaction.",
-    ),
+    title: t('what_is_foodrush'),
+    description: t('foodrush_description'),
   },
   {
     id: 3,
-    title: t('how_do_i_can_cancel_orders', 'How can I cancel my order?'),
-    description: t(
-      'cancel_order_description',
-      'You can cancel your order within 5 minutes of placing it, provided the restaurant hasn\'t confirmed it yet. Go to "My Orders" > "Active Orders" > Select your order > "Cancel Order". If the restaurant has already confirmed your order, please contact our support team for assistance. Refunds for cancelled orders are processed within 24-48 hours.',
-    ),
+    title: t('how_can_i_make_a_payment'),
+    description: t('payment_methods_description'),
   },
   {
     id: 4,
-    title: t('how_do_i_can_delete_my_account', 'How can I delete my account?'),
-    description: t(
-      'delete_account_description',
-      'To delete your account, go to Profile > Settings > Account Settings > Delete Account. Please note that this action is permanent and cannot be undone. All your order history, saved addresses, and preferences will be permanently removed. You can also contact our support team for assistance with account deletion.',
-    ),
+    title: t('how_do_i_can_cancel_orders'),
+    description: t('cancel_order_description'),
   },
   {
     id: 5,
-    title: t('how_does_delivery_work', 'How does delivery work?'),
-    description: t(
-      'delivery_description',
-      "Once you place an order, the restaurant prepares your food and our delivery partner picks it up. You can track your order in real-time through the app. Delivery times typically range from 20-45 minutes depending on distance and restaurant preparation time. You'll receive notifications at each step of the delivery process.",
-    ),
+    title: t('how_do_i_can_delete_my_account'),
+    description: t('delete_account_description'),
   },
   {
     id: 6,
-    title: t(
-      'what_if_my_order_is_wrong',
-      'What if my order is wrong or missing items?',
-    ),
-    description: t(
-      'wrong_order_description',
-      "If your order is incorrect or missing items, please contact our support team immediately through the app or call our hotline. We'll work with the restaurant to resolve the issue quickly. You may be eligible for a refund, replacement, or credit for future orders depending on the situation.",
-    ),
+    title: t('how_does_delivery_work'),
+    description: t('delivery_description'),
   },
   {
     id: 7,
-    title: t('how_to_track_my_order', 'How can I track my order?'),
-    description: t(
-      'order_tracking_description',
-      'You can track your order in real-time by going to "My Orders" > "Active Orders" and selecting your current order. The tracking screen shows the order status (confirmed, preparing, ready for pickup, out for delivery, delivered) with estimated delivery time and live updates.',
-    ),
+    title: t('what_if_my_order_is_wrong'),
+    description: t('wrong_order_description'),
   },
   {
     id: 8,
-    title: t(
-      'delivery_fees_and_charges',
-      'What are the delivery fees and charges?',
-    ),
-    description: t(
-      'delivery_fees_description',
-      'Delivery fees vary by restaurant and distance, typically ranging from 300-1000 XAF. Some restaurants offer free delivery for orders above a certain amount. All fees are clearly displayed before you complete your order. There are no hidden charges - what you see is what you pay.',
-    ),
+    title: t('how_to_track_my_order'),
+    description: t('order_tracking_description'),
+  },
+  {
+    id: 9,
+    title: t('delivery_fees_and_charges'),
+    description: t('delivery_fees_description'),
   },
 ];
 
@@ -124,13 +99,10 @@ const FAQ = () => {
             weight="bold"
             style={{ marginBottom: 8 }}
           >
-            {t('frequently_asked_questions', 'Frequently Asked Questions')}
+            {t('frequently_asked_questions')}
           </Heading4>
           <Body color={colors.onSurfaceVariant}>
-            {t(
-              'faq_subtitle',
-              'Find answers to common questions about Food Rush',
-            )}
+            {t('faq_subtitle')}
           </Body>
         </View>
         {faqData.map((item) => (
@@ -163,17 +135,14 @@ const FAQ = () => {
                 weight="semibold"
                 style={{ marginLeft: 8 }}
               >
-                {t('need_more_help', 'Need More Help?')}
+                {t('need_more_help')}
               </Label>
             </View>
             <Body
               color={colors.onPrimaryContainer || colors.primary}
               style={{ lineHeight: 20, fontSize: 14 }}
             >
-              {t(
-                'contact_support_description',
-                "If you couldn't find the answer to your question, our support team is here to help you 24/7.",
-              )}
+              {t('contact_support_description')}
             </Body>
           </View>
         </Card>

@@ -9,6 +9,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { useTheme, Card, Avatar, Button, Switch } from 'react-native-paper';
+import Toast from 'react-native-toast-message';
 
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
@@ -180,11 +181,12 @@ const AccountHome: React.FC<
             await logout();
           } catch (error) {
             console.error('Logout error in AccountHome:', error);
-            Alert.alert(
-              'Logout Error',
-              'There was an error logging out. Please try again.',
-              [{ text: 'OK' }],
-            );
+            Toast.show({
+              type: 'error',
+              text1: 'Logout Error',
+              text2: 'There was an error logging out. Please try again.',
+              position: 'bottom',
+            });
           }
         },
       },

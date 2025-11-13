@@ -2,6 +2,7 @@ import { MaterialCommunityIcon } from '@/src/components/common/icons';
 import React, { useState, useCallback } from 'react';
 import { View, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { Button, useTheme } from 'react-native-paper';
+import Toast from 'react-native-toast-message';
 
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
@@ -58,7 +59,12 @@ const LocationModal: React.FC<LocationModalProps> = ({
               onLocationSelected(manualLocation);
               onClose();
             } else {
-              Alert.alert(t('error'), t('please_enter_valid_address'));
+              Toast.show({
+                type: 'error',
+                text1: t('error'),
+                text2: t('please_enter_valid_address'),
+                position: 'bottom',
+              });
             }
           },
         },
@@ -78,17 +84,12 @@ const LocationModal: React.FC<LocationModalProps> = ({
       const servicesEnabled = await ExpoLocation.hasServicesEnabledAsync();
       if (!servicesEnabled) {
         setIsGettingLocation(false);
-        Alert.alert(
-          t('location_services_disabled'),
-          t('location_services_disabled_description'),
-          [
-            { text: t('cancel'), style: 'cancel' },
-            {
-              text: t('open_settings'),
-              onPress: () => ExpoLocation.enableNetworkProviderAsync(),
-            },
-          ],
-        );
+        Toast.show({
+          type: 'error',
+          text1: t('location_services_disabled'),
+          text2: t('location_services_disabled_description'),
+          position: 'bottom',
+        });
         return;
       }
 
@@ -98,14 +99,12 @@ const LocationModal: React.FC<LocationModalProps> = ({
           await ExpoLocation.requestForegroundPermissionsAsync();
         if (status !== 'granted') {
           setIsGettingLocation(false);
-          Alert.alert(
-            t('location_permission_required'),
-            t('location_required_for_restaurant'),
-            [
-              { text: t('cancel'), style: 'cancel' },
-              { text: t('try_again'), onPress: handleGetCurrentLocation },
-            ],
-          );
+          Toast.show({
+            type: 'error',
+            text1: t('location_permission_required'),
+            text2: t('location_required_for_restaurant'),
+            position: 'bottom',
+          });
           return;
         }
       }
@@ -170,17 +169,19 @@ const LocationModal: React.FC<LocationModalProps> = ({
         error instanceof Error ? error.message : 'Unknown error';
 
       if (errorMessage.includes('timeout')) {
-        Alert.alert(t('location_timeout'), t('location_timeout_message'), [
-          { text: t('cancel'), style: 'cancel' },
-          { text: t('try_again'), onPress: handleGetCurrentLocation },
-          { text: t('use_manual'), onPress: handleManualEntry },
-        ]);
+        Toast.show({
+          type: 'error',
+          text1: t('location_timeout'),
+          text2: t('location_timeout_message'),
+          position: 'bottom',
+        });
       } else {
-        Alert.alert(t('location_error'), t('location_error_generic'), [
-          { text: t('cancel'), style: 'cancel' },
-          { text: t('try_again'), onPress: handleGetCurrentLocation },
-          { text: t('use_manual'), onPress: handleManualEntry },
-        ]);
+        Toast.show({
+          type: 'error',
+          text1: t('location_error'),
+          text2: t('location_error_generic'),
+          position: 'bottom',
+        });
       }
     } finally {
       setIsGettingLocation(false);

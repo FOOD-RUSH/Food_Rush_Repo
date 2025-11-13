@@ -10,6 +10,7 @@ import {
   Platform,
 } from 'react-native';
 import { TextInput, useTheme, ActivityIndicator } from 'react-native-paper';
+import Toast from 'react-native-toast-message';
 
 import * as Haptics from 'expo-haptics';
 
@@ -341,10 +342,12 @@ export const AddFoodScreen = () => {
       if (imageResult) {
         // Validate image type (JPG/PNG only)
         if (!isValidImageType(imageResult.type)) {
-          Alert.alert(
-            t('invalid_image_type') || 'Invalid Image Type',
-            `Please select a JPG or PNG image only. Selected type: ${imageResult.type}`,
-          );
+          Toast.show({
+            type: 'error',
+            text1: t('invalid_image_type') || 'Invalid Image Type',
+            text2: `Please select a JPG or PNG image only. Selected type: ${imageResult.type}`,
+            position: 'bottom',
+          });
           return;
         }
 
@@ -371,7 +374,12 @@ export const AddFoodScreen = () => {
         errorMessage = error.message;
       }
 
-      Alert.alert(t('error') || 'Error', errorMessage);
+      Toast.show({
+        type: 'error',
+        text1: t('error') || 'Error',
+        text2: errorMessage,
+        position: 'bottom',
+      });
     } finally {
       setIsUploading(false);
     }
@@ -380,20 +388,23 @@ export const AddFoodScreen = () => {
   // Memoized save handler
   const handleSave = useCallback(async () => {
     if (!restaurantId) {
-      Alert.alert(
-        t('error') || 'Error',
-        t('restaurant_id_not_found') || 'Restaurant ID not found',
-      );
+      Toast.show({
+        type: 'error',
+        text1: t('error') || 'Error',
+        text2: t('restaurant_id_not_found') || 'Restaurant ID not found',
+        position: 'bottom',
+      });
       return;
     }
 
     if (!validation.isValid) {
       const errorMessage = validation.errors.join('\n• ');
-      Alert.alert(
-        t('validation_errors') || 'Validation Errors',
-        `${t('please_fix_following_errors') || 'Please fix the following errors'}:\n\n• ${errorMessage}`,
-        [{ text: t('ok') || 'OK', style: 'default' }],
-      );
+      Toast.show({
+        type: 'error',
+        text1: t('validation_errors') || 'Validation Errors',
+        text2: `${t('please_fix_following_errors') || 'Please fix the following errors'}:\n\n• ${errorMessage}`,
+        position: 'bottom',
+      });
       return;
     }
 
@@ -428,11 +439,13 @@ export const AddFoodScreen = () => {
       });
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert(
-        t('success') || 'Success',
-        t('menu_item_created_successfully') || 'Menu item created successfully',
-        [{ text: t('ok') || 'OK', onPress: () => navigation.goBack() }],
-      );
+      Toast.show({
+        type: 'success',
+        text1: t('success') || 'Success',
+        text2: t('menu_item_created_successfully') || 'Menu item created successfully',
+        position: 'bottom',
+        onHide: () => navigation.goBack(),
+      });
     } catch (error: any) {
       console.error('Error creating menu item:', error);
 
@@ -446,9 +459,12 @@ export const AddFoodScreen = () => {
         errorMessage = error.message;
       }
 
-      Alert.alert(t('error') || 'Error', errorMessage, [
-        { text: t('ok') || 'OK', style: 'default' },
-      ]);
+      Toast.show({
+        type: 'error',
+        text1: t('error') || 'Error',
+        text2: errorMessage,
+        position: 'bottom',
+      });
     }
   }, [
     restaurantId,

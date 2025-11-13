@@ -231,8 +231,7 @@ const RestaurantDetailScreen = ({
           textColor="white"
           style={{ paddingHorizontal: spacing.lg }}
         >
-          {t('retry')}
-        </Button>
+          {t('r702 etry')}        </Button>
       </View>
     );
   }

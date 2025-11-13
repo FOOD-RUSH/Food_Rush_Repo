@@ -64,25 +64,6 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
     ]);
   }, [logout, navigation, t]);
 
-  const handleRefresh = useCallback(async () => {
-    Toast.show({
-      type: 'info',
-      text1: t('checking_status'),
-      text2: t('refreshing_approval_status'),
-      position: 'top',
-    });
-
-    // Simulate API call
-    setTimeout(() => {
-      Toast.show({
-        type: 'info',
-        text1: t('status_update'),
-        text2: t('still_under_review'),
-        position: 'top',
-      });
-    }, 1500);
-  }, [t]);
-
   const handleContactSupport = useCallback(() => {
     // Navigate to support or open email
     Toast.show({
@@ -509,17 +490,6 @@ const AwaitingApprovalScreen: React.FC<AwaitingApprovalScreenProps> = ({
 
           {/* Action Buttons */}
           <View style={styles.actionSection}>
-            <TouchableOpacity
-              style={[styles.button, styles.primaryButton]}
-              onPress={handleRefresh}
-              activeOpacity={0.8}
-            >
-              <IoniconsIcon name="refresh" size={20} color="white" />
-              <Label color="white" weight="semibold">
-                {t('check_status')}
-              </Label>
-            </TouchableOpacity>
-
             <TouchableOpacity
               style={[styles.button, styles.secondaryButton]}
               onPress={handleContactSupport}

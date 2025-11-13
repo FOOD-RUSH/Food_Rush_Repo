@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
+import Toast from 'react-native-toast-message';
 import { IoniconsIcon } from '@/src/components/common/icons';
 import { images } from '@/assets/images';
 import {
@@ -90,7 +91,12 @@ const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
     const cleanNumber = phoneNumber.replace(/\D/g, '');
 
     if (!cleanNumber || cleanNumber.length !== 9) {
-      Alert.alert(t('error'), t('invalid_phone_format'));
+      Toast.show({
+        type: 'error',
+        text1: t('error'),
+        text2: t('invalid_phone_format'),
+        position: 'bottom',
+      });
       return;
     }
 
@@ -99,7 +105,12 @@ const PaymentMethodModal: React.FC<PaymentMethodModalProps> = ({
         selectedProvider === 'mtn'
           ? t('invalid_mtn_number')
           : t('invalid_orange_number');
-      Alert.alert(t('error'), errorMessage);
+      Toast.show({
+        type: 'error',
+        text1: t('error'),
+        text2: errorMessage,
+        position: 'bottom',
+      });
       return;
     }
 

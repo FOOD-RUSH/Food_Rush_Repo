@@ -7,7 +7,7 @@ import { eventBus } from '@/src/services/shared/eventBus';
 
 export interface CartItem {
   id: string;
-  menuItem: MenuProps;
+  menuItem: FoodProps;
   quantity: number;
   specialInstructions?: string;
   addedAt: number;
@@ -78,8 +78,7 @@ export const useCartStore = create<CartState & CartActions>()(
         const { restaurantID, items } = get();
         if (items.length === 0) return true;
 
-        const itemRestaurantId =
-          item.restaurantId || (item as any).restaurant?.id;
+        const itemRestaurantId = item.restaurant.id;
         if (!itemRestaurantId) {
           return false;
         }
@@ -138,10 +137,9 @@ export const useCartStore = create<CartState & CartActions>()(
 
             // Set restaurant info if first item
             if (items.length === 0) {
-              const itemRestaurantId =
-                item.restaurantId || (item as any).restaurant?.id;
+              const itemRestaurantId = item.restaurant.id;
               const restaurantName =
-                (item as any).restaurant?.name || 'Unknown Restaurant';
+                item.restaurant.name || 'Unknown Restaurant';
 
               set({
                 restaurantID: itemRestaurantId || null,

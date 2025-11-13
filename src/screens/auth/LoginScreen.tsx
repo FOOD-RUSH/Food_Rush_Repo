@@ -489,7 +489,7 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
             </View>
 
             {/* Social Login Buttons */}
-            <View style={{ flexDirection: 'row', gap: 12, marginBottom: 32 }}>
+            {/* <View style={{ flexDirection: 'row', gap: 12, marginBottom: 32 }}>
               <Button
                 mode="outlined"
                 onPress={() => handleSocialSignIn('Google')}
@@ -508,7 +508,7 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
               >
                 {t('apple', { defaultValue: 'Apple' })}
               </Button>
-            </View>
+            </View> */}
 
             {/* Sign Up Link */}
             <View

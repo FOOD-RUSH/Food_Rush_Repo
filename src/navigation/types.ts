@@ -86,6 +86,7 @@ export type RootStackParamList = {
     restaurantId: string;
     restaurantName: string;
   };
+  PaymentInfo: undefined;
 };
 
 // Auth Stack (unchanged)

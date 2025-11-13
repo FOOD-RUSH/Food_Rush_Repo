@@ -2,6 +2,7 @@ import { MaterialCommunityIcon } from '@/src/components/common/icons';
 import React, { useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { Button, Card, useTheme } from 'react-native-paper';
+import Toast from 'react-native-toast-message';
 
 import { useTranslation } from 'react-i18next';
 import * as Haptics from 'expo-haptics';
@@ -51,14 +52,13 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
           },
           () => {
             setIsPickingLocation(false);
-            Alert.alert(
-              t('location_required'),
-              t('location_required_for_restaurant'),
-              [
-                { text: t('cancel'), style: 'cancel' },
-                { text: t('try_again'), onPress: handleLocationRequest },
-              ],
-            );
+            // Use toast instead of alert
+            Toast.show({
+              type: 'error',
+              text1: t('location_required'),
+              text2: t('location_required_for_restaurant'),
+              position: 'bottom',
+            });
           },
         );
       } else {
@@ -72,7 +72,12 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
     } catch (error) {
       console.error('Location picker error:', error);
       setIsPickingLocation(false);
-      Alert.alert(t('error'), t('failed_to_get_location'), [{ text: t('ok') }]);
+      Toast.show({
+        type: 'error',
+        text1: t('error'),
+        text2: t('failed_to_get_location'),
+        position: 'bottom',
+      });
     }
   }, [
     hasPermission,
@@ -218,26 +223,19 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
           alignItems: 'center',
         }}
         onPress={() => {
-          Alert.alert(t('manual_address'), t('manual_address_description'), [
-            { text: t('cancel'), style: 'cancel' },
-            {
-              text: t('continue'),
-              onPress: () => {
-                // For now, we'll use a fallback location
-                // In a real app, you'd show a text input dialog
-                const fallbackLocation: Location = {
-                  latitude: 3.848,
-                  longitude: 11.502,
-                  city: 'Yaoundé',
-                  exactLocation: 'Manual Address',
-                  formattedAddress: 'Manual Address, Yaoundé, Cameroun',
-                  isFallback: true,
-                  timestamp: Date.now(),
-                };
-                onLocationSelected(fallbackLocation);
-              },
-            },
-          ]);
+          // Use a more suitable UI component for manual address input
+          // For now, we'll use a simplified fallback
+          // In a real app, you'd use a modal or form
+          const fallbackLocation: Location = {
+            latitude: 3.848,
+            longitude: 11.502,
+            city: 'Yaoundé',
+            exactLocation: 'Manual Address',
+            formattedAddress: 'Manual Address, Yaoundé, Cameroun',
+            isFallback: true,
+            timestamp: Date.now(),
+          };
+          onLocationSelected(fallbackLocation);
         }}
       >
         <Text

@@ -76,13 +76,11 @@ class PushNotificationService {
 
   async requestPermissions(): Promise<boolean> {
     if (!Device.isDevice) {
-      console.warn(
-        '[PushService] Push notifications only work on physical devices',
-      );
+      // Push notifications only work on physical devices
       return false;
     }
 
-    console.log('[PushService] Requesting permissions...');
+    // Removed console.log for production
 
     try {
       const { status: existingStatus } =
@@ -98,10 +96,7 @@ class PushNotificationService {
       const granted = finalStatus === 'granted';
       return granted;
     } catch (error) {
-      console.error(
-        '[PushService] Error requesting notification permissions:',
-        error,
-      );
+      // Error requesting notification permissions - handle silently
       return false;
     }
   }
@@ -112,7 +107,7 @@ class PushNotificationService {
     }
 
     if (!Device.isDevice) {
-      console.warn('[PushService] Not a physical device, cannot get token');
+      // Not a physical device, cannot get token
       return null;
     }
 
@@ -120,7 +115,7 @@ class PushNotificationService {
     try {
       const hasPermission = await this.requestPermissions();
       if (!hasPermission) {
-        console.warn('[PushService] No permission, cannot get token');
+        // No permission, cannot get token
         return null;
       }
 
@@ -133,67 +128,60 @@ class PushNotificationService {
       this.expoPushToken = token.data;
       return token.data;
     } catch (error) {
-      console.error('[PushService] Error getting push token:', error);
+      // Error getting push token - handle silently
       return null;
     }
   }
 
   async registerDevice(): Promise<string | null> {
-    console.log('[PushService] Registering device...');
+    // Removed console.log for production
 
     try {
       const token = await this.getExpoPushToken();
       if (!token) {
-        console.warn('[PushService] No token available for registration');
+        // No token available for registration
         return null;
       }
 
       const { user } = useAuthStore.getState();
       if (!user) {
-        console.warn(
-          '[PushService] User not authenticated, cannot register device',
-        );
+        // User not authenticated, cannot register device
         return null;
       }
 
       const platform = Platform.OS;
       const role = user.role?.toLowerCase() || 'customer';
 
-      console.log('[PushService] Registering with:', { platform, role });
+      // Removed console.log for production
 
       await notificationApi.registerDevice(token, platform, role);
       useNotificationStore.getState().setPushEnabled(true);
 
-      console.log('[PushService] Device registered successfully');
+      // Removed console.log for production
       return token;
     } catch (error) {
-      console.error('[PushService] Error registering device:', error);
+      // Error registering device - handle silently
       return null;
     }
   }
 
   async unregisterDevice(): Promise<void> {
-    console.log('[PushService] Unregistering device...');
+    // Removed console.log for production
 
     try {
       if (this.expoPushToken) {
         await notificationApi.unregisterDevice(this.expoPushToken);
         this.expoPushToken = null;
         useNotificationStore.getState().setPushEnabled(false);
-        console.log('[PushService] Device unregistered successfully');
+        // Removed console.log for production
       }
     } catch (error) {
-      console.error('[PushService] Error unregistering device:', error);
+      // Error unregistering device - handle silently
     }
   }
 
   private handleNotificationReceived(notification: Notifications.Notification) {
-    console.log('[PushService] Notification received:', {
-      id: notification.request.identifier,
-      title: notification.request.content.title,
-      body: notification.request.content.body,
-      data: notification.request.content.data,
-    });
+    // Removed console.log for production
 
     try {
       const { addNotification, fetchNotifications } =
@@ -216,26 +204,19 @@ class PushNotificationService {
 
       // Refresh notifications from backend to sync
       fetchNotifications().catch((err) => {
-        console.error('[PushService] Failed to refresh notifications:', err);
+        // Failed to refresh notifications - handle silently
       });
 
-      console.log('[PushService] Notification handled successfully');
+      // Removed console.log for production
     } catch (error) {
-      console.error(
-        '[PushService] Error handling notification received:',
-        error,
-      );
+      // Error handling notification received - handle silently
     }
   }
 
   private handleNotificationResponse(
     response: Notifications.NotificationResponse,
   ) {
-    console.log('[PushService] Notification response:', {
-      id: response.notification.request.identifier,
-      actionIdentifier: response.actionIdentifier,
-      data: response.notification.request.content.data,
-    });
+    // Removed console.log for production
 
     try {
       const data = response.notification.request.content.data;
@@ -243,26 +224,23 @@ class PushNotificationService {
 
       const { markAsRead } = useNotificationStore.getState();
       markAsRead(notificationId).catch((err) => {
-        console.error('[PushService] Error marking notification as read:', err);
+        // Error marking notification as read - handle silently
       });
 
       if (data?.orderId) {
-        console.log('[PushService] Navigate to order:', data.orderId);
+        // Navigate to order - removed console.log
         // TODO: Implement navigation
       } else if (data?.restaurantId) {
-        console.log('[PushService] Navigate to restaurant:', data.restaurantId);
+        // Navigate to restaurant - removed console.log
         // TODO: Implement navigation
       }
     } catch (error) {
-      console.error(
-        '[PushService] Error handling notification response:',
-        error,
-      );
+      // Error handling notification response - handle silently
     }
   }
 
   async sendLocalNotification(payload: NotificationPayload): Promise<string> {
-    console.log('[PushService] Sending local notification:', payload.title);
+    // Removed console.log for production
 
     try {
       const notificationId = await Notifications.scheduleNotificationAsync({
@@ -277,10 +255,10 @@ class PushNotificationService {
           : null,
       });
 
-      console.log('[PushService] Local notification sent:', notificationId);
+      // Removed console.log for production
       return notificationId;
     } catch (error) {
-      console.error('[PushService] Error sending local notification:', error);
+      // Error sending local notification - handle silently
       throw error;
     }
   }
@@ -291,10 +269,7 @@ class PushNotificationService {
     minutesFromNow: number,
     data?: Record<string, any>,
   ): Promise<string> {
-    console.log('[PushService] Scheduling reminder:', {
-      title,
-      minutesFromNow,
-    });
+    // Removed console.log for production
 
     return this.sendLocalNotification({
       title: `⏰ ${title}`,
@@ -305,29 +280,29 @@ class PushNotificationService {
   }
 
   async cancelNotification(notificationId: string): Promise<void> {
-    console.log('[PushService] Canceling notification:', notificationId);
+    // Removed console.log for production
 
     try {
       await Notifications.cancelScheduledNotificationAsync(notificationId);
-      console.log('[PushService] Notification canceled');
+      // Removed console.log for production
     } catch (error) {
-      console.error('[PushService] Error canceling notification:', error);
+      // Error canceling notification - handle silently
     }
   }
 
   async cancelAllScheduled(): Promise<void> {
-    console.log('[PushService] Canceling all scheduled notifications');
+    // Removed console.log for production
 
     try {
       await Notifications.cancelAllScheduledNotificationsAsync();
-      console.log('[PushService] All notifications canceled');
+      // Removed console.log for production
     } catch (error) {
-      console.error('[PushService] Error canceling all notifications:', error);
+      // Error canceling all notifications - handle silently
     }
   }
 
   cleanup() {
-    console.log('[PushService] Cleaning up...');
+    // Removed console.log for production
 
     if (this.notificationListener) {
       this.notificationListener.remove();
@@ -339,7 +314,7 @@ class PushNotificationService {
     }
     this.initialized = false;
 
-    console.log('[PushService] Cleanup complete');
+    // Removed console.log for production
   }
 }
 

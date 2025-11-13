@@ -33,9 +33,6 @@ export const useAnalyticsSummary = (dateRange?: AnalyticsDateRange) => {
         await socketService.connect();
 
         if (!socketService.isConnected()) {
-          console.log(
-            '[Analytics] WebSocket not available, using HTTP polling',
-          );
           return;
         }
 
@@ -56,7 +53,7 @@ export const useAnalyticsSummary = (dateRange?: AnalyticsDateRange) => {
           socketService.off('analytics:summary', handleSummaryUpdate);
         };
       } catch (error) {
-        console.log('[Analytics] WebSocket setup failed, using HTTP only');
+        // WebSocket setup failed, using HTTP polling
       }
     };
 
@@ -114,7 +111,7 @@ export const useRestaurantBalance = () => {
           socketService.off('analytics:balance', handleBalanceUpdate);
         };
       } catch (error) {
-        console.log('[Balance] WebSocket setup failed, using HTTP only');
+        // WebSocket setup failed, using HTTP polling
       }
     };
 
@@ -179,7 +176,7 @@ export const useRevenueBuckets = (
           socketService.off('analytics:revenue', handleRevenueUpdate);
         };
       } catch (error) {
-        console.log('[Revenue] WebSocket setup failed, using HTTP only');
+        // WebSocket setup failed, using HTTP polling
       }
     };
 

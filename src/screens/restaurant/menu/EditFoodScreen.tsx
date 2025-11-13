@@ -15,6 +15,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { TextInput, Button, Card, useTheme } from 'react-native-paper';
+import Toast from 'react-native-toast-message';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
 
@@ -118,7 +119,12 @@ export const EditFoodScreen = ({
         errorMessage = error.message;
       }
 
-      Alert.alert(t('error') || 'Error', errorMessage);
+      Toast.show({
+        type: 'error',
+        text1: t('error') || 'Error',
+        text2: errorMessage,
+        position: 'bottom',
+      });
     }
   }, [t]);
 
@@ -183,11 +189,13 @@ export const EditFoodScreen = ({
 
   const handleSave = useCallback(async () => {
     if (!restaurantId) {
-      Alert.alert(
-        t('error') || 'Error',
-        t('restaurant_id_not_found') ||
+      Toast.show({
+        type: 'error',
+        text1: t('error') || 'Error',
+        text2: t('restaurant_id_not_found') ||
           'Restaurant ID not found. Please log in again.',
-      );
+        position: 'bottom',
+      });
       return;
     }
 
@@ -217,12 +225,14 @@ export const EditFoodScreen = ({
       });
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert(
-        t('success') || 'Success',
-        t('menu_item_updated_successfully') ||
+      Toast.show({
+        type: 'success',
+        text1: t('success') || 'Success',
+        text2: t('menu_item_updated_successfully') ||
           'Menu item updated successfully!',
-        [{ text: t('ok') || 'OK', onPress: () => navigation.goBack() }],
-      );
+        position: 'bottom',
+        onHide: () => navigation.goBack(),
+      });
     } catch (error: any) {
       console.error('Error updating menu item:', error);
 
@@ -245,7 +255,12 @@ export const EditFoodScreen = ({
         errorMessage = error.message;
       }
 
-      Alert.alert(t('error') || 'Error', errorMessage);
+      Toast.show({
+        type: 'error',
+        text1: t('error') || 'Error',
+        text2: errorMessage,
+        position: 'bottom',
+      });
     }
   }, [
     restaurantId,

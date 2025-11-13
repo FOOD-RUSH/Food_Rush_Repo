@@ -44,27 +44,11 @@ const NotificationScreen = () => {
     isInitialized,
   } = useNotifications();
 
-  // Log mount
-  useEffect(() => {
-    console.log('[NotificationScreen] Mounted', {
-      hasNotifications,
-      isInitialized,
-      isLoading,
-      notificationsCount: notifications.length,
-    });
-  }, []);
+  // Log mount - removed console.log for production
+  useEffect(() => {}, []);
 
-  // Log state changes
-  useEffect(() => {
-    console.log('[NotificationScreen] State update:', {
-      notificationsCount: notifications.length,
-      unreadCount,
-      isLoading,
-      hasNextPage,
-      selectedFilter,
-      error,
-    });
-  }, [
+  // Log state changes - removed console.log for production
+  useEffect(() => {}, [
     notifications.length,
     unreadCount,
     isLoading,
@@ -76,7 +60,7 @@ const NotificationScreen = () => {
   // Show error alert
   useEffect(() => {
     if (error) {
-      console.error('[NotificationScreen] Error:', error);
+      // Error handling - removed console.log for production
       Alert.alert(t('error'), error, [
         {
           text: t('retry'),
@@ -96,14 +80,11 @@ const NotificationScreen = () => {
 
   const handleNotificationPress = useCallback(
     async (notification: Notification) => {
-      console.log(
-        '[NotificationScreen] Notification pressed:',
-        notification.id,
-      );
+      // Removed console.log for production
 
       if (!notification.readAt) {
         const success = await markAsRead(notification.id);
-        console.log('[NotificationScreen] Mark as read result:', success);
+        // Removed console.log for production
       }
 
       // Handle navigation based on notification type and data
@@ -113,11 +94,7 @@ const NotificationScreen = () => {
             userType === 'restaurant'
               ? 'RestaurantOrderDetails'
               : 'OrderReceipt';
-          console.log(
-            '[NotificationScreen] Navigating to:',
-            screenName,
-            notification.data.orderId,
-          );
+          // Removed console.log for production
           navigation.navigate(
             screenName as never,
             {
@@ -125,10 +102,7 @@ const NotificationScreen = () => {
             } as never,
           );
         } else if (notification.data?.restaurantId) {
-          console.log(
-            '[NotificationScreen] Navigating to restaurant:',
-            notification.data.restaurantId,
-          );
+          // Removed console.log for production
           navigation.navigate(
             'RestaurantDetails' as never,
             {
@@ -139,7 +113,7 @@ const NotificationScreen = () => {
           Alert.alert(notification.title, notification.body);
         }
       } catch (navError) {
-        console.error('[NotificationScreen] Navigation error:', navError);
+        // Navigation error - removed console.log for production
         Alert.alert(notification.title, notification.body);
       }
     },
@@ -148,26 +122,23 @@ const NotificationScreen = () => {
 
   const handleMarkAllAsRead = useCallback(async () => {
     if (unreadCount === 0) {
-      console.log('[NotificationScreen] No unread notifications');
+      // No unread notifications - removed console.log for production
       return;
     }
 
-    console.log('[NotificationScreen] Marking all as read...');
+    // Removed console.log for production
     const success = await markAllAsRead();
 
     if (!success) {
-      console.error('[NotificationScreen] Mark all as read failed');
+      // Mark all as read failed - removed console.log for production
       Alert.alert(t('error'), t('mark_all_read_error'));
     } else {
-      console.log('[NotificationScreen] Mark all as read success');
+      // Removed console.log for production
     }
   }, [unreadCount, markAllAsRead, t]);
 
   const handleLoadMore = useCallback(() => {
-    console.log('[NotificationScreen] Load more triggered:', {
-      isLoadingMore,
-      hasNextPage,
-    });
+    // Removed console.log for production
 
     if (!isLoadingMore && hasNextPage) {
       loadMore();
@@ -175,7 +146,7 @@ const NotificationScreen = () => {
   }, [isLoadingMore, hasNextPage, loadMore]);
 
   const handleRefresh = useCallback(() => {
-    console.log('[NotificationScreen] Refresh triggered');
+    // Removed console.log for production
     refresh();
   }, [refresh]);
 
@@ -232,7 +203,7 @@ const NotificationScreen = () => {
       if (diffInDays < 7) return `${diffInDays}d ago`;
       return date.toLocaleDateString();
     } catch (error) {
-      console.error('[NotificationScreen] Date format error:', error);
+      // Date format error - removed console.log for production
       return '';
     }
   };
@@ -346,7 +317,7 @@ const NotificationScreen = () => {
   const renderFilter = ({ item }: { item: (typeof filters)[0] }) => (
     <TouchableOpacity
       onPress={() => {
-        console.log('[NotificationScreen] Filter selected:', item.key);
+        // Removed console.log for production
         setFilter(item.key as any);
       }}
       className="px-3 py-2 mr-2 rounded-full flex-row items-center"

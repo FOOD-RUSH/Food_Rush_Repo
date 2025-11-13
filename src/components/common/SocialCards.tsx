@@ -4,10 +4,11 @@ import {
   Text,
   TouchableOpacity,
   Linking,
-  Alert,
   Platform,
+  Alert,
 } from 'react-native';
 import React from 'react';
+import Toast from 'react-native-toast-message';
 
 import { useTheme, Card } from 'react-native-paper';
 import { useTranslation } from 'react-i18next';
@@ -30,7 +31,12 @@ const SocialCards = ({
 
   const handlePress = async () => {
     if (!link) {
-      Alert.alert(t('info'), t('contact_info_not_available'));
+      Toast.show({
+        type: 'info',
+        text1: t('info'),
+        text2: t('contact_info_not_available'),
+        position: 'bottom',
+      });
       return;
     }
 
@@ -40,6 +46,7 @@ const SocialCards = ({
         const phoneNumber = link.replace('tel:', '');
 
         // Show confirmation dialog for phone calls
+        // For phone calls, we still need user confirmation, so we'll keep Alert for this case
         Alert.alert(
           t('make_phone_call'),
           t('call_confirmation', { phoneNumber }),
@@ -70,12 +77,22 @@ const SocialCards = ({
                     if (canCallAlternative) {
                       await Linking.openURL(alternativeLink);
                     } else {
-                      Alert.alert(t('error'), t('phone_not_supported'));
+                      Toast.show({
+                        type: 'error',
+                        text1: t('error'),
+                        text2: t('phone_not_supported'),
+                        position: 'bottom',
+                      });
                     }
                   }
                 } catch (callError) {
                   console.error('Error making phone call:', callError);
-                  Alert.alert(t('error'), t('call_failed'));
+                  Toast.show({
+                    type: 'error',
+                    text1: t('error'),
+                    text2: t('call_failed'),
+                    position: 'bottom',
+                  });
                 }
               },
             },
@@ -90,16 +107,20 @@ const SocialCards = ({
       if (supported) {
         await Linking.openURL(link);
       } else {
-        Alert.alert(
-          t('error'),
-          t('cannot_open_link', { platform: social_platform }),
+        Toast.show({
+          type: 'error',
+          text1: t('error'),
+          text2: t('cannot_open_link', { platform: social_platform }),
+          position: 'bottom',
         );
       }
     } catch (error) {
       console.error('Error opening link:', error);
-      Alert.alert(
-        t('error'),
-        t('failed_to_open_link', { platform: social_platform }),
+      Toast.show({
+        type: 'error',
+        text1: t('error'),
+        text2: t('failed_to_open_link', { platform: social_platform }),
+        position: 'bottom',
       );
     }
   };

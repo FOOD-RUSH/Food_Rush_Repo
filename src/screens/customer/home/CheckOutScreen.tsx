@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import CommonView from '@/src/components/common/CommonView';
 import { ScrollView } from 'react-native-gesture-handler';
+import Toast from 'react-native-toast-message';
 
 import { RootStackScreenProps } from '@/src/navigation/types';
 import { Card, useTheme } from 'react-native-paper';
@@ -123,14 +124,17 @@ const CheckOutScreen = ({
 
   // Handle payment info press (informational only)
   const handlePaymentPress = useCallback(() => {
-    Alert.alert(t('payment_info'), t('payment_after_restaurant_confirmation'), [
-      { text: t('ok') },
-    ]);
-  }, [t]);
+    navigation.navigate('PaymentInfo');
+  }, [navigation]);
 
   // Handle promo code
   const handlePromoPress = useCallback(() => {
-    Alert.alert(t('info'), t('promo_code_functionality_coming_soon'));
+    Toast.show({
+      type: 'info',
+      text1: t('info'),
+      text2: t('promo_code_functionality_coming_soon'),
+      position: 'bottom',
+    });
   }, [t]);
 
   // Handle place order confirmation - create actual order
@@ -144,7 +148,12 @@ const CheckOutScreen = ({
         cartItems[0]?.menuItem?.restaurantId;
 
       if (!restaurantId) {
-        Alert.alert(t('error'), 'Restaurant information missing');
+        Toast.show({
+          type: 'error',
+          text1: t('error'),
+          text2: 'Restaurant information missing',
+          position: 'bottom',
+        });
         console.error('Missing restaurant ID:', {
           cartRestaurantId,
           routeRestaurantId: route.params?.restaurantId,
@@ -160,7 +169,12 @@ const CheckOutScreen = ({
         longitude: nearLng,
       });
     } catch (error) {
-      Alert.alert(t('error'), t('failed_to_place_order'));
+      Toast.show({
+        type: 'error',
+        text1: t('error'),
+        text2: t('failed_to_place_order'),
+        position: 'bottom',
+      });
       console.error('Order placement error:', error);
       setShowOrderModal(false);
     }
@@ -169,7 +183,12 @@ const CheckOutScreen = ({
   // Handle place order - show validation modal
   const handlePlaceOrder = useCallback(() => {
     if (cartItems.length === 0) {
-      Alert.alert(t('error'), t('your_cart_is_empty'));
+      Toast.show({
+        type: 'error',
+        text1: t('error'),
+        text2: t('your_cart_is_empty'),
+        position: 'bottom',
+      });
       return;
     }
 
@@ -406,13 +425,11 @@ const CheckOutScreen = ({
               </View>
 
               <View className="flex-row items-center">
-                <Text
-                  className="text-sm mr-2"
-                  style={{ color: colors.onSurfaceVariant }}
-                >
-                  {t('pay_after_confirmation')}
-                </Text>
-                <MaterialIcon name="info" size={18} color={colors.primary} />
+                <MaterialIcon
+                  name="arrow-forward-ios"
+                  size={18}
+                  color={colors.onSurfaceVariant}
+                />
               </View>
             </TouchableOpacity>
 

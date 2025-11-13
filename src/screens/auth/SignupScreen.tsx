@@ -628,7 +628,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
               </View>
 
               {/* Social Sign Up Buttons */}
-              <View style={styles.socialButtonsContainer}>
+              {/* <View style={styles.socialButtonsContainer}>
                 <Button
                   mode="outlined"
                   onPress={handleGoogleSignUp}
@@ -652,7 +652,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                 >
                   Apple
                 </Button>
-              </View>
+              </View> */}
 
               {/* Login Link */}
               <View style={styles.loginLinkContainer}>

@@ -64,11 +64,11 @@ export const useNotificationStore = create<NotificationState>((set, get) => {
   fetchNotifications: async () => {
     const state = get();
     if (state.isLoading) {
-      console.log('[NotificationStore] Already loading, skipping fetch');
+      // Already loading, skipping fetch
       return;
     }
 
-    console.log('[NotificationStore] Fetching notifications...');
+    // Removed console.log for production
     set({ isLoading: true, error: null });
 
     try {
@@ -79,23 +79,16 @@ export const useNotificationStore = create<NotificationState>((set, get) => {
         params.type = state.selectedFilter;
       }
 
-      console.log('[NotificationStore] API params:', params);
+      // Removed console.log for production
       const response = await notificationApi.getNotifications(params);
-      console.log('[NotificationStore] API response:', {
-        total: response.data.total,
-        items: response.data.items.length,
-        pages: response.data.pages,
-      });
+      // Removed console.log for production
 
       let notifications = response.data.items || [];
 
       // Apply unread filter locally (API might not support it)
       if (state.selectedFilter === 'unread') {
         notifications = notifications.filter((n) => !n.readAt);
-        console.log(
-          '[NotificationStore] Filtered to unread:',
-          notifications.length,
-        );
+        // Removed console.log for production
       }
 
       const unreadCount = notifications.filter((n) => !n.readAt).length;
@@ -111,13 +104,9 @@ export const useNotificationStore = create<NotificationState>((set, get) => {
         error: null,
       });
 
-      console.log('[NotificationStore] State updated:', {
-        notificationsCount: notifications.length,
-        unreadCount,
-        hasNextPage: response.data.page < response.data.pages,
-      });
+      // Removed console.log for production
     } catch (error: any) {
-      console.error('[NotificationStore] Fetch error:', error);
+      // Fetch error - handle silently
       set({
         error: error.message || 'Failed to fetch notifications',
         isLoading: false,
@@ -126,7 +115,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => {
   },
 
   refreshNotifications: async () => {
-    console.log('[NotificationStore] Refreshing notifications...');
+    // Removed console.log for production
     set({ currentPage: 1 });
     await get().fetchNotifications();
   },
@@ -135,14 +124,11 @@ export const useNotificationStore = create<NotificationState>((set, get) => {
     const state = get();
 
     if (state.isLoadingMore || !state.hasNextPage) {
-      console.log('[NotificationStore] Skip load more:', {
-        isLoadingMore: state.isLoadingMore,
-        hasNextPage: state.hasNextPage,
-      });
+      // Skip load more - removed console.log
       return;
     }
 
-    console.log('[NotificationStore] Loading more notifications...');
+    // Removed console.log for production
     set({ isLoadingMore: true, error: null });
 
     try {
@@ -153,12 +139,9 @@ export const useNotificationStore = create<NotificationState>((set, get) => {
         params.type = state.selectedFilter;
       }
 
-      console.log('[NotificationStore] Load more params:', params);
+      // Removed console.log for production
       const response = await notificationApi.getNotifications(params);
-      console.log('[NotificationStore] Load more response:', {
-        newItems: response.data.items.length,
-        page: response.data.page,
-      });
+      // Removed console.log for production
 
       let newNotifications = response.data.items || [];
 
@@ -177,12 +160,9 @@ export const useNotificationStore = create<NotificationState>((set, get) => {
         isLoadingMore: false,
       });
 
-      console.log('[NotificationStore] Load more complete:', {
-        totalNotifications: allNotifications.length,
-        unreadCount,
-      });
+      // Removed console.log for production
     } catch (error: any) {
-      console.error('[NotificationStore] Load more error:', error);
+      // Load more error - handle silently
       set({
         error: error.message || 'Failed to load more notifications',
         isLoadingMore: false,
@@ -191,7 +171,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => {
   },
 
   markAsRead: async (id: string) => {
-    console.log('[NotificationStore] Marking as read:', id);
+    // Removed console.log for production
 
     try {
       await notificationApi.markAsRead(id);
@@ -204,10 +184,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => {
           (n) => !n.readAt,
         ).length;
 
-        console.log('[NotificationStore] Mark as read success:', {
-          id,
-          newUnreadCount: unreadCount,
-        });
+        // Removed console.log for production
 
         return {
           notifications: updatedNotifications,
@@ -215,13 +192,13 @@ export const useNotificationStore = create<NotificationState>((set, get) => {
         };
       });
     } catch (error: any) {
-      console.error('[NotificationStore] Mark as read error:', error);
+      // Mark as read error - handle silently
       throw error;
     }
   },
 
   markAllAsRead: async () => {
-    console.log('[NotificationStore] Marking all as read...');
+    // Removed console.log for production
 
     try {
       await notificationApi.markAllAsRead();
@@ -232,7 +209,7 @@ export const useNotificationStore = create<NotificationState>((set, get) => {
           readAt: n.readAt || new Date().toISOString(),
         }));
 
-        console.log('[NotificationStore] Mark all as read success');
+        // Removed console.log for production
 
         return {
           notifications: updatedNotifications,
@@ -240,35 +217,26 @@ export const useNotificationStore = create<NotificationState>((set, get) => {
         };
       });
     } catch (error: any) {
-      console.error('[NotificationStore] Mark all as read error:', error);
+      // Mark all as read error - handle silently
       throw error;
     }
   },
 
   addNotification: (notification: Notification) => {
-    console.log('[NotificationStore] Adding notification:', {
-      id: notification.id,
-      title: notification.title,
-      type: notification.type,
-    });
+    // Removed console.log for production
 
     set((state) => {
       // Check if notification already exists
       const exists = state.notifications.some((n) => n.id === notification.id);
       if (exists) {
-        console.log(
-          '[NotificationStore] Notification already exists, skipping',
-        );
+        // Notification already exists, skipping - removed console.log
         return state;
       }
 
       const notifications = [notification, ...state.notifications];
       const unreadCount = notifications.filter((n) => !n.readAt).length;
 
-      console.log('[NotificationStore] Notification added:', {
-        totalNotifications: notifications.length,
-        unreadCount,
-      });
+      // Removed console.log for production
 
       return {
         notifications,
@@ -278,17 +246,14 @@ export const useNotificationStore = create<NotificationState>((set, get) => {
   },
 
   setFilter: (filter: NotificationState['selectedFilter']) => {
-    console.log('[NotificationStore] Setting filter:', filter);
+    // Removed console.log for production
     set({ selectedFilter: filter, currentPage: 1 });
     get().fetchNotifications();
   },
 
   getFilteredNotifications: () => {
     const state = get();
-    console.log('[NotificationStore] Getting filtered notifications:', {
-      filter: state.selectedFilter,
-      total: state.notifications.length,
-    });
+    // Removed console.log for production
 
     switch (state.selectedFilter) {
       case 'unread':
@@ -303,31 +268,31 @@ export const useNotificationStore = create<NotificationState>((set, get) => {
   },
 
   updateUnreadCount: async () => {
-    console.log('[NotificationStore] Updating unread count...');
+    // Removed console.log for production
 
     try {
       const response = await notificationApi.getUnreadCount();
       const count = response.data.count;
 
-      console.log('[NotificationStore] Unread count updated:', count);
+      // Removed console.log for production
       set({ unreadCount: count });
     } catch (error: any) {
-      console.error('[NotificationStore] Update unread count error:', error);
+      // Update unread count error - handle silently
     }
   },
 
   setPushEnabled: (enabled: boolean) => {
-    console.log('[NotificationStore] Push enabled:', enabled);
+    // Removed console.log for production
     set({ pushEnabled: enabled });
   },
 
   clearError: () => {
-    console.log('[NotificationStore] Clearing error');
+    // Removed console.log for production
     set({ error: null });
   },
 
   reset: () => {
-    console.log('[NotificationStore] Resetting store');
+    // Removed console.log for production
     set(initialState);
   },
   };

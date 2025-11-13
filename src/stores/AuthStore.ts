@@ -313,3 +313,16 @@ export const useResetAuth = () => useAuthStore((state) => state.resetAuth);
 // Backward compatibility
 export const useAuth = () => useAuthStore();
 export const useAuthUser = () => useUser();
+
+// Listen for session expired event to trigger logout
+eventBus.on('session-expired', () => {
+  // Use getState to access the store's methods outside of a component
+  const { isAuthenticated, logout } = useAuthStore.getState();
+  if (isAuthenticated) {
+    console.log(
+      'Session expired event received, triggering automatic logout...',
+    );
+    logout();
+  }
+});
+
