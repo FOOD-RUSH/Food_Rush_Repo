@@ -112,7 +112,7 @@ const SocialCards = ({
           text1: t('error'),
           text2: t('cannot_open_link', { platform: social_platform }),
           position: 'bottom',
-        );
+        });
       }
     } catch (error) {
       console.error('Error opening link:', error);
@@ -121,7 +121,7 @@ const SocialCards = ({
         text1: t('error'),
         text2: t('failed_to_open_link', { platform: social_platform }),
         position: 'bottom',
-      );
+      });
     }
   };
 

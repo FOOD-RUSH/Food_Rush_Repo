@@ -408,6 +408,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                         style={[styles.textInput, styles.phoneTextInput]}
                         contentStyle={styles.inputContent}
                         error={!!errors.phoneNumber}
+                        disabled={isPending}
                       />
                     </View>
                     {errors.phoneNumber && (
@@ -444,6 +445,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                       style={styles.textInput}
                       contentStyle={styles.inputContent}
                       error={!!errors.email}
+                      disabled={isPending}
                     />
                     {errors.email && (
                       <HelperText type="error" visible={!!errors.email}>
@@ -482,6 +484,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                       style={styles.textInput}
                       contentStyle={styles.inputContent}
                       error={!!errors.fullName}
+                      disabled={isPending}
                     />
                     {errors.fullName && (
                       <HelperText type="error" visible={!!errors.fullName}>
@@ -524,6 +527,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                       style={styles.textInput}
                       contentStyle={styles.inputContent}
                       error={!!errors.password}
+                      disabled={isPending}
                     />
                     {errors.password && (
                       <HelperText type="error" visible={!!errors.password}>
@@ -559,6 +563,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
                       style={styles.textInput}
                       contentStyle={styles.inputContent}
                       error={!!errors.confirmPassword}
+                      disabled={isPending}
                     />
                     {errors.confirmPassword && (
                       <HelperText
@@ -619,7 +624,7 @@ const SignupScreen: React.FC<AuthStackScreenProps<'SignUp'>> = ({
               </Button>
 
               {/* Divider */}
-              <View style={styles.dividerContainer}>
+              {/* <View style={styles.dividerContainer}>
                 <View style={styles.dividerLine} />
                 <Label color={colors.outline} style={{ paddingHorizontal: 16 }}>
                   {t('or_continue_with')}

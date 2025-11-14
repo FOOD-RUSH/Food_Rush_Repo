@@ -184,7 +184,18 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
           position: 'top',
         });
 
-        navigation.getParent()?.navigate('CustomerApp');
+        // Reset navigation stack to prevent back navigation to auth screens
+        setTimeout(() => {
+          // Use the navigationRef to reset the entire navigation stack
+          import('@/src/navigation/navigationRef').then(({ navigationRef }) => {
+            if (navigationRef.isReady()) {
+              navigationRef.reset({
+                index: 0,
+                routes: [{ name: userType === 'restaurant' ? 'RestaurantApp' : 'CustomerApp' }],
+              });
+            }
+          });
+        }, 100);
       } catch (err: unknown) {
         let errorMessage: string = t('login_failed_generic', {
           defaultValue: 'Login failed. Please try again.',
@@ -373,6 +384,7 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                     style={inputStyle}
                     outlineStyle={inputOutlineStyle}
                     contentStyle={{ borderRadius: 16 }}
+                    disabled={loginMutation.isPending}
                   />
                   <HelperText type="error" visible={!!errors.email}>
                     {errors.email?.message}
@@ -408,6 +420,7 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
                     style={inputStyle}
                     outlineStyle={inputOutlineStyle}
                     contentStyle={{ borderRadius: 16 }}
+                    disabled={loginMutation.isPending}
                   />
                   <HelperText type="error" visible={!!errors.password}>
                     {errors.password?.message}
@@ -468,7 +481,7 @@ const LoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
             </Button>
 
             {/* Divider */}
-            <View
+            {/* <View
               style={{
                 flexDirection: 'row',
                 alignItems: 'center',

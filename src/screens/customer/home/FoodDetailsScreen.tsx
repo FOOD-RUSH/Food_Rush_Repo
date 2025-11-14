@@ -23,6 +23,7 @@ import { images } from '@/assets/images';
 import { RootStackScreenProps } from '@/src/navigation/types';
 import Seperator from '@/src/components/common/Seperator';
 import InputField from '@/src/components/customer/InputField';
+import Toast from 'react-native-toast-message';
 import {
   useCartStore,
   useIsItemInCart,
@@ -31,84 +32,123 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useMenuItemById } from '@/src/hooks/customer/useCustomerApi';
 
-const FoodDetailsScreen = ({
-  navigation,
-  route,
-}: RootStackScreenProps<'FoodDetails'>) => {
+const FoodDetailsScreenFixed = ({ navigation, route }) => {
   const { foodId } = route.params;
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
 
-  // Cart state
+  // ADDED: Subscribe to cart error
+  const cartError = useCartError();
+  const clearError = useCartStore((state) => state.clearError);
+  const restaurantName = useCartStore((state) => state.restaurantName);
+  const canAddItem = useCartStore((state) => state.canAddItem);
+  
   const isInCart = useIsItemInCart(foodId);
   const cartQuantity = useItemQuantityInCart(foodId);
 
-  // Local state - initialize with cart quantity or 1
   const [quantity, setQuantity] = useState(1);
   const [instructions, setInstructions] = useState('');
 
-  // API and store
   const {
     data: MenuDetails,
     isLoading,
-    isRefetching,
-    refetch,
     error,
   } = useMenuItemById(foodId);
-  const addItemtoCart = useCartStore().addItemtoCart;
+  
+  const addItemtoCart = useCartStore((state) => state.addItemtoCart);
+  const clearCartAndSwitch = useCartStore((state) => state.clearCartAndSwitchRestaurant);
 
-  // Initialize quantity based on cart state
+  // ADDED: Handle cart errors
   useEffect(() => {
-    if (isInCart && cartQuantity > 0) {
-      setQuantity(cartQuantity);
+    if (cartError) {
+      Toast.show({
+        type: 'error',
+        text1: t('error'),
+        text2: cartError,
+        position: 'top',
+        visibilityTime: 4000,
+      });
+      clearError();
     }
-  }, [isInCart, cartQuantity]);
+  }, [cartError, clearError, t]);
 
-  const handleQuantityChange = useCallback(
-    (change: number) => {
-      const newQuantity = quantity + change;
-      if (newQuantity >= 1 && newQuantity <= 99) {
-        setQuantity(newQuantity);
-      }
-    },
-    [quantity],
-  );
-
-  const calculateTotalPrice = useMemo(() => {
-    if (!MenuDetails) return 0;
-    return parseFloat(MenuDetails.price || '0') * quantity;
-  }, [MenuDetails, quantity]);
-
-  const formattedTotalPrice = useMemo(() => {
-    return calculateTotalPrice.toLocaleString('fr-FR', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    });
-  }, [calculateTotalPrice]);
-
+  // IMPROVED: Handle add to basket with proper feedback
   const handleAddToBasket = useCallback(() => {
     if (!MenuDetails) return;
 
-    try {
-      addItemtoCart(MenuDetails, quantity, instructions, () => {
-        // Navigate back to home screen after successful addition
+    // ADDED: Check if item can be added (restaurant match)
+    const canAdd = canAddItem(MenuDetails);
+    
+    if (!canAdd && restaurantName) {
+      // ADDED: Show alert for restaurant mismatch
+      Alert.alert(
+        t('different_restaurant'),
+        t('cart_has_items_from', { restaurant: restaurantName }) + 
+        '\n\n' + 
+        t('clear_cart_to_add_from_new_restaurant'),
+        [
+          {
+            text: t('cancel'),
+            style: 'cancel',
+          },
+          {
+            text: t('clear_cart'),
+            style: 'destructive',
+            onPress: () => {
+              clearCartAndSwitch(MenuDetails, quantity, instructions);
+              Toast.show({
+                type: 'success',
+                text1: t('cart_cleared'),
+                text2: t('item_added_to_cart'),
+                position: 'bottom',
+              });
+              navigation.navigate('CustomerApp', {
+                screen: 'Home',
+                params: { screen: 'HomeScreen' },
+              });
+            },
+          },
+        ],
+      );
+      return;
+    }
+
+    // FIXED: Add item with both success and error callbacks
+    addItemtoCart(
+      MenuDetails,
+      quantity,
+      instructions,
+      () => {
+        // Success callback
+        Toast.show({
+          type: 'success',
+          text1: t('item_added_to_cart'),
+          text2: `${MenuDetails.name} ${t('added_to_cart_successfully')}`,
+          position: 'bottom',
+          visibilityTime: 2000,
+        });
+
         navigation.navigate('CustomerApp', {
           screen: 'Home',
-          params: {
-            screen: 'HomeScreen',
-          },
+          params: { screen: 'HomeScreen' },
         });
-      });
-      // Show success feedback
-      // Note: The cart store will handle the duplicate item dialog
-    } catch (error) {
-      Alert.alert(
-        t('error') || 'Error',
-        t('failed_to_add_to_cart') || 'Failed to add item to cart',
-        [{ text: 'OK' }],
-      );
-    }
-  }, [MenuDetails, quantity, instructions, addItemtoCart, navigation, t]);
+      },
+      (error) => {
+        // Error callback - already handled by useEffect above
+        console.error('Failed to add to cart:', error);
+      }
+    );
+  }, [
+    MenuDetails,
+    quantity,
+    instructions,
+    addItemtoCart,
+    clearCartAndSwitch,
+    canAddItem,
+    restaurantName,
+    navigation,
+    t,
+  ]);
 
   // Loading state
   if (isLoading) {

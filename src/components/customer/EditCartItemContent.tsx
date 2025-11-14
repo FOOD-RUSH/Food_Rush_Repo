@@ -26,7 +26,8 @@ const EditCartItemContent: React.FC<CartItemProps> = ({
   const updateItemQuantity = useCartStore((state) => state.updateItemQuantity);
   const removeItem = useCartStore((state) => state.removeItem);
   const addtoCart = useCartStore((state) => state.addItemtoCart);
-
+  
+  const updateItem = useCartStore((state) => state.updateItem);
   // Handle quantity changes
   const handleIncrease = useCallback(() => {
     setQuantity((prev) => (prev < 99 ? prev + 1 : prev));
@@ -37,28 +38,23 @@ const EditCartItemContent: React.FC<CartItemProps> = ({
   }, []);
 
   // Handle save changes
-  const handleSave = useCallback(() => {
-    // Update quantity
-    updateItemQuantity(id, pquantity);
+   const handleSave = useCallback(() => {
+    // IMPROVED: Single update operation
+    updateItem(id, {
+      quantity: pquantity,
+      specialInstructions: instructions,
+    });
 
-    // For special instructions, we need to remove and re-add the item
-    if (specialInstructions !== instructions) {
-      removeItem(id);
-      addtoCart(menuItem, pquantity, instructions);
-    }
+    Toast.show({
+      type: 'success',
+      text1: t('cart_updated'),
+      text2: t('item_updated_successfully'),
+      position: 'bottom',
+    });
 
     onDismiss();
-  }, [
-    id,
-    pquantity,
-    instructions,
-    specialInstructions,
-    updateItemQuantity,
-    removeItem,
-    menuItem,
-    onDismiss,
-    addtoCart,
-  ]);
+  }, [id, pquantity, instructions, updateItem, onDismiss, t]);
+
 
   // Check if there are changes
   const hasChanges = useMemo(() => {

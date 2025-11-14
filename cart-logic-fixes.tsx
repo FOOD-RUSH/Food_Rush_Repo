@@ -382,3 +382,227 @@ export const useCartRestaurantName = () =>
 
 export const useCartLastActivity = () =>
   useCartStore((state) => state.lastActivity);
+
+// ============================================
+// FIXED FoodDetailsScreen.tsx - Key Changes
+// ============================================
+
+// Add this to your FoodDetailsScreen component:
+
+const FoodDetailsScreenFixed = ({ navigation, route }) => {
+  const { foodId } = route.params;
+  const { colors } = useTheme();
+  const { t } = useTranslation('translation');
+
+  // ADDED: Subscribe to cart error
+  const cartError = useCartError();
+  const clearError = useCartStore((state) => state.clearError);
+  const restaurantName = useCartStore((state) => state.restaurantName);
+  const canAddItem = useCartStore((state) => state.canAddItem);
+  
+  const isInCart = useIsItemInCart(foodId);
+  const cartQuantity = useItemQuantityInCart(foodId);
+
+  const [quantity, setQuantity] = useState(1);
+  const [instructions, setInstructions] = useState('');
+
+  const {
+    data: MenuDetails,
+    isLoading,
+    error,
+  } = useMenuItemById(foodId);
+  
+  const addItemtoCart = useCartStore((state) => state.addItemtoCart);
+  const clearCartAndSwitch = useCartStore((state) => state.clearCartAndSwitchRestaurant);
+
+  // ADDED: Handle cart errors
+  useEffect(() => {
+    if (cartError) {
+      Toast.show({
+        type: 'error',
+        text1: t('error'),
+        text2: cartError,
+        position: 'top',
+        visibilityTime: 4000,
+      });
+      clearError();
+    }
+  }, [cartError, clearError, t]);
+
+  // IMPROVED: Handle add to basket with proper feedback
+  const handleAddToBasket = useCallback(() => {
+    if (!MenuDetails) return;
+
+    // ADDED: Check if item can be added (restaurant match)
+    const canAdd = canAddItem(MenuDetails);
+    
+    if (!canAdd && restaurantName) {
+      // ADDED: Show alert for restaurant mismatch
+      Alert.alert(
+        t('different_restaurant'),
+        t('cart_has_items_from', { restaurant: restaurantName }) + 
+        '\n\n' + 
+        t('clear_cart_to_add_from_new_restaurant'),
+        [
+          {
+            text: t('cancel'),
+            style: 'cancel',
+          },
+          {
+            text: t('clear_cart'),
+            style: 'destructive',
+            onPress: () => {
+              clearCartAndSwitch(MenuDetails, quantity, instructions);
+              Toast.show({
+                type: 'success',
+                text1: t('cart_cleared'),
+                text2: t('item_added_to_cart'),
+                position: 'bottom',
+              });
+              navigation.navigate('CustomerApp', {
+                screen: 'Home',
+                params: { screen: 'HomeScreen' },
+              });
+            },
+          },
+        ],
+      );
+      return;
+    }
+
+    // FIXED: Add item with both success and error callbacks
+    addItemtoCart(
+      MenuDetails,
+      quantity,
+      instructions,
+      () => {
+        // Success callback
+        Toast.show({
+          type: 'success',
+          text1: t('item_added_to_cart'),
+          text2: `${MenuDetails.name} ${t('added_to_cart_successfully')}`,
+          position: 'bottom',
+          visibilityTime: 2000,
+        });
+
+        navigation.navigate('CustomerApp', {
+          screen: 'Home',
+          params: { screen: 'HomeScreen' },
+        });
+      },
+      (error) => {
+        // Error callback - already handled by useEffect above
+        console.error('Failed to add to cart:', error);
+      }
+    );
+  }, [
+    MenuDetails,
+    quantity,
+    instructions,
+    addItemtoCart,
+    clearCartAndSwitch,
+    canAddItem,
+    restaurantName,
+    navigation,
+    t,
+  ]);
+
+  // ... rest of component
+};
+
+// ============================================
+// FIXED EditCartItemContent.tsx
+// ============================================
+
+const EditCartItemContentFixed = ({ id, menuItem, quantity, specialInstructions, onDismiss }) => {
+  const { colors } = useTheme();
+  const { t } = useTranslation('translation');
+  const [pquantity, setQuantity] = useState(quantity);
+  const [instructions, setInstructions] = useState(specialInstructions || '');
+
+  // FIXED: Use new updateItem method instead of remove + add
+  const updateItem = useCartStore((state) => state.updateItem);
+
+  const handleSave = useCallback(() => {
+    // IMPROVED: Single update operation
+    updateItem(id, {
+      quantity: pquantity,
+      specialInstructions: instructions,
+    });
+
+    Toast.show({
+      type: 'success',
+      text1: t('cart_updated'),
+      text2: t('item_updated_successfully'),
+      position: 'bottom',
+    });
+
+    onDismiss();
+  }, [id, pquantity, instructions, updateItem, onDismiss, t]);
+
+  // ... rest of component
+};
+
+// ============================================
+// TRANSLATION KEYS TO ADD (i18n)
+// ============================================
+
+const translationKeys = {
+  en: {
+    different_restaurant: "Different Restaurant",
+    cart_has_items_from: "Your cart has items from {{restaurant}}",
+    clear_cart_to_add_from_new_restaurant: "Clear your cart to add items from a different restaurant?",
+    clear_cart: "Clear Cart",
+    cart_cleared: "Cart Cleared",
+    item_updated_successfully: "Item updated successfully",
+    cart_updated: "Cart Updated",
+    error: "Error",
+    item_added_to_cart: "Added to Cart",
+    added_to_cart_successfully: "added successfully",
+  },
+  fr: {
+    different_restaurant: "Restaurant Différent",
+    cart_has_items_from: "Votre panier contient des articles de {{restaurant}}",
+    clear_cart_to_add_from_new_restaurant: "Vider votre panier pour ajouter des articles d'un autre restaurant?",
+    clear_cart: "Vider le Panier",
+    cart_cleared: "Panier Vidé",
+    item_updated_successfully: "Article mis à jour avec succès",
+    cart_updated: "Panier Mis à Jour",
+    error: "Erreur",
+    item_added_to_cart: "Ajouté au Panier",
+    added_to_cart_successfully: "ajouté avec succès",
+  },
+};
+
+// ============================================
+// SUMMARY OF FIXES
+// ============================================
+
+/*
+✅ CRITICAL FIXES:
+1. Fixed duplicate item detection - now considers special instructions
+2. Added error callback to addItemtoCart for proper user feedback
+3. Added missing reminderEnabled state and selector
+4. Added updateItem method to avoid remove+add pattern
+5. Added clearCartAndSwitchRestaurant for smooth restaurant switching
+
+✅ IMPROVEMENTS:
+1. Consistent restaurant ID extraction with helper function
+2. Error handling in FoodDetailsScreen with useEffect
+3. Alert dialog for restaurant mismatch with clear cart option
+4. Better item quantity calculation (sums all instances of foodId)
+5. Toast feedback for all cart operations
+6. Proper TypeScript types for all callbacks
+
+✅ USER EXPERIENCE:
+- User gets immediate feedback for all cart operations
+- Clear explanation when trying to add from different restaurant
+- Option to clear cart and switch restaurants
+- Items with same food but different instructions are separate
+- Updating items preserves original timestamp and ID
+
+🎯 CAMEROON-SPECIFIC:
+- Currency displays as "FCFA" (standardized)
+- Multi-language support (English/French)
+- Proper error messages in both languages
+*/
