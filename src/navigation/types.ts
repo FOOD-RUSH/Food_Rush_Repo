@@ -61,7 +61,7 @@ export type RootStackParamList = {
   RestaurantMenuItemForm: { itemId?: string };
   RestaurantEditFoodItem: { menuId: string };
 
-  RestaurantTimeHeatmap: undefined;
+
   RestaurantNotificationDetails: { notificationId: string };
   RestaurantNotifications: undefined;
   RestaurantProfile: undefined;

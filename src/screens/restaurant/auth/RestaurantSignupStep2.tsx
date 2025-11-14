@@ -306,11 +306,11 @@ const RestaurantSignupStep2: React.FC<
         const registrationData = {
           fullName: step1Data.fullName.trim(),
           email: step1Data.email.trim(),
-          phoneNumber: step1Data.phoneNumber.replace('+237', ''),
+          phoneNumber: step1Data.phoneNumber.replace('+237', '').trim(),
           password: step1Data.password,
           name: data.restaurantName.trim(),
           address: selectedLocation.formattedAddress,
-          phone: step1Data.phoneNumber,
+          phone: step1Data.phoneNumber.trim(),
           nearLat: selectedLocation.latitude,
           nearLng: selectedLocation.longitude,
           ...(documentUri && { document: documentUri }),
@@ -394,6 +394,7 @@ const RestaurantSignupStep2: React.FC<
               text1: t('error'),
               text2: errorMessage,
               position: 'top',
+              visibilityTime: 5000,
             });
           },
         });

@@ -3,7 +3,6 @@
 
 export * from './authApi';
 export * from './restaurant.service';
-export * from './cartReminderService';
 export * from './orders.service';
 export * from './payment.service';
 

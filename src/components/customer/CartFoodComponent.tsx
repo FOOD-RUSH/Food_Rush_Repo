@@ -252,7 +252,12 @@ const CartFoodComponent: React.FC<CartFoodComponentProps> = React.memo(
                             { color: colors.onSurfaceVariant },
                           ]}
                         >
-                          1.5{t('km_unit')}
+                          {typeof (menuItem as any).distanceKm === 'number'
+                            ? (menuItem as any).distanceKm.toFixed(1)
+                            : typeof (menuItem as any).distance === 'number'
+                            ? (menuItem as any).distance.toFixed(1)
+                            : 'N/A'}
+                          {t('km_unit')}
                         </Text>
                       </View>
 

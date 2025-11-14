@@ -416,30 +416,16 @@ const RestaurantSignupStep1: React.FC<
                     autoComplete="tel"
                     mode="outlined"
                     left={
-                      <TextInput.Icon
-                        icon={() => (
-                          <View
-                            style={{
-                              flexDirection: 'row',
-                              alignItems: 'center',
-                              paddingHorizontal: 8,
-                              minWidth: 70,
-                            }}
-                          >
-                            <Body style={{ marginRight: 8, fontSize: 16 }}>
-                              🇨🇲
-                            </Body>
-                            <Body
-                              style={{
-                                fontFamily: 'Urbanist-Medium',
-                                fontSize: 15,
-                                color: colors.onSurface,
-                              }}
-                            >
-                              +237
-                            </Body>
-                          </View>
-                        )}
+                      <TextInput.Affix
+                        text="🇨🇲 +237"
+                        textStyle={{
+                          fontFamily: 'Urbanist-SemiBold',
+                          fontSize: 16,
+                          color: colors.onSurface,
+                          fontWeight: '600',
+                          paddingRight: 8,
+                          minWidth: 80,
+                        }}
                       />
                     }
                     error={!!errors.phoneNumber}

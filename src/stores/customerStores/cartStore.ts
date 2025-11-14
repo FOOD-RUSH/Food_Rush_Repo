@@ -24,7 +24,6 @@ interface CartState {
   restaurantName: string | null;
   lastActivity: number;
   error: string | null;
-  reminderEnabled: boolean; // ADDED: Missing field for cart reminders
 }
 
 interface CartActions {
@@ -90,7 +89,6 @@ export const useCartStore = create<CartState & CartActions>()(
         restaurantName: null,
         lastActivity: Date.now(),
         error: null,
-        reminderEnabled: true, // ADDED: Default to enabled
 
         canAddItem: (item) => {
           const { restaurantID, items } = get();
@@ -337,7 +335,6 @@ export const useCartStore = create<CartState & CartActions>()(
         restaurantID: state.restaurantID,
         restaurantName: state.restaurantName,
         lastActivity: state.lastActivity,
-        reminderEnabled: state.reminderEnabled, // ADDED: Persist reminder preference
       }),
     },
   ),
@@ -352,7 +349,6 @@ export const useCartTotal = () => useCartStore((state) => state.getTotal());
 export const useCartRestaurantID = () => useCartStore((state) => state.restaurantID);
 export const useCartError = () => useCartStore((state) => state.error);
 export const useCanAddToCart = () => useCartStore((state) => state.canAddItem);
-export const useCartReminderEnabled = () => useCartStore((state) => state.reminderEnabled); // ADDED: Missing selector
 
 // Computed selectors
 export const useCartItemCount = () =>

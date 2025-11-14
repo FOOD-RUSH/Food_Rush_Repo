@@ -163,10 +163,7 @@ const AnalyticsOverview: React.FC<
     }
   }, [navigation, restaurantProfile, t]);
 
-  const handleViewTimeHeatmap = useCallback(() => {
-    Haptics.selectionAsync();
-    navigation?.navigate('RestaurantTimeHeatmap');
-  }, [navigation]);
+
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -618,71 +615,6 @@ const AnalyticsOverview: React.FC<
                       name="chevron-right"
                       size={24}
                       color={colors.primary}
-                    />
-                  </View>
-                </View>
-              </TouchableOpacity>
-            </Card>
-
-            {/* Time Heatmap Card */}
-            <Card
-              style={{
-                marginBottom: 16,
-                backgroundColor: colors.surface,
-                borderRadius: 12,
-                elevation: 2,
-              }}
-            >
-              <TouchableOpacity
-                onPress={handleViewTimeHeatmap}
-                activeOpacity={0.7}
-              >
-                <View style={{ padding: 16 }}>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        flex: 1,
-                      }}
-                    >
-                      <View
-                        style={{
-                          backgroundColor: colors.primaryContainer,
-                          borderRadius: 12,
-                          padding: 10,
-                          marginRight: 12,
-                        }}
-                      >
-                        <MaterialCommunityIcon
-                          name="chart-timeline-variant"
-                          size={24}
-                          color={colors.primary}
-                        />
-                      </View>
-                      <View style={{ flex: 1 }}>
-                        <Label
-                          color={colors.onSurface}
-                          weight="semibold"
-                          style={{ marginBottom: 4 }}
-                        >
-                          {t('time_heatmap')}
-                        </Label>
-                        <Caption color={colors.onSurfaceVariant}>
-                          {t('hourly_order_patterns')}
-                        </Caption>
-                      </View>
-                    </View>
-                    <MaterialCommunityIcon
-                      name="chevron-right"
-                      size={24}
-                      color={colors.onSurfaceVariant}
                     />
                   </View>
                 </View>

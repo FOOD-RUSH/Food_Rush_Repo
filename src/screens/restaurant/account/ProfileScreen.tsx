@@ -36,6 +36,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
 
   // State to track image loading failure
   const [imageLoadError, setImageLoadError] = React.useState(false);
+  const [profileImageError, setProfileImageError] = React.useState(false);
 
   const profileOptions = [
     {
@@ -89,10 +90,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
     ]).start();
   }, [fadeAnim, slideAnim]);
 
-  // Reset image error when restaurant changes
+  // Reset image error when restaurant or profile changes
   useEffect(() => {
     setImageLoadError(false);
-  }, [currentRestaurant?.id, currentRestaurant?.image]);
+    setProfileImageError(false);
+  }, [currentRestaurant?.id, currentRestaurant?.image, profileData?.profilePicture]);
 
   const handleLogout = () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
@@ -110,7 +112,16 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
             { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
           ]}
         >
-          {profileData?.pictureUrl && !imageLoadError ? (
+          {/* Priority: profilePicture > pictureUrl > restaurant image > initials */}
+          {profileData?.profilePicture && !profileImageError ? (
+            <Avatar.Image
+              size={80}
+              source={{ uri: profileData.profilePicture }}
+              style={[styles.avatar]}
+              onError={() => setProfileImageError(true)}
+              onLoad={() => setProfileImageError(false)}
+            />
+          ) : profileData?.pictureUrl && !imageLoadError ? (
             <Avatar.Image
               size={80}
               source={{ uri: profileData.pictureUrl }}

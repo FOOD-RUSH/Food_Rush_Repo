@@ -96,24 +96,44 @@ const SupportScreen = ({ navigation }: Props) => {
             </View>
           ))}
           <Text style={styles.sectionTitle}>{t('contact_us')}</Text>
+          {/* Food Rush Contact Options */}
           <TouchableOpacity
             style={styles.contactBtn}
-            onPress={() => Linking.openURL('mailto:support@restaurant.com')}
+            onPress={() => Linking.openURL('tel:+237672913008')}
+          >
+            <MaterialCommunityIcon
+              name="phone-outline"
+              size={22}
+              color="#fff"
+            />
+            <Text style={styles.contactBtnText}>{t('call_support', 'Call Support')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.contactBtn}
+            onPress={() => Linking.openURL('https://wa.me/237672913008')}
+          >
+            <MaterialCommunityIcon name="whatsapp" size={22} color="#fff" />
+            <Text style={styles.contactBtnText}>{t('chat_on_whatsapp', 'WhatsApp Support')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.contactBtn}
+            onPress={() => Linking.openURL('mailto:support@foodrush.cm')}
           >
             <MaterialCommunityIcon
               name="email-outline"
               size={22}
               color="#fff"
             />
-            <Text style={styles.contactBtnText}>{t('email_support')}</Text>
+            <Text style={styles.contactBtnText}>{t('email_support', 'Email Support')}</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.contactBtn}
-            onPress={() => Linking.openURL('https://wa.me/650979844')}
-          >
-            <MaterialCommunityIcon name="chat-outline" size={22} color="#fff" />
-            <Text style={styles.contactBtnText}>{t('chat_on_whatsapp')}</Text>
-          </TouchableOpacity>
+          
+          {/* Support Hours */}
+          <View style={styles.supportHoursBox}>
+            <Text style={styles.supportHoursTitle}>{t('support_hours', 'Support Hours')}</Text>
+            <Text style={styles.supportHoursText}>
+              {t('support_schedule', 'Monday - Saturday: 10:00 AM - 7:00 PM (WAT)')}
+            </Text>
+          </View>
         </Animated.View>
       </ScrollView>
     </CommonView>
@@ -220,6 +240,32 @@ const getStyles = (isDarkMode: boolean, colors: any) =>
       fontWeight: 'bold',
       fontSize: 16,
       marginLeft: 8,
+    },
+    supportHoursBox: {
+      backgroundColor: isDarkMode
+        ? RESTAURANT_COLORS.SURFACE_DARK
+        : RESTAURANT_COLORS.SURFACE_LIGHT,
+      borderRadius: 14,
+      padding: 20,
+      marginHorizontal: 20,
+      marginTop: 20,
+      borderWidth: 1.2,
+      borderColor: isDarkMode
+        ? RESTAURANT_COLORS.BORDER_DARK
+        : RESTAURANT_COLORS.BORDER_LIGHT,
+    },
+    supportHoursTitle: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: RESTAURANT_COLORS.PRIMARY,
+      marginBottom: 8,
+    },
+    supportHoursText: {
+      fontSize: 15,
+      color: isDarkMode
+        ? RESTAURANT_COLORS.TEXT_DARK
+        : RESTAURANT_COLORS.TEXT_LIGHT,
+      lineHeight: 22,
     },
   });
 

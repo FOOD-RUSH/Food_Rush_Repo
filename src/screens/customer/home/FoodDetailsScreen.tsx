@@ -28,16 +28,17 @@ import {
   useCartStore,
   useIsItemInCart,
   useItemQuantityInCart,
+  useCartError,
 } from '@/src/stores/customerStores/cartStore';
 import { useTranslation } from 'react-i18next';
 import { useMenuItemById } from '@/src/hooks/customer/useCustomerApi';
 
-const FoodDetailsScreenFixed = ({ navigation, route }) => {
+const FoodDetailsScreen = ({ navigation, route }: RootStackScreenProps<'FoodDetails'>) => {
   const { foodId } = route.params;
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
 
-  // ADDED: Subscribe to cart error
+  // Subscribe to cart error
   const cartError = useCartError();
   const clearError = useCartStore((state) => state.clearError);
   const restaurantName = useCartStore((state) => state.restaurantName);
@@ -53,12 +54,14 @@ const FoodDetailsScreenFixed = ({ navigation, route }) => {
     data: MenuDetails,
     isLoading,
     error,
+    refetch,
+    isRefetching,
   } = useMenuItemById(foodId);
   
   const addItemtoCart = useCartStore((state) => state.addItemtoCart);
   const clearCartAndSwitch = useCartStore((state) => state.clearCartAndSwitchRestaurant);
 
-  // ADDED: Handle cart errors
+  // Handle cart errors
   useEffect(() => {
     if (cartError) {
       Toast.show({
@@ -72,15 +75,36 @@ const FoodDetailsScreenFixed = ({ navigation, route }) => {
     }
   }, [cartError, clearError, t]);
 
-  // IMPROVED: Handle add to basket with proper feedback
+  // Handle quantity changes
+  const handleQuantityChange = useCallback((delta: number) => {
+    setQuantity((prev) => {
+      const newQuantity = prev + delta;
+      if (newQuantity < 1) return 1;
+      if (newQuantity > 99) return 99;
+      return newQuantity;
+    });
+  }, []);
+
+  // Calculate formatted total price
+  const formattedTotalPrice = useMemo(() => {
+    if (!MenuDetails) return '0';
+    const price = parseFloat(MenuDetails.price || '0');
+    const total = price * quantity;
+    return total.toLocaleString('fr-FR', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    });
+  }, [MenuDetails, quantity]);
+
+  // Handle add to basket with proper feedback
   const handleAddToBasket = useCallback(() => {
     if (!MenuDetails) return;
 
-    // ADDED: Check if item can be added (restaurant match)
+    // Check if item can be added (restaurant match)
     const canAdd = canAddItem(MenuDetails);
     
     if (!canAdd && restaurantName) {
-      // ADDED: Show alert for restaurant mismatch
+      // Show alert for restaurant mismatch
       Alert.alert(
         t('different_restaurant'),
         t('cart_has_items_from', { restaurant: restaurantName }) + 
@@ -113,7 +137,19 @@ const FoodDetailsScreenFixed = ({ navigation, route }) => {
       return;
     }
 
-    // FIXED: Add item with both success and error callbacks
+    // Immediate visual feedback (Alert + optional haptics)
+    try {
+      const Haptics = require('expo-haptics');
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    } catch {}
+    Alert.alert(
+      t('adding_to_cart'),
+      `${MenuDetails.name} × ${quantity}`,
+      [{ text: t('ok'), style: 'default' }],
+      { cancelable: true },
+    );
+
+    // Add item with both success and error callbacks
     addItemtoCart(
       MenuDetails,
       quantity,
@@ -159,7 +195,7 @@ const FoodDetailsScreenFixed = ({ navigation, route }) => {
       >
         <ActivityIndicator size="large" color={colors.primary} />
         <Body color={colors.onSurface} style={{ marginTop: 16 }}>
-          {t('loading_food_details') || 'Loading food details...'}
+          {t('loading_food_details')}
         </Body>
       </View>
     );
@@ -182,15 +218,14 @@ const FoodDetailsScreenFixed = ({ navigation, route }) => {
           align="center"
           style={{ marginTop: 16, marginBottom: 8 }}
         >
-          {t('failed_to_load_food_details') || 'Failed to load food details'}
+          {t('failed_to_load_food_details')}
         </Heading4>
         <Body
           color={colors.onSurfaceVariant}
           align="center"
           style={{ marginBottom: 24 }}
         >
-          {t('please_check_connection_and_try_again') ||
-            'Please check your connection and try again'}
+          {t('please_check_connection_and_try_again')}
         </Body>
         <Button
           mode="contained"
@@ -198,7 +233,7 @@ const FoodDetailsScreenFixed = ({ navigation, route }) => {
           loading={isRefetching}
           style={{ backgroundColor: colors.primary }}
         >
-          {t('retry') || 'Retry'}
+          {t('retry')}
         </Button>
       </View>
     );
@@ -233,7 +268,7 @@ const FoodDetailsScreenFixed = ({ navigation, route }) => {
             >
               <MaterialIcon name="shopping-cart" size={16} color="white" />
               <Label color="white" weight="bold" style={{ marginLeft: 4 }}>
-                {cartQuantity} in cart
+                {cartQuantity} {t('in_cart')}
               </Label>
             </View>
           )}
@@ -296,7 +331,6 @@ const FoodDetailsScreenFixed = ({ navigation, route }) => {
           </View>
 
           {/* Quantity Selector */}
-
           <View className="p-6">
             <LabelLarge
               color={colors.onSurface}
@@ -349,7 +383,6 @@ const FoodDetailsScreenFixed = ({ navigation, route }) => {
           </View>
 
           {/* Special Instructions */}
-
           <View className="p-6">
             <LabelLarge
               color={colors.onSurface}

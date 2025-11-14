@@ -158,7 +158,7 @@ const CustomOrderConfirmationModal: React.FC<
                       fontWeight: '600',
                     }}
                   >
-                    {restaurantName || 'Restaurant'}
+                    {restaurantName || t('restaurant')}
                   </Text>
                   <Text
                     style={{
@@ -167,7 +167,7 @@ const CustomOrderConfirmationModal: React.FC<
                       opacity: 0.8,
                     }}
                   >
-                    {itemCount} {itemCount === 1 ? 'item' : 'items'}
+                    {itemCount} {itemCount === 1 ? t('item') : t('items')}
                   </Text>
                 </View>
               </View>
@@ -225,7 +225,7 @@ const CustomOrderConfirmationModal: React.FC<
                           }}
                           numberOfLines={1}
                         >
-                          Note: {item.specialInstructions}
+                          {t('note')}: {item.specialInstructions}
                         </Text>
                       )}
                     </View>
@@ -442,8 +442,7 @@ const CustomOrderConfirmationModal: React.FC<
                   marginBottom: 12,
                 }}
               >
-                {t(
-                  'immediate_payment_required'  )}
+                {t('immediate_payment_required')}
               </Text>
               <View
                 style={{
@@ -461,9 +460,7 @@ const CustomOrderConfirmationModal: React.FC<
                     fontWeight: '500',
                   }}
                 >
-                  ⚠️ {t(
-                    'ensure_sufficient_funds'
-                    )}
+                  ⚠️ {t('ensure_sufficient_funds')}
                 </Text>
               </View>
               <Text
@@ -474,10 +471,7 @@ const CustomOrderConfirmationModal: React.FC<
                   fontStyle: 'italic',
                 }}
               >
-                {t(
-                  'payment_methods_available'
-               
-                )}
+                {t('payment_methods_available')}
               </Text>
             </View>
 
@@ -498,10 +492,7 @@ const CustomOrderConfirmationModal: React.FC<
                   fontStyle: 'italic',
                 }}
               >
-                *{' '}
-                {t(
-                  'service_fee_note'
-                )}
+                * {t('service_fee_note')}
               </Text>
             </View>
           </ScrollView>

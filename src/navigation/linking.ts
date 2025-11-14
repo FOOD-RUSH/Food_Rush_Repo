@@ -109,7 +109,7 @@ export const linking: LinkingOptions<RootStackParamList> = {
       // Restaurant full-screen screens (RootStack)
       RestaurantOrderDetails: 'restaurant/order/:orderId',
       RestaurantBestSellers: 'restaurant/analytics/bestsellers',
-      RestaurantTimeHeatmap: 'restaurant/analytics/heatmap',
+
       RestaurantMenuItemForm: 'restaurant/menu/item',
 
       RestaurantProfile: 'restaurant/profile',

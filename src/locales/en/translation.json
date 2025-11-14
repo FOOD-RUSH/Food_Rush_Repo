@@ -1374,5 +1374,62 @@
   "frequently_asked_questions": "Frequently Asked Questions",
   "faq_subtitle": "Find answers to common questions about Food Rush",
   "need_more_help": "Need More Help?",
-  "contact_support_description": "If you couldn't find the answer to your question, our support team is here to help you 24/7."
+  "contact_support_description": "If you couldn't find the answer to your question, our support team is here to help you 24/7.",
+  "in_cart": "in cart",
+  "note": "Note",
+  "restaurant": "Restaurant",
+  "cart_updated": "Cart Updated",
+  "item_updated_successfully": "Item updated successfully",
+  "special_instructions_placeholder": "Add any special requests here...",
+  "different_restaurant": "Different Restaurant",
+  "cart_has_items_from": "Your cart has items from {{restaurant}}",
+  "clear_cart_to_add_from_new_restaurant": "Clear your cart to add items from a different restaurant",
+  "cart_cleared": "Cart Cleared",
+  "item_added_to_cart": "Item Added to Cart",
+  "added_to_cart_successfully": "added to cart successfully",
+  "no_active_orders_found": "No Active Orders Found",
+  "your_active_orders_will_appear_here": "Your active orders will appear here",
+  "check_phone_for_prompt": "Check your phone for a {{provider}} payment prompt",
+  "payment_expired": "Payment Expired",
+  "failed_to_start_verification": "Failed to start payment verification",
+   "faq_subtitle": "Find answers to common questions about Food Rush",
+    "need_more_help": "Need More Help?",
+    "contact_support_description": "If you couldn't find the answer to your question, our support team is here to help you 24/7. Contact us via email at support@foodrush.cm or WhatsApp.",
+    
+    "faq_what_is_foodrush_title": "What is Food Rush?",
+    "faq_what_is_foodrush_desc": "Food Rush is Cameroon's premier food delivery platform connecting you with local restaurants in Douala, Yaoundé, and other major cities. Order your favorite meals from verified restaurants and get them delivered fresh to your doorstep. We support MTN Mobile Money and Orange Money for convenient payments.",
+    
+    "faq_how_to_order_title": "How do I place an order?",
+    "faq_how_to_order_desc": "1. Browse restaurants near you or search for specific dishes\n2. Select items and add them to your cart\n3. Review your order and add delivery address\n4. Confirm your order - you'll only pay after the restaurant accepts\n5. Complete payment using MTN or Orange Money\n6. Track your order in real-time until delivery",
+    
+    "faq_payment_methods_title": "What payment methods are accepted?",
+    "faq_payment_methods_desc": "Food Rush accepts MTN Mobile Money and Orange Money. Payment is required IMMEDIATELY after the restaurant confirms your order. Make sure you have sufficient funds in your mobile money account before placing an order. We do not accept cash on delivery at this time.",
+    
+    "faq_delivery_time_title": "How long does delivery take?",
+    "faq_delivery_time_desc": "Delivery times typically range from 20-45 minutes depending on:\n• Restaurant preparation time\n• Distance from restaurant to your location\n• Traffic conditions\n• Time of day (peak hours may be longer)\n\nYou can track your order in real-time and see estimated delivery time in the app.",
+    
+    "faq_track_order_title": "How can I track my order?",
+    "faq_track_order_desc": "To track your order:\n1. Go to 'My Orders' from the bottom navigation\n2. Tap on 'Active Orders'\n3. Select your current order\n4. Tap 'Track Order' to see real-time status\n\nYou'll see updates when:\n• Restaurant confirms your order\n• Food is being prepared\n• Driver picks up your order\n• Driver is on the way\n• Order is delivered",
+    
+    "faq_cancel_order_title": "Can I cancel my order?",
+    "faq_cancel_order_desc": "You can cancel your order BEFORE the restaurant accepts it (usually within 2-15 minutes). Once the restaurant confirms and you've paid, cancellation is not possible as the food is already being prepared. To cancel:\n1. Go to 'Active Orders'\n2. Select your order\n3. Tap 'Cancel Order'\n4. Confirm cancellation\n\nNo refund is needed if you cancel before payment.",
+    
+    "faq_delivery_fees_title": "How are delivery fees calculated?",
+    "faq_delivery_fees_desc": "Delivery fees are calculated based on:\n• Distance from restaurant to your location\n• Restaurant's delivery pricing\n• Time of day (peak hours may have higher fees)\n\nYou'll see the exact delivery fee before confirming your order. There are no hidden charges - the total you see is what you pay. A small service fee helps us maintain and improve the platform.",
+    
+    "faq_wrong_order_title": "What if my order is wrong or missing items?",
+    "faq_wrong_order_desc": "If your order is incorrect or missing items:\n1. Take photos of what you received\n2. Go to 'My Orders' > 'Order History'\n3. Select the order and tap 'Report Issue'\n4. Describe the problem and attach photos\n5. Our support team will review and respond within 24 hours\n\nYou may be eligible for a refund, replacement, or credit for future orders depending on the situation.",
+    
+    "faq_change_address_title": "Can I change my delivery address after ordering?",
+    "faq_change_address_desc": "You can change your delivery address ONLY before the restaurant confirms your order. Once confirmed and paid, the address cannot be changed as the driver is already assigned. To change address:\n1. Cancel the current order (if not yet confirmed)\n2. Update your address in 'My Addresses'\n3. Place a new order with the correct address\n\nAlways double-check your delivery address before confirming!",
+    
+    "faq_payment_failed_title": "What should I do if my payment fails?",
+    "faq_payment_failed_desc": "If your payment fails:\n1. Check your mobile money balance\n2. Ensure you have sufficient funds (order total + fees)\n3. Verify your mobile money PIN is correct\n4. Check if your mobile money account is active\n5. Try again or use a different mobile money provider\n\nCommon reasons for payment failure:\n• Insufficient funds\n• Incorrect PIN\n• Network issues\n• Mobile money account suspended\n\nIf problems persist, contact your mobile money provider or our support team.",
+    
+    "faq_restaurant_closed_title": "What happens if a restaurant is closed?",
+    "faq_restaurant_closed_desc": "Restaurants show their operating hours in the app. If a restaurant is closed:\n• You cannot place orders from that restaurant\n• The restaurant will show as 'Closed' with opening hours\n• You can browse their menu and add to favorites\n• You'll be notified when they open (if you enable notifications)\n\nIf a restaurant closes unexpectedly after you order, you'll be notified and receive a full refund automatically.",
+    
+    "faq_account_security_title": "How do I keep my account secure?",
+    "faq_account_security_desc": "To keep your Food Rush account secure:\n• Use a strong, unique password\n• Never share your password with anyone\n• Enable biometric login if available\n• Log out from shared devices\n• Keep your app updated to the latest version\n• Review your order history regularly\n• Report suspicious activity immediately\n\nFood Rush will NEVER ask for your password via email, SMS, or phone call.",
+        "adding_to_cart": "Added to cart",
 }

@@ -69,7 +69,7 @@ import { AddFoodScreen } from '../screens/restaurant/menu/AddFoodScreen';
 import { EditFoodScreen } from '../screens/restaurant/menu/EditFoodScreen';
 
 import RestaurantAnalyticsReviewsScreen from '../screens/restaurant/analytics/RestaurantReviewsScreen';
-import TimeHeatmap from '../screens/restaurant/analytics/TimeHeatmap';
+
 import ProfileScreen from '../screens/restaurant/account/ProfileScreen';
 import SupportScreen from '../screens/restaurant/account/SupportScreen';
 import AboutScreen from '../screens/restaurant/account/AboutScreen';
@@ -404,11 +404,7 @@ const RootNavigator: React.FC = () => {
               component={RestaurantAnalyticsReviewsScreen}
               options={{ headerTitle: t('customer_reviews') }}
             />
-            <Stack.Screen
-              name="RestaurantTimeHeatmap"
-              component={TimeHeatmap}
-              options={{ headerTitle: t('time_heatmap') }}
-            />
+
 
             <Stack.Screen
               name="RestaurantReview"

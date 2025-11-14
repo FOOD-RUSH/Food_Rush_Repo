@@ -1389,5 +1389,64 @@
   "frequently_asked_questions": "Questions Fr\u00e9quemment Pos\u00e9es",
   "faq_subtitle": "Trouvez des r\u00e9ponses aux questions courantes sur Food Rush",
   "need_more_help": "Besoin d\u0027aide suppl\u00e9mentaire ?",
-  "contact_support_description": "Si vous n\u0027avez pas trouv\u00e9 la r\u00e9ponse \u00e0 votre question, notre \u00e9quipe de support est l\u0027pour vous aider 24h/24 et 7j/7."
+  "contact_support_description": "Si vous n\u0027avez pas trouv\u00e9 la r\u00e9ponse \u00e0 votre question, notre \u00e9quipe de support est l\u0027pour vous aider 24h/24 et 7j/7.",
+  "in_cart": "dans le panier",
+  "note": "Note",
+  "restaurant": "Restaurant",
+  "cart_updated": "Panier Mis à Jour",
+  "item_updated_successfully": "Article mis à jour avec succès",
+  "special_instructions_placeholder": "Ajoutez vos demandes spéciales ici...",
+  "different_restaurant": "Restaurant Différent",
+  "cart_has_items_from": "Votre panier contient des articles de {{restaurant}}",
+  "clear_cart_to_add_from_new_restaurant": "Videz votre panier pour ajouter des articles d'un autre restaurant",
+  "cart_cleared": "Panier Vidé",
+  "item_added_to_cart": "Article Ajouté au Panier",
+  "added_to_cart_successfully": "ajouté au panier avec succès",
+  "no_active_orders_found": "Aucune Commande Active Trouvée",
+  "your_active_orders_will_appear_here": "Vos commandes actives apparaîtront ici",
+  "check_phone_for_prompt": "Vérifiez votre téléphone pour une invite de paiement {{provider}}",
+  "payment_expired": "Paiement Expiré",
+  "failed_to_start_verification": "Échec du démarrage de la vérification du paiement",
+   "faq_subtitle": "Trouvez des réponses aux questions courantes sur Food Rush",
+    "need_more_help": "Besoin d'Aide Supplémentaire?",
+    "contact_support_description": "Si vous n'avez pas trouvé la réponse à votre question, notre équipe d'assistance est là pour vous aider 24h/24 et 7j/7. Contactez-nous par email à support@foodrush.cm ou WhatsApp.",
+    
+    "faq_what_is_foodrush_title": "Qu'est-ce que Food Rush?",
+    "faq_what_is_foodrush_desc": "Food Rush est la principale plateforme de livraison de nourriture au Cameroun qui vous connecte avec des restaurants locaux à Douala, Yaoundé et d'autres grandes villes. Commandez vos plats préférés dans des restaurants vérifiés et faites-les livrer frais à votre porte. Nous acceptons MTN Mobile Money et Orange Money pour des paiements pratiques.",
+    
+    "faq_how_to_order_title": "Comment passer une commande?",
+    "faq_how_to_order_desc": "1. Parcourez les restaurants près de chez vous ou recherchez des plats spécifiques\n2. Sélectionnez des articles et ajoutez-les à votre panier\n3. Vérifiez votre commande et ajoutez l'adresse de livraison\n4. Confirmez votre commande - vous ne paierez qu'après l'acceptation du restaurant\n5. Effectuez le paiement via MTN ou Orange Money\n6. Suivez votre commande en temps réel jusqu'à la livraison",
+    
+    "faq_payment_methods_title": "Quels modes de paiement sont acceptés?",
+    "faq_payment_methods_desc": "Food Rush accepte MTN Mobile Money et Orange Money. Le paiement est requis IMMÉDIATEMENT après que le restaurant confirme votre commande. Assurez-vous d'avoir suffisamment de fonds dans votre compte mobile money avant de passer une commande. Nous n'acceptons pas le paiement à la livraison pour le moment.",
+    
+    "faq_delivery_time_title": "Combien de temps prend la livraison?",
+    "faq_delivery_time_desc": "Les délais de livraison varient généralement de 20 à 45 minutes selon:\n• Le temps de préparation du restaurant\n• La distance du restaurant à votre emplacement\n• Les conditions de circulation\n• L'heure de la journée (les heures de pointe peuvent être plus longues)\n\nVous pouvez suivre votre commande en temps réel et voir le délai de livraison estimé dans l'application.",
+    
+    "faq_track_order_title": "Comment puis-je suivre ma commande?",
+    "faq_track_order_desc": "Pour suivre votre commande:\n1. Allez dans 'Mes Commandes' depuis la navigation en bas\n2. Appuyez sur 'Commandes Actives'\n3. Sélectionnez votre commande actuelle\n4. Appuyez sur 'Suivre la Commande' pour voir le statut en temps réel\n\nVous verrez des mises à jour quand:\n• Le restaurant confirme votre commande\n• La nourriture est en préparation\n• Le livreur récupère votre commande\n• Le livreur est en route\n• La commande est livrée",
+    
+    "faq_cancel_order_title": "Puis-je annuler ma commande?",
+    "faq_cancel_order_desc": "Vous pouvez annuler votre commande AVANT que le restaurant ne l'accepte (généralement dans les 2-15 minutes). Une fois que le restaurant confirme et que vous avez payé, l'annulation n'est pas possible car la nourriture est déjà en préparation. Pour annuler:\n1. Allez dans 'Commandes Actives'\n2. Sélectionnez votre commande\n3. Appuyez sur 'Annuler la Commande'\n4. Confirmez l'annulation\n\nAucun remboursement n'est nécessaire si vous annulez avant le paiement.",
+    
+    "faq_delivery_fees_title": "Comment sont calculés les frais de livraison?",
+    "faq_delivery_fees_desc": "Les frais de livraison sont calculés en fonction de:\n• La distance du restaurant à votre emplacement\n• La tarification de livraison du restaurant\n• L'heure de la journée (les heures de pointe peuvent avoir des frais plus élevés)\n\nVous verrez les frais de livraison exacts avant de confirmer votre commande. Il n'y a pas de frais cachés - le total que vous voyez est ce que vous payez. Des frais de service minimes nous aident à maintenir et améliorer la plateforme.",
+    
+    "faq_wrong_order_title": "Que faire si ma commande est incorrecte ou manque d'articles?",
+    "faq_wrong_order_desc": "Si votre commande est incorrecte ou manque d'articles:\n1. Prenez des photos de ce que vous avez reçu\n2. Allez dans 'Mes Commandes' > 'Historique des Commandes'\n3. Sélectionnez la commande et appuyez sur 'Signaler un Problème'\n4. Décrivez le problème et joignez des photos\n5. Notre équipe d'assistance examinera et répondra dans les 24 heures\n\nVous pourriez être éligible à un remboursement, un remplacement ou un crédit pour de futures commandes selon la situation.",
+    
+    "faq_change_address_title": "Puis-je changer mon adresse de livraison après avoir commandé?",
+    "faq_change_address_desc": "Vous pouvez changer votre adresse de livraison UNIQUEMENT avant que le restaurant ne confirme votre commande. Une fois confirmée et payée, l'adresse ne peut pas être changée car le livreur est déjà assigné. Pour changer l'adresse:\n1. Annulez la commande actuelle (si pas encore confirmée)\n2. Mettez à jour votre adresse dans 'Mes Adresses'\n3. Passez une nouvelle commande avec l'adresse correcte\n\nVérifiez toujours votre adresse de livraison avant de confirmer!",
+    
+    "faq_payment_failed_title": "Que faire si mon paiement échoue?",
+    "faq_payment_failed_desc": "Si votre paiement échoue:\n1. Vérifiez votre solde mobile money\n2. Assurez-vous d'avoir suffisamment de fonds (total commande + frais)\n3. Vérifiez que votre code PIN mobile money est correct\n4. Vérifiez si votre compte mobile money est actif\n5. Réessayez ou utilisez un autre fournisseur mobile money\n\nRaisons courantes d'échec de paiement:\n• Fonds insuffisants\n• Code PIN incorrect\n• Problèmes de réseau\n• Compte mobile money suspendu\n\nSi les problèmes persistent, contactez votre fournisseur mobile money ou notre équipe d'assistance.",
+    
+    "faq_restaurant_closed_title": "Que se passe-t-il si un restaurant est fermé?",
+    "faq_restaurant_closed_desc": "Les restaurants affichent leurs heures d'ouverture dans l'application. Si un restaurant est fermé:\n• Vous ne pouvez pas passer de commandes dans ce restaurant\n• Le restaurant s'affichera comme 'Fermé' avec les heures d'ouverture\n• Vous pouvez parcourir leur menu et ajouter aux favoris\n• Vous serez notifié quand ils ouvrent (si vous activez les notifications)\n\nSi un restaurant ferme de manière inattendue après votre commande, vous serez notifié et recevrez un remboursement complet automatiquement.",
+    
+    "faq_account_security_title": "Comment garder mon compte sécurisé?",
+    "faq_account_security_desc": "Pour garder votre compte Food Rush sécurisé:\n• Utilisez un mot de passe fort et unique\n• Ne partagez jamais votre mot de passe avec personne\n• Activez la connexion biométrique si disponible\n• Déconnectez-vous des appareils partagés\n• Gardez votre application à jour avec la dernière version\n• Vérifiez régulièrement votre historique de commandes\n• Signalez immédiatement toute activité suspecte\n\nFood Rush ne vous demandera JAMAIS votre mot de passe par email, SMS ou appel téléphonique.",
+    "adding_to_cart": "ajouté au panier",
+    
+    
 }

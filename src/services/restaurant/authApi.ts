@@ -49,8 +49,23 @@ export const restaurantAuthApi = {
       formData.append('nearLat', data.nearLat.toString());
       formData.append('nearLng', data.nearLng.toString());
 
+      // Handle document upload properly
       if (data.document) {
-        formData.append('document', data.document);
+        if (typeof data.document === 'object' && 'uri' in data.document) {
+          // Document is a file object
+          formData.append('document', {
+            uri: (data.document as any).uri,
+            name: (data.document as any).name || 'document.pdf',
+            type: (data.document as any).type || 'application/pdf',
+          } as any);
+        } else if (typeof data.document === 'string') {
+          // Document is a URI string
+          formData.append('document', {
+            uri: data.document,
+            name: 'document.pdf',
+            type: 'application/pdf',
+          } as any);
+        }
       }
 
       // Add the picture file
@@ -67,8 +82,9 @@ export const restaurantAuthApi = {
         {
           headers: {
             Accept: 'application/json',
+            // Content-Type will be set automatically by axios with boundary
           },
-          timeout: 30000, // 30 seconds timeout for file upload
+          timeout: 60000, // 60 seconds timeout for file upload
         },
       );
     } else {
@@ -76,6 +92,9 @@ export const restaurantAuthApi = {
       return apiClient.post<RestaurantRegisterResponse>(
         '/restaurants/auth/register-and-create',
         { ...data },
+        {
+          timeout: 30000,
+        },
       );
     }
   },

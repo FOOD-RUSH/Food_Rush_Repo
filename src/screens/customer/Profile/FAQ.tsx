@@ -15,52 +15,67 @@ interface FAQItem {
   description: string;
 }
 
-// FAQ data with comprehensive information about the Food Rush app
+// FAQ data specific to Food Rush app in Cameroon
 const getFAQData = (t: any): FAQItem[] => [
   {
     id: 1,
-    title: t('how_to_get_started'),
-    description: t('get_started_description'),
+    title: t('faq_what_is_foodrush_title'),
+    description: t('faq_what_is_foodrush_desc'),
   },
   {
     id: 2,
-    title: t('what_is_foodrush'),
-    description: t('foodrush_description'),
+    title: t('faq_how_to_order_title'),
+    description: t('faq_how_to_order_desc'),
   },
   {
     id: 3,
-    title: t('how_can_i_make_a_payment'),
-    description: t('payment_methods_description'),
+    title: t('faq_payment_methods_title'),
+    description: t('faq_payment_methods_desc'),
   },
   {
     id: 4,
-    title: t('how_do_i_can_cancel_orders'),
-    description: t('cancel_order_description'),
+    title: t('faq_delivery_time_title'),
+    description: t('faq_delivery_time_desc'),
   },
   {
     id: 5,
-    title: t('how_do_i_can_delete_my_account'),
-    description: t('delete_account_description'),
+    title: t('faq_track_order_title'),
+    description: t('faq_track_order_desc'),
   },
   {
     id: 6,
-    title: t('how_does_delivery_work'),
-    description: t('delivery_description'),
+    title: t('faq_cancel_order_title'),
+    description: t('faq_cancel_order_desc'),
   },
   {
     id: 7,
-    title: t('what_if_my_order_is_wrong'),
-    description: t('wrong_order_description'),
+    title: t('faq_delivery_fees_title'),
+    description: t('faq_delivery_fees_desc'),
   },
   {
     id: 8,
-    title: t('how_to_track_my_order'),
-    description: t('order_tracking_description'),
+    title: t('faq_wrong_order_title'),
+    description: t('faq_wrong_order_desc'),
   },
   {
     id: 9,
-    title: t('delivery_fees_and_charges'),
-    description: t('delivery_fees_description'),
+    title: t('faq_change_address_title'),
+    description: t('faq_change_address_desc'),
+  },
+  {
+    id: 10,
+    title: t('faq_payment_failed_title'),
+    description: t('faq_payment_failed_desc'),
+  },
+  {
+    id: 11,
+    title: t('faq_restaurant_closed_title'),
+    description: t('faq_restaurant_closed_desc'),
+  },
+  {
+    id: 12,
+    title: t('faq_account_security_title'),
+    description: t('faq_account_security_desc'),
   },
 ];
 

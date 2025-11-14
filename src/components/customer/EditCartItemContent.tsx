@@ -1,7 +1,8 @@
 import { MaterialIcon } from '@/src/components/common/icons';
 import React, { useCallback, useState, useMemo } from 'react';
-import { View, Text, TouchableOpacity, TextInput, Image } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput } from 'react-native';
 import { useTheme } from 'react-native-paper';
+import Toast from 'react-native-toast-message';
 
 import { useCartStore, CartItem } from '@/src/stores/customerStores/cartStore';
 import { useTranslation } from 'react-i18next';
@@ -10,36 +11,27 @@ interface CartItemProps extends Omit<CartItem, 'ItemtotalPrice'> {
   onDismiss: () => void;
 }
 
-const EditCartItemContent: React.FC<CartItemProps> = ({
-  id,
-  menuItem,
-  quantity,
-  specialInstructions,
-  onDismiss,
-}) => {
+const EditCartItemContent = ({ id, menuItem, quantity, specialInstructions, onDismiss }: CartItemProps) => {
   const { colors } = useTheme();
   const { t } = useTranslation('translation');
   const [pquantity, setQuantity] = useState(quantity);
   const [instructions, setInstructions] = useState(specialInstructions || '');
 
-  // Cart actions
-  const updateItemQuantity = useCartStore((state) => state.updateItemQuantity);
-  const removeItem = useCartStore((state) => state.removeItem);
-  const addtoCart = useCartStore((state) => state.addItemtoCart);
-  
+  // Use new updateItem method instead of remove + add
   const updateItem = useCartStore((state) => state.updateItem);
-  // Handle quantity changes
-  const handleIncrease = useCallback(() => {
-    setQuantity((prev) => (prev < 99 ? prev + 1 : prev));
-  }, []);
 
+  // Handle quantity decrease
   const handleDecrease = useCallback(() => {
-    setQuantity((prev) => (prev > 1 ? prev - 1 : prev));
+    setQuantity((prev) => Math.max(1, prev - 1));
   }, []);
 
-  // Handle save changes
-   const handleSave = useCallback(() => {
-    // IMPROVED: Single update operation
+  // Handle quantity increase
+  const handleIncrease = useCallback(() => {
+    setQuantity((prev) => Math.min(99, prev + 1));
+  }, []);
+
+  const handleSave = useCallback(() => {
+    // Single update operation
     updateItem(id, {
       quantity: pquantity,
       specialInstructions: instructions,
@@ -54,7 +46,6 @@ const EditCartItemContent: React.FC<CartItemProps> = ({
 
     onDismiss();
   }, [id, pquantity, instructions, updateItem, onDismiss, t]);
-
 
   // Check if there are changes
   const hasChanges = useMemo(() => {
@@ -79,8 +70,6 @@ const EditCartItemContent: React.FC<CartItemProps> = ({
           {menuItem.name}
         </Text>
       </View>
-
-      {/* Item Image */}
 
       {/* Quantity Selector */}
       <View
@@ -157,6 +146,7 @@ const EditCartItemContent: React.FC<CartItemProps> = ({
               backgroundColor: colors.primary,
               alignItems: 'center',
               justifyContent: 'center',
+              opacity: pquantity >= 99 ? 0.5 : 1,
             }}
             activeOpacity={0.7}
           >

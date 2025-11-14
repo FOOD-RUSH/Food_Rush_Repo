@@ -297,70 +297,7 @@ const RestaurantLoginScreen: React.FC<AuthStackScreenProps<'SignIn'>> = ({
               </Heading2>
             </TouchableOpacity>
 
-            {/* Divider */}
-            <View style={styles.divider}>
-              <View
-                style={[
-                  styles.dividerLine,
-                  { backgroundColor: colors.outline },
-                ]}
-              />
-              <Label color={colors.onSurfaceVariant} style={styles.dividerText}>
-                {t('or_signin_with')}
-              </Label>
-              <View
-                style={[
-                  styles.dividerLine,
-                  { backgroundColor: colors.outline },
-                ]}
-              />
-            </View>
-
-            {/* Social Buttons */}
-            <View style={styles.socialButtons}>
-              <TouchableOpacity
-                style={[
-                  styles.socialButton,
-                  {
-                    backgroundColor: colors.surface,
-                    borderColor: colors.outline,
-                  },
-                ]}
-                onPress={handleGoogleSignIn}
-                disabled={loginMutation.isPending}
-              >
-                <IoniconsIcon
-                  name="logo-google"
-                  size={20}
-                  color={colors.onSurfaceVariant}
-                />
-                <Body color={colors.onSurfaceVariant} weight="medium">
-                  Google
-                </Body>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.socialButton,
-                  {
-                    backgroundColor: colors.surface,
-                    borderColor: colors.outline,
-                  },
-                ]}
-                onPress={handleAppleSignIn}
-                disabled={loginMutation.isPending}
-              >
-                <IoniconsIcon
-                  name="logo-apple"
-                  size={20}
-                  color={colors.onSurfaceVariant}
-                />
-                <Body color={colors.onSurfaceVariant} weight="medium">
-                  Apple
-                </Body>
-              </TouchableOpacity>
-            </View>
-
+          
             {/* Signup Link */}
             <View style={styles.signupContainer}>
               <Body color={colors.onSurfaceVariant}>

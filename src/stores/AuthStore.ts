@@ -319,9 +319,6 @@ eventBus.on('session-expired', () => {
   // Use getState to access the store's methods outside of a component
   const { isAuthenticated, logout } = useAuthStore.getState();
   if (isAuthenticated) {
-    console.log(
-      'Session expired event received, triggering automatic logout...',
-    );
     logout();
   }
 });

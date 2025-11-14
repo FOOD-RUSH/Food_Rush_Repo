@@ -73,15 +73,47 @@ const AboutScreen = ({ navigation }: Props) => {
               />
             </LinearGradient>
           </View>
-          <Text style={styles.appName}>{t('food_rush')}</Text>
-          <Text style={styles.version}>{t('version_1_0_0')}</Text>
-          <Text style={styles.description}>{t('food_rush_description')}</Text>
+          <Text style={styles.appName}>{t('food_rush', 'Food Rush')}</Text>
+          <Text style={styles.tagline}>{t('restaurant_partner_app', 'Restaurant Partner App')}</Text>
+          <Text style={styles.version}>{t('version_1_0_0', 'Version 1.0.0')}</Text>
+          <Text style={styles.description}>
+            {t(
+              'food_rush_restaurant_description',
+              'Manage your restaurant, track orders, update menus, and grow your business with Food Rush - Cameroon\'s leading food delivery platform.',
+            )}
+          </Text>
+          
+          {/* Mission Section */}
           <View style={styles.sectionBox}>
-            <Text style={styles.sectionTitle}>{t('credits')}</Text>
+            <Text style={styles.sectionTitle}>{t('our_mission', 'Our Mission')}</Text>
             <Text style={styles.creditText}>
-              {t('developed_by_food_rush_team')}
+              {t(
+                'mission_statement',
+                'To empower restaurants across Cameroon by connecting them with hungry customers through seamless technology and exceptional service.',
+              )}
             </Text>
-            <Text style={styles.creditText}>{t('copyright_2025')}</Text>
+          </View>
+          
+          {/* Credits Section */}
+          <View style={styles.sectionBox}>
+            <Text style={styles.sectionTitle}>{t('credits', 'Credits')}</Text>
+            <Text style={styles.creditText}>
+              {t('developed_by_food_rush_team', 'Developed by Food Rush Team')}
+            </Text>
+            <Text style={styles.creditText}>
+              {t('copyright_2025', '© 2025 Food Rush. All rights reserved.')}
+            </Text>
+            <Text style={styles.creditText}>
+              {t('made_in_cameroon', 'Made with ❤️ in Cameroon')}
+            </Text>
+          </View>
+          
+          {/* Contact Section */}
+          <View style={styles.sectionBox}>
+            <Text style={styles.sectionTitle}>{t('contact_info', 'Contact Information')}</Text>
+            <Text style={styles.creditText}>📧 support@foodrush.cm</Text>
+            <Text style={styles.creditText}>📱 +237 672 913 008</Text>
+            <Text style={styles.creditText}>🌐 www.foodrush.cm</Text>
           </View>
         </Animated.View>
       </ScrollView>
@@ -145,6 +177,15 @@ const getStyles = (isDarkMode: boolean, colors: any) =>
       fontWeight: 'bold',
       color: RESTAURANT_COLORS.PRIMARY,
       marginTop: 6,
+    },
+    tagline: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: isDarkMode
+        ? RESTAURANT_COLORS.TEXT_SECONDARY_DARK
+        : RESTAURANT_COLORS.TEXT_SECONDARY_LIGHT,
+      marginTop: 4,
+      marginBottom: 8,
     },
     version: {
       fontSize: 15,

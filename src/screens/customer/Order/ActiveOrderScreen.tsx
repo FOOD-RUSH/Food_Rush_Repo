@@ -10,10 +10,13 @@ import {
 import LoadingScreen from '@/src/components/common/LoadingScreen';
 import { useTheme } from 'react-native-paper';
 import { Order } from '@/src/types';
+import { useNavigation } from '@react-navigation/native';
+import { RootStackScreenProps } from '@/src/navigation/types';
 
 const ActiveOrderScreen = () => {
   const { t } = useTranslation('translation');
   const { colors } = useTheme();
+  const navigation = useNavigation<RootStackScreenProps<'CustomerApp'>['navigation']>();
 
   // Fetch active orders using React Query
   const {
@@ -29,11 +32,13 @@ const ActiveOrderScreen = () => {
   }, [refetch]);
 
   const handleTrackOrder = useCallback((orderId: string) => {
-    // Handle order tracking navigation
-  }, []);
+    // Navigate to OrderTracking screen
+    navigation.push('OrderTracking', { orderId });
+  }, [navigation]);
 
   const handleReorder = useCallback((order: Order) => {
     // Handle reorder logic
+    // TODO: Implement reorder functionality
   }, []);
 
   const renderOrderItem = useCallback(
